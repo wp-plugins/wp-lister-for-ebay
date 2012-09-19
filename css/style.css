@@ -1,0 +1,196 @@
+
+
+/* general styles for edit pages (edit template, edit profile and settings) */
+.wplister-page .postbox .inside {
+	margin-bottom: 15px;
+}
+
+.wplister-page .postbox .inside p.desc {
+	font-size: smaller;
+	font-style: italic;
+	margin-top: 0;
+	margin-left: 35%;
+}
+.wplister-page .postbox .inside p.edit_links {
+	margin-top: 0;
+	margin-left: 35%;
+}
+
+.wplister-page .postbox label.text_label {
+	display: block;
+	float: left;
+	width: 33%;
+	margin: 1px;
+	padding: 3px;
+}
+.wplister-page .postbox input.text_input,
+.wplister-page .postbox textarea,
+.wplister-page .postbox select.select {
+	width: 65%;
+	margin-bottom: 5px;
+	padding: 3px 8px;
+}
+.wplister-page .postbox textarea {
+	height: 120px;
+}
+
+
+/* sandbox reminder - styled similar to screen options button */
+#wpl-sandbox-reminder-wrap {
+    float: right;
+    padding: 0;
+    margin: 0 6px 0 0;
+    background: #e3e3e3;
+    background: #ffc;
+    border: 1px solid #E6DB55;
+
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    -moz-border-radius-bottomleft: 3px;
+    -moz-border-radius-bottomright: 3px;
+    -webkit-border-bottom-left-radius: 3px;
+    -webkit-border-bottom-right-radius: 3px;
+}
+ 
+#wpl-sandbox-reminder-wrap a.show-settings {
+    background-image: none;
+    padding:0 6px 0 6px;
+}
+
+
+/* JobRunner styles */
+#jobs_window h2 {
+	margin: 5px 0 15px 0;
+}
+#jobs_message {
+	width: 100%;
+	text-align: center;
+	padding: 3px 5px;
+	font-size: 1em;
+}
+#job_bottom_notice {
+	float:left; 
+	padding: 15px 0 0 0;
+	font-size: 0.9em;
+	font-style: italic;
+}
+
+/* JobRunner log view */
+#jobs_log {
+	overflow: auto;
+	border: 1px solid #ddd;
+}
+
+#jobs_log .logRow {
+	position: relative;
+	height: 20px;
+	line-height: 20px;
+	padding: 2px 7px;
+	border-bottom: 1px solid #eee;
+}
+
+#jobs_log .logRowTitle {
+	display: inline;
+}
+
+#jobs_log .logRowErrors {
+	position: absolute;
+	top: 0px;
+	right: 32px;
+	line-height: 24px;
+	font-style: italic;
+}
+#jobs_log .logRowErrors a {
+	text-decoration: none;
+}
+#jobs_log .logRowErrors a:hover {
+	text-decoration: underline;
+}
+
+#jobs_log .logRowStatus {
+	position: absolute;
+	top: 4px;
+	right: 7px;
+}
+
+#jobs_log img {
+	max-width: 16px;
+	max-height: 16px;
+}
+
+#jobs_log .taskDetails {
+	/*background-color: #eee;*/
+	border-bottom: 1px solid #ddd;
+	padding-bottom: 5px
+}
+
+#jobs_log div#message {
+	margin: 5px 5px 2px;
+}
+
+
+/* JobRunner progress bar */
+#progressbar {
+  height: 23px;
+}
+#progressbar .ui-progressbar {
+  position: relative;
+}
+#progressbar .ui-progressbar-value {
+  margin-top: -23px;
+}
+#progressbar span.caption {
+  display: block;
+  position: static;
+  text-align: center;
+  line-height: 23px;
+}
+
+/* fix other plugins overriding progressbar style */
+#jobs_window .ui-progressbar .ui-progressbar-value {
+	background: #CCC url( smoothness/images/ui-bg_highlight-soft_75_cccccc_1x100.png ) 50% 50% repeat-x;
+}
+
+
+/* bulk actions buttons */
+.submit .wpl_job_button {
+	margin-right: 15px;
+}
+
+body.toplevel_page_wplister .widefat .column-status mark {
+	display: block;
+	text-align: center;
+	white-space: nowrap;
+	padding: 0 2px;
+	background: #999;
+	border: 1px solid #999;
+	-webkit-box-shadow: inset 0 0 2px 1px rgba(255, 255, 255, 0.5);
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	-o-border-radius: 4px;
+	border-radius: 4px;
+	margin: 0;
+	font-size: 9px;
+	text-transform: uppercase;
+	color: white;
+	font-weight: bold;
+	text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+	/* firefox only */
+	padding-top: 2px;
+}
+
+/* toggle links with little triangle */
+/* unused for now 
+.toggle_container a:link, .toggle_container a:visited, .toggle_container a:hover, .toggle_container a:active {
+	padding-left: 13px;
+	background-position: left center;
+	background-repeat: no-repeat;
+	background-image: url(../img/triangle-closed.gif);
+	text-decoration: none;
+}
+
+.toggle_container a.open:link, .toggle_container a.open:visited, .toggle_container a.open:hover, .toggle_container a.open:active {
+	background-image: url(../img/triangle-open.gif);
+}
+ */
+
