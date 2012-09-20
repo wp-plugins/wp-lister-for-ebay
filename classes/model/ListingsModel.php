@@ -227,7 +227,7 @@ class ListingsModel extends WPL_Model {
 	}
 
 
-	function buildItem( $id, $session, $isFixedPriceItem = false )
+	function buildItem( $id, $session, $isFixedPriceItem = false, $reviseItem = false )
 	{
 
 		// fetch record from db
@@ -248,8 +248,13 @@ class ListingsModel extends WPL_Model {
 
 		// Set Listing Properties
 		$item->ListingDuration = $p['listing_duration'];
-		$item->ListingType = $p['auction_type'];
 		$item->Quantity = $p['quantity'];
+
+		
+		// omit ListingType when revising item
+		if ( ! $reviseItem ) {
+			$item->ListingType = $p['auction_type'];
+		}
 
 		// Set the Listing Starting Price and Buy It Now Price
 		$item->StartPrice = new AmountType();
@@ -892,7 +897,7 @@ class ListingsModel extends WPL_Model {
 		$this->initServiceProxy($session);
 
 		// build item
-		$item = $this->buildItem( $id, $session );
+		$item = $this->buildItem( $id, $session, false, true );
 		if ( ! $this->checkItem($item) ) return $this->result;
 		
 		// set ItemID to revise

@@ -155,7 +155,7 @@ class TemplatesModel extends WPL_Model {
 
 		// replace shortcodes
 		$tpl_html = str_replace( '[[product_title]]', $listing->prepareTitleAsHTML( $item['auction_title'] ), $tpl_html );
-		$tpl_html = str_replace( '[[product_content]]', nl2br( $item['post_content'] ), $tpl_html );
+		$tpl_html = str_replace( '[[product_content]]', apply_filters('the_content', $item['post_content'] ), $tpl_html );
 
 		$tpl_html = str_replace( '[[product_excerpt]]', $listing->getRawPostExcerpt( $item['post_id'] ), $tpl_html );
 		$tpl_html = str_replace( '[[product_additional_content]]', $listing->getRawPostExcerpt( $item['post_id'] ), $tpl_html );
