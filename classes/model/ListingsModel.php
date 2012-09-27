@@ -227,6 +227,247 @@ class ListingsModel extends WPL_Model {
 	}
 
 
+	function uploadPictureToEPS( $url, $session ) {
+
+		// preparation - set up new ServiceProxy with given session
+		$this->initServiceProxy($session);
+
+		// preprocess url
+		$url = str_replace(' ', '%20', $url );
+
+		$req = new UploadSiteHostedPicturesRequestType();
+        $req->setExternalPictureURL( $url );
+
+		# http://www.intradesys.com/de/forum/1496       
+		// $req = new UploadSiteHostedPicturesRequestType();
+		// $req->setPictureSet( 'Standard' );
+		// $req->setPictureName( 'MyPic' );
+		// $req->setPictureData(file_get_contents($url));
+
+		$this->logger->info( "calling UploadSiteHostedPictures - $url " );
+		$this->logger->debug( "Request: ".print_r($req,1) );
+		// $res = $this->_cs->UploadSiteHostedPictures($req); 
+		$res = $this->callUploadSiteHostedPictures($req, $session ); 
+		$this->logger->info( "UploadSiteHostedPictures Complete" );
+		$this->logger->info( "Response: ".print_r($res,1) );
+
+		// handle response and check if successful
+		if ( $this->handleResponse($res) ) {
+
+			// fetch final url
+			$eps_url = $res->SiteHostedPictureDetails->FullURL;
+			
+			$this->logger->info( "image was uploaded to EPS successfully. " );
+
+			return $eps_url;
+
+		} // call successful
+
+		return false;
+
+	}
+
+
+	function callUploadSiteHostedPictures( $request, $session, $parseMode = EBATNS_PARSEMODE_CALL )
+	{
+
+		$this->_session = $session;
+		// $this->_session->ReadTokenFile();
+		$userToken = $this->_session->getRequestToken();
+		$version = $this->_cs->getVersion();
+		$ExternalPictureURL = $request->getExternalPictureURL();
+
+	    ///Build the request XML request which is first part of multi-part POST
+	    $xmlReq = '<?xml version="1.0" encoding="utf-8"?>' . "\n";
+	    $xmlReq .= '<UploadSiteHostedPicturesRequest xmlns="urn:ebay:apis:eBLBaseComponents">' . "\n";
+	    $xmlReq .= "<Version>$version</Version>\n";
+	    $xmlReq .= "<ExternalPictureURL>$ExternalPictureURL</ExternalPictureURL>\n";    
+	    $xmlReq .= "<RequesterCredentials><eBayAuthToken>$userToken</eBayAuthToken></RequesterCredentials>\n";
+	    $xmlReq .= '</UploadSiteHostedPicturesRequest>';
+
+		// place all data into theirs header
+		$reqHeaders[] = 'X-EBAY-API-COMPATIBILITY-LEVEL: ' . $version;
+		$reqHeaders[] = 'X-EBAY-API-DEV-NAME: ' . $this->_session->getDevId();
+		$reqHeaders[] = 'X-EBAY-API-APP-NAME: ' . $this->_session->getAppId();
+		$reqHeaders[] = 'X-EBAY-API-CERT-NAME: ' . $this->_session->getCertId();
+		$reqHeaders[] = 'X-EBAY-API-CALL-NAME: ' . 'UploadSiteHostedPictures';
+		$reqHeaders[] = 'X-EBAY-API-SITEID: ' . $this->_session->getSiteId();		
+		$multiPartData = null;
+
+		// echo "<pre>";print_r($request);#die();		
+		// $body = $this->encodeMessageXmlStyle( $method, $request );
+		// echo "<pre>";echo htmlspecialchars($body);die();				
+
+		// $message = '<?xml version="1.0" encoding="utf-8"?---*-->' . "\n";
+		// $message .= $body;
+		$message = $xmlReq;
+		
+		// we support only Sandbox and Production here !
+		if ($this->_session->getAppMode() == 1)
+			$this->_ep = "https://api.sandbox.ebay.com/ws/api.dll";
+		else
+			$this->_ep = 'https://api.ebay.com/ws/api.dll';
+		$this->_ep .= '?callname=' . 'UploadSiteHostedPictures';
+		$this->_ep .= '&version=' . $version;
+
+		// echo "<pre>";echo htmlspecialchars($message);die();		
+				
+		// $responseMsg = $this->_cs->sendMessageXmlStyle( $message, $reqHeaders, $multiPartData );
+		$responseMsg = $this->sendMessageXmlStyle( $message, $reqHeaders, $multiPartData );
+		// echo "<pre>";print_r($responseMsg);#die();				
+
+		if ( $responseMsg )	{
+
+			// $this->_cs->_startTp('Decoding SOAP Message');
+			$ret = & $this->_cs->decodeMessage( 'UploadSiteHostedPictures', $responseMsg, $parseMode );
+			// $this->_cs->_stopTp('Decoding SOAP Message');
+
+		} else {
+			$ret = & $this->_currentResult;
+		}
+		
+		return $ret;
+	}
+	
+
+	// sendMessage in XmlStyle,
+	// the only difference is the extra headers we use here
+	function sendMessageXmlStyle( $message, $extraXmlHeaders, $multiPartImageData = null )
+	{
+		$this->_currentResult = null;
+		$this->_cs->log( $this->_ep, 'RequestUrl' );
+		$this->_cs->logXml( $message, 'Request' );
+		
+		// $timeout = $this->_cs->_transportOptions['HTTP_TIMEOUT'];
+		// if (!$timeout || $timeout <= 0)
+		// 	$timeout = 300;
+		$timeout = 30;
+
+		
+		$ch = curl_init();
+		
+		if ($multiPartImageData !== null)
+		{
+			$boundary = "MIME_boundary";
+			
+			$CRLF = "\r\n";
+			
+			$mp_message .= "--" . $boundary . $CRLF;
+			$mp_message .= 'Content-Disposition: form-data; name="XML Payload"' . $CRLF;
+			$mp_message .= 'Content-Type: text/xml;charset=utf-8' . $CRLF . $CRLF;
+			$mp_message .= $message;
+			$mp_message .= $CRLF;
+			
+			$mp_message .= "--" . $boundary . $CRLF;
+			$mp_message .= 'Content-Disposition: form-data; name="dumy"; filename="dummy"' . $CRLF;
+			$mp_message .= "Content-Transfer-Encoding: binary" . $CRLF;
+			$mp_message .= "Content-Type: application/octet-stream" . $CRLF . $CRLF;
+			$mp_message .= $multiPartImageData;
+			
+			$mp_message .= $CRLF;
+			$mp_message .= "--" . $boundary . "--" . $CRLF;
+			
+			$message = $mp_message;
+			
+			$reqHeaders[] = 'Content-Type: multipart/form-data; boundary=' . $boundary;
+			$reqHeaders[] = 'Content-Length: ' . strlen($message);
+		}
+		else
+		{
+			$reqHeaders[] = 'Content-Type: text/xml;charset=utf-8';
+		}
+		
+		
+		// if ($this->_cs->_transportOptions['HTTP_COMPRESS'])
+		// {
+		// 	$reqHeaders[] = 'Accept-Encoding: gzip, deflate';
+		// 	curl_setopt( $ch, CURLOPT_ENCODING, "gzip");
+		// 	curl_setopt( $ch, CURLOPT_ENCODING, "deflate");
+		// }
+		
+		if (is_array($extraXmlHeaders))
+			$reqHeaders = array_merge((array)$reqHeaders, $extraXmlHeaders);
+		
+		curl_setopt( $ch, CURLOPT_URL, $this->_ep );
+		
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
+		
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, $reqHeaders );
+		curl_setopt( $ch, CURLOPT_USERAGENT, 'ebatns;xmlstyle;1.0' );
+		curl_setopt( $ch, CURLOPT_TIMEOUT, $timeout );
+		
+		curl_setopt( $ch, CURLOPT_POST, 1 );
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, $message );
+		
+		curl_setopt( $ch, CURLOPT_FAILONERROR, 0 );
+		curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 1 );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		curl_setopt( $ch, CURLOPT_HEADER, 1 );
+		curl_setopt( $ch, CURLOPT_HTTP_VERSION, 1 );
+		
+		// added support for multi-threaded clients
+		// if (isset($this->_cs->_transportOptions['HTTP_CURL_MULTITHREADED']))
+		// {
+		// 	curl_setopt( $ch, CURLOPT_DNS_USE_GLOBAL_CACHE, 0 );
+		// }
+
+
+		$responseRaw = curl_exec( $ch );
+		// echo"<pre>";print_r($responseRaw);#die();
+		if ( !$responseRaw )
+		{
+			$this->_currentResult = new EbatNs_ResponseError();
+			$this->_currentResult->raise( 'curl_error ' . curl_errno( $ch ) . ' ' . curl_error( $ch ), 80000 + 1, EBAT_SEVERITY_ERROR );
+			curl_close( $ch );
+			
+			return null;
+		} 
+		else
+		{
+			curl_close( $ch );
+			
+			$responseRaw = str_replace
+			(
+				array
+				(
+					"HTTP/1.1 100 Continue\r\n\r\nHTTP/1.1 200 OK\r\n",
+					"HTTP/1.1 100 Continue\n\nHTTP/1.1 200 OK\n"
+				),
+				array
+				(
+					"HTTP/1.1 200 OK\r\n",
+					"HTTP/1.1 200 OK\n"
+				),
+				$responseRaw
+			);
+
+			$responseBody = null;
+			if ( preg_match( "/^(.*?)\r?\n\r?\n(.*)/s", $responseRaw, $match ) )
+			{
+				$responseBody = $match[2];
+				$headerLines = split( "\r?\n", $match[1] );
+				foreach ( $headerLines as $line )
+				{
+					if ( strpos( $line, ':' ) === false )
+					{
+						$responseHeaders[0] = $line;
+						continue;
+					} 
+					list( $key, $value ) = split( ':', $line );
+					$responseHeaders[strtolower( $key )] = trim( $value );
+				} 
+			} 
+			
+			if ($responseBody)
+				$this->_cs->logXml( $responseBody, 'Response' );
+			else
+				$this->_cs->logXml( $responseRaw, 'ResponseRaw' );
+		} 
+		
+		return $responseBody;
+	} 
+	
 	function buildItem( $id, $session, $isFixedPriceItem = false, $reviseItem = false )
 	{
 
@@ -275,10 +516,14 @@ class ListingsModel extends WPL_Model {
 		// SKU - omit if empty
 		if ($product_sku) $item->SKU = $product_sku;
 
+
 		// handle product image
 		$item->PictureDetails = new PictureDetailsType();
-		$item->PictureDetails->PictureURL = str_replace(' ', '%20', $main_image );
+		$item->PictureDetails->addPictureURL( str_replace(' ', '%20', $main_image ) );
 		if ( $profile_details['with_gallery_image'] ) $item->PictureDetails->GalleryType = 'Gallery';
+        
+
+
 
 		// handle VAT (percent)
 		if ( $profile_details['tax_mode'] == 'fix' ) {
@@ -762,7 +1007,12 @@ class ListingsModel extends WPL_Model {
 		    	$VariationSpecificPictureSet = new VariationSpecificPictureSetType();
     	    	$VariationSpecificPictureSet->setVariationSpecificValue( $VariationValue );
         		$VariationSpecificPictureSet->addPictureURL( str_replace(' ', '%20', $var['image'] ) );
-	    		$Pictures->addVariationSpecificPictureSet( $VariationSpecificPictureSet );
+
+		        // only list variation images if enabled
+        		if ( @$profile_details['with_variation_images'] != '0' ) {
+	    			$Pictures->addVariationSpecificPictureSet( $VariationSpecificPictureSet );
+		        }
+	    
 	    		// remove value from VariationValuesForPictures to avoid duplicates
 	    		unset( $VariationValuesForPictures[ array_search( $VariationValue, $VariationValuesForPictures ) ] );
         	}
@@ -852,19 +1102,35 @@ class ListingsModel extends WPL_Model {
 		$allowed_statuses = array( 'prepared', 'verified' );
 		if ( ! $this->checkItemStatus( $id, $allowed_statuses ) ) return false;
 
-		// preparation - set up new ServiceProxy with given session
-		$this->initServiceProxy($session);
-
 		// build item
 		$item = $this->buildItem( $id, $session );
 		if ( ! $this->checkItem($item) ) return $this->result;
 
-		$req = new AddItemRequestType(); # ***
-		$req->setItem($item);
+		// preparation - set up new ServiceProxy with given session
+		$this->initServiceProxy($session);
+
+		// switch to FixedPriceItem if product has variations
+		$listing_item = $this->getItem( $id );
+		$useFixedPriceItem = ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) ? true : false;
 
 		$this->logger->info( "Adding #$id: ".$item->Title );
-		$this->logger->debug( "Request: ".print_r($req,1) );
-		$res = $this->_cs->AddItem($req); # ***
+		if ( $useFixedPriceItem ) {
+
+			$req = new AddFixedPriceItemRequestType(); 
+			$req->setItem($item);
+			
+			$this->logger->debug( "Request: ".print_r($req,1) );
+			$res = $this->_cs->AddFixedPriceItem($req); 
+
+		} else {
+
+			$req = new AddItemRequestType(); 
+			$req->setItem($item);
+			
+			$this->logger->debug( "Request: ".print_r($req,1) );
+			$res = $this->_cs->AddItem($req); 
+
+		}
 
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
@@ -893,22 +1159,38 @@ class ListingsModel extends WPL_Model {
 		$allowed_statuses = array( 'published', 'changed' );
 		if ( ! $this->checkItemStatus( $id, $allowed_statuses ) ) return false;
 
-		// preparation - set up new ServiceProxy with given session
-		$this->initServiceProxy($session);
+		// switch to FixedPriceItem if product has variations
+		$listing_item = $this->getItem( $id );
+		$useFixedPriceItem = ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) ? true : false;
 
 		// build item
 		$item = $this->buildItem( $id, $session, false, true );
 		if ( ! $this->checkItem($item) ) return $this->result;
 		
+		// preparation - set up new ServiceProxy with given session
+		$this->initServiceProxy($session);
+
 		// set ItemID to revise
 		$item->setItemID( $this->getEbayIDFromID($id) );
 
-		$req = new ReviseItemRequestType(); # ***
-		$req->setItem($item);
-		
 		$this->logger->info( "Revising #$id: ".$p['auction_title'] );
-		$this->logger->debug( "Request: ".print_r($req,1) );
-		$res = $this->_cs->ReviseItem($req); # ***
+		if ( $useFixedPriceItem ) {
+
+			$req = new ReviseFixedPriceItemRequestType(); 
+			$req->setItem($item);
+			
+			$this->logger->debug( "Request: ".print_r($req,1) );
+			$res = $this->_cs->ReviseFixedPriceItem($req); 
+
+		} else {
+
+			$req = new ReviseItemRequestType(); 
+			$req->setItem($item);
+			
+			$this->logger->debug( "Request: ".print_r($req,1) );
+			$res = $this->_cs->ReviseItem($req); 
+
+		}
 
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
@@ -942,12 +1224,12 @@ class ListingsModel extends WPL_Model {
 		$listing_item = $this->getItem( $id );
 		if ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) return $this->verifyAddFixedPriceItem( $id, $session );
 
-		// preparation - set up new ServiceProxy with given session
-		$this->initServiceProxy($session);
-
 		// build item
 		$item = $this->buildItem( $id, $session );
 		if ( ! $this->checkItem($item) ) return $this->result;
+
+		// preparation - set up new ServiceProxy with given session
+		$this->initServiceProxy($session);
 
 		$req = new VerifyAddItemRequestType();
 		$req->setItem($item);
@@ -979,12 +1261,12 @@ class ListingsModel extends WPL_Model {
 		$allowed_statuses = array( 'prepared', 'verified' );
 		if ( ! $this->checkItemStatus( $id, $allowed_statuses ) ) return false;
 
-		// preparation - set up new ServiceProxy with given session
-		$this->initServiceProxy($session);
-
 		// build item
 		$item = $this->buildItem( $id, $session, true );
 		if ( ! $this->checkItem($item) ) return $this->result;
+
+		// preparation - set up new ServiceProxy with given session
+		$this->initServiceProxy($session);
 
 		$req = new VerifyAddFixedPriceItemRequestType();
 		$req->setItem($item);
@@ -1145,6 +1427,12 @@ class ListingsModel extends WPL_Model {
 		$data['quantity'] 			= $Detail->Quantity;
 		$data['ViewItemURL'] 		= $Detail->ListingDetails->ViewItemURL;
 		$data['GalleryURL'] 		= $Detail->PictureDetails->GalleryURL;
+
+		// if this item has variations, we don't update quantity
+		if ( count( @$Detail->Variations->Variation ) > 0 ) {
+			unset( $data['quantity'] );
+		}
+
 
 		// set status to ended if end_date is in the past
 		if ( time() > mysql2date('U', $data['end_date']) ) {

@@ -151,11 +151,13 @@
 
 							<label for="wpl-text-price" class="text_label"><?php echo __('Price / Start price','wplister'); ?>:</label>
 							<input type="text" name="wpl_e2e_price" id="wpl-text-price" value="<?php echo $wpl_item['price']; ?>" class="text_input" />
-							<br class="clear" />
+							<p class="desc" style="display: block;"><?php echo __('This will have no effect on product variations.','wplister'); ?></p>
+							<!br class="clear" />
 
 							<label for="wpl-text-quantity" class="text_label"><?php echo __('Quantity','wplister'); ?>:</label>
 							<input type="text" name="wpl_e2e_quantity" id="wpl-text-quantity" value="<?php echo $wpl_item['quantity']; ?>" class="text_input" />
-							<br class="clear" />
+							<p class="desc" style="display: block;"><?php echo __('This will have no effect on product variations.','wplister'); ?></p>
+							<!br class="clear" />
 
 
 							<label for="wpl-text-listing_duration" class="text_label"><?php echo __('Duration','wplister'); ?>: *</label>

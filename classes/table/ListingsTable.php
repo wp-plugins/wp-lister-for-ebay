@@ -427,8 +427,8 @@ class ListingsTable extends WP_List_Table {
             'reselect'  => __('Select another profile','wplister'),
             'reapply'   => __('Re-apply profile','wplister'),
             'revise'    => __('Revise items','wplister'),
-            'end_item'  => __('End auctions prematurely','wplister'),
-            'delete'    => __('Delete','wplister')
+            'end_item'  => __('End listings','wplister'),
+            'delete'    => __('Delete listings','wplister')
         );
         return $actions;
     }

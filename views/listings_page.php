@@ -106,4 +106,16 @@
 	</script>
 
 
+	<?php if ( @$_GET['action'] == 'verifyPreparedItemsNow' ) : ?>
+		<script type="text/javascript">
+			jQuery( document ).ready( function () {	
+				// auto start verify job
+				setTimeout(function() {
+					jQuery('#btn_verify_all_prepared_items').click();
+				}, 1000); // delays 1 sec
+			});
+		</script>
+	<?php endif; ?>
+
+
 </div>

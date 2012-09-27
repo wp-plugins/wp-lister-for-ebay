@@ -131,7 +131,8 @@ class ProductWrapper {
 		$available_variations = $product->get_available_variations();
 		$attributes = $product->get_variation_attributes();
 
-		// print_r($attributes);
+		// echo "<pre>";print_r($available_variations);die();echo"</pre>";
+		// echo "<pre>";print_r($attributes);die();echo"</pre>";
 		// (
 		//     [pa_size] => Array
 		//         (
@@ -160,7 +161,7 @@ class ProductWrapper {
 
 		} // foreach $attributes
 
-		// print_r($attribute_labels);
+		// print_r($attribute_labels);die();
 		// (
 		//     [attribute_pa_size] => Size
 		//     [attribute_pa_colour] => Colour
@@ -182,7 +183,9 @@ class ProductWrapper {
 			foreach ($attributes as $key => $value) {	// this loop will only run once for one dimensional variations
 				// $newvar['name'] = $value; #deprecated
 				// v2
-				$newvar['variation_attributes'][ $attribute_labels[ $key ] ] = $value;
+				$taxonomy = str_replace('attribute_', '', $key); // attribute_pa_color -> pa_color
+				$term = get_term_by('slug', $value, $taxonomy );
+				$newvar['variation_attributes'][ $attribute_labels[ $key ] ] = $term->name;
 			}
 			// $newvar['group_name'] = $attribute_labels[ $key ]; #deprecated
 			
@@ -202,7 +205,7 @@ class ProductWrapper {
 
 		return $variations;
 
-		// echo "<pre>";print_r($variations);die()echo"</pre>";
+		// echo "<pre>";print_r($variations);die();echo"</pre>";
 		/* the returned array looks like this:
 		    
 		    [0] => Array

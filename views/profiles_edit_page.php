@@ -201,6 +201,8 @@
 								onclick="jQuery('#payment_options_table').find('tr.row').first().clone().appendTo('#payment_options_table');"
 								class="button-secondary">
 
+
+
 						</div>
 					</div>
 

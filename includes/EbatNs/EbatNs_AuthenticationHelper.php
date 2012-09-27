@@ -62,7 +62,7 @@ class EbatNs_AuthenticationHelper
 			case 3:
 				return 'ebay.co.uk';
 			case 15:
-				return 'ebay.au';
+				return 'ebay.com.au';
 			case 16:
 				return 'ebay.at';
 			case 23:

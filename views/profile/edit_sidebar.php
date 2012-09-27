@@ -158,7 +158,7 @@
 						<h3><span><?php echo __('Layout','wplister'); ?></span></h3>
 						<div class="inside">
 
-							<label for="wpl-text-with_image" class="text_label"><?php echo __('Image','wplister'); ?>: *</label>
+							<label for="wpl-text-with_image" class="text_label"><?php echo __('Image','wplister'); ?>:</label>
 							<select id="wpl-text-with_image" name="wpl_e2e_with_image" title="Image" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 								<option value="1" <?php if ( $item_details['with_image'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
@@ -166,7 +166,7 @@
 							</select>
 							<br class="clear" />
 
-							<label for="wpl-text-with_gallery_image" class="text_label"><?php echo __('Gallery image','wplister'); ?>: *</label>
+							<label for="wpl-text-with_gallery_image" class="text_label"><?php echo __('Gallery image','wplister'); ?>:</label>
 							<select id="wpl-text-with_gallery_image" name="wpl_e2e_with_gallery_image" title="Gallery image" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 								<option value="1" <?php if ( $item_details['with_gallery_image'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
@@ -174,7 +174,15 @@
 							</select>
 							<br class="clear" />
 
-							<label for="wpl-text-counter_style" class="text_label"><?php echo __('Counter','wplister'); ?>: *</label>
+
+							<label for="wpl-text-with_variation_images" class="text_label"><?php echo __('Variation images','wplister'); ?>:</label>
+							<select id="wpl-text-with_variation_images" name="wpl_e2e_with_variation_images" title="Variation images" class=" required-entry select">
+								<option value="1" <?php if ( @$item_details['with_variation_images'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( @$item_details['with_variation_images'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
+							<label for="wpl-text-counter_style" class="text_label"><?php echo __('Counter','wplister'); ?>:</label>
 							<select id="wpl-text-counter_style" name="wpl_e2e_counter_style" title="Counter" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 								<option value="BasicStyle" <?php if ( $item_details['counter_style'] == 'BasicStyle' ): ?>selected="selected"<?php endif; ?>>BasicStyle</option>

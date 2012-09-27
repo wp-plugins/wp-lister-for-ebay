@@ -13,7 +13,7 @@ List products from WordPress on eBay.
 
 WP-Lister connects your WooCommerce, WP e-Commerce, Shopp or MarketPress site with your eBay Store. You can select multiple products right from your products page, select a profile to apply a set of predefined options and list them all on eBay with just a few clicks.
 
-We worked hard to make WP-Lister easy to use but flexible. The workflow of listing items requires not a single click more than neccessary. Due to its tight integration in WordPress, your client will actually not have to learn anything new as he will feel right at home.
+We worked hard to make WP-Lister easy to use but flexible. The workflow of listing items requires not a single click more than neccessary. Due to its tight integration in WordPress, your client will not have to learn anything new as he will feel right at home.
 
 = Features =
 
@@ -49,11 +49,19 @@ Yes, WP-Lister works with every eBay site, but only one site at a time.
 
 = What are the requirements to run WP-Lister? =
 
-WP-Lister requires a recent version of WordPress (3.3+) with  WooCommerce, WP e-Commerce or Shopp installed. Your server needs to have cURL support and PHP 5.2 or better.
+WP-Lister requires a recent version of WordPress (3.3+) with  WooCommerce, WP e-Commerce, MarketPress or Shopp installed. Your server needs to have cURL support and PHP 5.2 or better.
 
 = I use products variations on my site but eBay doesn’t allow variations in the selected category. How can I find out in which categories variations are allowed? =
 
-To learn more about variations and allowed categories you should visit this page: http://pages.ebay.com/help/sell/listing-variations.html. There you will find a link to eBay’s look up table for categories allowing variations.
+To learn more about variations and allowed categories you should visit this page: http://pages.ebay.com/help/sell/listing-variations.html. There you will find a link to eBay’s look up table for categories allowing variations. If you can only list to categories where no variations are allowed, consider purchasing WP-Lister Pro which can split variations into single listings.
+
+= Are there any more FAQ? =
+
+Yes, there are more questions and answers on http://www.wplab.de/plugins/wp-lister/faq/
+
+= Any plans for WP-Lister for Amazon? =
+
+You bet ;-)
 
 == Screenshots ==
 
@@ -62,5 +70,17 @@ To learn more about variations and allowed categories you should visit this page
 
 == Changelog ==
 
+= 1.0.5 =
+* various bug fixes
+
+= 1.0.2 =
+* improved inventory sync for variations
+* added advanced options to listing edit page
+* MarketPress: added support for calculated shipping services
+
+= 1.0.1 =
+* support for MarketPress
+
 = 1.0 =
 * Initial release
+

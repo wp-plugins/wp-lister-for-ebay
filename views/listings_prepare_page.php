@@ -85,7 +85,7 @@
 	
 	<div id="message" class="updated fade below-h2"  style="padding-left: 15px; padding-top: 5px">
     <form id="profiles-filter" method="get" action="<?php echo $wpl_form_action; ?>" >
-        <input type="hidden" name="action" value="apply_auction_profile" />
+        <input type="hidden" name="action" value="apply_listing_profile" />
         <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
 		
 		<p>

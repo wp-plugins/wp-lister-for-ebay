@@ -60,9 +60,9 @@ class ListingsPage extends WPL_Page {
 			exit();
 		}
 
-		if ( $this->requestAction() == 'apply_auction_profile' ) {
+		if ( $this->requestAction() == 'apply_listing_profile' ) {
 
-	        $this->logger->info( 'apply_auction_profile' );
+	        $this->logger->info( 'apply_listing_profile' );
 	        #$this->logger->info( print_r( $_REQUEST, 1 ) );
 			$profilesModel = new ProfilesModel();
 	        $profile = $profilesModel->getItem( $_REQUEST['wpl_e2e_profile_to_apply'] );
@@ -71,25 +71,30 @@ class ListingsPage extends WPL_Page {
 	        $items = $listingsModel->applyProfileToNewListings( $profile );
 
 			// verify new listings if asked to
-			if ( @$_REQUEST['wpl_e2e_verify_after_profile']=='1') {
+			// if ( @$_REQUEST['wpl_e2e_verify_after_profile']=='1') {
 
-		        $this->logger->info( 'verifying new items NOW' );
+			//	$this->logger->info( 'verifying new items NOW' );
 	
-				// get session
-				$this->initEC();
+			// 	// get session
+			// 	$this->initEC();
 				
-				// verify prepared items
-				foreach( $items as $item ) {
-					$listingsModel->verifyAddItem( $item['id'], $this->EC->session );
-				}		
-				$this->EC->closeEbay();
-			}
+			// 	// verify prepared items
+			// 	foreach( $items as $item ) {
+			// 		$listingsModel->verifyAddItem( $item['id'], $this->EC->session );
+			// 	}		
+			// 	$this->EC->closeEbay();
+			// }
 
 			// remember selected profile
 			self::updateOption('last_selected_profile', intval( $_REQUEST['wpl_e2e_profile_to_apply'] ) );
 	        
 	        // redirect to listings page
-			wp_redirect( get_admin_url().'admin.php?page=wplister' );
+			if ( @$_REQUEST['wpl_e2e_verify_after_profile']=='1') {
+				// verify new listings if asked to
+				wp_redirect( get_admin_url().'admin.php?page=wplister&action=verifyPreparedItemsNow' );
+			} else {
+				wp_redirect( get_admin_url().'admin.php?page=wplister' );
+			}
 			exit();
 		}
 
