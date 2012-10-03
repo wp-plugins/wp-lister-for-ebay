@@ -324,7 +324,7 @@ class EbayController {
 
     // process $this->lastResults and look for errors and/or warnings
     public function processLastResults(){ 
-        $this->logger->info('processLastResults()'.print_r( $this->lastResults, 1 ));
+        $this->logger->debug('processLastResults()'.print_r( $this->lastResults, 1 ));
 
         $this->isSuccess = true;
         $this->hasErrors = false;

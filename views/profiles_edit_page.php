@@ -91,6 +91,8 @@
 							<br class="clear" />
 							<p class="desc" style="display: block;">
 								<?php echo __('Leave this empty to list all available items.','wplister'); ?>
+								<?php 
+								?>
 							</p>
 
 

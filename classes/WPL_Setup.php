@@ -9,13 +9,16 @@ class WPL_Setup extends WPL_Core {
 		// check if cURL is loaded
 		if ( ! self::isCurlLoaded() ) return false;
 
+		// check for windows server
+		if ( self::isWindowsServer() ) return false;
+
 		// setup wizard
 		// if ( self::getOption('ebay_token') == '' ) {
 		if ( ( '1' == self::getOption('setup_next_step') ) && ( $page != 'settings') ) {
 		
 			$msg1 = __('You have not linked WP-Lister to your eBay account yet.','wplister');
 			$msg2 = __('To complete the setup procedure go to %s and follow the instructions.','wplister');
-			$link = '<a href="admin.php?page=wplister-settings">'.__('Settings').'</a>';
+			$link = '<a href="admin.php?page=wplister-settings">'.__('Settings','wplister').'</a>';
 			$msg2 = sprintf($msg2, $link);
 			$msg = "<p><b>$msg1</b></p><p>$msg2</p>";
 			$this->showMessage($msg);
@@ -41,7 +44,7 @@ class WPL_Setup extends WPL_Core {
 			$msg2 = __('To create your first listing template click on %s.','wplister').'<br>';
 			if ( @$_GET['action'] == 'add_new_template' )
 				$msg2 = __('Replace the default text according to your requirements and save your template to continue.','wplister');
-			$link = '<a href="admin.php?page=wplister-templates&action=add_new_template">'.__('New Template').'</a>';
+			$link = '<a href="admin.php?page=wplister-templates&action=add_new_template">'.__('New Template', 'wplister').'</a>';
 			$msg2 = sprintf($msg2, $link);
 			$msg = "<p><b>$title</b></p><p><b>$msg1</b></p><p>$msg2</p>";
 			$this->showMessage($msg);
@@ -51,7 +54,7 @@ class WPL_Setup extends WPL_Core {
 			$title = __('WP-Lister Setup - Step 4','wplister');
 			$msg1  = __('The final step: create your first listing profile.', 'wplister');
 			$msg2  = __('Click on %s and start defining your listing options.<br>After saving your profile, visit your Products page and select the products to list on eBay.','wplister');
-			$link  = '<a href="admin.php?page=wplister-profiles&action=add_new_profile">'.__('New Profile').'</a>';
+			$link  = '<a href="admin.php?page=wplister-profiles&action=add_new_profile">'.__('New Profile', 'wplister').'</a>';
 			$msg2  = sprintf($msg2, $link);
 			$msg   = "<p><b>$msg1</b></p><p>$msg2</p>";
 			$this->showMessage($msg);
@@ -255,6 +258,25 @@ class WPL_Setup extends WPL_Core {
 		}
 
 		return true;
+	}
+
+	// check server is running windows
+	public function isWindowsServer() {
+
+		if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+
+			$this->showMessage("
+				<b>Server requirements not met</b><br>
+				<br>
+				Your server seems to run on Windows.<br>
+				WP-Lister currently only supports unixoid operating systems like Linux, FreeBSD and OS X.<br>
+				<br>
+				If you'd like to help make WP-Lister run on Windows, please contact us at info@wplab.de.
+			",1);
+			return true;
+		}
+
+		return false;
 	}
 
 

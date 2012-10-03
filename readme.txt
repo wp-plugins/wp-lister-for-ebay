@@ -28,18 +28,27 @@ We worked hard to make WP-Lister easy to use but flexible. The workflow of listi
 * built in template editor with HTML / CSS syntax highlighting
 * download / upload listing templates – makes life easy for 3rd party template developers
 
+= Localization =
+
+* english
+* german
+
+To make WP-Lister available in more languages, we will provide a free license for WP-Lister Pro for everyone who will provide any maintain a new localization.
+
 = Screencast =
 
 http://www.youtube.com/watch?feature=player_embedded&v=zBQilzwr9UI
 
 = More information and Pro version =
 
-http://www.wplab.de/plugins/wp-lister/
+Visit http://www.wplab.de/plugins/wp-lister/ to read more about WP-Lister including documentation, installation instructions and user reviews.
+
+To find out more about the different versions have a look on this feature comparison: http://www.wplab.de/plugins/wp-lister/feature-comparison/
 
 == Installation ==
 
 1. Install WP-Lister for eBay either via the WordPress.org plugin directory, or by uploading the files to your server
-2. After activating the plugins, visit the new page WP-Lister and follow the setup instructions. 
+2. After activating the plugin, visit the new page WP-Lister and follow the setup instructions. 
 
 == Frequently Asked Questions ==
 
@@ -49,7 +58,11 @@ Yes, WP-Lister works with every eBay site, but only one site at a time.
 
 = What are the requirements to run WP-Lister? =
 
-WP-Lister requires a recent version of WordPress (3.3+) with  WooCommerce, WP e-Commerce, MarketPress or Shopp installed. Your server needs to have cURL support and PHP 5.2 or better.
+WP-Lister requires a recent version of WordPress (3.3+) with WooCommerce, WP e-Commerce, MarketPress or Shopp installed. Your server should run on Linux and have PHP 5.2 or better with cURL support.
+
+= Any plans to support windows servers? =
+
+This has been requested by less than 2% of our users so far, so it's not top priority. But if you need to run WP-Lister on windows and are willing to provide us with a development area for testing, we would gladly take care of fixing any issues.
 
 = I use products variations on my site but eBay doesn’t allow variations in the selected category. How can I find out in which categories variations are allowed? =
 
@@ -69,6 +82,10 @@ You bet ;-)
 2. Profile Editor
 
 == Changelog ==
+
+= 1.0.6 =
+* german localization
+* improved inventory sync for WooCommerce (Pro only)
 
 = 1.0.5 =
 * various bug fixes
