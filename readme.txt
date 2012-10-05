@@ -7,7 +7,7 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-List products from WordPress on eBay.
+List products from WordPress on eBay. The easy way.
 
 == Description ==
 
@@ -23,7 +23,6 @@ We worked hard to make WP-Lister easy to use but flexible. The workflow of listi
 * choose categories from eBay and your eBay Store
 * national and international shipping options
 * support for product variations
-* supports local requirements like ReturnPolicy for ebay.de
 * create custom listing templates using WordPress post editor
 * built in template editor with HTML / CSS syntax highlighting
 * download / upload listing templates – makes life easy for 3rd party template developers
@@ -33,7 +32,7 @@ We worked hard to make WP-Lister easy to use but flexible. The workflow of listi
 * english
 * german
 
-To make WP-Lister available in more languages, we will provide a free license for WP-Lister Pro for everyone who will provide any maintain a new localization.
+To make WP-Lister available in more languages, we will provide a free license for WP-Lister Pro for everyone who will provide and maintain a new localization.
 
 = Screencast =
 
