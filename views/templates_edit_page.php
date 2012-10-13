@@ -195,10 +195,10 @@
 							</p>
 							<p>
 								For more information visit the 
-								<a href="http://www.wplab.de/plugins/wp-lister/faq/" target="_blank">FAQ</a>.
+								<a href="http://www.wplab.com/plugins/wp-lister/faq/" target="_blank">FAQ</a>.
 							</p>
 							<p>
-								If you need help setting up your template, don't hesitate to contact us at support@wplab.de.
+								If you need help setting up your template, don't hesitate to contact us at support@wplab.com.
 							</p>
 						</div>
 					</div>

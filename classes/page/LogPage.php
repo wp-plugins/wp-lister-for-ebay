@@ -89,7 +89,7 @@ class LogPage extends WPL_Page {
 			$content = $this->display( 'log_details', array( 'row' => $row, 'version' => $this->get_plugin_version() ), false );
 
 			// build email
-			$to = 'matt@wplab.de';
+			$to = 'support@wplab.com';
 			$subject = 'WP-Lister Debug Log Entry #'.$id;
 			$attachments = array();
 			$headers = '';

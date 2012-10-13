@@ -435,7 +435,7 @@ class WPL_AjaxHandler extends WPL_Core {
 		$msg .= 'SERVER: '.print_r($_SERVER,1)."\n";
 		$msg .= 'Headers: '.print_r($headers,1)."\n";
 
-		$to = get_option('admin_email', 'info@wplab.de');
+		$to = get_option('admin_email', 'support@wplab.com');
 		$subject = 'New eBay platform notification';
 		wp_mail($to, $subject, $msg);
 		

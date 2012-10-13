@@ -71,7 +71,7 @@ class WPL_Page extends WPL_Core {
 
 	function change_admin_footer_text() {  
 	    echo '<span id="footer-thankyou">';
-	    echo sprintf( __('Thank you for listing with %s','wplister'), '<a href="http://www.wplab.de/plugins/wp-lister/" target="_blank">WP-Lister</a>' );
+	    echo sprintf( __('Thank you for listing with %s','wplister'), '<a href="http://www.wplab.com/plugins/wp-lister/" target="_blank">WP-Lister</a>' );
 	    echo '</span>';
 	}  
 	function change_admin_footer_version( $version ) {  

@@ -224,6 +224,53 @@ class WPL_Setup extends WPL_Core {
 			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
 		}
 		
+		// upgrade to version 10  (1.0.7)
+		if ( 10 > $db_version ) {
+			$new_db_version = 10;
+
+			// add column to ebay_transactions table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
+			        ADD COLUMN `wp_order_id` int(10) UNSIGNED NOT NULL DEFAULT 0 AFTER `post_id`
+			";
+			$wpdb->query($sql);	#echo mysql_error();
+
+			// fetch all transactions
+			$sql = "SELECT id FROM `{$wpdb->prefix}ebay_transactions` ";
+			$items = $wpdb->get_results($sql);	echo mysql_error();
+
+			// find and assign orders
+			$tm = new TransactionsModel();
+			foreach ($items as $transaction) {
+
+				// fetch item details
+				$item = $tm->getItem( $transaction->id );
+				$details = $item['details'];
+
+				// build order title (WooCommerce only)
+			    $post_title = 'Order &ndash; '.date('F j, Y @ h:i A', strtotime( $details->CreatedDate ) );
+
+			    // find created order
+				$sql = "
+					SELECT ID FROM `{$wpdb->prefix}posts`
+					WHERE post_title = '$post_title'
+					  AND post_status = 'publish'
+				";
+				$post_id = $wpdb->get_var($sql);	echo mysql_error();
+				
+				// set order_id for transaction
+				$tm->updateWpOrderID( $transaction->id, $post_id );							    
+
+				// Update post data
+				update_post_meta( $post_id, '_transaction_id', $transaction->id );
+				update_post_meta( $post_id, '_ebay_item_id', $item['item_id'] );
+				update_post_meta( $post_id, '_ebay_transaction_id', $item['transaction_id'] );
+
+			}
+			
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
+		}
+		
 		if ( $msg )	$this->showMessage($msg);		
 
 		#debug: update_option('wplister_db_version', 0);
@@ -271,7 +318,7 @@ class WPL_Setup extends WPL_Core {
 				Your server seems to run on Windows.<br>
 				WP-Lister currently only supports unixoid operating systems like Linux, FreeBSD and OS X.<br>
 				<br>
-				If you'd like to help make WP-Lister run on Windows, please contact us at info@wplab.de.
+				If you'd like to help make WP-Lister run on Windows, please contact us at info@wplab.com.
 			",1);
 			return true;
 		}

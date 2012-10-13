@@ -237,7 +237,7 @@ class ProfilesPage extends WPL_Page {
 
 		// proper error handling
 		if ($result===false) {
-			$this->showMessage( "There was a problem saving your profile.<br>SQL:<pre>".$wpdb->last_query.'</pre>', true );	
+			$this->showMessage( "There was a problem saving your profile.<br>SQL:<pre>".$wpdb->last_query.'</pre>'.mysql_error(), true );	
 		} else {
 			$this->showMessage( __('Profile saved.','wplister') );
 

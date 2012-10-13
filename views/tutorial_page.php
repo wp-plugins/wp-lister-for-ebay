@@ -71,10 +71,10 @@
 
 							<p><strong>Further ressources</strong></p>
 							<p class="desc" style="display: block;">
-								<a href="http://www.wplab.de/plugins/wp-lister/faq/" target="_blank">FAQ</a> <br>
-								<a href="http://www.wplab.de/plugins/wp-lister/documentation/" target="_blank">Documentation</a> <br>
-								<a href="http://www.wplab.de/plugins/wp-lister/installing-wp-lister/" target="_blank">Installing WP-Lister</a> <br>
-								<a href="http://www.wplab.de/plugins/wp-lister/screencasts/" target="_blank">Screencasts</a> <br>
+								<a href="http://www.wplab.com/plugins/wp-lister/faq/" target="_blank">FAQ</a> <br>
+								<a href="http://www.wplab.com/plugins/wp-lister/documentation/" target="_blank">Documentation</a> <br>
+								<a href="http://www.wplab.com/plugins/wp-lister/installing-wp-lister/" target="_blank">Installing WP-Lister</a> <br>
+								<a href="http://www.wplab.com/plugins/wp-lister/screencasts/" target="_blank">Screencasts</a> <br>
 							</p>
 							<br class="clear" />
 						</div>

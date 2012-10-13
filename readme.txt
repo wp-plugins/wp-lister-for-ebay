@@ -40,9 +40,9 @@ http://www.youtube.com/watch?feature=player_embedded&v=zBQilzwr9UI
 
 = More information and Pro version =
 
-Visit http://www.wplab.de/plugins/wp-lister/ to read more about WP-Lister including documentation, installation instructions and user reviews.
+Visit http://www.wplab.com/plugins/wp-lister/ to read more about WP-Lister including documentation, installation instructions and user reviews.
 
-To find out more about the different versions have a look on this feature comparison: http://www.wplab.de/plugins/wp-lister/feature-comparison/
+To find out more about the different versions have a look on this feature comparison: http://www.wplab.com/plugins/wp-lister/feature-comparison/
 
 == Installation ==
 
@@ -69,7 +69,7 @@ To learn more about variations and allowed categories you should visit this page
 
 = Are there any more FAQ? =
 
-Yes, there are more questions and answers on http://www.wplab.de/plugins/wp-lister/faq/
+Yes, there are more questions and answers on http://www.wplab.com/plugins/wp-lister/faq/
 
 = Any plans for WP-Lister for Amazon? =
 

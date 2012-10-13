@@ -99,7 +99,8 @@ WpLister.JobRunner = function () {
             task: task,
             nonce: 'TODO'
         };
-        var jqxhr = jQuery.getJSON( ajaxurl, params )
+        // var jqxhr = jQuery.getJSON( ajaxurl, params )
+        var jqxhr = jQuery.post( ajaxurl, params, null, 'json' )
         .success( function( response ) { 
 
             // check task success
@@ -155,7 +156,7 @@ WpLister.JobRunner = function () {
 
             jQuery('#jobs_log').append( "There was a problem processing this task. The server responded: " + e.responseText + "<br>" );
             jQuery('#jobs_window .btn_close').show();
-            // alert( "There was a problem running the task '"+task.displayName+"'.\n\nThe server responded:\n" + e.responseText + '\n\nPlease contact support@wplab.de.' ); 
+            // alert( "There was a problem running the task '"+task.displayName+"'.\n\nThe server responded:\n" + e.responseText + '\n\nPlease contact support@wplab.com.' ); 
             console.log( "error", xhr, error ); 
             console.log( e.responseText ); 
         });
@@ -207,7 +208,7 @@ WpLister.JobRunner = function () {
         .error( function(e,xhr,error) { 
             jQuery('#jobs_log').append( "problem completing job - server responded: " + e.responseText + "<br>" );
             jQuery('#jobs_window .btn_close').show();
-            alert( "There was a problem completing this job.\n\nThe server responded:\n" + e.responseText + '\n\nPlease contact support@wplab.de.' ); 
+            alert( "There was a problem completing this job.\n\nThe server responded:\n" + e.responseText + '\n\nPlease contact support@wplab.com.' ); 
             console.log( "error", xhr, error ); 
             console.log( e.responseText ); 
         });

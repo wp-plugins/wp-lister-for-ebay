@@ -275,6 +275,17 @@ class TransactionsModel extends WPL_Model {
 
 		return $transaction;
 	}
+	function getTransactionByOrderID( $wp_order_id ) {
+		global $wpdb;
+
+		$transaction = $wpdb->get_row( "
+			SELECT *
+			FROM $this->tablename
+			WHERE wp_order_id = '$wp_order_id'
+		", ARRAY_A );
+
+		return $transaction;
+	}
 
 	function getDateOfLastTransaction() {
 		global $wpdb;
@@ -294,6 +305,14 @@ class TransactionsModel extends WPL_Model {
 		" );
 	}
 
+	function updateWpOrderID( $id, $wp_order_id ) {
+		global $wpdb;
+		$wpdb->query( "
+			UPDATE $this->tablename
+			SET wp_order_id = '$wp_order_id'
+			WHERE id = '$id'
+		" );
+	}
 
 
 	function getPageItems( $current_page, $per_page ) {
@@ -328,6 +347,7 @@ class TransactionsModel extends WPL_Model {
 
 		return $items;
 	}
+
 
 
 

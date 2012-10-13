@@ -60,7 +60,7 @@
 							</div>
 
 							<label for="wpl-text-profile_description" class="text_label"><?php echo __('Profile description','wplister'); ?>:</label>
-							<input type="text" name="wpl_e2e_profile_description" id="wpl-text-profile_description" value="<?php echo $wpl_item['profile_description']; ?>" class="text_input" />
+							<input type="text" name="wpl_e2e_profile_description" id="wpl-text-profile_description" value="<?php echo str_replace('"','&quot;', $wpl_item['profile_description'] ); ?>" class="text_input" />
 							<br class="clear" />
 
 							<label for="wpl-text-auction_type" class="text_label"><?php echo __('Type','wplister'); ?>: *</label>
