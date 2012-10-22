@@ -308,7 +308,8 @@
 
 
 					// flat: local shipping price required
-					if ( jQuery('.select_shipping_type')[0].value == 'flat' ) {
+					var shipping_type = jQuery('.select_shipping_type')[0] ? jQuery('.select_shipping_type')[0].value : 'flat';
+					if ( shipping_type == 'flat' ) {
 						if ( jQuery('#loc_shipping_options_table_flat input.price_input')[0].value == '' ) {
 							alert('Please enter a your shipping fee.'); return false;
 						}

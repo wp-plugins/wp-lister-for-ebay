@@ -112,7 +112,7 @@ class WPL_Core {
 	}
 	
 	protected function getSubmenuPageTitle( $insTitle ) {
-		return self::ParentTitle.' - '.$insTitle;
+		return $insTitle.' - '.self::ParentTitle;
 	}
 	
 	protected function getSubmenuId( $insId ) {

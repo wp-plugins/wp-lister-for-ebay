@@ -50,6 +50,13 @@
 						</form>
 						<br style="clear:both;"/>
 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="update_ebay_transactions_30" />
+								<input type="submit" value="<?php echo __('Update eBay transactions','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('This will load all transactions within 30 days from eBay.','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
 
 					</div>
 				</div> <!-- postbox -->
@@ -61,23 +68,28 @@
 
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
-								<input type="hidden" name="action" value="update_ebay_transactions" />
-								<input type="submit" value="<?php echo __('Update eBay transactions','wplister'); ?>" name="submit" class="button-secondary">
-								<p><?php echo __('Update transactions from eBay','wplister'); ?></p>
+								<input type="hidden" name="action" value="test_connection" />
+								<input type="submit" value="<?php echo __('Test eBay connection','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('Test connection to eBay API','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
 
-						<!-- beta!
-						<p><?php echo __('Import active auctions from eBay','wplister'); ?></p>
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
-							<div class="submit" style="padding-top: 0; float: left;">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
-								<input type="hidden" name="action" value="update_ebay_auctions" />
-								<input type="submit" value="<?php echo __('Import eBay auctions','wplister'); ?>" name="submit" class="button-secondary">
-							</div>
+								<input type="hidden" name="action" value="test_curl" />
+								<input type="submit" value="<?php echo __('Test Curl / PHP connection','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('Check availability of CURL php extension and show phpinfo()','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
-						-->
+
+
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="view_logfile" />
+								<input type="submit" value="<?php echo __('View debug log','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('View Logfile','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
 
 						<!-- platform notifictions don't work yet -->
 						<!--
@@ -101,33 +113,6 @@
 						</form>
 						<br style="clear:both;"/>
 						-->
-
-
-						<form method="post" action="<?php echo $wpl_form_action; ?>">
-								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
-								<input type="hidden" name="action" value="test_connection" />
-								<input type="submit" value="<?php echo __('Test eBay connection','wplister'); ?>" name="submit" class="button-secondary">
-								<p><?php echo __('Test connection to eBay API','wplister'); ?></p>
-						</form>
-						<br style="clear:both;"/>
-
-
-						<form method="post" action="<?php echo $wpl_form_action; ?>">
-								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
-								<input type="hidden" name="action" value="test_curl" />
-								<input type="submit" value="<?php echo __('Test Curl / PHP connection','wplister'); ?>" name="submit" class="button-secondary">
-								<p><?php echo __('Check availability of CURL php extension and show phpinfo()','wplister'); ?></p>
-						</form>
-						<br style="clear:both;"/>
-
-
-						<form method="post" action="<?php echo $wpl_form_action; ?>">
-								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
-								<input type="hidden" name="action" value="view_logfile" />
-								<input type="submit" value="<?php echo __('View debug log','wplister'); ?>" name="submit" class="button-secondary">
-								<p><?php echo __('View Logfile','wplister'); ?></p>
-						</form>
-						<br style="clear:both;"/>
 
 					</div>
 				</div> <!-- postbox -->

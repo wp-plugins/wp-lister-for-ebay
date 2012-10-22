@@ -85,48 +85,15 @@ class ToolsPage extends WPL_Page {
 					$this->EC->closeEbay();
 				}
 	
-				// update_ebay_categories
-				// if ( $_POST['action'] == 'update_ebay_categories') {				
-				// 	$this->initEC();
-				// 	$this->EC->loadCategories();
-				// 	$this->EC->closeEbay();
-				// 	$this->showMessage( __('Categories updated.','wplister') );
-				// }
-	
-				// update_store_categories
-				// if ( $_POST['action'] == 'update_store_categories') {				
-				// 	$this->initEC();
-				// 	$this->EC->loadStoreCategories();
-				// 	$this->EC->closeEbay();
-				// 	$this->showMessage( __('Store categories updated.','wplister') );
-				// }
-	
-				// update_ebay_auctions
-				if ( $_POST['action'] == 'update_ebay_auctions') {				
-					$this->initEC();
-					$this->EC->loadListings();
-					$this->EC->closeEbay();
-					$this->showMessage( __('Active auctions updated.','wplister') );
-				}
-
 				// update_ebay_transactions
-				if ( $_POST['action'] == 'update_ebay_transactions') {				
+				if ( $_POST['action'] == 'update_ebay_transactions_30') {				
 					$this->initEC();
-					$this->EC->loadTransactions();
+					$this->EC->loadTransactions( 30 );
 					$this->EC->updateListings();
 					$this->EC->closeEbay();
 					$this->showMessage( __('Transactions updated.','wplister') );
 				}
 	
-				// update ebay shipping and payment data
-				// if ( $_POST['action'] == 'update_ebay_details') {				
-				// 	$this->initEC();
-				// 	$this->EC->loadShippingServices();
-				// 	$this->EC->loadPaymentOptions();
-				// 	$this->EC->closeEbay();
-				// 	$this->showMessage( __('Shipping services and payment options updated.','wplister') );
-				// }
-
 	
 			} else {
 				die ('not allowed');

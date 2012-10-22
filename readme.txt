@@ -67,6 +67,10 @@ This has been requested by less than 2% of our users so far, so it's not top pri
 
 To learn more about variations and allowed categories you should visit this page: http://pages.ebay.com/help/sell/listing-variations.html. There you will find a link to eBay’s look up table for categories allowing variations. If you can only list to categories where no variations are allowed, consider purchasing WP-Lister Pro which can split variations into single listings.
 
+= I already have listed my products on eBay. Can WP-Lister import them to WordPress? =
+
+WP-Lister is specifically designed to let you manage your products in WordPress - and list them from there on eBay. If you would like to use WP-Lister but you need to import all your items from eBay to WooCommerce to start up, please contact us on www.wplab.com as we are currently developing a plugin to do just that.
+
 = Are there any more FAQ? =
 
 Yes, there are more questions and answers on http://www.wplab.com/plugins/wp-lister/faq/

@@ -167,18 +167,30 @@ class TransactionsModel extends WPL_Model {
 			$wpdb->insert( $this->tablename, $data );
 			$id = $wpdb->insert_id;
 
-			// mark listing item as sold when last piece is sold
-			$total_quantity = $wpdb->get_var( 'SELECT quantity FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$data['item_id'] );
-			$qsold = $wpdb->get_var( 'SELECT quantity_sold FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$data['item_id'] );
-			if ( $qsold + $data['quantity'] == $total_quantity ) {
-				$adata['status'] = 'sold';
-				$adata['date_finished'] = $data['date_created'];
+
+			// update listing sold quantity and status
+
+			// get current values from db
+			$quantity_purchased = $data['quantity'];
+			$quantity_total = $wpdb->get_var( 'SELECT quantity FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$data['item_id'] );
+			$quantity_sold = $wpdb->get_var( 'SELECT quantity_sold FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$data['item_id'] );
+
+			// increase the listing's quantity_sold
+			$quantity_sold = $quantity_sold + $quantity_purchased;
+			$wpdb->update( $wpdb->prefix.'ebay_auctions', 
+				array( 'quantity_sold' => $quantity_sold ), 
+				array( 'ebay_id' => $data['item_id'] ) 
+			);
+
+			// mark listing as sold when last item is sold
+			if ( $quantity_sold == $quantity_total ) {
+				$wpdb->update( $wpdb->prefix.'ebay_auctions', 
+					array( 'status' => 'sold', 'date_finished' => $data['date_created'], ), 
+					array( 'ebay_id' => $data['item_id'] ) 
+				);
 				$this->logger->info( 'marked item #'.$data['item_id'].' as SOLD ');
 			}
 
-			// update listing's quantity_sold
-			$adata['quantity_sold'] = $qsold + $data['quantity'];
-			$wpdb->update( $wpdb->prefix.'ebay_auctions', $adata, array( 'ebay_id' => $data['item_id'] ) );
 
 
 		}

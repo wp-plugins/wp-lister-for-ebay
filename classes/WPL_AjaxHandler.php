@@ -190,8 +190,8 @@ class WPL_AjaxHandler extends WPL_Core {
 				exit();
 			
 			default:
-				echo "unknown task";
-				exit();
+				// echo "unknown task";
+				// exit();
 		}
 
 	}
@@ -274,10 +274,10 @@ class WPL_AjaxHandler extends WPL_Core {
 				exit();
 			
 			default:
-				echo "unknown job";
-				break;
+				// echo "unknown job";
+				// break;
 		}
-		exit();
+		// exit();
 
 	}
 

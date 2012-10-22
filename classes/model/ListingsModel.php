@@ -59,35 +59,6 @@ class ListingsModel extends WPL_Model {
 	}
 
 
-	function downloadListingDetails($session, $siteid = 77)
-	{
-		$this->initServiceProxy($session);
-
-		$this->_cs->setHandler('ItemType', array(& $this, 'storeItemDetail'));
-
-		// download the data
-		$req = new GetMyeBaySellingRequestType();
-		$req->setActiveList( true );
-
-		$res = $this->_cs->GetMyeBaySelling($req);
-	}
-
-	function storeItemDetail($type, & $Detail)
-	{
-		global $wpdb;
-		//#type $Detail ItemType
-		
-		// map ItemType to DB columns
-		$data = $this->mapItemDetailToDB( $Detail );
-
-		$wpdb->insert( $this->tablename, $data );
-		$data['status'] = 'imported';
-
-		return true;
-	}
-
-
-
 	function getPageItems( $current_page, $per_page ) {
 		global $wpdb;
 
@@ -532,6 +503,8 @@ class ListingsModel extends WPL_Model {
 	public function checkItem( $item ) {
 
 		$success = true;
+		$this->VariationsHaveStock = false;
+
 
 		// check StartPrice
 		if ( is_object( $item->Variations ) ) {
@@ -578,6 +551,9 @@ class ListingsModel extends WPL_Model {
 				$longMessage = __('None of these variations are in stock.','wplister');
 				$success = false;
 			}
+
+			// make this info available to reviseItem()
+			$this->VariationsHaveStock = $VariationsHaveStock;
 
 		} else {
 			// StartPrice must be greater than 0
@@ -928,21 +904,28 @@ class ListingsModel extends WPL_Model {
 		$allowed_statuses = array( 'published', 'changed' );
 		if ( ! $this->checkItemStatus( $id, $allowed_statuses ) ) return false;
 
-		// switch to FixedPriceItem if product has variations
+		// check if product has variations
 		$listing_item = $this->getItem( $id );
 		$useFixedPriceItem = ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) ? true : false;
 
 		// build item
 		$item = $this->buildItem( $id, $session, false, true );
 		if ( ! $this->checkItem($item) ) return $this->result;
+
+		// if quantity is zero, end item instead
+		if ( ( $item->Quantity == 0 ) && ( ! $this->VariationsHaveStock ) ) {
+			$this->logger->info( "Item #$id has no stock, switching to endItem()" );
+			return $this->endItem( $id, $session );
+		}
 		
 		// preparation - set up new ServiceProxy with given session
 		$this->initServiceProxy($session);
 
 		// set ItemID to revise
 		$item->setItemID( $this->getEbayIDFromID($id) );
-
 		$this->logger->info( "Revising #$id: ".$p['auction_title'] );
+
+		// switch to FixedPriceItem if product has variations
 		if ( $useFixedPriceItem ) {
 
 			$req = new ReviseFixedPriceItemRequestType(); 
@@ -1114,7 +1097,7 @@ class ListingsModel extends WPL_Model {
 			return false;
 		}
 
-	} // endItem()
+	} // checkItemStatus()
 
 
 	function getListingFeeFromResponse( $res )

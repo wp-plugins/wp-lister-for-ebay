@@ -290,16 +290,10 @@ class EbayController {
     }
 
 
-    // load active auctions and insert to db
-    public function loadListings(){ 
-        $sm = new ListingsModel();
-        $sm->downloadListingDetails( $this->session );
-    }
-
     // update transactions
-    public function loadTransactions(){ 
+    public function loadTransactions( $days = null ){ 
         $sm = new TransactionsModel();
-        $sm->updateTransactions( $this->session );
+        $sm->updateTransactions( $this->session, $days );
     }
 
     // update listings
@@ -655,7 +649,7 @@ class EbayController {
         $res = $this->sp->GeteBayOfficialTime($req);
 
         // handle result
-        return ( print_r( $res, 1 ) );
+        return ( $res );
         
     }
 
