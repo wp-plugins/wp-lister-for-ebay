@@ -112,7 +112,7 @@ class EbayController {
         require_once 'EbatNs_ServiceProxy.php';
         require_once 'EbatNs_Logger.php';
 
-        // hide inevitable CURL warnings from SDK 
+        // hide inevitable cURL warnings from SDK 
         // *** DISABLE FOR DEBUGGING ***
         $this->error_reporting_level = error_reporting();
         error_reporting( E_ERROR );
@@ -210,6 +210,16 @@ class EbayController {
         
         // send request
         $res = $this->sp->GetSessionID($req);
+
+        // handle errors like blocked ips
+        if ( $res->Ack != 'Success' ) {
+            echo "<h1>Problem connecting to eBay</h1>";
+            echo "<p>WP-Lister can't seem to establish a connection to eBay's servers. This could be caused by a firewall blocking cURL from accessing unkown ip addresses.</p>";
+            echo "<p>Only your hosting company can sort out the problems causing cURL not to connect properly. Your hosting company's server administrator should be able to resolve the permission problems preventing cURL from working. They've probably got overly limiting restrictions configured on the server, preventing it from being able to do the communication required for listing items on eBay.</p>";
+            echo "<p>debug output:</p>";
+            echo "<pre>"; print_r($res); echo "</pre>";
+            die();
+        }
 
         // TODO: handle error        
         return ( $res->SessionID );

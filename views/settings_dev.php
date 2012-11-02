@@ -31,7 +31,7 @@
 						<div class="inside">
 
 							<p>
-								<?php echo __('Enable the sandbox to test drive WP-Lister on the eBay sandbox.','wplister'); ?>
+								<?php echo __('The eBay sandbox allows you to list items free of charge to a testing area free of charge.','wplister'); ?>
 							</p>
 							<label for="wpl-option-sandbox_enabled" class="text_label"><?php echo __('Sandbox enabled','wplister') ?></label>
 							<select id="wpl-option-sandbox_enabled" name="wpl_e2e_option_sandbox_enabled" title="Sandbox" class=" required-entry select">
@@ -55,7 +55,7 @@
 								<option value="0" <?php if ( $wpl_option_log_to_db != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
-								<?php echo __('Log communication with eBay to database.','wplister'); ?>
+								<?php echo __('Enable to log all communication with eBay to the database.','wplister'); ?>
 							</p>
 
 						</div>

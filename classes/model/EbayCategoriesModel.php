@@ -179,6 +179,9 @@ class EbayCategoriesModel extends WPL_Model {
 		$data['leaf'] = $Category->LeafCategory;
 		$data['version'] = $this->_categoryVersion;
 		
+		// remove unrecognizable chars from category name
+		// $data['cat_name'] = trim(str_replace('?','', $data['cat_name'] ));
+
 		$wpdb->insert( $this->tablename, $data );
 					
 		return true;

@@ -129,11 +129,17 @@ class ListingsTable extends WP_List_Table {
         );
 
         $profile_data = maybe_unserialize( $item['profile_data'] );
-        
+        $listing_title = $item['auction_title'];
+
+        // make title link to products edit page
+        if ( ProductWrapper::plugin == 'woo' ) {
+            $listing_title = '<a class="product_title_link" href="post.php?post='.$item['post_id'].'&action=edit">'.$listing_title.'</a>';
+        }
+
         // show variations
         if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
-            $item['auction_title'] .= ' (<a href="#" onClick="jQuery(\'#pvars_'.$item['id'].'\').toggle();return false;">&raquo;Variations</a>)<br>';
-            // $item['auction_title'] .= '<pre>'.print_r( ProductWrapper::getVariations( $item['post_id'] ), 1 )."</pre>";
+            $listing_title .= ' (<a href="#" onClick="jQuery(\'#pvars_'.$item['id'].'\').toggle();return false;">&raquo;Variations</a>)<br>';
+            // $listing_title .= '<pre>'.print_r( ProductWrapper::getVariations( $item['post_id'] ), 1 )."</pre>";
             $variations = ProductWrapper::getVariations( $item['post_id'] );
 
             $listingsModel = new ListingsModel();
@@ -165,7 +171,7 @@ class ListingsTable extends WP_List_Table {
 
 
             $variations_html .= '</div>';
-            $item['auction_title'] .= $variations_html;
+            $listing_title .= $variations_html;
         }
 
         // disable some actions depending on status
@@ -183,7 +189,7 @@ class ListingsTable extends WP_List_Table {
         //Return the title contents
         //return sprintf('%1$s <span style="color:silver">%2$s</span>%3$s',
         return sprintf('%1$s %2$s',
-            /*$1%s*/ $item['auction_title'],
+            /*$1%s*/ $listing_title,
             /*$2%s*/ //$item['profile_id'],
             /*$3%s*/ $this->row_actions($actions)
         );

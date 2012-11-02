@@ -9,6 +9,15 @@
 	th.column-auction_title {
 		width: 25%;
 	}
+	
+	td.column-auction_title a.product_title_link {
+		color: #555;
+	}
+	td.column-auction_title a.product_title_link:hover {
+		/*color: #21759B;*/
+		color: #D54E21;
+	}
+
 
 </style>
 

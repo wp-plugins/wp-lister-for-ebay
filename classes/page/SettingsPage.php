@@ -199,7 +199,7 @@ class SettingsPage extends WPL_Page {
 	protected function saveDeveloperSettings() {
 
 		// TODO: check nonce
-		if ( isset( $_POST['wpl_e2e_update_channel'] ) ) {
+		if ( isset( $_POST['wpl_e2e_option_sandbox_enabled'] ) ) {
 
 			// toggle sandbox ?
 			$oldToken = self::getOption( 'ebay_token' );

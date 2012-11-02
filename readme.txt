@@ -69,7 +69,7 @@ To learn more about variations and allowed categories you should visit this page
 
 = I already have listed my products on eBay. Can WP-Lister import them to WordPress? =
 
-WP-Lister is specifically designed to let you manage your products in WordPress - and list them from there on eBay. If you would like to use WP-Lister but you need to import all your items from eBay to WooCommerce to start up, please contact us on www.wplab.com as we are currently developing a plugin to do just that.
+WP-Lister is specifically designed to let you manage your products in WordPress - and list them from there on eBay. If you would like to use WP-Lister but you need to import all your items from eBay to WooCommerce to start up, please contact us on www.wplab.com as we have developed a plugin to import products and store categories from eBay to WooCommerce which will be published very soon.
 
 = Are there any more FAQ? =
 
@@ -85,6 +85,12 @@ You bet ;-)
 2. Profile Editor
 
 == Changelog ==
+
+= 1.0.7 =
+* various bug fixes
+* support for new eBay to WooCommerce product importer
+* developer options were not saved (free version only)
+* support for tracking numbers, feedback and best offer added (Pro only)
 
 = 1.0.6 =
 * german localization

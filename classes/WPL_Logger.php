@@ -1,5 +1,7 @@
 <?php
 
+if ( ! class_exists('WPL_Logger') ) :
+
 class WPL_Logger{
 
 	var $file;
@@ -7,22 +9,35 @@ class WPL_Logger{
 	var $level = array('debug'=>7,'info'=>6,'notice'=>5,'warn'=>4,'critical'=>3,'error'=>2);
 
 	function __construct($file = false){
-		if($file){
-			$this->file = $file;
+
+		if ( ! defined('WPLISTER_DEBUG') ) return;
+
+		// build logfile path
+		$uploads = wp_upload_dir();
+		$uploaddir = $uploads['basedir'];
+		$logdir = $uploaddir . '/wp-lister';
+		$logfile = $logdir.'/wplister.log';
+
+		if ( WPLISTER_DEBUG == '' ) {
+			// remove logfile when logging is disabled
+			if ( file_exists($logfile) ) unlink( $logfile );
 		} else {
-			// get WP uploads folder
-			$uploads = wp_upload_dir();
-			$uploaddir = $uploads['basedir'];
-			$logdir = $uploaddir . '/wp-lister';
-			if ( !is_dir($logdir) ) mkdir($logdir);
-			$logfile = $logdir.'/wplister.log';
-			if ( !file_exists($logfile) ) touch($logfile);
-			$this->file = $logfile;
+
+			if ( $file ) {
+				$this->file = $file;
+			} else {
+				// make sure logfile exists
+				if ( !is_dir($logdir) ) mkdir($logdir);
+				if ( !file_exists($logfile) ) touch($logfile);
+				$this->file = $logfile;
+			}
+			$this->strdate = 'Y/m/d H:i:s';
+			$this->debug('Start Session:'.print_r($_SERVER,1));
+			$this->info( $_SERVER['REQUEST_METHOD'].': '.$_SERVER['QUERY_STRING'] . @$_POST['action'] .' - '. @$_POST['do'] );
+
 		}
-		$this->strdate = 'Y/m/d H:i:s';
-		$this->debug('Start Session:'.print_r($_SERVER,1));
-		$this->info( $_SERVER['REQUEST_METHOD'].': '.$_SERVER['QUERY_STRING'] . @$_POST['action'] .' - '. @$_POST['do'] );
-	}
+
+	} // __contruct()
 
 	function log($level=debug,$msg=false){
 		//If debug is not on, then don't log
@@ -71,4 +86,4 @@ class WPL_Logger{
 
 }
 
-
+endif;

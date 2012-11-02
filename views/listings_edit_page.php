@@ -43,7 +43,7 @@
 </style>
 
 <?php
-	$item_details = $wpl_item['details'];
+	$item_details = $wpl_item['profile_data']['details'];
 ?>
 
 <div class="wrap wplister-page">

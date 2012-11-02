@@ -313,7 +313,8 @@ class ListingsPage extends WPL_Page {
 		$item['quantity'] 					= $this->getValueFromPost( 'quantity' );
 		$item['listing_duration'] 			= $this->getValueFromPost( 'listing_duration' );
 		$item['template']					= $this->getValueFromPost( 'template' );
-		
+
+
 		// if item is published change status to changed
 		if ( 'published' == $this->getValueFromPost( 'status' ) ) {
 			$item['status'] = 'changed';

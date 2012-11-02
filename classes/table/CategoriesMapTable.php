@@ -84,7 +84,8 @@ class CategoriesMapTable extends WP_List_Table {
 
         $id = $item['term_id'];
         $tpl = '
-            <p class="categorySelector" style="margin:0; position:relative;">
+        <div class="row-actions-wrapper" style="position:relative;">
+            <p class="categorySelector" style="margin:0;">
                 <input type="hidden" name="wpl_e2e_ebay_category_id['.$id.']"   id="ebay_category_id_'.$id.'"   value="' . $item['ebay_category_id'] .'" class="" />
                 <!input type="text"   name="wpl_e2e_ebay_category_name['.$id.']" id="ebay_category_name_'.$id.'" value="' . $item['ebay_category_name'] . '" class="text_input" disabled="true" style="width:35%"/>
                 <span id="ebay_category_name_'.$id.'" class="text_input" >' . $item['ebay_category_name'] . '</span>
@@ -93,7 +94,8 @@ class CategoriesMapTable extends WP_List_Table {
                 <input type="button" class="button-secondary btn_select_category" value="' . __('select','wplister') . '" >
                 <input type="button" class="button-secondary btn_remove_category" value="' . __('remove','wplister') . '" >
             </span>
-            ';
+        </div>
+        ';
 
         return $tpl;
     }
@@ -102,7 +104,8 @@ class CategoriesMapTable extends WP_List_Table {
 
         $id = $item['term_id'];
         $tpl = '
-            <p class="categorySelector" style="margin:0; position:relative;">
+        <div class="row-actions-wrapper" style="position:relative;">
+            <p class="categorySelector" style="margin:0;">
                 <input type="hidden" name="wpl_e2e_store_category_id['.$id.']"   id="store_category_id_'.$id.'"   value="' . $item['store_category_id'] .'" class="" />
                 <!input type="text"   name="wpl_e2e_store_category_name['.$id.']" id="store_category_name_'.$id.'" value="' . $item['store_category_name'] . '" class="text_input" disabled="true" style="width:35%"/>
                 <span id="store_category_name_'.$id.'" class="text_input" >' . $item['store_category_name'] . '</span>
@@ -111,7 +114,8 @@ class CategoriesMapTable extends WP_List_Table {
                 <input type="button" class="button-secondary btn_select_category" value="' . __('select','wplister') . '" >
                 <input type="button" class="button-secondary btn_remove_category" value="' . __('remove','wplister') . '" >
             </span>
-            ';
+        </div>
+        ';
 
         return $tpl;
     }

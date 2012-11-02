@@ -71,8 +71,24 @@ WpLister.JobRunner = function () {
 
     var runTask = function ( task ) {
 
+        // estimate time left
+        var time_left = 'estimating time left...';
+        if (self.currentTask == 0) {
+            self.time_started = new Date().getTime() / 1000;
+        } else {
+            var current_time = new Date().getTime() / 1000;
+            time_running = current_time - self.time_started;
+            time_estimated = time_running / self.currentTask * self.jobsQueue.length;
+            time_left = time_estimated - time_running;
+            if ( time_left > 60 ) {
+                time_left = 'about '+Math.round(time_left/60)+' min. remaining';
+            } else {
+                time_left = 'about '+Math.round(time_left)+' sec. remaining';
+            }
+        }
+
         // update message
-        jQuery('#jobs_message').html('processing '+(self.currentTask+1)+' of '+self.jobsQueue.length );
+        jQuery('#jobs_message').html('processing '+(self.currentTask+1)+' of '+self.jobsQueue.length + ' - ' + time_left);
         this.updateProgressBar( (self.currentTask + 1) / self.jobsQueue.length );
 
         // create new log row for currentTask
