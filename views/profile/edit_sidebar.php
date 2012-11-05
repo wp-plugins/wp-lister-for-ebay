@@ -182,6 +182,13 @@
 							</select>
 							<br class="clear" />
 
+							<label for="wpl-text-subtitle_enabled" class="text_label"><?php echo __('List subtitle','wplister'); ?>:</label>
+							<select id="wpl-text-subtitle_enabled" name="wpl_e2e_subtitle_enabled" title="Use additional product description as subtitle" class=" required-entry select">
+								<option value="1" <?php if ( @$item_details['subtitle_enabled'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( @$item_details['subtitle_enabled'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
 							<label for="wpl-text-counter_style" class="text_label"><?php echo __('Counter','wplister'); ?>:</label>
 							<select id="wpl-text-counter_style" name="wpl_e2e_counter_style" title="Counter" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>

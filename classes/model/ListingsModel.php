@@ -278,6 +278,11 @@ class ListingsModel extends WPL_Model {
 		$item->DispatchTimeMax = $profile_details['dispatch_time'];
 		$item->ConditionID = $profile_details['condition_id'];
 
+		// postal code
+		if ( $profile_details['postcode'] != '' ) {
+			$item->PostalCode = $profile_details['postcode'];
+		}
+
 		// set eBay site from global site iD
 		// http://developer.ebay.com/DevZone/XML/docs/Reference/eBay/types/SiteCodeType.html
 		$site_id = $session->getSiteId();
@@ -373,6 +378,13 @@ class ListingsModel extends WPL_Model {
 			}
 		}
 
+		// add subtitle if enabled
+		if ( @$profile_details['subtitle_enabled'] == 1 ) {
+			$the_post = get_post( $p['post_id'] );
+			$subtitle = substr( strip_tags( $the_post->post_excerpt ), 0, 55 );
+			$item->setSubTitle( $subtitle );			
+			$this->logger->debug( 'setSubTitle: '.$subtitle );
+		}
 
 		// add shipping services and options
 		$item = $this->buildShipping( $id, $item, $p['post_id'], $profile_details );			
@@ -428,6 +440,10 @@ class ListingsModel extends WPL_Model {
 
 			$localShippingServices[]=$ShippingServiceOptions;
 			$pr++;
+			
+			$EbayShippingModel = new EbayShippingModel();
+			$lastShippingCategory = $EbayShippingModel->getShippingCategoryByServiceName( $opt['service_name'] );
+			$this->logger->debug('ShippingCategory: '.print_r($lastShippingCategory,1));
 		}
 		$shippingDetails->setShippingServiceOptions($localShippingServices, null);
 
@@ -494,7 +510,36 @@ class ListingsModel extends WPL_Model {
 		}
 
 		
-		$item->setShippingDetails($shippingDetails,null);
+		// check if we have local pickup only - if yes, exclude all locations
+		if ( ( count($localShippingOptions) == 1 ) && ( $lastShippingCategory == 'PICKUP' ) ) {
+
+			// $item->setShipToLocations( 'None' );
+			$item->setDispatchTimeMax( null );
+			$this->logger->info('no shipping mode enabled');
+
+			$shippingDetails->addExcludeShipToLocation( 'Channel Islands' );
+			$shippingDetails->addExcludeShipToLocation( 'Isle of Wight' );
+			$shippingDetails->addExcludeShipToLocation( 'Isle of Man' );
+			$shippingDetails->addExcludeShipToLocation( 'Scilly Isles' );
+			$shippingDetails->addExcludeShipToLocation( 'Scottish Highlands' );
+			$shippingDetails->addExcludeShipToLocation( 'Scottish Islands' );
+			$shippingDetails->addExcludeShipToLocation( 'Northern Ireland' );
+			$shippingDetails->addExcludeShipToLocation( 'Africa' );
+			$shippingDetails->addExcludeShipToLocation( 'Asia' );
+			$shippingDetails->addExcludeShipToLocation( 'Central America and Caribbean' );
+			$shippingDetails->addExcludeShipToLocation( 'Europe' );
+			$shippingDetails->addExcludeShipToLocation( 'Middle East' );
+			$shippingDetails->addExcludeShipToLocation( 'North America' );
+			$shippingDetails->addExcludeShipToLocation( 'Oceania' );
+			$shippingDetails->addExcludeShipToLocation( 'Southeast Asia' );
+			$shippingDetails->addExcludeShipToLocation( 'South America' );
+
+			$item->setShippingDetails($shippingDetails);
+
+		} else {
+			$item->setShippingDetails($shippingDetails);
+		}
+
 
 		return $item;
 
@@ -506,8 +551,9 @@ class ListingsModel extends WPL_Model {
 		$this->VariationsHaveStock = false;
 
 
-		// check StartPrice
+		// check StartPrice, Quantity and SKU
 		if ( is_object( $item->Variations ) ) {
+			// item has variations
 
 			$VariationsHaveStock = false;
 			$VariationsSkuArray = array();
@@ -556,6 +602,8 @@ class ListingsModel extends WPL_Model {
 			$this->VariationsHaveStock = $VariationsHaveStock;
 
 		} else {
+			// item has no variations
+
 			// StartPrice must be greater than 0
 			if ( intval($item->StartPrice) == 0 ) {
 				$itemTitle = trim($item->Title); 
@@ -1493,7 +1541,7 @@ class ListingsModel extends WPL_Model {
 		// echo mysql_error();
 	}
 
-	
+
 	public function reSelectListings( $ids ) {
 		global $wpdb;
 		foreach( $ids as $id ) {

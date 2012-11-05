@@ -186,6 +186,18 @@ class EbayShippingModel extends WPL_Model {
 		// $services = self::fixShippingCategory( $services );
 		return $services;		
 	}
+	function getShippingCategoryByServiceName( $service_name ) {
+		global $wpdb;	
+		$this->tablename = $wpdb->prefix . self::table;
+
+		$ShippingCategory = $wpdb->get_var("
+			SELECT ShippingCategory 
+			FROM $this->tablename
+			WHERE service_name = '$service_name'
+		");		
+
+		return $ShippingCategory;		
+	}
 
 	function getItem( $id ) {
 		global $wpdb;	

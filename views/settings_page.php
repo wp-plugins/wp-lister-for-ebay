@@ -132,8 +132,8 @@
 								<option value="0" <?php if ( $wpl_option_uninstall != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
-								<?php echo __('Enable to completely remove listings, transactions and settings when deactivating the plugin.','wplister'); ?>
-								<?php echo __('Please deactivate your license first.','wplister'); ?>
+								<?php echo __('Enable to completely remove listings, transactions and settings when deactivating the plugin.','wplister'); ?><br>
+								<?php echo __('To remove your listing templates as well, please delete the folder <code>wp-content/uploads/wp-lister/templates/</code>.','wplister'); ?>
 							</p>
 
 						</div>

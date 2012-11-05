@@ -86,6 +86,11 @@ You bet ;-)
 
 == Changelog ==
 
+= 1.0.7.4 =
+* updated german localization
+* support for variations using custom product attributes in WooCommerce
+* proper error handling if uploads folder is not writeable
+
 = 1.0.7 =
 * various bug fixes
 * support for new eBay to WooCommerce product importer

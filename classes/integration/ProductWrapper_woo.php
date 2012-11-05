@@ -185,7 +185,14 @@ class ProductWrapper {
 				// v2
 				$taxonomy = str_replace('attribute_', '', $key); // attribute_pa_color -> pa_color
 				$term = get_term_by('slug', $value, $taxonomy );
-				$newvar['variation_attributes'][ $attribute_labels[ $key ] ] = $term->name;
+				if ( $term ) {
+					// handle proper attribute taxonomies
+					$newvar['variation_attributes'][ $attribute_labels[ $key ] ] = $term->name;
+				} else {
+					// handle fake custom product attributes
+					$newvar['variation_attributes'][ $attribute_labels[ $key ] ] = $value;
+					// echo "no term found for $value<br>";
+				}
 			}
 			// $newvar['group_name'] = $attribute_labels[ $key ]; #deprecated
 			
@@ -206,6 +213,7 @@ class ProductWrapper {
 		return $variations;
 
 		// echo "<pre>";print_r($variations);die();echo"</pre>";
+
 		/* the returned array looks like this:
 		    
 		    [0] => Array

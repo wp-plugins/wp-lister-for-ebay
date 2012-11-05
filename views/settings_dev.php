@@ -31,7 +31,7 @@
 						<div class="inside">
 
 							<p>
-								<?php echo __('The eBay sandbox allows you to list items free of charge to a testing area free of charge.','wplister'); ?>
+								<?php echo __('The eBay sandbox allows you to list items to a testing area free of charge.','wplister'); ?>
 							</p>
 							<label for="wpl-option-sandbox_enabled" class="text_label"><?php echo __('Sandbox enabled','wplister') ?></label>
 							<select id="wpl-option-sandbox_enabled" name="wpl_e2e_option_sandbox_enabled" title="Sandbox" class=" required-entry select">

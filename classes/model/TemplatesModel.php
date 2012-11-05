@@ -34,6 +34,12 @@ class TemplatesModel extends WPL_Model {
 		// get user templates
 		$upload_dir = wp_upload_dir();
 
+		// if there is a problem with the uploads folder, wp might return an error
+		if ( $upload_dir['error'] ) {
+			$this->showMessage( $upload_dir['error'], 1, true );
+			return array();
+		}
+
 		$templates = array();
 		$files = glob( $upload_dir['basedir'].'/wp-lister/templates/*/template.html' );
 		foreach ($files as $file) {
