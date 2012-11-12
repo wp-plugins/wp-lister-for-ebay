@@ -151,7 +151,7 @@ class ProductWrapper {
 		// ) 
 
 		// build array of attribute labels
-		$attributes_labels = array();
+		$attribute_labels = array();
 		foreach ( $attributes as $name => $options ) {
 
 			$label = $woocommerce->attribute_label($name); 
@@ -187,10 +187,10 @@ class ProductWrapper {
 				$term = get_term_by('slug', $value, $taxonomy );
 				if ( $term ) {
 					// handle proper attribute taxonomies
-					$newvar['variation_attributes'][ $attribute_labels[ $key ] ] = $term->name;
+					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $term->name;
 				} else {
 					// handle fake custom product attributes
-					$newvar['variation_attributes'][ $attribute_labels[ $key ] ] = $value;
+					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $value;
 					// echo "no term found for $value<br>";
 				}
 			}
@@ -331,9 +331,9 @@ function wpl_woocommerce_edit_product_columns($columns){
 /**
  * Custom Columns for Products page
  **/
-add_action('manage_product_posts_custom_column', 'wpl_woocommerce_custom_product_columns', 3 );
+add_action('manage_product_posts_custom_column', 'wplister_woocommerce_custom_product_columns', 3 );
 
-function wpl_woocommerce_custom_product_columns( $column ) {
+function wplister_woocommerce_custom_product_columns( $column ) {
 	global $post, $woocommerce;
 	// $product = new WC_Product($post->ID);
 
@@ -372,5 +372,29 @@ function wpl_woocommerce_custom_product_columns( $column ) {
 	} // switch ($column)
 
 }
+
+
+// hook into save_post to mark listing as changed when a product is updated
+function wplister_on_woocommerce_product_quick_edit_save( $post_id, $post ) {
+
+	if ( !$_POST ) return $post_id;
+	if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
+	if( is_int( wp_is_post_autosave( $post_id ) ) ) return;
+	if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
+	// if ( !isset($_POST['woocommerce_quick_edit_nonce']) || (isset($_POST['woocommerce_quick_edit_nonce']) && !wp_verify_nonce( $_POST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ))) return $post_id;
+	if ( !current_user_can( 'edit_post', $post_id )) return $post_id;
+	if ( $post->post_type != 'product' ) return $post_id;
+
+	// global $woocommerce, $wpdb;
+	// $product = new WC_Product( $post_id );
+
+	$lm = new ListingsModel();
+	$lm->markItemAsModified( $post_id );
+
+	// Clear transient
+	// $woocommerce->clear_product_transients( $post_id );
+}
+
+add_action( 'save_post', 'wplister_on_woocommerce_product_quick_edit_save', 10, 2 );
 
 

@@ -154,6 +154,32 @@ class TemplatesModel extends WPL_Model {
 		// $this->logger->debug( 'template loaded from ' . $tpl_path );
 		// $this->logger->info( $tpl_html );
 		
+		// handle variations
+		$variations_html = '';
+        if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
+
+        	// generate variations table
+        	$variations_html = $this->getVariationsHTML( $item );
+
+        	// add variations table to item description
+        	if ( @$item['profile_data']['details']['add_variations_table'] ) {
+        		$item['post_content'] .= $variations_html;
+        	}
+
+        }
+		
+		// handle shopp addons
+        if ( ProductWrapper::plugin == 'shopp' ) {
+
+        	// generate addons table
+        	$addons_html = $this->getAddonsHTML( $item );
+
+        	// add variations table to item description
+        	if ( @$item['profile_data']['details']['add_variations_table'] ) {
+        		$item['post_content'] .= $addons_html;
+        	}
+
+        }
 		
 		// remove ALL links from post content by default
 		// TODO: make this an option in settings
@@ -162,6 +188,8 @@ class TemplatesModel extends WPL_Model {
 		// replace shortcodes
 		$tpl_html = str_replace( '[[product_title]]', $listing->prepareTitleAsHTML( $item['auction_title'] ), $tpl_html );
 		$tpl_html = str_replace( '[[product_content]]', apply_filters('the_content', $item['post_content'] ), $tpl_html );
+		$tpl_html = str_replace( '[[product_variations]]', $variations_html, $tpl_html );
+		$tpl_html = str_replace( '[[product_addons]]', $addons_html, $tpl_html );
 
 		$tpl_html = str_replace( '[[product_excerpt]]', $listing->getRawPostExcerpt( $item['post_id'] ), $tpl_html );
 		$tpl_html = str_replace( '[[product_additional_content]]', $listing->getRawPostExcerpt( $item['post_id'] ), $tpl_html );
@@ -245,6 +273,93 @@ class TemplatesModel extends WPL_Model {
 
 		// return html
 		return $tpl_html;
+	}
+
+
+	function getAddonsHTML( $item ) {
+        $addons = ProductWrapper::getAddons( $item['post_id'] );
+        $variations_html .= '<table style="margin-bottom: 8px;">';
+        foreach ($addons as $addonGroup) {
+
+            // first column: quantity
+            $variations_html .= '<tr><td colspan="2" align="left"><h5>';
+            $variations_html .= $addonGroup->name;
+            $variations_html .= '</h5></td></tr>';
+
+            foreach ($addonGroup->options as $addon) {
+                $variations_html .= '<tr><td align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                $variations_html .= $addon->name;
+                $variations_html .= '</td><td align="right">';
+                $variations_html .= number_format_i18n( $addon->price, 2 );
+                $variations_html .= '</td></tr>';
+            }
+            
+        }
+        $variations_html .= '</table>';
+        return $variations_html;
+	}
+
+
+	function getVariationsHTML( $item ) {
+
+        $listingsModel = new ListingsModel();
+        $profile_data = maybe_unserialize( $item['profile_data'] );
+        $variations = ProductWrapper::getVariations( $item['post_id'] );
+
+        $variations_html = '<div class="variations_list" style="margin:10px 0;">';
+        $variations_html .= '<table style="margin-bottom: 8px;">';
+
+        //table header
+        if (true) {
+
+            // first column: quantity
+            $variations_html .= '<tr>';
+
+            foreach ($variations[0]['variation_attributes'] as $name => $value) {
+                $variations_html .= '<th>';
+                $variations_html .= $name;
+                $variations_html .= '</th>';
+            }
+            
+            // last column: price
+            $variations_html .= '<th align="right">';
+            $variations_html .= __('Price','wplister');
+            $variations_html .= '</th></tr>';
+
+        }
+
+        //table body
+        foreach ($variations as $var) {
+
+            // first column: quantity
+            // $variations_html .= '<tr><td align="right">';
+            // $variations_html .= intval( $var['stock'] ) . '&nbsp;x';
+            // $variations_html .= '</td><td>';
+            $variations_html .= '<tr>';
+
+            foreach ($var['variation_attributes'] as $name => $value) {
+                // $variations_html .= $name.': '.$value ;
+	            $variations_html .= '<td>';
+                $variations_html .= $value ;
+                $variations_html .= '</td>';
+            }
+            // $variations_html .= '('.$var['sku'].') ';
+            // $variations_html .= '('.$var['image'].') ';
+            
+            // last column: price
+            $variations_html .= '<td align="right">';
+            $price = $listingsModel->applyProfilePrice( $var['price'], $profile_data['details']['start_price'] );
+            $variations_html .= number_format_i18n( $price, 2 );
+
+            $variations_html .= '</td></tr>';
+
+        }
+
+        $variations_html .= '</table>';
+        $variations_html .= '</div>';
+
+		// return html
+		return $variations_html;
 	}
 
 

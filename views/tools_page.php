@@ -125,7 +125,7 @@
 	<br style="clear:both;"/>
 
 	<?php if ( get_option('wplister_log_level') > 5 ): ?>
-		<pre><?php echo $wpl_debug; ?></pre>
+		<pre><?php print_r($wpl_debug); ?></pre>
 	<?php endif; ?>
 
 	<?php if ( @$_REQUEST['action'] == 'test_curl' ): ?>

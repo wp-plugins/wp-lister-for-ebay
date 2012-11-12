@@ -101,31 +101,44 @@
 								<div id="misc-publishing-actions">
 
 									<?php if ( ! $wpl_add_new_template ): ?>
+
+										<div class="misc-pub-section">
+										<!-- optional save and apply to all prepared listings already using this template -->
+										<?php if ( count($wpl_prepared_listings) > -1 ): ?>
+											<p><?php printf( __('There are %s prepared, %s verified and %s published items using this template.','wplister'), count($wpl_prepared_listings), count($wpl_verified_listings), count($wpl_published_listings) ) ?></p>
+										<?php else: ?>
+											<p>There are no prepared items using this template.</p>
+										<?php endif; ?>
+
+											<p>To update already published items you need to revise them after saving the template.</p>
+										</div>
+
 										<div class="misc-pub-section">
 											<p>
 												<?php echo __('You can find the theme files in this folder:','wplister'); ?>
 												<em><?php echo $wpl_template_location; ?></em>
 											</p>
 										</div>
+
+									<?php else: ?>
+
+										<div class="misc-pub-section">
+											<p>To update already published items you need to revise them after saving the template.</p>
+										</div>
+
 									<?php endif; ?>
 
-									<div class="misc-pub-section">
-									<!-- optional save and apply to all prepared listings already using this template -->
-									<?php if ( (isset($wpl_prepared_auctions)) && ( count($wpl_prepared_auctions) > 0 ) ): ?>
-										<p><?php printf( __('There are %s prepared items using this profile.','wplister'), count($wpl_prepared_auctions) ) ?></p>
-										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_prepared" value="yes" id="apply_changes_to_all_prepared" />
-										<label for="apply_changes_to_all_prepared"><?php printf( __('apply changes to all %s prepared listings using this template','wplister'), count($wpl_prepared_auctions) ) ?></label>
-									<?php else: ?>
-										<p>To update already published items you need to revise them after saving the template.</p>
-									<?php endif; ?>
-									</div>
+
 
 								</div>
+
+
 
 								<div id="major-publishing-actions">
 									<div id="publishing-action">
 										<input type="hidden" name="action" value="save_template" />
 										<input type="hidden" name="wpl_e2e_template_id" value="<?php echo $wpl_item['template_id']; ?>" />
+										<input type="hidden" name="return_to" value="<?php echo @$_GET['return_to']; ?>" />
 										<input type="submit" value="<?php echo __('Save template','wplister'); ?>" id="publish" class="button-primary" name="save">
 									</div>
 									<div class="clear"></div>
@@ -192,6 +205,10 @@
 								<code>[[attribute_Size]]</code><br>
 								<code>[[attribute_Brand]]</code><br>
 								example for custom product attributes<br>
+							</p>
+							<p>
+								<code>[[product_variations]]</code><br>
+								adds a html table listing all product variations<br>
 							</p>
 							<p>
 								For more information visit the 

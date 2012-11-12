@@ -22,6 +22,7 @@
 	width: 33%;
 	margin: 1px;
 	padding: 3px;
+	white-space:nowrap;
 }
 .wplister-page .postbox input.text_input,
 .wplister-page .postbox textarea,

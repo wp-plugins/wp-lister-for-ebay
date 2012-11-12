@@ -59,17 +59,17 @@ Yes, WP-Lister works with every eBay site, but only one site at a time.
 
 WP-Lister requires a recent version of WordPress (3.3+) with WooCommerce, WP e-Commerce, MarketPress or Shopp installed. Your server should run on Linux and have PHP 5.2 or better with cURL support.
 
-= Any plans to support windows servers? =
-
-This has been requested by less than 2% of our users so far, so it's not top priority. But if you need to run WP-Lister on windows and are willing to provide us with a development area for testing, we would gladly take care of fixing any issues.
-
 = I use products variations on my site but eBay doesn’t allow variations in the selected category. How can I find out in which categories variations are allowed? =
 
 To learn more about variations and allowed categories you should visit this page: http://pages.ebay.com/help/sell/listing-variations.html. There you will find a link to eBay’s look up table for categories allowing variations. If you can only list to categories where no variations are allowed, consider purchasing WP-Lister Pro which can split variations into single listings.
 
 = I already have listed my products on eBay. Can WP-Lister import them to WordPress? =
 
-WP-Lister is specifically designed to let you manage your products in WordPress - and list them from there on eBay. If you would like to use WP-Lister but you need to import all your items from eBay to WooCommerce to start up, please contact us on www.wplab.com as we have developed a plugin to import products and store categories from eBay to WooCommerce which will be published very soon.
+WP-Lister is specifically designed to let you manage your products in WordPress - and list them from there on eBay. If you would like to use WP-Lister but you need to import all your items from eBay to WooCommerce first, you might want to use this plugin which we developed to get you started: http://www.wplab.com/plugins/import-from-ebay-to-woocommerce/
+
+= Any plans to support windows servers? =
+
+This has been requested by less than 2% of our users so far, so it's not top priority. But if you need to run WP-Lister on windows and are willing to provide us with a development area for testing, we would gladly take care of fixing any issues.
 
 = Are there any more FAQ? =
 
@@ -85,6 +85,12 @@ You bet ;-)
 2. Profile Editor
 
 == Changelog ==
+
+= 1.0.8.6 =
+* new options to process variations
+* update all prepared, verified or published items when saving a profile
+* improved attribute handling in Shopp
+* the usual bug fixes
 
 = 1.0.7.4 =
 * updated german localization

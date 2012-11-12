@@ -29,6 +29,9 @@ class ProfilesPage extends WPL_Page {
 		// handle save profile
 		if ( $this->requestAction() == 'save_profile' ) {
 			$this->saveProfile();
+			if ( @$_POST['return_to'] == 'listings' ) {
+				wp_redirect( get_admin_url().'admin.php?page=wplister' );
+			}
 		}
 		// handle duplicate profile
 		if ( $this->requestAction() == 'duplicate_auction_profile' ) {
@@ -87,7 +90,9 @@ class ProfilesPage extends WPL_Page {
 			$store_categories          = $this->getStoreCategories();
 			
 			$listingsModel = new ListingsModel();
-			$prepared_auctions = $listingsModel->getAllPreparedWithProfile( $item['profile_id'] );
+			$prepared_listings  = $listingsModel->getAllPreparedWithProfile( $item['profile_id'] );
+			$verified_listings  = $listingsModel->getAllVerifiedWithProfile( $item['profile_id'] );
+			$published_listings = $listingsModel->getAllPublishedWithProfile( $item['profile_id'] );
 
 			$aData = array(
 				'plugin_url'				=> self::$PLUGIN_URL,
@@ -101,7 +106,9 @@ class ProfilesPage extends WPL_Page {
 				'countries'                 => $countries,
 				'template_files'            => $template_files,
 				'store_categories'          => $store_categories,
-				'prepared_auctions'         => $prepared_auctions,
+				'prepared_listings'         => $prepared_listings,
+				'verified_listings'         => $verified_listings,
+				'published_listings'        => $published_listings,
 				
 				'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-profiles'
 			);
@@ -246,19 +253,30 @@ class ProfilesPage extends WPL_Page {
 
 		}
 
+		// prepare for updating items
+		$listingsModel = new ListingsModel();
+		$profilesModel = new ProfilesModel();
+        $profile = $profilesModel->getItem( $this->getValueFromPost( 'profile_id' ) );
+
 		// re-apply profile to all prepared
 		if ( $this->getValueFromPost( 'apply_changes_to_all_prepared' ) == 'yes' ) {
-
-	        // get profile
-			$profilesModel = new ProfilesModel();
-	        $profile = $profilesModel->getItem( $this->getValueFromPost( 'profile_id' ) );
-
-	        // apply to prepared auctions using this profile
-			$listingsModel = new ListingsModel();
 			$items = $listingsModel->getAllPreparedWithProfile( $item['profile_id'] );
 	        $listingsModel->applyProfileToNewListings( $profile, $items );
-
-			$this->showMessage( sprintf( __('%s items updated.','wplister'), count($items) ) );			
+			$this->showMessage( sprintf( __('%s prepared items updated.','wplister'), count($items) ) );			
+		}
+		
+		// re-apply profile to all verified
+		if ( $this->getValueFromPost( 'apply_changes_to_all_verified' ) == 'yes' ) {
+			$items = $listingsModel->getAllVerifiedWithProfile( $item['profile_id'] );
+	        $listingsModel->applyProfileToNewListings( $profile, $items );
+			$this->showMessage( sprintf( __('%s verified items updated.','wplister'), count($items) ) );			
+		}
+		
+		// re-apply profile to all published
+		if ( $this->getValueFromPost( 'apply_changes_to_all_published' ) == 'yes' ) {
+			$items = $listingsModel->getAllPublishedWithProfile( $item['profile_id'] );
+	        $listingsModel->applyProfileToNewListings( $profile, $items );
+			$this->showMessage( sprintf( __('%s published items changed.','wplister'), count($items) ) );			
 		}
 		
 	}

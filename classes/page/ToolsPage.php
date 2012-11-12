@@ -32,10 +32,13 @@ class ToolsPage extends WPL_Page {
 
 		// force wp update check
 		if ( $this->requestAction() == 'force_update_check') {				
-			global $wpdb;
-			$wpdb->query("update wp_options set option_value='' where option_name='_site_transient_update_plugins'");
+
+            // global $wpdb;
+            // $wpdb->query("update wp_options set option_value='' where option_name='_site_transient_update_plugins'");
+            set_site_transient('update_plugins', null);
+
 			$this->showMessage( 
-				__('Check for updates was initiated.','wplister') . ' '
+				'<big>'. __('Check for updates was initiated.','wplister') . '</big><br><br>'
 				. __('You can visit your WordPress Updates now.','wplister') . '<br><br>'
 				. __('Since the updater runs in the background, it might take a little while before new updates appear.','wplister') . '<br><br>'
 				. '&raquo; <a href="update-core.php">'.__('view updates','wplister') . '</a>'

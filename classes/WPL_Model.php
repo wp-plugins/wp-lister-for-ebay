@@ -153,6 +153,15 @@ class WPL_Model {
 			$extraMsg .= $res->getMessage();
 			$extraMsg .= '</div>';
 			if ( ! $this->is_ajax() ) echo $extraMsg;
+
+			// save errors and warnings as array of objects
+			$errorObj = new stdClass();
+			$errorObj->SeverityCode = 'Info';
+			$errorObj->ErrorCode 	= @$error->getErrorCode();
+			$errorObj->ShortMessage = __('Additional details about this error','wplister');
+			$errorObj->LongMessage 	= $res->getMessage();
+			$errorObj->HtmlMessage 	= $extraMsg;
+			$errors[] = $errorObj;
 		}
 
 

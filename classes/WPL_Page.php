@@ -70,12 +70,14 @@ class WPL_Page extends WPL_Core {
 	}
 
 	function change_admin_footer_text() {  
+		$plugin_name = WPLISTER_LIGHT ? 'WP-Lister' : 'WP-Lister Pro';  
 	    echo '<span id="footer-thankyou">';
-	    echo sprintf( __('Thank you for listing with %s','wplister'), '<a href="http://www.wplab.com/plugins/wp-lister/" target="_blank">WP-Lister</a>' );
+	    echo sprintf( __('Thank you for listing with %s','wplister'), '<a href="http://www.wplab.com/plugins/wp-lister/" target="_blank">'.$plugin_name.'</a>' );
 	    echo '</span>';
 	}  
-	function change_admin_footer_version( $version ) {  
-	    return $version . ' / WP-Lister '.$this->get_plugin_version();
+	function change_admin_footer_version( $version ) {
+		$plugin_name = WPLISTER_LIGHT ? 'WP-Lister' : 'WP-Lister Pro';  
+	    return $version . ' / ' . $plugin_name . ' ' . $this->get_plugin_version();
 	}  
 
 	function get_plugin_version() {

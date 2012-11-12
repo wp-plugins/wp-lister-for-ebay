@@ -50,10 +50,20 @@
 								<div id="misc-publishing-actions">
 									<div class="misc-pub-section">
 									<!-- optional save and apply to all prepared listings already using this profile -->
-									<?php if ( count($wpl_prepared_auctions) > 0 ): ?>
-										<p><?php printf( __('There are %s prepared items using this profile.','wplister'), count($wpl_prepared_auctions) ) ?></p>
-										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_prepared" value="yes" id="apply_changes_to_all_prepared" />
-										<label for="apply_changes_to_all_prepared"><?php printf( __('update prepared items','wplister'), count($wpl_prepared_auctions) ) ?></label>
+									<?php if ( count($wpl_prepared_listings) > -1 ): ?>
+										<p><?php printf( __('There are %s prepared, %s verified and %s published items using this profile.','wplister'), count($wpl_prepared_listings), count($wpl_verified_listings), count($wpl_published_listings) ) ?></p>
+
+										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_prepared" value="yes" id="apply_changes_to_all_prepared" <?php if ($wpl_prepared_listings) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_prepared"><?php printf( __('update %s prepared items','wplister'), count($wpl_prepared_listings) ) ?></label>
+										<br class="clear" />
+
+										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_verified" value="yes" id="apply_changes_to_all_verified" <?php if ($wpl_verified_listings) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_verified"><?php printf( __('update %s verified items','wplister'), count($wpl_verified_listings) ) ?></label>
+										<br class="clear" />
+
+										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_published" value="yes" id="apply_changes_to_all_published" <?php if ($wpl_published_listings) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_published"><?php printf( __('update %s published items','wplister'), count($wpl_published_listings) ) ?></label>
+
 									<?php else: ?>
 										<p>There are no prepared items using this profile.</p>
 									<?php endif; ?>
@@ -64,6 +74,7 @@
 									<div id="publishing-action">
 										<input type="hidden" name="action" value="save_profile" />
 										<input type="hidden" name="wpl_e2e_profile_id" value="<?php echo $wpl_item['profile_id']; ?>" />
+										<input type="hidden" name="return_to" value="<?php echo @$_GET['return_to']; ?>" />
 										<input type="submit" value="<?php echo __('Save profile','wplister'); ?>" id="publish" class="button-primary" name="save">
 									</div>
 									<div class="clear"></div>
@@ -154,6 +165,35 @@
 					</div>
 
 
+					<div class="postbox" id="VariationsSettingsBox">
+						<h3><span><?php echo __('Variations','wplister'); ?></span></h3>
+						<div class="inside">
+
+							<label for="wpl-text-variations_mode" class="text_label"><?php echo __('Mode','wplister'); ?>:</label>
+							<select id="wpl-text-variations_mode" name="wpl_e2e_variations_mode" title="Variation images" class=" required-entry select">
+								<option value="default" <?php if ( @$item_details['variations_mode'] == 'default' ): ?>selected="selected"<?php endif; ?>><?php echo __('list as variations','wplister'); ?></option>
+								<option value="flat"    <?php if ( @$item_details['variations_mode'] == 'flat' ): ?>selected="selected"<?php endif; ?>><?php echo __('flatten variations','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
+							<label for="wpl-text-add_variations_table" class="text_label"><?php echo __('Table of variations','wplister'); ?>:</label>
+							<select id="wpl-text-add_variations_table" name="wpl_e2e_add_variations_table" title="Variation images" class=" required-entry select">
+								<option value="1" <?php if ( @$item_details['add_variations_table'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( @$item_details['add_variations_table'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
+							<label for="wpl-text-with_variation_images" class="text_label"><?php echo __('Variation images','wplister'); ?>:</label>
+							<select id="wpl-text-with_variation_images" name="wpl_e2e_with_variation_images" title="Variation images" class=" required-entry select">
+								<option value="1" <?php if ( @$item_details['with_variation_images'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( @$item_details['with_variation_images'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
+						</div>
+					</div>
+
+
 					<div class="postbox" id="LayoutSettingsBox">
 						<h3><span><?php echo __('Layout','wplister'); ?></span></h3>
 						<div class="inside">
@@ -174,13 +214,6 @@
 							</select>
 							<br class="clear" />
 
-
-							<label for="wpl-text-with_variation_images" class="text_label"><?php echo __('Variation images','wplister'); ?>:</label>
-							<select id="wpl-text-with_variation_images" name="wpl_e2e_with_variation_images" title="Variation images" class=" required-entry select">
-								<option value="1" <?php if ( @$item_details['with_variation_images'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
-								<option value="0" <?php if ( @$item_details['with_variation_images'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
-							</select>
-							<br class="clear" />
 
 							<label for="wpl-text-subtitle_enabled" class="text_label"><?php echo __('List subtitle','wplister'); ?>:</label>
 							<select id="wpl-text-subtitle_enabled" name="wpl_e2e_subtitle_enabled" title="Use additional product description as subtitle" class=" required-entry select">

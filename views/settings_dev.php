@@ -79,6 +79,9 @@
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('write debug information to logfile.','wplister'); ?>
+								<?php if ( $wpl_text_log_level > 1 ): ?>
+									&raquo; <a href="/wp-content/uploads/wp-lister/wplister.log" target="_blank">view log</a>
+								<?php endif; ?>
 							</p>
 
 							<label for="wpl-text-ebay_token" class="text_label"><?php echo __('eBay token','wplister'); ?>:</label>

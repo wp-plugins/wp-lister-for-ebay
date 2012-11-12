@@ -14,7 +14,7 @@ class ProductWrapper {
 	static function getPostType() {
 		return self::post_type;
 	}	
-	// get product catrgories taxonomy
+	// get product categories taxonomy
 	static function getTaxonomy() {
 		return self::taxonomy;
 	}	
@@ -111,17 +111,80 @@ class ProductWrapper {
 		return false;
 	}	
 
+	// get all product addons (shopp only)
+	static function getAddons( $post_id ) {
+		global $wpl_logger;
+		$addons = array();
+		$wpl_logger->info('getAddons() for post_id '.print_r($post_id,1));
+
+		// check if addons are enabled
+		$Product = new Product($product);
+		$Product->load_data(array('summary'));
+		if ( "off" == $Product->addons ) return array();
+
+		// get product options
+		$meta = shopp_product_meta($post_id, 'options');
+		$a = $meta['a'];
+		// $wpl_logger->info('a:'.print_r($a,1));
+
+		// build clean options array
+		$options = array();
+		foreach ( $a as $menus ) {
+			$addonGroup = new stdClass();
+			$addonGroup->name = $menus['name'];
+			$addonGroup->options = array();
+			foreach ( $menus['options'] as $option ) {
+				$addonObj = new stdClass();
+				$addonObj->id = $option['id'];
+				$addonObj->name = $option['name'];
+
+				// get addon price
+				$priceObj = shopp_product_addon( $option['id'] );
+				// $priceObj = shopp_product_addon( array( 'product' => $post_id, 'option' => array( 'addonmenu' => $option['name'] ) ) );
+				// $wpl_logger->info('priceObj:'.print_r($priceObj,1));
+				$addonObj->price = $priceObj->price;
+
+				$addonGroup->options[] = $addonObj;
+			}
+			$options[] = $addonGroup;
+		}
+		$wpl_logger->info('addons:'.print_r($options,1));
+
+		return $options;
+	}	
+
 	// get all product variations
 	static function getVariations( $post_id ) {
+
 		global $wpl_logger;
 		$variations = array();
 		$wpl_logger->info('getVariations() for post_id '.print_r($post_id,1));
 
+		// get available variations 
+		$variants = shopp_product_variants( $post_id );
+		$available_variations = $variants;
+		$wpl_logger->debug('variants:'.print_r($variants,1));
+
+
 		// get product options
 		$meta = shopp_product_meta($post_id, 'options');
 		$v = $meta['v'];
+		$wpl_logger->debug('v:'.print_r($v,1));
 
-		// build clean options array
+		// build clean options array (v2)
+		// indexed by options id
+		$new_options = array();
+		foreach ( $v as $menus ) {
+			foreach ( $menus['options'] as $option ) {
+				$new_options[$option['id']] = array();
+				$new_options[$option['id']]['name']  = $menus['name'];
+				$new_options[$option['id']]['value'] = $option['name'];
+			}
+		}
+		$wpl_logger->debug('new_options:'.print_r($new_options,1));
+
+		// build clean options array (deprecated)
+		/*
 		$options = array();
 		foreach ( $v as $menus ) {
 			$options[$menus['name']] = array();
@@ -129,8 +192,9 @@ class ProductWrapper {
 				$options[$menus['name']][] = $option['name'];
 			}
 		}
-		$wpl_logger->info('options:'.print_r($options,1));
-
+		$wpl_logger->debug('options:'.print_r($options,1));
+		*/
+	
 		// $options: 
 		// Array (
 		//     [Size] => Array
@@ -143,11 +207,12 @@ class ProductWrapper {
 
 		 
 		// build available_variations array
-		$available_variations = array();
-		$first_loop = true;
-		$tmpArray = array();
+		// $available_variations = array();
+		// $first_loop = true;
+		// $tmpArray = array();
 
-		// loop attributes
+		// loop attributes (v1)
+		/*
 		foreach ($options as $option_name => $option_values) {
 			
 			// loop attribute values
@@ -165,11 +230,14 @@ class ProductWrapper {
 					// $available_variations = $tmpArray;
 				}
 			}
+			$wpl_logger->debug('loop:'.print_r($available_variations,1));
 			$first_loop = false;
 		}
-		$available_variations = $tmpArray;
-		$wpl_logger->info('available_variations:'.print_r($available_variations,1));
-
+		if ( ! empty($tmpArray) ) $available_variations = $tmpArray;
+		
+		$wpl_logger->debug('available_variations:'.print_r($available_variations,1));
+		*/
+	
 		// Shopp doesn't use images for variations
 		$product_image = self::getImageURL( $post_id );
 
@@ -177,14 +245,22 @@ class ProductWrapper {
 		foreach ($available_variations as $var) {
 			
 			// fetch price data for this variation
-			$priceObj = shopp_product_variant( array( 'product' => $post_id, 'option' => $var ) );
+			// $priceObj = shopp_product_variant( array( 'product' => $post_id, 'option' => $var ) );
+			$priceObj = $var;
 			// $wpl_logger->info('priceObj:'.print_r($priceObj,1));
 
 			// build variation array for wp-lister
 			$newvar = array();
 			$newvar['post_id'] = $post_id;
-			$newvar['variation_attributes'] = $var;
-			// $newvar['group_name'] = $attribute_labels[ $key ];
+			$newvar['variation_attributes'] = array();
+	
+			// parse and assign options
+			$options = explode(',', $var->options);
+			foreach ($options as $option_id) {
+				$option_name  = $new_options[ $option_id ]['name'];
+				$option_value = $new_options[ $option_id ]['value'];
+				$newvar['variation_attributes'][ $option_name ] = $option_value;		
+			}
 			
 			$newvar['price']      = $priceObj->promoprice;
 			$newvar['stock']      = $priceObj->stock;
@@ -197,6 +273,7 @@ class ProductWrapper {
 			$variations[] = $newvar;			
 			
 		}
+		// $wpl_logger->debug('variations:'.print_r($variations,1));
 		return $variations;
 
 		// print_r($variations);die();

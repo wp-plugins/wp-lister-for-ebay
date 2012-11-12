@@ -134,6 +134,8 @@ class ListingsTable extends WP_List_Table {
         // make title link to products edit page
         if ( ProductWrapper::plugin == 'woo' ) {
             $listing_title = '<a class="product_title_link" href="post.php?post='.$item['post_id'].'&action=edit">'.$listing_title.'</a>';
+        } elseif ( ProductWrapper::plugin == 'shopp' ) {
+            $listing_title = '<a class="product_title_link" href="admin.php?page=shopp-products&id='.$item['post_id'].'">'.$listing_title.'</a>';
         }
 
         // show variations
@@ -145,22 +147,43 @@ class ListingsTable extends WP_List_Table {
             $listingsModel = new ListingsModel();
 
             $variations_html = '<div id="pvars_'.$item['id'].'" class="variations_list" style="display:none;margin-bottom:10px;">';
+
+            // show variation mode message
+            if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
+                $variations_html .= '<p><b>' . __('These variations will be listed as a single item.','wplister') . '</b></p>';
+            }
+
             $variations_html .= '<table style="margin-bottom: 8px;">';
+
+            // header
+            $variations_html .= '<tr><th>';
+            $variations_html .= '&nbsp;';
+            $variations_html .= '</th><th>';
+            foreach ($variations[0]['variation_attributes'] as $name => $value) {
+                $variations_html .= $name;
+                $variations_html .= '</th><th>';
+            }
+            $variations_html .= __('Price','wplister');
+            $variations_html .= '</th></tr>';
+
             foreach ($variations as $var) {
 
                 // first column: quantity
                 $variations_html .= '<tr><td align="right">';
                 $variations_html .= intval( $var['stock'] ) . '&nbsp;x';
-                $variations_html .= '</td><td>';
+                $variations_html .= '</td>';
 
                 foreach ($var['variation_attributes'] as $name => $value) {
-                    $variations_html .= $name.': '.$value ;
-                    $variations_html .= '</td><td>';
+                    // $variations_html .= $name.': '.$value ;
+                    $variations_html .= '<td>';
+                    $variations_html .= $value ;
+                    $variations_html .= '</td>';
                 }
                 // $variations_html .= '('.$var['sku'].') ';
                 // $variations_html .= '('.$var['image'].') ';
                 
                 // last column: price
+                $variations_html .= '<td align="right">';
                 $price = $listingsModel->applyProfilePrice( $var['price'], $profile_data['details']['start_price'] );
                 $variations_html .= number_format_i18n( $price, 2 );
 
@@ -168,6 +191,37 @@ class ListingsTable extends WP_List_Table {
 
             }
             $variations_html .= '</table>';
+
+            // show variation mode message
+            if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
+                // $variations_html .= '<p><b>' . __('These variations will be listed as a single item.','wplister') . '</b></p>';
+            } else {
+    
+
+            }
+
+            // list shopp addons
+            if ( ProductWrapper::plugin == 'shopp' ) {
+                $addons = ProductWrapper::getAddons( $item['post_id'] );
+                $variations_html .= '<table style="margin-bottom: 8px;">';
+                foreach ($addons as $addonGroup) {
+
+                    // first column: quantity
+                    $variations_html .= '<tr><td colspan="2" align="left"><b>';
+                    $variations_html .= $addonGroup->name;
+                    $variations_html .= '</b></td></tr>';
+
+                    foreach ($addonGroup->options as $addon) {
+                        $variations_html .= '<tr><td align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                        $variations_html .= $addon->name;
+                        $variations_html .= '</td><td align="right">';
+                        $variations_html .= number_format_i18n( $addon->price, 2 );
+                        $variations_html .= '</td></tr>';
+                    }
+                    
+                }
+                $variations_html .= '</table>';
+            }
 
 
             $variations_html .= '</div>';
@@ -213,6 +267,13 @@ class ListingsTable extends WP_List_Table {
 	  
     function column_quantity($item){
         
+        // use profile quantity for flattened variations
+        $profile_data = maybe_unserialize( $item['profile_data'] );
+        if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
+            return $item['quantity']; 
+        }
+
+
         // if item has variations count them...
         if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
 
@@ -248,6 +309,13 @@ class ListingsTable extends WP_List_Table {
             $profile_data = maybe_unserialize( $item['profile_data'] );
             $price_min = $listingsModel->applyProfilePrice( $price_min, $profile_data['details']['start_price'] );
             $price_max = $listingsModel->applyProfilePrice( $price_max, $profile_data['details']['start_price'] );
+
+            // use lowest price for flattened variations
+            $profile_data = maybe_unserialize( $item['profile_data'] );
+            if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
+                return number_format_i18n( $price_min, 2 );
+            }
+
 
             if ( $price_min == $price_max ) {
                 return number_format_i18n( $price_min, 2 );
@@ -326,7 +394,7 @@ class ListingsTable extends WP_List_Table {
         $profile_name = @$this->profiles[ $item['profile_id'] ];
 
         return sprintf(
-            '<a href="admin.php?page=wplister-profiles&action=edit&profile=%1$s" title="%2$s">%3$s</a>',
+            '<a href="admin.php?page=wplister-profiles&action=edit&profile=%1$s&return_to=listings" title="%2$s">%3$s</a>',
             /*$1%s*/ $item['profile_id'],  
             /*$2%s*/ __('Edit','wplister'),  
             /*$3%s*/ $profile_name        
@@ -339,7 +407,7 @@ class ListingsTable extends WP_List_Table {
         $template_name = TemplatesModel::getNameFromCache( $template_id );
 
         return sprintf(
-            '<a href="admin.php?page=wplister-templates&action=edit&template=%1$s" title="%2$s">%3$s</a>',
+            '<a href="admin.php?page=wplister-templates&action=edit&template=%1$s&return_to=listings" title="%2$s">%3$s</a>',
             /*$1%s*/ $template_id,  
             /*$2%s*/ __('Edit','wplister'),  
             /*$3%s*/ $template_name        

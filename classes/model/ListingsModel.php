@@ -390,7 +390,15 @@ class ListingsModel extends WPL_Model {
 		$item = $this->buildShipping( $id, $item, $p['post_id'], $profile_details );			
 
 		// add variations
-		if ( $hasVariations ) $item = $this->buildVariations( $id, $item, $profile_details );			
+		if ( $hasVariations ) {
+			if ( @$profile_details['variations_mode'] == 'flat' ) {
+				// don't build variations - list as flat item
+				$item = $this->flattenVariations( $id, $item, $profile_details );	
+			} else {
+				// default: list as variations
+				$item = $this->buildVariations( $id, $item, $profile_details );	
+			}
+		}
 	
 		// add item specifics (attributes) - after variations
 		$item = $this->buildItemSpecifics( $id, $item );			
@@ -703,6 +711,48 @@ class ListingsModel extends WPL_Model {
 		return $item;
 
 	} /* end of buildItemSpecifics() */
+
+	public function flattenVariations( $id, $item, $profile_details ) {
+
+		// get product variations
+		$p = $this->getItem( $id );
+        $variations = ProductWrapper::getVariations( $p['post_id'] );
+		$this->logger->info("flattenVariations($id)");
+
+		// fetch first variations start price
+		if ( intval($item->StartPrice->value) == 0 ) {
+
+			$start_price = $variations[0]['price'];
+			$start_price = $this->applyProfilePrice( $start_price, $profile_details['start_price'] );
+			$item->StartPrice->setTypeValue( $start_price );
+			$this->logger->info("using first variations price: ".print_r($item->StartPrice->value,1));
+
+		}
+
+
+    	// ebay doesn't allow different weight and dimensions for varations
+    	// so for calculated shipping services we just fetch those from the first variation
+    	// and overwrite 
+		$isCalc = $profile_details['shipping_service_type'] == 'calc' ? true : false;
+		if ( $isCalc ) {
+
+			// get weight and dimensions from first variation
+			$weight = $variations[0]['weight'];
+			$dimensions = $variations[0]['dimensions'];
+
+			$item->ShippingDetails->CalculatedShippingRate->setWeightMajor( floatval( $weight ) );
+			if ( trim( @$dimensions['width']  ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageWidth( $dimensions['width'] );
+			if ( trim( @$dimensions['length'] ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageLength( $dimensions['length'] );
+			if ( trim( @$dimensions['height'] ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageDepth( $dimensions['height'] );
+
+			// debug
+			$this->logger->info('first variations weight: '.print_r($weight,1));
+			$this->logger->info('first variations dimensions: '.print_r($dimensions,1));
+		}
+
+		return $item;
+
+	} /* end of flattenVariations() */
 
 	public function buildVariations( $id, $item, $profile_details ) {
 
@@ -1345,6 +1395,10 @@ class ListingsModel extends WPL_Model {
 		// get item data
 		$item = $this->getItem( $id );
 
+		// use latest post_content from product
+		$post = get_post( $item['post_id'] );
+		if ( ! empty($post->post_content) ) $item['post_content'] = $post->post_content;
+
 		// load template
 		$template = new TemplatesModel( $item['template'] );
 		$html = $template->processItem( $item );
@@ -1398,6 +1452,7 @@ class ListingsModel extends WPL_Model {
 
 		// ebay doesn't accept https - only http and ftp
 		$image_url = str_replace( 'https://', 'http://', $image_url );
+		$image_url = str_replace( ':443', '', $image_url );
 		
 		return $image_url;
 
@@ -1420,8 +1475,12 @@ class ListingsModel extends WPL_Model {
 		
 		$filenames = array();
 		foreach($results as $row) {
-			#$filenames[] = basename( $row );
-			$filenames[] = str_replace( 'https://', 'http://', $row );
+
+			// ebay doesn't accept https - only http and ftp
+			$row = str_replace( 'https://', 'http://', $row );
+			$row = str_replace( ':443', '', $row );
+
+			$filenames[] = $row ;
 		}
 		
 		return $filenames;
@@ -1496,12 +1555,73 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
+	function getAllVerifiedWithProfile( $profile_id ) {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE status = 'verified'
+			  AND profile_id = '$profile_id'
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
+	function getAllPublishedWithProfile( $profile_id ) {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE ( status = 'published' OR status = 'changed' )
+			  AND profile_id = '$profile_id'
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
+	function getAllPreparedWithTemplate( $template ) {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE status = 'prepared'
+			  AND template LIKE '%$template'
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
+	function getAllVerifiedWithTemplate( $template ) {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE status = 'verified'
+			  AND template LIKE '%$template'
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
+	function getAllPublishedWithTemplate( $template ) {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE ( status = 'published' OR status = 'changed' )
+			  AND template LIKE '%$template'
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
 	function getAllPastEndDate() {
 		global $wpdb;	
 		$items = $wpdb->get_results("
 			SELECT id 
 			FROM $this->tablename
 			WHERE NOT status = 'ended'
+			  AND NOT listing_duration = 'GTC'
 			  AND end_date < NOW()
 			ORDER BY id DESC
 		", ARRAY_A);		
@@ -1539,6 +1659,16 @@ class ListingsModel extends WPL_Model {
 		$wpdb->update( $this->tablename, array( 'quantity' => $quantity ), array( 'post_id' => $post_id ) );
 		// echo $wpdb->last_query;
 		// echo mysql_error();
+	}
+
+	public function markItemAsModified( $post_id ) {
+		global $wpdb;	
+
+		// set published items to changed
+		$wpdb->update( $this->tablename, array( 'status' => 'changed' ), array( 'status' => 'published', 'post_id' => $post_id ) );
+
+		// set verified items to prepared
+		$wpdb->update( $this->tablename, array( 'status' => 'prepared' ), array( 'status' => 'verified', 'post_id' => $post_id ) );
 	}
 
 
@@ -1694,6 +1824,7 @@ class ListingsModel extends WPL_Model {
 
 		// update auctions table
 		$wpdb->update( $this->tablename, $data, array( 'id' => $id ) );
+
 
 	}
 

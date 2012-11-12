@@ -29,6 +29,9 @@ class TemplatesPage extends WPL_Page {
 		// handle save template
 		if ( $this->requestAction() == 'save_template' ) {
 			$this->saveTemplate();
+			if ( @$_POST['return_to'] == 'listings' ) {
+				wp_redirect( get_admin_url().'admin.php?page=wplister' );
+			}
 		}
 		// handle download template
 		if ( $this->requestAction() == 'download_listing_template' ) {
@@ -143,6 +146,11 @@ class TemplatesPage extends WPL_Page {
 			$css = str_replace($matches[0], '', $css);
 		}
 
+		$listingsModel = new ListingsModel();
+		$prepared_listings  = $listingsModel->getAllPreparedWithTemplate( $template );
+		$verified_listings  = $listingsModel->getAllVerifiedWithTemplate( $template );
+		$published_listings = $listingsModel->getAllPublishedWithTemplate( $template );
+
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,
 			'message'					=> $this->message,
@@ -154,6 +162,10 @@ class TemplatesPage extends WPL_Page {
 			'footer'					=> $footer,
 			'template_location'			=> $item['template_path'],
 			'add_new_template'			=> ( $this->requestAction() == 'add_new_template' ) ? true : false,
+
+			'prepared_listings'         => $prepared_listings,
+			'verified_listings'         => $verified_listings,
+			'published_listings'        => $published_listings,
 			
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-templates'
 		);
@@ -225,6 +237,16 @@ class TemplatesPage extends WPL_Page {
 			
 			$dirname = $this->getValueFromPost( 'template_id' );
 			$tpl_dir = $templates_dir . $dirname;
+
+			// re-apply profile to all published
+			$listingsModel = new ListingsModel();
+			$items = $listingsModel->getAllPublishedWithTemplate( $dirname );
+			if ( ! empty( $items ) ) {
+		        foreach ($items as $item) {
+			        $listingsModel->updateListing( $item['id'], array('status' => 'changed') );
+		        }
+				$this->showMessage( sprintf( __('%s published items marked as changed.','wplister'), count($items) ) );			
+			}
 		
 		}
 
@@ -251,7 +273,7 @@ class TemplatesPage extends WPL_Page {
 		$header_css .= "*/\n";
 		$tpl_css = $header_css . $tpl_css;
 
-		// update profile
+		// update template files
 		$result = file_put_contents($file_css , $tpl_css);
 		$result = file_put_contents($file_footer , $tpl_footer);
 		$result = file_put_contents($file_header , $tpl_header);
