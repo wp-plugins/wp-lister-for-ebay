@@ -88,6 +88,7 @@ class ProfilesPage extends WPL_Page {
 			$countries                 = EbayShippingModel::getEbayCountries();
 			$template_files            = $this->getTemplatesList();
 			$store_categories          = $this->getStoreCategories();
+			$available_dispatch_times     = self::getOption('DispatchTimeMaxDetails');
 			
 			$listingsModel = new ListingsModel();
 			$prepared_listings  = $listingsModel->getAllPreparedWithProfile( $item['profile_id'] );
@@ -109,6 +110,7 @@ class ProfilesPage extends WPL_Page {
 				'prepared_listings'         => $prepared_listings,
 				'verified_listings'         => $verified_listings,
 				'published_listings'        => $published_listings,
+				'available_dispatch_times'  => $available_dispatch_times,
 				
 				'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-profiles'
 			);

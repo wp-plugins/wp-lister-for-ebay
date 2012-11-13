@@ -134,6 +134,36 @@ class EbayShippingModel extends WPL_Model {
 
 
 
+	function downloadDispatchTimes($session)
+	{
+		$this->logger->info( "downloadDispatchTimes()" );
+		$this->initServiceProxy($session);
+		
+		// download the shipping data 
+		$req = new GeteBayDetailsRequestType();
+        $req->setDetailName( 'DispatchTimeMaxDetails' );
+		
+		$res = $this->_cs->GeteBayDetails($req);
+
+		// handle response and check if successful
+		if ( $this->handleResponse($res) ) {
+
+			// save array of allowed dispatch times
+			$dispatch_times = array();
+			foreach ($res->DispatchTimeMaxDetails as $Detail) {
+				$dispatch_times[ $Detail->DispatchTimeMax ] = $Detail->Description;
+			}
+			
+			// update_option('wplister_dispatch_times_available', $dispatch_times);
+			update_option('wplister_DispatchTimeMaxDetails', $dispatch_times);
+
+		} // call successful
+				
+	}
+	
+	
+
+
 	
 	/* the following methods could go into another class, since they use wpdb instead of EbatNs_DatabaseProvider */
 	

@@ -142,7 +142,24 @@
 
 
 							<label for="wpl-text-dispatch_time" class="text_label"><?php echo __('Handling time','wplister'); ?>: *</label>
-							<input type="text" name="wpl_e2e_dispatch_time" id="wpl-text-dispatch_time" value="<?php echo $item_details['dispatch_time']; ?>" class="text_input" />
+
+							<select id="wpl-text-dispatch_time" name="wpl_e2e_dispatch_time" title="Condition" class=" required-entry select">
+							<?php if ( isset( $wpl_available_dispatch_times ) && is_array( $wpl_available_dispatch_times ) ): ?>
+								<?php foreach ($wpl_available_dispatch_times as $dispatch_time => $desc) : ?>
+									<option value="<?php echo $dispatch_time ?>" 
+										<?php if ( $item_details['dispatch_time'] == $dispatch_time ) : ?>
+											selected="selected"
+										<?php endif; ?>
+										><?php echo $desc ?></option>
+								<?php endforeach; ?>
+							<?php /* elseif ( $wpl_conditions[ $item_details['ebay_category_1_id'] ] == 'none' ) : ?>
+								<option value="" selected="selected"><?php echo __('none','wplister'); ?></option>
+							<?php */ else: ?>
+								<option value="1000" selected="selected"><?php echo __('New','wplister'); ?></option>
+							<?php endif; ?>
+							</select>
+							<!--<input type="text" name="wpl_e2e_dispatch_time" id="wpl-text-dispatch_time" value="<?php echo $item_details['dispatch_time']; ?>" class="text_input" />-->
+
 							<br class="clear" />
 							<p class="desc" style="display: block;">
 								<?php echo __('The maximum number of business days a seller commits to for shipping an item to domestic buyers after receiving a cleared payment.','wplister'); ?>

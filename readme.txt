@@ -86,7 +86,7 @@ You bet ;-)
 
 == Changelog ==
 
-= 1.0.8.6 =
+= 1.0.8.5 =
 * new options to process variations
 * update all prepared, verified or published items when saving a profile
 * improved attribute handling in Shopp

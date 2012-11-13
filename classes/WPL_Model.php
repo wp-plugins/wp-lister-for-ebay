@@ -157,7 +157,7 @@ class WPL_Model {
 			// save errors and warnings as array of objects
 			$errorObj = new stdClass();
 			$errorObj->SeverityCode = 'Info';
-			$errorObj->ErrorCode 	= @$error->getErrorCode();
+			$errorObj->ErrorCode 	= 101;
 			$errorObj->ShortMessage = __('Additional details about this error','wplister');
 			$errorObj->LongMessage 	= $res->getMessage();
 			$errorObj->HtmlMessage 	= $extraMsg;

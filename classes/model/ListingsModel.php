@@ -184,6 +184,7 @@ class ListingsModel extends WPL_Model {
 			SELECT status
 			FROM $this->tablename
 			WHERE post_id = '$post_id'
+			ORDER BY id DESC
 		");
 		return $item;
 	}
@@ -193,6 +194,7 @@ class ListingsModel extends WPL_Model {
 			SELECT id
 			FROM $this->tablename
 			WHERE post_id = '$post_id'
+			ORDER BY id DESC
 		");
 		return $item;
 	}
@@ -202,6 +204,7 @@ class ListingsModel extends WPL_Model {
 			SELECT ViewItemURL
 			FROM $this->tablename
 			WHERE post_id = '$post_id'
+			ORDER BY id DESC
 		");
 		return $item;
 	}

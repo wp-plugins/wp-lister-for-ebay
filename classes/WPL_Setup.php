@@ -270,6 +270,21 @@ class WPL_Setup extends WPL_Core {
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
 		}
+
+		// upgrade to version 11  (1.0.8.8)
+		if ( 11 > $db_version ) {
+			$new_db_version = 11;
+
+			// fetch available dispatch times
+			$this->initEC();
+			$result = $this->EC->loadDispatchTimes();
+			$this->EC->closeEbay();
+			
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
+		}
+		
+
 		
 		if ( $msg )	$this->showMessage($msg);		
 

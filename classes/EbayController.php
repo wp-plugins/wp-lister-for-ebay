@@ -291,12 +291,19 @@ class EbayController {
         $sm->downloadCountryDetails( $this->session );
         $sm->downloadShippingLocations( $this->session );
         $sm->downloadShippingDetails( $this->session );
+        $sm->downloadDispatchTimes( $this->session );      
     }
 
     // load shipping services and insert to db
     public function loadPaymentOptions(){ 
         $sm = new EbayPaymentModel();
         $sm->downloadPaymentDetails( $this->session );      
+    }
+
+    // load available dispatch times
+    public function loadDispatchTimes(){ 
+        $sm = new EbayShippingModel();
+        return $sm->downloadDispatchTimes( $this->session );      
     }
 
 
