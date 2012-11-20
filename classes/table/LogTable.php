@@ -104,7 +104,15 @@ class LogTable extends WP_List_Table {
         $link = sprintf('<a href="?page=%s&action=%s&log_id=%s&width=820&height=550" class="thickbox">%s</a>',$_REQUEST['page'],'display_log_entry',$item['id'],$item['callname']);
         return $link;
     }
-    
+
+    function column_cb($item){
+        return sprintf(
+            '<input type="checkbox" name="%1$s[]" value="%2$s" />',
+            /*$1%s*/ $this->_args['singular'],  //Let's simply repurpose the table's singular label ("listing")
+            /*$2%s*/ $item['id']                //The value of the checkbox should be the record's id
+        );
+    }
+        
     /** ************************************************************************
      * REQUIRED! This method dictates the table's columns and titles. This should
      * return an array where the key is the column slug (and class) and the value 
@@ -120,6 +128,7 @@ class LogTable extends WP_List_Table {
      **************************************************************************/
     function get_columns(){
         $columns = array(
+            'cb'                => '<input type="checkbox" />', //Render a checkbox instead of text
             'timestamp'      	=> __('Date','wplister'),
             'callname'			=> __('Request','wplister'),
             'ebay_id'			=> __('Item ID','wplister'),
@@ -146,7 +155,7 @@ class LogTable extends WP_List_Table {
      **************************************************************************/
     function get_bulk_actions() {
         $actions = array(
-            'clear_log'    => __('Clear log','wplister')
+            'delete'    => __('Delete','wplister')
         );
         return $actions;
     }

@@ -108,6 +108,7 @@ class SettingsPage extends WPL_Page {
 
 			'option_cron_auctions'		=> self::getOption( 'cron_auctions' ),
 			'option_cron_transactions'	=> self::getOption( 'cron_transactions' ),
+			'process_shortcodes'		=> self::getOption( 'process_shortcodes', 'content' ),
 			'option_uninstall'			=> self::getOption( 'uninstall' ),
 	
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
@@ -172,6 +173,7 @@ class SettingsPage extends WPL_Page {
 			
 			self::updateOption( 'cron_auctions',	$this->getValueFromPost( 'option_cron_auctions' ) );
 			self::updateOption( 'cron_transactions',$this->getAnswerFromPost( 'option_cron_transactions' ) );
+			self::updateOption( 'process_shortcodes', $this->getValueFromPost( 'process_shortcodes' ) );
 			self::updateOption( 'uninstall',		$this->getValueFromPost( 'option_uninstall' ) );
 
 			$this->handleCronSettings( $this->getValueFromPost( 'option_cron_auctions' ) );
@@ -264,11 +266,14 @@ class SettingsPage extends WPL_Page {
 	protected function loadProductCategories() {
 	global $wpdb;
 
+		$flatlist = array();
 		$tree = get_terms( ProductWrapper::getTaxonomy(), 'orderby=count&hide_empty=0' );
 
-		$result = $this->parseTree( $tree );
-		$flatlist = $this->printTree( $result );
-		// echo "<pre>";print_r($flatlist);echo "</pre>";
+		if ( ! is_wp_error($tree) ) {
+			$result = $this->parseTree( $tree );
+			$flatlist = $this->printTree( $result );
+			// echo "<pre>";print_r($flatlist);echo "</pre>";		
+		}
 
 		return $flatlist;
 	}

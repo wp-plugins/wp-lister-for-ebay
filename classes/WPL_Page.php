@@ -76,8 +76,11 @@ class WPL_Page extends WPL_Core {
 	    echo '</span>';
 	}  
 	function change_admin_footer_version( $version ) {
-		$plugin_name = WPLISTER_LIGHT ? 'WP-Lister' : 'WP-Lister Pro';  
-	    return $version . ' / ' . $plugin_name . ' ' . $this->get_plugin_version();
+		$plugin_name  = WPLISTER_LIGHT ? 'WP-Lister' : 'WP-Lister Pro';  
+		$plugin_name .= ' ' . $this->get_plugin_version();
+		$network_activated = get_option('wplister_is_network_activated') == 1 ? true : false;
+		if ( $network_activated ) $plugin_name .= 'n';
+	    return $version . ' / ' . $plugin_name;
 	}  
 
 	function get_plugin_version() {

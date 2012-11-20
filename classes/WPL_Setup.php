@@ -12,6 +12,9 @@ class WPL_Setup extends WPL_Core {
 		// check for windows server
 		if ( self::isWindowsServer() ) return false;
 
+		// check for multisite installation
+		// if ( self::checkMultisite() ) return false;
+
 		// setup wizard
 		// if ( self::getOption('ebay_token') == '' ) {
 		if ( ( '1' == self::getOption('setup_next_step') ) && ( $page != 'settings') ) {
@@ -276,9 +279,11 @@ class WPL_Setup extends WPL_Core {
 			$new_db_version = 11;
 
 			// fetch available dispatch times
-			$this->initEC();
-			$result = $this->EC->loadDispatchTimes();
-			$this->EC->closeEbay();
+			if ( get_option('wplister_ebay_token') != '' ) {
+				$this->initEC();
+				$result = $this->EC->loadDispatchTimes();
+				$this->EC->closeEbay();		
+			}
 			
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
@@ -335,6 +340,33 @@ class WPL_Setup extends WPL_Core {
 				<br>
 				If you'd like to help make WP-Lister run on Windows, please contact us at info@wplab.com.
 			",1);
+			return true;
+		}
+
+		return false;
+	}
+
+
+	// checks for multisite network
+	public function checkMultisite() {
+
+		if ( is_multisite() ) {
+
+			// check for network activation
+			if ( ! function_exists( 'is_plugin_active_for_network' ) )
+				require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+
+			if ( function_exists('is_network_admin') && is_plugin_active_for_network( plugin_basename( WPLISTER_PATH.'/wp-lister.php' ) ) )
+				$this->showMessage("network activated!",1);
+			else
+				$this->showMessage("not network activated!");
+
+
+			// $this->showMessage("
+			// 	<b>Multisite installation detected</b><br>
+			// 	<br>
+			// 	This is a site network...<br>
+			// ");
 			return true;
 		}
 

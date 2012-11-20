@@ -169,6 +169,7 @@ class TemplatesModel extends WPL_Model {
         }
 		
 		// handle shopp addons
+		$addons_html = '';
         if ( ProductWrapper::plugin == 'shopp' ) {
 
         	// generate addons table
@@ -187,7 +188,11 @@ class TemplatesModel extends WPL_Model {
 
 		// replace shortcodes
 		$tpl_html = str_replace( '[[product_title]]', $listing->prepareTitleAsHTML( $item['auction_title'] ), $tpl_html );
-		$tpl_html = str_replace( '[[product_content]]', apply_filters('the_content', $item['post_content'] ), $tpl_html );
+ 		if ( 'off' == get_option( 'wplister_process_shortcodes', 'content' ) ) {
+	 		$tpl_html = str_replace( '[[product_content]]', $item['post_content'], $tpl_html );
+ 		} else {
+	 		$tpl_html = str_replace( '[[product_content]]', apply_filters('the_content', $item['post_content'] ), $tpl_html );
+ 		}
 		$tpl_html = str_replace( '[[product_variations]]', $variations_html, $tpl_html );
 		$tpl_html = str_replace( '[[product_addons]]', $addons_html, $tpl_html );
 
@@ -209,21 +214,8 @@ class TemplatesModel extends WPL_Model {
 		$tpl_html = str_replace( '[[product_length]]', $length,  $tpl_html );		
 
 		// attributes
-		$product_attributes = ProductWrapper::getAttributes( $item['post_id'] );
-		if ( preg_match_all("/\\[\\[attribute_(.*)\\]\\]/uUsm", $tpl_html, $matches ) ) {
+		$tpl_html = $this->processAttributeShortcodes( $item['post_id'], $tpl_html);
 
-			foreach ( $matches[1] as $attribute ) {
-
-				if ( isset( $product_attributes[ $attribute ] )){
-					$attribute_value = $product_attributes[ $attribute ];
-				} else {					
-					$attribute_value = '';
-				}
-				$tpl_html = str_replace( '[[attribute_'.$attribute.']]', $attribute_value,  $tpl_html );		
-
-			}
-
-		}
 
 		// handle images...
 		$main_image = $listing->getProductMainImageURL( $item['post_id'] );
@@ -269,9 +261,35 @@ class TemplatesModel extends WPL_Model {
 			
 		}		
 		$tpl_html = str_replace( '[[additional_product_images]]', $imagelist, $tpl_html );
-		
+
+		// process wp shortcodes in listing template - if enabled
+ 		if ( 'full' == get_option( 'wplister_process_shortcodes', 'content' ) ) {
+ 			$tpl_html = do_shortcode( $tpl_html );
+ 		}
 
 		// return html
+		return $tpl_html;
+	}
+
+
+	public function processAttributeShortcodes( $post_id, $tpl_html ) {
+
+		// attribute shortcodes i.e. [[attribute_Brand]]
+		$product_attributes = ProductWrapper::getAttributes( $post_id );
+		if ( preg_match_all("/\\[\\[attribute_(.*)\\]\\]/uUsm", $tpl_html, $matches ) ) {
+
+			foreach ( $matches[1] as $attribute ) {
+
+				if ( isset( $product_attributes[ $attribute ] )){
+					$attribute_value = $product_attributes[ $attribute ];
+				} else {					
+					$attribute_value = '';
+				}
+				$tpl_html = str_replace( '[[attribute_'.$attribute.']]', $attribute_value,  $tpl_html );		
+
+			}
+
+		}
 		return $tpl_html;
 	}
 

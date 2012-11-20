@@ -329,10 +329,15 @@ class ListingsTable extends WP_List_Table {
     
     function column_end_date($item) {
 
-    	if ( $item['date_finished'] ) {
-	        $date = $item['date_finished'];
-	    	$value = mysql2date( get_option('date_format'), $date );
-			return '<span style="color:darkgreen">'.$value.'</span>';
+        $profile_data = maybe_unserialize( $item['profile_data'] );
+        
+        if ( $item['date_finished'] ) {
+            $date = $item['date_finished'];
+            $value = mysql2date( get_option('date_format'), $date );
+            return '<span style="color:darkgreen">'.$value.'</span>';
+        } elseif ( 'GTC' == $profile_data['details']['listing_duration'] ) {
+            $value = 'GTC';
+            return '<span style="color:silver">'.$value.'</span>';
     	} else {
 			$date = $item['end_date'];
 	    	$value = mysql2date( get_option('date_format'), $date );
@@ -350,7 +355,7 @@ class ListingsTable extends WP_List_Table {
                 $value = __('prepared','wplister');
 				break;
             case 'verified':
-                $color = 'green';
+                $color = 'darkblue';
                 $value = __('verified','wplister');
 				break;
             case 'published':

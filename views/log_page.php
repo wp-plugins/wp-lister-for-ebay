@@ -10,6 +10,9 @@
 		width: 25%;
 	}
 
+	.widefat tbody th.check-column {
+		padding-bottom: 0;
+	}
 </style>
 
 <div class="wrap">

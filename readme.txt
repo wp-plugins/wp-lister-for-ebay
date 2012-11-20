@@ -86,6 +86,13 @@ You bet ;-)
 
 == Changelog ==
 
+= 1.0.9.2 =
+* support for multisite network activation (beta)
+* support for product images from NextGen gallery
+* improved support for Shopp
+* new option to flatten variations
+* other improvements and fixes
+
 = 1.0.8.5 =
 * new options to process variations
 * update all prepared, verified or published items when saving a profile

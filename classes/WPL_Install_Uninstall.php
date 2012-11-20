@@ -4,28 +4,72 @@ class WPLister_Install {
 	
 	public function __construct( $file ) {
 		register_activation_hook( $file, array( &$this, 'onWpActivatePlugin' ) );
+		add_action( 'wpmu_new_blog', array( &$this, 'onWpmuNewBlog' ), 10, 6 );
 	}
-	
-	public function onWpActivatePlugin() {
+ 
+	public function onWpActivatePlugin( $networkwide ) {
 		global $wpdb;
-        #global $wpl_logger;
-        $wpl_logger = new WPL_Logger();
-
+        // global $wpl_logger;
+        // $wpl_logger = new WPL_Logger();
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-		// rename plugin options - new prefix 'wplister_'
-		// $wpl_logger->info('renaming plugin options');		
-		// $query = "SELECT * FROM `{$wpdb->prefix}options` WHERE option_name LIKE 'LWS_e2e_%' ";
-		// $options = $wpdb->get_results($query);
-		// if ($options)
-		// foreach ($options as $opt) {
-		// 	$new_name = str_replace('LWS_e2e_', 'wplister_', $opt->option_name);
-		// 	$wpdb->update( $wpdb->prefix.'options', array('option_name' => $new_name), array('option_id' => $opt->option_id) ); 
-		// 	echo mysql_error();
-		// 	echo ".\n";
-		// 	$wpl_logger->info("updated option $new_name ");		
-		// }
+	    // check for multisite installation
+	    if (function_exists('is_multisite') && is_multisite()) {
 
+	        // check if it is a network activation - if so, run the activation function for each blog id
+	        if ($networkwide) {
+                // $old_blog = $wpdb->blogid;
+
+	            // Get all blog ids
+	            $blogids = $wpdb->get_col($wpdb->prepare("SELECT blog_id FROM $wpdb->blogs"));
+	            foreach ($blogids as $blog_id) {
+
+	                switch_to_blog($blog_id);
+
+					$this->createOptions( $networkwide );
+					$this->createFolders( $networkwide );
+					$this->createTables( $networkwide );
+
+					restore_current_blog();
+	            }
+
+	            // switch_to_blog($old_blog);
+	            // return;
+	        }   
+
+	    } else {
+	    	// no multisite
+			$this->createOptions( $networkwide );
+			$this->createFolders( $networkwide );
+			$this->createTables( $networkwide );
+	    }
+
+        // debug:
+        // echo "<br> blogid: ".$wpdb->blogid;
+        // echo "<br> networkwide: ".print_r($networkwide,1);
+        // echo "<br> is_main_site(): ".print_r(is_main_site(),1);
+        // echo "<br> get_current_site(): ".print_r(get_current_site(),1);
+        // die();
+
+	}
+	
+	public function onWpmuNewBlog( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {
+	    if (is_plugin_active_for_network('wp-lister/wp-lister.php')) {
+	        switch_to_blog($blog_id);
+			$this->createOptions( $networkwide );
+			$this->createFolders( $networkwide );
+			$this->createTables( $networkwide );
+			restore_current_blog();
+	    }
+	}
+
+	public function createOptions( $networkwide ) {
+
+        if ( $networkwide ) {
+			WPL_WPLister::addOption( 'is_network_activated','1' );
+        } else {
+			WPL_WPLister::addOption( 'is_network_activated','0' );
+        }
 
 		WPL_WPLister::addOption( 'ebay_token',			'' );
 		WPL_WPLister::addOption( 'ebay_site_id',		'0' );
@@ -41,16 +85,32 @@ class WPLister_Install {
 
 		WPL_WPLister::addOption( 'setup_next_step',		'1' );
 
+	}
+	
+	public function createFolders( $networkwide ) {
+		global $wpl_logger;
+		$wpl_logger->info('creating wp-content/uploads/wp-lister/templates etc.');		
 
 		// make subdirectories in wp-content/uploads
-		$wpl_logger->info('creating wp-content/uploads/wp-lister/templates etc.');		
 		$uploads = wp_upload_dir();
 		$uploaddir = $uploads['basedir'];
+
 		$wpldir = $uploaddir . '/wp-lister';
 		if ( !is_dir($wpldir) ) mkdir($wpldir);
+
 		$tpldir = $wpldir . '/templates';
 		if ( !is_dir($tpldir) ) mkdir($tpldir);
-		
+
+		$wpl_logger->info('template folder: '.$tpldir);		
+	
+	}
+	
+	public function createTables( $networkwide ) {
+		global $wpdb;
+        global $wpl_logger;
+        // $wpl_logger = new WPL_Logger();
+		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
 
 		$wpl_logger->info("creating table {$wpdb->prefix}ebay_auctions");		
 
@@ -197,7 +257,6 @@ class WPLister_Install {
 		// mysql updates - insert new columns
 		$this->add_column_if_not_exist( $wpdb->prefix.'ebay_profiles', 'conditions', 'TEXT' );
 
-
 	}
 
 	// mysql update helper method
@@ -220,16 +279,44 @@ class WPLister_Install {
 
 class WPLister_Uninstall {
 	
-	// TODO: when uninstalling, maybe have a WPversion save settings offsite-like setting
+	// TODO: when uninstalling, maybe have an option to backup and restore settings
 	
 	public function __construct( $file ) {
 		register_deactivation_hook( $file, array( &$this, 'onWpDeactivatePlugin' ) );
 	}
 	
-	public function onWpDeactivatePlugin() {
+	public function onWpDeactivatePlugin( $networkwide ) {
 		global $wpdb;
 
-		if ( WPL_WPLister::getOption('uninstall') == 1 ) {
+	    // check for multisite installation
+	    if (function_exists('is_multisite') && is_multisite()) {
+
+	        // check if it is a network (de)activation - if so, run the (de)activation function for each blog id
+	        if ($networkwide) {
+
+	            // Get all blog ids
+	            $blogids = $wpdb->get_col($wpdb->prepare("SELECT blog_id FROM $wpdb->blogs"));
+	            foreach ($blogids as $blog_id) {
+
+	                switch_to_blog($blog_id);
+					$this->deactivatePlugin();
+					restore_current_blog();
+	            }
+
+	        }   
+
+	    } else {
+	    	// no multisite
+			$this->deactivatePlugin();
+	    }
+
+	}
+	
+	public function deactivatePlugin() {
+		global $wpdb;
+
+		// always uninstall on multisite networks
+		if ( ( is_multisite() ) || ( WPL_WPLister::getOption('uninstall') == 1 ) ) {
 
 			// remove tables
 			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_auctions' );
@@ -240,18 +327,9 @@ class WPLister_Uninstall {
 			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_shipping' );
 			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_transactions' );
 			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_log' );			
+			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_jobs' );			
 
 			// remove options
-			// WPL_WPLister::deleteOption( 'ebay_token' );
-			// WPL_WPLister::deleteOption( 'ebay_site_id' );
-			// WPL_WPLister::deleteOption( 'sandbox_enabled' );
-			// WPL_WPLister::deleteOption( 'paypal_email'  );
-			// WPL_WPLister::deleteOption( 'cron_auctions'  );
-			// WPL_WPLister::deleteOption( 'cron_transactions'  );
-			// WPL_WPLister::deleteOption( 'log_level' );
-			// WPL_WPLister::deleteOption( 'log_to_db' );
-			// WPL_WPLister::deleteOption( 'uninstall' );
-			// WPL_WPLister::deleteOption( 'setup_next_step' );
 			$wpdb->query( 'DELETE FROM '.$wpdb->prefix."options WHERE option_name LIKE 'wplister_%' " );
 
 		}

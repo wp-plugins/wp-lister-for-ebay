@@ -122,6 +122,24 @@
 						</div>
 					</div>
 
+					<div class="postbox" id="TemplateSettingsBox">
+						<h3 class="hndle"><span><?php echo __('Listing Templates','wplister') ?></span></h3>
+						<div class="inside">
+
+							<label for="wpl-process_shortcodes" class="text_label"><?php echo __('Shortcode processing','wplister'); ?>:</label>
+							<select id="wpl-process_shortcodes" name="wpl_e2e_process_shortcodes" title="Uninstall" class=" required-entry select">
+								<option value="off"     <?php if ( $wpl_process_shortcodes == 'off' ): ?>selected="selected"<?php endif; ?>><?php echo __('off','wplister'); ?></option>
+								<option value="content" <?php if ( $wpl_process_shortcodes == 'content' ): ?>selected="selected"<?php endif; ?>><?php echo __('only in product description','wplister'); ?></option>
+								<option value="full"    <?php if ( $wpl_process_shortcodes == 'full' ): ?>selected="selected"<?php endif; ?>><?php echo __('in description and listing template','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Enable this if you want to use WordPress shortcodes in your product description or your listing template.','wplister'); ?><br>
+							</p>
+
+						</div>
+					</div>
+
+					<?php if ( ( ! is_multisite() ) || ( is_main_site() ) ) : ?>
 					<div class="postbox" id="UninstallSettingsBox">
 						<h3 class="hndle"><span><?php echo __('Uninstall','wplister') ?></span></h3>
 						<div class="inside">
@@ -138,6 +156,7 @@
 
 						</div>
 					</div>
+					<?php endif; ?>
 
 
 
@@ -148,6 +167,11 @@
 				<?php endif; // $wpl_text_ebay_token == ''  ?>
 				<?php endif; // $active_tab == 'settings' ) ?>
 
+				<?php if ( ( is_multisite() ) && ( is_main_site() ) ) : ?>
+				<p>
+					<b>Warning:</b> Deactivating WP-Lister on a multisite network will remove all settings and data from all sites.
+				</p>
+				<?php endif; ?>
 
 
 			</div>

@@ -187,5 +187,22 @@ class WPL_Model {
 		return defined( 'DOING_AJAX' ) && DOING_AJAX;
 	}
 
+	// check if given WordPress plugin is active
+	public function is_plugin_active( $plugin ) {
+
+		if ( is_multisite() ) {
+
+			// check for network activation
+			if ( ! function_exists( 'is_plugin_active_for_network' ) )
+				require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+
+			if ( function_exists('is_plugin_active_for_network') && is_plugin_active_for_network( $plugin ) )
+				return true;				
+
+		}
+
+    	return in_array( $plugin, (array) get_option( 'active_plugins', array() ) );
+	}
+
 }
 

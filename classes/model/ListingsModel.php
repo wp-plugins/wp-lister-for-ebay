@@ -198,6 +198,16 @@ class ListingsModel extends WPL_Model {
 		");
 		return $item;
 	}
+	function getAllListingsFromPostID( $post_id ) {
+		global $wpdb;
+		$items = $wpdb->get_results("
+			SELECT *
+			FROM $this->tablename
+			WHERE post_id = '$post_id'
+			ORDER BY id DESC
+		");
+		return $items;
+	}
 	function getViewItemURLFromPostID( $post_id ) {
 		global $wpdb;
 		$item = $wpdb->get_var("
@@ -310,65 +320,6 @@ class ListingsModel extends WPL_Model {
 		}			
 
 
-		// handle primary category
-		if ( intval($profile_details['ebay_category_1_id']) > 0 ) {
-			$item->PrimaryCategory = new CategoryType();
-			$item->PrimaryCategory->CategoryID = $profile_details['ebay_category_1_id'];
-		} else {
-			// get categories map
-			$categories_map_ebay = get_option( 'wplister_categories_map_ebay' );
-            
-			// fetch products local category
-			$terms = wp_get_post_terms( $p['post_id'], ProductWrapper::getTaxonomy() );
-  			foreach ( $terms as $term ) $cats_array[] = $term->term_id;
-			// TODO: look and check other categories
-			$product_category = $cats_array[0];
-
-            // look up ebay category 
-            $ebay_category_id = @$categories_map_ebay[ $product_category ];
-
-            if ( intval( $ebay_category_id ) > 0 ) {
-				$item->PrimaryCategory = new CategoryType();
-				$item->PrimaryCategory->CategoryID = $ebay_category_id;
-            }
-
-		}
-
-		// optional secondary category
-		if ( intval($profile_details['ebay_category_2_id']) > 0 ) {
-			$item->SecondaryCategory = new CategoryType();
-			$item->SecondaryCategory->CategoryID = $profile_details['ebay_category_2_id'];
-		}
-
-		// handle optional store category
-		if ( intval($profile_details['store_category_1_id']) > 0 ) {
-			$item->Storefront = new StorefrontType();
-			$item->Storefront->StoreCategoryID = $profile_details['store_category_1_id'];
-		} else {
-			// get categories map
-			$categories_map_store = get_option( 'wplister_categories_map_store' );
-            
-			// fetch products local category
-			$terms = wp_get_post_terms( $p['post_id'], ProductWrapper::getTaxonomy() );
-  			foreach ( $terms as $term ) $cats_array[] = $term->term_id;
-			// TODO: look and check other categories
-			$product_category = $cats_array[0];
-
-            // look up store category 
-            $store_category_id = @$categories_map_store[ $product_category ];
-
-            if ( intval( $store_category_id ) > 0 ) {
-				$item->Storefront = new StorefrontType();
-				$item->Storefront->StoreCategoryID = $store_category_id;
-            }
-            
-		}
-
-		// optional secondary store category
-		if ( intval($profile_details['store_category_2_id']) > 0 ) {
-			$item->Storefront->StoreCategory2ID = $profile_details['store_category_2_id'];
-		}
-
 		// Set Payment Methods
 		// $item->PaymentMethods[] = 'PersonalCheck';
 		// $item->PaymentMethods[] = 'PayPal';
@@ -383,14 +334,28 @@ class ListingsModel extends WPL_Model {
 
 		// add subtitle if enabled
 		if ( @$profile_details['subtitle_enabled'] == 1 ) {
-			$the_post = get_post( $p['post_id'] );
-			$subtitle = substr( strip_tags( $the_post->post_excerpt ), 0, 55 );
+			
+			// check for custom subtitle from profile
+			$subtitle = @$profile_details['custom_subtitle'];
+
+			// if empty use product excerpt
+			if ( $subtitle == '' ) {
+				$the_post = get_post( $p['post_id'] );
+				$subtitle = strip_tags( $the_post->post_excerpt );
+			}
+			
+			// limit to 55 chars
+			$subtitle = substr( $subtitle, 0, 55 );
+
 			$item->setSubTitle( $subtitle );			
 			$this->logger->debug( 'setSubTitle: '.$subtitle );
 		}
 
 		// add shipping services and options
 		$item = $this->buildShipping( $id, $item, $p['post_id'], $profile_details );			
+
+		// add ebay categories and store categories
+		$item = $this->buildCategories( $id, $item, $p['post_id'], $profile_details );			
 
 		// add variations
 		if ( $hasVariations ) {
@@ -413,6 +378,123 @@ class ListingsModel extends WPL_Model {
 		return $item;
 
 	} /* end of buildItem() */
+
+	public function buildCategories( $id, $item, $post_id, $profile_details ) {
+
+		// handle primary category
+		if ( intval($profile_details['ebay_category_1_id']) > 0 ) {
+			$item->PrimaryCategory = new CategoryType();
+			$item->PrimaryCategory->CategoryID = $profile_details['ebay_category_1_id'];
+		} else {
+			// get ebay categories map
+			$categories_map_ebay = get_option( 'wplister_categories_map_ebay' );
+            
+			// fetch products local category terms
+			$terms = wp_get_post_terms( $post_id, ProductWrapper::getTaxonomy() );
+			// $this->logger->info('terms: '.print_r($terms,1));
+
+			$ebay_category_id = false;
+			$primary_category_id = false;
+			$secondary_category_id = false;
+  			foreach ( $terms as $term ) {
+
+	            // look up ebay category 
+	            if ( isset( $categories_map_ebay[ $term->term_id ] ) ) {
+    		        $ebay_category_id = @$categories_map_ebay[ $term->term_id ];
+	            }
+	            
+	            // check ebay category 
+	            if ( intval( $ebay_category_id ) > 0 ) {
+
+	            	if ( ! $primary_category_id ) {
+	    		        $primary_category_id = $ebay_category_id;
+	            	} else {
+	            		$secondary_category_id = $ebay_category_id;
+	            	}
+	            }
+
+  			}
+
+			$this->logger->info('mapped primary_category_id: '.$primary_category_id);
+			$this->logger->info('mapped secondary_category_id: '.$secondary_category_id);
+
+            if ( intval( $primary_category_id ) > 0 ) {
+				$item->PrimaryCategory = new CategoryType();
+				$item->PrimaryCategory->CategoryID = $primary_category_id;
+            }
+
+            if ( intval( $secondary_category_id ) > 0 ) {
+				$item->SecondaryCategory = new CategoryType();
+				$item->SecondaryCategory->CategoryID = $secondary_category_id;
+            }
+
+		}
+
+		// optional secondary category
+		if ( intval($profile_details['ebay_category_2_id']) > 0 ) {
+			$item->SecondaryCategory = new CategoryType();
+			$item->SecondaryCategory->CategoryID = $profile_details['ebay_category_2_id'];
+		}
+
+
+
+		// handle optional store category
+		if ( intval($profile_details['store_category_1_id']) > 0 ) {
+			$item->Storefront = new StorefrontType();
+			$item->Storefront->StoreCategoryID = $profile_details['store_category_1_id'];
+		} else {
+			// get store categories map
+			$categories_map_store = get_option( 'wplister_categories_map_store' );
+
+			// fetch products local category terms
+			$terms = wp_get_post_terms( $post_id, ProductWrapper::getTaxonomy() );
+			// $this->logger->info('terms: '.print_r($terms,1));
+
+			$store_category_id = false;
+			$primary_store_category_id = false;
+			$secondary_store_category_id = false;
+  			foreach ( $terms as $term ) {
+
+	            // look up store category 
+	            if ( isset( $categories_map_store[ $term->term_id ] ) ) {
+    		        $store_category_id = @$categories_map_store[ $term->term_id ];
+	            }
+	            
+	            // check store category 
+	            if ( intval( $store_category_id ) > 0 ) {
+
+	            	if ( ! $primary_store_category_id ) {
+	    		        $primary_store_category_id = $store_category_id;
+	            	} else {
+	            		$secondary_store_category_id = $store_category_id;
+	            	}
+	            }
+
+  			}
+
+			$this->logger->info('mapped primary_store_category_id: '.$primary_store_category_id);
+			$this->logger->info('mapped secondary_store_category_id: '.$secondary_store_category_id);
+
+            if ( intval( $primary_store_category_id ) > 0 ) {
+				$item->Storefront = new StorefrontType();
+				$item->Storefront->StoreCategoryID = $primary_store_category_id;
+            }
+
+            if ( intval( $secondary_store_category_id ) > 0 ) {
+				$item->Storefront->StoreCategory2ID = $secondary_store_category_id;
+            }
+            
+		}
+
+		// optional secondary store category
+		if ( intval($profile_details['store_category_2_id']) > 0 ) {
+			$item->Storefront->StoreCategory2ID = $profile_details['store_category_2_id'];
+		}
+
+		return $item;
+
+	} /* end of buildCategories() */
+
 
 	public function buildShipping( $id, $item, $post_id, $profile_details ) {
 
@@ -575,7 +657,6 @@ class ListingsModel extends WPL_Model {
 				
 				// StartPrice must be greater than 0
 				if ( intval($var->StartPrice) == 0 ) {
-					$itemTitle = trim($item->Title); 
 					$longMessage = __('Some variations seem to have no price.','wplister');
 					$success = false;
 				}
@@ -617,10 +698,15 @@ class ListingsModel extends WPL_Model {
 
 			// StartPrice must be greater than 0
 			if ( intval($item->StartPrice) == 0 ) {
-				$itemTitle = trim($item->Title); 
 				$longMessage = __('Price can not be zero.','wplister');
 				$success = false;
 			}
+		}
+
+		// PrimaryCategory->CategoryID must be greater than 0
+		if ( intval( @$item->PrimaryCategory->CategoryID ) == 0 ) {
+			$longMessage = __('There has been no primary category assigned.','wplister');
+			$success = false;
 		}
 
 		if ( ! $success && ! $this->is_ajax() ) {
@@ -957,7 +1043,8 @@ class ListingsModel extends WPL_Model {
 
 		// switch to FixedPriceItem if product has variations
 		$listing_item = $this->getItem( $id );
-		$useFixedPriceItem = ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) ? true : false;
+		// $useFixedPriceItem = ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) ? true : false;
+		$useFixedPriceItem = ( 'FixedPriceItem' == $listing_item['auction_type'] ) ? true : false;
 
 		$this->logger->info( "Adding #$id: ".$item->Title );
 		if ( $useFixedPriceItem ) {
@@ -1007,7 +1094,8 @@ class ListingsModel extends WPL_Model {
 
 		// check if product has variations
 		$listing_item = $this->getItem( $id );
-		$useFixedPriceItem = ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) ? true : false;
+		// $useFixedPriceItem = ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) ? true : false;
+		$useFixedPriceItem = ( 'FixedPriceItem' == $listing_item['auction_type'] ) ? true : false;
 
 		// build item
 		$item = $this->buildItem( $id, $session, false, true );
@@ -1075,7 +1163,8 @@ class ListingsModel extends WPL_Model {
 
 		// switch to FixedPriceItem if product has variations
 		$listing_item = $this->getItem( $id );
-		if ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) return $this->verifyAddFixedPriceItem( $id, $session );
+		// if ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) return $this->verifyAddFixedPriceItem( $id, $session );
+		if ( 'FixedPriceItem' == $listing_item['auction_type'] ) return $this->verifyAddFixedPriceItem( $id, $session );
 
 		// build item
 		$item = $this->buildItem( $id, $session );
@@ -1442,7 +1531,19 @@ class ListingsModel extends WPL_Model {
 			$image_url = $large_image_url;
 		} else {
 			$images = $this->getProductImagesURL( $post_id );
-			$image_url = $images[0];
+			$image_url = @$images[0];
+		}
+
+		// check if featured image comes from nextgen gallery
+		if ( $this->is_plugin_active('nextgen-gallery/nggallery.php') ) {
+			$thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
+			if ( 'ngg' == substr($thumbnail_id, 0, 3) ) {
+				$imageID = str_replace('ngg-', '', $thumbnail_id);
+				$picture = nggdb::find_image($imageID);
+				$image_url = $picture->imageURL;
+				// $this->logger->info( "NGG - picture: " . print_r($picture,1) );
+				$this->logger->info( "NGG - image_url: " . print_r($image_url,1) );
+			}
 		}
 
 		if ( ( $image_url == '' ) && ( ! $checking_parent ) ) {
@@ -1454,8 +1555,7 @@ class ListingsModel extends WPL_Model {
 		}
 
 		// ebay doesn't accept https - only http and ftp
-		$image_url = str_replace( 'https://', 'http://', $image_url );
-		$image_url = str_replace( ':443', '', $image_url );
+		$image_url = $this->removeHttpsFromUrl( $image_url );
 		
 		return $image_url;
 
@@ -1476,17 +1576,26 @@ class ListingsModel extends WPL_Model {
 		);
 		$this->logger->debug( "getProductImagesURL( $id ) : " . print_r($results,1) );
 		
+		// Shopp stores images in db by default...
+		if ( ProductWrapper::plugin == 'shopp' ) {
+			$results = ProductWrapper::getAllImages( $id );
+			// $this->logger->info( "SHOPP - getAllImages( $id ) : " . print_r($results,1) );
+		}
+
 		$filenames = array();
 		foreach($results as $row) {
-
-			// ebay doesn't accept https - only http and ftp
-			$row = str_replace( 'https://', 'http://', $row );
-			$row = str_replace( ':443', '', $row );
-
-			$filenames[] = $row ;
+			$filenames[] = $this->removeHttpsFromUrl( $row );
 		}
 		
 		return $filenames;
+	}
+
+
+	// ebay doesn't accept image urls using https - only http and ftp
+	function removeHttpsFromUrl( $url ) {
+		$url = str_replace( 'https://', 'http://', $url );
+		$url = str_replace( ':443', '', $url );
+		return $url;
 	}
 
 
@@ -1628,6 +1737,27 @@ class ListingsModel extends WPL_Model {
 			  AND end_date < NOW()
 			ORDER BY id DESC
 		", ARRAY_A);		
+
+		return $items;		
+	}
+
+	function getAllDuplicateProducts() {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT post_id, COUNT(*) c
+			FROM $this->tablename
+			GROUP BY post_id 
+			HAVING c > 1
+		", OBJECT_K);		
+
+		if ( ! empty($items) ) {
+			foreach ($items as &$item) {
+				
+				$listings = $this->getAllListingsFromPostID( $item->post_id );
+				$item->listings = $listings;
+
+			}
+		}
 
 		return $items;		
 	}
@@ -1809,7 +1939,12 @@ class ListingsModel extends WPL_Model {
 			$title_suffix = ' ' . trim( $profile['details']['title_suffix'] );
 
 			$data['auction_title'] = trim( $title_prefix . $post_title . $title_suffix );
+
 		}
+
+		// process attribute shortcodes in title - like [[attribute_Brand]]
+		$templatesModel = new TemplatesModel();
+		$data['auction_title'] = $templatesModel->processAttributeShortcodes( $item['post_id'], $data['auction_title'] );
 
 		// apply profile price
 		$data['price'] = ProductWrapper::getPrice( $post_id );

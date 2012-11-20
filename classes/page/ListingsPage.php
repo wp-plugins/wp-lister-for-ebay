@@ -277,6 +277,34 @@ class ListingsPage extends WPL_Page {
 				$this->showMessage( __('Profiles were re-applied to selected items.','wplister') );
 			}
 
+			// show warning if duplicate products found
+			$duplicateProducts = $listingsModel->getAllDuplicateProducts();
+			if ( ! empty($duplicateProducts) ) {
+				$msg  = '<p><b>'.__('WP-Lister has found multiple listings for some of your products.','wplister').'</b>';
+				$msg .= ' <a href="#" onclick="jQuery(\'#wpl_dupe_details\').toggle()">'.__('Show details','wplister').'</a></p>';
+				// $msg .= '<br>';
+				$msg .= '<div id="wpl_dupe_details" style="display:none"><p>';
+				$msg .= __('Creating multiple listings for one product is not recommended as it can cause issues syncing inventory and other unexpected behaviour.','wplister');
+				$msg .= '<br><br>';
+				foreach ($duplicateProducts as $dupe) {
+
+
+					$msg .= '<b>'.__('Listings for product','wplister').' #'.$dupe->post_id.':</b>';
+					$msg .= '<br>';
+					
+					foreach ($dupe->listings as $listing) {
+						$msg .= '&nbsp;&bull;&nbsp;';					
+						$msg .= ''.$listing->auction_title.'';					
+						if ($listing->ebay_id) $msg .= ' (#'.$listing->ebay_id.')';
+						$msg .= '<br>';
+					}
+
+					$msg .= '<br>';
+				}
+				$msg .= __('If you need to list single products multiple times for some reason, please contact support@wplab.com and we will find a solution.','wplister');
+				$msg .= '</p></div>';
+				$this->showMessage( $msg );				
+			}
 
 			// get all items
 			// $listings = $listingsModel->getAll();

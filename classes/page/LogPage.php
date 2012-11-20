@@ -33,6 +33,17 @@ class LogPage extends WPL_Page {
 			exit();
 		}
 
+		// handle delete action
+		if ( $this->requestAction() == 'delete' ) {
+			$log_ids = @$_REQUEST['log'];
+			if ( is_array($log_ids)) {
+				foreach ($log_ids as $id) {
+					$this->deleteLogEntry( $id );
+				}
+				$this->showMessage( __('Selected items were removed.','wplister') );
+			}
+		}
+
 	}
 
 	function addScreenOptions() {
@@ -108,6 +119,12 @@ class LogPage extends WPL_Page {
 
 		exit();		
 
+	}
+
+	public function deleteLogEntry( $id ) {
+		global $wpdb;
+		$wpdb->delete( $wpdb->prefix.'ebay_log',  array( 'id' => $id ) );
+		echo mysql_error();
 	}
 
 

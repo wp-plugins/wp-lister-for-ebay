@@ -21,13 +21,27 @@ class ProductWrapper {
 	
 	// get product price
 	static function getPrice( $post_id ) {
-		global $wpdb;
-		$item = $wpdb->get_var("
-			SELECT price
-			FROM {$wpdb->prefix}shopp_price
-			WHERE product = '$post_id'
-		");
-		return $item;	
+
+		$Product = new Product($post_id);
+		$Product->load_data(array('prices'));
+
+		if ( "on" == $Product->variants ) {
+
+			// find lowest variation price
+            $price_min = 1000000; // one million should be a high enough ceiling
+            foreach ($Product->prices as $priceObj) {
+            	if ( $priceObj->context == 'variation') {
+	                if ( $priceObj->price < $price_min ) $price_min = $priceObj->price;
+            	}
+            }
+			// global $wpl_logger;
+			// $wpl_logger->info('getPrice() minimum price for variation: '.print_r($price_min,1));
+            return $price_min;
+
+		} else {
+			return $Product->prices[0]->price;			
+		}
+
 	}	
 	
 	// set product price
@@ -94,6 +108,20 @@ class ProductWrapper {
 		return $first_image_url;
 	}	
 	
+	// get all product images (Shopp)
+	static function getAllImages( $post_id ) {
+
+		$product = new Product( $post_id );
+		$product->load_data();
+
+		$images = array();
+		foreach ($product->images as $id => $image) {
+		 	$images[] = site_url() . '/?siid='.$image->id;
+		} 
+
+		return $images;
+	}	
+	
 	// get all product attributes
 	static function getAttributes( $post_id ) {
 		// TODO
@@ -118,14 +146,18 @@ class ProductWrapper {
 		$wpl_logger->info('getAddons() for post_id '.print_r($post_id,1));
 
 		// check if addons are enabled
-		$Product = new Product($product);
+		$Product = new Product($post_id);
 		$Product->load_data(array('summary'));
 		if ( "off" == $Product->addons ) return array();
+
+		// get available addons for prices
+		$available_addons = shopp_product_addons( $post_id );
+		$wpl_logger->info('addons (v2):'.print_r($available_addons,1));
 
 		// get product options
 		$meta = shopp_product_meta($post_id, 'options');
 		$a = $meta['a'];
-		// $wpl_logger->info('a:'.print_r($a,1));
+		$wpl_logger->info('a:'.print_r($a,1));
 
 		// build clean options array
 		$options = array();
@@ -138,12 +170,21 @@ class ProductWrapper {
 				$addonObj->id = $option['id'];
 				$addonObj->name = $option['name'];
 
-				// get addon price
-				$priceObj = shopp_product_addon( $option['id'] );
+				// get addon price /*
+				// $wpl_logger->info('fetching addon price for option: '.print_r($option['id'],1));
+				// $priceObj = shopp_product_addon( $option['id'] );
+				// $wpl_logger->info('fetching addon price for product : '.$post_id.' - addon name: '.$option['name']);
 				// $priceObj = shopp_product_addon( array( 'product' => $post_id, 'option' => array( 'addonmenu' => $option['name'] ) ) );
 				// $wpl_logger->info('priceObj:'.print_r($priceObj,1));
-				$addonObj->price = $priceObj->price;
+				// $addonObj->price = $priceObj->price;
 
+				// get addon price (v2)
+				foreach ($available_addons as $av_addon) {
+					if ( $av_addon->label == $option['name'] ) {
+						$addonObj->price = $av_addon->price;						
+					}
+				}
+				
 				$addonGroup->options[] = $addonObj;
 			}
 			$options[] = $addonGroup;

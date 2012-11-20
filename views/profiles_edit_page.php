@@ -178,6 +178,15 @@
 								<?php echo __('Use these to automatically prepend and append keywords to your listing title.','wplister'); ?>
 							</p>
 
+							<label for="wpl-text-custom_subtitle" class="text_label"><?php echo __('Custom subtitle','wplister'); ?>:</label>
+							<input type="text" name="wpl_e2e_custom_subtitle" id="wpl-text-custom_subtitle" value="<?php echo @$item_details['custom_subtitle']; ?>" class="text_input" />
+							<br class="clear" />
+
+							<p class="desc" style="display: block;">
+								<?php echo __('Leave this empty to use the short description as subtitle.','wplister'); ?>
+								<?php echo __('Will be truncated after 55 characters.','wplister'); ?>
+							</p>
+
 						</div>
 					</div>
 
