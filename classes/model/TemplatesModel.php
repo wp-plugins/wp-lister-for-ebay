@@ -276,6 +276,7 @@ class TemplatesModel extends WPL_Model {
 
 		// attribute shortcodes i.e. [[attribute_Brand]]
 		$product_attributes = ProductWrapper::getAttributes( $post_id );
+		$this->logger->info('product_attributes: '.print_r($product_attributes,1));
 		if ( preg_match_all("/\\[\\[attribute_(.*)\\]\\]/uUsm", $tpl_html, $matches ) ) {
 
 			foreach ( $matches[1] as $attribute ) {

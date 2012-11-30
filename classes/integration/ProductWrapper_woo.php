@@ -21,6 +21,8 @@ class ProductWrapper {
 	
 	// get product price
 	static function getPrice( $post_id ) {
+		$sale_price = get_post_meta( $post_id, '_sale_price', true);
+		if ( floatval($sale_price) > 0 ) return $sale_price;
 		return get_post_meta( $post_id, '_price', true);
 	}	
 	
@@ -56,6 +58,29 @@ class ProductWrapper {
 		return get_post_meta( $post_id, '_weight', true);
 	}	
 
+	// get product weight as major weight and minor
+	static function getEbayWeight( $post_id ) {
+		$weight_value = self::getWeight( $post_id );
+		$weigth_unit  = get_option( 'woocommerce_weight_unit' );
+
+		// convert value to major and minor if unit is gram or ounces
+		if ( 'g' == $weigth_unit ) {
+			$kg = intval( $weight_value / 1000 );
+			$g = $weight_value - $kg * 1000 ;
+			$weight_major = $kg;
+			$weight_minor = $g;
+		} elseif ( 'oz' == $weigth_unit ) {
+			$lbs = intval( $weight_value / 16 );
+			$oz = $weight_value - $lbs * 16 ;
+			$weight_major = $lbs;
+			$weight_minor = $oz;
+		} else {
+			$weight_major = $weight_value;
+			$weight_minor = 0;
+		}
+		return array( $weight_major, $weight_minor );
+	}	
+
 	// get product dimensions array
 	static function getDimensions( $post_id ) {
 		$dimensions = array();
@@ -87,9 +112,13 @@ class ProductWrapper {
 
 		$product = new WC_Product( $post_id );
 		$attribute_taxnomies = $product->get_attributes();
+		
+		global $wpl_logger;
+		$wpl_logger->info('attribute_taxnomies: '.print_r($attribute_taxnomies,1));
 
 		foreach ($attribute_taxnomies as $attribute) {
 			$terms = wp_get_post_terms( $post_id, $attribute['name'] );
+			$wpl_logger->info('terms: '.print_r($terms,1));
 			if ( is_wp_error($terms) ) {
 				// echo "post id: $post_id <br>";
 				// echo "attribute name: " . $attribute['name']."<br>";
@@ -201,6 +230,13 @@ class ProductWrapper {
 			$newvar['weight']     = self::getWeight( $var_id );
 			$newvar['dimensions'] = self::getDimensions( $var_id );
 			$newvar['sku']        = self::getSKU( $var_id );
+
+			list( $weight_major, $weight_minor ) = self::getEbayWeight( $var_id );
+			if ( ($weight_major == 0) && ($weight_minor == 0) ) {
+				list( $weight_major, $weight_minor ) = self::getEbayWeight( $post_id );
+			}
+			$newvar['weight_major']     = $weight_major;
+			$newvar['weight_minor']     = $weight_minor;
 
 			$var_image 		  = self::getImageURL( $var_id );
 			$newvar['image']  = ($var_image == '') ? self::getImageURL( $post_id ) : $var_image;

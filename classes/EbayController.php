@@ -180,10 +180,16 @@ class EbayController {
         // creating a proxy for UTF8
         $sp = new EbatNs_ServiceProxy($session, 'EbatNs_DataConverterUtf8');
 
-        // logger doc: http://www.intradesys.com/de/forum/1528
-        if ( get_option('wplister_log_level') > 5 ) {
-            #$sp->attachLogger( new EbatNs_Logger(false, 'stdout', true, false) );
-            $sp->attachLogger( new EbatNs_Logger(false, $this->logger->file ) );
+        // // logger doc: http://www.intradesys.com/de/forum/1528
+        // if ( get_option('wplister_log_level') > 5 ) {
+        //     #$sp->attachLogger( new EbatNs_Logger(false, 'stdout', true, false) );
+        //     $sp->attachLogger( new EbatNs_Logger(false, $this->logger->file ) );
+        // }
+
+        // attach custom DB Logger for Tools page
+        // if ( get_option('wplister_log_to_db') == '1' ) {
+        if ( 'wplister-tools' == $_REQUEST['page'] ) {
+            $sp->attachLogger( new WPL_EbatNs_Logger( false, 'db' ) );
         }
         
         // save service proxy - and session
@@ -422,6 +428,26 @@ class EbayController {
         
     }
 
+    // call relistItem on selected items
+    public function relistItems( $id ){ 
+        $this->logger->info('EC::relistItems('.$id.')');
+        
+        $sm = new ListingsModel();
+
+        if ( is_array( $id )) {
+            foreach( $id as $single_id ) {
+                $this->lastResults[] = $sm->relistItem( $single_id, $this->session );   
+            }
+            $this->processLastResults();
+        } else {
+            $this->lastResults[] = $sm->relistItem( $id, $this->session );          
+            $this->processLastResults();
+            return $this->lastResults;
+        }
+        
+    }
+
+
     // call GetItemDetails on selected items
     public function updateItemsFromEbay( $id ){ 
         
@@ -632,9 +658,24 @@ class EbayController {
 
 
 
+    // GetUser
+    public function GetUser(){ 
+
+        // prepare request
+        $req = new GetUserRequestType();
+        
+        // send request
+        $res = $this->sp->GetUser($req);
+
+        $UserID = $res->User->UserID;
+        update_option('wplister_ebay_token_userid', $UserID);
+
+        return ( $UserID );        
+    }
+
     // GetTokenStatus
     public function GetTokenStatus(){ 
-        require_once 'GetTokenStatusRequestType.php';
+        // require_once 'GetTokenStatusRequestType.php';
 
         // prepare request
         $req = new GetTokenStatusRequestType();

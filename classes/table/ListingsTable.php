@@ -77,7 +77,7 @@ class ListingsTable extends WP_List_Table {
                 return $item[$column_name];
             case 'fees':
             case 'price':
-                return number_format_i18n( $item[$column_name], 2 );
+                return $this->number_format( $item[$column_name], 2 );
             case 'end_date':
             case 'date_published':
             	// use date format from wp
@@ -125,7 +125,8 @@ class ListingsTable extends WP_List_Table {
             'end_item'        => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'end_item',$item['id'],__('End Listing','wplister')),
             #'update'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'update',$item['id'],__('Update','wplister')),
             #'open'           => sprintf('<a href="%s" target="_blank">%s</a>',$item['ViewItemURL'],__('Open in new tab','wplister')),
-            #'delete'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete',$item['id'],__('Delete','wplister')),
+            'relist'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'relist',$item['id'],__('Relist','wplister')),
+            'delete'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete',$item['id'],__('Delete','wplister')),
         );
 
         $profile_data = maybe_unserialize( $item['profile_data'] );
@@ -185,7 +186,7 @@ class ListingsTable extends WP_List_Table {
                 // last column: price
                 $variations_html .= '<td align="right">';
                 $price = $listingsModel->applyProfilePrice( $var['price'], $profile_data['details']['start_price'] );
-                $variations_html .= number_format_i18n( $price, 2 );
+                $variations_html .= $this->number_format( $price, 2 );
 
                 $variations_html .= '</td></tr>';
 
@@ -215,7 +216,7 @@ class ListingsTable extends WP_List_Table {
                         $variations_html .= '<tr><td align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
                         $variations_html .= $addon->name;
                         $variations_html .= '</td><td align="right">';
-                        $variations_html .= number_format_i18n( $addon->price, 2 );
+                        $variations_html .= $this->number_format( $addon->price, 2 );
                         $variations_html .= '</td></tr>';
                     }
                     
@@ -239,6 +240,8 @@ class ListingsTable extends WP_List_Table {
             ($item['status'] != 'ended')) unset( $actions['open'] );
         if ( $item['status'] == 'ended' ) unset( $actions['edit'] );
         if ( $item['status'] == 'ended' ) unset( $actions['preview_auction'] );
+        if ( $item['status'] != 'ended' ) unset( $actions['delete'] );
+        if ( $item['status'] != 'ended' ) unset( $actions['relist'] );
 
         //Return the title contents
         //return sprintf('%1$s <span style="color:silver">%2$s</span>%3$s',
@@ -270,6 +273,12 @@ class ListingsTable extends WP_List_Table {
         // use profile quantity for flattened variations
         $profile_data = maybe_unserialize( $item['profile_data'] );
         if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
+
+            if ( $item['quantity_sold'] > 0 ) {
+                $qty_available = $item['quantity'] - $item['quantity_sold'];
+                return $qty_available . ' / ' . $item['quantity'];
+            }
+
             return $item['quantity']; 
         }
 
@@ -284,6 +293,11 @@ class ListingsTable extends WP_List_Table {
                 $quantity += intval( $var['stock'] );
             }
             return $quantity;
+        }
+
+        if ( $item['quantity_sold'] > 0 ) {
+            $qty_available = $item['quantity'] - $item['quantity_sold'];
+            return $qty_available . ' / ' . $item['quantity'];
         }
 
         return $item['quantity'];
@@ -313,18 +327,18 @@ class ListingsTable extends WP_List_Table {
             // use lowest price for flattened variations
             $profile_data = maybe_unserialize( $item['profile_data'] );
             if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
-                return number_format_i18n( $price_min, 2 );
+                return $this->number_format( $price_min, 2 );
             }
 
 
             if ( $price_min == $price_max ) {
-                return number_format_i18n( $price_min, 2 );
+                return $this->number_format( $price_min, 2 );
             } else {
-                return number_format_i18n( $price_min, 2 ) . ' - ' . number_format_i18n( $price_max, 2 );
+                return $this->number_format( $price_min, 2 ) . ' - ' . $this->number_format( $price_max, 2 );
             }
         }
 
-        return number_format_i18n( $item['price'], 2 );
+        return $this->number_format( $item['price'], 2 );
     }
     
     function column_end_date($item) {
@@ -335,7 +349,7 @@ class ListingsTable extends WP_List_Table {
             $date = $item['date_finished'];
             $value = mysql2date( get_option('date_format'), $date );
             return '<span style="color:darkgreen">'.$value.'</span>';
-        } elseif ( 'GTC' == $profile_data['details']['listing_duration'] ) {
+        } elseif ( ( is_array($profile_data['details']) ) && ( 'GTC' == $profile_data['details']['listing_duration'] ) ) {
             $value = 'GTC';
             return '<span style="color:silver">'.$value.'</span>';
     	} else {
@@ -355,7 +369,7 @@ class ListingsTable extends WP_List_Table {
                 $value = __('prepared','wplister');
 				break;
             case 'verified':
-                $color = 'darkblue';
+                $color = '#21759B';
                 $value = __('verified','wplister');
 				break;
             case 'published':
@@ -507,6 +521,7 @@ class ListingsTable extends WP_List_Table {
             'reapply'   => __('Re-apply profile','wplister'),
             'revise'    => __('Revise items','wplister'),
             'end_item'  => __('End listings','wplister'),
+            'relist'    => __('Re-list ended items','wplister'),
             'delete'    => __('Delete listings','wplister')
         );
         return $actions;
@@ -534,7 +549,46 @@ class ListingsTable extends WP_List_Table {
         }
         
     }
-    
+
+    // status filter links
+    // http://wordpress.stackexchange.com/questions/56883/how-do-i-create-links-at-the-top-of-wp-list-table
+    function get_views(){
+       $views = array();
+       $current = ( !empty($_REQUEST['listing_status']) ? $_REQUEST['listing_status'] : 'all');
+
+       // All link
+       $class = ($current == 'all' ? ' class="current"' :'');
+       $all_url = remove_query_arg('listing_status');
+       $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
+       // $views['all'] .= '<span class="count">('.$this->total_items.')</span>';
+
+       // prepared link
+       $prepared_url = add_query_arg('listing_status','prepared');
+       $class = ($current == 'prepared' ? ' class="current"' :'');
+       $views['prepared'] = "<a href='{$prepared_url}' {$class} >".__('Prepared','wplister')."</a>";
+
+       // verified link
+       $verified_url = add_query_arg('listing_status','verified');
+       $class = ($current == 'verified' ? ' class="current"' :'');
+       $views['verified'] = "<a href='{$verified_url}' {$class} >".__('Verified','wplister')."</a>";
+
+       // published link
+       $published_url = add_query_arg('listing_status','published');
+       $class = ($current == 'published' ? ' class="current"' :'');
+       $views['published'] = "<a href='{$published_url}' {$class} >".__('Published','wplister')."</a>";
+
+       // changed link
+       $changed_url = add_query_arg('listing_status','changed');
+       $class = ($current == 'changed' ? ' class="current"' :'');
+       $views['changed'] = "<a href='{$changed_url}' {$class} >".__('Changed','wplister')."</a>";
+
+       // ended link
+       $ended_url = add_query_arg('listing_status','ended');
+       $class = ($current == 'ended' ? ' class="current"' :'');
+       $views['ended'] = "<a href='{$ended_url}' {$class} >".__('Ended','wplister')."</a>";
+
+       return $views;
+    }    
     
     /** ************************************************************************
      * REQUIRED! This is where you prepare your data for display. This method will
@@ -567,23 +621,29 @@ class ListingsTable extends WP_List_Table {
 
             $listingsModel = new ListingsModel();
             $this->items = $listingsModel->getPageItems( $current_page, $per_page );
-            $total_items = $listingsModel->total_items;
+            $this->total_items = $listingsModel->total_items;
 
         } else {
 
             $this->items = $items;
-            $total_items = count($items);
+            $this->total_items = count($items);
 
         }
 
         // register our pagination options & calculations.
         $this->set_pagination_args( array(
-            'total_items' => $total_items,
+            'total_items' => $this->total_items,
             'per_page'    => $per_page,
-            'total_pages' => ceil($total_items/$per_page)
+            'total_pages' => ceil($this->total_items/$per_page)
         ) );
 
     }
+
+    // small helper to make sure $price is not a string    
+    function number_format( $price, $decimals = 2 ) {
+        return number_format_i18n( floatval($price), $decimals );
+    }
+    
     
 }
 

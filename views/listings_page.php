@@ -26,14 +26,15 @@
 	<h2><?php echo __('Listings','wplister') ?></h2>
 	<?php echo $wpl_message ?>
 
-
 	<!-- show listings table -->
+	<?php $wpl_listingsTable->views(); ?>
     <!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
     <form id="listings-filter" method="post" action="<?php echo $wpl_form_action; ?>" >
         <!-- For plugins, we also need to ensure that the form posts back to our current page -->
         <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
         <!-- Now we can render the completed list table -->
         <?php #$wpl_listingsTable->search_box( 'search', 'search_id' ); ?>
+		<?php $wpl_listingsTable->search_box(__('Search'), 'listing-search-input'); ?>
         <?php $wpl_listingsTable->display() ?>
     </form>
 
@@ -104,9 +105,17 @@
 		jQuery( document ).ready(
 			function () {
 		
-				// ask again before deleting
+				// ask again before ending items
 				jQuery('.row-actions .end_item a').on('click', function() {
 					return confirm("<?php echo __('Are you sure you want to end this listing?.','wplister') ?>");
+				})
+	
+				// ask again before deleting items
+				jQuery('.row-actions .delete a').on('click', function() {
+					return confirm("<?php echo __('Are you sure you want to remove this listing from WP-Lister?.','wplister') ?>");
+				})
+				jQuery('#wpl_dupe_details a.delete').on('click', function() {
+					return confirm("<?php echo __('Are you sure you want to remove this listing from WP-Lister?.','wplister') ?>");
 				})
 	
 			}

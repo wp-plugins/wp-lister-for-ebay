@@ -74,6 +74,9 @@ if ( class_exists('PEAR') ) {
 	$req .= '<!-- wpl_formatXmlString() -->';
 }
 
+// remove <![CDATA[ * ]]> tags for readibily
+$req = str_replace('<![CDATA[', '', $req);
+$req = str_replace(']]>', '', $req);
 
 $req = htmlspecialchars( $req );
 

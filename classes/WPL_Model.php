@@ -39,6 +39,7 @@ class WPL_Model {
 		if ( get_option('wplister_log_to_db') == '1' ) {
 			$this->_cs->attachLogger( new WPL_EbatNs_Logger( false, 'db' ) );
 		}
+
 		// attach Logger if log level is debug or greater
 		// if ( get_option('wplister_log_level') > 6 ) {
 		// 	$this->_cs->attachLogger( new EbatNs_Logger( false, $this->logger->file ) );

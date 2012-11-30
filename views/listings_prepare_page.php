@@ -16,6 +16,7 @@
 
 	/* hide some columns which are useless on prepare page */
 	.tablenav .actions,
+	.wp-list-table .row-actions,
 	.wp-list-table .check-column,
 	.wp-list-table .column-cb,
 	.wp-list-table .column-quantity,

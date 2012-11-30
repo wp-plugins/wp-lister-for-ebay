@@ -7,8 +7,8 @@ function wpl_generate_shipping_option_tags( $services, $selected_service ) {
 
 	<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 	
-	<?php $lastShippingCategory = $services[0]['ShippingCategory'] ?>
-	<optgroup label="<?php echo $services[0]['ShippingCategory'] ?>">
+	<?php $lastShippingCategory = @$services[0]['ShippingCategory'] ?>
+	<optgroup label="<?php echo @$services[0]['ShippingCategory'] ?>">
 	
 	<?php foreach ($services as $service) : ?>
 		

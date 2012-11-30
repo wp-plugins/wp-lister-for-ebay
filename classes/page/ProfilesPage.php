@@ -14,6 +14,14 @@ class ProfilesPage extends WPL_Page {
 		// Add custom screen options
 		add_action( "load-wp-lister_page_wplister-".self::slug, array( &$this, 'addScreenOptions' ) );
 
+		// handle save profile
+		if ( $this->requestAction() == 'save_profile' ) {
+			$this->saveProfile();
+			if ( @$_POST['return_to'] == 'listings' ) {
+				wp_redirect( get_admin_url().'admin.php?page=wplister' );
+			}
+		}
+
 	}
 
 	public function onWpAdminMenu() {
@@ -26,13 +34,6 @@ class ProfilesPage extends WPL_Page {
 	public function handleSubmit() {
         $this->logger->debug("handleSubmit()");
 
-		// handle save profile
-		if ( $this->requestAction() == 'save_profile' ) {
-			$this->saveProfile();
-			if ( @$_POST['return_to'] == 'listings' ) {
-				wp_redirect( get_admin_url().'admin.php?page=wplister' );
-			}
-		}
 		// handle duplicate profile
 		if ( $this->requestAction() == 'duplicate_auction_profile' ) {
 			$this->duplicateProfile();
@@ -45,7 +46,7 @@ class ProfilesPage extends WPL_Page {
 			$this->showMessage( __('Selected items were removed.','wplister') );
 		}
 	}
-
+	
 	function addScreenOptions() {
 		$option = 'per_page';
 		$args = array(

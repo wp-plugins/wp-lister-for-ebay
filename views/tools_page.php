@@ -50,6 +50,15 @@
 						</form>
 						<br style="clear:both;"/>
 
+						<!-- Get user id --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="GetUser" />
+								<input type="submit" value="<?php echo __('Get user ID','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('Get user ID','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="update_ebay_transactions_30" />

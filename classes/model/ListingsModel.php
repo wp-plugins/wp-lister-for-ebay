@@ -66,10 +66,25 @@ class ListingsModel extends WPL_Model {
         $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'desc'; //If no order, default to asc
         $offset = ( $current_page - 1 ) * $per_page;
 
+        // filter listing_status
+        $where_sql = '';
+		$listing_status = ( isset($_REQUEST['listing_status']) ? $_REQUEST['listing_status'] : 'all');
+		if ( $listing_status != 'all' ) {
+			$where_sql = "WHERE status = '".$listing_status."'";
+		} 
+
+        // filter search_query
+		$search_query = ( isset($_REQUEST['s']) ? $_REQUEST['s'] : false);
+		if ( $search_query ) {
+			$where_sql = "WHERE auction_title LIKE '%".$search_query."%'";
+		} 
+
+
         // get items
 		$items = $wpdb->get_results("
 			SELECT *
 			FROM $this->tablename
+            $where_sql
 			ORDER BY $orderby $order
             LIMIT $offset, $per_page
 		", ARRAY_A);
@@ -282,6 +297,11 @@ class ListingsModel extends WPL_Model {
 		if ( $profile_details['tax_mode'] == 'fix' ) {
 			$item->VATDetails = new VATDetailsType();
 			$item->VATDetails->VATPercent = $profile_details['vat_percent'];
+		}
+
+		// use Sales Tax Table
+		if ( $profile_details['tax_mode'] == 'ebay_table' ) {
+			$item->UseTaxTable = true;
 		}
 
 		// Set Local Info
@@ -586,7 +606,10 @@ class ListingsModel extends WPL_Model {
 			$calculatedShippingRate = new CalculatedShippingRateType();
 			$calculatedShippingRate->setOriginatingPostalCode( $profile_details['postcode'] );
 			$calculatedShippingRate->setShippingPackage( $localShippingOptions[0]['ShippingPackage'] );
-			$calculatedShippingRate->setWeightMajor( floatval(ProductWrapper::getWeight( $post_id )) );
+
+			list( $weight_major, $weight_minor ) = ProductWrapper::getEbayWeight( $post_id );
+			$calculatedShippingRate->setWeightMajor( floatval( $weight_major) );
+			$calculatedShippingRate->setWeightMinor( floatval( $weight_minor) );
 
 			$dimensions = ProductWrapper::getDimensions( $post_id );
 			if ( trim( @$dimensions['width']  ) != '' ) $calculatedShippingRate->setPackageWidth( $dimensions['width'] );
@@ -603,31 +626,17 @@ class ListingsModel extends WPL_Model {
 		}
 
 		
-		// check if we have local pickup only - if yes, exclude all locations
+		// check if we have local pickup only
 		if ( ( count($localShippingOptions) == 1 ) && ( $lastShippingCategory == 'PICKUP' ) ) {
 
-			// $item->setShipToLocations( 'None' );
+			$item->setShipToLocations( 'None' );
 			$item->setDispatchTimeMax( null );
-			$this->logger->info('no shipping mode enabled');
+			$this->logger->info('PICKUP ONLY mode');
 
-			$shippingDetails->addExcludeShipToLocation( 'Channel Islands' );
-			$shippingDetails->addExcludeShipToLocation( 'Isle of Wight' );
-			$shippingDetails->addExcludeShipToLocation( 'Isle of Man' );
-			$shippingDetails->addExcludeShipToLocation( 'Scilly Isles' );
-			$shippingDetails->addExcludeShipToLocation( 'Scottish Highlands' );
-			$shippingDetails->addExcludeShipToLocation( 'Scottish Islands' );
-			$shippingDetails->addExcludeShipToLocation( 'Northern Ireland' );
-			$shippingDetails->addExcludeShipToLocation( 'Africa' );
-			$shippingDetails->addExcludeShipToLocation( 'Asia' );
-			$shippingDetails->addExcludeShipToLocation( 'Central America and Caribbean' );
-			$shippingDetails->addExcludeShipToLocation( 'Europe' );
-			$shippingDetails->addExcludeShipToLocation( 'Middle East' );
-			$shippingDetails->addExcludeShipToLocation( 'North America' );
-			$shippingDetails->addExcludeShipToLocation( 'Oceania' );
-			$shippingDetails->addExcludeShipToLocation( 'Southeast Asia' );
-			$shippingDetails->addExcludeShipToLocation( 'South America' );
-
-			$item->setShippingDetails($shippingDetails);
+			// don't set ShippingDetails for pickup-only in UK!
+			if ( $item->Site != 'UK' ) {
+				$item->setShippingDetails($shippingDetails);
+			}
 
 		} else {
 			$item->setShippingDetails($shippingDetails);
@@ -826,10 +835,13 @@ class ListingsModel extends WPL_Model {
 		if ( $isCalc ) {
 
 			// get weight and dimensions from first variation
-			$weight = $variations[0]['weight'];
+			$weight_major = $variations[0]['weight_major'];
+			$weight_minor = $variations[0]['weight_minor'];
 			$dimensions = $variations[0]['dimensions'];
 
-			$item->ShippingDetails->CalculatedShippingRate->setWeightMajor( floatval( $weight ) );
+			$item->ShippingDetails->CalculatedShippingRate->setWeightMajor( floatval( $weight_major ) );
+			$item->ShippingDetails->CalculatedShippingRate->setWeightMinor( floatval( $weight_minor ) );
+
 			if ( trim( @$dimensions['width']  ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageWidth( $dimensions['width'] );
 			if ( trim( @$dimensions['length'] ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageLength( $dimensions['length'] );
 			if ( trim( @$dimensions['height'] ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageDepth( $dimensions['height'] );
@@ -959,10 +971,13 @@ class ListingsModel extends WPL_Model {
 		if ( $isCalc ) {
 
 			// get weight and dimensions from first variation
-			$weight = $variations[0]['weight'];
+			$weight_major = $variations[0]['weight_major'];
+			$weight_minor = $variations[0]['weight_minor'];
 			$dimensions = $variations[0]['dimensions'];
 
-			$item->ShippingDetails->CalculatedShippingRate->setWeightMajor( floatval( $weight ) );
+			$item->ShippingDetails->CalculatedShippingRate->setWeightMajor( floatval( $weight_major ) );
+			$item->ShippingDetails->CalculatedShippingRate->setWeightMinor( floatval( $weight_minor ) );
+
 			if ( trim( @$dimensions['width']  ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageWidth( $dimensions['width'] );
 			if ( trim( @$dimensions['length'] ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageLength( $dimensions['length'] );
 			if ( trim( @$dimensions['height'] ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageDepth( $dimensions['height'] );
@@ -1086,6 +1101,67 @@ class ListingsModel extends WPL_Model {
 
 	} // addItem()
 
+	function relistItem( $id, $session )
+	{
+		// skip this item if item status not allowed
+		$allowed_statuses = array( 'ended', 'sold' );
+		if ( ! $this->checkItemStatus( $id, $allowed_statuses ) ) return false;
+
+		// build item
+		$item = $this->buildItem( $id, $session );
+		if ( ! $this->checkItem($item) ) return $this->result;
+
+		// preparation - set up new ServiceProxy with given session
+		$this->initServiceProxy($session);
+
+		// switch to FixedPriceItem if product has variations
+		$listing_item = $this->getItem( $id );
+		// $useFixedPriceItem = ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) ? true : false;
+		$useFixedPriceItem = ( 'FixedPriceItem' == $listing_item['auction_type'] ) ? true : false;
+
+		// add old ItemID for relisting
+		$item->setItemID( $listing_item['ebay_id'] );
+
+		$this->logger->info( "Relisting #$id (ItemID ".$listing_item['ebay_id'].") - ".$item->Title );
+		if ( $useFixedPriceItem ) {
+
+			$req = new RelistFixedPriceItemRequestType(); 
+			$req->setItem($item);
+			
+			$this->logger->debug( "Request: ".print_r($req,1) );
+			$res = $this->_cs->RelistFixedPriceItem($req); 
+
+		} else {
+
+			$req = new RelistItemRequestType(); 
+			$req->setItem($item);
+			
+			$this->logger->debug( "Request: ".print_r($req,1) );
+			$res = $this->_cs->RelistItem($req); 
+
+		}
+
+		// handle response and check if successful
+		if ( $this->handleResponse($res) ) {
+
+			// save ebay ID and fees to db
+			$listingFee = $this->getListingFeeFromResponse( $res );
+			$data['ebay_id'] = $res->ItemID;
+			$data['fees'] = $listingFee;
+			$data['status'] = 'published';
+			$this->updateListing( $id, $data );
+			
+			// get details like ViewItemURL from ebay automatically
+			$this->updateItemDetails( $id, $session );
+
+			$this->logger->info( "Item #$id relisted on ebay, NEW ItemID is ".$res->ItemID );
+
+		} // call successful
+
+		return $this->result;
+
+	} // relistItem()
+
 	function reviseItem( $id, $session )
 	{
 		// skip this item if item status not allowed
@@ -1161,11 +1237,6 @@ class ListingsModel extends WPL_Model {
 		$allowed_statuses = array( 'prepared', 'verified' );
 		if ( ! $this->checkItemStatus( $id, $allowed_statuses ) ) return false;
 
-		// switch to FixedPriceItem if product has variations
-		$listing_item = $this->getItem( $id );
-		// if ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) return $this->verifyAddFixedPriceItem( $id, $session );
-		if ( 'FixedPriceItem' == $listing_item['auction_type'] ) return $this->verifyAddFixedPriceItem( $id, $session );
-
 		// build item
 		$item = $this->buildItem( $id, $session );
 		if ( ! $this->checkItem($item) ) return $this->result;
@@ -1173,11 +1244,29 @@ class ListingsModel extends WPL_Model {
 		// preparation - set up new ServiceProxy with given session
 		$this->initServiceProxy($session);
 
-		$req = new VerifyAddItemRequestType();
-		$req->setItem($item);
+		// switch to FixedPriceItem if product has variations
+		$listing_item = $this->getItem( $id );
+		// $useFixedPriceItem = ( ProductWrapper::hasVariations( $listing_item['post_id'] ) ) ? true : false;
+		$useFixedPriceItem = ( 'FixedPriceItem' == $listing_item['auction_type'] ) ? true : false;
 
 		$this->logger->info( "Verifying #$id: ".$item->Title );
-		$res = $this->_cs->VerifyAddItem($req);
+		if ( $useFixedPriceItem ) {
+
+			$req = new VerifyAddFixedPriceItemRequestType(); 
+			$req->setItem($item);
+			
+			$this->logger->debug( "Request: ".print_r($req,1) );
+			$res = $this->_cs->VerifyAddFixedPriceItem($req); 
+
+		} else {
+
+			$req = new VerifyAddItemRequestType(); 
+			$req->setItem($item);
+			
+			$this->logger->debug( "Request: ".print_r($req,1) );
+			$res = $this->_cs->VerifyAddItem($req); 
+
+		}
 
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
@@ -1193,43 +1282,6 @@ class ListingsModel extends WPL_Model {
 
 		} // call successful
 		
-		return $this->result;
-
-	} // verifyAddItem()
-
-	function verifyAddFixedPriceItem( $id, $session )
-	{
-		// skip this item if item status not allowed
-		$allowed_statuses = array( 'prepared', 'verified' );
-		if ( ! $this->checkItemStatus( $id, $allowed_statuses ) ) return false;
-
-		// build item
-		$item = $this->buildItem( $id, $session, true );
-		if ( ! $this->checkItem($item) ) return $this->result;
-
-		// preparation - set up new ServiceProxy with given session
-		$this->initServiceProxy($session);
-
-		$req = new VerifyAddFixedPriceItemRequestType();
-		$req->setItem($item);
-
-		$this->logger->debug( "Verifying FixedPriceItem #$id: ".$p['auction_title'] );
-		$res = $this->_cs->VerifyAddFixedPriceItem($req);
-
-		// handle response and check if successful
-		if ( $this->handleResponse($res) ) {
-
-			// save fees to db
-			$listingFee = $this->getListingFeeFromResponse( $res );
-			// $data['ebay_id'] = $res->ItemID;
-			$data['fees'] = $listingFee;
-			$data['status'] = 'verified';
-			$this->updateListing( $id, $data );
-
-			$this->logger->info( "Item #$id verified with ebay, getAck(): ".$res->getAck() );
-
-		} // call successful
-
 		return $this->result;
 
 	} // verifyAddItem()
@@ -1945,6 +1997,8 @@ class ListingsModel extends WPL_Model {
 		// process attribute shortcodes in title - like [[attribute_Brand]]
 		$templatesModel = new TemplatesModel();
 		$data['auction_title'] = $templatesModel->processAttributeShortcodes( $item['post_id'], $data['auction_title'] );
+		$this->logger->info('processAttributeShortcodes('.$item['post_id'].')');
+		$this->logger->info('auction_title: '.$data['auction_title'].'');
 
 		// apply profile price
 		$data['price'] = ProductWrapper::getPrice( $post_id );

@@ -25,6 +25,7 @@ class ListingsPage extends WPL_Page {
 			exit();
 		}
 
+		$this->handleSubmitOnInit();
 	}
 
 	public function onWpTopAdminMenu() {
@@ -33,7 +34,7 @@ class ListingsPage extends WPL_Page {
 					   self::ParentMenuId, array( $this, 'onDisplayListingsPage' ), $this->getImageUrl( 'hammer-16x16.png' ), ProductWrapper::menu_page_position );
 	}
 
-	public function handleSubmit() {
+	public function handleSubmitOnInit() {
         $this->logger->debug("handleSubmit()");
 
 		if ( $this->requestAction() == 'prepare_auction' ) {
@@ -219,6 +220,17 @@ class ListingsPage extends WPL_Page {
 					$this->showMessage( __('Some items could not be published.','wplister'), 1 );					
 				}
 			}
+			// handle relist action
+			if ( $this->requestAction() == 'relist' ) {
+				$this->initEC();
+				$this->EC->relistItems( $_REQUEST['auction'] );
+				$this->EC->closeEbay();
+				if ( $this->EC->isSuccess ) {
+					$this->showMessage( __('Selected items were re-listed on eBay.','wplister') );
+				} else {
+					$this->showMessage( __('There were some problems relisting your items.','wplister'), 1 );					
+				}
+			}
 			// handle end_item action
 			if ( $this->requestAction() == 'end_item' ) {
 				$this->initEC();
@@ -280,6 +292,11 @@ class ListingsPage extends WPL_Page {
 			// show warning if duplicate products found
 			$duplicateProducts = $listingsModel->getAllDuplicateProducts();
 			if ( ! empty($duplicateProducts) ) {
+
+		        // get current page with paging as url param
+		        $page = $_REQUEST['page'];
+		        if ( isset( $_REQUEST['paged'] )) $page .= '&paged='.$_REQUEST['paged'];
+
 				$msg  = '<p><b>'.__('WP-Lister has found multiple listings for some of your products.','wplister').'</b>';
 				$msg .= ' <a href="#" onclick="jQuery(\'#wpl_dupe_details\').toggle()">'.__('Show details','wplister').'</a></p>';
 				// $msg .= '<br>';
@@ -296,7 +313,13 @@ class ListingsPage extends WPL_Page {
 						$msg .= '&nbsp;&bull;&nbsp;';					
 						$msg .= ''.$listing->auction_title.'';					
 						if ($listing->ebay_id) $msg .= ' (#'.$listing->ebay_id.')';
+						$msg .= ' &ndash; <i>'.$listing->status.'</i>';					
 						$msg .= '<br>';
+						if ( in_array( $listing->status, array( 'prepared', 'verified', 'ended' ) ) ) {
+							$delete_link = sprintf('<a class="delete" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete',$listing->id,__('Click to remove this listing','wplister'));
+							$msg .= '&nbsp;&nbsp;&nbsp;'.$delete_link;
+							$msg .= '<br>';
+						}
 					}
 
 					$msg .= '<br>';

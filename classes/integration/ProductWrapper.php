@@ -54,6 +54,14 @@ class ProductWrapper {
 	static function getWeight( $post_id, $include_weight_unit = false ) {
 	}	
 
+	// get product weight as major weight and minor
+	static function getEbayWeight( $post_id ) {
+		$weight_value = self::getWeight( $post_id );
+		$weight_major = $weight_value;
+		$weight_minor = 0;
+		return array( $weight_major, $weight_minor );
+	}	
+
 	// get product dimensions array
 	static function getDimensions( $post_id ) {
 		return array();

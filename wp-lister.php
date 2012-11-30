@@ -3,7 +3,7 @@
 Plugin Name: WP-Lister for eBay
 Plugin URI: http://www.wplab.com/plugins/wp-lister/
 Description: List your products on eBay the easy way. 
-Version: 1.0.9.2
+Version: 1.0.9.9
 Author: Matthias Krok
 Author URI: http://www.wplab.com/ 
 Max WP Version: 3.4.2
@@ -13,7 +13,7 @@ License: GPL2+
 
 
 // include base classes
-define('WPLISTER_VERSION', '1.0.9.2' );
+define('WPLISTER_VERSION', '1.0.9.9' );
 define('WPLISTER_PATH', realpath( dirname(__FILE__) ) );
 define('WPLISTER_URL', WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)) . '/' );
 require_once( WPLISTER_PATH . '/classes/WPL_Autoloader.php' );
@@ -89,6 +89,7 @@ class WPL_WPLister extends WPL_BasePlugin {
 			add_action( 'admin_footer', array( &$this, 'modifyProductsBulkActionMenu' ) );
 			add_action( 'admin_print_styles', array( &$this, 'printProductsPageStyles' ) );
 		}
+		add_action( 'admin_print_styles', array( &$this, 'printOrdersPageStyles' ) );
 	}
 	
 	public function onWpPrintStyles() {
@@ -111,12 +112,17 @@ class WPL_WPLister extends WPL_BasePlugin {
     	<?php
 	}
 
-	// add custom bulk action 'prepare_auction' for cpt products
-	// should be called by 'admin_footer' action
 	public function printProductsPageStyles() {	
 		?>
     	<style type="text/css">
 			table.wp-list-table .column-listed { width: 25px; }    	
+    	</style>
+    	<?php
+	}
+	public function printOrdersPageStyles() {	
+		?>
+    	<style type="text/css">
+			table.wp-list-table .column-ebay { width: 25px; }    	
     	</style>
     	<?php
 	}

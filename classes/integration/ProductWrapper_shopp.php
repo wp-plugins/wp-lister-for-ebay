@@ -89,6 +89,14 @@ class ProductWrapper {
 		return $Product->prices[0]->dimensions['weight'];
 	}	
 
+	// get product weight as major weight and minor
+	static function getEbayWeight( $post_id ) {
+		$weight_value = self::getWeight( $post_id );
+		$weight_major = $weight_value;
+		$weight_minor = 0;
+		return array( $weight_major, $weight_minor );
+	}	
+
 	// get product dimensions array
 	static function getDimensions( $post_id ) {
 		$Product = new Product($post_id);
@@ -309,6 +317,10 @@ class ProductWrapper {
 			$newvar['dimensions'] = $priceObj->dimensions;
 			$newvar['sku']        = $priceObj->sku;
 			$newvar['image']      = $product_image;
+
+			// TODO: check weight unit
+			$newvar['weight_major']     = $priceObj->dimensions['weight'];;
+			$newvar['weight_minor']     = 0;
 
 			// add to collection
 			$variations[] = $newvar;			
