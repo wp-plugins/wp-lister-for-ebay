@@ -21,6 +21,8 @@ class ProductWrapper {
 	
 	// get product price
 	static function getPrice( $post_id ) {
+		$sale_price = get_post_meta( $post_id, '_wpsc_special_price', true);
+		if ( floatval($sale_price) > 0 ) return $sale_price;
 		return get_post_meta( $post_id, '_wpsc_price', true);
 	}	
 	

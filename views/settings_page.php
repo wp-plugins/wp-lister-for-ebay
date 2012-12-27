@@ -9,6 +9,17 @@
 		margin-left: 4px;
 	}
 
+	#side-sortables .postbox input.text_input,
+	#side-sortables .postbox select.select {
+	    width: 50%;
+	}
+	#side-sortables .postbox label.text_label {
+	    width: 45%;
+	}
+	#side-sortables .postbox p.desc {
+	    margin-left: 5px;
+	}
+
 </style>
 
 <div class="wrap wplister-page">
@@ -18,11 +29,84 @@
 	<?php include_once( dirname(__FILE__).'/settings_tabs.php' ); ?>		
 	<?php echo $wpl_message ?>
 
-	<div style="width:60%;min-width:640px;" class="postbox-container">
-		<div class="metabox-holder">
-			<div class="meta-box-sortables ui-sortable">
+	<div id="poststuff">
+		<div id="post-body" class="metabox-holder columns-2">
 
-				<?php if ( $active_tab == 'settings' ): ?>
+			<div id="postbox-container-1" class="postbox-container">
+				<div id="side-sortables" class="meta-box">
+
+
+					<!-- first sidebox -->
+					<div class="postbox" id="submitdiv">
+						<!--<div title="Click to toggle" class="handlediv"><br></div>-->
+						<h3><span><?php echo __('Your Account','wplister'); ?></span></h3>
+						<div class="inside">
+
+							<div id="submitpost" class="submitbox">
+
+								<div id="misc-publishing-actions">
+									<div class="misc-pub-section">
+									<?php if ( $wpl_ebay_token_userid ): ?>
+										<p>
+											<!-- <b><?php echo __('Account Details','wplister') ?></b> -->
+											<table style="width:95%">
+												<tr><td><?php echo __('User ID','wplister') . ':</td><td>' . $wpl_ebay_token_userid ?></td></tr>
+												<tr><td><?php echo __('Status','wplister') . ':</td><td>' . $wpl_ebay_user->Status ?></td></tr>
+												<tr><td><?php echo __('Score','wplister') . ':</td><td>' . $wpl_ebay_user->FeedbackScore ?></td></tr>
+												<tr><td><?php echo __('Site','wplister') . ':</td><td>' . $wpl_ebay_user->Site ?></td></tr>
+												<?php if ( $wpl_ebay_user->StoreOwner ) : ?>
+												<tr><td><?php echo __('Store','wplister') . ':</td><td>' ?><a href="<?php echo $wpl_ebay_user->StoreURL ?>" target="_blank"><?php echo __('visit store','wplister') ?></a></td></tr>
+												<?php endif; ?>
+											</table>												
+										</p>
+									<?php else: ?>
+										<p><?php echo __('WP-Lister is not linked to your eBay account yet. ','wplister') ?></p>
+									<?php endif; ?>
+									</div>
+								</div>
+
+								<div id="major-publishing-actions">
+									<div id="publishing-action">
+										<!input type="hidden" name="action" value="save_settings" />
+										<input type="submit" value="<?php echo __('Save Settings','wplister'); ?>" id="save_settings" class="button-primary" name="save">
+									</div>
+									<div class="clear"></div>
+								</div>
+
+							</div>
+
+						</div>
+					</div>
+
+					<?php if ( ( ! is_multisite() ) || ( is_main_site() ) ) : ?>
+					<div class="postbox" id="UninstallSettingsBox">
+						<h3 class="hndle"><span><?php echo __('Uninstall on deactivation','wplister') ?></span></h3>
+						<div class="inside">
+
+							<label for="wpl-option-uninstall" class="text_label"><?php echo __('Uninstall','wplister'); ?>:</label>
+							<select id="wpl-option-uninstall" name="wpl_e2e_option_uninstall" title="Uninstall" class=" required-entry select">
+								<option value="1" <?php if ( $wpl_option_uninstall == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( $wpl_option_uninstall != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Enable to completely remove listings, transactions and settings when deactivating the plugin.','wplister'); ?><br><br>
+								<?php echo __('To remove your listing templates as well, please delete the folder <code>wp-content/uploads/wp-lister/templates/</code>.','wplister'); ?>
+							</p>
+
+						</div>
+					</div>
+					<?php endif; ?>
+
+					<?php #include('profile/edit_sidebar.php') ?>
+				</div>
+			</div> <!-- #postbox-container-1 -->
+
+
+			<!-- #postbox-container-2 -->
+			<div id="postbox-container-2" class="postbox-container">
+				<div class="meta-box-sortables ui-sortable">
+					
+				<?php #if ( $active_tab == 'settings' ): ?>
 				<?php if ( $wpl_text_ebay_token == '' ) : ?>
 				
 					<div class="postbox" id="AuthSettingsBox">
@@ -79,7 +163,7 @@
 
 				<?php else: // $wpl_text_ebay_token != ''  ?>
 
-				<form method="post" action="<?php echo $wpl_form_action; ?>">
+				<form method="post" id="settingsForm" action="<?php echo $wpl_form_action; ?>">
 					<input type="hidden" name="action" value="save_wplister_settings" >
 
 					<div class="postbox" id="ConnectionSettingsBox">
@@ -139,33 +223,14 @@
 						</div>
 					</div>
 
-					<?php if ( ( ! is_multisite() ) || ( is_main_site() ) ) : ?>
-					<div class="postbox" id="UninstallSettingsBox">
-						<h3 class="hndle"><span><?php echo __('Uninstall','wplister') ?></span></h3>
-						<div class="inside">
-
-							<label for="wpl-option-uninstall" class="text_label"><?php echo __('Uninstall on deactivation','wplister'); ?>:</label>
-							<select id="wpl-option-uninstall" name="wpl_e2e_option_uninstall" title="Uninstall" class=" required-entry select">
-								<option value="1" <?php if ( $wpl_option_uninstall == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
-								<option value="0" <?php if ( $wpl_option_uninstall != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
-							</select>
-							<p class="desc" style="display: block;">
-								<?php echo __('Enable to completely remove listings, transactions and settings when deactivating the plugin.','wplister'); ?><br>
-								<?php echo __('To remove your listing templates as well, please delete the folder <code>wp-content/uploads/wp-lister/templates/</code>.','wplister'); ?>
-							</p>
-
-						</div>
-					</div>
-					<?php endif; ?>
-
-
-
+<!-- 
 					<div class="submit" style="padding-top: 0; float: right;">
 						<input type="submit" value="<?php echo __('Save Settings','wplister') ?>" name="submit" class="button-primary">
 					</div>
+ -->
 				</form>
 				<?php endif; // $wpl_text_ebay_token == ''  ?>
-				<?php endif; // $active_tab == 'settings' ) ?>
+				<?php #endif; // $active_tab == 'settings' ) ?>
 
 				<?php if ( ( is_multisite() ) && ( is_main_site() ) ) : ?>
 				<p>
@@ -174,9 +239,15 @@
 				<?php endif; ?>
 
 
-			</div>
-		</div>
-	</div>
+				</div> <!-- .meta-box-sortables -->
+			</div> <!-- #postbox-container-1 -->
+
+
+
+		</div> <!-- #post-body -->
+		<br class="clear">
+	</div> <!-- #poststuff -->
+
 
 
 
@@ -193,6 +264,13 @@
 					if ( site_id ) {
 						jQuery('#frmSetEbaySite').submit();
 					}
+					
+				});
+
+				// save changes button
+				jQuery('#save_settings').click( function() {					
+
+					jQuery('#settingsForm').first().submit();
 					
 				});
 

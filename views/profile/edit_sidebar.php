@@ -171,14 +171,14 @@
 						<div class="inside">
 
 							<label for="wpl-text-variations_mode" class="text_label"><?php echo __('Mode','wplister'); ?>:</label>
-							<select id="wpl-text-variations_mode" name="wpl_e2e_variations_mode" title="Variation images" class=" required-entry select">
+							<select id="wpl-text-variations_mode" name="wpl_e2e_variations_mode" title="Variation Mode" class=" required-entry select">
 								<option value="default" <?php if ( @$item_details['variations_mode'] == 'default' ): ?>selected="selected"<?php endif; ?>><?php echo __('list as variations','wplister'); ?></option>
 								<option value="flat"    <?php if ( @$item_details['variations_mode'] == 'flat' ): ?>selected="selected"<?php endif; ?>><?php echo __('flatten variations','wplister'); ?></option>
 							</select>
 							<br class="clear" />
 
-							<label for="wpl-text-add_variations_table" class="text_label"><?php echo __('Table of variations','wplister'); ?>:</label>
-							<select id="wpl-text-add_variations_table" name="wpl_e2e_add_variations_table" title="Variation images" class=" required-entry select">
+							<label for="wpl-text-add_variations_table" class="text_label"><?php echo __('Include variations list','wplister'); ?>:</label>
+							<select id="wpl-text-add_variations_table" name="wpl_e2e_add_variations_table" title="Add variations list as HTML table to item description" class=" required-entry select">
 								<option value="1" <?php if ( @$item_details['add_variations_table'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( @$item_details['add_variations_table'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 							</select>
@@ -196,7 +196,7 @@
 
 
 					<div class="postbox" id="LayoutSettingsBox">
-						<h3><span><?php echo __('Layout','wplister'); ?></span></h3>
+						<h3><span><?php echo __('Images','wplister'); ?></span></h3>
 						<div class="inside">
 
 							<label for="wpl-text-with_image" class="text_label"><?php echo __('Image','wplister'); ?>:</label>
@@ -216,10 +216,27 @@
 							<br class="clear" />
 
 
+						</div>
+					</div>
+
+
+
+
+					<div class="postbox" id="OtherSettingsBox">
+						<h3><span><?php echo __('Other options','wplister'); ?></span></h3>
+						<div class="inside">
+
 							<label for="wpl-text-subtitle_enabled" class="text_label"><?php echo __('List subtitle','wplister'); ?>:</label>
 							<select id="wpl-text-subtitle_enabled" name="wpl_e2e_subtitle_enabled" title="Use additional product description as subtitle" class=" required-entry select">
 								<option value="1" <?php if ( @$item_details['subtitle_enabled'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( @$item_details['subtitle_enabled'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
+							<label for="wpl-text-private_listing" class="text_label"><?php echo __('Private listing','wplister'); ?>:</label>
+							<select id="wpl-text-private_listing" name="wpl_e2e_private_listing" title="List as private listing" class=" required-entry select">
+								<option value="1" <?php if ( @$item_details['private_listing'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( @$item_details['private_listing'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 							</select>
 							<br class="clear" />
 
@@ -238,7 +255,6 @@
 
 						</div>
 					</div>
-
 
 
 					<div class="postbox" id="HelpBox">

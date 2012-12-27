@@ -23,8 +23,8 @@ We worked hard to make WP-Lister easy to use but flexible. The workflow of listi
 * choose categories from eBay and your eBay Store
 * national and international shipping options
 * support for product variations
-* create custom listing templates using WordPress post editor
-* built in template editor with HTML / CSS syntax highlighting
+* create simple listing templates using WordPress post editor
+* advanced template editor with HTML / CSS syntax highlighting
 * download / upload listing templates – makes life easy for 3rd party template developers
 
 = Localization =
@@ -53,7 +53,7 @@ To find out more about the different versions have a look on this feature compar
 
 = Does WP-Lister work with all eBay sites? =
 
-Yes, WP-Lister works with every eBay site, but only one site at a time.
+Yes, WP-Lister works with all eBay sites.
 
 = What are the requirements to run WP-Lister? =
 
@@ -77,7 +77,7 @@ Yes, there are more questions and answers on http://www.wplab.com/plugins/wp-lis
 
 = Any plans for WP-Lister for Amazon? =
 
-You bet ;-)
+Already working on it.
 
 == Screenshots ==
 
@@ -85,6 +85,13 @@ You bet ;-)
 2. Profile Editor
 
 == Changelog ==
+
+= 1.1.0 =
+* tested with WordPress 3.5
+* various UI improvements
+* new option for private listings
+* code cleanup
+* bug fixes
 
 = 1.0.9.2 =
 * support for multisite network activation (beta)

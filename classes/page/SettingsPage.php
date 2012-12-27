@@ -105,6 +105,8 @@ class SettingsPage extends WPL_Page {
 			'text_ebay_site_id'			=> self::getOption( 'ebay_site_id' ),
 			'text_paypal_email'			=> self::getOption( 'paypal_email' ),
 			'ebay_sites'				=> EbayController::getEbaySites(),
+			'ebay_token_userid'			=> self::getOption( 'ebay_token_userid' ),
+			'ebay_user'					=> self::getOption( 'ebay_user' ),
 
 			'option_cron_auctions'		=> self::getOption( 'cron_auctions' ),
 			'option_cron_transactions'	=> self::getOption( 'cron_transactions' ),

@@ -76,6 +76,15 @@ class WPL_Setup extends WPL_Core {
 		// db upgrade
 		self::upgradeDB();
 
+		// fetch user details if not done yet
+		if ( ( self::getOption('ebay_token') != '' ) && ( ! self::getOption('ebay_user') ) ) {
+			$this->initEC();
+			$UserID = $this->EC->GetUser();
+			$this->EC->closeEbay();
+			// $this->showMessage( __('Account details were updated.','wplister') . $UserID );
+			// $this->showMessage( __('Your UserID is ','wplister') . $UserID );
+		}
+		
 	}
 
 

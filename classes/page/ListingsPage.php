@@ -329,6 +329,21 @@ class ListingsPage extends WPL_Page {
 				$this->showMessage( $msg );				
 			}
 
+	        // get listing status summary
+	        $summary = $listingsModel->getStatusSummary();
+
+	        // check for changed items and display reminder
+	        if ( isset($summary->changed) ) {
+				$msg  = '<p>';
+				$msg .= sprintf( __('WP-Lister has found %s changed item(s) which need to be revised on eBay to apply their latest changes.','wplister'), $summary->changed );
+				// $msg .= '<br><br>';
+				$msg .= '&nbsp;&nbsp;';
+				$msg .= '<a id="btn_revise_all_changed_items_reminder" class="button-secondary wpl_job_button">' . __('Revise all changed items','wplister') . '</a>';
+				$msg .= '</p>';
+				$this->showMessage( $msg );				
+
+	        }
+
 			// get all items
 			// $listings = $listingsModel->getAll();
 	
@@ -408,8 +423,8 @@ class ListingsPage extends WPL_Page {
 	public function previewListing( $id ) {
 	
 		// init model
-		$listingsModel = new ListingsModel();
-		$preview_html = $listingsModel->getFinalHTML( $id );
+		$ibm = new ItemBuilderModel();
+		$preview_html = $ibm->getFinalHTML( $id );
 		echo $preview_html;
 		exit();		
 

@@ -140,6 +140,7 @@ class TemplatesModel extends WPL_Model {
 	public function processItem( $item ) {
 		
 		$listing = new ListingsModel();
+		$ibm = new ItemBuilderModel();
 
 		// load template content
 		$tpl_html = $this->getContent();
@@ -187,7 +188,7 @@ class TemplatesModel extends WPL_Model {
 		$item['post_content'] = preg_replace('#<a.*?>([^<]*)</a>#i', '$1', $item['post_content'] );
 
 		// replace shortcodes
-		$tpl_html = str_replace( '[[product_title]]', $listing->prepareTitleAsHTML( $item['auction_title'] ), $tpl_html );
+		$tpl_html = str_replace( '[[product_title]]', $ibm->prepareTitleAsHTML( $item['auction_title'] ), $tpl_html );
  		if ( 'off' == get_option( 'wplister_process_shortcodes', 'content' ) ) {
 	 		$tpl_html = str_replace( '[[product_content]]', $item['post_content'], $tpl_html );
  		} else {
@@ -218,8 +219,8 @@ class TemplatesModel extends WPL_Model {
 
 
 		// handle images...
-		$main_image = $listing->getProductMainImageURL( $item['post_id'] );
-		$images = $listing->getProductImagesURL( $item['post_id'] );
+		$main_image = $ibm->getProductMainImageURL( $item['post_id'] );
+		$images = $ibm->getProductImagesURL( $item['post_id'] );
 		$this->logger->debug( 'images found ' . print_r($images,1) );
 		
 		// [[product_main_image]]

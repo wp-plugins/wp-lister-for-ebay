@@ -670,6 +670,29 @@ class EbayController {
         $UserID = $res->User->UserID;
         update_option('wplister_ebay_token_userid', $UserID);
 
+        $user = new stdClass();
+        $user->UserID              = $res->User->UserID;
+        $user->Email               = $res->User->Email;
+        $user->FeedbackScore       = $res->User->FeedbackScore;
+        $user->FeedbackRatingStar  = $res->User->FeedbackRatingStar;
+        $user->NewUser             = $res->User->NewUser;
+        $user->IDVerified          = $res->User->IDVerified;
+        $user->eBayGoodStanding    = $res->User->eBayGoodStanding;
+        $user->Status              = $res->User->Status;
+        $user->Site                = $res->User->Site;
+        $user->VATStatus           = $res->User->VATStatus;
+        $user->PayPalAccountLevel  = $res->User->PayPalAccountLevel;
+        $user->PayPalAccountType   = $res->User->PayPalAccountType;
+        $user->PayPalAccountStatus = $res->User->PayPalAccountStatus;
+
+        $user->StoreOwner          = $res->User->SellerInfo->StoreOwner;
+        $user->StoreURL            = $res->User->SellerInfo->StoreURL;
+        $user->SellerBusinessType  = $res->User->SellerInfo->SellerBusinessType;
+        $user->ExpressEligible     = $res->User->SellerInfo->ExpressEligible;
+        $user->StoreSite           = $res->User->SellerInfo->StoreSite;
+
+        update_option('wplister_ebay_user', $user);
+
         return ( $UserID );        
     }
 

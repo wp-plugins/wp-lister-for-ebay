@@ -73,6 +73,9 @@
 			jQuery('#btn_revise_all_changed_items').click( function(event) {
 				WpLister.JobRunner.runJob( 'reviseAllChangedItems', 'Revising items...' );
 			});
+			jQuery('#btn_revise_all_changed_items_reminder').click( function(event) {
+				WpLister.JobRunner.runJob( 'reviseAllChangedItems', 'Revising items...' );
+			});
 
 			// btn_update_all_published_items
 			jQuery('#btn_update_all_published_items').click( function(event) {
