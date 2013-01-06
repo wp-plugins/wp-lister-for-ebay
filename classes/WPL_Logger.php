@@ -33,7 +33,9 @@ class WPL_Logger{
 			}
 			$this->strdate = 'Y/m/d H:i:s';
 			$this->debug('Start Session:'.print_r($_SERVER,1));
-			$this->info( $_SERVER['REQUEST_METHOD'].': '.$_SERVER['QUERY_STRING'] . @$_POST['action'] .' - '. @$_POST['do'] );
+			if (@$_REQUEST['action'] != 'wplister_tail_log') {
+				$this->info( $_SERVER['REQUEST_METHOD'].': '.$_SERVER['QUERY_STRING'] . ' - ' . @$_POST['action'] .' - '. @$_POST['do'] );
+			}
 
 		}
 

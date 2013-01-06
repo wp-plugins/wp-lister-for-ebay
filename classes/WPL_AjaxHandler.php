@@ -17,6 +17,9 @@ class WPL_AjaxHandler extends WPL_Core {
 		add_action('wp_ajax_wpl_jobs_run_task', array( &$this, 'jobs_run_task' ) );	
 		add_action('wp_ajax_wpl_jobs_complete_job', array( &$this, 'jobs_complete_job' ) );	
 
+		// logfile viewer
+		add_action('wp_ajax_wplister_tail_log', array( &$this, 'ajax_wplister_tail_log' ) );
+
 		// handle incoming ebay notifications
 		add_action('wp_ajax_handle_ebay_notify', array( &$this, 'ajax_handle_ebay_notify' ) );
 		add_action('wp_ajax_nopriv_handle_ebay_notify', array( &$this, 'ajax_handle_ebay_notify' ) );
@@ -404,6 +407,26 @@ class WPL_AjaxHandler extends WPL_Core {
 			echo "</ul>";	
 		}
 		exit();
+	}
+
+	// handle calls to logfile viewer based on php-tail
+	// http://code.google.com/p/php-tail
+	public function ajax_wplister_tail_log() {
+
+		require_once( WPLISTER_PATH . '/includes/php-tail/PHPTail.php' );
+		
+		// Initilize a new instance of PHPTail
+		$tail = new PHPTail( $this->logger->file, 3000 );
+
+		// handle ajax call
+		if(isset($_GET['ajax']))  {
+			echo $tail->getNewLines( @$_GET['lastsize'], $_GET['grep'], $_GET['invert']);
+			die();
+		}
+
+		// else show gui
+		$tail->generateGUI();
+		die();		
 	}
 
 	// there are still problems with eBay's notification system. 

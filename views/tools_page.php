@@ -83,6 +83,15 @@
 						<br style="clear:both;"/>
 
 
+						<form method="post" action="admin-ajax.php" target="_blank">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="wplister_tail_log" />
+								<input type="submit" value="<?php echo __('View debug log','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('Open logfile viewer in new tab','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
+						<!--
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="view_logfile" />
@@ -90,6 +99,7 @@
 								<p><?php echo __('View Logfile','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
+						-->
 
 						<!-- Get user id --> 
 						<form method="post" action="<?php echo $wpl_form_action; ?>">

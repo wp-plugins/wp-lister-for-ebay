@@ -85,7 +85,7 @@ class ItemBuilderModel extends WPL_Model {
 		// handle VAT (percent)
 		if ( $profile_details['tax_mode'] == 'fix' ) {
 			$item->VATDetails = new VATDetailsType();
-			$item->VATDetails->VATPercent = $profile_details['vat_percent'];
+			$item->VATDetails->VATPercent = floatval( $profile_details['vat_percent'] );
 		}
 
 		// use Sales Tax Table

@@ -367,7 +367,7 @@ class ListingsModel extends WPL_Model {
 		if ( ! $ibm->checkItem($item) ) return $ibm->result;
 
 		// if quantity is zero, end item instead
-		if ( ( $item->Quantity == 0 ) && ( ! $this->VariationsHaveStock ) ) {
+		if ( ( $item->Quantity == 0 ) && ( ! $ibm->VariationsHaveStock ) ) {
 			$this->logger->info( "Item #$id has no stock, switching to endItem()" );
 			return $this->endItem( $id, $session );
 		}
@@ -525,7 +525,7 @@ class ListingsModel extends WPL_Model {
 		} else {
 			$this->logger->info("skipped item $id with status ".$item['status']);
 			$this->logger->debug("allowed_statuses: ".print_r($allowed_statuses,1) );
-			$this->showMessage( sprintf( 'Skipped %s item: %s', $item['status'], $item['auction_title'] ), false, true );
+			$this->showMessage( sprintf( 'Skipped %s item "%s" as its listing status is not %s', $item['status'], $item['auction_title'], join( $allowed_statuses, ' or ' ) ), false, true );
 			return false;
 		}
 

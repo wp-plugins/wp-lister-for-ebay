@@ -86,6 +86,9 @@ Already working on it.
 
 == Changelog ==
 
+= 1.1.0.1 =
+* fixed an issue revising items with variations
+
 = 1.1.0 =
 * tested with WordPress 3.5
 * various UI improvements
