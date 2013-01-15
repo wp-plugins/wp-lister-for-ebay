@@ -25,7 +25,7 @@ class ItemBuilderModel extends WPL_Model {
 
 
 
-	function buildItem( $id, $session, $isFixedPriceItem = false, $reviseItem = false )
+	function buildItem( $id, $session, $reviseItem = false )
 	{
 
 		// fetch record from db
@@ -76,7 +76,7 @@ class ItemBuilderModel extends WPL_Model {
 
 		// handle product image
 		$item->PictureDetails = new PictureDetailsType();
-		$item->PictureDetails->addPictureURL( str_replace(' ', '%20', $main_image ) );
+		$item->PictureDetails->addPictureURL( $this->encodeUrl( $main_image ) );
 		if ( $profile_details['with_gallery_image'] ) $item->PictureDetails->GalleryType = 'Gallery';
         
 
@@ -144,8 +144,13 @@ class ItemBuilderModel extends WPL_Model {
 		// add subtitle if enabled
 		if ( @$profile_details['subtitle_enabled'] == 1 ) {
 			
-			// check for custom subtitle from profile
-			$subtitle = @$profile_details['custom_subtitle'];
+			// check if custom post meta field 'ebay_subtitle' exists
+			if ( get_post_meta( $p['post_id'], 'ebay_subtitle', true ) ) {
+				$subtitle = get_post_meta( $p['post_id'], 'ebay_subtitle', true );
+			} else {
+				// check for custom subtitle from profile
+				$subtitle = @$profile_details['custom_subtitle'];
+			}
 
 			// if empty use product excerpt
 			if ( $subtitle == '' ) {
@@ -153,7 +158,7 @@ class ItemBuilderModel extends WPL_Model {
 				$subtitle = strip_tags( $the_post->post_excerpt );
 			}
 			
-			// limit to 55 chars
+			// limit to 55 chars to avoid error
 			$subtitle = substr( $subtitle, 0, 55 );
 
 			$item->setSubTitle( $subtitle );			
@@ -599,7 +604,7 @@ class ItemBuilderModel extends WPL_Model {
         	if ( in_array( $VariationValue, $VariationValuesForPictures ) ) {
 		    	$VariationSpecificPictureSet = new VariationSpecificPictureSetType();
     	    	$VariationSpecificPictureSet->setVariationSpecificValue( $VariationValue );
-        		$VariationSpecificPictureSet->addPictureURL( str_replace(' ', '%20', $var['image'] ) );
+        		$VariationSpecificPictureSet->addPictureURL( $this->encodeUrl( $var['image'] ) );
 
 		        // only list variation images if enabled
         		if ( @$profile_details['with_variation_images'] != '0' ) {
@@ -878,32 +883,15 @@ class ItemBuilderModel extends WPL_Model {
 		$this->logger->debug('prepareTitleAsHTML()  in: ' . $title );
 		$title = htmlentities( $title, ENT_QUOTES, 'UTF-8', false );
 		$this->logger->debug('prepareTitleAsHTML() out: ' . $title );
-
 		return $title;
 	}
 
 
 	public function prepareTitle( $title ) {
 
-		$this->logger->info('prepareTitle()  in: ' . $title );
-
-		// replace some specials chars with harmless versions
-		// $title = str_replace('&#8211;', '-', $title );
-		// $title = str_replace('&ndash;', '-', $title );
-		// $title = str_replace('“', '"', $title );
-		// $title = str_replace('”', '"', $title );
-		// $title = str_replace('’', '\'', $title );
-
-		// $title = str_replace('&#8220;', '"', $title );
-		// $title = str_replace('&#8221;', '"', $title );
-		// $title = str_replace('&#8217;', '\'', $title );
-		// $title = str_replace('&#8230;', '...', $title );
-
-		// $this->logger->info('prepareTitle()  s1: ' . $title );
-
+		$this->logger->debug('prepareTitle()  in: ' . $title );
 		$title = html_entity_decode( $title, ENT_QUOTES, 'UTF-8' );
-
-		$this->logger->info('prepareTitle() out: ' . $title );
+		$this->logger->debug('prepareTitle() out: ' . $title );
 		return $title;
 	}
 	
@@ -927,6 +915,11 @@ class ItemBuilderModel extends WPL_Model {
 
 
 	public function getProductMainImageURL( $post_id, $checking_parent = false ) {
+
+		// check if custom post meta field 'ebay_image_url' exists
+		if ( get_post_meta( $post_id, 'ebay_image_url', true ) ) {
+			return $this->removeHttpsFromUrl( get_post_meta( $post_id, 'ebay_image_url', true ) );
+		}
 
 		// this seems to be neccessary for listing previews on some installations 
 		if ( ! function_exists('get_post_thumbnail_id')) 
@@ -1000,6 +993,15 @@ class ItemBuilderModel extends WPL_Model {
 	function removeHttpsFromUrl( $url ) {
 		$url = str_replace( 'https://', 'http://', $url );
 		$url = str_replace( ':443', '', $url );
+		return $url;
+	}
+	
+	// encode special characters and spaces for PictureURL
+	function encodeUrl( $url ) {
+		$url = rawurlencode( $url );
+		// $url = str_replace(' ', '%20', $url );
+		$url = str_replace('%2F', '/', $url );
+		$url = str_replace('%3A', ':', $url );
 		return $url;
 	}
 	

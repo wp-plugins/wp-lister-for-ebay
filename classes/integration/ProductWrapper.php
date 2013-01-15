@@ -67,6 +67,10 @@ class ProductWrapper {
 		return array();
 	}	
 	
+	// get name of main product category
+	static function getProductCategoryName( $post_id ) {
+	}	
+	
 	// get product featured image
 	static function getImageURL( $post_id ) {
 	}	

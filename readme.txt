@@ -11,7 +11,7 @@ List products from WordPress on eBay. The easy way.
 
 == Description ==
 
-WP-Lister connects your WooCommerce, WP e-Commerce, Shopp or MarketPress site with your eBay Store. You can select multiple products right from your products page, select a profile to apply a set of predefined options and list them all on eBay with just a few clicks.
+WP-Lister connects your WooCommerce, Jigoshop, WP e-Commerce, Shopp or MarketPress site with your eBay Store. You can select multiple products right from your products page, select a profile to apply a set of predefined options and list them all on eBay with just a few clicks.
 
 We worked hard to make WP-Lister easy to use but flexible. The workflow of listing items requires not a single click more than neccessary. Due to its tight integration in WordPress, your client will not have to learn anything new as he will feel right at home.
 
@@ -86,8 +86,16 @@ Already working on it.
 
 == Changelog ==
 
-= 1.1.0.1 =
-* fixed an issue revising items with variations
+= 1.1.1 =
+* support for JigoShop (beta) 
+* support for custom post meta overrides
+  (ebay_title, ebay_title_prefix, ebay_title_suffix, ebay_subtitle, ebay_image_url)
+* more listing shortcodes for product category and custom product meta
+* most listing shortcodes work in title prefix and suffix as well
+* option to remove links from product description
+* option to hide warning about duplicate listings
+* fixed issues revising items
+* fixed issue with PHP 5.4
 
 = 1.1.0 =
 * tested with WordPress 3.5

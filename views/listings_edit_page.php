@@ -206,6 +206,16 @@
 							</select>
 							<br class="clear" />
 
+							<label for="wpl-text-auction_type" class="text_label"><?php echo __('Type','wplister'); ?>: *</label>
+							<select id="wpl-text-auction_type" name="wpl_e2e_auction_type" title="Type" class=" required-entry select">
+								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+								<option value="Chinese" <?php if ( $wpl_item['auction_type'] == 'Chinese' ): ?>selected="selected"<?php endif; ?>><?php echo __('Auction','wplister'); ?></option>
+								<option value="FixedPriceItem" <?php if ( $wpl_item['auction_type'] == 'FixedPriceItem' ): ?>selected="selected"<?php endif; ?>><?php echo __('Fixed Price','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Note: eBay does not allow changing the listing type for already published items.','wplister'); ?>
+							</p>
+
 							<label for="wpl-text-post_id" class="text_label"><?php echo __('Product ID','wplister'); ?>:</label>
 							<input type="text" name="wpl_e2e_post_id" size="30" value="<?php echo $wpl_item['post_id']; ?>" class="text_input" />
 							<br class="clear" />

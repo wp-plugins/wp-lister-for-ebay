@@ -135,6 +135,8 @@ class ListingsTable extends WP_List_Table {
         // make title link to products edit page
         if ( ProductWrapper::plugin == 'woo' ) {
             $listing_title = '<a class="product_title_link" href="post.php?post='.$item['post_id'].'&action=edit">'.$listing_title.'</a>';
+        } elseif ( ProductWrapper::plugin == 'jigo' ) {
+            $listing_title = '<a class="product_title_link" href="post.php?post='.$item['post_id'].'&action=edit">'.$listing_title.'</a>';
         } elseif ( ProductWrapper::plugin == 'shopp' ) {
             $listing_title = '<a class="product_title_link" href="admin.php?page=shopp-products&id='.$item['post_id'].'">'.$listing_title.'</a>';
         }

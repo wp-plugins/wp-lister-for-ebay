@@ -378,11 +378,15 @@ class EbatNs_Client
 			{
 				if ( is_object( $callback['object'] ) )
 				{
-					return call_user_method( $callback['method'], $callback['object'], $typeName, & $value, $mapName, & $this );
+					// fix fatal error on PHP 5.4 - Call-time pass-by-reference has been removed
+					// return call_user_method( $callback['method'], $callback['object'], $typeName, & $value, $mapName, & $this );
+					return call_user_method( $callback['method'], $callback['object'], $typeName, $value, $mapName, $this );
 				} 
 				else
 				{
-					return call_user_func( $callback['method'], $typeName, & $value, $mapName, & $this );
+					// fix fatal error on PHP 5.4 - Call-time pass-by-reference has been removed
+					// return call_user_func( $callback['method'], $typeName, & $value, $mapName, & $this );
+					return call_user_func( $callback['method'], $typeName, $value, $mapName, $this );
 				} 
 			} 
 		} 

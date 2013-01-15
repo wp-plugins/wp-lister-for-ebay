@@ -315,26 +315,27 @@ class EbayController {
 
     // update transactions
     public function loadTransactions( $days = null ){ 
-        $sm = new TransactionsModel();
-        $sm->updateTransactions( $this->session, $days );
+        $tm = new TransactionsModel();
+        $tm->updateTransactions( $this->session, $days );
+        return $tm;
     }
 
     // update listings
     public function updateListings(){ 
-        $sm = new ListingsModel();
-        $sm->updateEndedListings( $this->session );
+        $lm = new ListingsModel();
+        $lm->updateEndedListings( $this->session );
     }
 
     // get category conditions
     public function getCategoryConditions( $category_id ){ 
-        $sm = new EbayCategoriesModel();
-        return $sm->getCategoryConditions( $this->session, $category_id );
+        $cm = new EbayCategoriesModel();
+        return $cm->getCategoryConditions( $this->session, $category_id );
     }
 
     // get category specifics
     public function getCategorySpecifics( $category_id ){ 
-        $sm = new EbayCategoriesModel();
-        return $sm->getCategorySpecifics( $this->session, $category_id );
+        $cm = new EbayCategoriesModel();
+        return $cm->getCategorySpecifics( $this->session, $category_id );
     }
 
 

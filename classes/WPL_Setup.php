@@ -266,9 +266,9 @@ class WPL_Setup extends WPL_Core {
 		}
 		
 
-		// upgrade to version 11  (1.0.9.8)
-		if ( 11 > $db_version ) {
-			$new_db_version = 11;
+		// upgrade to version 12  (1.0.9.8)
+		if ( 12 > $db_version ) {
+			$new_db_version = 12;
 
 			// fetch all transactions
 			$sql = "SELECT id FROM `{$wpdb->prefix}ebay_transactions` ";
@@ -306,6 +306,36 @@ class WPL_Setup extends WPL_Core {
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
 		}
+
+
+		// upgrade to version 13  (1.1.0.2)
+		if ( 13 > $db_version ) {
+			$new_db_version = 13;
+
+			// add column to ebay_transactions table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
+			        ADD COLUMN `OrderLineItemID` varchar(64) DEFAULT NULL AFTER `transaction_id`
+			";
+			$wpdb->query($sql);	#echo mysql_error();
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
+		}
+
+		// upgrade to version 14  (1.1.0.4)
+		if ( 14 > $db_version ) {
+			$new_db_version = 14;
+
+			// remove invalid transactions - update on next cron schedule
+			$sql = "DELETE FROM `{$wpdb->prefix}ebay_transactions`
+			        WHERE transaction_id = 0
+			";
+			$wpdb->query($sql);	#echo mysql_error();
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
+		}
+
 
 		
 		if ( $msg )	$this->showMessage($msg);		

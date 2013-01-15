@@ -8,6 +8,10 @@
 	    width: 45%;
 	}
 
+	#side-sortables .postbox .inside p.desc {
+		margin-left: 2%;
+	}
+
 	/* backwards compatibility to WP 3.3 */
 	#poststuff #post-body.columns-2 {
 	    margin-right: 300px;
@@ -87,7 +91,7 @@
 
 
 					<div class="postbox" id="LocationSettingsBox">
-						<h3><span><?php echo __('Location settings','wplister'); ?></span></h3>
+						<h3><span><?php echo __('Location and Taxes','wplister'); ?></span></h3>
 						<div class="inside">
 
 							<label for="wpl-text-location" class="text_label"><?php echo __('Location','wplister'); ?>: *</label>
@@ -166,6 +170,56 @@
 					</div>
 
 
+					<div class="postbox" id="TitleSettingsBox">
+						<h3><span><?php echo __('Title and Subtitle','wplister'); ?></span></h3>
+						<div class="inside">
+
+							<label for="wpl-text-title_prefix" class="text_label"><?php echo __('Title prefix','wplister'); ?>:</label>
+							<input type="text" name="wpl_e2e_title_prefix" id="wpl-text-title_prefix" value="<?php echo $item_details['title_prefix']; ?>" class="text_input" />
+							<br class="clear" />
+
+							<label for="wpl-text-title_suffix" class="text_label"><?php echo __('Title suffix','wplister'); ?>:</label>
+							<input type="text" name="wpl_e2e_title_suffix" id="wpl-text-title_suffix" value="<?php echo $item_details['title_suffix']; ?>" class="text_input" />
+							<br class="clear" />
+
+							<p class="desc" style="display: block;">
+								<?php echo __('Use these to automatically prepend and append keywords to your listing title.','wplister'); ?>
+								<a href="#" onclick="jQuery('#title_help_msg').slideToggle('fast');return false;">
+									<?php echo __('more info','wplister'); ?>
+								</a>
+							</p>
+							<p id="title_help_msg" class="desc_toggle" style="display: none;">
+								<?php echo __('You can use a subset of the available listing shortcodes in title prefix and suffix.','wplister'); ?>
+								<br><br>
+								<?php echo __('Example','wplister'); ?>: 
+								If you have a product attribute "Size", use the following shortcode to include the products size in the listing title:
+								<br><br>
+								<code>[[attribute_Size]]</code><br>
+								<hr>
+							</p>
+
+
+							<label for="wpl-text-subtitle_enabled" class="text_label"><?php echo __('List subtitle','wplister'); ?>:</label>
+							<select id="wpl-text-subtitle_enabled" name="wpl_e2e_subtitle_enabled" title="Use additional product description as subtitle" class=" required-entry select">
+								<option value="1" <?php if ( @$item_details['subtitle_enabled'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( @$item_details['subtitle_enabled'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
+							<label for="wpl-text-custom_subtitle" class="text_label"><?php echo __('Custom subtitle','wplister'); ?>:</label>
+							<input type="text" name="wpl_e2e_custom_subtitle" id="wpl-text-custom_subtitle" value="<?php echo @$item_details['custom_subtitle']; ?>" maxlength="55" class="text_input" />
+							<br class="clear" />
+
+							<p class="desc" style="display: block;">
+								<?php echo __('Leave this empty to use the short description as subtitle.','wplister'); ?>
+								<?php echo __('Will be truncated after 55 characters.','wplister'); ?>
+							</p>
+
+
+						</div>
+					</div>
+
+
 					<div class="postbox" id="VariationsSettingsBox">
 						<h3><span><?php echo __('Variations','wplister'); ?></span></h3>
 						<div class="inside">
@@ -226,12 +280,6 @@
 						<h3><span><?php echo __('Other options','wplister'); ?></span></h3>
 						<div class="inside">
 
-							<label for="wpl-text-subtitle_enabled" class="text_label"><?php echo __('List subtitle','wplister'); ?>:</label>
-							<select id="wpl-text-subtitle_enabled" name="wpl_e2e_subtitle_enabled" title="Use additional product description as subtitle" class=" required-entry select">
-								<option value="1" <?php if ( @$item_details['subtitle_enabled'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
-								<option value="0" <?php if ( @$item_details['subtitle_enabled'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
-							</select>
-							<br class="clear" />
 
 							<label for="wpl-text-private_listing" class="text_label"><?php echo __('Private listing','wplister'); ?>:</label>
 							<select id="wpl-text-private_listing" name="wpl_e2e_private_listing" title="List as private listing" class=" required-entry select">
@@ -251,7 +299,6 @@
 								<option value="RetroStyle" <?php if ( $item_details['counter_style'] == 'RetroStyle' ): ?>selected="selected"<?php endif; ?>>RetroStyle</option>
 							</select>
 							<br class="clear" />
-
 
 						</div>
 					</div>

@@ -211,6 +211,14 @@
 								adds a html table listing all product variations<br>
 							</p>
 							<p>
+								<code>[[product_category]]</code><br>
+								main product category name<br>
+							</p>
+							<p>
+								<code>[[meta_<em>custom-meta-field-name</em>]]</code><br>
+								adds custom meta values<br>
+							</p>
+							<p>
 								For more information visit the 
 								<a href="http://www.wplab.com/plugins/wp-lister/faq/" target="_blank">FAQ</a>.
 							</p>

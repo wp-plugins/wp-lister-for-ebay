@@ -290,44 +290,7 @@ class ListingsPage extends WPL_Page {
 			}
 
 			// show warning if duplicate products found
-			$duplicateProducts = $listingsModel->getAllDuplicateProducts();
-			if ( ! empty($duplicateProducts) ) {
-
-		        // get current page with paging as url param
-		        $page = $_REQUEST['page'];
-		        if ( isset( $_REQUEST['paged'] )) $page .= '&paged='.$_REQUEST['paged'];
-
-				$msg  = '<p><b>'.__('WP-Lister has found multiple listings for some of your products.','wplister').'</b>';
-				$msg .= ' <a href="#" onclick="jQuery(\'#wpl_dupe_details\').toggle()">'.__('Show details','wplister').'</a></p>';
-				// $msg .= '<br>';
-				$msg .= '<div id="wpl_dupe_details" style="display:none"><p>';
-				$msg .= __('Creating multiple listings for one product is not recommended as it can cause issues syncing inventory and other unexpected behaviour.','wplister');
-				$msg .= '<br><br>';
-				foreach ($duplicateProducts as $dupe) {
-
-
-					$msg .= '<b>'.__('Listings for product','wplister').' #'.$dupe->post_id.':</b>';
-					$msg .= '<br>';
-					
-					foreach ($dupe->listings as $listing) {
-						$msg .= '&nbsp;&bull;&nbsp;';					
-						$msg .= ''.$listing->auction_title.'';					
-						if ($listing->ebay_id) $msg .= ' (#'.$listing->ebay_id.')';
-						$msg .= ' &ndash; <i>'.$listing->status.'</i>';					
-						$msg .= '<br>';
-						if ( in_array( $listing->status, array( 'prepared', 'verified', 'ended' ) ) ) {
-							$delete_link = sprintf('<a class="delete" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete',$listing->id,__('Click to remove this listing','wplister'));
-							$msg .= '&nbsp;&nbsp;&nbsp;'.$delete_link;
-							$msg .= '<br>';
-						}
-					}
-
-					$msg .= '<br>';
-				}
-				$msg .= __('If you need to list single products multiple times for some reason, please contact support@wplab.com and we will find a solution.','wplister');
-				$msg .= '</p></div>';
-				$this->showMessage( $msg );				
-			}
+			$this->checkForDuplicates();
 
 	        // get listing status summary
 	        $summary = $listingsModel->getStatusSummary();
@@ -378,6 +341,7 @@ class ListingsPage extends WPL_Page {
 		$item['price'] 						= $this->getValueFromPost( 'price' );
 		$item['quantity'] 					= $this->getValueFromPost( 'quantity' );
 		$item['listing_duration'] 			= $this->getValueFromPost( 'listing_duration' );
+		$item['auction_type'] 				= $this->getValueFromPost( 'auction_type' );
 		$item['template']					= $this->getValueFromPost( 'template' );
 
 
@@ -416,6 +380,55 @@ class ListingsPage extends WPL_Page {
 		}
 
 		
+	}
+
+	public function checkForDuplicates() {
+
+		// skip if dupe warning is disabled
+		if ( self::getOption( 'hide_dupe_msg' ) ) return;
+	
+		// show warning if duplicate products found
+		$listingsModel = new ListingsModel();
+		$duplicateProducts = $listingsModel->getAllDuplicateProducts();
+		if ( ! empty($duplicateProducts) ) {
+
+	        // get current page with paging as url param
+	        $page = $_REQUEST['page'];
+	        if ( isset( $_REQUEST['paged'] )) $page .= '&paged='.$_REQUEST['paged'];
+
+			$msg  = '<p><b>'.__('WP-Lister has found multiple listings for some of your products.','wplister').'</b>';
+			$msg .= ' <a href="#" onclick="jQuery(\'#wpl_dupe_details\').toggle()">'.__('Show details','wplister').'</a></p>';
+			// $msg .= '<br>';
+			$msg .= '<div id="wpl_dupe_details" style="display:none"><p>';
+			$msg .= __('Creating multiple listings for one product is not recommended as it can cause issues syncing inventory and other unexpected behaviour.','wplister');
+			$msg .= '<br><br>';
+			foreach ($duplicateProducts as $dupe) {
+
+
+				$msg .= '<b>'.__('Listings for product','wplister').' #'.$dupe->post_id.':</b>';
+				$msg .= '<br>';
+				
+				foreach ($dupe->listings as $listing) {
+					$msg .= '&nbsp;&bull;&nbsp;';					
+					$msg .= ''.$listing->auction_title.'';					
+					if ($listing->ebay_id) $msg .= ' (#'.$listing->ebay_id.')';
+					$msg .= ' &ndash; <i>'.$listing->status.'</i>';					
+					$msg .= '<br>';
+					if ( in_array( $listing->status, array( 'prepared', 'verified', 'ended' ) ) ) {
+						$delete_link = sprintf('<a class="delete" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete',$listing->id,__('Click to remove this listing','wplister'));
+						$msg .= '&nbsp;&nbsp;&nbsp;'.$delete_link;
+						$msg .= '<br>';
+					}
+				}
+
+				$msg .= '<br>';
+			}
+			$msg .= __('If you are not planning to use the inventory sync, you can hide this warning in settings.','wplister');
+			$msg .= '<br>';
+			$msg .= __('If you need to list single products multiple times for some reason, please contact support@wplab.com and we will find a solution.','wplister');
+			$msg .= '</p></div>';
+			$this->showMessage( $msg );				
+		}
 	}
 
 	

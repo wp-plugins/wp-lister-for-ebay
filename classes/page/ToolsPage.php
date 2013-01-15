@@ -96,10 +96,17 @@ class ToolsPage extends WPL_Page {
 				// update_ebay_transactions
 				if ( $_POST['action'] == 'update_ebay_transactions_30') {				
 					$this->initEC();
-					$this->EC->loadTransactions( 30 );
+					$tm = $this->EC->loadTransactions( 30 );
 					$this->EC->updateListings();
 					$this->EC->closeEbay();
-					$this->showMessage( __('Transactions updated.','wplister') );
+
+					// show transaction report
+					$msg  = $tm->count_total .' '. __('Transactions were loaded from eBay.','wplister') . '<br>';
+					$msg .= __('Timespan','wplister') .': '. $tm->getHtmlTimespan();
+					$msg .= '&nbsp;&nbsp;';
+					$msg .= '<a href="#" onclick="jQuery(\'#transaction_report\').toggle();return false;">'.__('show details','wplister').'</a>';
+					$msg .= $tm->getHtmlReport();
+					$this->showMessage( $msg );
 				}
 	
 	

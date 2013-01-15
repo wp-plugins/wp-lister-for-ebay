@@ -363,7 +363,7 @@ class ListingsModel extends WPL_Model {
 
 		// build item
 		$ibm = new ItemBuilderModel();
-		$item = $ibm->buildItem( $id, $session );
+		$item = $ibm->buildItem( $id, $session, true );
 		if ( ! $ibm->checkItem($item) ) return $ibm->result;
 
 		// if quantity is zero, end item instead
@@ -999,14 +999,27 @@ class ListingsModel extends WPL_Model {
 			$title_prefix = trim( $profile['details']['title_prefix'] ) . ' ';
 			$title_suffix = ' ' . trim( $profile['details']['title_suffix'] );
 
+			// custom post meta fields override profile values
+			if ( get_post_meta( $post_id, 'ebay_title_prefix', true ) ) {
+				$title_prefix = trim( get_post_meta( $post_id, 'ebay_title_prefix', true ) ) . ' ';
+			}
+			if ( get_post_meta( $post_id, 'ebay_title_suffix', true ) ) {
+				$title_prefix = trim( get_post_meta( $post_id, 'ebay_title_suffix', true ) ) . ' ';
+			}
+
 			$data['auction_title'] = trim( $title_prefix . $post_title . $title_suffix );
+
+			// custom post meta title override
+			if ( get_post_meta( $post_id, 'ebay_title', true ) ) {
+				$data['auction_title']  = trim( get_post_meta( $post_id, 'ebay_title', true ) );
+			}
 
 		}
 
 		// process attribute shortcodes in title - like [[attribute_Brand]]
 		$templatesModel = new TemplatesModel();
-		$data['auction_title'] = $templatesModel->processAttributeShortcodes( $item['post_id'], $data['auction_title'] );
-		$this->logger->info('processAttributeShortcodes('.$item['post_id'].')');
+		$data['auction_title'] = $templatesModel->processAllTextShortcodes( $item['post_id'], $data['auction_title'] );
+		// $this->logger->info('processAttributeShortcodes('.$item['post_id'].')');
 		$this->logger->info('auction_title: '.$data['auction_title'].'');
 
 		// apply profile price

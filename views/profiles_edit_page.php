@@ -69,7 +69,11 @@
 								<option value="Chinese" <?php if ( $item_details['auction_type'] == 'Chinese' ): ?>selected="selected"<?php endif; ?>><?php echo __('Auction','wplister'); ?></option>
 								<option value="FixedPriceItem" <?php if ( $item_details['auction_type'] == 'FixedPriceItem' ): ?>selected="selected"<?php endif; ?>><?php echo __('Fixed Price','wplister'); ?></option>
 							</select>
-							<br class="clear" />
+							<?php if ($wpl_published_listings) : ?>
+							<p class="desc" style="display: block;">
+								<?php echo __('Note: eBay does not allow changing the listing type for already published items.','wplister'); ?>
+							</p>
+							<?php endif; ?>
 
 							<label for="wpl-text-start_price" class="text_label"><?php echo __('Price / Start price','wplister'); ?>:</label>
 							<input type="text" name="wpl_e2e_start_price" id="wpl-text-start_price" value="<?php echo $item_details['start_price']; ?>" class="text_input" />
@@ -164,29 +168,7 @@
 							<p class="desc" style="display: block;">
 								<?php echo __('The maximum number of business days a seller commits to for shipping an item to domestic buyers after receiving a cleared payment.','wplister'); ?>
 							</p>
-
-
-							<label for="wpl-text-title_prefix" class="text_label"><?php echo __('Title prefix','wplister'); ?>:</label>
-							<input type="text" name="wpl_e2e_title_prefix" id="wpl-text-title_prefix" value="<?php echo $item_details['title_prefix']; ?>" class="text_input" />
-							<br class="clear" />
-
-							<label for="wpl-text-title_suffix" class="text_label"><?php echo __('Title suffix','wplister'); ?>:</label>
-							<input type="text" name="wpl_e2e_title_suffix" id="wpl-text-title_suffix" value="<?php echo $item_details['title_suffix']; ?>" class="text_input" />
-							<br class="clear" />
-
-							<p class="desc" style="display: block;">
-								<?php echo __('Use these to automatically prepend and append keywords to your listing title.','wplister'); ?>
-							</p>
-
-							<label for="wpl-text-custom_subtitle" class="text_label"><?php echo __('Custom subtitle','wplister'); ?>:</label>
-							<input type="text" name="wpl_e2e_custom_subtitle" id="wpl-text-custom_subtitle" value="<?php echo @$item_details['custom_subtitle']; ?>" maxlength="55" class="text_input" />
-							<br class="clear" />
-
-							<p class="desc" style="display: block;">
-								<?php echo __('Leave this empty to use the short description as subtitle.','wplister'); ?>
-								<?php echo __('Will be truncated after 55 characters.','wplister'); ?>
-							</p>
-
+	
 						</div>
 					</div>
 

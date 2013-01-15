@@ -61,10 +61,17 @@ class TransactionsPage extends WPL_Page {
 		// handle update ALL from eBay action
 		if ( $this->requestAction() == 'update_transactions' ) {
 			$this->initEC();
-			$this->EC->loadTransactions();
+			$tm = $this->EC->loadTransactions();
 			$this->EC->updateListings();
 			$this->EC->closeEbay();
-			$this->showMessage( __('Transactions were updated from eBay.','wplister') );
+
+			// show transaction report
+			$msg  = $tm->count_total .' '. __('Transactions were loaded from eBay.','wplister') . '<br>';
+			$msg .= __('Timespan','wplister') .': '. $tm->getHtmlTimespan();
+			$msg .= '&nbsp;&nbsp;';
+			$msg .= '<a href="#" onclick="jQuery(\'#transaction_report\').toggle();return false;">'.__('show details','wplister').'</a>';
+			$msg .= $tm->getHtmlReport();
+			$this->showMessage( $msg );
 		}
 		// handle update from eBay action
 		if ( $this->requestAction() == 'update' ) {

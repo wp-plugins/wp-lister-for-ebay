@@ -43,6 +43,13 @@ class WPL_EbatNs_Logger{
 				$data['success'] = $this->success;
 			}
 		}
+		// extract ItemID from request
+		if ( $subject == 'Request' ) {
+			if ( preg_match("/<ItemID>(.*)<\/ItemID>/", $msg, $matches) ) {
+				$this->ebay_id = $matches[1];
+				$data['ebay_id'] = $this->ebay_id;
+			}
+		}
 		// extract ItemID from response
 		if ( $subject == 'Response' ) {
 			if ( preg_match("/<ItemID>(.*)<\/ItemID>/", $msg, $matches) ) {
@@ -50,7 +57,7 @@ class WPL_EbatNs_Logger{
 				$data['ebay_id'] = $this->ebay_id;
 			}
 		}
-		// extract ItemID from response
+		// extract call name from request url
 		if ( $subject == 'RequestUrl' ) {
 			if ( preg_match("/callname=(.*)&/U", $msg, $matches) ) {
 				$this->callname = $matches[1];

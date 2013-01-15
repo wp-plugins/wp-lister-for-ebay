@@ -114,6 +114,8 @@ class WPL_Autoloader {
 			$path = WPLISTER_PATH . '/classes/integration/ProductWrapper_woo.php'; 
 		} elseif ( self::is_plugin_active('wp-e-commerce/wp-shopping-cart.php') ) {
 			$path = WPLISTER_PATH . '/classes/integration/ProductWrapper_wpec.php';
+		} elseif ( self::is_plugin_active('jigoshop/jigoshop.php') ) {
+			$path = WPLISTER_PATH . '/classes/integration/ProductWrapper_jigo.php';
 		} elseif ( self::is_plugin_active('shopp/Shopp.php') ) {
 			$path = WPLISTER_PATH . '/classes/integration/ProductWrapper_shopp.php';
 		} elseif ( self::is_plugin_active('marketpress/marketpress.php') ) {

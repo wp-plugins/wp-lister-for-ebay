@@ -70,6 +70,11 @@ class ProductWrapper {
 		return array( $weight_major, $weight_minor );
 	}	
 	
+	// get name of main product category
+	static function getProductCategoryName( $post_id ) {
+		return '';
+	}	
+	
 	// get product dimensions array
 	static function getDimensions( $post_id ) {
 		$metadata = get_post_meta( $post_id, '_wpsc_product_metadata', true);

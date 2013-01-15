@@ -97,6 +97,11 @@ class ProductWrapper {
 		return array( $weight_major, $weight_minor );
 	}	
 
+	// get name of main product category
+	static function getProductCategoryName( $post_id ) {
+		return '';
+	}	
+	
 	// get product dimensions array
 	static function getDimensions( $post_id ) {
 		$Product = new Product($post_id);

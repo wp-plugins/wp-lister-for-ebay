@@ -1,11 +1,11 @@
 <?php
 /**
- * wrapper functions to access products on WooCommerce
+ * wrapper functions to access products on JigoShop
  */
 
 class ProductWrapper {
 	
-	const plugin = 'woo';
+	const plugin = 'jigo';
 	const post_type = 'product';
 	const taxonomy  = 'product_cat';
 	const menu_page_position = 57;
@@ -21,47 +21,49 @@ class ProductWrapper {
 	
 	// get product price
 	static function getPrice( $post_id ) {
-		$sale_price = get_post_meta( $post_id, '_sale_price', true);
+		$sale_price = get_post_meta( $post_id, 'sale_price', true);
 		if ( floatval($sale_price) > 0 ) return $sale_price;
-		return get_post_meta( $post_id, '_price', true);
+		$regular_price = get_post_meta( $post_id, 'regular_price', true);
+		if ( floatval($regular_price) > 0 ) return $regular_price;
+		return get_post_meta( $post_id, 'price', true);
 	}	
 	
 	// set product price
 	static function setPrice( $post_id, $price ) {
-		update_post_meta( $post_id, '_price', $price);
-		update_post_meta( $post_id, '_regular_price', $price);
+		update_post_meta( $post_id, 'price', $price);
+		update_post_meta( $post_id, 'regular_price', $price);
 	}	
 
 	// get product sku
 	static function getSKU( $post_id ) {
-		return get_post_meta( $post_id, '_sku', true);
+		return get_post_meta( $post_id, 'sku', true);
 	}	
 	
 	// set product sku
 	static function setSKU( $post_id, $sku ) {
-		return update_post_meta( $post_id, '_sku', $sku);
+		return update_post_meta( $post_id, 'sku', $sku);
 	}	
 
 	// get product stock (deprecated)
 	static function getStock( $post_id ) {
-		return get_post_meta( $post_id, '_stock', true);
+		return get_post_meta( $post_id, 'stock', true);
 	}	
 	
 	// set product stock (deprecated)
 	static function setStock( $post_id, $stock ) {
-		return update_post_meta( $post_id, '_stock', $stock);
+		return update_post_meta( $post_id, 'stock', $stock);
 	}	
 
 	
 	// get product weight
 	static function getWeight( $post_id, $include_weight_unit = false ) {
-		return get_post_meta( $post_id, '_weight', true);
+		return get_post_meta( $post_id, 'weight', true);
 	}	
 
 	// get product weight as major weight and minor
 	static function getEbayWeight( $post_id ) {
 		$weight_value = self::getWeight( $post_id );
-		$weigth_unit  = get_option( 'woocommerce_weight_unit' );
+		$weigth_unit  = Jigoshop_Base::get_options()->get_option('jigoshop_weight_unit');
 
 		// convert value to major and minor if unit is gram or ounces
 		if ( 'g' == $weigth_unit ) {
@@ -84,7 +86,6 @@ class ProductWrapper {
 	// get name of main product category
 	static function getProductCategoryName( $post_id ) {
 		$terms = get_the_terms($post_id, "product_cat");
-		if ( ! $terms ) return '';
 		$category_name = $terms[0]->name;
 		return $category_name;
 	}	
@@ -92,10 +93,10 @@ class ProductWrapper {
 	// get product dimensions array
 	static function getDimensions( $post_id ) {
 		$dimensions = array();
-		$unit = get_option( 'woocommerce_dimension_unit' );
-		$dimensions['length'] = get_post_meta( $post_id, '_length', true);
-		$dimensions['height'] = get_post_meta( $post_id, '_height', true);
-		$dimensions['width']  = get_post_meta( $post_id, '_width',  true);
+		$unit = Jigoshop_Base::get_options()->get_option('jigoshop_dimension_unit');
+		$dimensions['length'] = get_post_meta( $post_id, 'length', true);
+		$dimensions['height'] = get_post_meta( $post_id, 'height', true);
+		$dimensions['width']  = get_post_meta( $post_id, 'width',  true);
 		$dimensions['length_unit'] = $unit;
 		$dimensions['height_unit'] = $unit;
 		$dimensions['width_unit']  = $unit;
@@ -115,10 +116,9 @@ class ProductWrapper {
 	
 	// get all product attributes
 	static function getAttributes( $post_id ) {
-		global $woocommerce;
 		$attributes = array();
 
-		$product = new WC_Product( $post_id );
+		$product = new jigoshop_product( $post_id );
 		$attribute_taxnomies = $product->get_attributes();
 		
 		global $wpl_logger;
@@ -135,7 +135,7 @@ class ProductWrapper {
 				continue;
 			}
 			if ( count( $terms ) > 0 ) {
-				$attribute_name = $woocommerce->attribute_label( $attribute['name'] );
+				$attribute_name = jigoshop_product::attribute_label( $attribute['name'] );
 				$attributes[ $attribute_name ] = $terms[0]->name;
 			}
 		}
@@ -151,25 +151,24 @@ class ProductWrapper {
 	// check if product has variations
 	static function hasVariations( $post_id ) {
 		
-		$product = new WC_Product( $post_id );
-		$variations = $product->get_available_variations();
-
-		if ( ! is_array($variations) ) return false;
-		if ( 0 == count($variations) ) return false;
-		return true;
+		$product = new jigoshop_product( $post_id );
+		return $product->is_type('variable');
 
 	}	
 
 	// get all product variations
 	static function getVariations( $post_id ) {
-		global $woocommerce;
 
-		$product = new WC_Product( $post_id );
-		$available_variations = $product->get_available_variations();
-		$attributes = $product->get_variation_attributes();
+		$product = new jigoshop_product( $post_id );
+		$children = $product->get_children();
+
+		// echo "<pre>";print_r($product);echo"</pre>";die();
+
+		// $available_variations = $product->get_available_variations();
+		$attributes = $product->get_attributes();
 
 		// echo "<pre>";print_r($available_variations);die();echo"</pre>";
-		// echo "<pre>";print_r($attributes);die();echo"</pre>";
+		// echo "<pre>";print_r($attributes);echo"</pre>";
 		// (
 		//     [pa_size] => Array
 		//         (
@@ -187,13 +186,15 @@ class ProductWrapper {
 
 		// ) 
 
-		// build array of attribute labels
+		// build array of attribute labels 
 		$attribute_labels = array();
-		foreach ( $attributes as $name => $options ) {
+		foreach ( $attributes as $name => $item ) {
 
-			$label = $woocommerce->attribute_label($name); 
+			// $label = jigoshop_product::attribute_label($name); 
+			$label = $item['name']; 
+			// echo "label for $name: $label <br>";
 			if ($label == '') $label = $name;
-			$id   = "attribute_".sanitize_title($name);
+			$id   = "tax_".sanitize_title($name);
 			$attribute_labels[ $id ] = $label;
 
 		} // foreach $attributes
@@ -205,28 +206,32 @@ class ProductWrapper {
 		// )		
 
 		// loop variations
-		foreach ($available_variations as $var) {
+		foreach ($children as $var_id) {
 			
-			// find child post_id for this variation
-			$var_id = $var['variation_id'];
+			// find child post_id for this variation (woo)
+			// $var_id = $var['variation_id'];
+			
+			// get variation (jigo)
+			$var = $product->get_child( $var_id );
+			// echo "<pre>";print_r($var);echo"</pre>";
 
 			// build variation array for wp-lister
 			$newvar = array();
 			$newvar['post_id'] = $var_id;
 			// $newvar['term_id'] = $var->term_id;
 			
-			$attributes = $var['attributes'];
+			$attributes = $var->get_variation_attributes();
 			$newvar['variation_attributes'] = array();
 			foreach ($attributes as $key => $value) {	// this loop will only run once for one dimensional variations
 				// $newvar['name'] = $value; #deprecated
 				// v2
-				$taxonomy = str_replace('attribute_', '', $key); // attribute_pa_color -> pa_color
+				$taxonomy = str_replace('tax_', '', $key); // tax_color -> color
 				$term = get_term_by('slug', $value, $taxonomy );
 				if ( $term ) {
-					// handle proper attribute taxonomies
+					// handle proper attribute taxonomies (woo only)
 					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $term->name;
 				} else {
-					// handle fake custom product attributes
+					// handle fake custom product attributes (jigo for now)
 					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $value;
 					// echo "no term found for $value<br>";
 				}
@@ -254,6 +259,7 @@ class ProductWrapper {
 			
 		}
 
+		// echo "<hr><pre>";print_r($variations);echo"</pre>";
 		return $variations;
 
 		// echo "<pre>";print_r($variations);die();echo"</pre>";
@@ -300,17 +306,17 @@ class ProductWrapper {
 
 	// get a list of all available attribute names
 	static function getAttributeTaxonomies() {
-		global $woocommerce;
 
-		// $attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
-		$attribute_taxonomies = $woocommerce->get_attribute_taxonomy_names();
+		$attribute_taxonomies = jigoshop_product::getAttributeTaxonomies();
 		// print_r($attribute_taxonomies);
 		
 		$attributes = array();
 		foreach ($attribute_taxonomies as $tax) {
 			$attrib = new stdClass();
-			$attrib->name = $woocommerce->attribute_label( $tax );
-			$attrib->label = $woocommerce->attribute_label( $tax );
+			// $attrib->name = jigoshop_product::attribute_label( $tax );
+			// $attrib->label = jigoshop_product::attribute_label( $tax );
+			$attrib->name = $tax->attribute_name;
+			$attrib->label = $tax->attribute_label;
 			$attributes[] = $attrib;
 		}
 		// print_r($attributes);die();
@@ -363,9 +369,9 @@ class ProductWrapper {
 /**
  * Columns for Products page
  **/
-add_filter('manage_edit-product_columns', 'wpl_woocommerce_edit_product_columns', 11 );
+add_filter('manage_edit-product_columns', 'wpl_jigoshop_edit_product_columns', 11 );
 
-function wpl_woocommerce_edit_product_columns($columns){
+function wpl_jigoshop_edit_product_columns($columns){
 	
 	$columns['listed'] = '<img src="'.WPLISTER_URL.'/img/hammer-dark-16x16.png" title="'.__('Listing status', 'wplister').'" />';		
 	return $columns;
@@ -375,11 +381,11 @@ function wpl_woocommerce_edit_product_columns($columns){
 /**
  * Custom Columns for Products page
  **/
-add_action('manage_product_posts_custom_column', 'wplister_woocommerce_custom_product_columns', 3 );
+add_action('manage_product_posts_custom_column', 'wplister_jigoshop_custom_product_columns', 3 );
 
-function wplister_woocommerce_custom_product_columns( $column ) {
-	global $post, $woocommerce;
-	// $product = new WC_Product($post->ID);
+function wplister_jigoshop_custom_product_columns( $column ) {
+	global $post;
+	// $product = new jigoshop_product($post->ID);
 
 	switch ($column) {
 		case "listed" :
@@ -419,26 +425,21 @@ function wplister_woocommerce_custom_product_columns( $column ) {
 
 
 // hook into save_post to mark listing as changed when a product is updated
-function wplister_on_woocommerce_product_quick_edit_save( $post_id, $post ) {
+function wplister_on_jigoshop_product_quick_edit_save( $post_id, $post ) {
 
 	if ( !$_POST ) return $post_id;
 	if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
-	if( is_int( wp_is_post_autosave( $post_id ) ) ) return;
+	if ( is_int( wp_is_post_autosave( $post_id ) ) ) return;
 	if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
-	// if ( !isset($_POST['woocommerce_quick_edit_nonce']) || (isset($_POST['woocommerce_quick_edit_nonce']) && !wp_verify_nonce( $_POST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ))) return $post_id;
+	// if ( !isset($_POST['jigoshop_quick_edit_nonce']) || (isset($_POST['jigoshop_quick_edit_nonce']) && !wp_verify_nonce( $_POST['jigoshop_quick_edit_nonce'], 'jigoshop_quick_edit_nonce' ))) return $post_id;
 	if ( !current_user_can( 'edit_post', $post_id )) return $post_id;
 	if ( $post->post_type != 'product' ) return $post_id;
-
-	// global $woocommerce, $wpdb;
-	// $product = new WC_Product( $post_id );
 
 	$lm = new ListingsModel();
 	$lm->markItemAsModified( $post_id );
 
-	// Clear transient
-	// $woocommerce->clear_product_transients( $post_id );
 }
 
-add_action( 'save_post', 'wplister_on_woocommerce_product_quick_edit_save', 10, 2 );
+add_action( 'save_post', 'wplister_on_jigoshop_product_quick_edit_save', 10, 2 );
 
 

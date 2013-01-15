@@ -106,7 +106,6 @@
 			<div id="postbox-container-2" class="postbox-container">
 				<div class="meta-box-sortables ui-sortable">
 					
-				<?php #if ( $active_tab == 'settings' ): ?>
 				<?php if ( $wpl_text_ebay_token == '' ) : ?>
 				
 					<div class="postbox" id="AuthSettingsBox">
@@ -220,17 +219,39 @@
 								<?php echo __('Enable this if you want to use WordPress shortcodes in your product description or your listing template.','wplister'); ?><br>
 							</p>
 
+							<label for="wpl-remove_links" class="text_label"><?php echo __('Link handling','wplister'); ?>:</label>
+							<select id="wpl-remove_links" name="wpl_e2e_remove_links" title="Uninstall" class=" required-entry select">
+								<option value="default"   <?php if ( $wpl_remove_links == 'default'   ): ?>selected="selected"<?php endif; ?>><?php echo __('remove all links from description','wplister'); ?></option>
+								<option value="allow_all" <?php if ( $wpl_remove_links == 'allow_all' ): ?>selected="selected"<?php endif; ?>><?php echo __('allow all links','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('WP-Lister does remove links from product descrptions by default to avoid violating the eBay Links policy.','wplister'); ?>
+								<?php echo __('Specifically you are not allowed to advertise products that you list on eBay by linking to their product pages on your site.','wplister'); ?>
+								Read more about eBay's Link policy <a href="http://pages.ebay.com/help/policies/listing-links.html" target="_blank">here</a>
+							</p>
+
 						</div>
 					</div>
 
-<!-- 
-					<div class="submit" style="padding-top: 0; float: right;">
-						<input type="submit" value="<?php echo __('Save Settings','wplister') ?>" name="submit" class="button-primary">
+					<div class="postbox" id="OtherSettingsBox">
+						<h3 class="hndle"><span><?php echo __('Misc options','wplister') ?></span></h3>
+						<div class="inside">
+
+							<label for="wpl-hide_dupe_msg" class="text_label"><?php echo __('Hide duplicates warning','wplister'); ?>:</label>
+							<select id="wpl-hide_dupe_msg" name="wpl_e2e_hide_dupe_msg" title="Uninstall" class=" required-entry select">
+								<option value=""  <?php if ( $wpl_hide_dupe_msg == ''  ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+								<option value="1" <?php if ( $wpl_hide_dupe_msg == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes, I know what I am doing.','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('If you do not plan to use the inventory sync feature, you can safely list one product multiple times.','wplister'); ?>
+							</p>
+
+						</div>
 					</div>
- -->
+
+
 				</form>
 				<?php endif; // $wpl_text_ebay_token == ''  ?>
-				<?php #endif; // $active_tab == 'settings' ) ?>
 
 				<?php if ( ( is_multisite() ) && ( is_main_site() ) ) : ?>
 				<p>

@@ -184,8 +184,10 @@ class TemplatesModel extends WPL_Model {
         }
 		
 		// remove ALL links from post content by default
-		// TODO: make this an option in settings
-		$item['post_content'] = preg_replace('#<a.*?>([^<]*)</a>#i', '$1', $item['post_content'] );
+ 		if ( 'default' == get_option( 'wplister_remove_links', 'default' ) ) {
+			$item['post_content'] = preg_replace('#<a.*?>([^<]*)</a>#i', '$1', $item['post_content'] );
+ 		}
+
 
 		// replace shortcodes
 		$tpl_html = str_replace( '[[product_title]]', $ibm->prepareTitleAsHTML( $item['auction_title'] ), $tpl_html );
@@ -203,19 +205,9 @@ class TemplatesModel extends WPL_Model {
 		$tpl_html = str_replace( '[[product_price]]', number_format_i18n( floatval($item['price']), 2 ), $tpl_html );
 		$tpl_html = str_replace( '[[product_price_raw]]', $item['price'], $tpl_html );
 
-		$tpl_html = str_replace( '[[product_weight]]', ProductWrapper::getWeight( $item['post_id'], true ), $tpl_html );
 
-		// dimensions
-		$dimensions = ProductWrapper::getDimensions( $item['post_id'] );
-		$width  = @$dimensions['width']  . ' ' . @$dimensions['width_unit'];
-		$height = @$dimensions['height'] . ' ' . @$dimensions['height_unit'];
-		$length = @$dimensions['length'] . ' ' . @$dimensions['length_unit'];
-		$tpl_html = str_replace( '[[product_width]]' , $width,  $tpl_html );
-		$tpl_html = str_replace( '[[product_height]]', $height, $tpl_html );
-		$tpl_html = str_replace( '[[product_length]]', $length,  $tpl_html );		
-
-		// attributes
-		$tpl_html = $this->processAttributeShortcodes( $item['post_id'], $tpl_html);
+		// process simple text shortcodes (used for title as well)
+		$tpl_html = $this->processAllTextShortcodes( $item['post_id'], $tpl_html);
 
 
 		// handle images...
@@ -273,6 +265,33 @@ class TemplatesModel extends WPL_Model {
 	}
 
 
+	public function processAllTextShortcodes( $post_id, $tpl_html ) {
+
+		// product_category
+		$tpl_html = str_replace( '[[product_category]]', ProductWrapper::getProductCategoryName( $post_id ), $tpl_html );
+
+		// weight
+		$tpl_html = str_replace( '[[product_weight]]', ProductWrapper::getWeight( $post_id, true ), $tpl_html );
+
+		// dimensions
+		$dimensions = ProductWrapper::getDimensions( $post_id );
+		$width  = @$dimensions['width']  . ' ' . @$dimensions['width_unit'];
+		$height = @$dimensions['height'] . ' ' . @$dimensions['height_unit'];
+		$length = @$dimensions['length'] . ' ' . @$dimensions['length_unit'];
+		$tpl_html = str_replace( '[[product_width]]' , $width,  $tpl_html );
+		$tpl_html = str_replace( '[[product_height]]', $height, $tpl_html );
+		$tpl_html = str_replace( '[[product_length]]', $length,  $tpl_html );		
+
+		// attributes
+		$tpl_html = $this->processAttributeShortcodes( $post_id, $tpl_html);
+
+		// custom meta
+		$tpl_html = $this->processCustomMetaShortcodes( $post_id, $tpl_html);
+
+		return $tpl_html;
+	}
+
+
 	public function processAttributeShortcodes( $post_id, $tpl_html ) {
 
 		// attribute shortcodes i.e. [[attribute_Brand]]
@@ -291,6 +310,18 @@ class TemplatesModel extends WPL_Model {
 
 			}
 
+		}
+		return $tpl_html;
+	}
+
+	public function processCustomMetaShortcodes( $post_id, $tpl_html ) {
+
+		// custom meta shortcodes i.e. [[meta_Name]]
+		if ( preg_match_all("/\\[\\[meta_(.*)\\]\\]/uUsm", $tpl_html, $matches ) ) {
+			foreach ( $matches[1] as $meta_name ) {
+				$meta_value = get_post_meta( $post_id, $meta_name, true );
+				$tpl_html = str_replace( '[[meta_'.$meta_name.']]', $meta_value,  $tpl_html );		
+			}
 		}
 		return $tpl_html;
 	}

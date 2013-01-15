@@ -117,6 +117,19 @@ class WPL_Model {
 				// $longMessage = $error->getLongMessage();
 			}
 
+			// #240 - generic error on listing item
+			if ( $error->getErrorCode() == 240 ) { 
+				$longMessage .= '<br><br>'. '<b>Note:</b> The message above is a generic error message from eBay which is not to be taken literally.';
+				$longMessage .= '<br>'. 'Below you find an explaination as to what triggered the above error:';
+			}
+			
+			// #302 - Invalid auction listing type
+			if ( $error->getErrorCode() == 302 ) { 
+				$longMessage .= '<br><br>'. '<b>Note:</b> eBay does not allow changing the listing type of an active listing.';
+				$longMessage .= '<br>'. 'To change a listing type from auction to fixed price or vice versa, you need to end and relist the item.';
+			}
+			
+
 			// some errors like #240 may return an extra ErrorParameters array
 			// deactivated for now since a copy of this will be found in $res->getMessage()
 			// if ( isset( $error->ErrorParameters ) ) { 

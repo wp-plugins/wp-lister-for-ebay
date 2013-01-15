@@ -19,6 +19,15 @@ class TransactionsModel extends WPL_Model {
 	var $_session;
 	var $_cs;
 
+	var $count_total    = 0;
+	var $count_skipped  = 0;
+	var $count_updated  = 0;
+	var $count_inserted = 0;
+	var $report         = array();
+	var $ModTimeTo      = false;
+	var $ModTimeFrom    = false;
+	var $NumberOfDays   = false;
+
 	function TransactionsModel() {
 		global $wpl_logger;
 		$this->logger = &$wpl_logger;
@@ -29,7 +38,7 @@ class TransactionsModel extends WPL_Model {
 
 
 	function updateTransactions( $session, $days = null ) {
-		$this->logger->info('updateTransactions('.$days.')');
+		$this->logger->info('*** updateTransactions('.$days.')');
 
 		$this->initServiceProxy($session);
 
@@ -53,22 +62,28 @@ class TransactionsModel extends WPL_Model {
 
 		// parameter $days has priority
 		if ( $days ) {
-			$req->NumberOfDays = $days;
+			$req->NumberOfDays  = $days;
+			$this->NumberOfDays = $days;
+			$this->logger->info('NumberOfDays: '.$req->NumberOfDays);
 
 		// default: transactions since last change
 		} elseif ( $lastdate ) {
-			$req->ModTimeFrom = gmdate( 'Y-m-d H:i:s', $lastdate );
-			$req->ModTimeTo   = gmdate( 'Y-m-d H:i:s', time() );
+			$req->ModTimeFrom  = gmdate( 'Y-m-d H:i:s', $lastdate );
+			$req->ModTimeTo    = gmdate( 'Y-m-d H:i:s', time() );
+			$this->ModTimeFrom = $req->ModTimeFrom;
+			$this->ModTimeTo   = $req->ModTimeTo;
+			$this->logger->info('lastdate: '.$lastdate);
+			$this->logger->info('ModTimeFrom: '.$req->ModTimeFrom);
+			$this->logger->info('ModTimeTo: '.$req->ModTimeTo);
 
 		// fallback: last 7 days (max allowed by ebay: 30 days)
 		} else {
 			$days = 7;
-			$req->NumberOfDays = $days;
+			$req->NumberOfDays  = $days;
+			$this->NumberOfDays = $days;
+			$this->logger->info('NumberOfDays (fallback): '.$req->NumberOfDays);
 		}
 
-		$this->logger->info('lastdate: '.$lastdate);
-		$this->logger->info('ModTimeFrom: '.$req->ModTimeFrom);
-		$this->logger->info('ModTimeTo: '.$req->ModTimeTo);
 
 		$req->DetailLevel = $Facet_DetailLevelCodeType->ReturnAll;
 
@@ -77,7 +92,7 @@ class TransactionsModel extends WPL_Model {
 
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
-			$this->logger->info( "Transactions updated successfully." );
+			$this->logger->info( "*** Transactions updated successfully." );
 		} else {
 			$this->logger->error( "Error on transactions update".print_r( $res, 1 ) );			
 		}
@@ -161,6 +176,7 @@ class TransactionsModel extends WPL_Model {
 			// update existing transaction
 			$this->logger->info( 'update transaction #'.$data['transaction_id'].' for item #'.$data['item_id'] );
 			$wpdb->update( $this->tablename, $data, array( 'transaction_id' => $data['transaction_id'] ) );
+			$this->addToReport( 'updated', $data );
 		} else {
 			// create new transaction
 			$this->logger->info( 'insert transaction #'.$data['transaction_id'].' for item #'.$data['item_id'] );
@@ -191,7 +207,10 @@ class TransactionsModel extends WPL_Model {
 				$this->logger->info( 'marked item #'.$data['item_id'].' as SOLD ');
 			}
 
+			$newstock = false;
+			$wp_order_id = false;
 
+			$this->addToReport( 'inserted', $data, $newstock, $wp_order_id );
 
 		}
 
@@ -218,6 +237,7 @@ class TransactionsModel extends WPL_Model {
 		$data['PaymentMethod']             = $Detail->Status->PaymentMethodUsed;
 		$data['CompleteStatus']            = $Detail->Status->CompleteStatus;
 		$data['LastTimeModified']          = $Detail->Status->LastTimeModified;
+		$data['OrderLineItemID']           = $Detail->OrderLineItemID;
 
 		$listingsModel = new ListingsModel();
 		$listingItem = $listingsModel->getItemByEbayID( $Detail->Item->ItemID );
@@ -225,12 +245,18 @@ class TransactionsModel extends WPL_Model {
 		// skip items not found in listings
 		if ( $listingItem ) {
 			$data['item_title'] = $listingItem->auction_title;
-			$this->logger->info( "Transaction for '".$data['item_title']."' - item #".$Detail->Item->ItemID );
+			$this->logger->info( "process transaction #".$Detail->TransactionID." for item '".$data['item_title']."' - #".$Detail->Item->ItemID );
 		} else {
-			$this->logger->info( "skipped transaction ".$Detail->TransactionID." for foreign item #".$Detail->Item->ItemID );			
+			$this->logger->info( "skipped transaction #".$Detail->TransactionID." for foreign item #".$Detail->Item->ItemID );			
+			$this->addToReport( 'skipped', $data );
 			return false;
 		}
 
+		// avoid empty transaction id
+		if ( intval($data['transaction_id']) == 0 ) {
+			// use negative OrderLineItemID to separate from real TransactionIDs
+			$data['transaction_id'] = 0 - str_replace('-', '', $data['OrderLineItemID']);
+		}
 
 		// use buyer name from shipping address if registration address is empty
 		if ( $data['buyer_name'] == '' ) {
@@ -245,8 +271,80 @@ class TransactionsModel extends WPL_Model {
 	}
 
 
+	function addToReport( $status, $data, $newstock = false, $wp_order_id = false ) {
 
+		$rep = new stdClass();
+		$rep->status          = $status;
+		$rep->item_id         = $data['item_id'];
+		$rep->transaction_id  = $data['transaction_id'];
+		$rep->date_created    = $data['date_created'];
+		$rep->OrderLineItemID = $data['OrderLineItemID'];
+		$rep->LastTimeModified = $data['LastTimeModified'];
+		$rep->data            = $data;
+		$rep->newstock        = $newstock;
+		$rep->wp_order_id     = $wp_order_id;
 
+		$this->report[] = $rep;
+
+		switch ($status) {
+			case 'skipped':
+				$this->count_skipped++;
+				break;
+			case 'updated':
+				$this->count_updated++;
+				break;
+			case 'inserted':
+				$this->count_inserted++;
+				break;
+		}
+		$this->count_total++;
+
+	}
+
+	function getHtmlTimespan() {
+		if ( $this->NumberOfDays ) {
+			return sprintf( __('the last %s days','wplister'), $this->NumberOfDays );
+		} elseif ( $this->ModTimeFrom ) {
+			return sprintf( __('from %s to %s','wplister'), $this->ModTimeFrom , $this->ModTimeTo );
+		}
+	}
+
+	function getHtmlReport() {
+
+		$html  = '<div id="transaction_report" style="display:none">';
+		$html .= '<br>';
+		$html .= __('New transactions created','wplister') .': '. $this->count_inserted .' '. '<br>';
+		$html .= __('Existing transactions updated','wplister')  .': '. $this->count_updated  .' '. '<br>';
+		$html .= __('Foreign transactions skipped','wplister')  .': '. $this->count_skipped  .' '. '<br>';
+		$html .= '<br>';
+
+		$html .= '<table style="width:99%">';
+		$html .= '<tr>';
+		$html .= '<th align="left">'.__('Last modified','wplister').'</th>';
+		$html .= '<th align="left">'.__('Transaction ID','wplister').'</th>';
+		$html .= '<th align="left">'.__('Action','wplister').'</th>';
+		$html .= '<th align="left">'.__('Item ID','wplister').'</th>';
+		$html .= '<th align="left">'.__('Title','wplister').'</th>';
+		$html .= '<th align="left">'.__('Buyer ID','wplister').'</th>';
+		$html .= '<th align="left">'.__('Date created','wplister').'</th>';
+		$html .= '</tr>';
+		
+		foreach ($this->report as $item) {
+			$html .= '<tr>';
+			$html .= '<td>'.$item->LastTimeModified.'</td>';
+			$html .= '<td>'.$item->transaction_id.'</td>';
+			$html .= '<td>'.$item->status.'</td>';
+			$html .= '<td>'.$item->item_id.'</td>';
+			$html .= '<td>'.@$item->data['auction_title'].'</td>';
+			$html .= '<td>'.@$item->data['buyer_userid'].'</td>';
+			$html .= '<td>'.$item->date_created.'</td>';
+			$html .= '</tr>';
+		}
+
+		$html .= '</table>';
+		$html .= '</div>';
+		return $html;
+	}
 
 	/* the following methods could go into another class, since they use wpdb instead of EbatNs_DatabaseProvider */
 

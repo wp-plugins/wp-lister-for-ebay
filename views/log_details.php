@@ -55,7 +55,8 @@ if ( @$_GET['desc'] != 'show' ) {
 }
 
 
-include_once ('PEAR.php');
+// try to include PEAR and hide php warnings on fail
+@include_once ('PEAR.php');
 if ( class_exists('PEAR') ) {
 	// add XML dir to include path
 	$incPath = WPLISTER_PATH.'/includes';
