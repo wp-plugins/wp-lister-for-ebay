@@ -100,8 +100,6 @@
 							</p>
 
 
-
-
 							<label for="wpl-text-listing_duration" class="text_label"><?php echo __('Duration','wplister'); ?>: *</label>
 							<select id="wpl-text-listing_duration" name="wpl_e2e_listing_duration" title="Duration" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
@@ -120,20 +118,19 @@
 							</p>
 
 
-
 							<label for="wpl-text-condition_id" class="text_label"><?php echo __('Condition','wplister'); ?>: *</label>
 							<select id="wpl-text-condition_id" name="wpl_e2e_condition_id" title="Condition" class=" required-entry select">
-							<?php if ( isset( $wpl_conditions[ $item_details['ebay_category_1_id'] ] ) && is_array( $wpl_conditions[ $item_details['ebay_category_1_id'] ] ) ): ?>
-								<?php foreach ($wpl_conditions[ $item_details['ebay_category_1_id'] ] as $condition_id => $desc) : ?>
+							<?php if ( isset( $wpl_available_conditions ) && is_array( $wpl_available_conditions ) ): ?>
+								<?php foreach ($wpl_available_conditions as $condition_id => $desc) : ?>
 									<option value="<?php echo $condition_id ?>" 
 										<?php if ( $item_details['condition_id'] == $condition_id ) : ?>
 											selected="selected"
 										<?php endif; ?>
 										><?php echo $desc ?></option>
 								<?php endforeach; ?>
-							<?php /* elseif ( $wpl_conditions[ $item_details['ebay_category_1_id'] ] == 'none' ) : ?>
-								<option value="" selected="selected"><?php echo __('none','wplister'); ?></option>
-							<?php */ else: ?>
+							<?php elseif ( $wpl_available_conditions == 'none' ) : ?>
+								<option value="none" selected="selected"><?php echo __('none','wplister'); ?></option>
+							<?php else: ?>
 								<option value="1000" selected="selected"><?php echo __('New','wplister'); ?></option>
 							<?php endif; ?>
 							</select>
@@ -146,7 +143,6 @@
 
 
 							<label for="wpl-text-dispatch_time" class="text_label"><?php echo __('Handling time','wplister'); ?>: *</label>
-
 							<select id="wpl-text-dispatch_time" name="wpl_e2e_dispatch_time" title="Condition" class=" required-entry select">
 							<?php if ( isset( $wpl_available_dispatch_times ) && is_array( $wpl_available_dispatch_times ) ): ?>
 								<?php foreach ($wpl_available_dispatch_times as $dispatch_time => $desc) : ?>
@@ -156,13 +152,11 @@
 										<?php endif; ?>
 										><?php echo $desc ?></option>
 								<?php endforeach; ?>
-							<?php /* elseif ( $wpl_conditions[ $item_details['ebay_category_1_id'] ] == 'none' ) : ?>
-								<option value="" selected="selected"><?php echo __('none','wplister'); ?></option>
-							<?php */ else: ?>
+							<?php else: ?>
 								<option value="1000" selected="selected"><?php echo __('New','wplister'); ?></option>
 							<?php endif; ?>
 							</select>
-							<!--<input type="text" name="wpl_e2e_dispatch_time" id="wpl-text-dispatch_time" value="<?php echo $item_details['dispatch_time']; ?>" class="text_input" />-->
+
 
 							<br class="clear" />
 							<p class="desc" style="display: block;">

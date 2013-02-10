@@ -132,6 +132,10 @@ class ListingsTable extends WP_List_Table {
         $profile_data = maybe_unserialize( $item['profile_data'] );
         $listing_title = $item['auction_title'];
 
+        // limit item title to 80 characters
+        if ( strlen($listing_title) > 80 ) $listing_title = substr( $listing_title, 0, 77 ) . '...';
+        
+
         // make title link to products edit page
         if ( ProductWrapper::plugin == 'woo' ) {
             $listing_title = '<a class="product_title_link" href="post.php?post='.$item['post_id'].'&action=edit">'.$listing_title.'</a>';
@@ -297,6 +301,16 @@ class ListingsTable extends WP_List_Table {
             return $quantity;
         }
 
+        // fetch latest quantity for changed items
+        // if ( $item['status'] == 'changed' ) {
+        //     $profile_data = maybe_unserialize( $item['profile_data'] );
+        //     if ( intval($profile_data['details']['quantity']) == 0 ) {
+        //         $latest_quantity = ProductWrapper::getStock( $item['post_id'] );
+        //         $$item['quantity'] = $latest_quantity;
+        //     }
+        // }        
+
+        // show sold items if there are any
         if ( $item['quantity_sold'] > 0 ) {
             $qty_available = $item['quantity'] - $item['quantity_sold'];
             return $qty_available . ' / ' . $item['quantity'];

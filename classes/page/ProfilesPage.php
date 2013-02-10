@@ -96,6 +96,22 @@ class ProfilesPage extends WPL_Page {
 			$verified_listings  = $listingsModel->getAllVerifiedWithProfile( $item['profile_id'] );
 			$published_listings = $listingsModel->getAllPublishedWithProfile( $item['profile_id'] );
 
+
+			// do we have a primary category?
+			$details = $item['details'];
+			if ( intval( $details['ebay_category_1_id'] ) != 0 ) {
+				$primary_category_id = $details['ebay_category_1_id'];
+			} else {
+				// if not use default category
+			    $primary_category_id = self::getOption('default_ebay_category_id');
+			}
+
+			// build available conditions array
+			$available_conditions = false;
+			if ( isset( $item['conditions'][ $primary_category_id ] ) ) {
+				$available_conditions = $item['conditions'][ $primary_category_id ];
+			}
+
 			$aData = array(
 				'plugin_url'				=> self::$PLUGIN_URL,
 				'message'					=> $this->message,
@@ -112,6 +128,7 @@ class ProfilesPage extends WPL_Page {
 				'verified_listings'         => $verified_listings,
 				'published_listings'        => $published_listings,
 				'available_dispatch_times'  => $available_dispatch_times,
+				'available_conditions'  	=> $available_conditions,
 				
 				'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-profiles'
 			);
@@ -202,18 +219,28 @@ class ProfilesPage extends WPL_Page {
 		}
 
 		
+		// do we have a primary category?
+		if ( intval( $details['ebay_category_1_id'] ) != 0 ) {
+			$primary_category_id = $details['ebay_category_1_id'];
+		} else {
+			// if not use default category
+		    $primary_category_id = self::getOption('default_ebay_category_id');
+		}
+
+
 		// do we have ConditionDetails for primary category?
 		if ( intval($this->getValueFromPost( 'profile_id' )) != 0 ) {
 			$saved_conditions = $wpdb->get_var('SELECT conditions FROM '.$wpdb->prefix.'ebay_profiles WHERE profile_id = '.$this->getValueFromPost( 'profile_id' ));
 			$saved_conditions = unserialize($saved_conditions);
 		}
 
-		if ( isset( $saved_conditions[$details['ebay_category_1_id']] ) ) {
+		if ( isset( $saved_conditions[ $primary_category_id ] ) ) {
+			// conditions for primary category are already saved
 			$conditions = $saved_conditions; 
-		} elseif ( (int)$details['ebay_category_1_id'] != 0 ) {
-			// call GetCategoryFeatures for category #1
+		} elseif ( intval( $primary_category_id ) != 0 ) {
+			// call GetCategoryFeatures for primary category
 			$this->initEC();
-			$conditions = $this->EC->getCategoryConditions( $details['ebay_category_1_id'] );
+			$conditions = $this->EC->getCategoryConditions( $primary_category_id );
 			$this->EC->closeEbay();
 		} else {
 			$conditions = array();

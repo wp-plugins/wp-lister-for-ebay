@@ -3,17 +3,17 @@
 Plugin Name: WP-Lister for eBay
 Plugin URI: http://www.wplab.com/plugins/wp-lister/
 Description: List your products on eBay the easy way. 
-Version: 1.1.1
+Version: 1.1.3
 Author: Matthias Krok
 Author URI: http://www.wplab.com/ 
-Max WP Version: 3.4.2
+Max WP Version: 3.5
 Text Domain: wp-lister
 License: GPL2+
 */
 
 
 // include base classes
-define('WPLISTER_VERSION', '1.1.1' );
+define('WPLISTER_VERSION', '1.1.3' );
 define('WPLISTER_PATH', realpath( dirname(__FILE__) ) );
 define('WPLISTER_URL', WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)) . '/' );
 require_once( WPLISTER_PATH . '/classes/WPL_Autoloader.php' );
@@ -54,14 +54,25 @@ class WPL_WPLister extends WPL_BasePlugin {
 		
 	public function loadPages() {
 
-		$this->pages['listings']     = new ListingsPage();
-		$this->pages['profiles']     = new ProfilesPage();
-		$this->pages['templates']    = new TemplatesPage();
-		$this->pages['transactions'] = new TransactionsPage();
-		$this->pages['tools']        = new ToolsPage();
-		$this->pages['settings']     = new SettingsPage();
-		$this->pages['tutorial']     = new HelpPage();
-		$this->pages['log']          = new LogPage();
+		if ( is_network_admin() ) {
+	
+			$this->pages['sites']    	 = new NetworkAdminPage();
+			$this->pages['settings']     = new SettingsPage();
+	
+		} else {
+
+			if ( ( is_multisite() ) && ( self::getOption('is_enabled') == 'N' ) ) return;
+
+			$this->pages['listings']     = new ListingsPage();
+			$this->pages['profiles']     = new ProfilesPage();
+			$this->pages['templates']    = new TemplatesPage();
+			$this->pages['transactions'] = new TransactionsPage();
+			$this->pages['tools']        = new ToolsPage();
+			$this->pages['settings']     = new SettingsPage();
+			$this->pages['tutorial']     = new HelpPage();
+			$this->pages['log']          = new LogPage();
+
+		}
 
 	}
 		

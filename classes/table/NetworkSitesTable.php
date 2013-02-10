@@ -25,7 +25,7 @@ if(!class_exists('WP_List_Table')){
  * 
  * Our theme for this list table is going to be profiles.
  */
-class TransactionsTable extends WP_List_Table {
+class NetworkSitesTable extends WP_List_Table {
 
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
@@ -36,8 +36,8 @@ class TransactionsTable extends WP_List_Table {
                 
         //Set parent defaults
         parent::__construct( array(
-            'singular'  => 'transaction',     //singular name of the listed records
-            'plural'    => 'transactions',    //plural name of the listed records
+            'singular'  => 'site',     //singular name of the listed records
+            'plural'    => 'sites',    //plural name of the listed records
             'ajax'      => false        //does this table support ajax?
         ) );
         
@@ -67,22 +67,10 @@ class TransactionsTable extends WP_List_Table {
      **************************************************************************/
     function column_default($item, $column_name){
         switch($column_name){
-            case 'item_id':
-            case 'transaction_id':
-            case 'quantity':
-            case 'buyer_userid':
-            case 'buyer_name':
-            case 'PaymentMethod':
-            case 'eBayPaymentStatus':
-            case 'CheckoutStatus':
-            case 'CompleteStatus':
-            case 'status':
+            case 'blog_id':
                 return $item[$column_name];
-            case 'price':
-                return number_format( $item[$column_name], 2, ',', '.' );
-            case 'date_created':
             case 'LastTimeModified':
-            	// use date format from wp
+                // use date format from wp
                 $date = mysql2date( get_option('date_format'), $item[$column_name] );
                 $time = mysql2date( 'H:i', $item[$column_name] );
                 return sprintf('%1$s <br><span style="color:silver">%2$s</span>', $date, $time );
@@ -108,80 +96,139 @@ class TransactionsTable extends WP_List_Table {
      * @param array $item A singular item (one full row's worth of data)
      * @return string Text to be placed inside the column <td> (profile title only)
      **************************************************************************/
-    function column_item_title($item){
+    function column_blog_title($item){
+
+        // get blog details
+        $blog_details = get_blog_details( $item[ 'blog_id' ] );
+
+        // switch to blog and load details about WP-Lister installation
+        $this->fetchBlogDetails( $item['blog_id'] );
+
         
         //Build row actions
         $actions = array(
-            'view_invoice' => sprintf('<a href="?page=%s&action=%s&transaction=%s&width=600&height=470" class="thickbox">%s</a>',$_REQUEST['page'],'view_invoice',$item['id'],__('Details','wplister')),
-            // 'print_invoice' => sprintf('<a href="?page=%s&action=%s&transaction=%s" target="_blank">%s</a>',$_REQUEST['page'],'print_invoice',$item['id'],__('Invoice','wplister')),
-            // 'create_order' => sprintf('<a href="?page=%s&action=%s&transaction=%s">%s</a>',$_REQUEST['page'],'create_order',$item['id'],__('Create Order','wplister')),
-            // 'edit'      => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$_REQUEST['page'],'edit',$item['id'],__('Edit','wplister')),
+            // 'create_order' => sprintf('<a href="?page=%s&action=%s&site=%s">%s</a>',$_REQUEST['page'],'create_order',$item['id'],__('Create Order','wplister')),
+            'dashboard'  => sprintf('<a href="%s/wp-admin/">%s</a>', $blog_details->siteurl, __('Dashboard') ),
+            'settings'   => sprintf('<a href="%s/wp-admin/admin.php?page=wplister-settings">%s</a>', $blog_details->siteurl, __('Settings') ),
+            // 'reinstall'  => sprintf('<a href="?page=%s&action=%s&site=%s">%s</a>',$_REQUEST['page'],'reinstall',$item['blog_id'],__('Re-Install','wplister')),
+            'install'    => sprintf('<a href="?page=%s&action=%s&site=%s">%s</a>',$_REQUEST['page'],'install',$item['blog_id'],__('Install','wplister')),
+            'uninstall'  => sprintf('<a href="?page=%s&action=%s&site=%s">%s</a>',$_REQUEST['page'],'uninstall',$item['blog_id'],__('Uninstall','wplister')),
+            'activate'   => sprintf('<a href="?page=%s&action=%s&site=%s">%s</a>',$_REQUEST['page'],'activate',$item['blog_id'],__('Activate','wplister')),
+            'deactivate' => sprintf('<a href="?page=%s&action=%s&site=%s">%s</a>',$_REQUEST['page'],'deactivate',$item['blog_id'],__('Deactivate','wplister')),
+            // 'edit'      => sprintf('<a href="?page=%s&action=%s&site=%s">%s</a>',$_REQUEST['page'],'edit',$item['blog_id'],__('Edit','wplister')),
         );
 
-        if ( $item['wp_order_id'] == 0 ) {
-            $actions['create_order'] = sprintf('<a href="?page=%s&action=%s&transaction=%s">%s</a>',$_REQUEST['page'],'create_order',$item['id'],__('Create Order','wplister'));
+        // echo "<pre>";print_r($blog_details);echo"</pre>";#die();
+        if ( $this->blog->enabled == 'Y' ) {
+            unset( $actions['activate'] );
+            unset( $actions['reinstall'] );            
+            unset( $actions['uninstall'] );            
+            unset( $actions['install'] );            
+        } elseif ( $this->blog->enabled == 'N' ) {
+            unset( $actions['deactivate'] );            
+            unset( $actions['settings'] );            
+            unset( $actions['install'] );            
         } else {
-            $actions['edit_order'] = sprintf('<a href="post.php?action=%s&post=%s">%s</a>','edit',$item['wp_order_id'],__('View Order','wplister'));
-            $actions['edit_order'] .= ' #'.$item['wp_order_id'];
+            unset( $actions['deactivate'] );            
+            unset( $actions['settings'] );            
+            unset( $actions['uninstall'] );            
+            unset( $actions['activate'] );            
         }
 
-        // free version can't create orders
-        if ( WPLISTER_LIGHT ) unset( $actions['create_order'] );
 
         //Return the title contents
         return sprintf('%1$s %2$s',
-            /*$1%s*/ $item['item_title'],
+            /*$1%s*/ $blog_details->blogname,
             /*$2%s*/ $this->row_actions($actions)
         );
     }
 
-    function column_item_id($item){
-        //Return buyer name and ID
-        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
-            /*$1%s*/ $item['item_id'],
-            /*$2%s*/ $item['transaction_id']
-        );
-    }
-    function column_buyer_name($item){
-        //Return buyer name and ID
-        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
-            /*$1%s*/ $item['buyer_name'],
-            /*$2%s*/ $item['buyer_userid']
-        );
-    }
-    function column_PaymentMethod($item){
-        //Return buyer name and ID
-        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
-            /*$1%s*/ $item['PaymentMethod'],
-            /*$2%s*/ $item['eBayPaymentStatus']
-        );
+
+    function fetchBlogDetails( $blog_id ){
+        global $wpdb;
+        $this->blog = new stdClass();
+
+        switch_to_blog( $blog_id );
+
+        $this->blog->token   = get_option( 'wplister_ebay_token' );
+        $this->blog->user    = get_option( 'wplister_ebay_token_userid' );
+        $this->blog->dbver   = get_option( 'wplister_db_version' );
+        $this->blog->enabled = get_option( 'wplister_is_enabled');
+        $this->blog->setup   = get_option( 'wplister_setup_next_step' );
+
+
+        // check template folder
+        $uploads = wp_upload_dir();
+        $this->blog->tpldir = $uploads['basedir'] . '/wp-lister/templates';
+
+        restore_current_blog();
+
     }
 
-    function column_CompleteStatus($item){
 
-        switch( $item['CompleteStatus'] ){
-            case 'InComplete':
-                $color = 'orange';
-                $value = __('InComplete','wplister');
-				break;
-            case 'Complete':
-                $color = 'green';
-                $value = __('Complete','wplister');
-				break;
+    // function column_status($item){
+    //     return $this->blog->enabled ? 'enabled' : 'disabled';
+    // }
+
+    function column_ebay_id($item){
+        return $this->blog->user;
+    }
+
+    function column_db_version($item){
+        return $this->blog->dbver;
+    }
+
+    function column_setup_step($item){
+        if ( $this->blog->setup == '0' ) return 'OK';
+        return 'Step ' . $this->blog->setup;
+    }
+
+    function column_tpl_dir($item){
+        $msg = '';
+
+        if ( is_dir( $this->blog->tpldir )) {
+           // $msg .= 'OK: ' . $this->blog->tpldir;
+           $msg .= 'OK';
+        } else {
+           $msg .= 'MISSING: ' . $this->blog->tpldir;            
+        }
+
+        // $msg .= '<br>';
+        // if ( is_dir( dirname( $this->blog->tpldir ) )) {
+        //    $msg .= 'OK: ' . dirname( $this->blog->tpldir ) ;
+        // } else {
+        //    $msg .= 'MISSING: ' . dirname( $this->blog->tpldir ) ;            
+        // }
+        return $msg;
+    }
+
+
+    function column_status($item){
+
+        $status = $this->blog->enabled == 'Y' ? 'enabled' : 'disabled';
+
+        switch( $this->blog->enabled ){
+            case 'Y':
+                $color = 'darkgreen';
+                $value = __('enabled','wplister');
+                break;
+            case 'N':
+                $color = 'darkred';
+                $value = __('disabled','wplister');
+                break;
             default:
-                $color = 'black';
-                $value = $item['CompleteStatus'];
+                $color = 'gray';
+                $value = __('not installed','wplister');
         }
 
         //Return the title contents
-        return sprintf('<span style="color:%1$s">%2$s</span><br><span style="color:silver">%3$s</span>',
+        return sprintf('<span style="color:%1$s">%2$s</span>',
             /*$1%s*/ $color,
-            /*$2%s*/ $value,
-            /*$2%s*/ $item['CheckoutStatus']
+            /*$2%s*/ $value
         );
-	}
-	  
-	
+    }
+      
+    
     /** ************************************************************************
      * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
      * is given special treatment when columns are processed. It ALWAYS needs to
@@ -195,7 +242,7 @@ class TransactionsTable extends WP_List_Table {
         return sprintf(
             '<input type="checkbox" name="%1$s[]" value="%2$s" />',
             /*$1%s*/ $this->_args['singular'],  //Let's simply repurpose the table's singular label ("profile")
-            /*$2%s*/ $item['id']       			//The value of the checkbox should be the record's id
+            /*$2%s*/ $item['id']                //The value of the checkbox should be the record's id
         );
     }
     
@@ -215,21 +262,15 @@ class TransactionsTable extends WP_List_Table {
      **************************************************************************/
     function get_columns(){
         $columns = array(
-            'cb'        		=> '<input type="checkbox" />', //Render a checkbox instead of text
-            'date_created'		=> __('Created at','wplister'),
-            'item_id'  			=> __('eBay ID','wplister'),
-            'item_title'  		=> __('Title','wplister'),
-            #'transaction_id'  	=> __('Transaction ID','wplister'),
-            'price'				=> __('Price','wplister'),
-            'quantity'			=> __('Quantity','wplister'),
-            #'buyer_userid'		=> __('User ID','wplister'),
-            'buyer_name'		=> __('Name','wplister'),
-            'PaymentMethod'		=> __('Payment method','wplister'),
-            #'eBayPaymentStatus'	=> __('Payment status','wplister'),
-            #'CheckoutStatus'	=> __('Checkout status','wplister'),
-            'CompleteStatus'	=> __('Status','wplister'),
-            #'status'		 	=> __('Status','wplister'),
-            'LastTimeModified'	=> __('Last change','wplister')
+            'cb'                => '<input type="checkbox" />', //Render a checkbox instead of text
+            // 'blog_id'        => __('Site ID','wplister'),
+            'blog_title'        => __('Title','wplister'),
+            'status'            => __('Status','wplister'),
+            'ebay_id'           => __('eBay ID','wplister'),
+            'db_version'        => __('DB Version','wplister'),
+            'setup_step'        => __('Setup','wplister'),
+            'tpl_dir'           => __('Folder','wplister'),
+            // 'LastTimeModified'  => __('Last change','wplister')
         );
         return $columns;
     }
@@ -248,13 +289,13 @@ class TransactionsTable extends WP_List_Table {
      * 
      * @return array An associative array containing all the columns that should be sortable: 'slugs'=>array('data_values',bool)
      **************************************************************************/
-    function get_sortable_columns() {
-        $sortable_columns = array(
-            'date_created'  	=> array('date_created',false),     //true means its already sorted
-            'LastTimeModified' 	=> array('LastTimeModified',false)
-        );
-        return $sortable_columns;
-    }
+    // function get_sortable_columns() {
+    //     $sortable_columns = array(
+    //         'blog_id'           => array('blog_id',false),     //true means its already sorted
+    //         'LastTimeModified'  => array('LastTimeModified',false)
+    //     );
+    //     return $sortable_columns;
+    // }
     
     
     /** ************************************************************************
@@ -273,8 +314,10 @@ class TransactionsTable extends WP_List_Table {
      **************************************************************************/
     function get_bulk_actions() {
         $actions = array(
-            'update' 	=> __('Update transaction from eBay','wplister'),
-            'delete'    => __('Delete','wplister')
+            'activate'     => __('Activate','wplister'),
+            'deactivate'   => __('Deactivate','wplister'),
+            'update_db'    => __('Update DB','wplister'),
+            // 'delete'    => __('Delete','wplister')
         );
         return $actions;
     }
@@ -290,14 +333,8 @@ class TransactionsTable extends WP_List_Table {
     function process_bulk_action() {
         global $wbdb;
         
-        //Detect when a bulk action is being triggered...
-        if( 'delete'===$this->current_action() ) {
-            #wp_die('Items deleted (or they would be if we had items to delete)!');
-            #$wpdb->query("DELETE FROM {$wpdb->prefix}ebay_auctions WHERE id = ''",)
-        }
-
         if( 'update'===$this->current_action() ) {
-			#echo "<br>verify handler<br>";			
+            #echo "<br>verify handler<br>";         
         }
         
     }
@@ -324,15 +361,33 @@ class TransactionsTable extends WP_List_Table {
                         
         // get pagination state
         $current_page = $this->get_pagenum();
-        $per_page = $this->get_items_per_page('transactions_per_page', 20);
+        $per_page = $this->get_items_per_page('sites_per_page', 20);
         
         // define columns
-        $this->_column_headers = $this->get_column_info();
+        // $this->_column_headers = $this->get_column_info();
         
-        // fetch profiles from model
-        $transactionsModel = new TransactionsModel();
-        $this->items = $transactionsModel->getPageItems( $current_page, $per_page );
-        $total_items = $transactionsModel->total_items;
+        // define columns
+        $columns = $this->get_columns();
+        $hidden = array();
+        $sortable = array();
+        $this->_column_headers = array($columns, $hidden, $sortable);
+        
+        // fetch sites
+        // $blogs = get_blog_list( 0, 'all' );
+        global $wpdb;
+        $blogs = $wpdb->get_results( 
+            "SELECT blog_id, path FROM {$wpdb->blogs} 
+            WHERE site_id = '{$wpdb->siteid}' 
+            /* AND blog_id != {$wpdb->blogid} */
+            AND spam = '0' 
+            AND deleted = '0' 
+            AND archived = '0' 
+            order by blog_id", ARRAY_A
+        ); 
+
+        // $this->items = $sitesModel->getPageItems( $current_page, $per_page );
+        $this->items = $blogs;
+        $total_items = count( $blogs );
 
         // register our pagination options & calculations.
         $this->set_pagination_args( array(

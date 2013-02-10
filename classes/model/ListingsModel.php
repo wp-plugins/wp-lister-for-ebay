@@ -88,7 +88,7 @@ class ListingsModel extends WPL_Model {
 			WHERE id = '$id'
 		", ARRAY_A);
 
-		$item['profile_data'] = $this->decodeObject( $item['profile_data'], true );
+		if ( !empty($item) ) $item['profile_data'] = $this->decodeObject( $item['profile_data'], true );
 		// $item['details'] = $this->decodeObject( $item['details'] );
 
 		return $item;
@@ -480,7 +480,7 @@ class ListingsModel extends WPL_Model {
 	function endItem( $id, $session )
 	{
 		// skip this item if item status not allowed
-		$allowed_statuses = array( 'published' );
+		$allowed_statuses = array( 'published', 'changed' );
 		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return false;
 
 		// preparation - set up new ServiceProxy with given session
@@ -858,11 +858,15 @@ class ListingsModel extends WPL_Model {
 	public function markItemAsModified( $post_id ) {
 		global $wpdb;	
 
+		// $listingsModel = new ListingsModel();
+		$listing_id = $this->getListingIDFromPostID( $post_id );
+        $this->reapplyProfileToItem( $listing_id );
+
 		// set published items to changed
-		$wpdb->update( $this->tablename, array( 'status' => 'changed' ), array( 'status' => 'published', 'post_id' => $post_id ) );
+		// $wpdb->update( $this->tablename, array( 'status' => 'changed' ), array( 'status' => 'published', 'post_id' => $post_id ) );
 
 		// set verified items to prepared
-		$wpdb->update( $this->tablename, array( 'status' => 'prepared' ), array( 'status' => 'verified', 'post_id' => $post_id ) );
+		// $wpdb->update( $this->tablename, array( 'status' => 'prepared' ), array( 'status' => 'verified', 'post_id' => $post_id ) );
 	}
 
 
@@ -1066,7 +1070,9 @@ class ListingsModel extends WPL_Model {
 	public function reapplyProfileToItem( $id ) {
 	
 		// get item
+		if ( !$id ) return;
 		$item = $this->getItem( $id );
+		if ( empty($item) ) return;
 
 		// get profile
 		$profilesModel = new ProfilesModel();

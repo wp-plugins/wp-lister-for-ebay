@@ -12,6 +12,8 @@ class ListingsPage extends WPL_Page {
 	{
 		add_action( 'admin_menu', array( &$this, 'onWpTopAdminMenu' ), 10 );
 		add_action( 'admin_menu', array( &$this, 'fixSubmenu' ), 30 );
+
+		// add_action( 'network_admin_menu', array( &$this, 'onWpNetworkAdminMenu' ) ); 
 	}
 	
 	public function onWpInit() {
@@ -27,6 +29,14 @@ class ListingsPage extends WPL_Page {
 
 		$this->handleSubmitOnInit();
 	}
+
+	// public function onWpNetworkAdminMenu() {
+	// 	global $oWPL_WPLister;
+	// 	$settingsPage = $oWPL_WPLister->pages['settings'];
+
+	// 	$page_id = add_menu_page( self::ParentTitle, __('WP-Lister','wplister'), self::ParentPermissions, 
+	// 				   self::ParentMenuId, array( $settingsPage, 'onDisplaySettingsPage' ), $this->getImageUrl( 'hammer-16x16.png' ), ProductWrapper::menu_page_position );
+	// }
 
 	public function onWpTopAdminMenu() {
 

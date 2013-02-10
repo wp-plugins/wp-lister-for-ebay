@@ -66,8 +66,16 @@
 								</div>
 
 								<div id="major-publishing-actions">
+									<?php if ( $wpl_ebay_token_userid ): ?>
+									<div id="publishing-action" style="float:left">
+									<form method="post" id="removeTokenForm" action="<?php echo $wpl_form_action; ?>">
+										<?php wp_nonce_field( 'remove_token' ); ?>
+										<input type="hidden" name="action" value="remove_token" >
+										<input type="submit" value="<?php echo __('Change Account','wplister'); ?>" id="remove_token" class="button-secondary" name="remove_token">
+									</form>
+									</div>
+									<?php endif; ?>
 									<div id="publishing-action">
-										<!input type="hidden" name="action" value="save_settings" />
 										<input type="submit" value="<?php echo __('Save Settings','wplister'); ?>" id="save_settings" class="button-primary" name="save">
 									</div>
 									<div class="clear"></div>
@@ -196,7 +204,7 @@
 
 							<label for="wpl-option-cron_auctions" class="text_label"><?php echo __('Update transactions','wplister') ?></label>
 							<select id="wpl-option-cron_auctions" name="wpl_e2e_option_cron_auctions" title="Updates" class=" required-entry select">
-								<option value="" <?php if ( $wpl_option_cron_auctions == '' ): ?>selected="selected"<?php endif; ?>><?php echo __('none','wplister') ?></option>
+								<option value="" <?php if ( $wpl_option_cron_auctions == '' ): ?>selected="selected"<?php endif; ?>><?php echo __('manually','wplister') ?></option>
 								<option value="hourly" <?php if ( $wpl_option_cron_auctions == 'hourly' ): ?>selected="selected"<?php endif; ?>><?php echo __('hourly','wplister') ?></option>
 								<option value="daily" <?php if ( $wpl_option_cron_auctions == 'daily' ): ?>selected="selected"<?php endif; ?>><?php echo __('daily','wplister') ?></option>
 							</select>
@@ -285,6 +293,13 @@
 					if ( site_id ) {
 						jQuery('#frmSetEbaySite').submit();
 					}
+					
+				});
+
+				// change account button
+				jQuery('#remove_token').click( function() {					
+
+					return confirm('Do you really want to do this?');
 					
 				});
 

@@ -17,6 +17,9 @@ class SettingsPage extends WPL_Page {
 		// Add custom screen options
 		add_action( "load-wp-lister_page_wplister-".self::slug, array( &$this, 'addScreenOptions' ) );
 
+		// network admin page
+		add_action( 'network_admin_menu', array( &$this, 'onWpAdminMenu' ) ); 
+
 	}
 
 	public function onWpAdminMenu() {
@@ -76,10 +79,29 @@ class SettingsPage extends WPL_Page {
 	public function onDisplaySettingsPage() {
 		WPL_Setup::checkSetup('settings');
 
-        $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'settings';
+        $default_tab = is_network_admin() ? 'license' : 'settings';
+        $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : $default_tab;
         if ( 'categories' == $active_tab ) return $this->displayCategoriesPage();
         if ( 'developer' == $active_tab ) return $this->displayDeveloperPage();
 	
+		// action remove_token
+		if ( $this->requestAction() == 'remove_token' ) {
+			check_admin_referer('remove_token');
+
+			// remove_token
+			self::updateOption('ebay_token','');
+			self::updateOption('ebay_token_expirationtime','');
+			self::updateOption('ebay_token_userid','');
+			self::updateOption('ebay_user','');
+
+			// check if we have a token
+			if ( self::getOption('ebay_token') == '' ) {
+				$this->showMessage( "Please link WP-Lister to your eBay account." );
+			}
+
+			WPL_Setup::checkSetup('settings');
+		}
+
 		// action FetchToken
 		if ( $this->requestAction() == 'FetchToken' ) {
 
@@ -131,6 +153,9 @@ class SettingsPage extends WPL_Page {
     	//Fetch, prepare, sort, and filter our data...
 	    $categoriesMapTable->prepare_items( $shop_categories );
 
+	    $default_category_id = self::getOption('default_ebay_category_id');
+	    $default_category_name = EbayCategoriesModel::getFullEbayCategoryName( $default_category_id );
+	    if ( ! $default_category_name ) $default_category_name = 'None';
 
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,
@@ -138,6 +163,8 @@ class SettingsPage extends WPL_Page {
 
 			'shop_categories'			=> $shop_categories,
 			'categoriesMapTable'		=> $categoriesMapTable,
+			'default_category_id'	=> $default_category_id,
+			'default_category_name'=> $default_category_name,
 
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab=categories'
@@ -198,6 +225,9 @@ class SettingsPage extends WPL_Page {
 
 			// save store categories mapping
 			self::updateOption( 'categories_map_store',	$this->getValueFromPost( 'store_category_id' ) );
+
+			// save default ebay category
+			self::updateOption( 'default_ebay_category_id', $this->getValueFromPost( 'default_ebay_category_id' ) );
 
 			$this->showMessage( __('Categories mapping updated.','wplister') );
 		}

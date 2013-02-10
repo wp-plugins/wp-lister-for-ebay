@@ -96,6 +96,20 @@ class EbayPaymentModel extends WPL_Model {
 	}
 
 
+	function getTitleByServiceName( $payment_name ) {
+		global $wpdb;	
+		$this->tablename = $wpdb->prefix . self::table;
+
+		$payment_description = $wpdb->get_var("
+			SELECT payment_description 
+			FROM $this->tablename
+			WHERE payment_name = '$payment_name'
+		");		
+
+		if ( ! $payment_description ) return $payment_name;
+		return $payment_description;		
+	}
+
 	
 	
 }

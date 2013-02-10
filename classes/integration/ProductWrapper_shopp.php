@@ -345,8 +345,6 @@ class ProductWrapper {
 	                    [Size] => large
 	                    [Colour] => yellow
 	                )
-		            [name] => yellow
-		            [group_name] => Colour
 		            [price] => 
 		            [stock] => 
 		            [weight] => 
@@ -362,8 +360,6 @@ class ProductWrapper {
 	                    [Size] => large
 	                    [Colour] => orange
 	                )
-		            [name] => orange
-		            [group_name] => Colour
 		            [price] => 
 		            [stock] => 
 		            [weight] => 

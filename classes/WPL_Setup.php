@@ -12,6 +12,9 @@ class WPL_Setup extends WPL_Core {
 		// check for windows server
 		if ( self::isWindowsServer() ) return false;
 
+		// create folders if neccessary
+		if ( self::checkFolders() ) return false;
+
 		// check for multisite installation
 		// if ( self::checkMultisite() ) return false;
 
@@ -42,25 +45,37 @@ class WPL_Setup extends WPL_Core {
 		
 		} elseif ( '3' == self::getOption('setup_next_step') ) {
 		
-			$title = __('WP-Lister Setup - Step 3','wplister');
-			$msg1 = __('Create a default listing template.','wplister');
-			$msg2 = __('To create your first listing template click on %s.','wplister').'<br>';
-			if ( @$_GET['action'] == 'add_new_template' )
-				$msg2 = __('Replace the default text according to your requirements and save your template to continue.','wplister');
-			$link = '<a href="admin.php?page=wplister-templates&action=add_new_template">'.__('New Template', 'wplister').'</a>';
-			$msg2 = sprintf($msg2, $link);
-			$msg = "<p><b>$title</b></p><p><b>$msg1</b></p><p>$msg2</p>";
-			$this->showMessage($msg);
+			$tm = new TemplatesModel();
+			$templates = $tm->getAll();
+			if ( sizeof($templates) > 0 ) {
+				self::updateOption('setup_next_step', '4');
+			} else {
+				$title = __('WP-Lister Setup - Step 3','wplister');
+				$msg1 = __('Create a default listing template.','wplister');
+				$msg2 = __('To create your first listing template click on %s.','wplister').'<br>';
+				if ( @$_GET['action'] == 'add_new_template' )
+					$msg2 = __('Replace the default text according to your requirements and save your template to continue.','wplister');
+				$link = '<a href="admin.php?page=wplister-templates&action=add_new_template">'.__('New Template', 'wplister').'</a>';
+				$msg2 = sprintf($msg2, $link);
+				$msg = "<p><b>$title</b></p><p><b>$msg1</b></p><p>$msg2</p>";
+				$this->showMessage($msg);			
+			}
 		
 		} elseif ( '4' == self::getOption('setup_next_step') ) {
 		
-			$title = __('WP-Lister Setup - Step 4','wplister');
-			$msg1  = __('The final step: create your first listing profile.', 'wplister');
-			$msg2  = __('Click on %s and start defining your listing options.<br>After saving your profile, visit your Products page and select the products to list on eBay.','wplister');
-			$link  = '<a href="admin.php?page=wplister-profiles&action=add_new_profile">'.__('New Profile', 'wplister').'</a>';
-			$msg2  = sprintf($msg2, $link);
-			$msg   = "<p><b>$msg1</b></p><p>$msg2</p>";
-			$this->showMessage($msg);
+			$pm = new ProfilesModel();
+			$profiles = $pm->getAll();
+			if ( sizeof($profiles) > 0 ) {
+				self::updateOption('setup_next_step', '0');
+			} else {
+				$title = __('WP-Lister Setup - Step 4','wplister');
+				$msg1  = __('The final step: create your first listing profile.', 'wplister');
+				$msg2  = __('Click on %s and start defining your listing options.<br>After saving your profile, visit your Products page and select the products to list on eBay.','wplister');
+				$link  = '<a href="admin.php?page=wplister-profiles&action=add_new_profile">'.__('New Profile', 'wplister').'</a>';
+				$msg2  = sprintf($msg2, $link);
+				$msg   = "<p><b>$msg1</b></p><p>$msg2</p>";
+				$this->showMessage($msg);
+			}
 		
 		} elseif ( '5' == self::getOption('setup_next_step') ) {
 		
@@ -92,9 +107,154 @@ class WPL_Setup extends WPL_Core {
 	public function upgradeDB() {
 		global $wpdb;
 
-		$db_version = get_option('wplister_db_version', 1);
+		$db_version = get_option('wplister_db_version', 0);
+		$hide_message = $db_version == 0 ? true : false;
 		$msg = false;
 
+		// initialize db with version 4
+		if ( 4 > $db_version ) {
+			$new_db_version = 4;
+		
+
+			// create table: ebay_auctions
+			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_auctions` (
+			  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+			  `ebay_id` bigint(255) DEFAULT NULL,
+			  `auction_title` varchar(255) DEFAULT NULL,
+			  `auction_type` varchar(255) DEFAULT NULL,
+			  `listing_duration` varchar(255) DEFAULT NULL,
+			  `date_created` datetime DEFAULT NULL,
+			  `date_published` datetime DEFAULT NULL,
+			  `date_finished` datetime DEFAULT NULL,
+			  `end_date` datetime DEFAULT NULL,
+			  `price` float DEFAULT NULL,
+			  `quantity` int(11) DEFAULT NULL,
+			  `quantity_sold` int(11) DEFAULT NULL,
+			  `status` varchar(50) DEFAULT NULL,
+			  `details` text,
+			  `ViewItemURL` varchar(255) DEFAULT NULL,
+			  `GalleryURL` varchar(255) DEFAULT NULL,
+			  `post_content` text,
+			  `post_id` int(11) DEFAULT NULL,
+			  `profile_id` int(11) DEFAULT NULL,
+			  `profile_data` text,
+			  `template` varchar(255) DEFAULT '',
+			  `fees` float DEFAULT NULL,
+			  PRIMARY KEY  (`id`)
+			);";
+			#dbDelta($sql);
+			$wpdb->query($sql);
+						
+			// create table: ebay_categories
+			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_categories` (
+			  `cat_id` bigint(16) DEFAULT NULL,
+			  `parent_cat_id` bigint(11) DEFAULT NULL,
+			  `level` int(11) DEFAULT NULL,
+			  `leaf` tinyint(4) DEFAULT NULL,
+			  `version` int(11) DEFAULT NULL,
+			  `cat_name` varchar(255) DEFAULT NULL,
+			  `wp_term_id` int(11) DEFAULT NULL,
+			  KEY `cat_id` (`cat_id`),
+			  KEY `parent_cat_id` (`parent_cat_id`)		
+			);";
+			$wpdb->query($sql);
+						
+			// create table: ebay_store_categories
+			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_store_categories` (
+			  `cat_id` bigint(20) DEFAULT NULL,
+			  `parent_cat_id` bigint(20) DEFAULT NULL,
+			  `level` int(11) DEFAULT NULL,
+			  `leaf` tinyint(4) DEFAULT NULL,
+			  `version` int(11) DEFAULT NULL,
+			  `cat_name` varchar(255) DEFAULT NULL,
+			  `order` int(11) DEFAULT NULL,
+			  `wp_term_id` int(11) DEFAULT NULL,
+			  KEY `cat_id` (`cat_id`),
+			  KEY `parent_cat_id` (`parent_cat_id`)		
+			);";
+			$wpdb->query($sql);			
+			
+			// create table: ebay_payment
+			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_payment` (
+			  `payment_name` varchar(255) DEFAULT NULL,
+			  `payment_description` varchar(255) DEFAULT NULL,
+			  `version` int(11) DEFAULT NULL	
+			);";
+			$wpdb->query($sql);
+						
+			// create table: ebay_profiles
+			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_profiles` (
+			  `profile_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+			  `profile_name` varchar(255) DEFAULT NULL,
+			  `profile_description` varchar(255) DEFAULT NULL,
+			  `listing_duration` varchar(255) DEFAULT NULL,
+			  `type` varchar(255) DEFAULT NULL,
+			  `details` text,
+			  `conditions` text,
+			  PRIMARY KEY  (`profile_id`)	
+			);";
+			$wpdb->query($sql);
+						
+			// create table: ebay_shipping
+			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_shipping` (
+			  `service_id` int(11) DEFAULT NULL,
+			  `service_name` varchar(255) DEFAULT NULL,
+			  `service_description` varchar(255) DEFAULT NULL,
+			  `carrier` varchar(255) DEFAULT NULL,
+			  `international` tinyint(4) DEFAULT NULL,
+			  `version` int(11) DEFAULT NULL	
+			);";
+			$wpdb->query($sql);
+			
+			// create table: ebay_transactions
+			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_transactions` (
+			  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+			  `item_id` bigint(255) DEFAULT NULL,
+			  `transaction_id` bigint(255) DEFAULT NULL,
+			  `date_created` datetime DEFAULT NULL,
+			  `item_title` varchar(255) DEFAULT NULL,
+			  `price` float DEFAULT NULL,
+			  `quantity` int(11) DEFAULT NULL,
+			  `status` varchar(50) DEFAULT NULL,
+			  `details` text,
+			  `post_id` int(11) DEFAULT NULL,
+			  `buyer_userid` varchar(255) DEFAULT NULL,
+			  `buyer_name` varchar(255) DEFAULT NULL,
+			  `buyer_email` varchar(255) DEFAULT NULL,
+			  `eBayPaymentStatus` varchar(50) DEFAULT NULL,
+			  `CheckoutStatus` varchar(50) DEFAULT NULL,
+			  `ShippingService` varchar(50) DEFAULT NULL,
+			  `PaymentMethod` varchar(50) DEFAULT NULL,
+			  `ShippingAddress_City` varchar(50) DEFAULT NULL,
+			  `CompleteStatus` varchar(50) DEFAULT NULL,
+			  `LastTimeModified` datetime DEFAULT NULL,
+			  PRIMARY KEY (`id`)
+	  		);";
+			$wpdb->query($sql);
+			
+			// create table: ebay_log
+			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_log` (
+			  `id` int(11) NOT NULL AUTO_INCREMENT,
+			  `timestamp` datetime DEFAULT NULL,
+			  `request_url` text DEFAULT NULL,
+			  `request` text DEFAULT NULL,
+			  `response` text DEFAULT NULL,
+			  `callname` varchar(64) DEFAULT NULL,
+			  `success` varchar(16) DEFAULT NULL,
+			  `ebay_id` bigint(255) DEFAULT NULL,
+			  `user_id` int(11) DEFAULT NULL,	
+			  PRIMARY KEY (`id`)	
+			);";
+			$wpdb->query($sql);
+
+
+			// $db_version = $new_db_version;
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
+
+		}
+		
+		/*
 		// upgrade to version 2
 		if ( 2 > $db_version ) {
 			$new_db_version = 2;
@@ -153,7 +313,8 @@ class WPL_Setup extends WPL_Core {
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
 		}
-		
+		*/
+	
 		// TODO: include upgrade 5-9 in WPLister_Install class
 		
 		// upgrade to version 5
@@ -337,8 +498,8 @@ class WPL_Setup extends WPL_Core {
 		}
 
 
-		
-		if ( $msg )	$this->showMessage($msg);		
+		// show update message
+		if ( ($msg) && (!$hide_message) ) $this->showMessage($msg);		
 
 		#debug: update_option('wplister_db_version', 0);
 		
@@ -419,6 +580,43 @@ class WPL_Setup extends WPL_Core {
 
 		return false;
 	}
+
+
+	// check folders
+	public function checkFolders() {
+		// global $wpl_logger;
+		// $wpl_logger->info('creating wp-content/uploads/wp-lister/templates');		
+
+		// create wp-content/uploads/wp-lister/templates if not exists
+		$uploads = wp_upload_dir();
+		$uploaddir = $uploads['basedir'];
+
+		$wpldir = $uploaddir . '/wp-lister';
+		if ( !is_dir($wpldir) ) {
+
+			$result  = @mkdir( $wpldir );
+			if ($result===false) {
+				$this->showMessage( "Could not create template folder: " . $wpldir, 1 );	
+				return false;
+			}
+
+		}
+
+		$tpldir = $wpldir . '/templates';
+		if ( !is_dir($tpldir) ) {
+
+			$result  = @mkdir( $tpldir );
+			if ($result===false) {
+				$this->showMessage( "Could not create template folder: " . $tpldir, 1 );	
+				return false;
+			}
+
+		}
+
+		// $wpl_logger->info('template folder: '.$tpldir);		
+	
+	}
+	
 
 
 }

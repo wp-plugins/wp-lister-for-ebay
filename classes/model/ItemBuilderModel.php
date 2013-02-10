@@ -98,7 +98,11 @@ class ItemBuilderModel extends WPL_Model {
 		$item->Country = $profile_details['country'];
 		$item->Location = $profile_details['location'];
 		$item->DispatchTimeMax = $profile_details['dispatch_time'];
-		$item->ConditionID = $profile_details['condition_id'];
+
+		// item condition
+		if ( $profile_details['condition_id'] != 'none' ) {
+			$item->ConditionID = $profile_details['condition_id'];
+		}
 
 		// postal code
 		if ( $profile_details['postcode'] != '' ) {
@@ -335,6 +339,7 @@ class ItemBuilderModel extends WPL_Model {
 
 			$price = $this->getDynamicShipping( $opt['price'], $post_id );
 			$add_price = $this->getDynamicShipping( $opt['add_price'], $post_id );
+			if ( ( $price == '' ) || ( $opt['service_name'] == '' ) ) continue;
 
 			$ShippingServiceOptions = new ShippingServiceOptionsType();
 			$ShippingServiceOptions->setShippingService( $opt['service_name'] );
@@ -377,6 +382,7 @@ class ItemBuilderModel extends WPL_Model {
 			// foreach ($opt as $loc=>$price) {
 				$price = $this->getDynamicShipping( $opt['price'], $post_id );
 				$add_price = $this->getDynamicShipping( $opt['add_price'], $post_id );
+				if ( ( $price == '' ) || ( $opt['service_name'] == '' ) ) continue;
 
 				$InternationalShippingServiceOptions = new InternationalShippingServiceOptionsType();
 				$InternationalShippingServiceOptions->setShippingService( $opt['service_name'] );
@@ -891,6 +897,10 @@ class ItemBuilderModel extends WPL_Model {
 
 		$this->logger->debug('prepareTitle()  in: ' . $title );
 		$title = html_entity_decode( $title, ENT_QUOTES, 'UTF-8' );
+
+        // limit item title to 80 characters
+        if ( strlen($title) > 80 ) $title = substr( $title, 0, 77 ) . '...';
+
 		$this->logger->debug('prepareTitle() out: ' . $title );
 		return $title;
 	}
@@ -963,9 +973,9 @@ class ItemBuilderModel extends WPL_Model {
 	public function getProductImagesURL( $id ) {
 		global $wpdb;
 
-		$results = $wpdb->get_col( 
+    	$results = $wpdb->get_results( 
 			"
-			SELECT guid 
+			SELECT id, guid 
 			FROM {$wpdb->prefix}posts
 			WHERE post_type = 'attachment' 
 			  AND post_parent = '$id' 
@@ -973,18 +983,26 @@ class ItemBuilderModel extends WPL_Model {
 			"
 		);
 		$this->logger->debug( "getProductImagesURL( $id ) : " . print_r($results,1) );
+        #echo "<pre>";print_r($results);echo"</pre>";#die();
 		
+		$images = array();
+		foreach($results as $row) {
+            // $url = wp_get_attachment_url( $row->id );
+            $url = $row->guid ? $row->guid : wp_get_attachment_url( $row->id );
+			$images[] = $url;
+		}
+
 		// Shopp stores images in db by default...
 		if ( ProductWrapper::plugin == 'shopp' ) {
-			$results = ProductWrapper::getAllImages( $id );
-			// $this->logger->info( "SHOPP - getAllImages( $id ) : " . print_r($results,1) );
+			$images = ProductWrapper::getAllImages( $id );
+			// $this->logger->info( "SHOPP - getAllImages( $id ) : " . print_r($images,1) );
 		}
 
 		$filenames = array();
-		foreach($results as $row) {
-			$filenames[] = $this->removeHttpsFromUrl( $row );
+		foreach($images as $imageurl) {
+			$filenames[] = $this->removeHttpsFromUrl( $imageurl );
 		}
-		
+
 		return $filenames;
 	}
 

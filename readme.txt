@@ -86,6 +86,18 @@ Already working on it.
 
 == Changelog ==
 
+= 1.1.3 =
+* compatible with WooCommerce 2.0 RC1
+* fixed error when shipping options were not properly set up
+* new default category for item conditions (Pro)
+
+= 1.1.2 =
+* new option to switch ebay accounts
+* new network admin page to manage multisite networks
+* improved multisite installation
+* fixed issues creating orders on WooCommerce
+* truncate listing title after 80 characters automatically
+
 = 1.1.1 =
 * support for JigoShop (beta) 
 * support for custom post meta overrides

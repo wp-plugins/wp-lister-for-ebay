@@ -110,8 +110,8 @@ class WPL_Model {
 
 			// #37 means soap error - and htmlentities have to be encoded (maybe not anymore?)
 			if ( $error->getErrorCode() == 37 ) { 
-				// $longMessage = htmlspecialchars( $error->getLongMessage() );
-				$longMessage = $error->getLongMessage();
+				$longMessage = htmlspecialchars( $error->getLongMessage() );
+				// $longMessage = $error->getLongMessage();
 			} else {
 				$longMessage = htmlspecialchars( $error->getLongMessage() );
 				// $longMessage = $error->getLongMessage();

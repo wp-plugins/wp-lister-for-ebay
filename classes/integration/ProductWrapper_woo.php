@@ -118,7 +118,7 @@ class ProductWrapper {
 		global $woocommerce;
 		$attributes = array();
 
-		$product = new WC_Product( $post_id );
+		$product = self::getProduct( $post_id );
 		$attribute_taxnomies = $product->get_attributes();
 		
 		global $wpl_logger;
@@ -151,12 +151,14 @@ class ProductWrapper {
 	// check if product has variations
 	static function hasVariations( $post_id ) {
 		
-		$product = new WC_Product( $post_id );
-		$variations = $product->get_available_variations();
+		$product = self::getProduct( $post_id );
+		if ( $product->product_type == 'variable' ) return true;
 
-		if ( ! is_array($variations) ) return false;
-		if ( 0 == count($variations) ) return false;
-		return true;
+		// $variations = $product->get_available_variations();
+		// if ( ! is_array($variations) ) return false;
+		// if ( 0 == count($variations) ) return false;
+
+		return false;
 
 	}	
 
@@ -164,7 +166,7 @@ class ProductWrapper {
 	static function getVariations( $post_id ) {
 		global $woocommerce;
 
-		$product = new WC_Product( $post_id );
+		$product = self::getProduct( $post_id );
 		$available_variations = $product->get_available_variations();
 		$attributes = $product->get_variation_attributes();
 
@@ -268,8 +270,6 @@ class ProductWrapper {
 	                    [Size] => large
 	                    [Colour] => yellow
 	                )
-		            [name] => yellow
-		            [group_name] => Colour
 		            [price] => 
 		            [stock] => 
 		            [weight] => 
@@ -285,8 +285,6 @@ class ProductWrapper {
 	                    [Size] => large
 	                    [Colour] => orange
 	                )
-		            [name] => orange
-		            [group_name] => Colour
 		            [price] => 
 		            [stock] => 
 		            [weight] => 
@@ -350,6 +348,19 @@ class ProductWrapper {
 		return false;
 	}	
 	
+	// get WooCommerce product object (private)
+	static function getProduct( $post_id, $is_variation = false ) {
+
+		// use get_product() on WC 2.0+
+		if ( function_exists('get_product') ) {
+			return get_product( $post_id );
+		} else {
+			// instantiate WC_Product on WC 1.x
+			return $is_variation ? new WC_Product_Variation( $post_id ) : new WC_Product( $post_id );
+		}
+
+	}	
+	
 	
 	
 }
@@ -379,7 +390,7 @@ add_action('manage_product_posts_custom_column', 'wplister_woocommerce_custom_pr
 
 function wplister_woocommerce_custom_product_columns( $column ) {
 	global $post, $woocommerce;
-	// $product = new WC_Product($post->ID);
+	// $product = self::getProduct($post->ID);
 
 	switch ($column) {
 		case "listed" :
@@ -430,7 +441,7 @@ function wplister_on_woocommerce_product_quick_edit_save( $post_id, $post ) {
 	if ( $post->post_type != 'product' ) return $post_id;
 
 	// global $woocommerce, $wpdb;
-	// $product = new WC_Product( $post_id );
+	// $product = self::getProduct( $post_id );
 
 	$lm = new ListingsModel();
 	$lm->markItemAsModified( $post_id );

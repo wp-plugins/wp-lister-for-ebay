@@ -2,9 +2,11 @@
 
 class WPLister_Install {
 	
-	public function __construct( $file ) {
-		register_activation_hook( $file, array( &$this, 'onWpActivatePlugin' ) );
-		add_action( 'wpmu_new_blog', array( &$this, 'onWpmuNewBlog' ), 10, 6 );
+	public function __construct( $file = false ) {
+		if ( $file ) {
+			register_activation_hook( $file, array( &$this, 'onWpActivatePlugin' ) );
+			add_action( 'wpmu_new_blog', array( &$this, 'onWpmuNewBlog' ), 10, 6 );
+		}
 	}
  
 	public function onWpActivatePlugin( $networkwide ) {
@@ -27,8 +29,8 @@ class WPLister_Install {
 	                switch_to_blog($blog_id);
 
 					$this->createOptions( $networkwide );
-					$this->createFolders( $networkwide );
-					$this->createTables( $networkwide );
+					$this->createFolders();
+					// $this->createTables();
 
 					restore_current_blog();
 	            }
@@ -40,8 +42,8 @@ class WPLister_Install {
 	    } else {
 	    	// no multisite
 			$this->createOptions( $networkwide );
-			$this->createFolders( $networkwide );
-			$this->createTables( $networkwide );
+			$this->createFolders();
+			// $this->createTables();
 	    }
 
         // debug:
@@ -57,8 +59,8 @@ class WPLister_Install {
 	    if (is_plugin_active_for_network('wp-lister/wp-lister.php')) {
 	        switch_to_blog($blog_id);
 			$this->createOptions( $networkwide );
-			$this->createFolders( $networkwide );
-			$this->createTables( $networkwide );
+			$this->createFolders();
+			// $this->createTables();
 			restore_current_blog();
 	    }
 	}
@@ -66,9 +68,11 @@ class WPLister_Install {
 	public function createOptions( $networkwide ) {
 
         if ( $networkwide ) {
-			WPL_WPLister::addOption( 'is_network_activated','1' );
+			WPL_WPLister::addOption( 'is_network_activated', '1' );
+			WPL_WPLister::addOption( 'is_enabled', 'Y' );
         } else {
-			WPL_WPLister::addOption( 'is_network_activated','0' );
+			WPL_WPLister::addOption( 'is_network_activated', '0' );
+			WPL_WPLister::addOption( 'is_enabled', 'Y' );
         }
 
 		WPL_WPLister::addOption( 'ebay_token',			'' );
@@ -81,15 +85,15 @@ class WPLister_Install {
 		WPL_WPLister::addOption( 'log_level',			'' );
 		WPL_WPLister::addOption( 'log_to_db',			'0' );
 		WPL_WPLister::addOption( 'uninstall',			'0' );
-		WPL_WPLister::addOption( 'db_version',			'4' );
+		WPL_WPLister::addOption( 'db_version',			'1' );
 
 		WPL_WPLister::addOption( 'setup_next_step',		'1' );
 
 	}
 	
-	public function createFolders( $networkwide ) {
-		global $wpl_logger;
-		$wpl_logger->info('creating wp-content/uploads/wp-lister/templates etc.');		
+	public function createFolders() {
+		// global $wpl_logger;
+		// $wpl_logger->info('creating wp-content/uploads/wp-lister/templates etc.');		
 
 		// make subdirectories in wp-content/uploads
 		$uploads = wp_upload_dir();
@@ -101,11 +105,11 @@ class WPLister_Install {
 		$tpldir = $wpldir . '/templates';
 		if ( !is_dir($tpldir) ) mkdir($tpldir);
 
-		$wpl_logger->info('template folder: '.$tpldir);		
+		// $wpl_logger->info('template folder: '.$tpldir);		
 	
 	}
 	
-	public function createTables( $networkwide ) {
+	public function createTables() {
 		global $wpdb;
         global $wpl_logger;
         // $wpl_logger = new WPL_Logger();
@@ -281,8 +285,8 @@ class WPLister_Uninstall {
 	
 	// TODO: when uninstalling, maybe have an option to backup and restore settings
 	
-	public function __construct( $file ) {
-		register_deactivation_hook( $file, array( &$this, 'onWpDeactivatePlugin' ) );
+	public function __construct( $file = false ) {
+		if ($file) register_deactivation_hook( $file, array( &$this, 'onWpDeactivatePlugin' ) );
 	}
 	
 	public function onWpDeactivatePlugin( $networkwide ) {
@@ -331,6 +335,9 @@ class WPLister_Uninstall {
 
 			// remove options
 			$wpdb->query( 'DELETE FROM '.$wpdb->prefix."options WHERE option_name LIKE 'wplister_%' " );
+
+			// clear options from cache
+			wp_cache_flush();
 
 		}
 
