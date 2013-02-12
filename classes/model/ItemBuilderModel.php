@@ -339,7 +339,8 @@ class ItemBuilderModel extends WPL_Model {
 
 			$price = $this->getDynamicShipping( $opt['price'], $post_id );
 			$add_price = $this->getDynamicShipping( $opt['add_price'], $post_id );
-			if ( ( $price == '' ) || ( $opt['service_name'] == '' ) ) continue;
+			if ( $price == '' ) $price = 0;
+			if ( $opt['service_name'] == '' ) continue;
 
 			$ShippingServiceOptions = new ShippingServiceOptionsType();
 			$ShippingServiceOptions->setShippingService( $opt['service_name'] );
@@ -382,7 +383,9 @@ class ItemBuilderModel extends WPL_Model {
 			// foreach ($opt as $loc=>$price) {
 				$price = $this->getDynamicShipping( $opt['price'], $post_id );
 				$add_price = $this->getDynamicShipping( $opt['add_price'], $post_id );
-				if ( ( $price == '' ) || ( $opt['service_name'] == '' ) ) continue;
+				// if ( ( $price == '' ) || ( $opt['service_name'] == '' ) ) continue;
+				if ( $price == '' ) $price = 0;
+				if ( $opt['service_name'] == '' ) continue;
 
 				$InternationalShippingServiceOptions = new InternationalShippingServiceOptionsType();
 				$InternationalShippingServiceOptions->setShippingService( $opt['service_name'] );
