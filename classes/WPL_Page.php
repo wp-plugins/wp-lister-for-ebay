@@ -97,5 +97,25 @@ class WPL_Page extends WPL_Core {
 
 	}
 
+	function get_i8n_html( $basename )	{
+		if ( empty( $basename ) ) return false;
+		if ( ! defined( 'WPLANG' ) ) define( 'WPLANG', 'en_US' );
+
+		$lang = defined('ICL_LANGUAGE_CODE') ? ICL_LANGUAGE_CODE : substr( WPLANG, 0, 2 ); // WPML COMPATIBILITY
+		$lang_folder = trailingslashit(WPLISTER_PATH) . 'views/lang/'; 
+
+		$default_file    = $lang_folder . $basename . '_en.html';
+		$translated_file = $lang_folder . $basename . '_' . $lang . '.html';
+
+		$file = file_exists( $translated_file ) ? $translated_file : $default_file;
+		if ( is_readable( $file ) ) return file_get_contents( $file );
+
+		$this->showMessage('file not found: '.$file,1,1);
+		
+		return false;
+	}
+
+
+
 }
 

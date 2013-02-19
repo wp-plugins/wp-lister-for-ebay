@@ -258,9 +258,14 @@ class SettingsPage extends WPL_Page {
 					// restore sandbox token
 					if ( isset($tokens['sandbox']) ) {
 						self::updateOption( 'ebay_token', $tokens['sandbox']['token'] );
-						$this->showMessage( "Enabled sandbox mode. Your token was restored." );
+						self::updateOption( 'sandbox_enabled',	$this->getValueFromPost( 'option_sandbox_enabled' ) );
+						$this->initEC();
+						$UserID = $this->EC->GetUser();
+						$this->EC->closeEbay();
+						$this->showMessage( __('Enabled sandbox mode.','wplister') . ' ' .
+											sprintf( "Your token for %s was restored.", $UserID ) );
 					} else {
-						$this->showMessage( "Enabled sandbox mode." );
+						$this->showMessage( __('Enabled sandbox mode.','wplister') );
 					}
 
 				} else {
@@ -274,25 +279,32 @@ class SettingsPage extends WPL_Page {
 					// restore production token
 					if ( isset($tokens['production']) ) {
 						self::updateOption( 'ebay_token', $tokens['production']['token'] );
-						$this->showMessage( "Switched to production mode. Your token was restored." );
+						self::updateOption( 'sandbox_enabled',	$this->getValueFromPost( 'option_sandbox_enabled' ) );
+						$this->initEC();
+						$UserID = $this->EC->GetUser();
+						$this->EC->closeEbay();
+						$this->showMessage( __('Switched to production mode.','wplister') . ' ' .
+											sprintf( "Your token for %s was restored.", $UserID ) );
 					} else {
-						$this->showMessage( "Switched to production mode." );
+						$this->showMessage( __('Switched to production mode.','wplister') );
 					}
 
 				}
 			}
 
-			// new manual token ?
-			if ( $oldToken != $this->getValueFromPost( 'text_ebay_token' ) ) {
-				self::updateOption( 'ebay_token', $this->getValueFromPost( 'text_ebay_token' ) );
-				$this->showMessage( __('Your token was changed.','wplister') );
-			}
-
-
 			self::updateOption( 'log_level',		$this->getValueFromPost( 'text_log_level' ) );
 			self::updateOption( 'log_to_db',		$this->getValueFromPost( 'option_log_to_db' ) );
 			self::updateOption( 'sandbox_enabled',	$this->getValueFromPost( 'option_sandbox_enabled' ) );
 
+			// new manual token ?
+			if ( $oldToken != $this->getValueFromPost( 'text_ebay_token' ) ) {
+				self::updateOption( 'ebay_token', $this->getValueFromPost( 'text_ebay_token' ) );
+				$this->initEC();
+				$UserID = $this->EC->GetUser();
+				$this->EC->closeEbay();
+				$this->showMessage( __('Your token was changed.','wplister') );
+				$this->showMessage( __('Your UserID is ','wplister') . $UserID );
+			}
 
 			$this->showMessage( __('Settings updated.','wplister') );
 

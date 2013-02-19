@@ -116,10 +116,10 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
 
     <h3>Debug Info</h3>
     <pre>
-    	WP-Lister: <?php echo $wpl_version ?>
+    	WP-Lister: <?php echo $wpl_version ?> <?php echo WPLISTER_LIGHT ? '' : 'Pro' ?>
 
     	Database : <?php echo get_option('wplister_db_version') ?>
-
+    	
     	PHP      : <?php echo phpversion() ?>
 
     	WordPress: <?php echo get_bloginfo ( 'version' ) ?>
@@ -131,6 +131,8 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
     	Site URL : <?php echo get_bloginfo ( 'wpurl' ) ?>
     	
     	Admin    : <?php echo get_bloginfo ( 'admin_email' ) ?>
+
+    	Email    : <?php echo get_option('wplister_license_email') ?>
     </pre>
 
 

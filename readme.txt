@@ -31,6 +31,7 @@ We worked hard to make WP-Lister easy to use but flexible. The workflow of listi
 
 * english
 * german
+* italian
 
 To make WP-Lister available in more languages, we will provide a free license for WP-Lister Pro for everyone who will provide and maintain a new localization.
 
@@ -85,6 +86,11 @@ Already working on it.
 2. Profile Editor
 
 == Changelog ==
+
+= 1.1.3.4 =
+* added italian localization (thanks Giuseppe)
+* updated german localization
+* various minor fixes and improvements
 
 = 1.1.3 =
 * compatible with WooCommerce 2.0 RC1

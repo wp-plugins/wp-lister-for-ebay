@@ -22,6 +22,10 @@ class HelpPage extends WPL_Page {
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,
 			'message'					=> $this->message,
+
+			'content_help_setup'		=> $this->get_i8n_html('help_setup'),
+			'content_help_listing'		=> $this->get_i8n_html('help_listing'),
+
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-settings'
 		);
 		$this->display( 'tutorial_page', $aData );

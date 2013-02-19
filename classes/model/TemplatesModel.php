@@ -42,11 +42,13 @@ class TemplatesModel extends WPL_Model {
 
 		$templates = array();
 		$files = glob( $upload_dir['basedir'].'/wp-lister/templates/*/template.html' );
-		foreach ($files as $file) {
-			// save template path relative to WP_CONTENT_DIR
-			// $file = str_replace(WP_CONTENT_DIR,'',$file);
-			$file = basename(dirname( $file ));
-			$templates[] = $this->getItem( $file );
+		if ( is_array($files) ) {
+			foreach ($files as $file) {
+				// save template path relative to WP_CONTENT_DIR
+				// $file = str_replace(WP_CONTENT_DIR,'',$file);
+				$file = basename(dirname( $file ));
+				$templates[] = $this->getItem( $file );
+			}		
 		}
 
 		return $templates;	

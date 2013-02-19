@@ -23,6 +23,7 @@ class TransactionsModel extends WPL_Model {
 	var $count_skipped  = 0;
 	var $count_updated  = 0;
 	var $count_inserted = 0;
+	var $count_failed   = 0;
 	var $report         = array();
 	var $ModTimeTo      = false;
 	var $ModTimeFrom    = false;
@@ -180,8 +181,14 @@ class TransactionsModel extends WPL_Model {
 		} else {
 			// create new transaction
 			$this->logger->info( 'insert transaction #'.$data['transaction_id'].' for item #'.$data['item_id'] );
-			$wpdb->insert( $this->tablename, $data );
+			$result = $wpdb->insert( $this->tablename, $data );
+			if ( ! $result ) {
+				$this->logger->error( 'insert transaction failed - MySQL said: '.$wpdb->last_error );
+				$this->addToReport( 'error', $data, false, false, $wpdb->last_error );
+				return false;
+			}
 			$id = $wpdb->insert_id;
+			// $this->logger->info( 'insert_id: '.$id );
 
 
 			// update listing sold quantity and status
@@ -216,12 +223,20 @@ class TransactionsModel extends WPL_Model {
 
 	}
 
+	// convert 2013-02-14T08:00:58.000Z to 2013-02-14 08:00:58
+	function convertEbayDateToSql( $ebay_date ) {
+		$search = array( 'T', '.000Z' );
+		$replace = array( ' ', '' );
+		$sql_date = str_replace( $search, $replace, $ebay_date );
+		return $sql_date;
+	}
+
 	function mapItemDetailToDB( $Detail ) {
 		//#type $Detail TransactionType
 
 		$data['item_id']                   = $Detail->Item->ItemID;
 		$data['transaction_id']            = $Detail->TransactionID;
-		$data['date_created']              = $Detail->CreatedDate;
+		$data['date_created']              = $this->convertEbayDateToSql( $Detail->CreatedDate );
 		$data['price']                     = $Detail->TransactionPrice->value;
 		$data['quantity']                  = $Detail->QuantityPurchased;
 		$data['buyer_userid']              = $Detail->Buyer->UserID;
@@ -236,7 +251,7 @@ class TransactionsModel extends WPL_Model {
 		$data['ShippingAddress_City']      = $Detail->Buyer->BuyerInfo->ShippingAddress->CityName;
 		$data['PaymentMethod']             = $Detail->Status->PaymentMethodUsed;
 		$data['CompleteStatus']            = $Detail->Status->CompleteStatus;
-		$data['LastTimeModified']          = $Detail->Status->LastTimeModified;
+		$data['LastTimeModified']          = $this->convertEbayDateToSql( $Detail->Status->LastTimeModified );
 		$data['OrderLineItemID']           = $Detail->OrderLineItemID;
 
 		$listingsModel = new ListingsModel();
@@ -271,7 +286,7 @@ class TransactionsModel extends WPL_Model {
 	}
 
 
-	function addToReport( $status, $data, $newstock = false, $wp_order_id = false ) {
+	function addToReport( $status, $data, $newstock = false, $wp_order_id = false, $error = false ) {
 
 		$rep = new stdClass();
 		$rep->status          = $status;
@@ -283,6 +298,7 @@ class TransactionsModel extends WPL_Model {
 		$rep->data            = $data;
 		$rep->newstock        = $newstock;
 		$rep->wp_order_id     = $wp_order_id;
+		$rep->error     	  = $error;
 
 		$this->report[] = $rep;
 
@@ -295,6 +311,10 @@ class TransactionsModel extends WPL_Model {
 				break;
 			case 'inserted':
 				$this->count_inserted++;
+				break;
+			case 'error':
+			case 'failed':
+				$this->count_failed++;
 				break;
 		}
 		$this->count_total++;
@@ -316,6 +336,7 @@ class TransactionsModel extends WPL_Model {
 		$html .= __('New transactions created','wplister') .': '. $this->count_inserted .' '. '<br>';
 		$html .= __('Existing transactions updated','wplister')  .': '. $this->count_updated  .' '. '<br>';
 		$html .= __('Foreign transactions skipped','wplister')  .': '. $this->count_skipped  .' '. '<br>';
+		if ( $this->count_failed ) $html .= __('Transactions failed to create','wplister')  .': '. $this->count_failed  .' '. '<br>';
 		$html .= '<br>';
 
 		$html .= '<table style="width:99%">';
@@ -339,6 +360,11 @@ class TransactionsModel extends WPL_Model {
 			$html .= '<td>'.@$item->data['buyer_userid'].'</td>';
 			$html .= '<td>'.$item->date_created.'</td>';
 			$html .= '</tr>';
+			if ( $item->error ) {
+				$html .= '<tr>';
+				$html .= '<td colspan="7" style="color:darkred;">ERROR: '.$item->error.'</td>';
+				$html .= '</tr>';			
+			}
 		}
 
 		$html .= '</table>';
