@@ -26,6 +26,12 @@
 	<br style="clear:both;"/>
 
 
+	<?php if ( wp_next_scheduled( 'wplister_update_auctions' ) ) : ?>
+	<p>
+		<?php echo __('Next scheduled update','wplister'); ?>: 
+		<?php echo human_time_diff( wp_next_scheduled( 'wplister_update_auctions' ), current_time('timestamp',1) ) ?>
+	</p>
+	<?php endif; ?>
 
 	<form method="post" action="<?php echo $wpl_form_action; ?>">
 		<div class="submit" style="padding-top: 0; float: left;">

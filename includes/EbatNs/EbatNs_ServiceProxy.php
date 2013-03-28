@@ -17,8 +17,8 @@
 // Initial, PHP5
 //
 // 
-// auto-generated 09.05.2012 13:19 
-// Ebay-Schema Version 771
+// auto-generated 10.09.2012 12:58 
+// Ebay-Schema Version 789
 //
 /**
  * Load files we depend on.
@@ -30,7 +30,7 @@ require_once 'EbatNs_Session.php';
 /**
  * The WSDL version the SDK is built against.
  */
-define('EBAY_WSDL_VERSION', '771');
+define('EBAY_WSDL_VERSION', '789');
 
 /**
  * This class is the basic interface to the eBay-Webserice for the user.
@@ -721,15 +721,6 @@ class EbatNs_ServiceProxy extends EbatNs_Client
 		return $this->call('GetPictureManagerOptions', $request);
 	}
 	/**
-	 * @return GetPopularKeywordsResponseType
-	 * @param GetPopularKeywordsRequestType $request 
-	 */
-	function GetPopularKeywords($request)
-	{
-		$request->setVersion(EBAY_WSDL_VERSION);
-		return $this->call('GetPopularKeywords', $request);
-	}
-	/**
 	 * @return GetProductFamilyMembersResponseType
 	 * @param GetProductFamilyMembersRequestType $request 
 	 */
@@ -782,15 +773,6 @@ class EbatNs_ServiceProxy extends EbatNs_Client
 	{
 		$request->setVersion(EBAY_WSDL_VERSION);
 		return $this->call('GetProductSellingPages', $request);
-	}
-	/**
-	 * @return GetProductsResponseType
-	 * @param GetProductsRequestType $request 
-	 */
-	function GetProducts($request)
-	{
-		$request->setVersion(EBAY_WSDL_VERSION);
-		return $this->call('GetProducts', $request);
 	}
 	/**
 	 * @return GetPromotionRulesResponseType

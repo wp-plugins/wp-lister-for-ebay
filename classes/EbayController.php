@@ -35,7 +35,7 @@ class EbayController {
 
     static function loadEbayClasses() {
         // we want to be patient when talking to ebay
-        set_time_limit(600);
+        if( ! ini_get('safe_mode') ) set_time_limit(600);
 
         // add EbatNs folder to include path - required for SDK
         $incPath = WPLISTER_PATH . '/includes/EbatNs';

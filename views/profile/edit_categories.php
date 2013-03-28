@@ -47,7 +47,7 @@
 						<div class="inside">
 
 							<div style="position:relative; margin: 0 5px;">
-								<label for="wpl-text-ebay_category_1_name" class="text_label"><?php echo __('Category','wplister'); ?> 1: *</label>
+								<label for="wpl-text-ebay_category_1_name" class="text_label"><?php echo __('Category','wplister'); ?> 1: <?php echo WPLISTER_LIGHT ? '*' : '' ?></label>
 								<input type="hidden" name="wpl_e2e_ebay_category_1_id" id="ebay_category_id_1" value="<?php echo $item_details['ebay_category_1_id']; ?>" class="" />
 								<span  id="ebay_category_name_1" class="text_input" style="width:45%;float:left;"><?php echo $item_details['ebay_category_1_name']; ?></span>
 								<div class="category_row_actions">

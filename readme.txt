@@ -87,6 +87,32 @@ Already working on it.
 
 == Changelog ==
 
+= 1.1.6.3 =
+* improvements on handling items manually relisted on ebay website
+
+= 1.1.6 =
+* updated eBay API to version 789
+* fixed global shipping option
+* minor improvements
+
+= 1.1.5.6 =
+* improvements for creating and updating orders in WooCommerce (Pro only)
+* beta support for listing to eBay US and eBay Motors without switching sites
+* set PicturePack to Supersize when uploading images to EPS (Pro only)
+* added Global Shipping option
+* fixed an issue with item specifics when no default category was selected
+
+= 1.1.5 =
+* beta support for Automated Relisting Rules (Seller Manager Pro account required) (Pro only)
+* support for pulling best offer options from WooCommerce Name Your Price plugin
+* fixed an issue with PackagingHandlingCosts when calculated shipping is used (Pro only)
+
+= 1.1.4.1 =
+* various improvements on calculated shipping services (Pro only)
+* use SKU for item specifics
+* new shortcodes for passing product excerpt through nl2br()
+* faster inventory sync (Pro only)
+
 = 1.1.3.4 =
 * added italian localization (thanks Giuseppe)
 * updated german localization

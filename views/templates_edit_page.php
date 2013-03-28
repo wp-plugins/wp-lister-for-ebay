@@ -9,7 +9,8 @@
 
 	#styles_editor,
 	#header_editor,
-	#footer_editor {
+	#footer_editor,
+	#functs_editor {
 		height: 240px;
 		width: 100%;
 		position: relative;
@@ -170,6 +171,7 @@
 							</p>
 							<p>
 								<code>[[product_excerpt]]</code> or<br>
+								<code>[[product_excerpt_nl2br]]</code> or<br>
 								<code>[[product_additional_content]]</code><br>
 								additional product content<br>
 							</p>
@@ -271,8 +273,10 @@
 					</div>
 
 				    <?php 
+
 				    	// template stylesheet url
-				    	$stylesheet_url = WP_CONTENT_URL . $wpl_item['template_path'] . '/style.css';
+				    	$stylesheet 	 = WP_CONTENT_DIR . $wpl_item['template_path'] . '/style.css';
+				    	$stylesheet_url  = WP_CONTENT_URL . $wpl_item['template_path'] . '/style.css' . '?ver='.@filemtime( $stylesheet );
 				    	// $stylesheet_url = str_replace(' ', urlencode(' '), $stylesheet_url);
 				    	if ( $wpl_add_new_template ) $stylesheet_url = $wpl_plugin_url . '/templates/default/style.css';
 				    	// echo "loading stylesheet $stylesheet_url <br>";
@@ -319,6 +323,14 @@
 				    	<textarea name="wpl_e2e_tpl_footer"><?php echo $wpl_footer ?></textarea>
 				    	<div id="footer_editor"></div>
 				    </div>
+				    <p>&nbsp;</p>
+				    
+				    <h2>functions.php</h2>
+
+				    <div id="functions-editor-wrapper">
+				    	<textarea name="wpl_e2e_tpl_functions"><?php echo $wpl_functions ?></textarea>
+				    	<div id="functs_editor"></div>
+				    </div>
 
 
 
@@ -359,16 +371,20 @@
 			    var styles_editor = ace.edit("styles_editor");
 			    var header_editor = ace.edit("header_editor");
 			    var footer_editor = ace.edit("footer_editor");
+			    var functs_editor = ace.edit("functs_editor");
 			    var styles_textarea = jQuery('textarea[name="wpl_e2e_tpl_css"]').hide();
 			    var header_textarea = jQuery('textarea[name="wpl_e2e_tpl_header"]').hide();
 			    var footer_textarea = jQuery('textarea[name="wpl_e2e_tpl_footer"]').hide();
+			    var functs_textarea = jQuery('textarea[name="wpl_e2e_tpl_functions"]').hide();
 
 			    styles_editor.setTheme("ace/theme/chrome");
 			    header_editor.setTheme("ace/theme/chrome");
 			    footer_editor.setTheme("ace/theme/chrome");
+			    functs_editor.setTheme("ace/theme/chrome");
 			    styles_editor.setShowPrintMargin( false );
 			    header_editor.setShowPrintMargin( false );
 			    footer_editor.setShowPrintMargin( false );
+			    functs_editor.setShowPrintMargin( false );
 
 			    // var JavaScriptMode = require("ace/mode/javascript").Mode;
 			    var CssMode = require("ace/mode/css").Mode;
@@ -376,12 +392,14 @@
 			    styles_editor.getSession().setMode(new CssMode());
 			    header_editor.getSession().setMode(new PhpMode());
 			    footer_editor.getSession().setMode(new PhpMode());
+			    functs_editor.getSession().setMode(new PhpMode());
 	
 			    // connect editors with textareas
 			    // http://stackoverflow.com/questions/6440439/how-do-i-make-a-textarea-an-ace-editor
 			    styles_editor.getSession().setValue(styles_textarea.val());
 			    header_editor.getSession().setValue(header_textarea.val());
 			    footer_editor.getSession().setValue(footer_textarea.val());
+			    functs_editor.getSession().setValue(functs_textarea.val());
 
 			    styles_editor.getSession().on('change', function(){
 					styles_textarea.val(styles_editor.getSession().getValue());
@@ -391,6 +409,9 @@
 				});
 			    footer_editor.getSession().on('change', function(){
 					footer_textarea.val(footer_editor.getSession().getValue());
+				});
+			    functs_editor.getSession().on('change', function(){
+					functs_textarea.val(functs_editor.getSession().getValue());
 				});
 				// or just call
 				// textarea.val(editor.getSession().getValue());

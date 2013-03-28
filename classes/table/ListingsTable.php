@@ -123,7 +123,7 @@ class ListingsTable extends WP_List_Table {
             'open'            => sprintf('<a href="%s" target="_blank">%s</a>',$item['ViewItemURL'],__('View on eBay','wplister')),
             'revise'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'revise',$item['id'],__('Revise','wplister')),
             'end_item'        => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'end_item',$item['id'],__('End Listing','wplister')),
-            #'update'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'update',$item['id'],__('Update','wplister')),
+            'update'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'update',$item['id'],__('Update','wplister')),
             #'open'           => sprintf('<a href="%s" target="_blank">%s</a>',$item['ViewItemURL'],__('Open in new tab','wplister')),
             'relist'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'relist',$item['id'],__('Relist','wplister')),
             'delete'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete',$item['id'],__('Delete','wplister')),
@@ -166,9 +166,11 @@ class ListingsTable extends WP_List_Table {
             $variations_html .= '<tr><th>';
             $variations_html .= '&nbsp;';
             $variations_html .= '</th><th>';
-            foreach ($variations[0]['variation_attributes'] as $name => $value) {
-                $variations_html .= $name;
-                $variations_html .= '</th><th>';
+            if ( is_array( $variations[0]['variation_attributes'] ) ) {
+                foreach ($variations[0]['variation_attributes'] as $name => $value) {
+                    $variations_html .= $name;
+                    $variations_html .= '</th><th>';
+                }
             }
             $variations_html .= __('Price','wplister');
             $variations_html .= '</th></tr>';
@@ -248,6 +250,7 @@ class ListingsTable extends WP_List_Table {
         if ( $item['status'] == 'ended' ) unset( $actions['preview_auction'] );
         if ( $item['status'] != 'ended' ) unset( $actions['delete'] );
         if ( $item['status'] != 'ended' ) unset( $actions['relist'] );
+        if ( $item['status'] != 'relisted' ) unset( $actions['update'] );
 
         //Return the title contents
         //return sprintf('%1$s <span style="color:silver">%2$s</span>%3$s',
@@ -411,6 +414,10 @@ class ListingsTable extends WP_List_Table {
             case 'changed':
                 $color = 'purple';
                 $value = __('changed','wplister');
+                break;
+            case 'relisted':
+                $color = 'purple';
+                $value = __('relisted','wplister');
                 break;
             default:
                 $color = 'black';

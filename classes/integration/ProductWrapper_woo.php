@@ -119,6 +119,8 @@ class ProductWrapper {
 		$attributes = array();
 
 		$product = self::getProduct( $post_id );
+		if ( ! $product ) return array();
+		
 		$attribute_taxnomies = $product->get_attributes();
 		
 		global $wpl_logger;

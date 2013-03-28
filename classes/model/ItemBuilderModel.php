@@ -54,6 +54,13 @@ class ItemBuilderModel extends WPL_Model {
 			$item->ListingType = $p['auction_type'];
 		}
 
+		// support for WooCommerce Name Your Price plugin
+		$nyp_enabled = get_post_meta( $p['post_id'], '_nyp', true ) == 'yes' ? true : false;
+		if ( $nyp_enabled ) {
+			$suggested_price = get_post_meta( $p['post_id'], '_suggested_price', true );
+			if ( $suggested_price ) $start_price = $suggested_price;
+		}
+
 		// Set the Listing Starting Price and Buy It Now Price
 		$item->StartPrice = new AmountType();
 		$item->StartPrice->setTypeValue( $start_price );
@@ -73,6 +80,14 @@ class ItemBuilderModel extends WPL_Model {
 		// SKU - omit if empty
 		if ($product_sku) $item->SKU = $product_sku;
 
+
+		// set UPC - if enabled
+		if ( ($product_sku) && ( @$profile_details['use_sku_as_upc'] == '1' ) ) {
+			$ProductListingDetails = new ProductListingDetailsType();
+			$ProductListingDetails->setUPC( $product_sku );
+			$item->setProductListingDetails( $ProductListingDetails );
+		}
+		
 
 		// handle product image
 		$item->PictureDetails = new PictureDetailsType();
@@ -138,6 +153,9 @@ class ItemBuilderModel extends WPL_Model {
 		// $item->PaymentMethods[] = 'PayPal';
 		// $item->PayPalEmailAddress = 'youraccount@yourcompany.com';
 		foreach ( $profile_details['payment_options'] as $payment_method ) {
+
+			if ( $payment_method['payment_name'] == '' ) continue;			
+
 			# BuyerPaymentMethodCodeType
 			$item->addPaymentMethods( $payment_method['payment_name'] );
 			if ( $payment_method['payment_name'] == 'PayPal' ) {
@@ -314,6 +332,15 @@ class ItemBuilderModel extends WPL_Model {
 			$item->Storefront->StoreCategory2ID = $profile_details['store_category_2_id'];
 		}
 
+
+		// adjust Site if required - eBay Motors (beta)
+		$lm = new EbayCategoriesModel();
+		$primary_category = $lm->getItem( $item->PrimaryCategory->CategoryID );
+		if ( $primary_category['site_id'] == 100 ) {
+			$item->setSite('eBayMotors');
+			// echo "<pre>";print_r($primary_category);echo"</pre>";die();
+		}
+
 		return $item;
 
 	} /* end of buildCategories() */
@@ -321,13 +348,22 @@ class ItemBuilderModel extends WPL_Model {
 
 	public function buildShipping( $id, $item, $post_id, $profile_details ) {
 
-
+		// handle flat and calc shipping
 		$this->logger->info('shipping_service_type: '.$profile_details['shipping_service_type'] );
 		$isFlat = $profile_details['shipping_service_type'] != 'calc' ? true : false;
 		$isCalc = $profile_details['shipping_service_type'] == 'calc' ? true : false;
 
+		// handle flat and calc shipping (new version)
+		$service_type = $profile_details['shipping_service_type'];
+		if ( $service_type == 'flat' ) $service_type = 'Flat';
+		if ( $service_type == 'calc' ) $service_type = 'Calculated';
+		$isFlatLoc = ( in_array( $service_type, array('Flat','FlatDomesticCalculatedInternational') ) ) ? true : false;
+		$isFlatInt = ( in_array( $service_type, array('Flat','CalculatedDomesticFlatInternational') ) ) ? true : false;
+		$isCalcLoc = ! $isFlatLoc;
+		$isCalcInt = ! $isFlatInt;
+
 		$shippingDetails = new ShippingDetailsType();
-		$shippingDetails->ShippingType = $isFlat ? 'Flat' : 'Calculated';
+		$shippingDetails->ShippingType = $service_type;
 		$this->logger->info('shippingDetails->ShippingType: '.$shippingDetails->ShippingType );
 
 		// local shipping options
@@ -347,8 +383,11 @@ class ItemBuilderModel extends WPL_Model {
 			$ShippingServiceOptions->setShippingServicePriority($pr);
 			
 			// set shipping costs for flat services
-			if ( $isFlat ) {
-				$ShippingServiceOptions->setShippingServiceCost( $price );
+			if ( $isFlatLoc ) {
+				$ShippingServiceOptions->setShippingServiceCost( $price );		
+				if ( $price == 0 ) $ShippingServiceOptions->setFreeShipping( true );
+
+				// price for additonal items
 				if ( trim( $add_price ) == '' ) {
 					$ShippingServiceOptions->setShippingServiceAdditionalCost( $price );
 				} else {
@@ -393,7 +432,7 @@ class ItemBuilderModel extends WPL_Model {
 				$InternationalShippingServiceOptions->setShipToLocation( $opt['location'] );
 
 				// set shipping costs for flat services
-				if ( $isFlat ) {
+				if ( $isFlatInt ) {
 					$InternationalShippingServiceOptions->setShippingServiceCost( $price );
 					if ( trim( $add_price ) == '' ) {
 						$InternationalShippingServiceOptions->setShippingServiceAdditionalCost( $price );
@@ -410,10 +449,20 @@ class ItemBuilderModel extends WPL_Model {
 			$shippingDetails->setInternationalShippingServiceOption($shippingInternational,null);
 
 		// set CalculatedShippingRate
-		if ( $isCalc ) {
+		if ( $isCalcLoc || $isCalcInt ) {
 			$calculatedShippingRate = new CalculatedShippingRateType();
 			$calculatedShippingRate->setOriginatingPostalCode( $profile_details['postcode'] );
-			$calculatedShippingRate->setShippingPackage( $localShippingOptions[0]['ShippingPackage'] );
+			
+			if ( $isCalcLoc ) $calculatedShippingRate->setShippingPackage( $localShippingOptions[0]['ShippingPackage'] );
+			if ( $isCalcInt ) $calculatedShippingRate->setShippingPackage( 'PackageThickEnvelope' );
+
+			if ( $isCalcLoc ) {
+				$calculatedShippingRate->setPackagingHandlingCosts( floatval( @$profile_details['PackagingHandlingCosts'] ) );	
+			} 
+			if ( $isCalcInt ) {
+				$calculatedShippingRate->setPackagingHandlingCosts( floatval( @$profile_details['PackagingHandlingCosts'] ) );	
+				$calculatedShippingRate->setInternationalPackagingHandlingCosts( floatval( @$profile_details['InternationalPackagingHandlingCosts'] ) );
+			}
 
 			list( $weight_major, $weight_minor ) = ProductWrapper::getEbayWeight( $post_id );
 			$calculatedShippingRate->setWeightMajor( floatval( $weight_major) );
@@ -433,6 +482,10 @@ class ItemBuilderModel extends WPL_Model {
 			$shippingDetails->setCalculatedShippingRate( $calculatedShippingRate );
 		}
 
+		// global shipping
+		if ( @$profile_details['global_shipping'] == 1 ) {
+			$shippingDetails->setGlobalShipping( true ); // available since api version 781
+		}
 		
 		// check if we have local pickup only
 		if ( ( count($localShippingOptions) == 1 ) && ( $lastShippingCategory == 'PICKUP' ) ) {
@@ -482,7 +535,10 @@ class ItemBuilderModel extends WPL_Model {
 	        	}
 				$this->logger->info("specs: added custom value: {$spec['name']} - $value");
         	} elseif ( $spec['attribute'] != '' ) {
+
         		$value = $attributes[ $spec['attribute'] ];
+        		if ( '_sku' == $spec['attribute'] ) $value = ProductWrapper::getSKU( $listing['post_id'] );
+
 	            $NameValueList = new NameValueListType();
 		    	$NameValueList->setName ( $spec['name']  );
 	    		$NameValueList->setValue( $value );
@@ -630,7 +686,11 @@ class ItemBuilderModel extends WPL_Model {
     	// ebay doesn't allow different weight and dimensions for varations
     	// so for calculated shipping services we just fetch those from the first variation
     	// and overwrite 
-		$isCalc = $profile_details['shipping_service_type'] == 'calc' ? true : false;
+
+		// $isCalc = $profile_details['shipping_service_type'] == 'calc' ? true : false;
+		$service_type = $profile_details['shipping_service_type'];
+		$isCalc = ( in_array( $service_type, array('calc','FlatDomesticCalculatedInternational' ,'CalculatedDomesticFlatInternational') ) ) ? true : false;
+
 		if ( $isCalc ) {
 
 			// get weight and dimensions from first variation
@@ -728,7 +788,11 @@ class ItemBuilderModel extends WPL_Model {
     	// ebay doesn't allow different weight and dimensions for varations
     	// so for calculated shipping services we just fetch those from the first variation
     	// and overwrite 
-		$isCalc = $profile_details['shipping_service_type'] == 'calc' ? true : false;
+
+		// $isCalc = $profile_details['shipping_service_type'] == 'calc' ? true : false;
+		$service_type = $profile_details['shipping_service_type'];
+		$isCalc = ( in_array( $service_type, array('calc','FlatDomesticCalculatedInternational' ,'CalculatedDomesticFlatInternational') ) ) ? true : false;
+
 		if ( $isCalc ) {
 
 			// get weight and dimensions from first variation

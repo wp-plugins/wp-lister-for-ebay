@@ -88,7 +88,7 @@ class LogPage extends WPL_Page {
 	global $wpdb;
 
 		$row = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}ebay_log WHERE id = '$id' ");
-		echo mysql_error();
+		if ( mysql_error() ) echo 'Error in displayLogEntry(): '.mysql_error();
 
 		// send log entry to support
 		if ( @$_REQUEST['send_to_support']=='yes' ) {
@@ -124,7 +124,7 @@ class LogPage extends WPL_Page {
 	public function deleteLogEntry( $id ) {
 		global $wpdb;
 		$wpdb->delete( $wpdb->prefix.'ebay_log',  array( 'id' => $id ) );
-		echo mysql_error();
+		if ( mysql_error() ) echo 'Error in deleteLogEntry(): '.mysql_error();
 	}
 
 

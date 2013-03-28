@@ -185,6 +185,14 @@
 								<?php endforeach; ?>
 							</select>
 
+							<div id="wrap_enable_ebay_motors" style="<?php echo $wpl_text_ebay_site_id != 0 ? 'display:none' : '' ?>">
+								<label for="wpl-option-enable_ebay_motors" class="text_label"><?php echo __('Include eBay Motors','wplister') ?></label>
+								<select id="wpl-option-enable_ebay_motors" name="wpl_e2e_option_enable_ebay_motors" title="Handle stock" class=" required-entry select">
+									<option value="1" <?php if ( $wpl_option_enable_ebay_motors == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+									<option value="0" <?php if ( $wpl_option_enable_ebay_motors != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+								</select>
+							</div>
+
 							<label for="wpl-text-paypal_email" class="text_label"><?php echo __('PayPal Email adress','wplister'); ?>:</label>
 							<input type="text" name="wpl_e2e_text_paypal_email" id="wpl-text-paypal_email" value="<?php echo $wpl_text_paypal_email; ?>" class="text_input" />
 							<p class="desc" style="display: block;">
@@ -208,7 +216,7 @@
 								<option value="hourly" <?php if ( $wpl_option_cron_auctions == 'hourly' ): ?>selected="selected"<?php endif; ?>><?php echo __('hourly','wplister') ?></option>
 								<option value="daily" <?php if ( $wpl_option_cron_auctions == 'daily' ): ?>selected="selected"<?php endif; ?>><?php echo __('daily','wplister') ?></option>
 							</select>
-	
+
 
 						</div>
 					</div>
@@ -292,6 +300,18 @@
 					var site_id = event.target.value;
 					if ( site_id ) {
 						jQuery('#frmSetEbaySite').submit();
+					}
+					
+				});
+
+				// show eBay Motors option only for US site
+				jQuery('#ConnectionSettingsBox #wpl-text-ebay_site_id').change( function(event, a, b) {					
+
+					var site_id = event.target.value;
+					if ( site_id == '0') {
+						jQuery('#wrap_enable_ebay_motors').slideDown(300);
+					} else {
+						jQuery('#wrap_enable_ebay_motors').slideUp(300);						
 					}
 					
 				});

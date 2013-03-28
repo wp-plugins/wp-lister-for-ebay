@@ -177,6 +177,8 @@ class TransactionsModel extends WPL_Model {
 			// update existing transaction
 			$this->logger->info( 'update transaction #'.$data['transaction_id'].' for item #'.$data['item_id'] );
 			$wpdb->update( $this->tablename, $data, array( 'transaction_id' => $data['transaction_id'] ) );
+
+
 			$this->addToReport( 'updated', $data );
 		} else {
 			// create new transaction

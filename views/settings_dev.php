@@ -32,6 +32,7 @@
 
 							<p>
 								<?php echo __('The eBay sandbox allows you to list items to a testing area free of charge.','wplister'); ?>
+								<?php echo __('To use the sandbox, you need to create a dedicated sandbox account and authenticate WP-Lister using this account.','wplister'); ?>
 							</p>
 							<label for="wpl-option-sandbox_enabled" class="text_label"><?php echo __('Sandbox enabled','wplister') ?></label>
 							<select id="wpl-option-sandbox_enabled" name="wpl_e2e_option_sandbox_enabled" title="Sandbox" class=" required-entry select">

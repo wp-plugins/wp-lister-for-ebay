@@ -22,6 +22,7 @@ class EbayCategoriesModel extends WPL_Model {
 	var $_session;
 	var $_cs;
 	var $_categoryVersion;
+	var $_siteid;
 
 	function EbayCategoriesModel()
 	{
@@ -42,6 +43,7 @@ class EbayCategoriesModel extends WPL_Model {
 		
 		// we will not know the version till the first call went through !
 		$this->_categoryVersion = -1;
+		$this->_siteid = $siteid;
 		
 		// truncate the db
 		global $wpdb;
@@ -58,6 +60,7 @@ class EbayCategoriesModel extends WPL_Model {
 		
 		// let's update the version information on the top-level entries
 		$data['version'] = $this->_categoryVersion;
+		$data['site_id'] = $this->_siteid;
 		$wpdb->update( $this->tablename, $data, array( 'parent_cat_id' => '0') );
 
 		// include other update tasks
@@ -76,7 +79,28 @@ class EbayCategoriesModel extends WPL_Model {
 			'displayName' => 'update custom store categories'
 		);
 
-		
+
+		// include eBay Motors for US site
+		if ( ( $siteid == 0 ) && ( get_option( 'wplister_enable_ebay_motors' ) == 1 ) ) {
+
+			// insert top level motors category manually
+			$data['cat_id']        = 6000;
+			$data['parent_cat_id'] = 0;
+			$data['level']         = 1;
+			$data['leaf']          = 0;
+			$data['cat_name']      = 'eBay Motors';
+			$data['site_id']       = 100;
+			$wpdb->insert( $this->tablename, $data );
+
+			// $task = array( 
+			// 	'task'        => 'loadEbayCategoriesBranch', 
+			// 	'displayName' => 'eBay Motors', 
+			// 	'cat_id'      => '6000' 
+			// );
+			// $tasks[] = $task;
+
+		}
+
 		// fetch the data back from the db and add a task for each top-level id
 		$rows = $wpdb->get_results( "select cat_id, cat_name from $this->tablename where parent_cat_id=0", ARRAY_A );
 		foreach ($rows as $row)
@@ -98,8 +122,12 @@ class EbayCategoriesModel extends WPL_Model {
 		$this->initServiceProxy($session);
 		$this->logger->info('loadEbayCategoriesBranch() #'.$cat_id );
 
+		// handle eBay Motors category
+		if ( $cat_id == 6000 ) $siteid = 100;
+
 		// set handler to receive CategoryType items from result
 		$this->_cs->setHandler('CategoryType', array(& $this, 'storeCategory'));	
+		$this->_siteid = $siteid;
 
 		// call GetCategories()
 		$req = new GetCategoriesRequestType();
@@ -175,9 +203,10 @@ class EbayCategoriesModel extends WPL_Model {
 			$data['parent_cat_id'] = $Category->CategoryParentID[0];			
 		}
 		$data['cat_name'] = $Category->CategoryName;
-		$data['level'] = $Category->CategoryLevel;
-		$data['leaf'] = $Category->LeafCategory;
-		$data['version'] = $this->_categoryVersion;
+		$data['level']    = $Category->CategoryLevel;
+		$data['leaf']     = $Category->LeafCategory;
+		$data['version']  = $this->_categoryVersion;
+		$data['site_id']  = $this->_siteid;
 		
 		// remove unrecognizable chars from category name
 		// $data['cat_name'] = trim(str_replace('?','', $data['cat_name'] ));
@@ -347,8 +376,6 @@ class EbayCategoriesModel extends WPL_Model {
 			FROM $this->tablename
 			WHERE cat_id = '$id'
 		");		
-#		echo mysql_error();
-#		echo $wpdb->last_query;		
 
 		return $value;		
 	}
@@ -396,8 +423,9 @@ class EbayCategoriesModel extends WPL_Model {
 	/* recursively get full ebay category name */	
 	function getFullEbayCategoryName( $cat_id ) {
 		global $wpdb;
+		if ( intval($cat_id) == 0 ) return null;
 
-		$result = $wpdb->get_row('SELECT * FROM '.$wpdb->prefix.'ebay_categories WHERE cat_id = '.intval($cat_id) );
+		$result = $wpdb->get_row('SELECT * FROM '.$wpdb->prefix.'ebay_categories WHERE cat_id = '.$cat_id );
 		if ( $result ) { 
 			if ( $result->parent_cat_id != 0 ) {
 				$parentname = self::getFullEbayCategoryName( $result->parent_cat_id ) . ' &raquo; ';
@@ -412,8 +440,9 @@ class EbayCategoriesModel extends WPL_Model {
 	/* recursively get full store category name */	
 	function getFullStoreCategoryName( $cat_id ) {
 		global $wpdb;
+		if ( intval($cat_id) == 0 ) return null;
 
-		$result = $wpdb->get_row('SELECT * FROM '.$wpdb->prefix.'ebay_store_categories WHERE cat_id = '.intval($cat_id) );
+		$result = $wpdb->get_row('SELECT * FROM '.$wpdb->prefix.'ebay_store_categories WHERE cat_id = '.$cat_id );
 		if ( $result ) { 
 			if ( $result->parent_cat_id != 0 ) {
 				$parentname = self::getFullStoreCategoryName( $result->parent_cat_id ) . ' &raquo; ';

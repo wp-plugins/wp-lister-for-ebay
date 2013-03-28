@@ -139,12 +139,27 @@ class TemplatesModel extends WPL_Model {
 	}
 
 
+	// initialize listing template
+	public function initTemplate() {
+		global $wpl_tpl_fields;
+
+		// load functions.php if present
+		$file = $this->folderpath . '/functions.php';
+		if ( file_exists($file) ) {
+			include_once( $file );
+			do_action( 'wplister_template_init' );
+		}
+
+	}
+
+
 	public function processItem( $item ) {
 		
 		$listing = new ListingsModel();
 		$ibm = new ItemBuilderModel();
 
 		// load template content
+		$this->initTemplate();
 		$tpl_html = $this->getContent();
 
 		// handle errors
@@ -156,7 +171,11 @@ class TemplatesModel extends WPL_Model {
 		}
 		// $this->logger->debug( 'template loaded from ' . $tpl_path );
 		// $this->logger->info( $tpl_html );
-		
+		// TODO: check if $item['post_id'] point to a valid product. Could have been deleted...
+
+		// custom template hook
+		$tpl_html = apply_filters( 'wplister_before_process_template_html', $tpl_html, $item );
+
 		// handle variations
 		$variations_html = '';
         if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
@@ -202,7 +221,9 @@ class TemplatesModel extends WPL_Model {
 		$tpl_html = str_replace( '[[product_addons]]', $addons_html, $tpl_html );
 
 		$tpl_html = str_replace( '[[product_excerpt]]', $listing->getRawPostExcerpt( $item['post_id'] ), $tpl_html );
+		$tpl_html = str_replace( '[[product_excerpt_nl2br]]', nl2br( $listing->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
 		$tpl_html = str_replace( '[[product_additional_content]]', $listing->getRawPostExcerpt( $item['post_id'] ), $tpl_html );
+		$tpl_html = str_replace( '[[product_additional_content_nl2br]]', nl2br( $listing->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
 		
 		$tpl_html = str_replace( '[[product_price]]', number_format_i18n( floatval($item['price']), 2 ), $tpl_html );
 		$tpl_html = str_replace( '[[product_price_raw]]', $item['price'], $tpl_html );
@@ -261,6 +282,9 @@ class TemplatesModel extends WPL_Model {
  		if ( 'full' == get_option( 'wplister_process_shortcodes', 'content' ) ) {
  			$tpl_html = do_shortcode( $tpl_html );
  		}
+
+		// custom template hook
+		$tpl_html = apply_filters( 'wplister_process_template_html', $tpl_html, $item, $images );
 
 		// return html
 		return $tpl_html;
@@ -440,12 +464,12 @@ class TemplatesModel extends WPL_Model {
 	function getHTML( $folder = false) {
 		if ( ! $folder ) $folder = $this->folderpath;
 		$file = $folder . '/template.html';		
-		return file_get_contents( $file );
+		return @file_get_contents( $file );
 	}
 	function getCSS( $folder = false ) {
 		if ( ! $folder ) $folder = $this->folderpath;
 		$file = $folder . '/style.css';		
-		return file_get_contents( $file );
+		return @file_get_contents( $file );
 	}
 	function getHeader( $folder = false ) {
 		if ( ! $folder ) $folder = $this->folderpath;
@@ -455,6 +479,11 @@ class TemplatesModel extends WPL_Model {
 	function getFooter( $folder = false ) {
 		if ( ! $folder ) $folder = $this->folderpath;
 		$file = $folder . '/footer.php';		
+		return @file_get_contents( $file );
+	}
+	function getFunctions( $folder = false ) {
+		if ( ! $folder ) $folder = $this->folderpath;
+		$file = $folder . '/functions.php';		
 		return @file_get_contents( $file );
 	}
 
@@ -522,3 +551,23 @@ class TemplatesModel extends WPL_Model {
 
 
 }
+
+//
+// Template API functions
+// 
+
+function wplister_register_custom_fields( $type, $id, $options = array() ) {
+	global $wpl_tpl_fields;
+	if ( ! $type || ! $id ) return;
+
+	// create field
+	$field = new stdClass();
+	$field->id   = $id;
+	$field->type = $type;
+	$field->slug = isset($options['slug']) ? $options['slug'] : $id;
+
+	// add to template fields
+	$wpl_tpl_fields[$id] = $field;
+}
+
+

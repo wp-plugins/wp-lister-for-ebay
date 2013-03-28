@@ -281,10 +281,24 @@
 						<div class="inside">
 
 
+							<label for="wpl-text-global_shipping" class="text_label"><?php echo __('Global Shipping','wplister'); ?>:</label>
+							<select id="wpl-text-global_shipping" name="wpl_e2e_global_shipping" title="Enable Global Shipping" class=" required-entry select">
+								<option value="1" <?php if ( @$item_details['global_shipping'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( @$item_details['global_shipping'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
 							<label for="wpl-text-private_listing" class="text_label"><?php echo __('Private listing','wplister'); ?>:</label>
 							<select id="wpl-text-private_listing" name="wpl_e2e_private_listing" title="List as private listing" class=" required-entry select">
 								<option value="1" <?php if ( @$item_details['private_listing'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( @$item_details['private_listing'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
+							<label for="wpl-text-use_sku_as_upc" class="text_label"><?php echo __('Use SKU as UPC','wplister'); ?>:</label>
+							<select id="wpl-text-use_sku_as_upc" name="wpl_e2e_use_sku_as_upc" title="Fetch the UPC value from the products SKU" class=" required-entry select">
+								<option value="1" <?php if ( @$item_details['use_sku_as_upc'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( @$item_details['use_sku_as_upc'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 							</select>
 							<br class="clear" />
 

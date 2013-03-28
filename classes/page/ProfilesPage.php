@@ -184,14 +184,34 @@ class ProfilesPage extends WPL_Page {
 		}
 		// print_r($details);die();
 
+
+		// handle flat and calculated shipping
+		$service_type = isset( $details['shipping_service_type'] ) ? $details['shipping_service_type'] : 'flat';
+
 		// process domestic and international shipping options arrays
-		if ( 'calc' == @$details['shipping_service_type'] ) { 
-			$details['loc_shipping_options'] = $details['loc_shipping_options_calc'];
-			$details['int_shipping_options'] = $details['int_shipping_options_calc'];
-		} else {
-			$details['loc_shipping_options'] = $details['loc_shipping_options_flat'];
-			$details['int_shipping_options'] = $details['int_shipping_options_flat'];
+		switch ( $service_type ) {
+			case 'calc':
+				$details['loc_shipping_options'] = $details['loc_shipping_options_calc'];
+				$details['int_shipping_options'] = $details['int_shipping_options_calc'];
+				break;
+			
+			case 'FlatDomesticCalculatedInternational':
+				$details['loc_shipping_options'] = $details['loc_shipping_options_flat'];
+				$details['int_shipping_options'] = $details['int_shipping_options_calc'];
+				break;
+			
+			case 'CalculatedDomesticFlatInternational':
+				$details['loc_shipping_options'] = $details['loc_shipping_options_calc'];
+				$details['int_shipping_options'] = $details['int_shipping_options_flat'];
+				break;
+			
+			default:
+				$details['loc_shipping_options'] = $details['loc_shipping_options_flat'];
+				$details['int_shipping_options'] = $details['int_shipping_options_flat'];
+				break;
 		}
+
+		// clean details array
 		unset( $details['loc_shipping_options_flat'] );
 		unset( $details['loc_shipping_options_calc'] );
 		unset( $details['int_shipping_options_flat'] );

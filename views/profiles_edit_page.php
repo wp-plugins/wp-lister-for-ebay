@@ -311,18 +311,18 @@
 
 					// flat: local shipping price required
 					var shipping_type = jQuery('.select_shipping_type')[0] ? jQuery('.select_shipping_type')[0].value : 'flat';
-					if ( shipping_type == 'flat' ) {
-						if ( jQuery('#loc_shipping_options_table_flat input.price_input')[0].value == '' ) {
-							alert('Please enter a your shipping fee.'); return false;
-						}
+					if ( ( shipping_type == 'flat' ) || ( shipping_type == 'FlatDomesticCalculatedInternational' ) ) {
+						// if ( jQuery('#loc_shipping_options_table_flat input.price_input')[0].value == '' ) {
+						// 	alert('Please enter a shipping fee.'); return false;
+						// }
 						// local shipping option required
 						if ( jQuery('#loc_shipping_options_table_flat .select_service_name')[0].value == '' ) {
-							alert('Please select a shipping service.'); return false;
+							alert('Please select at least one domestic shipping service.'); return false;
 						}
 					} else {
 						// local shipping option required
 						if ( jQuery('#loc_shipping_options_table_calc .select_service_name')[0].value == '' ) {
-							alert('Please select a shipping service.'); return false;
+							alert('Please select at least one domestic shipping service.'); return false;
 						}						
 					}
 

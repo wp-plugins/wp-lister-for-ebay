@@ -213,7 +213,7 @@ class EbayShippingModel extends WPL_Model {
 			ORDER BY ShippingCategory, service_description
 		", ARRAY_A);		
 
-		// $services = self::fixShippingCategory( $services );
+		$services = self::fixShippingCategory( $services );
 		return $services;		
 	}
 	function getShippingCategoryByServiceName( $service_name ) {

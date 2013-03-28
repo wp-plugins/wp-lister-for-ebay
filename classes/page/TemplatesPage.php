@@ -128,6 +128,7 @@ class TemplatesPage extends WPL_Page {
 			$css					= $templatesModel->getCSS ();
 			$header					= $templatesModel->getHeader();
 			$footer					= $templatesModel->getFooter();				
+			$functions				= $templatesModel->getFunctions();				
 
 		} else {
 
@@ -139,6 +140,7 @@ class TemplatesPage extends WPL_Page {
 			$css					= $templatesModel->getCSS ();
 			$header					= $templatesModel->getHeader();
 			$footer					= $templatesModel->getFooter();				
+			$functions				= $templatesModel->getFunctions();				
 		}
 
 		// remove template header from stylesheet
@@ -160,6 +162,7 @@ class TemplatesPage extends WPL_Page {
 			'css'						=> $css,
 			'header'					=> $header,
 			'footer'					=> $footer,
+			'functions'					=> $functions,
 			'template_location'			=> $item['template_path'],
 			'add_new_template'			=> ( $this->requestAction() == 'add_new_template' ) ? true : false,
 
@@ -255,11 +258,13 @@ class TemplatesPage extends WPL_Page {
 		$file_css					= $tpl_dir . '/style.css';
 		$file_header				= $tpl_dir . '/header.php';
 		$file_footer				= $tpl_dir . '/footer.php';
+		$file_functions				= $tpl_dir . '/functions.php';
 		
 		$tpl_html	 				= stripslashes( $this->getValueFromPost( 'tpl_html' ) );
 		$tpl_css	 				= stripslashes( $this->getValueFromPost( 'tpl_css'  ) );
 		$tpl_header	 				= stripslashes( $this->getValueFromPost( 'tpl_header'  ) );
 		$tpl_footer	 				= stripslashes( $this->getValueFromPost( 'tpl_footer'  ) );
+		$tpl_functions	 			= stripslashes( $this->getValueFromPost( 'tpl_functions'  ) );
 		
 		$template_name 				= stripslashes( $this->getValueFromPost( 'template_name'  ) );
 		$template_description 		= stripslashes( $this->getValueFromPost( 'template_description'  ) );
@@ -275,6 +280,7 @@ class TemplatesPage extends WPL_Page {
 
 		// update template files
 		$result = file_put_contents($file_css , $tpl_css);
+		$result = file_put_contents($file_functions , $tpl_functions);
 		$result = file_put_contents($file_footer , $tpl_footer);
 		$result = file_put_contents($file_header , $tpl_header);
 		$result = file_put_contents($file_html, $tpl_html);
@@ -344,7 +350,7 @@ class TemplatesPage extends WPL_Page {
 	    $folder  = $templates_dir . $template_id . '/';
 	    $tmpfile = $templates_dir . $template_id . '.zip';
 
-	    $files_to_zip = array( 'style.css', 'template.html', 'header.php', 'footer.php' );
+	    $files_to_zip = array( 'style.css', 'template.html', 'header.php', 'footer.php', 'functions.php' );
 
 	    // create ZipArchive
 	    $zip = new ZipArchive;

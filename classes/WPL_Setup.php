@@ -497,6 +497,34 @@ class WPL_Setup extends WPL_Core {
 			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
 		}
 
+		// upgrade to version 15  (1.1.5.4)
+		if ( 15 > $db_version ) {
+			$new_db_version = 15;
+
+			// add column to ebay_categories table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_categories`
+			        ADD COLUMN `site_id` int(10) UNSIGNED DEFAULT NULL AFTER `wp_term_id`
+			";
+			$wpdb->query($sql);	#echo mysql_error();
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
+		}
+
+		// upgrade to version 16  (1.1.6.3)
+		if ( 16 > $db_version ) {
+			$new_db_version = 16;
+
+			// add column to ebay_auctions table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
+			        ADD COLUMN `history` TEXT AFTER `fees`
+			";
+			$wpdb->query($sql);	#echo mysql_error();
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
+		}
+
 
 		// show update message
 		if ( ($msg) && (!$hide_message) ) $this->showMessage($msg);		

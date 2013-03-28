@@ -170,11 +170,32 @@ WpLister.JobRunner = function () {
             var statusIconURL = wplister_url + "img/icon-error.png";                
             currentLogRow.find('.logRowStatus').html( '<img src="'+statusIconURL+'" />' );
 
-            jQuery('#jobs_log').append( "There was a problem processing this task. The server responded: " + e.responseText + "<br>" );
-            jQuery('#jobs_window .btn_close').show();
-            // alert( "There was a problem running the task '"+task.displayName+"'.\n\nThe server responded:\n" + e.responseText + '\n\nPlease contact support@wplab.com.' ); 
-            console.log( "error", xhr, error ); 
-            console.log( e.responseText ); 
+            // dont get fooled by 404 or 500 errors for admin-ajax.php
+            if ( e.status == 404 ) {
+
+                // just try running the task again
+                jQuery('#jobs_log').append( "Warning: server returned 404. will try again...<br>" );
+                self.runTask( self.jobsQueue[ self.currentTask ] );
+
+            } else if ( e.status == 500 ) {
+
+                // just try running the task again
+                jQuery('#jobs_log').append( "Warning: server returned 500. going to try again...<br>" );
+                self.runTask( self.jobsQueue[ self.currentTask ] );
+
+            } else {
+    
+                // quit on other errors
+                jQuery('#jobs_log').append( "A problem occured while processing this task. The server responded with code " + e.status + ": " + e.responseText + "<br>" );
+                jQuery('#jobs_window .btn_close').show();
+                // alert( "There was a problem running the task '"+task.displayName+"'.\n\nThe server responded:\n" + e.responseText + '\n\nPlease contact support@wplab.com.' ); 
+                console.log( "XHR object", e ); 
+                console.log( "error", xhr, error ); 
+                console.log( e.responseText ); 
+
+            }
+
+
         });
 
     }

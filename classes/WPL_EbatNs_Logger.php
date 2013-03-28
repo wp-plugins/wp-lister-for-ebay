@@ -26,7 +26,7 @@ class WPL_EbatNs_Logger{
 		$data['timestamp'] = date( 'Y-m-d H:i:s' );
 		$data['user_id'] = $this->currentUserID;
 		$wpdb->insert($wpdb->prefix.'ebay_log', $data);
-		echo mysql_error();
+		if ( mysql_error() ) echo 'Error in WPL_EbatNs_Logger::__construct: '.mysql_error().'<br>'.$wpdb->last_query;
 		$this->id = $wpdb->insert_id;
 
 	}
@@ -83,8 +83,9 @@ class WPL_EbatNs_Logger{
 			if ($this->debugLogDestination == 'db') {
 				
 				// insert into db
+				$data['ebay_id'] = intval( $data['ebay_id'] );
 				$wpdb->update($wpdb->prefix.'ebay_log', $data, array( 'id' => $this->id ));
-				echo mysql_error();
+				if ( mysql_error() ) echo 'Error in WPL_EbatNs_Logger::log() - subject '.$subject.' - '.mysql_error().'<br>'.$wpdb->last_query;
 
 			}
 		}

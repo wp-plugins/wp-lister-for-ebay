@@ -136,6 +136,7 @@ class SettingsPage extends WPL_Page {
 			'remove_links'				=> self::getOption( 'remove_links', 'default' ),
 			'hide_dupe_msg'				=> self::getOption( 'hide_dupe_msg' ),
 			'option_uninstall'			=> self::getOption( 'uninstall' ),
+			'option_enable_ebay_motors'	=> self::getOption( 'enable_ebay_motors' ),
 	
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'auth_url'					=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab='.$active_tab.'&action=wplRedirectToAuthURL',
@@ -199,6 +200,13 @@ class SettingsPage extends WPL_Page {
 		// TODO: check nonce
 		if ( isset( $_POST['wpl_e2e_text_ebay_site_id'] ) ) {
 
+			// reminder to update categories when site id changes
+			$old_ebay_site_id = self::getOption( 'ebay_site_id' );
+			if ( $old_ebay_site_id != $this->getValueFromPost( 'text_ebay_site_id' ) ) {
+				$this->showMessage( __('You switched to a different eBay site. Please make sure that you update eBay details on the Tools page.','wplister') );
+				// self::updateOption( 'site_id_changed', '1' );
+			}
+
 			self::updateOption( 'ebay_site_id',		$this->getValueFromPost( 'text_ebay_site_id' ) );
 			self::updateOption( 'paypal_email',		$this->getValueFromPost( 'text_paypal_email' ) );
 			
@@ -208,6 +216,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'remove_links',     $this->getValueFromPost( 'remove_links' ) );
 			self::updateOption( 'hide_dupe_msg',    $this->getValueFromPost( 'hide_dupe_msg' ) );
 			self::updateOption( 'uninstall',		$this->getValueFromPost( 'option_uninstall' ) );
+			self::updateOption( 'enable_ebay_motors', $this->getValueFromPost( 'option_enable_ebay_motors' ) );
 
 			$this->handleCronSettings( $this->getValueFromPost( 'option_cron_auctions' ) );
 			$this->showMessage( __('Settings saved.','wplister') );
@@ -385,8 +394,6 @@ class SettingsPage extends WPL_Page {
         $this->logger->info("handleCronSettings( $schedule )");
 
         // remove scheduled event
-	    $timestamp = wp_next_scheduled( 'e2e_update_auctions' );
-    	wp_unschedule_event($timestamp, 'e2e_update_auctions' );
 	    $timestamp = wp_next_scheduled( 'wplister_update_auctions' );
     	wp_unschedule_event($timestamp, 'wplister_update_auctions' );
 

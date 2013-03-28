@@ -215,6 +215,52 @@ class ListingsModel extends WPL_Model {
 		return $summary;
 	}
 
+	function getHistory( $ebay_id ) {
+		global $wpdb;
+		$item = $wpdb->get_var("
+			SELECT history
+			FROM $this->tablename
+			WHERE ebay_id = '$ebay_id'
+		");
+		return maybe_unserialize( $item );
+	}
+
+	function setHistory( $ebay_id, $history ) {
+		global $wpdb;
+
+		$data = array( 
+			'history' => maybe_serialize( $history )
+		);
+
+		$result = $wpdb->update( $this->tablename, $data, array( 'ebay_id' => $ebay_id ) );
+		return $result;
+	}
+
+	function addItemIdToHistory( $ebay_id, $previous_id ) {
+		global $wpdb;
+	
+		$history = $this->getHistory( $ebay_id );
+
+		$this->logger->info( "addItemIdToHistory($ebay_id, $previous_id) " );
+		$this->logger->info( "history: ".print_r($history,1) );
+
+		// init empty history
+		if ( ! isset($history['previous_ids'] ) ) {
+			$history = array(
+				'previous_ids' => array()
+			);
+		}
+
+		// return if ID already exists in history
+		if ( in_array( $previous_id, $history['previous_ids'] ) ) return;
+
+		// add ID to history
+		$history['previous_ids'][] = $previous_id;		
+
+		// update history
+		$this->setHistory( $ebay_id, $history );
+
+	}
 
 	
 	function listingUsesFixedPriceItem( $listing_item )
@@ -228,7 +274,11 @@ class ListingsModel extends WPL_Model {
 
 		return $useFixedPriceItem;
 	} 
-	
+
+	// handle additional requests after AddItem(), ReviseItem(), etc.
+	function postProcessListing( $id, $ItemID, $item, $listing_item, $res, $session ) {
+	}
+
 	function addItem( $id, $session )
 	{
 		// skip this item if item status not allowed
@@ -239,6 +289,9 @@ class ListingsModel extends WPL_Model {
 		$ibm = new ItemBuilderModel();
 		$item = $ibm->buildItem( $id, $session );
 		if ( ! $ibm->checkItem($item) ) return $ibm->result;
+
+		// eBay Motors (beta)
+		if ( $item->Site == 'eBayMotors' ) $session->setSiteId( 100 );
 
 		// preparation - set up new ServiceProxy with given session
 		$this->initServiceProxy($session);
@@ -279,6 +332,7 @@ class ListingsModel extends WPL_Model {
 			
 			// get details like ViewItemURL from ebay automatically
 			$this->updateItemDetails( $id, $session );
+			$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
 
 			$this->logger->info( "Item #$id sent to ebay, ItemID is ".$res->ItemID );
 
@@ -298,6 +352,9 @@ class ListingsModel extends WPL_Model {
 		$ibm = new ItemBuilderModel();
 		$item = $ibm->buildItem( $id, $session );
 		if ( ! $ibm->checkItem($item) ) return $ibm->result;
+
+		// eBay Motors (beta)
+		if ( $item->Site == 'eBayMotors' ) $session->setSiteId( 100 );
 
 		// preparation - set up new ServiceProxy with given session
 		$this->initServiceProxy($session);
@@ -341,6 +398,7 @@ class ListingsModel extends WPL_Model {
 			
 			// get details like ViewItemURL from ebay automatically
 			$this->updateItemDetails( $id, $session );
+			$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
 
 			$this->logger->info( "Item #$id relisted on ebay, NEW ItemID is ".$res->ItemID );
 
@@ -372,6 +430,9 @@ class ListingsModel extends WPL_Model {
 			return $this->endItem( $id, $session );
 		}
 		
+		// eBay Motors (beta)
+		if ( $item->Site == 'eBayMotors' ) $session->setSiteId( 100 );
+
 		// preparation - set up new ServiceProxy with given session
 		$this->initServiceProxy($session);
 
@@ -410,6 +471,7 @@ class ListingsModel extends WPL_Model {
 			
 			// get details like ViewItemURL from ebay automatically
 			#$this->updateItemDetails( $id, $session );
+			$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
 
 			$this->logger->info( "Item #$id was revised, ItemID is ".$res->ItemID );
 
@@ -430,6 +492,9 @@ class ListingsModel extends WPL_Model {
 		$ibm = new ItemBuilderModel();
 		$item = $ibm->buildItem( $id, $session );
 		if ( ! $ibm->checkItem($item) ) return $ibm->result;
+
+		// eBay Motors (beta)
+		if ( $item->Site == 'eBayMotors' ) $session->setSiteId( 100 );
 
 		// preparation - set up new ServiceProxy with given session
 		$this->initServiceProxy($session);
@@ -591,6 +656,22 @@ class ListingsModel extends WPL_Model {
 
 		$wpdb->update( $this->tablename, $data, array( 'ebay_id' => $Detail->ItemID ) );
 
+
+		// check for an updated ItemID 
+		// if item was relisted manually on ebay.com
+		if ( $Detail->ListingDetails->RelistedItemID ) {
+		
+			// keep item id in history
+			$this->addItemIdToHistory( $Detail->ItemID, $Detail->ItemID );
+
+			// mark as relisted - ie. should be updated once again
+			$wpdb->update( $this->tablename, array( 'status' => 'relisted' ), array( 'ebay_id' => $Detail->ItemID ) );
+
+			// update the listings ebay_id
+			$wpdb->update( $this->tablename, array( 'ebay_id' => $Detail->ListingDetails->RelistedItemID ), array( 'ebay_id' => $Detail->ItemID ) );
+
+		}
+
 		#$this->logger->info('sql: '.$wpdb->last_query );
 		#$this->logger->info( mysql_error() );
 
@@ -617,7 +698,6 @@ class ListingsModel extends WPL_Model {
 			unset( $data['quantity'] );
 			$this->logger->info('skip quantity for variation #'.$Detail->ItemID );
 		}
-
 
 		// set status to ended if end_date is in the past
 		if ( time() > mysql2date('U', $data['end_date']) ) {
@@ -711,6 +791,7 @@ class ListingsModel extends WPL_Model {
 			FROM $this->tablename
 			WHERE status = 'published'
 			   OR status = 'changed'
+			   OR status = 'relisted'
 			ORDER BY id DESC
 		", ARRAY_A);		
 
@@ -828,7 +909,7 @@ class ListingsModel extends WPL_Model {
 		$excerpt = $wpdb->get_var("
 			SELECT post_excerpt 
 			FROM {$wpdb->prefix}posts
-			WHERE ID = $post_id
+			WHERE ID = '$post_id'
 		");
 
 		return $excerpt;		
@@ -851,8 +932,6 @@ class ListingsModel extends WPL_Model {
 	public function setListingQuantity( $post_id, $quantity ) {
 		global $wpdb;	
 		$wpdb->update( $this->tablename, array( 'quantity' => $quantity ), array( 'post_id' => $post_id ) );
-		// echo $wpdb->last_query;
-		// echo mysql_error();
 	}
 
 	public function markItemAsModified( $post_id ) {
@@ -1032,7 +1111,7 @@ class ListingsModel extends WPL_Model {
 		
 		// fetch product stock if no quantity set in profile
 		if ( intval( $data['quantity'] ) == 0 ) {
-			$data['quantity'] = ProductWrapper::getStock( $post_id );
+			$data['quantity'] = intval( ProductWrapper::getStock( $post_id ) );
 		}
 		
 		// default new status is 'prepared'
@@ -1042,6 +1121,11 @@ class ListingsModel extends WPL_Model {
 
 		// update auctions table
 		$wpdb->update( $this->tablename, $data, array( 'id' => $id ) );
+
+		// $this->logger->info('updating listing ID '.$id);
+		// $this->logger->info('data: '.print_r($data,1));
+		// $this->logger->info('sql: '.$wpdb->last_query);
+		// $this->logger->info('error: '.mysql_error());
 
 
 	}

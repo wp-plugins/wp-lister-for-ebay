@@ -77,8 +77,6 @@ class EbayPaymentModel extends WPL_Model {
 			FROM $this->tablename
 			ORDER BY payment_description
 		", ARRAY_A);
-		#echo mysql_error()."<br>";
-		#echo $wpdb->last_query;		
 
 		return $profiles;		
 	}

@@ -21,12 +21,6 @@ class ListingsPage extends WPL_Page {
 		// Add custom screen options
 		add_action( "load-toplevel_page_wplister", array( &$this, 'addScreenOptions' ) );
 		
-		// handle preview action
-		if ( $this->requestAction() == 'preview_auction' ) {
-			$this->previewListing( $_REQUEST['auction'] );
-			exit();
-		}
-
 		$this->handleSubmitOnInit();
 	}
 
@@ -106,6 +100,12 @@ class ListingsPage extends WPL_Page {
 			} else {
 				wp_redirect( get_admin_url().'admin.php?page=wplister' );
 			}
+			exit();
+		}
+
+		// handle preview action
+		if ( $this->requestAction() == 'preview_auction' ) {
+			$this->previewListing( $_REQUEST['auction'] );
 			exit();
 		}
 
@@ -312,6 +312,17 @@ class ListingsPage extends WPL_Page {
 				// $msg .= '<br><br>';
 				$msg .= '&nbsp;&nbsp;';
 				$msg .= '<a id="btn_revise_all_changed_items_reminder" class="button-secondary wpl_job_button">' . __('Revise all changed items','wplister') . '</a>';
+				$msg .= '</p>';
+				$this->showMessage( $msg );				
+
+	        }
+
+	        // check for relisted items and display reminder
+	        if ( isset($summary->relisted) ) {
+				$msg  = '<p>';
+				$msg .= sprintf( __('WP-Lister has found %s manually relisted item(s) which need to be updated from eBay to fetch their latest changes.','wplister'), $summary->relisted );
+				// $msg .= '&nbsp;&nbsp;';
+				// $msg .= '<a id="btn_revise_all_relisted_items_reminder" class="button-secondary wpl_job_button">' . __('Update all relisted items','wplister') . '</a>';
 				$msg .= '</p>';
 				$this->showMessage( $msg );				
 
