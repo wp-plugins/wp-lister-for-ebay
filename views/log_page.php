@@ -6,8 +6,14 @@
 	td.column-fees {
 		text-align: right;
 	}
-	th.column-auction_title {
+	th.column-callname {
 		width: 25%;
+	}
+	th.column-user {
+		width: 10%;
+	}
+	th.column-success {
+		width: 30%;
 	}
 
 	.widefat tbody th.check-column {

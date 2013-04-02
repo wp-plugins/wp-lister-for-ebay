@@ -88,7 +88,14 @@ class LogTable extends WP_List_Table {
             return '<span style="color:orange">Warning</span>';
         }
         if ( $item['success'] == 'Failure' ) {
-            return '<span style="color:#B00">Failure</span>';
+
+            $details = '';
+            if ( preg_match("/<LongMessage>(.*)<\/LongMessage>/", $item['response'], $matches) ) {
+                $LongMessage = $matches[1];
+                $details .= ': <span style="color:#555">'.$LongMessage.'</span>';
+            }
+
+            return '<span style="color:#B00">Failed</span>'.$details;
         }
         return $item['success'];
     }    
@@ -102,6 +109,16 @@ class LogTable extends WP_List_Table {
     function column_callname($item){        
         //Build row action
         $link = sprintf('<a href="?page=%s&action=%s&log_id=%s&width=820&height=550" class="thickbox">%s</a>',$_REQUEST['page'],'display_log_entry',$item['id'],$item['callname']);
+
+        if ( preg_match("/<ShortMessage>(.*)<\/ShortMessage>/", $item['response'], $matches) ) {
+            $ShortMessage = $matches[1];
+            if ( $item['success'] == 'Warning' ) {
+                $link .= '<br><span style="color:orange">Warning: '.$ShortMessage.'</span>';
+            } else {
+                $link .= '<br><span style="color:#B00">Error: '.$ShortMessage.'</span>';               
+            }
+        }
+
         return $link;
     }
 

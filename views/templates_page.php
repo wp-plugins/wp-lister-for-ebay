@@ -57,6 +57,59 @@
 	<pre><?php #print_r($wpl_templates); ?></pre>
 	<?php endif; ?>
 
+
+
+	<!-- hidden ajax categories tree -->
+	<div id="wpl_duplicate_tpl_wrapper" style="display:none">
+		<div id="wpl_duplicate_tpl_container">
+			Loading...
+		</div>
+	</div>
+
+
+	<script type="text/javascript">
+
+		function wpl_duplicate_tpl( id ) {
+
+			// console.log('wpl_duplicate_tpl', id );
+
+			// var tbHeight = tb_getPageSize()[1] - 120;
+			var tbHeight = 180;
+			var tbURL = "#TB_inline?height="+tbHeight+"&width=500&inlineId=wpl_duplicate_tpl_wrapper"; 
+			tb_show('Duplicate template', tbURL);  
+
+			wpl_load_copy_template_form( id );
+		}
+
+		function wpl_load_copy_template_form( id ){
+
+		    jQuery('#wpl_duplicate_tpl_container').html( '<br>loading...' );
+
+			jQuery.ajax({
+				url: ajaxurl,
+				data: {
+				   	'action' : 'wpl_get_copy_template_form',
+				   	'template_id' : id
+				},
+				// dataType: 'JSON',
+				success:function(data){
+
+				    // console.log('success',data);
+				    jQuery('#wpl_duplicate_tpl_container').html( data );
+
+				},
+				error: function(errorThrown){
+				    alert('There was an error loading the form.');
+				    console.log(errorThrown);
+				}			   
+
+			});
+
+		} // wpl_load_copy_template_form
+
+	</script>
+
+
 	<script type="text/javascript">
 		jQuery( document ).ready(
 			function () {

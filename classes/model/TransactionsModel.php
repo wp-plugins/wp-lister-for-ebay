@@ -29,6 +29,11 @@ class TransactionsModel extends WPL_Model {
 	var $ModTimeFrom    = false;
 	var $NumberOfDays   = false;
 
+	var $total_items;
+	var $total_pages;
+	var $current_page;
+	var $current_lastdate;
+
 	function TransactionsModel() {
 		global $wpl_logger;
 		$this->logger = &$wpl_logger;
@@ -38,28 +43,40 @@ class TransactionsModel extends WPL_Model {
 	}
 
 
-	function updateTransactions( $session, $days = null ) {
-		$this->logger->info('*** updateTransactions('.$days.')');
+	function updateTransactions( $session, $days = null, $current_page = 1 ) {
+		$this->logger->info('*** updateTransactions('.$days.') - page '.$current_page);
 
 		$this->initServiceProxy($session);
 
 		// set request handler
 		$this->_cs->setHandler( 'TransactionType', array( & $this, 'handleTransactionType' ) );
+		// $this->_cs->setHandler( 'PaginationResultType', array( & $this, 'handlePaginationResultType' ) );
 
 		// build request
 		$req = new GetSellerTransactionsRequestType();
 
-		// period 30 days, which is the maximum allowed
-		$now = time();
-		$lastdate = $this->getDateOfLastTransaction();
-		$this->logger->info('getDateOfLastTransaction() returned: '.$lastdate);
-		if ($lastdate) $lastdate = mysql2date('U', $lastdate);
+		// check if we need to calculate lastdate
+		if ( $this->current_lastdate ) {
+			$lastdate = $this->current_lastdate;
+			$this->logger->info('used current_lastdate from last run: '.$lastdate);
+		} else {
 
-		// if last date is older than 30 days, fall back to default
-		if ( $lastdate < $now - 3600 * 24 * 30 ) {
-			$this->logger->info('resetting lastdate - fall back default ');
-			$lastdate = false;
-		} 
+			// period 30 days, which is the maximum allowed
+			$now = time();
+			$lastdate = $this->getDateOfLastTransaction();
+			$this->logger->info('getDateOfLastTransaction() returned: '.$lastdate);
+			if ($lastdate) $lastdate = mysql2date('U', $lastdate);
+
+			// if last date is older than 30 days, fall back to default
+			if ( $lastdate < $now - 3600 * 24 * 30 ) {
+				$this->logger->info('resetting lastdate - fall back default ');
+				$lastdate = false;
+			} 
+
+		}
+
+		// save lastdate for next page
+		$this->current_lastdate = $lastdate;
 
 		// parameter $days has priority
 		if ( $days ) {
@@ -88,12 +105,46 @@ class TransactionsModel extends WPL_Model {
 
 		$req->DetailLevel = $Facet_DetailLevelCodeType->ReturnAll;
 
-		// download the data
+		// set pagination for first page
+		$items_per_page = 100; // should be set to 200 for production
+		$this->current_page = $current_page;
+
+		$Pagination = new PaginationType();
+		$Pagination->setEntriesPerPage( $items_per_page );
+		$Pagination->setPageNumber( $this->current_page );
+		$req->setPagination( $Pagination );
+
+
+		// get transactions (single page)
+		$this->logger->info('fetching transactions - page '.$this->current_page);
 		$res = $this->_cs->GetSellerTransactions( $req );
+
+		$this->total_pages = $res->PaginationResult->TotalNumberOfPages;
+		$this->total_items = $res->PaginationResult->TotalNumberOfEntries;
+
+		// get transaction with pagination helper (doesn't work as expected)
+		// EbatNs_PaginationHelper($proxy, $callName, $request, $responseElementToMerge = '__COUNT_BY_HANDLER', $maxEntries = 200, $pageSize = 200, $initialPage = 1)
+		// $helper = new EbatNs_PaginationHelper( $this->_cs, 'GetSellerTransactions', $req, 'TransactionArray', 20, 10, 1);
+		// $res = $helper->QueryAll();
+
 
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
 			$this->logger->info( "*** Transactions updated successfully." );
+			// $this->logger->info( "*** PaginationResult:".print_r($res->PaginationResult,1) );
+			// $this->logger->info( "*** processed response:".print_r($res,1) );
+
+			$this->logger->info( "*** current_page: ".$this->current_page );
+			$this->logger->info( "*** total_pages: ".$this->total_pages );
+			$this->logger->info( "*** total_items: ".$this->total_items );
+
+			// fetch next page recursively - only in days mode
+			if ( $res->HasMoreTransactions ) {
+				$this->current_page++;
+				$this->updateTransactions( $session, $days, $this->current_page );
+			}
+
+
 		} else {
 			$this->logger->error( "Error on transactions update".print_r( $res, 1 ) );			
 		}
@@ -132,6 +183,13 @@ class TransactionsModel extends WPL_Model {
 		} else {
 			$this->logger->error( "Error on transactions update".print_r( $res, 1 ) );			
 		}
+	}
+
+	function handlePaginationResultType( $type, & $Detail ) {
+		//#type $Detail PaginationResultType
+		$this->total_pages = $Detail->TotalNumberOfPages;
+		$this->total_items = $Detail->TotalNumberOfEntries;
+		$this->logger->info( 'handlePaginationResultType()'.print_r( $Detail, 1 ) );
 	}
 
 	function handleTransactionType( $type, & $Detail ) {
@@ -337,9 +395,11 @@ class TransactionsModel extends WPL_Model {
 		$html .= '<br>';
 		$html .= __('New transactions created','wplister') .': '. $this->count_inserted .' '. '<br>';
 		$html .= __('Existing transactions updated','wplister')  .': '. $this->count_updated  .' '. '<br>';
-		$html .= __('Foreign transactions skipped','wplister')  .': '. $this->count_skipped  .' '. '<br>';
+		if ( $this->count_skipped ) $html .= __('Foreign transactions skipped','wplister')  .': '. $this->count_skipped  .' '. '<br>';
 		if ( $this->count_failed ) $html .= __('Transactions failed to create','wplister')  .': '. $this->count_failed  .' '. '<br>';
 		$html .= '<br>';
+
+		if ( $this->count_skipped ) $html .= __('Note: Foreign transactions for which no matching item ID could be found in WP-Lister\'s listings table were skipping during update.','wplister') . '<br><br>';
 
 		$html .= '<table style="width:99%">';
 		$html .= '<tr>';

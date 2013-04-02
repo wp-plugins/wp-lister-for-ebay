@@ -103,7 +103,7 @@ class TemplatesTable extends WP_List_Table {
         //Build row actions
         $actions = array(
             'edit'      => sprintf('<a href="?page=%s&action=%s&template=%s">%s</a>',$_REQUEST['page'],'edit',$item['template_id'],__('Edit','wplister')),
-            // 'duplicate' => sprintf('<a href="?page=%s&action=%s&template=%s">%s</a>',$_REQUEST['page'],'duplicate_auction_template',$item['template_id'],__('Duplicate','wplister')),
+            'duplicate' => sprintf('<a href="#" onclick="wpl_duplicate_tpl(\'%s\');return false;">%s</a>',$item['template_id'],__('Duplicate','wplister')),
             'delete_listing_template'    => sprintf('<a href="?page=%s&action=%s&template=%s">%s</a>',$_REQUEST['page'],'delete_listing_template',$item['template_id'],__('Delete','wplister')),
             'download_listing_template'  => sprintf('<a href="?page=%s&action=%s&template=%s">%s</a>',$_REQUEST['page'],'download_listing_template',$item['template_id'],__('Download','wplister')),
             // 'pathinfo'  => '<span style="color:silver">Location: '. $item['template_path'] .'</span>',

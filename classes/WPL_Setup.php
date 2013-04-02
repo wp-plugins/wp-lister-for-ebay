@@ -87,6 +87,17 @@ class WPL_Setup extends WPL_Core {
 			update_option('wplister_setup_next_step', '0');
 		
 		}
+
+		// warn about invalid token
+		if ( self::getOption('ebay_token_is_invalid') ) {
+		
+			// $title = __('Your eBay token has been marked as invalid.','wplister');
+			$msg1  = __('Your eBay token seems to be invalid.', 'wplister');
+			$msg2  = __('To re-authenticate WP-Lister visit the Settings page, click on "Change Account" and follow the instructions.','wplister');
+			$msg   = "<p><b>$msg1</b></p><p>$msg2</p>";
+			$this->showMessage($msg);
+		
+		}
 		
 		// db upgrade
 		self::upgradeDB();

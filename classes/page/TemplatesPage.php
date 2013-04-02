@@ -14,6 +14,9 @@ class TemplatesPage extends WPL_Page {
 		// Add custom screen options
 		add_action( "load-wp-lister_page_wplister-".self::slug, array( &$this, 'addScreenOptions' ) );
 
+		add_action('wp_ajax_wpl_get_copy_template_form', array( &$this, 'ajax_wpl_get_copy_template_form' ));
+		add_action('wp_ajax_wpl_duplicate_template', array( &$this, 'ajax_wpl_duplicate_template' ));
+
 	}
 
 	public function onWpAdminMenu() {
@@ -55,6 +58,7 @@ class TemplatesPage extends WPL_Page {
 	        );
 		add_screen_option( $option, $args );
 		$this->temmplatesTable = new TemplatesTable();
+		add_thickbox();
 	}
 	
 
@@ -373,6 +377,116 @@ class TemplatesPage extends WPL_Page {
 
 	}
 
+
+	function ajax_wpl_get_copy_template_form() {
+
+		// get template
+		$template_id 			= urldecode( @$_REQUEST['template_id'] );
+		if ( ! $template_id ) die('template not found.');
+		$templatesModel 		= new TemplatesModel( $template_id );
+		$item 					= $templatesModel->getItem();
+
+
+		$aData = array(
+			'item'						=> $item
+		);
+
+		$this->display( 'templates_copy_form', $aData );
+		exit;
+
+	}
+	
+
+	function ajax_wpl_duplicate_template() {
+
+		// get template
+		$template_id 			= urldecode( $this->getValueFromPost( 'template_id' ) );
+		if ( ! $template_id ) die('template not found.');
+		$templatesModel 		= new TemplatesModel( $template_id );
+		$item 					= $templatesModel->getItem();
+
+		// echo "<pre>";print_r($templatesModel);echo"</pre>";die();
+
+
+		// set templates root folder
+		$upload_dir = wp_upload_dir();
+		$templates_dir = $upload_dir['basedir'].'/wp-lister/templates/';
+
+		// check folder name
+		$dirname = strtolower( sanitize_file_name( $this->getValueFromPost( 'template_name' ) ) );
+		if ( $dirname == '') {
+			echo( "Could not create template. No template name was provided." );	
+			exit;				
+		}
+		
+		// tpl_dir is the full path to the template
+		$tpl_dir = $templates_dir . $dirname;
+
+		// if folder exists, append '-1', '-2', .. '-99'
+		if ( is_dir( $tpl_dir ) ) {
+			for ($i=1; $i < 100; $i++) { 
+				$new_tpl_dir = $tpl_dir . '-' . $i;					
+				if ( ! is_dir( $new_tpl_dir ) ) {
+					$tpl_dir = $new_tpl_dir;
+					break;
+				}
+			}
+		}
+
+		// make new folder
+		$result  = @mkdir( $tpl_dir );
+
+		// handle errors
+		if ($result===false) {
+			echo( "Could not create template folder: " . $tpl_dir );	
+			exit;
+		} else {
+			// echo( __('New template created in folder: ','wplister') . basename($tpl_dir) );
+		}
+
+
+		// destination files
+		$file_html					= $tpl_dir . '/template.html';
+		$file_css					= $tpl_dir . '/style.css';
+		$file_header				= $tpl_dir . '/header.php';
+		$file_footer				= $tpl_dir . '/footer.php';
+		$file_functions				= $tpl_dir . '/functions.php';
+		
+		$tpl_html	 				= $templatesModel->getHTML();
+		$tpl_css	 				= $templatesModel->getCSS();
+		$tpl_header	 				= $templatesModel->getHeader();
+		$tpl_footer	 				= $templatesModel->getFooter();
+		$tpl_functions	 			= $templatesModel->getFunctions();
+		
+		$template_name 				= stripslashes( $this->getValueFromPost( 'template_name'  ) );
+		$template_description 		= stripslashes( $this->getValueFromPost( 'template_description'  ) );
+		$template_version 			= $item[ 'template_version' ];
+
+		// add template header
+		$header_css = "/* \n";
+		$header_css .= "Template: $template_name\n";
+		$header_css .= "Description: $template_description\n";
+		$header_css .= "Version: $template_version\n";
+		$header_css .= "*/\n";
+		$tpl_css = $header_css . $tpl_css;
+
+		// update template files
+		$result = file_put_contents($file_css , $tpl_css);
+		$result = file_put_contents($file_functions , $tpl_functions);
+		$result = file_put_contents($file_footer , $tpl_footer);
+		$result = file_put_contents($file_header , $tpl_header);
+		$result = file_put_contents($file_html, $tpl_html);
+
+		// proper error handling
+		if ($result===false) {
+			echo( "There was a problem saving your template." );	
+		} else {
+			echo "success";
+		}
+
+		exit;
+
+	}
 	
 
 }

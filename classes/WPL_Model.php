@@ -116,6 +116,7 @@ class WPL_Model {
 				$longMessage = htmlspecialchars( $error->getLongMessage() );
 				// $longMessage = $error->getLongMessage();
 			}
+			$shortMessage = htmlspecialchars( $error->getShortMessage() );
 
 			// #240 - generic error on listing item
 			if ( $error->getErrorCode() == 240 ) { 
@@ -127,6 +128,16 @@ class WPL_Model {
 			if ( $error->getErrorCode() == 302 ) { 
 				$longMessage .= '<br><br>'. '<b>Note:</b> eBay does not allow changing the listing type of an active listing.';
 				$longMessage .= '<br>'. 'To change a listing type from auction to fixed price or vice versa, you need to end and relist the item.';
+			}
+			
+			// #931 - Auth token is invalid
+			if ( $error->getErrorCode() == 931 ) { 
+				$shortMessage = 'Your API token is invalid';
+				// $longMessage .= '<br><br>'. '<b>Your API token is invalid.</b> Please authenticate WP-Lister with eBay again.';
+				$longMessage .= '<br><br>'. '<b>Please authenticate WP-Lister with eBay again.</b>';
+				$longMessage .= '<br>'. 'This can happen if you enabled the sandbox mode or if your token has expired.';
+				$longMessage .= '<br>'. 'To re-authenticate WP-Lister visit the Settings page, click on "Change Account" and follow the instructions.';
+				update_option( 'wplister_ebay_token_is_invalid', true );
 			}
 			
 
@@ -144,7 +155,7 @@ class WPL_Model {
 			// display error message - if this is not an ajax request
 			$class = ( $error->SeverityCode == 'Error') ? 'error' : 'updated';
 			$htmlMsg  = '<div id="message" class="'.$class.'"><p>';
-			$htmlMsg .= '<b>' . $error->SeverityCode . ': ' . $error->getShortMessage() . '</b>' . ' (#'  . $error->getErrorCode() . ') ';
+			$htmlMsg .= '<b>' . $error->SeverityCode . ': ' . $shortMessage . '</b>' . ' (#'  . $error->getErrorCode() . ') ';
 			$htmlMsg .= '<br>' . $longMessage . '';
 			$htmlMsg .= '</p></div>';
 			// $htmlMsg .= $extraMsg;

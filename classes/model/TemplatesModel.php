@@ -190,19 +190,15 @@ class TemplatesModel extends WPL_Model {
 
         }
 		
-		// handle shopp addons
-		$addons_html = '';
-        if ( ProductWrapper::plugin == 'shopp' ) {
+		// handle addons
+    	// generate addons table
+    	$addons_html = $this->getAddonsHTML( $item );
 
-        	// generate addons table
-        	$addons_html = $this->getAddonsHTML( $item );
+    	// add addons table to item description
+    	if ( @$item['profile_data']['details']['add_variations_table'] ) {
+    		$item['post_content'] .= $addons_html;
+    	}
 
-        	// add variations table to item description
-        	if ( @$item['profile_data']['details']['add_variations_table'] ) {
-        		$item['post_content'] .= $addons_html;
-        	}
-
-        }
 		
 		// remove ALL links from post content by default
  		if ( 'default' == get_option( 'wplister_remove_links', 'default' ) ) {
@@ -354,26 +350,31 @@ class TemplatesModel extends WPL_Model {
 
 
 	function getAddonsHTML( $item ) {
+        
+        // get addons
         $addons = ProductWrapper::getAddons( $item['post_id'] );
-        $variations_html .= '<table style="margin-bottom: 8px;">';
+        if ( sizeof($addons) == 0 ) return '';
+
+        // build html table
+        $addons_html .= '<table style="margin-bottom: 8px;">';
         foreach ($addons as $addonGroup) {
 
             // first column: quantity
-            $variations_html .= '<tr><td colspan="2" align="left"><h5>';
-            $variations_html .= $addonGroup->name;
-            $variations_html .= '</h5></td></tr>';
+            $addons_html .= '<tr><td colspan="2" align="left"><h5>';
+            $addons_html .= $addonGroup->name;
+            $addons_html .= '</h5></td></tr>';
 
             foreach ($addonGroup->options as $addon) {
-                $variations_html .= '<tr><td align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-                $variations_html .= $addon->name;
-                $variations_html .= '</td><td align="right">';
-                $variations_html .= number_format_i18n( $addon->price, 2 );
-                $variations_html .= '</td></tr>';
+                $addons_html .= '<tr><td align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                $addons_html .= $addon->name;
+                $addons_html .= '</td><td align="right">';
+                $addons_html .= number_format_i18n( $addon->price, 2 );
+                $addons_html .= '</td></tr>';
             }
             
         }
-        $variations_html .= '</table>';
-        return $variations_html;
+        $addons_html .= '</table>';
+        return $addons_html;
 	}
 
 

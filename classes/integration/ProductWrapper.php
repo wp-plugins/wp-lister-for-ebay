@@ -80,6 +80,11 @@ class ProductWrapper {
 		return array();
 	}	
 
+	// get all product addons
+	static function getAddons( $post_id ) {
+		return array();
+	}	
+
 	// check if product has variations
 	static function hasVariations( $post_id ) {
 		return false;

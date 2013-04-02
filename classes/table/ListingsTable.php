@@ -209,9 +209,9 @@ class ListingsTable extends WP_List_Table {
 
             }
 
-            // list shopp addons
-            if ( ProductWrapper::plugin == 'shopp' ) {
-                $addons = ProductWrapper::getAddons( $item['post_id'] );
+            // list addons
+            $addons = ProductWrapper::getAddons( $item['post_id'] );
+            if ( sizeof($addons) > 0 ) {
                 $variations_html .= '<table style="margin-bottom: 8px;">';
                 foreach ($addons as $addonGroup) {
 

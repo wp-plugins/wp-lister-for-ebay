@@ -41,6 +41,9 @@ class WPL_EbatNs_Logger{
 			if ( preg_match("/<Ack>(.*)<\/Ack>/", $msg, $matches) ) {
 				$this->success = $matches[1];
 				$data['success'] = $this->success;
+			} elseif ( preg_match("/<ErrorCode>(.*)<\/ErrorCode>/", $msg, $matches) ) {
+				$this->success = 'Error '.$matches[1];
+				$data['success'] = $this->success;
 			}
 		}
 		// extract ItemID from request

@@ -164,6 +164,45 @@ class ProductWrapper {
 
 	}	
 
+	// get all product addons (requires Product Add-Ons extension)
+	static function getAddons( $post_id ) {
+		global $wpl_logger;
+		$addons = array();
+		$wpl_logger->info('getAddons() for post_id '.print_r($post_id,1));
+
+		// check if addons are enabled
+		$product_addons = get_post_meta( $post_id, '_product_addons', true );
+		if ( ! is_array($product_addons) ) return array();
+		if ( 0 == sizeof($product_addons) ) return array();
+
+		// get available addons for prices
+		// $available_addons = shopp_product_addons( $post_id );
+		// $meta = shopp_product_meta($post_id, 'options');
+		// $a = $meta['a'];
+		// $wpl_logger->info('a:'.print_r($a,1));
+
+		// build clean options array
+		$options = array();
+		foreach ( $product_addons as $product_addon ) {
+			$addonGroup = new stdClass();
+			$addonGroup->name    = $product_addon['name'];
+			$addonGroup->options = array();
+
+			foreach ( $product_addon['options'] as $option ) {
+				$addonObj = new stdClass();
+				$addonObj->id    = sanitize_key( $option['label'] );
+				$addonObj->name  = $option['label'];
+				$addonObj->price = $option['price'];				
+
+				$addonGroup->options[] = $addonObj;
+			}
+			$options[] = $addonGroup;
+		}
+		$wpl_logger->info('addons:'.print_r($options,1));
+
+		return $options;
+	}	
+
 	// get all product variations
 	static function getVariations( $post_id ) {
 		global $woocommerce;

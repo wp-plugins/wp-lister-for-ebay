@@ -88,6 +88,7 @@ class EbayController {
         if ($token) {
             update_option('wplister_ebay_token', $token);
             update_option('wplister_setup_next_step', '2');
+            update_option('wplister_ebay_token_is_invalid', false );
         }
         
     }

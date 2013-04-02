@@ -89,6 +89,11 @@ class ProductWrapper {
 		return $large_image_url[0];
 	}	
 	
+	// get all product addons
+	static function getAddons( $post_id ) {
+		return array();
+	}	
+
 	// get all product attributes
 	static function getAttributes( $post_id ) {
 
