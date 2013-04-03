@@ -2,7 +2,7 @@
 Contributors: wp-lab
 Tags: ebay, products, export
 Requires at least: 3.3
-Tested up to: 3.4.2
+Tested up to: 3.5.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -86,6 +86,20 @@ Already working on it.
 2. Profile Editor
 
 == Changelog ==
+
+
+= 1.1.6.8 =
+* fixed error regarding shipping service for flat shipping
+* improved debug log submission
+
+= 1.1.6.7 =
+* fixed paging issue on transaction update
+* more options for uploading images to EPS (Pro only)
+
+= 1.1.6.5 =
+* new option to duplicate listing templates
+* catch invalid token error (931) and prompt user to re-authenticate
+* added support for the WooCommerce Product Addons extension
 
 = 1.1.6.3 =
 * improvements on handling items manually relisted on ebay website

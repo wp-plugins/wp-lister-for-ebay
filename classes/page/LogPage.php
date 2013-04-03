@@ -106,11 +106,23 @@ class LogPage extends WPL_Page {
 			$headers = '';
 			$message = $content;
 
+			$user_name  = $_REQUEST['user_name'];
+			$user_email = $_REQUEST['user_email'];
+			$user_msg   = $_REQUEST['user_msg'];
+
+			$message .= '<hr>';
+			$message .= 'Name: '.$user_name.'<br>';
+			$message .= 'Email: '.$user_email.'<br>';
+			$message .= 'Message: <br><br>'.nl2br($user_msg).'<br>';
+
 			// send email as html
 			add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
 			wp_mail($to, $subject, $message, $headers, $attachments);
 			
-			echo "This log entry was sent to WP-Lister support.";
+			echo "<br>";
+			echo "Your log entry was sent to WP Lab.";
+			echo "<br><br>";
+			echo "Thank your for helping improve WP-Lister.";
 
 		} else {
 			// display detail page

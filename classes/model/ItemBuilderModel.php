@@ -350,11 +350,12 @@ class ItemBuilderModel extends WPL_Model {
 
 		// handle flat and calc shipping
 		$this->logger->info('shipping_service_type: '.$profile_details['shipping_service_type'] );
-		$isFlat = $profile_details['shipping_service_type'] != 'calc' ? true : false;
-		$isCalc = $profile_details['shipping_service_type'] == 'calc' ? true : false;
+		// $isFlat = $profile_details['shipping_service_type'] != 'calc' ? true : false;
+		// $isCalc = $profile_details['shipping_service_type'] == 'calc' ? true : false;
 
 		// handle flat and calc shipping (new version)
 		$service_type = $profile_details['shipping_service_type'];
+		if ( $service_type == '' )     $service_type = 'Flat';
 		if ( $service_type == 'flat' ) $service_type = 'Flat';
 		if ( $service_type == 'calc' ) $service_type = 'Calculated';
 		$isFlatLoc = ( in_array( $service_type, array('Flat','FlatDomesticCalculatedInternational') ) ) ? true : false;

@@ -94,14 +94,58 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
         	border: 1px solid #ccc;
         	padding: 20px;
         }
+        #support_request_wrap {
+        	margin-top: 15px;
+        	padding: 20px;
+        	padding-top: 0;
+        	background-color:#ffc;
+        	border: 1px solid #cca;
+        	display: none;
+        }
+        #support_request_wrap label {
+			float: left;
+        	width: 25%;
+        	line-height: 23px;
+        }
+        #support_request_wrap .text-input,
+        #support_request_wrap textarea {
+        	width: 70%;
+        }
     </style>
 </head>
 
 <body>
-	<div style="float:right;margin-top:10px;">
-		<a href="<?php echo $_SERVER['REQUEST_URI']; ?>&send_to_support=yes" target="_blank">send to support</a> &middot;
-		<a href="<?php echo $_SERVER['REQUEST_URI']; ?>" target="_blank">open in new tab</a>
-	</div>
+
+	<?php if ( ( ! isset($_REQUEST['send_to_support']) ) && ( ! isset($_REQUEST['new_tab']) ) ) : ?>
+		<div id="support_request_wrap" style="">
+			<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>" target="_blank" >
+				<input type="hidden" name="log_id" value="<?php echo $wpl_row->id ?>" />
+				<input type="hidden" name="send_to_support" value="yes" />
+
+				<h2>Send to support</h2>
+				Please to to provide as many details as possible about what steps you took and what we might need to do to reproduce the issue.
+				<br><br>
+
+				<label for="user_name"><?php echo __('Your Name','wplister') ?></label>
+				<input type="text" name="user_name" value="" class="text-input"/>
+				
+				<label for="user_email"><?php echo __('Your Email','wplister') ?></label>
+				<input type="text" name="user_email" value="<?php echo get_bloginfo ( 'admin_email' ) ?>" class="text-input"/>
+				
+				<label for="user_msg"><?php echo __('Your Message','wplister') ?></label>
+				<textarea name="user_msg"></textarea>
+				<br style="clear:both"/>
+
+				<input type="submit" value="<?php echo __('Send to support','wplister') ?>" class="button-primary"/>
+			</form>			
+		</div>
+
+		<div style="float:right;margin-top:10px;">
+			<!-- <a href="<?php echo $_SERVER['REQUEST_URI']; ?>&send_to_support=yes" target="_blank">send to support</a> &middot; -->
+			<a href="#" onclick="jQuery('#support_request_wrap').slideToggle();return false;" class="button-secondary">Send to support</a>&nbsp;
+			<a href="<?php echo $_SERVER['REQUEST_URI']; ?>&new_tab=yes" target="_blank" class="button-secondary">Open in new tab</a>
+		</div>
+	<?php endif; ?>
 
     <h2>Call: <?php echo $wpl_row->callname ?> (#<?php echo $wpl_row->id ?>)</h2>
 
