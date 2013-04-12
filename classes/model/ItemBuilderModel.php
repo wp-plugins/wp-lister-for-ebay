@@ -518,6 +518,7 @@ class ItemBuilderModel extends WPL_Model {
 		$listing = $this->lm->getItem( $id );
 
 		// get product attributes
+		$processed_attributes = array();
         $attributes = ProductWrapper::getAttributes( $listing['post_id'] );
 		$this->logger->info('product attributes: '.print_r($attributes,1));
 
@@ -533,8 +534,9 @@ class ItemBuilderModel extends WPL_Model {
 	    		$NameValueList->setValue( $value );
 	        	if ( ! in_array( $spec['name'], $this->variationAttributes ) ) {
 		        	$ItemSpecifics->addNameValueList( $NameValueList );
+		        	$processed_attributes[] = $spec['name'];
+					$this->logger->info("specs: added custom value: {$spec['name']} - $value");
 	        	}
-				$this->logger->info("specs: added custom value: {$spec['name']} - $value");
         	} elseif ( $spec['attribute'] != '' ) {
 
         		$value = $attributes[ $spec['attribute'] ];
@@ -545,8 +547,9 @@ class ItemBuilderModel extends WPL_Model {
 	    		$NameValueList->setValue( $value );
 	        	if ( ! in_array( $spec['name'], $this->variationAttributes ) ) {
 		        	$ItemSpecifics->addNameValueList( $NameValueList );
+		        	$processed_attributes[] = $spec['attribute'];
+					$this->logger->info("specs: added product attribute: {$spec['name']} - $value");
 	        	}
-				$this->logger->info("specs: added product attribute: {$spec['name']} - $value");
         	}
         }
 
@@ -554,17 +557,19 @@ class ItemBuilderModel extends WPL_Model {
         // if ( count($attributes) == 0 ) return $item;
 
     	// add ItemSpecifics from product attributes
-    	/* disabled for now, since it causes duplicates and it's not actually required anymore
+    	// disabled for now, since it causes duplicates and it's not actually required anymore
+    	// enabled again - mostly for free version
+    	// TODO: make this an option (globally?)
         foreach ($attributes as $name => $value) {
             $NameValueList = new NameValueListType();
 	    	$NameValueList->setName ( $name  );
     		$NameValueList->setValue( $value );
         	
-        	// only add attribute to ItemSpecifics if not already present in variations
-        	if ( ! in_array( $name, $this->variationAttributes ) ) {
+        	// only add attribute to ItemSpecifics if not already present in variations or processed attributes
+        	if ( ( ! in_array( $name, $this->variationAttributes ) ) && ( ! in_array( $name, $processed_attributes ) ) ) {
 	        	$ItemSpecifics->addNameValueList( $NameValueList );
         	}
-        } */
+        }
 
         if ( count($ItemSpecifics) > 0 ) {
     		$item->setItemSpecifics( $ItemSpecifics );        	

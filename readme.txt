@@ -88,6 +88,9 @@ Already working on it.
 == Changelog ==
 
 
+= 1.1.6.12 =
+* enabled listing product attributes as item specifics again
+
 = 1.1.6.8 =
 * fixed error regarding shipping service for flat shipping
 * improved debug log submission
