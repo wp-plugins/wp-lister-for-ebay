@@ -102,6 +102,9 @@ class WPL_Setup extends WPL_Core {
 		// db upgrade
 		self::upgradeDB();
 
+		// clean db
+		self::cleanDB();
+
 		// fetch user details if not done yet
 		if ( ( self::getOption('ebay_token') != '' ) && ( ! self::getOption('ebay_user') ) ) {
 			$this->initEC();
@@ -111,6 +114,21 @@ class WPL_Setup extends WPL_Core {
 			// $this->showMessage( __('Your UserID is ','wplister') . $UserID );
 		}
 		
+	}
+
+
+	// clean database of old log records
+	// TODO: hook this into daily cron schedule
+	public function cleanDB() {
+		global $wpdb;
+
+		if ( ( @$_GET['page'] == 'wplister-settings' ) && ( self::getOption('log_to_db') == '1' ) ) {
+			$delete_count = $wpdb->get_var('SELECT count(id) FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 MONTH )');
+			if ( $delete_count ) {
+				$wpdb->query('DELETE FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 MONTH )');
+				// $this->showMessage( __('Log entries cleaned: ','wplister') . $delete_count );
+			}
+		}
 	}
 
 
@@ -535,6 +553,45 @@ class WPL_Setup extends WPL_Core {
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
 		}
+
+		// upgrade to version 17  (1.2.0.12)
+		if ( 17 > $db_version ) {
+			$new_db_version = 17;
+
+			// fetch available dispatch times
+			if ( get_option('wplister_ebay_token') != '' ) {
+				$this->initEC();
+				$result = $this->EC->loadShippingPackages();
+				$this->EC->closeEbay();		
+			}
+			
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
+		}
+
+		// upgrade to version 18 (1.2.0.18)
+		if ( 18 > $db_version ) {
+			$new_db_version = 18;
+
+			// set column type to bigint in table: ebay_auctions
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
+			        CHANGE post_id post_id BIGINT ";
+			$wpdb->query($sql);	#echo mysql_error();
+			
+			// set column type to bigint in table: ebay_transactions
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
+			        CHANGE post_id post_id BIGINT ";
+			$wpdb->query($sql);	#echo mysql_error();
+			
+			// set column type to bigint in table: ebay_transactions
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
+			        CHANGE wp_order_id wp_order_id BIGINT ";
+			$wpdb->query($sql);	#echo mysql_error();
+			
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version ', 'wplister') . $new_db_version . '.';
+		}
+
 
 
 		// show update message

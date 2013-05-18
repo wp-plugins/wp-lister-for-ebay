@@ -54,19 +54,55 @@ class ProductWrapper {
 	// get product weight
 	static function getWeight( $post_id, $include_weight_unit = false ) {
 		$metadata = get_post_meta( $post_id, '_wpsc_product_metadata', true);
+
+		$weight      = $metadata['weight'];
+		$weight_unit = $metadata['weight_unit'];
+		$weight      = wpsc_convert_weight( $weight, 'pound', $weight_unit ); // wpsc always stores weight in lbs
+
 		if ( $include_weight_unit ) {
 			// $weight = number_format_i18n( floatval( $metadata['weight'] ), 2 );
-			$weight = $metadata['weight'];
-			return $weight . ' ' . $metadata['weight_unit'];
+			return $weight . ' ' . $weight_unit;
 		} 
-		return $metadata['weight'];
+		return $weight;
+	}	
+
+	// get product weight unit (wpsc only)
+	static function getWeightUnit( $post_id ) {
+		$metadata = get_post_meta( $post_id, '_wpsc_product_metadata', true);
+		return $metadata['weight_unit'];
 	}	
 
 	// get product weight as major weight and minor
 	static function getEbayWeight( $post_id ) {
 		$weight_value = self::getWeight( $post_id );
-		$weight_major = $weight_value;
-		$weight_minor = 0;
+		$weight_unit  = self::getWeightUnit( $post_id );
+
+		// convert value to major and minor if unit is gram or ounces
+		if ( 'gram' == $weight_unit ) {
+			$kg = intval( $weight_value / 1000 );
+			$g = $weight_value - $kg * 1000 ;
+			$weight_major = $kg;
+			$weight_minor = $g;
+		} elseif ( 'kilogram' == $weight_unit ) {
+			$kg = intval( $weight_value );
+			$g = ($weight_value - $kg) * 1000 ;
+			$weight_major = $kg;
+			$weight_minor = $g;
+		} elseif ( 'pound' == $weight_unit ) {
+			$lbs = intval( $weight_value );
+			$oz = ($weight_value - $lbs) * 16 ;
+			$weight_major = $lbs;
+			$weight_minor = $oz;
+		} elseif ( 'ounce' == $weight_unit ) {
+			$lbs = intval( $weight_value / 16 );
+			$oz = $weight_value - $lbs * 16 ;
+			$weight_major = $lbs;
+			$weight_minor = $oz;
+		} else {
+			$weight_major = $weight_value;
+			$weight_minor = 0;
+		}
+
 		return array( $weight_major, $weight_minor );
 	}	
 	

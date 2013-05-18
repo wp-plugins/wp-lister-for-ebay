@@ -139,7 +139,7 @@ class EbayShippingModel extends WPL_Model {
 		$this->logger->info( "downloadDispatchTimes()" );
 		$this->initServiceProxy($session);
 		
-		// download the shipping data 
+		// download ebay details 
 		$req = new GeteBayDetailsRequestType();
         $req->setDetailName( 'DispatchTimeMaxDetails' );
 		
@@ -156,6 +156,38 @@ class EbayShippingModel extends WPL_Model {
 			
 			// update_option('wplister_dispatch_times_available', $dispatch_times);
 			update_option('wplister_DispatchTimeMaxDetails', $dispatch_times);
+
+		} // call successful
+				
+	}
+	
+	function downloadShippingPackages($session)
+	{
+		$this->logger->info( "downloadShippingPackages()" );
+		$this->initServiceProxy($session);
+		
+		// download ebay details 
+		$req = new GeteBayDetailsRequestType();
+        $req->setDetailName( 'ShippingPackageDetails' );
+		
+		$res = $this->_cs->GeteBayDetails($req);
+
+		// handle response and check if successful
+		if ( $this->handleResponse($res) ) {
+
+			// save array of allowed shipping packages
+			$shipping_packages = array();
+			foreach ($res->ShippingPackageDetails as $Detail) {
+				$package = new stdClass();
+				$package->ShippingPackage     = $Detail->ShippingPackage;
+				$package->Description         = $Detail->Description;
+				$package->PackageID           = $Detail->PackageID;
+				$package->DefaultValue        = $Detail->DefaultValue;
+				$package->DimensionsSupported = $Detail->DimensionsSupported;
+				$shipping_packages[ $Detail->PackageID ] = $package;
+			}
+			
+			update_option('wplister_ShippingPackageDetails', $shipping_packages);
 
 		} // call successful
 				

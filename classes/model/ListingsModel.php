@@ -38,7 +38,10 @@ class ListingsModel extends WPL_Model {
         // filter search_query
 		$search_query = ( isset($_REQUEST['s']) ? $_REQUEST['s'] : false);
 		if ( $search_query ) {
-			$where_sql = "WHERE auction_title LIKE '%".$search_query."%'";
+			$where_sql = "
+				WHERE auction_title LIKE '%".$search_query."%'
+				   OR ebay_id = '".$search_query."'
+			";
 		} 
 
 
@@ -271,6 +274,10 @@ class ListingsModel extends WPL_Model {
 		// but switch to AddItem if BestOffer is enabled
 		$profile_details = $listing_item['profile_data']['details'];
         if ( @$profile_details['bestoffer_enabled'] == '1' ) $useFixedPriceItem = false;
+
+		// or switch to AddItem if product level listing type is Chinese
+		$product_listing_type = get_post_meta( $listing_item['post_id'], '_ebay_auction_type', true );
+        if ( $product_listing_type == 'Chinese' ) $useFixedPriceItem = false;
 
 		return $useFixedPriceItem;
 	} 
@@ -739,6 +746,60 @@ class ListingsModel extends WPL_Model {
 
 
 
+	function getItemsForGallery( $type = 'new', $related_to_id, $limit = 12 ) {
+		global $wpdb;	
+
+		switch ($type) {
+			case 'ending':
+				$where_sql = "WHERE status = 'published' AND end_date < NOW()";
+				$order_sql = "ORDER BY end_date DESC";
+				break;
+			
+			case 'featured':
+				$where_sql = "	JOIN {$wpdb->prefix}postmeta pm ON ( li.post_id = pm.post_id )
+								WHERE status = 'published' 
+								  AND pm.meta_key = '_featured'
+								  AND pm.meta_value = 'yes'
+							";
+				$order_sql = "ORDER BY date_published, end_date DESC";
+				break;
+			
+			case 'related': // combines upsell and crossell
+				$listing         = $this->getItem($related_to_id);
+				$upsell_ids      = get_post_meta( $listing['post_id'], '_upsell_ids', true );
+				$crosssell_ids   = get_post_meta( $listing['post_id'], '_crosssell_ids', true );
+				$inner_where_sql = '1 = 0';
+
+				foreach ($upsell_ids as $post_id) {
+					$inner_where_sql .= ' OR post_id = "'.$post_id.'" ';
+				}
+				foreach ($crosssell_ids as $post_id) {
+					$inner_where_sql .= ' OR post_id = "'.$post_id.'" ';
+				}
+
+				$where_sql = "	WHERE status = 'published' 
+								  AND ( $inner_where_sql )
+							";
+				$order_sql = "ORDER BY date_published, end_date DESC";
+				break;
+			
+			case 'new':
+			default:
+				$where_sql = "WHERE status = 'published' ";
+				$order_sql = "ORDER BY date_published DESC";
+				break;
+		}
+
+		$items = $wpdb->get_results("
+			SELECT *
+			FROM $this->tablename li
+			$where_sql
+			$order_sql
+			LIMIT $limit
+		", ARRAY_A);		
+
+		return $items;		
+	}
 
 	function getAllSelected() {
 		global $wpdb;	
@@ -1093,17 +1154,19 @@ class ListingsModel extends WPL_Model {
 			$data['auction_title'] = trim( $title_prefix . $post_title . $title_suffix );
 
 			// custom post meta title override
-			if ( get_post_meta( $post_id, 'ebay_title', true ) ) {
+			if ( get_post_meta( $post_id, '_ebay_title', true ) ) {
+				$data['auction_title']  = trim( get_post_meta( $post_id, '_ebay_title', true ) );
+			} elseif ( get_post_meta( $post_id, 'ebay_title', true ) ) {
 				$data['auction_title']  = trim( get_post_meta( $post_id, 'ebay_title', true ) );
 			}
 
-		}
+			// process attribute shortcodes in title - like [[attribute_Brand]]
+			$templatesModel = new TemplatesModel();
+			// $this->logger->info('auction_title before processing: '.$data['auction_title'].'');
+			$data['auction_title'] = $templatesModel->processAllTextShortcodes( $item['post_id'], $data['auction_title'] );
+			$this->logger->info('auction_title after processing : '.$data['auction_title'].'');
 
-		// process attribute shortcodes in title - like [[attribute_Brand]]
-		$templatesModel = new TemplatesModel();
-		$data['auction_title'] = $templatesModel->processAllTextShortcodes( $item['post_id'], $data['auction_title'] );
-		// $this->logger->info('processAttributeShortcodes('.$item['post_id'].')');
-		$this->logger->info('auction_title: '.$data['auction_title'].'');
+		}
 
 		// apply profile price
 		$data['price'] = ProductWrapper::getPrice( $post_id );

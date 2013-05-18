@@ -11,6 +11,7 @@ WpLister.JobRunner = function () {
     var jobsQueueActive = false;
     var jobKey = 0;
     var currentTask = 0;
+    var retryCount = 0;
     var self = {};
     
     // this will be a public method
@@ -48,7 +49,7 @@ WpLister.JobRunner = function () {
                 // run first task
                 self.runTask( self.jobsQueue[ self.currentTask ] );
             } else {
-                var logMsg = '<div id="message" class="updated"><p>' + 
+                var logMsg = '<div id="message" class="updated" style="display:block !important;"><p>' + 
                 'I could not find any matching items. Sorry.' +
                 '</p></div>';
                 jQuery('#jobs_log').append( logMsg );
@@ -108,7 +109,8 @@ WpLister.JobRunner = function () {
         var statusIconURL = wplister_url + "img/ajax-loader.gif";
         currentLogRow.find('.logRowStatus').html( '<img src="'+statusIconURL+'" />' );
 
-        // load task list
+        // run task
+        // task.displayName = 'ID '+self.jobKey; // reset displayName
         var params = {
             action: 'wpl_jobs_run_task',
             job: self.jobKey,
@@ -151,6 +153,7 @@ WpLister.JobRunner = function () {
 
             // prepare next task
             self.currentTask++;
+            retryCount=0;
             if ( self.currentTask < self.jobsQueue.length ) {
 
                 // run next task
@@ -170,18 +173,46 @@ WpLister.JobRunner = function () {
             var statusIconURL = wplister_url + "img/icon-error.png";                
             currentLogRow.find('.logRowStatus').html( '<img src="'+statusIconURL+'" />' );
 
+            // default error handling mode: skip
+            // if ( typeof wplister_ajax_error_handling === 'undefined' ) wplister_ajax_error_handling = 'skip';
+
             // dont get fooled by 404 or 500 errors for admin-ajax.php
-            if ( e.status == 404 ) {
+            if ( ( e.status == 404 ) || ( e.status == 500 ) ) {
 
-                // just try running the task again
-                jQuery('#jobs_log').append( "Warning: server returned 404. will try again...<br>" );
-                self.runTask( self.jobsQueue[ self.currentTask ] );
 
-            } else if ( e.status == 500 ) {
+                if ( ( wplister_ajax_error_handling == 'retry') && ( retryCount < 5 ) ) {
 
-                // just try running the task again
-                jQuery('#jobs_log').append( "Warning: server returned 500. going to try again...<br>" );
-                self.runTask( self.jobsQueue[ self.currentTask ] );
+                    // try running the task again
+                    retryCount++;
+                    jQuery('#jobs_log').append( "Warning: server returned "+e.status+". will try again...<!br>" );
+                    self.runTask( self.jobsQueue[ self.currentTask ] );
+
+                } else if ( wplister_ajax_error_handling == 'skip') {
+
+                    // prepare next task
+                    self.currentTask++;
+                    if ( self.currentTask < self.jobsQueue.length ) {
+                        // run next task
+                        self.runTask( self.jobsQueue[ self.currentTask ] );
+                    } else {
+                        // all tasks complete
+                        jQuery('#jobs_message').html('finishing up...');
+                        self.completeJob();
+                    }
+
+                } else { // halt
+
+                    // halt task processing
+                    jQuery('#jobs_log').append( "A problem occured while processing this task. The server responded with code " + e.status + ": " + e.responseText + "<br>" );
+                    jQuery('#jobs_window .btn_close').show();
+
+                }
+
+            // } else if ( e.status == 500 ) {
+
+            //     // just try running the task again
+            //     jQuery('#jobs_log').append( "Warning: server returned 500. going to try again...<br>" );
+            //     self.runTask( self.jobsQueue[ self.currentTask ] );
 
             } else {
     

@@ -299,6 +299,7 @@ class EbayController {
         $sm->downloadShippingLocations( $this->session );
         $sm->downloadShippingDetails( $this->session );
         $sm->downloadDispatchTimes( $this->session );      
+        $sm->downloadShippingPackages( $this->session );      
     }
 
     // load shipping services and insert to db
@@ -311,6 +312,12 @@ class EbayController {
     public function loadDispatchTimes(){ 
         $sm = new EbayShippingModel();
         return $sm->downloadDispatchTimes( $this->session );      
+    }
+    
+    // load available shipping packages
+    public function loadShippingPackages(){ 
+        $sm = new EbayShippingModel();
+        return $sm->downloadShippingPackages( $this->session );      
     }
 
 
@@ -811,7 +818,7 @@ class EbayController {
             case 212:
                 return 'ebay.pl';
             case 216:
-                return 'ebay.sg';
+                return 'ebay.com.sg';
             case 218:
                 return 'ebay.se';
             case 223:

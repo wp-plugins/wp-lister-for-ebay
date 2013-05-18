@@ -84,7 +84,7 @@
 	<h2><?php echo __('Choose a listing profile','wplister') ?></h2>
 	<?php #echo $wpl_message ?>
 	
-	<div id="message" class="updated fade below-h2"  style="padding-left: 15px; padding-top: 5px">
+	<div id="message" class="updated fade below-h2"  style="padding-left: 15px; padding-top: 5px; display:block !important;">
     <form id="profiles-filter" method="get" action="<?php echo $wpl_form_action; ?>" >
         <input type="hidden" name="action" value="apply_listing_profile" />
         <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />

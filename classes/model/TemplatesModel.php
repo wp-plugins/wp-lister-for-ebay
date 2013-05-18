@@ -5,6 +5,7 @@ class TemplatesModel extends WPL_Model {
 	public $foldername;
 	public $folderpath;
 	public $stylesheet;
+	public $fields = array();
 
 	function TemplatesModel( $foldername = false )
 	{
@@ -91,7 +92,7 @@ class TemplatesModel extends WPL_Model {
 		$item['template_path'] = str_replace(WP_CONTENT_DIR,'',$fullpath);
 
 		// last modified date
-		$item['last_modified'] = filemtime($fullpath.'/template.html');
+		$item['last_modified'] = file_exists($fullpath.'/template.html') ? filemtime($fullpath.'/template.html') : time();
 
 		// template type
 		$item['type'] = $type;
@@ -131,7 +132,7 @@ class TemplatesModel extends WPL_Model {
 			"template_id" => false,
 			"template_name" => "New listing template",
 			"template_path" => "enter a unique folder name here",
-			"template_version" => "1.0",
+			"template_version" => "1.2",
 			"template_description" => ""
 		);
 		$this->folderpath = WPLISTER_PATH . '/templates/default';
@@ -148,6 +149,25 @@ class TemplatesModel extends WPL_Model {
 		if ( file_exists($file) ) {
 			include_once( $file );
 			do_action( 'wplister_template_init' );
+		}
+
+		// load config.json
+		$config_file = $this->folderpath . '/config.json';
+		if ( file_exists($config_file) ) {
+			$config = @json_decode( file_get_contents($config_file), true );
+			// echo "<pre>";print_r($config);echo"</pre>";die();
+			if ( $config && is_array($config)) {
+				$this->config = $config;
+
+				// echo "<pre>";print_r($config);echo"</pre>";die();
+				foreach ($config as $key => $value) {
+					if ( isset( $wpl_tpl_fields[$key] ) ) {
+						$wpl_tpl_fields[$key]->value = $value;
+					}
+				}
+			}
+
+			$this->fields = $wpl_tpl_fields;
 		}
 
 	}
@@ -202,7 +222,9 @@ class TemplatesModel extends WPL_Model {
 		
 		// remove ALL links from post content by default
  		if ( 'default' == get_option( 'wplister_remove_links', 'default' ) ) {
-			$item['post_content'] = preg_replace('#<a.*?>([^<]*)</a>#i', '$1', $item['post_content'] );
+			/* $item['post_content'] = preg_replace('#<a.*?>([^<]*)</a>#i', '$1', $item['post_content'] ); */
+			// regex improved to work in cases like <a ...><b>text</b></a>
+			$item['post_content'] = preg_replace('#<a.*?>(.*)</a>#iU', '$1', $item['post_content'] );
  		}
 
 
@@ -227,6 +249,12 @@ class TemplatesModel extends WPL_Model {
 
 		// process simple text shortcodes (used for title as well)
 		$tpl_html = $this->processAllTextShortcodes( $item['post_id'], $tpl_html);
+
+		// process custom fields
+		$tpl_html = $this->processCustomFields( $tpl_html );
+
+		// process ajax galleries
+		$tpl_html = $this->processGalleryShortcodes( $item['id'], $tpl_html);
 
 
 		// handle images...
@@ -314,6 +342,43 @@ class TemplatesModel extends WPL_Model {
 	}
 
 
+	public function processGalleryShortcodes( $listing_id, $tpl_html ) {
+
+		$gallery_types = array('new','featured','ending','related');
+
+		foreach ($gallery_types as $type) {
+			
+			$url = admin_url( 'admin-ajax.php' ) . '?action=wpl_gallery&type='.$type.'&id='.$listing_id;
+
+
+			// v2 - does verify
+			$iframe_attributes = ' id="wpl_widget_new_listings" class="wpl_gallery" style="height:175px;width:100%;border:none;" src="'.$url.'" border="0" ';
+			$html = '
+			<script type="text/javascript">
+				document.write("<"+"if"+"ra"+"me");
+				document.write("'.addslashes($iframe_attributes).'");
+				document.write("></"+"if"+"ra"+"me"+">");
+			</script>
+			';
+
+			// v1 - wont verify
+			if ( isset($_REQUEST['action']) && $_REQUEST['action'] == 'preview_auction' ) {
+				$html = '<iframe id="wpl_widget_new_listings" class="wpl_gallery" style="height:175px;width:100%;border:none;" src="'.$url.'" border="0"></iframe>';
+			}
+
+			// this is how the ebay billboard app does it:
+			// (for reference only)
+			// <script>document.write('<'+'sc'+'rip'+'t src=\'http://www.domain.com/viewer/'+'swfobject.js\'></'+'sc'+'rip'+'t>')</script><script>if (swfobject.hasFlashPlayerVersion('9.0.18')) {var headerFn = function() {var att = { data:'http://www.domain.com/viewer/ViewerApplication.swf', width:'840', height:'280' }; var par = { flashvars:'docId=-123456789&docType=header', wmode:'transparent', allowScriptAccess:'always' }; var id = 'billboardsHeaderContent'; var myObject = swfobject.createSWF(att, par, id); }; swfobject.addDomLoadEvent(headerFn); } </script>
+
+
+			$tpl_html = str_replace( '[[widget_'.$type.'_listings]]' , $html,  $tpl_html );
+
+		}
+
+		return $tpl_html;
+	}
+
+
 	public function processAttributeShortcodes( $post_id, $tpl_html ) {
 
 		// attribute shortcodes i.e. [[attribute_Brand]]
@@ -333,6 +398,18 @@ class TemplatesModel extends WPL_Model {
 			}
 
 		}
+		return $tpl_html;
+	}
+
+	public function processCustomFields( $tpl_html ) {
+
+		if ( ! is_array( $this->fields )) return $tpl_html;
+
+		foreach ( $this->fields as $field ) {
+			$tpl_html = str_replace( '[['.$field->slug.']]', $field->value,  $tpl_html );		
+			$tpl_html = str_replace(  '$'.$field->slug.'', $field->value,  $tpl_html );		
+		}
+
 		return $tpl_html;
 	}
 
@@ -557,18 +634,25 @@ class TemplatesModel extends WPL_Model {
 // Template API functions
 // 
 
-function wplister_register_custom_fields( $type, $id, $options = array() ) {
+function wplister_register_custom_fields( $type, $id, $default, $label, $config = array() ) {
 	global $wpl_tpl_fields;
+	if ( ! $wpl_tpl_fields ) $wpl_tpl_fields = array();
+
 	if ( ! $type || ! $id ) return;
 
 	// create field
 	$field = new stdClass();
-	$field->id   = $id;
-	$field->type = $type;
-	$field->slug = isset($options['slug']) ? $options['slug'] : $id;
+	$field->id      = $id;
+	$field->type    = $type;
+	$field->label   = $label;
+	$field->default = $default;
+	$field->value   = $default;
+	$field->slug    = isset($config['slug']) ? $config['slug'] : $id;
+	$field->options = isset($config['options']) ? $config['options'] : array();
 
 	// add to template fields
 	$wpl_tpl_fields[$id] = $field;
+
 }
 
 

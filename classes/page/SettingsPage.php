@@ -181,6 +181,7 @@ class SettingsPage extends WPL_Page {
 			'message'					=> $this->message,
 
 			'update_channel'			=> self::getOption( 'update_channel', 'stable' ),
+			'ajax_error_handling'		=> self::getOption( 'ajax_error_handling', 'halt' ),
 
 			'text_ebay_token'			=> self::getOption( 'ebay_token' ),
 			'text_log_level'			=> self::getOption( 'log_level' ),
@@ -301,9 +302,10 @@ class SettingsPage extends WPL_Page {
 				}
 			}
 
-			self::updateOption( 'log_level',		$this->getValueFromPost( 'text_log_level' ) );
-			self::updateOption( 'log_to_db',		$this->getValueFromPost( 'option_log_to_db' ) );
-			self::updateOption( 'sandbox_enabled',	$this->getValueFromPost( 'option_sandbox_enabled' ) );
+			self::updateOption( 'log_level',			$this->getValueFromPost( 'text_log_level' ) );
+			self::updateOption( 'log_to_db',			$this->getValueFromPost( 'option_log_to_db' ) );
+			self::updateOption( 'sandbox_enabled',		$this->getValueFromPost( 'option_sandbox_enabled' ) );
+			self::updateOption( 'ajax_error_handling',	$this->getValueFromPost( 'ajax_error_handling' ) );
 
 			// new manual token ?
 			if ( $oldToken != $this->getValueFromPost( 'text_ebay_token' ) ) {

@@ -18,6 +18,12 @@
 		color: #D54E21;
 	}
 
+	.tablenav .actions a.wpl_job_button {
+		display: inline-block;
+		margin: 0;
+		margin-top: 1px;
+		margin-right: 5px;
+	}
 
 </style>
 
@@ -33,8 +39,7 @@
         <!-- For plugins, we also need to ensure that the form posts back to our current page -->
         <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
         <!-- Now we can render the completed list table -->
-        <?php #$wpl_listingsTable->search_box( 'search', 'search_id' ); ?>
-		<?php $wpl_listingsTable->search_box(__('Search'), 'listing-search-input'); ?>
+		<?php $wpl_listingsTable->search_box( __('Search'), 'listing-search-input' ); ?>
         <?php $wpl_listingsTable->display() ?>
     </form>
 
@@ -43,19 +48,19 @@
 
 	<div class="submit" style="">
 
-		<a id="btn_verify_all_prepared_items" class="button-secondary wpl_job_button"
+		<a id="btn_verify_all_prepared_items" class="btn_verify_all_prepared_items button-secondary wpl_job_button"
 		   title="<?php echo __('Verify all prepared items with eBay and get listing fees.','wplister') ?>"
 			><?php echo __('Verify all prepared items','wplister'); ?></a>
 
-		<a id="btn_publish_all_verified_items" class="button-secondary wpl_job_button"
+		<a id="btn_publish_all_verified_items" class="btn_publish_all_verified_items button-secondary wpl_job_button"
 		   title="<?php echo __('Publish all verified items on eBay.','wplister') ?>"
 			><?php echo __('Publish all verified items','wplister'); ?></a>
 
-		<a id="btn_revise_all_changed_items" class="button-secondary wpl_job_button"
+		<a id="btn_revise_all_changed_items" class="btn_revise_all_changed_items button-secondary wpl_job_button"
 		   title="<?php echo __('Revise all changed items on eBay.','wplister') ?>"
 			><?php echo __('Revise all changed items','wplister'); ?></a>
 
-		<a id="btn_update_all_published_items" class="button-secondary wpl_job_button"
+		<a id="btn_update_all_published_items" class="btn_update_all_published_items button-secondary wpl_job_button"
 		   title="<?php echo __('Update all published items from eBay.','wplister') ?>"
 			><?php echo __('Update all published items','wplister'); ?></a>
 

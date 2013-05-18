@@ -103,6 +103,7 @@
 							<label for="wpl-text-listing_duration" class="text_label"><?php echo __('Duration','wplister'); ?>: *</label>
 							<select id="wpl-text-listing_duration" name="wpl_e2e_listing_duration" title="Duration" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+								<option value="Days_1" <?php if ( $wpl_item['listing_duration'] == 'Days_1' ): ?>selected="selected"<?php endif; ?>>1 <?php echo __('Day','wplister'); ?></option>
 								<option value="Days_3" <?php if ( $wpl_item['listing_duration'] == 'Days_3' ): ?>selected="selected"<?php endif; ?>>3 <?php echo __('Days','wplister'); ?></option>
 								<option value="Days_5" <?php if ( $wpl_item['listing_duration'] == 'Days_5' ): ?>selected="selected"<?php endif; ?>>5 <?php echo __('Days','wplister'); ?></option>
 								<option value="Days_7" <?php if ( $wpl_item['listing_duration'] == 'Days_7' ): ?>selected="selected"<?php endif; ?>>7 <?php echo __('Days','wplister'); ?></option>
@@ -140,6 +141,15 @@
 								<?php echo __('Available conditions may vary for different categories.','wplister'); ?>
 								<?php echo __('You should set the category first.','wplister'); ?>
 							</p>
+
+							<div id="wpl-text-condition_description_container">
+							<label for="wpl-text-condition_description" class="text_label"><?php echo __('Condition description','wplister'); ?>:</label>
+							<input type="text" name="wpl_e2e_condition_description" id="wpl-text-condition_description" value="<?php echo @$item_details['condition_description']; ?>" class="text_input" />
+							<br class="clear" />
+							<p class="desc" style="display: block;">
+								<?php echo __('This field should only be used to further clarify the condition of used items.','wplister'); ?>
+							</p>
+							</div>
 
 
 							<label for="wpl-text-dispatch_time" class="text_label"><?php echo __('Handling time','wplister'); ?>: *</label>
@@ -206,6 +216,10 @@
 								class="button-secondary">
 
 
+
+							<label for="wpl-text-payment_instructions" class="text_label"><?php echo __('Payment instructions','wplister'); ?>:</label>
+							<textarea name="wpl_e2e_payment_instructions" id="wpl-text-payment_instructions" class="textarea"><?php echo stripslashes( @$item_details['payment_instructions'] ); ?></textarea>
+							<br class="clear" />
 
 						</div>
 					</div>
@@ -281,6 +295,16 @@
 				});
 				jQuery('#wpl-text-auction_type').change();
 
+				// hide condition description field for "new" conditions (Condition IDs 1000-1499)
+				jQuery('#wpl-text-condition_id').change(function() {
+  					if ( 1000 <= jQuery('#wpl-text-condition_id').val() <= 1499 ) {
+  						jQuery('#wpl-text-condition_description_container').show();
+  					} else {
+  						jQuery('#wpl-text-condition_description_container').hide();
+  					}
+				});
+				jQuery('#wpl-text-condition_id').change();
+
 
 			    // 
 			    // Validation
@@ -349,6 +373,110 @@
 
 			}
 		);
+
+
+
+
+
+
+		// load item conditions on primary category change
+
+		<?php
+			// get item conditions as json
+			$conditions = unserialize( @$wpl_item['category_conditions'] );
+		?>
+		var CategoryConditionsData = <?php echo json_encode( $conditions ) ?>;
+		// var CurrentItemSpecifics = <?php echo json_encode( @$item_details['item_conditions'] ) ?>;
+		// var default_ebay_category_id = <?php echo @$wpl_default_ebay_category_id ? $wpl_default_ebay_category_id : 0 ?>;
+
+		// handle new primary category
+		// update item conditions
+		function updateItemConditions() {
+			var primary_category_id = jQuery('#ebay_category_id_1')[0].value;
+
+			// jQuery('#EbayItemSpecificsBox .inside').slideUp(500);
+			// jQuery('#EbayItemSpecificsBox .loadingMsg').slideDown(500);
+
+	        // fetch category conditions
+	        var params = {
+	            action: 'wpl_getCategoryConditions',
+	            id: primary_category_id,
+	            nonce: 'TODO'
+	        };
+	        var jqxhr = jQuery.getJSON( ajaxurl, params )
+	        .success( function( response ) { 
+
+	            // append to log
+	            // console.log( 'response: ', response ); 
+	            CategoryConditionsData = response;
+
+	            buildItemConditions();
+				// jQuery('#EbayItemConditionsBox .inside').slideDown(500);
+				// jQuery('#EbayItemConditionsBox .loadingMsg').slideUp(500);
+
+	        })
+	        .error( function(e,xhr,error) { 
+	            console.log( "error", xhr, error ); 
+	            console.log( e.responseText ); 
+	        });			
+		}
+
+		// built item conditions table
+		function buildItemConditions() {
+
+			var primary_category_id = jQuery('#ebay_category_id_1')[0].value;
+			var conditions = CategoryConditionsData[ primary_category_id ];
+
+			// console.log('buildItemConditions()');
+			// console.log('primary_category_id',primary_category_id);
+			// console.log('conditions step 1',conditions);
+
+			// possibly use default category
+			if ( ( ! conditions ) && ( default_ebay_category_id ) ) {
+				conditions = CategoryConditionsData[ default_ebay_category_id ];
+			}
+			// console.log('conditions step 2',conditions);
+
+			// console.log('conditions: ',conditions);
+			// console.log('CategoryConditionsData: ',CategoryConditionsData);
+			// console.log('default_ebay_category_id: ',default_ebay_category_id);
+			// console.log('primary_category_id: ',primary_category_id);
+
+			if ( ( ! conditions ) || ( conditions == 'none' ) ) {
+				jQuery('#wpl-text-condition_id').children().remove();
+	            jQuery('#wpl-text-condition_id').append( jQuery('<option/>').val( 'none' ).html( 'none' ) );
+				return;
+			}
+			// console.log('conditions step 3',conditions);
+
+
+			// save current selection
+			var selected_condition_id = jQuery('#wpl-text-condition_id')[0].value;		
+			// console.log('selected_condition_id',selected_condition_id);
+
+			// clear options
+			jQuery('#wpl-text-condition_id').children().remove();
+
+			// add options
+			for (var condition_id in conditions ) {
+				// console.log('condition_id ',condition_id);
+				// console.log('condition_name ',conditions[condition_id]);
+				condition_name = conditions[condition_id];
+	            jQuery('#wpl-text-condition_id').append( jQuery('<option/>').val( condition_id ).html( condition_name ) );
+
+			}
+
+			// restore current selection
+			jQuery("#wpl-text-condition_id option[value='"+selected_condition_id+"']").attr('selected',true);
+
+
+		}
+
+		// init item conditions when page is loaded
+		jQuery( document ).ready( function () {
+			// buildItemConditions();
+		});	
+
 	
 	</script>
 

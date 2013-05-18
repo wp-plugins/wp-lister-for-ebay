@@ -211,6 +211,7 @@
 
 			        if ( e2e_selecting_cat == 1 ) {
 			        	updateItemSpecifics();
+			        	updateItemConditions();
 			        }
 
 			    });

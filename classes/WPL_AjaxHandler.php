@@ -11,6 +11,7 @@ class WPL_AjaxHandler extends WPL_Core {
 
 		// called from edit products page
 		add_action('wp_ajax_wpl_getCategorySpecifics', array( &$this, 'ajax_getCategorySpecifics' ) );		
+		add_action('wp_ajax_wpl_getCategoryConditions', array( &$this, 'ajax_getCategoryConditions' ) );		
 		
 		// called from jobs window
 		add_action('wp_ajax_wpl_jobs_load_tasks', array( &$this, 'jobs_load_tasks' ) );	
@@ -19,6 +20,10 @@ class WPL_AjaxHandler extends WPL_Core {
 
 		// logfile viewer
 		add_action('wp_ajax_wplister_tail_log', array( &$this, 'ajax_wplister_tail_log' ) );
+
+		// handle dynamic listing galleries
+		add_action('wp_ajax_wpl_gallery', array( &$this, 'ajax_wpl_gallery' ) );
+		add_action('wp_ajax_nopriv_wpl_gallery', array( &$this, 'ajax_wpl_gallery' ) );
 
 		// handle incoming ebay notifications
 		add_action('wp_ajax_handle_ebay_notify', array( &$this, 'ajax_handle_ebay_notify' ) );
@@ -32,6 +37,19 @@ class WPL_AjaxHandler extends WPL_Core {
 
 		$this->initEC();
 		$result = $this->EC->getCategorySpecifics( $category_id );
+		$this->EC->closeEbay();
+
+		$this->returnJSON( $result );
+		exit();
+	}
+	
+	// fetch category conditions
+	public function ajax_getCategoryConditions() {
+		
+		$category_id = $_REQUEST['id'];
+
+		$this->initEC();
+		$result = $this->EC->getCategoryConditions( $category_id );
 		$this->EC->closeEbay();
 
 		$this->returnJSON( $result );
@@ -405,6 +423,36 @@ class WPL_AjaxHandler extends WPL_Core {
 				}
 			}
 			echo "</ul>";	
+		}
+		exit();
+	}
+
+	// show dynamic listing gallery
+	public function ajax_wpl_gallery() {
+	
+		$type    = isset( $_REQUEST['type'] )  ? $_REQUEST['type']  : 'new';	
+		$limit   = isset( $_REQUEST['limit'] ) ? $_REQUEST['limit'] : 12;	
+		$id      = isset( $_REQUEST['id'] )    ? $_REQUEST['id']    : false;	
+
+		$lm = new ListingsModel();
+		$items = $lm->getItemsForGallery( $type, $id, $limit );
+		// echo "<pre>";print_r($items);echo"</pre>";die();
+
+		// get from_item and template path
+		$view = WPLISTER_PATH.'/views/gallery.php';
+		$from_item = $id ? $lm->getItem( $id ) : false;
+		if ( $from_item ) {
+			// if gallery.php exists in listing template, use it
+			$gallery_tpl_file = WPLISTER_PATH.'/../../' . $from_item['template'] . '/gallery.php';
+			if ( file_exists( $gallery_tpl_file ) ) $view = $gallery_tpl_file;
+		}
+
+		// load gallery template
+		if ( file_exists($view) ) {
+			header('X-Frame-Options: GOFORIT');
+			include( $view );
+		} else {
+			echo "file not found: ".$view;
 		}
 		exit();
 	}

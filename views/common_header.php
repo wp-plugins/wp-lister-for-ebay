@@ -46,6 +46,7 @@
 <script type="text/javascript">
 	
 	var wplister_url= '<?php echo WPLISTER_URL; ?>/';
+	var wplister_ajax_error_handling = "<?php echo get_option( 'wplister_ajax_error_handling', 'halt' ); ?>";
 
 	// on page load
 	jQuery( document ).ready(
@@ -60,25 +61,25 @@
 			});
 
 			// btn_verify_all_prepared_items
-			jQuery('#btn_verify_all_prepared_items').click( function(event) {
+			jQuery('.btn_verify_all_prepared_items').click( function(event) {
 				WpLister.JobRunner.runJob( 'verifyAllPreparedItems', 'Verifying items...' );
 			});
 
 			// btn_publish_all_verified_items
-			jQuery('#btn_publish_all_verified_items').click( function(event) {
+			jQuery('.btn_publish_all_verified_items').click( function(event) {
 				WpLister.JobRunner.runJob( 'publishAllVerifiedItems', 'Listing items...' );
 			});
 
 			// btn_revise_all_changed_items
-			jQuery('#btn_revise_all_changed_items').click( function(event) {
+			jQuery('.btn_revise_all_changed_items').click( function(event) {
 				WpLister.JobRunner.runJob( 'reviseAllChangedItems', 'Revising items...' );
 			});
-			jQuery('#btn_revise_all_changed_items_reminder').click( function(event) {
+			jQuery('.btn_revise_all_changed_items_reminder').click( function(event) {
 				WpLister.JobRunner.runJob( 'reviseAllChangedItems', 'Revising items...' );
 			});
 
 			// btn_update_all_published_items
-			jQuery('#btn_update_all_published_items').click( function(event) {
+			jQuery('.btn_update_all_published_items').click( function(event) {
 				WpLister.JobRunner.runJob( 'updateAllPublishedItems', 'Updating items...' );
 			});
 

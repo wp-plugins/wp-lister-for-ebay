@@ -1,12 +1,33 @@
 <?php include_once( dirname(__FILE__).'/common_header.php' ); ?>
 
 <script src="<?php echo $wpl_plugin_url; ?>/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="<?php echo $wpl_plugin_url; ?>/js/ace/mode-css.js" type="text/javascript" charset="utf-8"></script>
+<script src="<?php echo $wpl_plugin_url; ?>/js/ace/mode-scss.js" type="text/javascript" charset="utf-8"></script>
 <script src="<?php echo $wpl_plugin_url; ?>/js/ace/mode-php.js" type="text/javascript" charset="utf-8"></script>
 <script src="<?php echo $wpl_plugin_url; ?>/js/ace/theme-chrome.js" type="text/javascript" charset="utf-8"></script>
 
 <style type="text/css">
 
+	/* sidebar */
+	#side-sortables .postbox input.text_input,
+	#side-sortables .postbox select.select {
+	    width: 30%;
+	}
+	#side-sortables .postbox label.text_label {
+	    width: 66%;
+	}
+
+	#side-sortables .postbox .inside p.desc {
+		/*margin-left: 2%;*/
+	}
+
+	#side-sortables .postbox .inside h4 {
+		/*margin-left: 1%;*/
+		margin-top: 1em;
+		margin-bottom: 0.5em;
+	}
+
+
+	/* edit styles */
 	#styles_editor,
 	#header_editor,
 	#footer_editor,
@@ -114,12 +135,14 @@
 											<p>To update already published items you need to revise them after saving the template.</p>
 										</div>
 
+										<!--
 										<div class="misc-pub-section">
 											<p>
 												<?php echo __('You can find the theme files in this folder:','wplister'); ?>
 												<em><?php echo $wpl_template_location; ?></em>
 											</p>
 										</div>
+										-->
 
 									<?php else: ?>
 
@@ -149,6 +172,64 @@
 
 						</div>
 					</div>
+
+
+					<?php if ( sizeof($wpl_tpl_fields) > 0 ) : ?>
+					<div class="postbox" id="TemplateFieldsBox">
+						<h3><span><?php echo __('Template Options','wplister'); ?></span></h3>
+						<div class="inside">
+							<!--<p>This listing template provides the following custom settings:</p>-->
+
+							<?php foreach ($wpl_tpl_fields as $field_id => $field) : ?>
+								
+								<?php if ( 'title' == $field->type ) : ?>
+
+									<h4><?php echo $field->label ?></h4>
+
+								<?php elseif ( 'color' == $field->type ) : ?>
+
+								<!-- color input -->
+								<div>
+									<label for="<?php echo $field->id ?>" class="text_label"><?php echo $field->label ?></label>
+									<input 	type="<?php echo 'text' ?>" 
+										   	  id="<?php echo $field->id ?>"
+										   	name="wpl_e2e_tpl_field_<?php echo $field->id ?>"
+										   value="<?php echo strtoupper( $field->value ) ?>"
+										   class="text_input colorpick"
+										   
+									/>
+									<div id="colorPickerDiv_<?php echo $field->id ?>" class="colorpickdiv" style="z-index: 100;background:#eee;border:1px solid #ccc;position:absolute;right:1.2em;display:none;"></div>
+								</div>
+
+								<?php elseif ( 'select' == $field->type ) : ?>
+
+									<label for="<?php echo $field->id ?>" class="text_label"><?php echo $field->label ?></label>
+									<select	  id="<?php echo $field->id ?>"
+										   	name="wpl_e2e_tpl_field_<?php echo $field->id ?>"										   
+										   class="select" >
+										<?php foreach ($field->options as $option_name => $option_value) : ?>
+											<option value="<?php echo $option_value ?>" <?php if ($field->value == $option_value) echo "selected" ?>><?php echo $option_name ?></option>
+										<?php endforeach; ?>
+									</select>
+
+								<?php else : ?>
+									<!-- default text inpit -->
+									<label for="<?php echo $field->id ?>" class="text_label"><?php echo $field->label ?></label>
+									<input 	type="<?php echo 'text' ?>" 
+										   	  id="<?php echo $field->id ?>"
+										   	name="wpl_e2e_tpl_field_<?php echo $field->id ?>"
+										   value="<?php echo $field->value ?>"
+										   class="text_input"
+									/>
+
+								<?php endif; ?>
+								<!-- <pre><?php print_r($field) ?></pre> -->
+
+							<?php endforeach; ?>
+
+						</div>
+					</div>
+					<?php endif; ?>
 
 
 					<div class="postbox" id="HelpBox">
@@ -221,6 +302,13 @@
 								adds custom meta values<br>
 							</p>
 							<p>
+								<code>[[widget_new_listings]]</code><br>
+								<code>[[widget_ending_listings]]</code><br>
+								<code>[[widget_related_listings]]</code><br>
+								<code>[[widget_featured_listings]]</code><br>
+								embed the new crosssell widget (beta)
+							</p>
+							<p>
 								For more information visit the 
 								<a href="http://www.wplab.com/plugins/wp-lister/faq/" target="_blank">FAQ</a>.
 							</p>
@@ -277,8 +365,12 @@
 				    	// template stylesheet url
 				    	$stylesheet 	 = WP_CONTENT_DIR . $wpl_item['template_path'] . '/style.css';
 				    	$stylesheet_url  = WP_CONTENT_URL . $wpl_item['template_path'] . '/style.css' . '?ver='.@filemtime( $stylesheet );
+
+				    	// get parsed stylesheet (v2)
+				    	$stylesheet_url  = 'admin-ajax.php?action=wpl_get_tpl_css&tpl=' . $wpl_item['template_id'] . '&ver='.@filemtime( $stylesheet );
+				    	
 				    	// $stylesheet_url = str_replace(' ', urlencode(' '), $stylesheet_url);
-				    	if ( $wpl_add_new_template ) $stylesheet_url = $wpl_plugin_url . '/templates/default/style.css';
+				    	if ( $wpl_add_new_template ) $stylesheet_url = $wpl_plugin_url . '/templates/default/default.css';
 				    	// echo "loading stylesheet $stylesheet_url <br>";
 
 				        // unstyle editor content
@@ -387,9 +479,9 @@
 			    functs_editor.setShowPrintMargin( false );
 
 			    // var JavaScriptMode = require("ace/mode/javascript").Mode;
-			    var CssMode = require("ace/mode/css").Mode;
 			    var PhpMode = require("ace/mode/php").Mode;
-			    styles_editor.getSession().setMode(new CssMode());
+			    var ScssMode = require("ace/mode/scss").Mode;
+			    styles_editor.getSession().setMode(new ScssMode());
 			    header_editor.getSession().setMode(new PhpMode());
 			    footer_editor.getSession().setMode(new PhpMode());
 			    functs_editor.getSession().setMode(new PhpMode());
@@ -417,6 +509,23 @@
 				// textarea.val(editor.getSession().getValue());
 				// only when you submit the form 
 
+
+				// farbtastic color picker
+				jQuery('.colorpick').each(function(){
+					jQuery( '.colorpickdiv', jQuery(this).parent() ).farbtastic(this);
+					jQuery(this).click(function() {
+						if ( jQuery(this).val() == "" ) jQuery(this).val('#');
+						jQuery('.colorpickdiv', jQuery(this).parent() ).show();
+					});
+				});
+				jQuery(document).mousedown(function(){
+					jQuery('.colorpickdiv').hide();
+				});
+
+				// new WP color picker
+			    // if ( typeof jQuery.wp === 'object' && typeof jQuery.wp.wpColorPicker === 'function' ) {
+		    	//     jQuery( '.colorpick' ).wpColorPicker();
+		    	// }
 
 
 				// check required values on submit

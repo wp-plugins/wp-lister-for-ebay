@@ -122,7 +122,7 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
 				<input type="hidden" name="log_id" value="<?php echo $wpl_row->id ?>" />
 				<input type="hidden" name="send_to_support" value="yes" />
 
-				<h2>Send to support</h2>
+				<h2><?php echo __('Send to support','wplister') ?></h2>
 				Please to to provide as many details as possible about what steps you took and what we might need to do to reproduce the issue.
 				<br><br>
 
@@ -142,7 +142,7 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
 
 		<div style="float:right;margin-top:10px;">
 			<!-- <a href="<?php echo $_SERVER['REQUEST_URI']; ?>&send_to_support=yes" target="_blank">send to support</a> &middot; -->
-			<a href="#" onclick="jQuery('#support_request_wrap').slideToggle();return false;" class="button-secondary">Send to support</a>&nbsp;
+			<a href="#" onclick="jQuery('#support_request_wrap').slideToggle();return false;" class="button-secondary"><?php echo __('Send to support','wplister') ?></a>&nbsp;
 			<a href="<?php echo $_SERVER['REQUEST_URI']; ?>&new_tab=yes" target="_blank" class="button-secondary">Open in new tab</a>
 		</div>
 	<?php endif; ?>

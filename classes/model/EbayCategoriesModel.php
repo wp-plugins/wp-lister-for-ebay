@@ -275,6 +275,13 @@ class EbayCategoriesModel extends WPL_Model {
 	
 	function getCategoryConditions($session, $category_id )
 	{
+
+		// adjust Site if required - eBay Motors (beta)
+		$primary_category = $this->getItem( $category_id );
+		if ( $primary_category['site_id'] == 100 ) {
+			$session->setSiteId( 100 );
+		}
+
 		$this->initServiceProxy($session);
 		
 		// download store categories
@@ -292,7 +299,7 @@ class EbayCategoriesModel extends WPL_Model {
 		foreach ($res->Category[0]->ConditionValues->Condition as $Condition) {
 			$conditions[$Condition->ID] = $Condition->DisplayName;
 		}
-		// $this->logger->info('getCategoryConditions: '.print_r($conditions,1));
+		$this->logger->info('getCategoryConditions: '.print_r($conditions,1));
 		
 		if (!is_array($conditions)) $conditions = 'none';
 		return array( $category_id => $conditions );
@@ -301,6 +308,13 @@ class EbayCategoriesModel extends WPL_Model {
 	
 	function getCategorySpecifics($session, $category_id )
 	{
+
+		// adjust Site if required - eBay Motors (beta)
+		$primary_category = $this->getItem( $category_id );
+		if ( $primary_category['site_id'] == 100 ) {
+			$session->setSiteId( 100 );
+		}
+
 		$this->initServiceProxy($session);
 		
 		// download store categories
@@ -332,7 +346,7 @@ class EbayCategoriesModel extends WPL_Model {
 			#$specifics[$Recommendation->Name] = $new_specs;
 			$specifics[] = $new_specs;
 		}
-		// $this->logger->info('getCategorySpecifics: '.print_r($specifics,1));
+		$this->logger->info('getCategorySpecifics: '.print_r($specifics,1));
 		
 		if (!is_array($specifics)) $specifics = 'none';
 		return array( $category_id => $specifics );

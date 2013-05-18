@@ -41,6 +41,15 @@
 						</form>
 						<br style="clear:both;"/>
 
+						<!-- Get user id --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="GetUser" />
+								<input type="submit" value="<?php echo __('Update user details','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('Update account details from eBay','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
 						<!-- Get token expiration date --> 
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
@@ -100,15 +109,6 @@
 						</form>
 						<br style="clear:both;"/>
 						-->
-
-						<!-- Get user id --> 
-						<form method="post" action="<?php echo $wpl_form_action; ?>">
-								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
-								<input type="hidden" name="action" value="GetUser" />
-								<input type="submit" value="<?php echo __('Update user details','wplister'); ?>" name="submit" class="button-secondary">
-								<p><?php echo __('Update account details from eBay','wplister'); ?></p>
-						</form>
-						<br style="clear:both;"/>
 
 						<!-- platform notifictions don't work yet -->
 						<!--

@@ -1,4 +1,3 @@
-
 <!-- replace main image when hover over thumbnail -->
 <script type="text/javascript">
     function wplOnThumbnailHover(source) {

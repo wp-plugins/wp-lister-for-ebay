@@ -85,7 +85,7 @@ class LogTable extends WP_List_Table {
             return '<span style="color:green">Success</span>';
         }
         if ( $item['success'] == 'Warning' ) {
-            return '<span style="color:orange">Warning</span>';
+            return '<span style="color:darkorange">Warning</span>';
         }
         if ( $item['success'] == 'Failure' ) {
 
@@ -110,10 +110,18 @@ class LogTable extends WP_List_Table {
         //Build row action
         $link = sprintf('<a href="?page=%s&action=%s&log_id=%s&width=820&height=550" class="thickbox">%s</a>',$_REQUEST['page'],'display_log_entry',$item['id'],$item['callname']);
 
+        if ( 'GeteBayDetails' == $item['callname'] ) {
+            if ( preg_match("/<DetailName>(.*)<\/DetailName>/", $item['request'], $matches) ) {
+                $match = str_replace('<![CDATA[', '', $matches[1] );
+                $match = str_replace(']]>', '', $match );
+                $link .= ' - ' . strip_tags( $match );
+            }
+        }
+
         if ( preg_match("/<ShortMessage>(.*)<\/ShortMessage>/", $item['response'], $matches) ) {
             $ShortMessage = $matches[1];
             if ( $item['success'] == 'Warning' ) {
-                $link .= '<br><span style="color:orange">Warning: '.$ShortMessage.'</span>';
+                $link .= '<br><span style="color:darkorange">Warning: '.$ShortMessage.'</span>';
             } else {
                 $link .= '<br><span style="color:#B00">Error: '.$ShortMessage.'</span>';               
             }
@@ -193,7 +201,62 @@ class LogTable extends WP_List_Table {
         }
         
     }
-    
+
+    // status filter links
+    // http://wordpress.stackexchange.com/questions/56883/how-do-i-create-links-at-the-top-of-wp-list-table
+    function get_views(){
+       $views = array();
+       $current = ( !empty($_REQUEST['log_status']) ? $_REQUEST['log_status'] : 'all');
+
+       // get status summary
+       $summary = $this->getStatusSummary();
+
+       // All link
+       $class = ($current == 'all' ? ' class="current"' :'');
+       $all_url = remove_query_arg('log_status');
+       $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
+       $views['all'] .= '<span class="count">('.$this->total_items.')</span>';
+
+       // Success link
+       $Success_url = add_query_arg('log_status','Success');
+       $class = ($current == 'Success' ? ' class="current"' :'');
+       $views['Success'] = "<a href='{$Success_url}' {$class} >".__('Successful','wplister')."</a>";
+       if ( isset($summary->Success) ) $views['Success'] .= '<span class="count">('.$summary->Success.')</span>';
+
+       // Failure link
+       $Failure_url = add_query_arg('log_status','Failure');
+       $class = ($current == 'Failure' ? ' class="current"' :'');
+       $views['Failure'] = "<a href='{$Failure_url}' {$class} >".__('Failed','wplister')."</a>";
+       if ( isset($summary->Failure) ) $views['Failure'] .= '<span class="count">('.$summary->Failure.')</span>';
+
+       // unknown link
+       if ( isset($summary->unknown) ) {
+           $unknown_url = add_query_arg('log_status','unknown');
+           $class = ($current == 'unknown' ? ' class="current"' :'');
+           $views['unknown'] = "<a href='{$unknown_url}' {$class} >".__('Unknown','wplister')."</a>";
+           $views['unknown'] .= '<span class="count">('.$summary->unknown.')</span>';       
+       }
+
+       return $views;
+    }    
+        
+    function getStatusSummary() {
+        global $wpdb;
+        $result = $wpdb->get_results("
+            SELECT success as status, count(*) as total
+            FROM {$wpdb->prefix}ebay_log
+            GROUP BY status
+        ");
+
+        $summary = new stdClass();
+        foreach ($result as $row) {
+            $status = $row->status ? $row->status : 'unknown';
+            $summary->$status = $row->total;
+        }
+
+        return $summary;
+    }
+
     
     /** ************************************************************************
      * REQUIRED! This is where you prepare your data for display. This method will
@@ -244,10 +307,38 @@ class LogTable extends WP_List_Table {
         $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'desc'; //If no order, default to asc
         $offset = ( $current_page - 1 ) * $per_page;
 
+        // handle filters
+        $where_sql = ' WHERE 1 = 1 ';
+
+        // views
+        if ( isset( $_REQUEST['log_status'] ) ) {
+            $status = $_REQUEST['log_status'];
+            if ( in_array( $status, array('Success','Failure','unknown') ) ) {
+                if ( $status == 'unknown' ) {
+                    $where_sql .= " AND success IS NULL ";
+                } else {
+                    $where_sql .= " AND success = '$status' ";
+                }
+            }
+        }
+
+        // search box
+        if ( isset( $_REQUEST['s'] ) ) {
+            $query = esc_sql( $_REQUEST['s'] );
+            $where_sql .= " AND ( 
+                                    ( callname = '$query' ) OR 
+                                    ( ebay_id = '$query' ) 
+                                )
+                            AND NOT ebay_id = 0
+                            ";
+        }
+
+
         // get items
         $items = $wpdb->get_results("
             SELECT *
             FROM $this->tablename
+            $where_sql
             ORDER BY $orderby $order
             LIMIT $offset, $per_page
         ", ARRAY_A);
@@ -259,6 +350,7 @@ class LogTable extends WP_List_Table {
             $this->total_items = $wpdb->get_var("
                 SELECT COUNT(*)
                 FROM $this->tablename
+                $where_sql
                 ORDER BY $orderby $order
             ");         
         }

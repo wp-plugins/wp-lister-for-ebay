@@ -103,7 +103,8 @@ class TransactionsModel extends WPL_Model {
 		}
 
 
-		$req->DetailLevel = $Facet_DetailLevelCodeType->ReturnAll;
+		// $req->DetailLevel = $Facet_DetailLevelCodeType->ReturnAll;
+		if ( ! is_ajax() ) $req->setDetailLevel('ReturnAll');
 
 		// set pagination for first page
 		$items_per_page = 100; // should be set to 200 for production
@@ -165,7 +166,8 @@ class TransactionsModel extends WPL_Model {
 		$this->logger->info('ItemID: '.$req->ItemID);
 		$this->logger->info('TransactionID: '.$req->TransactionID);
 
-		$req->DetailLevel = $Facet_DetailLevelCodeType->ReturnAll;
+		// $req->DetailLevel = $Facet_DetailLevelCodeType->ReturnAll;
+		$req->setDetailLevel('ReturnAll');
 
 		// download the data
 		$res = $this->_cs->GetItemTransactions( $req );
@@ -322,9 +324,16 @@ class TransactionsModel extends WPL_Model {
 			$data['item_title'] = $listingItem->auction_title;
 			$this->logger->info( "process transaction #".$Detail->TransactionID." for item '".$data['item_title']."' - #".$Detail->Item->ItemID );
 		} else {
-			$this->logger->info( "skipped transaction #".$Detail->TransactionID." for foreign item #".$Detail->Item->ItemID );			
-			$this->addToReport( 'skipped', $data );
-			return false;
+			// only skip if foreign_transactions option is disabled
+			if ( get_option( 'wplister_foreign_transactions' ) != 1 ) {
+				$data['item_title'] = $Detail->Item->Title;
+				$this->logger->info( "skipped transaction #".$Detail->TransactionID." for foreign item #".$Detail->Item->ItemID );			
+				$this->addToReport( 'skipped', $data );
+				return false;			
+			} else {
+				$data['item_title'] = $Detail->Item->Title;
+				$this->logger->info( "IMPORTED transaction #".$Detail->TransactionID." for foreign item #".$Detail->Item->ItemID );							
+			}
 		}
 
 		// avoid empty transaction id
@@ -418,7 +427,7 @@ class TransactionsModel extends WPL_Model {
 			$html .= '<td>'.$item->transaction_id.'</td>';
 			$html .= '<td>'.$item->status.'</td>';
 			$html .= '<td>'.$item->item_id.'</td>';
-			$html .= '<td>'.@$item->data['auction_title'].'</td>';
+			$html .= '<td>'.@$item->data['item_title'].'</td>';
 			$html .= '<td>'.@$item->data['buyer_userid'].'</td>';
 			$html .= '<td>'.$item->date_created.'</td>';
 			$html .= '</tr>';

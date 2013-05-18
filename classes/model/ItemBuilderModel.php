@@ -29,13 +29,18 @@ class ItemBuilderModel extends WPL_Model {
 	{
 
 		// fetch record from db
-		$p = $this->lm->getItem( $id );
+		$p               = $this->lm->getItem( $id );
+		$post_id 		 = $p['post_id'];
 		$profile_details = $p['profile_data']['details'];
-		$images = $this->getProductImagesURL( $p['post_id'] );
-		$main_image = $this->getProductMainImageURL( $p['post_id'] );
-		$product_sku = ProductWrapper::getSKU( $p['post_id'] );
+		$hasVariations   = ProductWrapper::hasVariations( $post_id );
+		
+		$images          = $this->getProductImagesURL( $post_id );
+		$main_image      = $this->getProductMainImageURL( $post_id );
+		if ( ( trim($main_image) == '' ) && ( sizeof($images) > 0 ) ) $main_image = $images[0];
+		
+		$product_sku     = ProductWrapper::getSKU( $post_id );
 		if ( trim($product_sku) == '' ) $product_sku = false;
-		$hasVariations = ProductWrapper::hasVariations( $p['post_id'] );
+
 
 		// price has been calculated when applying the profile
 		$start_price  = $p['price'];
@@ -51,14 +56,20 @@ class ItemBuilderModel extends WPL_Model {
 		
 		// omit ListingType when revising item
 		if ( ! $reviseItem ) {
-			$item->ListingType = $p['auction_type'];
+			$product_listing_type = get_post_meta( $post_id, '_ebay_auction_type', true );
+			$item->ListingType = $product_listing_type ? $product_listing_type : $p['auction_type'];
 		}
 
 		// support for WooCommerce Name Your Price plugin
-		$nyp_enabled = get_post_meta( $p['post_id'], '_nyp', true ) == 'yes' ? true : false;
+		$nyp_enabled = get_post_meta( $post_id, '_nyp', true ) == 'yes' ? true : false;
 		if ( $nyp_enabled ) {
-			$suggested_price = get_post_meta( $p['post_id'], '_suggested_price', true );
+			$suggested_price = get_post_meta( $post_id, '_suggested_price', true );
 			if ( $suggested_price ) $start_price = $suggested_price;
+		}
+
+		// handle StartPrice on product level
+		if ( $product_start_price = get_post_meta( $post_id, '_ebay_start_price', true ) ) {
+			$start_price  = $product_start_price;
 		}
 
 		// Set the Listing Starting Price and Buy It Now Price
@@ -73,6 +84,14 @@ class ItemBuilderModel extends WPL_Model {
 			$item->BuyItNowPrice->setTypeValue( $buynow_price );
 			$item->BuyItNowPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
 		}
+
+		// optional ReservePrice
+		if ( $product_reserve_price = get_post_meta( $post_id, '_ebay_reserve_price', true ) ) {
+			$item->ReservePrice = new AmountType();
+			$item->ReservePrice->setTypeValue( $product_reserve_price );
+			$item->ReservePrice->setTypeAttribute('currencyID', $profile_details['currency'] );
+		}
+
 
 		// Set the Item Title
 		$item->Title = $this->prepareTitle( $p['auction_title'] );
@@ -91,6 +110,7 @@ class ItemBuilderModel extends WPL_Model {
 
 		// handle product image
 		$item->PictureDetails = new PictureDetailsType();
+		$item->PictureDetails->setGalleryURL( $this->encodeUrl( $main_image ) );
 		$item->PictureDetails->addPictureURL( $this->encodeUrl( $main_image ) );
 		if ( $profile_details['with_gallery_image'] ) $item->PictureDetails->GalleryType = 'Gallery';
         
@@ -166,9 +186,11 @@ class ItemBuilderModel extends WPL_Model {
 		// add subtitle if enabled
 		if ( @$profile_details['subtitle_enabled'] == 1 ) {
 			
-			// check if custom post meta field 'ebay_subtitle' exists
-			if ( get_post_meta( $p['post_id'], 'ebay_subtitle', true ) ) {
-				$subtitle = get_post_meta( $p['post_id'], 'ebay_subtitle', true );
+			// check if custom post meta field '_ebay_subtitle' exists
+			if ( get_post_meta( $post_id, '_ebay_subtitle', true ) ) {
+				$subtitle = get_post_meta( $post_id, '_ebay_subtitle', true );
+			} elseif ( get_post_meta( $post_id, 'ebay_subtitle', true ) ) {
+				$subtitle = get_post_meta( $post_id, 'ebay_subtitle', true );
 			} else {
 				// check for custom subtitle from profile
 				$subtitle = @$profile_details['custom_subtitle'];
@@ -176,7 +198,7 @@ class ItemBuilderModel extends WPL_Model {
 
 			// if empty use product excerpt
 			if ( $subtitle == '' ) {
-				$the_post = get_post( $p['post_id'] );
+				$the_post = get_post( $post_id );
 				$subtitle = strip_tags( $the_post->post_excerpt );
 			}
 			
@@ -187,16 +209,24 @@ class ItemBuilderModel extends WPL_Model {
 			$this->logger->debug( 'setSubTitle: '.$subtitle );
 		}
 
+		// item condition description
+		if ( @$profile_details['condition_description'] != '' ) {
+			$item->setConditionDescription( $profile_details['condition_description'] );
+		}
+		if ( get_post_meta( $post_id, '_ebay_condition_description', true ) ) {
+			$item->setConditionDescription( get_post_meta( $post_id, '_ebay_condition_description', true ) );
+		}
+
 		// private listing
 		if ( @$profile_details['private_listing'] == 1 ) {
 			$item->setPrivateListing( true );
 		}
 
 		// add shipping services and options
-		$item = $this->buildShipping( $id, $item, $p['post_id'], $profile_details );			
+		$item = $this->buildShipping( $id, $item, $post_id, $profile_details );			
 
 		// add ebay categories and store categories
-		$item = $this->buildCategories( $id, $item, $p['post_id'], $profile_details );			
+		$item = $this->buildCategories( $id, $item, $post_id, $profile_details );			
 
 		// add variations
 		if ( $hasVariations ) {
@@ -454,8 +484,10 @@ class ItemBuilderModel extends WPL_Model {
 			$calculatedShippingRate = new CalculatedShippingRateType();
 			$calculatedShippingRate->setOriginatingPostalCode( $profile_details['postcode'] );
 			
+			// if ( $isCalcInt ) $calculatedShippingRate->setShippingPackage( 'PackageThickEnvelope' );
+			// TODO: separate ShippingPackage field in profile from local / int shipping
+			if ( $isCalcInt ) $calculatedShippingRate->setShippingPackage( $localShippingOptions[0]['ShippingPackage'] );
 			if ( $isCalcLoc ) $calculatedShippingRate->setShippingPackage( $localShippingOptions[0]['ShippingPackage'] );
-			if ( $isCalcInt ) $calculatedShippingRate->setShippingPackage( 'PackageThickEnvelope' );
 
 			if ( $isCalcLoc ) {
 				$calculatedShippingRate->setPackagingHandlingCosts( floatval( @$profile_details['PackagingHandlingCosts'] ) );	
@@ -486,6 +518,17 @@ class ItemBuilderModel extends WPL_Model {
 		// global shipping
 		if ( @$profile_details['global_shipping'] == 1 ) {
 			$shippingDetails->setGlobalShipping( true ); // available since api version 781
+		}
+		if ( get_post_meta( $post_id, '_ebay_global_shipping', true ) == 'yes' ) {
+			$shippingDetails->setGlobalShipping( true );
+		}
+
+		// Payment Instructions
+		if ( trim( @$profile_details['payment_instructions'] ) != '' ) {
+			$shippingDetails->setPaymentInstructions( nl2br( $profile_details['payment_instructions'] ) );
+		}
+		if ( trim( get_post_meta( $post_id, '_ebay_payment_instructions', true ) ) != '' ) {
+			$shippingDetails->setPaymentInstructions( nl2br( get_post_meta( $post_id, '_ebay_payment_instructions', true ) ) );
 		}
 		
 		// check if we have local pickup only
@@ -895,13 +938,19 @@ class ItemBuilderModel extends WPL_Model {
 			$success = false;
 		}
 
+		// check for main image
+		if ( trim( @$item->PictureDetails->GalleryURL ) == '' ) {
+			$longMessage = __('You need to add at least one image to your product.','wplister');
+			$success = false;
+		}
+
 		if ( ! $success && ! $this->is_ajax() ) {
 			$this->showMessage( $longMessage, 1, true );
 		} elseif ( ( $longMessage != '' ) && ! $this->is_ajax() ) {
 			$this->showMessage( $longMessage, 0, true );
 		}
 
-		$htmlMsg  = '<div id="message" class="error"><p>';
+		$htmlMsg  = '<div id="message" class="error" style="display:block !important;"><p>';
 		$htmlMsg .= '<b>' . 'This item did not pass the validation check' . ':</b>';
 		$htmlMsg .= '<br>' . $longMessage . '';
 		$htmlMsg .= '</p></div>';
@@ -968,13 +1017,13 @@ class ItemBuilderModel extends WPL_Model {
 
 	public function prepareTitle( $title ) {
 
-		$this->logger->debug('prepareTitle()  in: ' . $title );
+		$this->logger->info('prepareTitle()  in: ' . $title );
 		$title = html_entity_decode( $title, ENT_QUOTES, 'UTF-8' );
 
         // limit item title to 80 characters
         if ( strlen($title) > 80 ) $title = substr( $title, 0, 77 ) . '...';
 
-		$this->logger->debug('prepareTitle() out: ' . $title );
+		$this->logger->info('prepareTitle() out: ' . $title );
 		return $title;
 	}
 	
@@ -1030,7 +1079,8 @@ class ItemBuilderModel extends WPL_Model {
 
 		if ( ( $image_url == '' ) && ( ! $checking_parent ) ) {
 			// $parents = get_post_ancestors( $post_id );
-			$parent_id = get_post($post_id)->post_parent;
+			$post = get_post($post_id);
+			$parent_id = isset($post->post_parent) ? $post->post_parent : false;
 			if ( $parent_id ) {
 				return $this->getProductMainImageURL( $parent_id, true);
 			}
@@ -1063,6 +1113,18 @@ class ItemBuilderModel extends WPL_Model {
             // $url = wp_get_attachment_url( $row->id );
             $url = $row->guid ? $row->guid : wp_get_attachment_url( $row->id );
 			$images[] = $url;
+		}
+
+		// support for WooCommerce 2.0 Product Gallery
+		$product_image_gallery = get_post_meta( $id, '_product_image_gallery', true );
+		if ( $product_image_gallery ) {
+			$images = array();
+			$image_ids = explode(',', $product_image_gallery );
+			foreach ( $image_ids as $image_id ) {
+	            $url = wp_get_attachment_url( $image_id );
+				if ( $url ) $images[] = $url;
+			}
+			$this->logger->info( "found WC2 product gallery images for product #$id " . print_r($images,1) );
 		}
 
 		// Shopp stores images in db by default...

@@ -171,7 +171,7 @@ class ToolsPage extends WPL_Page {
         wp_enqueue_script('jquery-ui-progressbar');
 
 		// jqueryFileTree
-		wp_register_script( 'wpl_JobRunner', self::$PLUGIN_URL.'/js/classes/JobRunner.js', array( 'jquery', 'jquery-ui-core', 'jquery-ui-progressbar' ) );
+		wp_register_script( 'wpl_JobRunner', self::$PLUGIN_URL.'/js/classes/JobRunner.js', array( 'jquery', 'jquery-ui-core', 'jquery-ui-progressbar' ), WPLISTER_VERSION );
 		wp_enqueue_script( 'wpl_JobRunner' );
 
 

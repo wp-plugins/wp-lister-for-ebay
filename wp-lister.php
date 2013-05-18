@@ -2,20 +2,20 @@
 /* 
 Plugin Name: WP-Lister for eBay
 Plugin URI: http://www.wplab.com/plugins/wp-lister/
-Description: List your products on eBay the easy way. 
-Version: 1.1.6.12
+Description: List your products on eBay the easy way.
+Version: 1.2.1
 Author: Matthias Krok
 Author URI: http://www.wplab.com/ 
-Max WP Version: 3.5
+Max WP Version: 3.5.1
 Text Domain: wp-lister
 License: GPL2+
 */
 
 
 // include base classes
-define('WPLISTER_VERSION', '1.1.6.12' );
+define('WPLISTER_VERSION', '1.2.1' );
 define('WPLISTER_PATH', realpath( dirname(__FILE__) ) );
-define('WPLISTER_URL', WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)) . '/' );
+define('WPLISTER_URL', plugins_url() . '/' . basename(dirname(__FILE__)) . '/' );
 require_once( WPLISTER_PATH . '/classes/WPL_Autoloader.php' );
 require_once( WPLISTER_PATH . '/classes/WPL_Core.php' );
 require_once( WPLISTER_PATH . '/classes/WPL_BasePlugin.php' );
@@ -51,6 +51,9 @@ class WPL_WPLister extends WPL_BasePlugin {
 			$this->loadPages();
 		}
 
+
+		// custom toolbar
+		add_action( 'admin_bar_menu', array( &$this, 'customize_toolbar' ), 999 );
 
 	}
 		
@@ -165,6 +168,157 @@ class WPL_WPLister extends WPL_BasePlugin {
 		$this->EC->closeEbay();
         $this->logger->info("WP-CRON: cron_update_auctions() finished");
 	}
+
+
+
+	// custom toolbar bar
+	function customize_toolbar( $wp_admin_bar ) {
+
+		// top level 'eBay'
+		$args = array(
+			'id'    => 'wplister_top',
+			'title' => __('eBay', 'wplister'),
+			'href'  => admin_url( 'admin.php?page=wplister' ),
+			'meta'  => array('class' => 'wplister-toolbar-top')
+		);
+		$wp_admin_bar->add_node($args);
+		
+		// Listings page	
+		$args = array(
+			'id'    => 'wplister_listings',
+			'title' => __('Listings', 'wplister'),
+			'href'  => admin_url( 'admin.php?page=wplister' ),
+			'parent'  => 'wplister_top',
+			'meta'  => array('class' => 'wplister-toolbar-page')
+		);
+		$wp_admin_bar->add_node($args);
+
+		// Profiles page
+		$args = array(
+			'id'    => 'wplister_profiles',
+			'title' => __('Profiles', 'wplister'),
+			'href'  => admin_url( 'admin.php?page=wplister-profiles' ),
+			'parent'  => 'wplister_top',
+			'meta'  => array('class' => 'wplister-toolbar-page')
+		);
+		$wp_admin_bar->add_node($args);
+
+		// Settings page
+		$args = array(
+			'id'    => 'wplister_settings',
+			'title' => __('Settings', 'wplister'),
+			'href'  => admin_url( 'admin.php?page=wplister-settings' ),
+			'parent'  => 'wplister_top',
+			'meta'  => array('class' => 'wplister-toolbar-page')
+		);
+		$wp_admin_bar->add_node($args);
+
+		// Settings - General tab
+		$args = array(
+			'id'    => 'wplister_settings_general',
+			'title' => __('General Settings', 'wplister'),
+			'href'  => admin_url( 'admin.php?page=wplister-settings' ),
+			'parent'  => 'wplister_settings',
+			'meta'  => array('class' => 'wplister-toolbar-page')
+		);
+		$wp_admin_bar->add_node($args);
+
+		// Settings - Categories tab
+		$args = array(
+			'id'    => 'wplister_settings_categories',
+			'title' => __('Categories', 'wplister'),
+			'href'  => admin_url( 'admin.php?page=wplister-settings&tab=categories' ),
+			'parent'  => 'wplister_settings',
+			'meta'  => array('class' => 'wplister-toolbar-page')
+		);
+		$wp_admin_bar->add_node($args);
+
+		// Settings - License tab
+		$args = array(
+			'id'    => 'wplister_settings_license',
+			'title' => __('License', 'wplister'),
+			'href'  => admin_url( 'admin.php?page=wplister-settings&tab=license' ),
+			'parent'  => 'wplister_settings',
+			'meta'  => array('class' => 'wplister-toolbar-page')
+		);
+		$wp_admin_bar->add_node($args);
+
+		// Settings - Developer tab
+		$args = array(
+			'id'    => 'wplister_settings_developer',
+			'title' => __('Developer', 'wplister'),
+			'href'  => admin_url( 'admin.php?page=wplister-settings&tab=developer' ),
+			'parent'  => 'wplister_settings',
+			'meta'  => array('class' => 'wplister-toolbar-page')
+		);
+		$wp_admin_bar->add_node($args);
+
+
+		if ( current_user_can('administrator') && ( get_option( 'wplister_log_to_db' ) == '1' ) ) {
+		
+			// Logs page
+			$args = array(
+				'id'    => 'wplister_log',
+				'title' => __('Logs', 'wplister'),
+				'href'  => admin_url( 'admin.php?page=wplister-log' ),
+				'parent'  => 'wplister_top',
+				'meta'  => array('class' => 'wplister-toolbar-page')
+			);
+			$wp_admin_bar->add_node($args);
+
+		}
+
+		// admin only from here on
+		if ( ! current_user_can('administrator') ) return;
+
+		// product page
+		global $post;
+		global $wp_query;
+		$post_id = false;
+
+		if ( isset( $wp_query->post->post_type ) && ( $wp_query->post->post_type == 'product' ) ) {
+			$post_id = $wp_query->post->ID;
+		} elseif ( isset( $post->post_type ) && ( $post->post_type == 'product' ) ) {
+			$post_id = $post->ID;
+		}
+
+		if ( $post_id ) {
+
+			$lm = new ListingsModel();
+			$ebay_id = $lm->getEbayIDFromPostID( $post_id );
+			$url = $lm->getViewItemURLFromPostID( $post_id );
+
+			// View on eBay link
+			$args = array(
+				'id'    => 'wplister_view_on_ebay',
+				'title' => __('View item on eBay', 'wplister'), # ." ($ebay_id)",
+				'href'  => $url,
+				'parent'  => 'wplister_top',
+				'meta'  => array('target' => '_blank', 'class' => 'wplister-toolbar-link')
+			);
+			if ( $url ) $wp_admin_bar->add_node($args);
+
+			// get all items
+			$listings = $lm->getAllListingsFromPostID( $post_id );
+			foreach ($listings as $listing) {
+
+				$args = array(
+					'id'    => 'wplister_view_on_ebay_'.$listing->id,
+					'title' => '#'.$listing->ebay_id . ': ' . $listing->auction_title,
+					'href'  => $listing->ViewItemURL,
+					'parent'  => 'wplister_view_on_ebay',
+					'meta'  => array('target' => '_blank', 'class' => 'wplister-toolbar-link')
+				);
+				if ( $listing->ViewItemURL ) $wp_admin_bar->add_node($args);
+
+			}
+
+		}
+
+
+
+	}
+
 
 	
 } // class WPL_WPLister

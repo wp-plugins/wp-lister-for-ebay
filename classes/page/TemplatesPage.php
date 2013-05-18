@@ -17,6 +17,8 @@ class TemplatesPage extends WPL_Page {
 		add_action('wp_ajax_wpl_get_copy_template_form', array( &$this, 'ajax_wpl_get_copy_template_form' ));
 		add_action('wp_ajax_wpl_duplicate_template', array( &$this, 'ajax_wpl_duplicate_template' ));
 
+		add_action('wp_ajax_wpl_get_tpl_css', array( &$this, 'ajax_wpl_get_tpl_css' ));
+
 	}
 
 	public function onWpAdminMenu() {
@@ -59,6 +61,22 @@ class TemplatesPage extends WPL_Page {
 		add_screen_option( $option, $args );
 		$this->temmplatesTable = new TemplatesTable();
 		add_thickbox();
+
+        wp_enqueue_style( 'farbtastic' );
+		wp_enqueue_script( 'farbtastic' );
+
+ 	    // If the WordPress version is greater than or equal to 3.5, then load the new WordPress color picker.
+		/*
+		global $wp_version;
+	    if ( 3.5 <= $wp_version ){
+	        wp_enqueue_style( 'wp-color-picker' );
+	        wp_enqueue_script( 'wp-color-picker' );
+	    } else {
+	        wp_enqueue_style( 'farbtastic' );
+			wp_enqueue_script( 'farbtastic' );
+	    }
+	    */
+
 	}
 	
 
@@ -147,6 +165,9 @@ class TemplatesPage extends WPL_Page {
 			$functions				= $templatesModel->getFunctions();				
 		}
 
+		// init template
+		$templatesModel->initTemplate();
+
 		// remove template header from stylesheet
 		if ( preg_match('/^\/\*.*^\*\//uUsm', $css, $matches ) ) {
 			$css = str_replace($matches[0], '', $css);
@@ -169,6 +190,7 @@ class TemplatesPage extends WPL_Page {
 			'functions'					=> $functions,
 			'template_location'			=> $item['template_path'],
 			'add_new_template'			=> ( $this->requestAction() == 'add_new_template' ) ? true : false,
+			'tpl_fields'  			    => $templatesModel->fields,
 
 			'prepared_listings'         => $prepared_listings,
 			'verified_listings'         => $verified_listings,
@@ -238,6 +260,10 @@ class TemplatesPage extends WPL_Page {
 				$this->showMessage( __('New template created in folder: ','wplister') . basename($tpl_dir) );
 			}
 
+			// init default template to handle setting
+			$templatesModel = new TemplatesModel();
+			$templatesModel->folderpath = WPLISTER_PATH . '/templates/default/';
+			$templatesModel->initTemplate();
 		
 		// save existing template
 		} else {
@@ -254,6 +280,10 @@ class TemplatesPage extends WPL_Page {
 		        }
 				$this->showMessage( sprintf( __('%s published items marked as changed.','wplister'), count($items) ) );			
 			}
+
+			// init template to handle setting
+			$templatesModel = new TemplatesModel( $dirname );
+			$templatesModel->initTemplate();
 		
 		}
 
@@ -263,6 +293,7 @@ class TemplatesPage extends WPL_Page {
 		$file_header				= $tpl_dir . '/header.php';
 		$file_footer				= $tpl_dir . '/footer.php';
 		$file_functions				= $tpl_dir . '/functions.php';
+		$file_settings				= $tpl_dir . '/config.json';
 		
 		$tpl_html	 				= stripslashes( $this->getValueFromPost( 'tpl_html' ) );
 		$tpl_css	 				= stripslashes( $this->getValueFromPost( 'tpl_css'  ) );
@@ -273,6 +304,15 @@ class TemplatesPage extends WPL_Page {
 		$template_name 				= stripslashes( $this->getValueFromPost( 'template_name'  ) );
 		$template_description 		= stripslashes( $this->getValueFromPost( 'template_description'  ) );
 		$template_version 			= stripslashes( $this->getValueFromPost( 'template_version'  ) );
+
+		// handle custom fields settings
+		$settings = array();
+		foreach ($templatesModel->fields as $field_id => $field) {
+			$value = $this->getValueFromPost( 'tpl_field_'.$field_id );
+			if ( $value ) {
+				$settings[ $field_id ] = stripslashes( $value );
+			}
+		}
 
 		// add template header
 		$header_css = "/* \n";
@@ -288,6 +328,7 @@ class TemplatesPage extends WPL_Page {
 		$result = file_put_contents($file_footer , $tpl_footer);
 		$result = file_put_contents($file_header , $tpl_header);
 		$result = file_put_contents($file_html, $tpl_html);
+		$result = file_put_contents($file_settings, json_encode( $settings ) );
 
 		// proper error handling
 		if ($result===false) {
@@ -354,7 +395,7 @@ class TemplatesPage extends WPL_Page {
 	    $folder  = $templates_dir . $template_id . '/';
 	    $tmpfile = $templates_dir . $template_id . '.zip';
 
-	    $files_to_zip = array( 'style.css', 'template.html', 'header.php', 'footer.php', 'functions.php' );
+	    $files_to_zip = array( 'style.css', 'template.html', 'header.php', 'footer.php', 'functions.php', 'config.json' );
 
 	    // create ZipArchive
 	    $zip = new ZipArchive;
@@ -375,6 +416,21 @@ class TemplatesPage extends WPL_Page {
 		// remove archive
 		unlink( $tmpfile );
 
+	}
+
+
+	function ajax_wpl_get_tpl_css() {
+
+		$tpl = $_REQUEST['tpl'];
+		$templatesModel = new TemplatesModel( $tpl );
+		$templatesModel->initTemplate();
+
+		$css = $templatesModel->getCSS();
+		$css = $templatesModel->processCustomFields( $css );
+		
+		header('Content-Type: text/css');
+		echo $css;
+		exit;
 	}
 
 

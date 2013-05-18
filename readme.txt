@@ -11,7 +11,7 @@ List products from WordPress on eBay. The easy way.
 
 == Description ==
 
-WP-Lister connects your WooCommerce, Jigoshop, WP e-Commerce, Shopp or MarketPress site with your eBay Store. You can select multiple products right from your products page, select a profile to apply a set of predefined options and list them all on eBay with just a few clicks.
+WP-Lister connects your WooCommerce shop with your eBay Store. You can select multiple products right from your products page, select a profile to apply a set of predefined options and list them all on eBay with just a few clicks.
 
 We worked hard to make WP-Lister easy to use but flexible. The workflow of listing items requires not a single click more than neccessary. Due to its tight integration in WordPress, your client will not have to learn anything new as he will feel right at home.
 
@@ -32,6 +32,8 @@ We worked hard to make WP-Lister easy to use but flexible. The workflow of listi
 * english
 * german
 * italian
+* french
+* korean
 
 To make WP-Lister available in more languages, we will provide a free license for WP-Lister Pro for everyone who will provide and maintain a new localization.
 
@@ -70,7 +72,7 @@ WP-Lister is specifically designed to let you manage your products in WordPress 
 
 = Any plans to support windows servers? =
 
-This has been requested by less than 2% of our users so far, so it's not top priority. But if you need to run WP-Lister on windows and are willing to provide us with a development area for testing, we would gladly take care of fixing any issues.
+This has been requested by less than 2% of our users so far, so it's not top priority. Won't happen until support for Amazon has been implemented - which actually is top priority right now.
 
 = Are there any more FAQ? =
 
@@ -78,7 +80,7 @@ Yes, there are more questions and answers on http://www.wplab.com/plugins/wp-lis
 
 = Any plans for WP-Lister for Amazon? =
 
-Already working on it.
+Already working on it. Expect it this summer.
 
 == Screenshots ==
 
@@ -87,9 +89,101 @@ Already working on it.
 
 == Changelog ==
 
+= 1.2.0.20 =
+* added WP-Lister toolbar links - along with a link to open a product on eBay in a new tab
 
-= 1.1.6.12 =
+= 1.2.0.19 =
+* added option to show only product which have not been listed on eBay yet
+
+= 1.2.0.18 =
+* added options for listing type, start price and reserved price on product level
+
+= 1.2.0.17 =
+* fix to allow percent and plus sign in profile prices again
+* changed column type for references to post_id to bigint(20)
+
+= 1.2.0.16 =
+* added Global Shipping option on product level (Pro only)
+* added Payment Instructions on profile and product level
+
+= 1.2.0.15 =
+* added SKU column to listings page
+* added verify and publish buttons on top of listings page
+* remove currency symbols from profile prices automatically
+
+= 1.2.0.14 =
+* fixed possible "Invalid ShippingPackage" issue
+
+= 1.2.0.12 =
+* fixed possible issue where item conditions and item specifics were empty
+* fixed weight conversion issue on WP e-Commerce
+
+= 1.2.0.11 =
+* fixed "You need to add at least one image to your product" if upload to EPS is disabled (Pro only)
+* improved removing links from description
+* filter options for log page
+
+= 1.2.0.10 =
+* fixed "Too Many Pictures" error
+
+= 1.2.0.9 =
+* improved sanity checks before listing and verifying
+* fixed error message when no featured image is found
+
+= 1.2.0.8 =
+* new option to import transaction for items which were not listed by WP-Lister
+* search listings by item id
+
+= 1.2.0.7 =
+* fetch item conditions via ajax when primary category is selected
+
+= 1.2.0.6 =
+* added support for item condition description
+
+= 1.2.0.5 =
+* transaction update reports shows listing titles again
+* fixed cross selling widgets for servers which send the X-Frame-Options HTTP header
+
+= 1.2.0.4 =
+* beta support for variations with attributes without values (like "all Sizes" instead of a value)
+
+= 1.2.0.3 =
+* fix for new cross-selling widgets
+
+= 1.2.0.2 =
 * enabled listing product attributes as item specifics again
+
+= 1.2.0.1 =
+* new eBay metabox on edit product page to set listing title and subtitle on product level
+
+= 1.2.0 =
+* new default template with options and color pickers
+* new cross-selling widgets to display your other active listings
+
+= 1.1.7.5 =
+* fixed missing package weight for split variations issue (Pro only)
+
+= 1.1.7.4 =
+* fixed item specifics and conditions for eBay Motors categories when using eBay US as main site
+
+= 1.1.7.3 =
+* fixed issue with empty titles when splitting variations (Pro only)
+
+= 1.1.7.2 =
+* support for WooCommerce 2.0 Product Galleries
+
+= 1.1.7 =
+* new option to schedule listings
+* new template engine with hooks and custom template options (beta)
+
+= 1.1.6.11 =
+* load admin scripts and stylesheets using SSL if enabled
+* WP-Lister won't update the order status if already completed orders anymore (Pro only)
+
+= 1.1.6.9 =
+* fixed an issue regarding inventory sync on WooCommerce 2.0 (Pro only)
+* added order note when revising an item during checkout (Pro only)
+* added one day listing duration
 
 = 1.1.6.8 =
 * fixed error regarding shipping service for flat shipping

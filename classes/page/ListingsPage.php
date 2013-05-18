@@ -311,7 +311,7 @@ class ListingsPage extends WPL_Page {
 				$msg .= sprintf( __('WP-Lister has found %s changed item(s) which need to be revised on eBay to apply their latest changes.','wplister'), $summary->changed );
 				// $msg .= '<br><br>';
 				$msg .= '&nbsp;&nbsp;';
-				$msg .= '<a id="btn_revise_all_changed_items_reminder" class="button-secondary wpl_job_button">' . __('Revise all changed items','wplister') . '</a>';
+				$msg .= '<a id="btn_revise_all_changed_items_reminder" class="btn_revise_all_changed_items_reminder button-secondary wpl_job_button">' . __('Revise all changed items','wplister') . '</a>';
 				$msg .= '</p>';
 				$this->showMessage( $msg );				
 

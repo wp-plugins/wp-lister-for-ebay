@@ -85,7 +85,7 @@ class WPL_Model {
 	/* Generic message display */
 	public function showMessage($message, $errormsg = false, $echo = false) {		
 		$class = ($errormsg) ? 'error' : 'updated fade';
-		$message = '<div id="message" class="'.$class.'"><p>'.$message.'</p></div>';
+		$message = '<div id="message" class="'.$class.'" style="display:block !important"><p>'.$message.'</p></div>';
 		if ($echo) {
 			echo $message;
 		} else {
@@ -144,7 +144,7 @@ class WPL_Model {
 			// some errors like #240 may return an extra ErrorParameters array
 			// deactivated for now since a copy of this will be found in $res->getMessage()
 			// if ( isset( $error->ErrorParameters ) ) { 
-			// 	$extraMsg  = '<div id="message" class="updated"><p>';
+			// 	$extraMsg  = '<div id="message" class="updated" style="display:block !important;"><p>';
 			// 	$extraMsg .= print_r( $error->ErrorParameters, 1 );
 			// 	$extraMsg .= '</p></div>';
 			// 	if ( ! $this->is_ajax() ) echo $extraMsg;
@@ -154,7 +154,7 @@ class WPL_Model {
 
 			// display error message - if this is not an ajax request
 			$class = ( $error->SeverityCode == 'Error') ? 'error' : 'updated';
-			$htmlMsg  = '<div id="message" class="'.$class.'"><p>';
+			$htmlMsg  = '<div id="message" class="'.$class.'" style="display:block !important;"><p>';
 			$htmlMsg .= '<b>' . $error->SeverityCode . ': ' . $shortMessage . '</b>' . ' (#'  . $error->getErrorCode() . ') ';
 			$htmlMsg .= '<br>' . $longMessage . '';
 			$htmlMsg .= '</p></div>';
@@ -174,7 +174,7 @@ class WPL_Model {
 
 		// some errors like #240 may trigger an extra Message field returned in the response
 		if ( $res->getMessage() ) { 
-			$extraMsg  = '<div id="message" class="updated">';
+			$extraMsg  = '<div id="message" class="updated" style="display:block !important;">';
 			$extraMsg .= $res->getMessage();
 			$extraMsg .= '</div>';
 			if ( ! $this->is_ajax() ) echo $extraMsg;

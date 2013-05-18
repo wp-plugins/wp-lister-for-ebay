@@ -141,6 +141,8 @@ class ListingsTable extends WP_List_Table {
             $listing_title = '<a class="product_title_link" href="post.php?post='.$item['post_id'].'&action=edit">'.$listing_title.'</a>';
         } elseif ( ProductWrapper::plugin == 'jigo' ) {
             $listing_title = '<a class="product_title_link" href="post.php?post='.$item['post_id'].'&action=edit">'.$listing_title.'</a>';
+        } elseif ( ProductWrapper::plugin == 'wpec' ) {
+            $listing_title = '<a class="product_title_link" href="post.php?post='.$item['post_id'].'&action=edit">'.$listing_title.'</a>';
         } elseif ( ProductWrapper::plugin == 'shopp' ) {
             $listing_title = '<a class="product_title_link" href="admin.php?page=shopp-products&id='.$item['post_id'].'">'.$listing_title.'</a>';
         }
@@ -455,6 +457,10 @@ class ListingsTable extends WP_List_Table {
             /*$3%s*/ $template_name        
         );
     }
+
+    function column_sku($item){
+        return get_post_meta( $item['post_id'], '_sku', true );
+    }
     
     /** ************************************************************************
      * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
@@ -492,6 +498,7 @@ class ListingsTable extends WP_List_Table {
             'cb'        		=> '<input type="checkbox" />', //Render a checkbox instead of text
             'ebay_id'  			=> __('eBay ID','wplister'),
             'auction_title' 	=> __('Title','wplister'),
+            'sku'               => __('SKU','wplister'),
             'quantity'			=> __('Quantity','wplister'),
             'quantity_sold'		=> __('Sold','wplister'),
             'price'				=> __('Price','wplister'),
@@ -621,6 +628,23 @@ class ListingsTable extends WP_List_Table {
 
        return $views;
     }    
+
+    function extra_tablenav( $which ) {
+        if ( 'top' != $which ) return;
+        ?>
+        <div class="alignleft actions" style="">
+
+            <a class="btn_verify_all_prepared_items button-secondary wpl_job_button"
+               title="<?php echo __('Verify all prepared items with eBay and get listing fees.','wplister') ?>"
+                ><?php echo __('Verify all prepared items','wplister'); ?></a>
+
+            <a class="btn_publish_all_verified_items button-secondary wpl_job_button"
+               title="<?php echo __('Publish all verified items on eBay.','wplister') ?>"
+                ><?php echo __('Publish all verified items','wplister'); ?></a>
+
+        </div>
+        <?php
+    }
     
     /** ************************************************************************
      * REQUIRED! This is where you prepare your data for display. This method will

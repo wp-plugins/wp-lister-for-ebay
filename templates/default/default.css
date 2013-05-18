@@ -1,29 +1,29 @@
 /* 
 Template: Default
-Description: WP-Lister default template
+Description: default preprocessed stylesheet for new template page
 Version: 1.2
 */
 
     /* user colors */
     #wpl_store_header .hotline {
-        color: $hotline_color;
-        background-color: $hotline_bgcolor;
-        display: $display_hotline;
+        color: #FFFFFF;
+        background-color: #FFA500;
+        display: block;
     }
 
     #wpl_wrapper .wpl_description h2 {
-        color: $title_color;
+        color: #000000;
     }
 
     #wpl_wrapper h3 {
-        color: $section_head_color;
-        background-color: $section_head_bgcolor_top;
-        background-image: -webkit-gradient(linear, left top, left bottom, from($section_head_bgcolor_top), to($section_head_bgcolor_bottom));
-        background-image: -webkit-linear-gradient(top, $section_head_bgcolor_top, $section_head_bgcolor_bottom);
-        background-image:    -moz-linear-gradient(top, $section_head_bgcolor_top, $section_head_bgcolor_bottom);
-        background-image:     -ms-linear-gradient(top, $section_head_bgcolor_top, $section_head_bgcolor_bottom);
-        background-image:      -o-linear-gradient(top, $section_head_bgcolor_top, $section_head_bgcolor_bottom);
-        background-image:         linear-gradient(to bottom, $section_head_bgcolor_top, $section_head_bgcolor_bottom);
+        color: #FFFFFF;
+        background-color: #555555;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(#555555), to(#000000));
+        background-image: -webkit-linear-gradient(top, #555555, #000000);
+        background-image:    -moz-linear-gradient(top, #555555, #000000);
+        background-image:     -ms-linear-gradient(top, #555555, #000000);
+        background-image:      -o-linear-gradient(top, #555555, #000000);
+        background-image:         linear-gradient(to bottom, #555555, #000000);
     }
 
 
@@ -40,33 +40,39 @@ Version: 1.2
         font-family:Arial,Helvetica,sans-serif;
     }
 
-    #wpl_store_header {       
+    #wpl_store_header
+    {       
         width:100%;
         overflow: hidden;
     }
 
-    .wpl_description {
+    .wpl_description
+    {
         padding: 0 30px 10px 0;
     }
 
-    #wpl_main_image {
+    #wpl_main_image
+    {
         height:370px;
         width:370px;
     }
 
-    #wpl_main_image img {
+    #wpl_main_image img
+    {
         max-height:360px;
         max-width:350px;
         margin-top:0px;
     }
 
     /* image thumbnails - 3 columns */
-    #wpl_list_images {
+    #wpl_list_images
+    {
         text-align:center;
         margin-top:10px;
     }
 
-    #wpl_list_images a {
+    #wpl_list_images a
+    {
         float:left;
         display:block;
         width:75px;
@@ -78,7 +84,8 @@ Version: 1.2
         padding:12px; 
     }
 
-    #wpl_list_images img {
+    #wpl_list_images img
+    {
         border:none;
         max-height: 75px;
         max-width: 75px;
@@ -101,9 +108,9 @@ Version: 1.2
         line-height: 30px;
         font-size: 16px;
         font-family: Helvetica, Arial, sans-serif;
-        -webkit-border-radius: $border_radius;
-        -moz-border-radius: $border_radius;
-        border-radius: $border_radius; 
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px; 
     }
 
     #wpl_store_header .logo {
@@ -118,9 +125,9 @@ Version: 1.2
         padding-right: 20px;
         padding-left: 20px;
         margin-top: 7px;
-        -webkit-border-radius: $border_radius;
-        -moz-border-radius: $border_radius;
-        border-radius: $border_radius;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
         text-decoration: none;
         text-shadow: 2px 2px 4px #713803;
         filter: dropshadow(color=#713803, offx=0, offy=1);

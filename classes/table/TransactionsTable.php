@@ -161,7 +161,7 @@ class TransactionsTable extends WP_List_Table {
 
         switch( $item['CompleteStatus'] ){
             case 'InComplete':
-                $color = 'orange';
+                $color = 'darkorange';
                 $value = __('InComplete','wplister');
 				break;
             case 'Complete':

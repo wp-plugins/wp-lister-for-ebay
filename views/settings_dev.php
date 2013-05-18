@@ -63,6 +63,23 @@
 						</div>
 					</div>
 
+					<div class="postbox" id="ErrorHandlingBox">
+						<h3 class="hndle"><span><?php echo __('Error handling','wplister') ?></span></h3>
+						<div class="inside">
+
+							<label for="wpl-option-ajax_error_handling" class="text_label"><?php echo __('Handle 404 errors for admin-ajax.php','wplister'); ?>:</label>
+							<select id="wpl-option-ajax_error_handling" name="wpl_e2e_ajax_error_handling" class=" required-entry select">
+								<option value="halt" <?php if ( $wpl_ajax_error_handling == 'halt' ): ?>selected="selected"<?php endif; ?>><?php echo __('Halt on error','wplister'); ?></option>
+								<option value="skip" <?php if ( $wpl_ajax_error_handling == 'skip' ): ?>selected="selected"<?php endif; ?>><?php echo __('Continue with next item','wplister'); ?></option>
+								<option value="retry" <?php if ( $wpl_ajax_error_handling == 'retry' ): ?>selected="selected"<?php endif; ?>><?php echo __('Try again','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('404 errors for admin-ajax.php should actually never happen and are generally a sign of incorrect server configuration.','wplister'); ?>
+								<?php echo __('This setting is just a workaround. You should consider moving to a proper hosting provider instead.','wplister'); ?>
+							</p>
+
+						</div>
+					</div>
 
 					<div class="postbox" id="DeveloperToolBox" style="display:none;">
 						<h3 class="hndle"><span><?php echo __('Debug options','wplister') ?></span></h3>

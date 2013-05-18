@@ -90,6 +90,7 @@ class ProfilesPage extends WPL_Page {
 			$template_files            = $this->getTemplatesList();
 			$store_categories          = $this->getStoreCategories();
 			$available_dispatch_times     = self::getOption('DispatchTimeMaxDetails');
+			$available_shipping_packages  = self::getOption('ShippingPackageDetails');
 			
 			$listingsModel = new ListingsModel();
 			$prepared_listings  = $listingsModel->getAllPreparedWithProfile( $item['profile_id'] );
@@ -129,6 +130,7 @@ class ProfilesPage extends WPL_Page {
 				'published_listings'        => $published_listings,
 				'available_dispatch_times'  => $available_dispatch_times,
 				'available_conditions'  	=> $available_conditions,
+				'available_shipping_packages' => $available_shipping_packages,
 				
 				'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-profiles'
 			);
@@ -169,6 +171,32 @@ class ProfilesPage extends WPL_Page {
 		// redirect to edit new profile
 		wp_redirect( get_admin_url().'admin.php?page=wplister-profiles&action=edit&profile='.$new_profile_id );
 
+	}
+
+	private function convertToDecimal( $price ) {
+		$price = str_replace(',', '.', $price );
+		$price = preg_replace( '/[^\d\.]/', '', $price );  
+		return $price;
+	}
+
+	private function fixProfilePrices( $details ) {
+	
+		if ( isset( $details['start_price'] ) ) $details['start_price'] = $this->convertToDecimal( $details['start_price'] );
+		if ( isset( $details['fixed_price'] ) ) $details['fixed_price'] = $this->convertToDecimal( $details['fixed_price'] );
+		if ( isset( $details['bo_minimum_price'] ) ) $details['bo_minimum_price'] = $this->convertToDecimal( $details['bo_minimum_price'] );
+		if ( isset( $details['bo_autoaccept_price'] ) ) $details['bo_autoaccept_price'] = $this->convertToDecimal( $details['bo_autoaccept_price'] );
+
+		foreach ($details['loc_shipping_options'] as $key => &$option) {
+			if ( isset( $option['price'] )) $option['price'] = $this->convertToDecimal( $option['price'] );
+			if ( isset( $option['add_price'] )) $option['add_price'] = $this->convertToDecimal( $option['add_price'] );
+		}
+
+		foreach ($details['int_shipping_options'] as $key => &$option) {
+			if ( isset( $option['price'] )) $option['price'] = $this->convertToDecimal( $option['price'] );
+			if ( isset( $option['add_price'] )) $option['add_price'] = $this->convertToDecimal( $option['add_price'] );
+		}
+
+		return $details;
 	}
 
 	private function saveProfile() {
@@ -217,6 +245,8 @@ class ProfilesPage extends WPL_Page {
 		unset( $details['int_shipping_options_flat'] );
 		unset( $details['int_shipping_options_calc'] );
 
+		// fix entered prices
+		// $details = $this->fixProfilePrices( $details );
 
 		// process item specifics
 		$item_specifics = array();
@@ -254,7 +284,7 @@ class ProfilesPage extends WPL_Page {
 			$saved_conditions = unserialize($saved_conditions);
 		}
 
-		if ( isset( $saved_conditions[ $primary_category_id ] ) ) {
+		if ( ( isset( $saved_conditions[ $primary_category_id ] ) ) && ( $saved_conditions[ $primary_category_id ] != 'none' ) ) {
 			// conditions for primary category are already saved
 			$conditions = $saved_conditions; 
 		} elseif ( intval( $primary_category_id ) != 0 ) {
