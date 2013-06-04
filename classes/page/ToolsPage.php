@@ -71,14 +71,14 @@ class ToolsPage extends WPL_Page {
 					$this->initEC();
 					$expdate = $this->EC->GetTokenStatus();
 					$this->EC->closeEbay();
-					$this->showMessage( __('Your token will expire on ','wplister') . $expdate );
+					$this->showMessage( __('Your token will expire on','wplister') . ' ' . $expdate );
 				}
 				// GetUser
 				if ( $_POST['action'] == 'GetUser') {				
 					$this->initEC();
 					$UserID = $this->EC->GetUser();
 					$this->EC->closeEbay();
-					$this->showMessage( __('Your UserID is ','wplister') . $UserID );
+					$this->showMessage( __('Your UserID is','wplister') . ' ' . $UserID );
 				}
 				// GetNotificationPreferences
 				if ( $_POST['action'] == 'GetNotificationPreferences') {				

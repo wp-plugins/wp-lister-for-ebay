@@ -34,7 +34,7 @@
         <!-- For plugins, we also need to ensure that the form posts back to our current page -->
         <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
         <!-- Now we can render the completed list table -->
-		<?php $wpl_logTable->search_box(__('Search'), 'log-search-input'); ?>
+		<?php $wpl_logTable->search_box(__('Search','wplister'), 'log-search-input'); ?>
         <?php $wpl_logTable->display() ?>
     </form>
 

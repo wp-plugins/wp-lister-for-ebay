@@ -262,34 +262,26 @@ class ListingsPage extends WPL_Page {
 				$this->EC->closeEbay();
 				$this->showMessage( __('Selected items were removed.','wplister') );
 			}
-			// // handle verify_all_prepared_items action
-			// if ( $this->requestAction() == 'verify_all_prepared_items' ) {
-			// 	$this->initEC();
-			// 	$this->EC->verifyAllPreparedItems();
-			// 	$this->EC->closeEbay();
-			// 	$this->showMessage( __('All prepared items were verified with eBay.','wplister') );
-			// }
-			// // handle publish_all_verified_items action
-			// if ( $this->requestAction() == 'publish_all_verified_items' ) {
-			// 	$this->initEC();
-			// 	$this->EC->publishAllVerifiedItems();
-			// 	$this->EC->closeEbay();
-			// 	$this->showMessage( __('All verified items were published with eBay.','wplister') );
-			// }
-			// // handle revise_all_changed_items action
-			// if ( $this->requestAction() == 'revise_all_changed_items' ) {
-			// 	$this->initEC();
-			// 	$this->EC->reviseAllChangedItems();
-			// 	$this->EC->closeEbay();
-			// 	$this->showMessage( __('All changes have been uploaded to eBay.','wplister') );
-			// }
-			// // handle update_all_published_items action
-			// if ( $this->requestAction() == 'update_all_published_items' ) {
-			// 	$this->initEC();
-			// 	$this->EC->updateAllPublishedItems();
-			// 	$this->EC->closeEbay();
-			// 	$this->showMessage( __('All published items have been updated from eBay.','wplister') );
-			// }
+
+			// handle toolbar action - prepare listing from product
+			if ( $this->requestAction() == 'wpl_prepare_single_listing' ) {
+
+		        // get profile
+				$profilesModel = new ProfilesModel();
+		        $profile = $profilesModel->getItem( $_REQUEST['profile_id'] );
+
+		        if ( $profile ) {
+			
+					// prepare product
+					$listingsModel = new ListingsModel();
+			        $listingsModel->prepareProductForListing( $_REQUEST['product_id'] );
+
+			        $listingsModel->applyProfileToNewListings( $profile );		      
+		        }
+
+				$this->showMessage( __('New listing was prepared from product.','wplister') );
+			}
+
 
 
 			// handle reapply profile action

@@ -302,6 +302,13 @@
 							</select>
 							<br class="clear" />
 
+							<label for="wpl-text-strikethrough_pricing" class="text_label"><?php echo __('Strikethrough price','wplister'); ?>:</label>
+							<select id="wpl-text-strikethrough_pricing" name="wpl_e2e_strikethrough_pricing" title="Fetch the UPC value from the products SKU" class=" required-entry select">
+								<option value="1" <?php if ( @$item_details['strikethrough_pricing'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( @$item_details['strikethrough_pricing'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
 							<label for="wpl-text-counter_style" class="text_label"><?php echo __('Counter','wplister'); ?>:</label>
 							<select id="wpl-text-counter_style" name="wpl_e2e_counter_style" title="Counter" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>

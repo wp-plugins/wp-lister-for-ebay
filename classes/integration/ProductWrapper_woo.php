@@ -25,6 +25,9 @@ class ProductWrapper {
 		if ( floatval($sale_price) > 0 ) return $sale_price;
 		return get_post_meta( $post_id, '_price', true);
 	}	
+	static function getOriginalPrice( $post_id ) {
+		return get_post_meta( $post_id, '_regular_price', true);
+	}	
 	
 	// set product price
 	static function setPrice( $post_id, $price ) {
@@ -624,6 +627,7 @@ class WpLister_Product_MetaBox {
 			$wpl_ebay_auction_type          = esc_attr( @$_POST['wpl_ebay_auction_type'] );
 			$wpl_ebay_start_price           = esc_attr( @$_POST['wpl_ebay_start_price'] );
 			$wpl_ebay_reserve_price         = esc_attr( @$_POST['wpl_ebay_reserve_price'] );
+			$wpl_ebay_buynow_price          = esc_attr( @$_POST['wpl_ebay_buynow_price'] );
 
 			// Update order data
 			update_post_meta( $post_id, '_ebay_title', $wpl_ebay_title );
@@ -634,6 +638,7 @@ class WpLister_Product_MetaBox {
 			update_post_meta( $post_id, '_ebay_auction_type', $wpl_ebay_auction_type );
 			update_post_meta( $post_id, '_ebay_start_price', $wpl_ebay_start_price );
 			update_post_meta( $post_id, '_ebay_reserve_price', $wpl_ebay_reserve_price );
+			update_post_meta( $post_id, '_ebay_buynow_price', $wpl_ebay_buynow_price );
 
 		}
 

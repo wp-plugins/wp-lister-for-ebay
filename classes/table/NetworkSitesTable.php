@@ -108,8 +108,8 @@ class NetworkSitesTable extends WP_List_Table {
         //Build row actions
         $actions = array(
             // 'create_order' => sprintf('<a href="?page=%s&action=%s&site=%s">%s</a>',$_REQUEST['page'],'create_order',$item['id'],__('Create Order','wplister')),
-            'dashboard'  => sprintf('<a href="%s/wp-admin/">%s</a>', $blog_details->siteurl, __('Dashboard') ),
-            'settings'   => sprintf('<a href="%s/wp-admin/admin.php?page=wplister-settings">%s</a>', $blog_details->siteurl, __('Settings') ),
+            'dashboard'  => sprintf('<a href="%s/wp-admin/">%s</a>', $blog_details->siteurl, __('Dashboard','wplister') ),
+            'settings'   => sprintf('<a href="%s/wp-admin/admin.php?page=wplister-settings">%s</a>', $blog_details->siteurl, __('Settings','wplister') ),
             // 'reinstall'  => sprintf('<a href="?page=%s&action=%s&site=%s">%s</a>',$_REQUEST['page'],'reinstall',$item['blog_id'],__('Re-Install','wplister')),
             'install'    => sprintf('<a href="?page=%s&action=%s&site=%s">%s</a>',$_REQUEST['page'],'install',$item['blog_id'],__('Install','wplister')),
             'uninstall'  => sprintf('<a href="?page=%s&action=%s&site=%s">%s</a>',$_REQUEST['page'],'uninstall',$item['blog_id'],__('Uninstall','wplister')),

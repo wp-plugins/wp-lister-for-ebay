@@ -238,13 +238,22 @@
 							<br class="clear" />
 
 							<label for="wpl-text-returns_within" class="text_label"><?php echo __('Returns within','wplister'); ?>:</label>
-							<!input type="text" name="wpl_e2e_returns_within" id="wpl-text-returns_within" value="<?php echo $item_details['returns_within']; ?>" class="text_input" />
 							<select id="wpl-text-returns_within" name="wpl_e2e_returns_within" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
-								<option value="Days_10" <?php if ( $item_details['returns_within'] == 'Days_10' ): ?>selected="selected"<?php endif; ?>>10 <?php echo __('Days','wplister'); ?></option>
-								<option value="Days_14" <?php if ( $item_details['returns_within'] == 'Days_14' ): ?>selected="selected"<?php endif; ?>>14 <?php echo __('Days','wplister'); ?></option>
-								<option value="Days_30" <?php if ( $item_details['returns_within'] == 'Days_30' ): ?>selected="selected"<?php endif; ?>>30 <?php echo __('Days','wplister'); ?></option>
-								<option value="Days_60" <?php if ( $item_details['returns_within'] == 'Days_60' ): ?>selected="selected"<?php endif; ?>>60 <?php echo __('Days','wplister'); ?></option>
+								<option value="Days_10" <?php if ( $item_details['returns_within'] == 'Days_10' ): ?>selected="selected"<?php endif; ?>>10 <?php echo __('days','wplister'); ?></option>
+								<option value="Days_14" <?php if ( $item_details['returns_within'] == 'Days_14' ): ?>selected="selected"<?php endif; ?>>14 <?php echo __('days','wplister'); ?></option>
+								<option value="Days_30" <?php if ( $item_details['returns_within'] == 'Days_30' ): ?>selected="selected"<?php endif; ?>>30 <?php echo __('days','wplister'); ?></option>
+								<option value="Days_60" <?php if ( $item_details['returns_within'] == 'Days_60' ): ?>selected="selected"<?php endif; ?>>60 <?php echo __('days','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
+							<label for="wpl-text-RestockingFee" class="text_label"><?php echo __('Restocking fee','wplister'); ?>:</label>
+							<select id="wpl-text-RestockingFee" name="wpl_e2e_RestockingFee" class=" required-entry select">
+								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+								<option value="NoRestockingFee" <?php if ( @$item_details['RestockingFee'] == 'NoRestockingFee' ): ?>selected="selected"<?php endif; ?>><?php echo __('No restocking fee','wplister'); ?></option>
+								<option value="Percent_10" <?php if ( @$item_details['RestockingFee'] == 'Percent_10' ): ?>selected="selected"<?php endif; ?>>10 <?php echo __('percent','wplister'); ?></option>
+								<option value="Percent_15" <?php if ( @$item_details['RestockingFee'] == 'Percent_15' ): ?>selected="selected"<?php endif; ?>>15 <?php echo __('percent','wplister'); ?></option>
+								<option value="Percent_20" <?php if ( @$item_details['RestockingFee'] == 'Percent_20' ): ?>selected="selected"<?php endif; ?>>20 <?php echo __('percent','wplister'); ?></option>
 							</select>
 							<br class="clear" />
 

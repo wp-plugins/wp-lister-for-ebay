@@ -1,7 +1,7 @@
 /* 
 Template: Default
 Description: WP-Lister default template
-Version: 1.2
+Version: 1.2.1
 */
 
     /* user colors */
@@ -15,7 +15,7 @@ Version: 1.2
         color: $title_color;
     }
 
-    #wpl_wrapper h3 {
+    #wpl_wrapper h3.bar {
         color: $section_head_color;
         background-color: $section_head_bgcolor_top;
         background-image: -webkit-gradient(linear, left top, left bottom, from($section_head_bgcolor_top), to($section_head_bgcolor_bottom));
@@ -93,7 +93,7 @@ Version: 1.2
         line-height: 30px;
     }
 
-    #wpl_wrapper h3 {
+    #wpl_wrapper h3.bar {
         margin-top: 30px;
         margin-bottom: 20px;
         padding-left: 10px;
@@ -152,6 +152,13 @@ Version: 1.2
     #wpl_wrapper .section big {
         font-size: 18px;
         font-weight: bold;
+    }
+
+    #wpl_wrapper .alignleft {
+        float: left;
+    }
+    #wpl_wrapper .alignright {
+        float: right;
     }
 
     /* these only apply in preview to override default styles from wp-admin */

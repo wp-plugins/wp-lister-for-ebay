@@ -84,6 +84,11 @@ class ItemBuilderModel extends WPL_Model {
 			$item->BuyItNowPrice->setTypeValue( $buynow_price );
 			$item->BuyItNowPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
 		}
+		if ( $buynow_price = get_post_meta( $post_id, '_ebay_buynow_price', true ) ) {
+			$item->BuyItNowPrice = new AmountType();
+			$item->BuyItNowPrice->setTypeValue( $buynow_price );
+			$item->BuyItNowPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
+		}
 
 		// optional ReservePrice
 		if ( $product_reserve_price = get_post_meta( $post_id, '_ebay_reserve_price', true ) ) {
@@ -92,6 +97,18 @@ class ItemBuilderModel extends WPL_Model {
 			$item->ReservePrice->setTypeAttribute('currencyID', $profile_details['currency'] );
 		}
 
+		// optional DiscountPriceInfo.OriginalRetailPrice
+		if ( intval($profile_details['strikethrough_pricing']) != 0) {
+			if ( method_exists( ProductWrapper, 'getOriginalPrice' ) ) {
+				$original_price = ProductWrapper::getOriginalPrice( $post_id );
+				if ( $start_price != $original_price ) {
+					$item->DiscountPriceInfo = new DiscountPriceInfoType();
+					$item->DiscountPriceInfo->OriginalRetailPrice = new AmountType();
+					$item->DiscountPriceInfo->OriginalRetailPrice->setTypeValue( $original_price );
+					$item->DiscountPriceInfo->OriginalRetailPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
+				}
+			}
+		}
 
 		// Set the Item Title
 		$item->Title = $this->prepareTitle( $p['auction_title'] );
@@ -161,8 +178,13 @@ class ItemBuilderModel extends WPL_Model {
 		$item->ReturnPolicy = new ReturnPolicyType();
 		if ( $profile_details['returns_accepted'] == 1 ) {
 			$item->ReturnPolicy->ReturnsAcceptedOption = 'ReturnsAccepted';
-			$item->ReturnPolicy->ReturnsWithinOption = $profile_details['returns_within'];
-			$item->ReturnPolicy->Description = stripslashes( $profile_details['returns_description'] );
+			$item->ReturnPolicy->ReturnsWithinOption   = $profile_details['returns_within'];
+			$item->ReturnPolicy->Description           = stripslashes( $profile_details['returns_description'] );
+
+			if ( ( isset($profile_details['RestockingFee']) ) && ( $profile_details['RestockingFee'] != '' ) ) {
+				$item->ReturnPolicy->RestockingFeeValueOption = $profile_details['RestockingFee'];
+			}
+
 		} else {
 			$item->ReturnPolicy->ReturnsAcceptedOption = 'ReturnsNotAccepted';
 		}			
@@ -1144,8 +1166,16 @@ class ItemBuilderModel extends WPL_Model {
 
 	// ebay doesn't accept image urls using https - only http and ftp
 	function removeHttpsFromUrl( $url ) {
+
+		// fix relative urls
+		if ( '/wp-content/' == substr( $url, 0, 12 ) ) {
+			$url = str_replace('/wp-content', content_url(), $url);
+		}
+
+		// fix https urls
 		$url = str_replace( 'https://', 'http://', $url );
 		$url = str_replace( ':443', '', $url );
+
 		return $url;
 	}
 	

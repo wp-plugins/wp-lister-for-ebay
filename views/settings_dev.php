@@ -13,7 +13,6 @@
 
 <div class="wrap wplister-page">
 	<div class="icon32" style="background: url(<?php echo $wpl_plugin_url; ?>img/hammer-32x32.png) no-repeat;" id="wpl-icon"><br /></div>
-	<!--<h2><?php echo __('Developer settings','wplister') ?></h2>-->
           
 	<?php include_once( dirname(__FILE__).'/settings_tabs.php' ); ?>
 	<?php echo $wpl_message ?>
@@ -109,6 +108,13 @@
 								<?php #echo __('To use this application you need to generate an eBay token.','wplister'); ?>
 								Please use the setup wizard to link WP-Lister to your eBay account. Entering the token manually should only be neccessary for developers when using sandbox mode.
 							</p>
+
+							<label for="wpl-option-log_record_limit" class="text_label"><?php echo __('Log entry size limit','wplister'); ?>:</label>
+							<select id="wpl-option-log_record_limit" name="wpl_e2e_log_record_limit" class=" required-entry select">
+								<option value="4096"  <?php if ( $wpl_log_record_limit == '4096' ):  ?>selected="selected"<?php endif; ?>>4 kb</option>
+								<option value="8192"  <?php if ( $wpl_log_record_limit == '8192' ):  ?>selected="selected"<?php endif; ?>>8 kb</option>
+								<option value="64000" <?php if ( $wpl_log_record_limit == '64000' ): ?>selected="selected"<?php endif; ?>>64 kb</option>
+							</select>
 
 
 						</div>

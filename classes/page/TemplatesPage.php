@@ -173,6 +173,17 @@ class TemplatesPage extends WPL_Page {
 			$css = str_replace($matches[0], '', $css);
 		}
 
+		// check for CDATA tag in html, header and footer
+		if ( strpos($html, '<![CDATA[') > 0 ) {
+			$this->showMessage( "Warning: Your template HTML code contains CDATA tags which can break the listing process. You should remove them as they don't fullfill any purpose in an eBay listing anyway.", 1 );
+		}
+		if ( strpos($header, '<![CDATA[') > 0 ) {
+			$this->showMessage( "Warning: Your template header contains CDATA tags which can break the listing process. You should remove them as they don't fullfill any purpose in an eBay listing anyway.", 1 );
+		}
+		if ( strpos($footer, '<![CDATA[') > 0 ) {
+			$this->showMessage( "Warning: Your template footer contains CDATA tags which can break the listing process. You should remove them as they don't fullfill any purpose in an eBay listing anyway.", 1 );
+		}
+
 		$listingsModel = new ListingsModel();
 		$prepared_listings  = $listingsModel->getAllPreparedWithTemplate( $template );
 		$verified_listings  = $listingsModel->getAllVerifiedWithTemplate( $template );
@@ -257,7 +268,7 @@ class TemplatesPage extends WPL_Page {
 				$this->showMessage( "Could not create template folder: " . $tpl_dir, 1 );	
 				return false;
 			} else {
-				$this->showMessage( __('New template created in folder: ','wplister') . basename($tpl_dir) );
+				$this->showMessage( __('New template created in folder:','wplister') .' '. basename($tpl_dir) );
 			}
 
 			// init default template to handle setting
@@ -307,10 +318,12 @@ class TemplatesPage extends WPL_Page {
 
 		// handle custom fields settings
 		$settings = array();
-		foreach ($templatesModel->fields as $field_id => $field) {
-			$value = $this->getValueFromPost( 'tpl_field_'.$field_id );
-			if ( $value ) {
-				$settings[ $field_id ] = stripslashes( $value );
+		if ( is_array( $templatesModel->fields ) ) {
+			foreach ($templatesModel->fields as $field_id => $field) {
+				$value = $this->getValueFromPost( 'tpl_field_'.$field_id );
+				if ( $value ) {
+					$settings[ $field_id ] = stripslashes( $value );
+				}
 			}
 		}
 
@@ -496,8 +509,6 @@ class TemplatesPage extends WPL_Page {
 		if ($result===false) {
 			echo( "Could not create template folder: " . $tpl_dir );	
 			exit;
-		} else {
-			// echo( __('New template created in folder: ','wplister') . basename($tpl_dir) );
 		}
 
 

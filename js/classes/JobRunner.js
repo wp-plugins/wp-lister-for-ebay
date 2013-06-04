@@ -11,6 +11,8 @@ WpLister.JobRunner = function () {
     var jobsQueueActive = false;
     var jobKey = 0;
     var currentTask = 0;
+    var currentSubTask = 0;
+    var subtaskQueue = {};
     var retryCount = 0;
     var self = {};
     
@@ -70,6 +72,67 @@ WpLister.JobRunner = function () {
 
     }
 
+    var runSubTask = function ( subtask ) {
+
+        var currentLogRow = jQuery('#wpl_logRow_'+self.currentTask);
+
+        // logRow: set title
+        currentLogRow.find('.logRowTitle').html( subtask.displayName );
+        currentLogRow.find('.logRowTitle').html( 'running subtask...'.subtask.displayName );
+
+        // run task
+        // task.displayName = 'ID '+self.jobKey; // reset displayName
+        var params = {
+            action: 'wpl_jobs_run_subtask',
+            job: self.jobKey,
+            subtask: subtask,
+            nonce: 'TODO'
+        };
+        // var jqxhr = jQuery.getJSON( ajaxurl, params )
+        var jqxhr = jQuery.post( ajaxurl, params, null, 'json' )
+        .success( function( response ) { 
+
+            // check task success
+            if ( response.success ) {
+                var statusIconURL = wplister_url + "img/icon-success.png";
+                var errors_label  = response.errors.length == 1 ? 'warning' : 'warnings';
+            } else {
+                var statusIconURL = wplister_url + "img/icon-error.png";                
+                var errors_label  = response.errors.length == 1 ? 'error' : 'errors';
+            }
+
+            // update row status
+            // currentLogRow.find('.logRowStatus').html( '<img src="'+statusIconURL+'" />' );
+
+            // prepare next subtask
+            self.currentSubTask++;
+            if ( self.currentSubTask < self.subtaskQueue.length ) {
+
+                // run next task
+                self.runSubTask( self.subtaskQueue[ self.currentSubTask ] );
+
+            } else {
+
+                // all subtasks complete
+                self.nextTask();
+
+            }
+
+        })
+        .error( function(e,xhr,error) { 
+
+            // quit on other errors
+            jQuery('#jobs_log').append( "A problem occured while processing this task. The server responded with code " + e.status + ": " + e.responseText + "<br>" );
+            jQuery('#jobs_window .btn_close').show();
+            // alert( "There was a problem running the task '"+task.displayName+"'.\n\nThe server responded:\n" + e.responseText + '\n\nPlease contact support@wplab.com.' ); 
+            console.log( "XHR object", e ); 
+            console.log( "error", xhr, error ); 
+            console.log( e.responseText ); 
+
+        });
+
+    }
+
     var runTask = function ( task ) {
 
         // estimate time left
@@ -121,6 +184,17 @@ WpLister.JobRunner = function () {
         var jqxhr = jQuery.post( ajaxurl, params, null, 'json' )
         .success( function( response ) { 
 
+            if ( response.subtasks && response.success ) {
+    
+                self.subtaskQueue = response.subtasks;
+                self.currentSubTask = 0;
+                if ( self.subtaskQueue.length > 0 ) {
+                    // run first subtask
+                    self.runSubTask( self.subtaskQueue[ self.currentSubTask ] );
+                    return;
+                }
+            }
+
             // check task success
             if ( response.success ) {
                 var statusIconURL = wplister_url + "img/icon-success.png";
@@ -151,21 +225,8 @@ WpLister.JobRunner = function () {
 
             }
 
-            // prepare next task
-            self.currentTask++;
-            retryCount=0;
-            if ( self.currentTask < self.jobsQueue.length ) {
-
-                // run next task
-                self.runTask( self.jobsQueue[ self.currentTask ] );
-
-            } else {
-
-                // all tasks complete
-                jQuery('#jobs_message').html('finishing up...');
-                self.completeJob();
-
-            }
+            // next task
+            self.nextTask();
 
         })
         .error( function(e,xhr,error) { 
@@ -180,10 +241,10 @@ WpLister.JobRunner = function () {
             if ( ( e.status == 404 ) || ( e.status == 500 ) ) {
 
 
-                if ( ( wplister_ajax_error_handling == 'retry') && ( retryCount < 5 ) ) {
+                if ( ( wplister_ajax_error_handling == 'retry') && ( self.retryCount < 5 ) ) {
 
                     // try running the task again
-                    retryCount++;
+                    self.retryCount++;
                     jQuery('#jobs_log').append( "Warning: server returned "+e.status+". will try again...<!br>" );
                     self.runTask( self.jobsQueue[ self.currentTask ] );
 
@@ -228,6 +289,25 @@ WpLister.JobRunner = function () {
 
 
         });
+
+    }
+
+    var nextTask = function () {
+
+        self.currentTask++;
+        self.retryCount=0;
+        if ( self.currentTask < self.jobsQueue.length ) {
+
+            // run next task
+            self.runTask( self.jobsQueue[ self.currentTask ] );
+
+        } else {
+
+            // all tasks complete
+            jQuery('#jobs_message').html('finishing up...');
+            self.completeJob();
+
+        }
 
     }
 
@@ -317,6 +397,7 @@ WpLister.JobRunner = function () {
         init: init,
         runJob: runJob,
         runTask: runTask,
+        nextTask: nextTask,
         completeJob: completeJob,
         updateProgressBar: updateProgressBar,
         showWindow: showWindow

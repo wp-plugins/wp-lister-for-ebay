@@ -24,7 +24,6 @@
 
 <div class="wrap wplister-page">
 	<div class="icon32" style="background: url(<?php echo $wpl_plugin_url; ?>img/hammer-32x32.png) no-repeat;" id="wpl-icon"><br /></div>
-	<!--<h2><?php echo __('Settings','wplister') ?></h2>-->
           
 	<?php include_once( dirname(__FILE__).'/settings_tabs.php' ); ?>		
 	<?php echo $wpl_message ?>
@@ -59,21 +58,32 @@
 												<?php endif; ?>
 											</table>												
 										</p>
+									<?php elseif ( $wpl_text_ebay_token ): ?>
+										<p><?php echo __('WP-Lister has been linked to your eBay account.','wplister') ?></p>
+										<p><?php echo __('Please visit the Tools page and click on "Update user details".','wplister') ?></p>
 									<?php else: ?>
-										<p><?php echo __('WP-Lister is not linked to your eBay account yet. ','wplister') ?></p>
+										<p><?php echo __('WP-Lister is not linked to your eBay account yet.','wplister') ?></p>
 									<?php endif; ?>
 									</div>
 								</div>
 
 								<div id="major-publishing-actions">
 									<?php if ( $wpl_ebay_token_userid ): ?>
-									<div id="publishing-action" style="float:left">
-									<form method="post" id="removeTokenForm" action="<?php echo $wpl_form_action; ?>">
-										<?php wp_nonce_field( 'remove_token' ); ?>
-										<input type="hidden" name="action" value="remove_token" >
-										<input type="submit" value="<?php echo __('Change Account','wplister'); ?>" id="remove_token" class="button-secondary" name="remove_token">
-									</form>
-									</div>
+										<div id="publishing-action" style="float:left">
+										<form method="post" id="removeTokenForm" action="<?php echo $wpl_form_action; ?>">
+											<?php wp_nonce_field( 'remove_token' ); ?>
+											<input type="hidden" name="action" value="remove_token" >
+											<input type="submit" value="<?php echo __('Change Account','wplister'); ?>" id="remove_token" class="button-secondary" name="remove_token">
+										</form>
+										</div>
+									<?php elseif ( $wpl_text_ebay_token ): ?>
+										<div id="publishing-action" style="float:left">
+										<form method="post" id="removeTokenForm" action="<?php echo $wpl_form_action; ?>">
+											<?php wp_nonce_field( 'remove_token' ); ?>
+											<input type="hidden" name="action" value="remove_token" >
+											<input type="submit" value="<?php echo __('Reset Account','wplister'); ?>" id="remove_token" class="button-secondary" name="remove_token">
+										</form>
+										</div>
 									<?php endif; ?>
 									<div id="publishing-action">
 										<input type="submit" value="<?php echo __('Save Settings','wplister'); ?>" id="save_settings" class="button-primary" name="save">
@@ -93,8 +103,8 @@
 
 							<label for="wpl-option-uninstall" class="text_label"><?php echo __('Uninstall','wplister'); ?>:</label>
 							<select id="wpl-option-uninstall" name="wpl_e2e_option_uninstall" title="Uninstall" class=" required-entry select">
-								<option value="1" <?php if ( $wpl_option_uninstall == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( $wpl_option_uninstall != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+								<option value="1" <?php if ( $wpl_option_uninstall == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('Enable to completely remove listings, transactions and settings when deactivating the plugin.','wplister'); ?><br><br>
@@ -195,7 +205,7 @@
 
 							<label for="wpl-text-paypal_email" class="text_label"><?php echo __('PayPal Email adress','wplister'); ?>:</label>
 							<input type="text" name="wpl_e2e_text_paypal_email" id="wpl-text-paypal_email" value="<?php echo $wpl_text_paypal_email; ?>" class="text_input" />
-							<p class="desc" style="display: block;">
+							<p class="desc" style="display: none;">
 								<?php echo __('To use PayPal you need to enter your PayPal adress.','wplister'); ?>
 							</p>
 

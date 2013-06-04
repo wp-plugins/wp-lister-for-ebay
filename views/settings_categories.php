@@ -53,7 +53,6 @@
 
 <div class="wrap wplister-page">
 	<div class="icon32" style="background: url(<?php echo $wpl_plugin_url; ?>img/hammer-32x32.png) no-repeat;" id="wpl-icon"><br /></div>
-	<!--<h2><?php echo __('Settings','wplister') ?></h2>-->
           
 	<?php include_once( dirname(__FILE__).'/settings_tabs.php' ); ?>
 	<?php echo $wpl_message ?>

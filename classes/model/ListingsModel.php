@@ -265,6 +265,20 @@ class ListingsModel extends WPL_Model {
 
 	}
 
+
+	function isUsingEPS( $id ) {
+		$this->logger->info( "isUsingEPS( $id ) " );
+
+		$listing_item = $this->getItem( $id );
+		$profile_details = $listing_item['profile_data']['details'];
+
+        $with_additional_images = isset( $profile_details['with_additional_images'] ) ? $profile_details['with_additional_images'] : false;
+        if ( $with_additional_images == '0' ) $with_additional_images = false;
+
+        return $with_additional_images;
+	}
+
+
 	
 	function listingUsesFixedPriceItem( $listing_item )
 	{
@@ -770,9 +784,12 @@ class ListingsModel extends WPL_Model {
 				$crosssell_ids   = get_post_meta( $listing['post_id'], '_crosssell_ids', true );
 				$inner_where_sql = '1 = 0';
 
+				if ( is_array( $upsell_ids ) )
 				foreach ($upsell_ids as $post_id) {
 					$inner_where_sql .= ' OR post_id = "'.$post_id.'" ';
 				}
+
+				if ( is_array( $crosssell_ids ) )
 				foreach ($crosssell_ids as $post_id) {
 					$inner_where_sql .= ' OR post_id = "'.$post_id.'" ';
 				}

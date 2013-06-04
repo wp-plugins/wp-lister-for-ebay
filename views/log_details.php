@@ -66,8 +66,19 @@ if ( class_exists('PEAR') ) {
 	define('XML_BEAUTIFIER_INCLUDE_PATH', WPLISTER_PATH.'/includes/XML/Beautifier');
 	include_once WPLISTER_PATH.'/includes/XML/Beautifier.php';
 	$fmt = new XML_Beautifier();
-	$req = $fmt->formatString($req);
-	$req .= '<!-- XML_Beautifier -->';
+	$formatted_req = $fmt->formatString($req);
+
+	// check if XML_Beautifier returned an error
+    if ( PEAR::isError($formatted_req) ) {
+
+		// fall back to build in formatter
+		$req = wpl_formatXmlString( $req );
+		$req .= '<!-- wpl_formatXmlString() -->';
+
+    } else {
+		$req = $formatted_req . '<!-- XML_Beautifier -->';
+    }
+
 
 } else {
 	// use build in function to format XML

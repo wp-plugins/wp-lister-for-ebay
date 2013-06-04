@@ -89,6 +89,37 @@ Already working on it. Expect it this summer.
 
 == Changelog ==
 
+= 1.2.1.6 = 
+* fix for order total missing shipping fee 
+* show warning if template contains CDATA tags 
+* added hook wplister_after_create_order 
+* updated localization 
+* added pot file
+
+= 1.2.1.5 = 
+* remember and use images already uploaded to EPS 
+* upload images to EPS one by one via ajax 
+* fixed possible php warning 
+
+= 1.2.1.4 = 
+* added prepare listing action to toolbar 
+* show warning if listing is missing a profile or template 
+* add ebay transaction id to order notes 
+* code cleanup 
+
+= 1.2.1.3 = 
+* added buy now price field on edit product page 
+
+= 1.2.1.2 = 
+* added restocking fee value option 
+* fix for relative image urls
+* improved account handling
+* updated inline documentation
+
+= 1.2.1.1 = 
+* fixed some php warnings
+
+
 = 1.2.0.20 =
 * added WP-Lister toolbar links - along with a link to open a product on eBay in a new tab
 

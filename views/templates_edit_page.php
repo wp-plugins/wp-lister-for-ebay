@@ -309,11 +309,14 @@
 								embed the new crosssell widget (beta)
 							</p>
 							<p>
+								Note: The <i>related listings widget</i> will only show up-sells or cross-sells - which you need to set up for each product in WooCommerce.
+							</p>
+							<p>
 								For more information visit the 
 								<a href="http://www.wplab.com/plugins/wp-lister/faq/" target="_blank">FAQ</a>.
 							</p>
 							<p>
-								If you need help setting up your template, don't hesitate to contact us at support@wplab.com.
+								If you need help setting up your template, please contact support at wplab.com.
 							</p>
 						</div>
 					</div>

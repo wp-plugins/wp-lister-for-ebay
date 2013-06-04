@@ -437,6 +437,12 @@ class ListingsTable extends WP_List_Table {
 
         $profile_name = @$this->profiles[ $item['profile_id'] ];
 
+        if ( ! $profile_name ) {
+            $profile_name = '<span style="color:red;">'. __('Profile missing','wplister') .'!</span>';
+            if ( $item['profile_id'] ) $profile_name .= ' (' . $item['profile_id'] . ')';
+            return $profile_name;
+        }
+
         return sprintf(
             '<a href="admin.php?page=wplister-profiles&action=edit&profile=%1$s&return_to=listings" title="%2$s">%3$s</a>',
             /*$1%s*/ $item['profile_id'],  
@@ -449,6 +455,12 @@ class ListingsTable extends WP_List_Table {
 
         $template_id = basename( $item['template'] );
         $template_name = TemplatesModel::getNameFromCache( $template_id );
+
+        if ( ! $template_name ) {
+            $template_name = '<span style="color:red;">'. __('Template missing','wplister') .'!</span>';
+            if ( $template_id ) $template_name .= ' (' . $template_id . ')';
+            return $template_name;
+        }
 
         return sprintf(
             '<a href="admin.php?page=wplister-templates&action=edit&template=%1$s&return_to=listings" title="%2$s">%3$s</a>',
