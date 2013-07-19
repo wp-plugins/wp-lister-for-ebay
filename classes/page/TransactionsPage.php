@@ -29,7 +29,7 @@ class TransactionsPage extends WPL_Page {
         $this->logger->debug("handleActionsOnInit()");
 
 		// these actions have to wait until 'init'
-		if ( $this->requestAction() == 'view_invoice' ) {
+		if ( $this->requestAction() == 'view_trx_details' ) {
 			$this->showTransactionDetails( $_REQUEST['transaction'] );
 			exit();
 		}

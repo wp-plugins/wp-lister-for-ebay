@@ -109,10 +109,12 @@ class TemplatesTable extends WP_List_Table {
             // 'pathinfo'  => '<span style="color:silver">Location: '. $item['template_path'] .'</span>',
         );
         
+        // make title link to edit page
+        $title = sprintf('<a href="?page=%s&action=%s&template=%s" class="title_link">%s</a>', $_REQUEST['page'], 'edit', $item['template_id'], $item['template_name'] );
+
         //Return the title contents
         return sprintf('%1$s <br><span style="color:gray">%2$s</span>%3$s',
-            /*$1%s*/ $item['template_name'],
-        #    /*$2%s*/ $item['template_id'],
+            /*$1%s*/ $title,
             /*$2%s*/ $item['template_description'],
         #    /*$2%s*/ dirname($item['template_path']),
             /*$3%s*/ $this->row_actions($actions)

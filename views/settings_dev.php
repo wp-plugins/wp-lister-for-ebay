@@ -63,7 +63,7 @@
 					</div>
 
 					<div class="postbox" id="ErrorHandlingBox">
-						<h3 class="hndle"><span><?php echo __('Error handling','wplister') ?></span></h3>
+						<h3 class="hndle"><span><?php echo __('Debug options','wplister') ?></span></h3>
 						<div class="inside">
 
 							<label for="wpl-option-ajax_error_handling" class="text_label"><?php echo __('Handle 404 errors for admin-ajax.php','wplister'); ?>:</label>
@@ -75,6 +75,16 @@
 							<p class="desc" style="display: block;">
 								<?php echo __('404 errors for admin-ajax.php should actually never happen and are generally a sign of incorrect server configuration.','wplister'); ?>
 								<?php echo __('This setting is just a workaround. You should consider moving to a proper hosting provider instead.','wplister'); ?>
+							</p>
+
+							<label for="wpl-option-disable_variations" class="text_label"><?php echo __('Disable variations','wplister'); ?>:</label>
+							<select id="wpl-option-disable_variations" name="wpl_e2e_disable_variations" class=" required-entry select">
+								<option value="0" <?php if ( $wpl_disable_variations == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+								<option value="1" <?php if ( $wpl_disable_variations == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								This is intended to work around an issue with the eBay API and will force using AddItem instead of AddFixedPriceItem, RelistItem instead of RelistFixedPriceItem, etc.<br>
+								Don't enable this unless you do not want to list variations.
 							</p>
 
 						</div>

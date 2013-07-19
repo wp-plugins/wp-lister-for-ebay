@@ -178,7 +178,11 @@ function wpl_generate_shipping_option_tags( $services, $selected_service ) {
 			var shipping_type = jQuery('.select_shipping_type')[0] ? jQuery('.select_shipping_type')[0].value : 'flat';
 			if ( shipping_type == 'flat' ) {
 				var serviceTable_id = mode == 'local' ? '#loc_shipping_options_table_flat' : '#int_shipping_options_table_flat';
-			} else {
+			} else if ( shipping_type == 'FlatDomesticCalculatedInternational' ) {
+				var serviceTable_id = mode == 'local' ? '#loc_shipping_options_table_flat' : '#int_shipping_options_table_calc';
+			} else if ( shipping_type == 'CalculatedDomesticFlatInternational' ) {
+				var serviceTable_id = mode == 'local' ? '#loc_shipping_options_table_calc' : '#int_shipping_options_table_flat';
+			} else { // calc
 				var serviceTable_id = mode == 'local' ? '#loc_shipping_options_table_calc' : '#int_shipping_options_table_calc';
 			}
 

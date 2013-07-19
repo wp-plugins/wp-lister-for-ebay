@@ -217,7 +217,11 @@ class ListingsPage extends WPL_Page {
 				$this->initEC();
 				$this->EC->reviseItems( $_REQUEST['auction'] );
 				$this->EC->closeEbay();
-				$this->showMessage( __('Selected items were revised on eBay.','wplister') );
+				if ( $this->EC->isSuccess ) {
+					$this->showMessage( __('Selected items were revised on eBay.','wplister') );
+				} else {
+					$this->showMessage( __('There were some problems revising your items.','wplister'), 1 );					
+				}
 			}
 			// handle publish to eBay action
 			if ( $this->requestAction() == 'publish2e' ) {

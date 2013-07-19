@@ -73,14 +73,36 @@ class WPL_Model {
 		if ( is_object($obj) || is_array($obj) ) return $obj;
 		
 		// unserialize fallback
-		$obj = unserialize( $str );
+		$obj = maybe_unserialize( $str );
 		//$this->logger->info('unserialize: '.print_r($obj,1));
 		if ( is_object($obj) || is_array($obj) ) return $obj;
 		
+		// mb_unserialize fallback
+		$obj = $this->mb_unserialize( $str );
+		// $this->logger->info('mb_unserialize: '.print_r($obj,1));
+		if ( is_object($obj) || is_array($obj) ) return $obj;
+
 		// log error
+		$e = new Exception;
+		$this->logger->error('backtrace: '.$e->getTraceAsString());
+		$this->logger->error('mb_unserialize returned: '.print_r($obj,1));
 		$this->logger->error('decodeObject() - not an valid object: '.$str);
 		return $str;
 	}	
+
+	/**
+	 * Mulit-byte Unserialize
+	 * UTF-8 will screw up a serialized string
+	 */
+	function mb_unserialize($string) {
+
+		// special handling for asterisk wrapped in zero bytes
+	    $string = str_replace( "\0*\0", "*\0", $string);
+	    $string = preg_replace('!s:(\d+):"(.*?)";!se', "'s:'.strlen('$2').':\"$2\";'", $string);
+	    $string = str_replace('*\0', "\0*\0", $string);
+
+	    return unserialize($string);
+	}
 
 	/* Generic message display */
 	public function showMessage($message, $errormsg = false, $echo = false) {		
@@ -101,6 +123,8 @@ class WPL_Model {
 	//  - returns true on success (even with warnings) and false on failure
 	function handleResponse( $res )	{
 		$errors = array();
+
+		// if ( ! is_object($res) ) return false;
 
 		// echo errors and warnings - call can be successful but with warnings
 		if ( $res->getErrors() )

@@ -10,7 +10,7 @@ class WPL_Setup extends WPL_Core {
 		if ( ! self::isCurlLoaded() ) return false;
 
 		// check for windows server
-		if ( self::isWindowsServer() ) return false;
+		// if ( self::isWindowsServer() ) return false;
 
 		// create folders if neccessary
 		if ( self::checkFolders() ) return false;
@@ -599,6 +599,20 @@ class WPL_Setup extends WPL_Core {
 			// add column to ebay_auctions table
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
 			        ADD COLUMN `eps` TEXT AFTER `history`
+			";
+			$wpdb->query($sql);	#echo mysql_error();
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+		// upgrade to version 20  (1.2.2.16)
+		if ( 20 > $db_version ) {
+			$new_db_version = 20;
+
+			// add column to ebay_transactions table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
+			        ADD COLUMN `history` TEXT AFTER `details`
 			";
 			$wpdb->query($sql);	#echo mysql_error();
 	

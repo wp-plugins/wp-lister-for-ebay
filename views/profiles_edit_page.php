@@ -133,6 +133,7 @@
 								<option value="none" selected="selected"><?php echo __('none','wplister'); ?></option>
 							<?php else: ?>
 								<option value="1000" selected="selected"><?php echo __('New','wplister'); ?></option>
+								<option value="3000" selected="selected"><?php echo __('Used','wplister'); ?></option>
 							<?php endif; ?>
 							</select>
 							<br class="clear" />
@@ -215,6 +216,7 @@
 								onclick="jQuery('#payment_options_table').find('tr.row').first().clone().appendTo('#payment_options_table');"
 								class="button-secondary">
 
+							<br class="clear" />
 
 
 							<label for="wpl-text-payment_instructions" class="text_label"><?php echo __('Payment instructions','wplister'); ?>:</label>

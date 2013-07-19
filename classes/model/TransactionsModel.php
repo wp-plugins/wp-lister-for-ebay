@@ -54,6 +54,7 @@ class TransactionsModel extends WPL_Model {
 
 		// build request
 		$req = new GetSellerTransactionsRequestType();
+		$req->setIncludeContainingOrder(true);
 
 		// check if we need to calculate lastdate
 		if ( $this->current_lastdate ) {
@@ -168,6 +169,7 @@ class TransactionsModel extends WPL_Model {
 
 		// $req->DetailLevel = $Facet_DetailLevelCodeType->ReturnAll;
 		$req->setDetailLevel('ReturnAll');
+		$req->setIncludeContainingOrder(true);
 
 		// download the data
 		$res = $this->_cs->GetItemTransactions( $req );
@@ -233,14 +235,18 @@ class TransactionsModel extends WPL_Model {
 
 		// try to get existing transaction by transaction id
 		$transaction = $this->getTransactionByTransactionID( $data['transaction_id'] );
+
 		if ( $transaction ) {
+
 			// update existing transaction
 			$this->logger->info( 'update transaction #'.$data['transaction_id'].' for item #'.$data['item_id'] );
 			$wpdb->update( $this->tablename, $data, array( 'transaction_id' => $data['transaction_id'] ) );
 
 
 			$this->addToReport( 'updated', $data );
+		
 		} else {
+		
 			// create new transaction
 			$this->logger->info( 'insert transaction #'.$data['transaction_id'].' for item #'.$data['item_id'] );
 			$result = $wpdb->insert( $this->tablename, $data );
@@ -267,6 +273,12 @@ class TransactionsModel extends WPL_Model {
 				array( 'ebay_id' => $data['item_id'] ) 
 			);
 
+			// add history record
+			$history_message = "Sold quantity increased by $quantity_purchased for listing #{$data['item_id']} - sold $quantity_sold";
+			$history_details = array( 'newstock' => $newstock );
+			$this->addHistory( $data['transaction_id'], 'reduce_stock', $history_message, $history_details );
+
+
 			// mark listing as sold when last item is sold
 			if ( $quantity_sold == $quantity_total ) {
 				$wpdb->update( $wpdb->prefix.'ebay_auctions', 
@@ -276,12 +288,52 @@ class TransactionsModel extends WPL_Model {
 				$this->logger->info( 'marked item #'.$data['item_id'].' as SOLD ');
 			}
 
+
+
 			$newstock = false;
 			$wp_order_id = false;
+
 
 			$this->addToReport( 'inserted', $data, $newstock, $wp_order_id );
 
 		}
+
+	} // insertOrUpdate()
+
+
+	// add transaction history entry
+	function addHistory( $transaction_id, $action, $msg, $details = array(), $success = true ) {
+		global $wpdb;
+
+		// build history record
+		$record = new stdClass();
+		$record->action  = $action;
+		$record->msg     = $msg;
+		$record->details = $details;
+		$record->success = $success;
+		$record->time    = time();
+
+		// load history
+		$history = $wpdb->get_var( "
+			SELECT history
+			FROM $this->tablename
+			WHERE transaction_id = '$transaction_id'
+		" );
+
+		// init with empty array
+		$history = maybe_unserialize( $history );
+		if ( ! $history ) $history = array();
+
+		// add record
+		$history[] = $record;
+
+		// update history
+		$history = serialize( $history );
+		$wpdb->query( "
+			UPDATE $this->tablename
+			SET history = '$history'
+			WHERE transaction_id = '$transaction_id'
+		" );
 
 	}
 
@@ -321,19 +373,26 @@ class TransactionsModel extends WPL_Model {
 
 		// skip items not found in listings
 		if ( $listingItem ) {
+
+			$data['post_id']    = $listingItem->post_id;
 			$data['item_title'] = $listingItem->auction_title;
 			$this->logger->info( "process transaction #".$Detail->TransactionID." for item '".$data['item_title']."' - #".$Detail->Item->ItemID );
+			$this->logger->info( "post_id: ".$data['post_id']);
+
 		} else {
+
+			$data['post_id']    = false;
+			$data['item_title'] = $Detail->Item->Title;
+
 			// only skip if foreign_transactions option is disabled
 			if ( get_option( 'wplister_foreign_transactions' ) != 1 ) {
-				$data['item_title'] = $Detail->Item->Title;
 				$this->logger->info( "skipped transaction #".$Detail->TransactionID." for foreign item #".$Detail->Item->ItemID );			
 				$this->addToReport( 'skipped', $data );
 				return false;			
 			} else {
-				$data['item_title'] = $Detail->Item->Title;
 				$this->logger->info( "IMPORTED transaction #".$Detail->TransactionID." for foreign item #".$Detail->Item->ItemID );							
 			}
+
 		}
 
 		// avoid empty transaction id
@@ -344,7 +403,7 @@ class TransactionsModel extends WPL_Model {
 
 		// use buyer name from shipping address if registration address is empty
 		if ( $data['buyer_name'] == '' ) {
-			$data['buyer_name']            = $Detail->Buyer->BuyerInfo->ShippingAddress->Name;
+			$data['buyer_name'] = $Detail->Buyer->BuyerInfo->ShippingAddress->Name;
 		}
 
 
@@ -358,16 +417,16 @@ class TransactionsModel extends WPL_Model {
 	function addToReport( $status, $data, $newstock = false, $wp_order_id = false, $error = false ) {
 
 		$rep = new stdClass();
-		$rep->status          = $status;
-		$rep->item_id         = $data['item_id'];
-		$rep->transaction_id  = $data['transaction_id'];
-		$rep->date_created    = $data['date_created'];
-		$rep->OrderLineItemID = $data['OrderLineItemID'];
+		$rep->status           = $status;
+		$rep->item_id          = $data['item_id'];
+		$rep->transaction_id   = $data['transaction_id'];
+		$rep->date_created     = $data['date_created'];
+		$rep->OrderLineItemID  = $data['OrderLineItemID'];
 		$rep->LastTimeModified = $data['LastTimeModified'];
-		$rep->data            = $data;
-		$rep->newstock        = $newstock;
-		$rep->wp_order_id     = $wp_order_id;
-		$rep->error     	  = $error;
+		$rep->data             = $data;
+		$rep->newstock         = $newstock;
+		$rep->wp_order_id      = $wp_order_id;
+		$rep->error            = $error;
 
 		$this->report[] = $rep;
 
@@ -467,6 +526,7 @@ class TransactionsModel extends WPL_Model {
 
 		// decode TransactionType object with eBay classes loaded
 		$item['details'] = $this->decodeObject( $item['details'], false, true );
+		$item['history'] = maybe_unserialize( $item['history'] );
 
 		return $item;
 	}

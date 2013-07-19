@@ -62,6 +62,16 @@ class SettingsPage extends WPL_Page {
 			$this->saveCategoriesSettings();
 		}
 
+		// import category map
+		if ( $this->requestAction() == 'wplister_import_categories_map' ) {
+			$this->handleImportCategoriesMap();
+		}
+
+		// export category map
+		if ( $this->requestAction() == 'wplister_export_categories_map' ) {
+			$this->handleExportCategoriesMap();
+		}
+
 
 		// save developer settings
 		if ( $this->requestAction() == 'save_wplister_devsettings' ) {
@@ -134,6 +144,8 @@ class SettingsPage extends WPL_Page {
 			'option_cron_transactions'	=> self::getOption( 'cron_transactions' ),
 			'process_shortcodes'		=> self::getOption( 'process_shortcodes', 'content' ),
 			'remove_links'				=> self::getOption( 'remove_links', 'default' ),
+			'default_image_size'		=> self::getOption( 'default_image_size', 'full' ),
+			'wc2_gallery_fallback'		=> self::getOption( 'wc2_gallery_fallback', 'attached' ),
 			'hide_dupe_msg'				=> self::getOption( 'hide_dupe_msg' ),
 			'option_uninstall'			=> self::getOption( 'uninstall' ),
 			'option_enable_ebay_motors'	=> self::getOption( 'enable_ebay_motors' ),
@@ -164,8 +176,8 @@ class SettingsPage extends WPL_Page {
 
 			'shop_categories'			=> $shop_categories,
 			'categoriesMapTable'		=> $categoriesMapTable,
-			'default_category_id'	=> $default_category_id,
-			'default_category_name'=> $default_category_name,
+			'default_category_id'		=> $default_category_id,
+			'default_category_name'		=> $default_category_name,
 
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab=categories'
@@ -182,6 +194,7 @@ class SettingsPage extends WPL_Page {
 
 			'update_channel'			=> self::getOption( 'update_channel', 'stable' ),
 			'ajax_error_handling'		=> self::getOption( 'ajax_error_handling', 'halt' ),
+			'disable_variations'		=> self::getOption( 'disable_variations', 0 ),
 			'log_record_limit'			=> self::getOption( 'log_record_limit', 4096 ),
 
 			'text_ebay_token'			=> self::getOption( 'ebay_token' ),
@@ -209,16 +222,18 @@ class SettingsPage extends WPL_Page {
 				// self::updateOption( 'site_id_changed', '1' );
 			}
 
-			self::updateOption( 'ebay_site_id',		$this->getValueFromPost( 'text_ebay_site_id' ) );
-			self::updateOption( 'paypal_email',		$this->getValueFromPost( 'text_paypal_email' ) );
+			self::updateOption( 'ebay_site_id',			$this->getValueFromPost( 'text_ebay_site_id' ) );
+			self::updateOption( 'paypal_email',			$this->getValueFromPost( 'text_paypal_email' ) );
 			
-			self::updateOption( 'cron_auctions',	$this->getValueFromPost( 'option_cron_auctions' ) );
-			self::updateOption( 'cron_transactions',$this->getAnswerFromPost( 'option_cron_transactions' ) );
-			self::updateOption( 'process_shortcodes', $this->getValueFromPost( 'process_shortcodes' ) );
-			self::updateOption( 'remove_links',     $this->getValueFromPost( 'remove_links' ) );
-			self::updateOption( 'hide_dupe_msg',    $this->getValueFromPost( 'hide_dupe_msg' ) );
-			self::updateOption( 'uninstall',		$this->getValueFromPost( 'option_uninstall' ) );
-			self::updateOption( 'enable_ebay_motors', $this->getValueFromPost( 'option_enable_ebay_motors' ) );
+			self::updateOption( 'cron_auctions',		$this->getValueFromPost( 'option_cron_auctions' ) );
+			self::updateOption( 'cron_transactions',	$this->getAnswerFromPost( 'option_cron_transactions' ) );
+			self::updateOption( 'process_shortcodes', 	$this->getValueFromPost( 'process_shortcodes' ) );
+			self::updateOption( 'remove_links',     	$this->getValueFromPost( 'remove_links' ) );
+			self::updateOption( 'default_image_size',   $this->getValueFromPost( 'default_image_size' ) );
+			self::updateOption( 'wc2_gallery_fallback', $this->getValueFromPost( 'wc2_gallery_fallback' ) );
+			self::updateOption( 'hide_dupe_msg',    	$this->getValueFromPost( 'hide_dupe_msg' ) );
+			self::updateOption( 'uninstall',			$this->getValueFromPost( 'option_uninstall' ) );
+			self::updateOption( 'enable_ebay_motors', 	$this->getValueFromPost( 'option_enable_ebay_motors' ) );
 
 			$this->handleCronSettings( $this->getValueFromPost( 'option_cron_auctions' ) );
 			$this->showMessage( __('Settings saved.','wplister') );
@@ -307,6 +322,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'log_to_db',			$this->getValueFromPost( 'option_log_to_db' ) );
 			self::updateOption( 'sandbox_enabled',		$this->getValueFromPost( 'option_sandbox_enabled' ) );
 			self::updateOption( 'ajax_error_handling',	$this->getValueFromPost( 'ajax_error_handling' ) );
+			self::updateOption( 'disable_variations',	$this->getValueFromPost( 'disable_variations' ) );
 			self::updateOption( 'log_record_limit',		$this->getValueFromPost( 'log_record_limit' ) );
 
 
@@ -393,6 +409,101 @@ class SettingsPage extends WPL_Page {
 	    }
 	    return $result;
 	}
+
+
+
+
+    // export rulesets as csv
+    protected function handleImportCategoriesMap() {
+
+        $uploaded_file = $this->process_upload();
+        if (!$uploaded_file) return;
+
+        // handle JSON export
+        $json = file_get_contents($uploaded_file);
+        $data = json_decode($json, true);
+        // echo "<pre>";print_r($data);echo"</pre>";#die();
+
+        if ( is_array($data) && ( sizeof($data) == 3 ) ) {
+
+			// save categories mapping
+			self::updateOption( 'categories_map_ebay',		$data['categories_map_ebay'] );
+			self::updateOption( 'categories_map_store',		$data['categories_map_store'] );
+			self::updateOption( 'default_ebay_category_id', $data['default_ebay_category_id'] );
+
+			// show result
+            $count_ebay  = sizeof($data['categories_map_ebay']);
+            $count_store = sizeof($data['categories_map_store']);
+            $this->showMessage( $count_ebay . ' ebay categories and '.$count_store.' store categories were imported.');
+
+        } else {
+            $this->showMessage( 'The uploaded file could not be imported. Please make sure you use a JSON backup file exported from this plugin.');                
+        }
+
+    }
+
+    // export rulesets as csv
+    protected function handleExportCategoriesMap() {
+
+    	// get data
+        $data = array();
+		$data['categories_map_ebay']  		= self::getOption( 'categories_map_ebay'  );
+		$data['categories_map_store'] 		= self::getOption( 'categories_map_store' );
+		$data['default_ebay_category_id'] 	= self::getOption( 'default_ebay_category_id' );
+
+        // send JSON file
+        header("Content-Disposition: attachment; filename=wplister_categories.json");
+        echo json_encode( $data );
+        exit;
+
+    }
+
+
+    /**
+     * process file upload
+     **/
+    public function process_upload() {
+
+        $this->target_path = WP_CONTENT_DIR.'/uploads/wplister_categories.json';
+
+        if(isset($_FILES['wpl_file_upload'])) {
+
+            $target_path = $this->target_path;
+            //echo "<br />Target Path: ".$target_path;
+
+            // delete last import
+            if ( file_exists($target_path) ) unlink($target_path);
+
+            // echo '<div id="message" class="X-updated X-fade"><p>';
+            if(move_uploaded_file($_FILES['wpl_file_upload']['tmp_name'], $target_path))
+            {
+                // echo "The file ".  basename( $_FILES['wpl_file_upload']['name'])." has been uploaded";               
+                // $file_name = WP_CSV_TO_DB_URL.'/uploads/'.basename( $_FILES['wpl_file_upload']['name']);
+                // update_option('wp_csvtodb_input_file_url', $file_name);
+                // return true;
+                return $target_path;
+            } 
+            else
+            {
+                echo "There was an error uploading the file, please try again!";
+            }
+            // echo '</p></div>';
+            return false;
+        }
+        echo "no file_upload set";
+        return false;
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
 	protected function handleCronSettings( $schedule ) {

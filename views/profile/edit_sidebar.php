@@ -67,6 +67,10 @@
 
 										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_published" value="yes" id="apply_changes_to_all_published" <?php if ($wpl_published_listings) echo 'checked' ?>/>
 										<label for="apply_changes_to_all_published"><?php printf( __('update %s published items','wplister'), count($wpl_published_listings) ) ?></label>
+										<br class="clear" />
+
+										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_ended" value="yes" id="apply_changes_to_all_ended" <?php #if ($wpl_ended_listings) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_ended"><?php printf( __('update %s ended items','wplister'), count($wpl_ended_listings) ) ?></label>
 
 									<?php else: ?>
 										<p>There are no prepared items using this profile.</p>

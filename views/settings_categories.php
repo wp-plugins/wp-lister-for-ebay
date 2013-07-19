@@ -85,10 +85,36 @@
 
 		<div class="submit" style="padding-top: 0; float: right;">
             <input type="button" value="<?php echo __('Select default category','wplister') ?>" class="button-secondary btn_select_default_category">
+	        <a href="#" onclick="jQuery('#import_export_container').slideToggle();return false;" class="button-secondary"><?php echo __('Import / Export','wplister'); ?></a> 
 			<input type="submit" value="<?php echo __('Update','wplister') ?>" name="submit" class="button-primary">
 		</div>
 	
+
+	
 	</form>
+
+
+    <div id="import_export_container" style="display:none; clear:both;">
+        <hr>
+        <h3><?php echo __('Backup and restore category mappings','wplister'); ?></h3>
+
+            <p>
+                <a href="<?php echo $wpl_form_action ?>&action=wplister_export_categories_map" class="button-secondary"><?php echo __('Export category mappings','wplister'); ?></a> 
+            </p>
+
+            <p>
+                <form id="upload_json" method="post" action="<?php echo $wpl_form_action; ?>" enctype="multipart/form-data" >
+
+                    <a href="#" onclick="alert('Please select a file using the button right next to this button.');return false;" class="button-secondary"><?php echo __('Import category mappings','wplister'); ?></a> 
+
+                    <input type="hidden" name="action" value="wplister_import_categories_map" />
+                    <input type="file" name="wpl_file_upload" onchange="this.form.submit();" />
+
+                </form>
+            </p>
+    </div>
+
+
 
 
 

@@ -109,11 +109,13 @@ class ProfilesTable extends WP_List_Table {
             'duplicate' => sprintf('<a href="?page=%s&action=%s&profile=%s">%s</a>',$_REQUEST['page'],'duplicate_auction_profile',$item['profile_id'],__('Duplicate','wplister')),
             'delete'    => sprintf('<a href="?page=%s&action=%s&profile=%s">%s</a>',$_REQUEST['page'],'delete',$item['profile_id'],__('Delete','wplister')),
         );
+
+        // make title link to edit page
+        $title = sprintf('<a href="?page=%s&action=%s&profile=%s" class="title_link">%s</a>', $_REQUEST['page'], 'edit', $item['profile_id'], $item['profile_name'] );
         
         //Return the title contents
         return sprintf('%1$s <br><span style="color:silver">%2$s</span>%3$s',
-            /*$1%s*/ $item['profile_name'],
-        #    /*$2%s*/ $item['profile_id'],
+            /*$1%s*/ $title,
             /*$2%s*/ $item['profile_description'],
             /*$3%s*/ $this->row_actions($actions)
         );

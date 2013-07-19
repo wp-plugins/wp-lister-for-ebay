@@ -176,9 +176,8 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
     	Database : <?php echo get_option('wplister_db_version') ?>
     	
     	PHP      : <?php echo phpversion() ?>
-
-    	WordPress: <?php echo get_bloginfo ( 'version' ) ?>
     	
+    	WordPress: <?php echo get_bloginfo ( 'version' ); echo ' (' . ProductWrapper::plugin . ')' ?>    	
     	Locale   : <?php echo get_bloginfo ( 'language' ) ?>
 
     	Charset  : <?php echo get_bloginfo ( 'charset' ) ?>

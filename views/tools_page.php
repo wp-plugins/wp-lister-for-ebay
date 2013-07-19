@@ -67,6 +67,14 @@
 						</form>
 						<br style="clear:both;"/>
 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="check_ebay_time_offset" />
+								<input type="submit" value="<?php echo __('Fetch current eBay time','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('Check eBay time to server time offset','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
 					</div>
 				</div> <!-- postbox -->
 
@@ -77,7 +85,7 @@
 
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
-								<input type="hidden" name="action" value="test_connection" />
+								<input type="hidden" name="action" value="update_ebay_time_offset" />
 								<input type="submit" value="<?php echo __('Test eBay connection','wplister'); ?>" name="submit" class="button-secondary">
 								<p><?php echo __('Test connection to eBay API','wplister'); ?></p>
 						</form>

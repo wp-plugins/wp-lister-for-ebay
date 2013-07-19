@@ -1,6 +1,13 @@
 <?php include_once( dirname(__FILE__).'/common_header.php' ); ?>
 
 <style type="text/css">
+
+	td.column-template_name a.title_link {
+		color: #555;
+	}
+	td.column-template_name a.title_link:hover {
+		color: #D54E21;
+	}
 	
 	th.column-template_name {
 		width: 65%;

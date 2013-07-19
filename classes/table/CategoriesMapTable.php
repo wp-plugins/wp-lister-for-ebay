@@ -67,14 +67,8 @@ class CategoriesMapTable extends WP_List_Table {
      **************************************************************************/
     function column_default($item, $column_name){
         switch($column_name){
-            case 'type':
-                return $item[$column_name] == 'user' ? __('User','wplister') : __('Default','wplister');
             case 'category':
                 return $item['category'];
-            case 'ebay_category':
-                return $item['ebay_category'];
-            case 'store_category':
-                return $item['store_category'];
             default:
                 return print_r($item,true); //Show the whole array for troubleshooting purposes
         }
@@ -82,13 +76,17 @@ class CategoriesMapTable extends WP_List_Table {
     
     function column_ebay_category( $item ) {
 
-        $id = $item['term_id'];
-        $tpl = '
+        $id   = $item['term_id'];
+        $name = $item['ebay_category_name'];
+        $name = apply_filters( 'wplister_get_ebay_category_name', $name, $item['ebay_category_id'] );
+
+        if ( $item['ebay_category_id'] && ! $name ) $name = '<span style="color:darkred;">' . __('Unknown category ID','wplister').': '.$item['ebay_category_id'] . '</span>';
+        $tpl  = '
         <div class="row-actions-wrapper" style="position:relative;">
             <p class="categorySelector" style="margin:0;">
                 <input type="hidden" name="wpl_e2e_ebay_category_id['.$id.']"   id="ebay_category_id_'.$id.'"   value="' . $item['ebay_category_id'] .'" class="" />
                 <!input type="text"   name="wpl_e2e_ebay_category_name['.$id.']" id="ebay_category_name_'.$id.'" value="' . $item['ebay_category_name'] . '" class="text_input" disabled="true" style="width:35%"/>
-                <span id="ebay_category_name_'.$id.'" class="text_input" >' . $item['ebay_category_name'] . '</span>
+                <span id="ebay_category_name_'.$id.'" class="text_input" >' . $name . '</span>
             </p>
             <span class="row-actions" id="sel_ebay_cat_id_'.$id.'" >
                 <input type="button" class="button-secondary btn_select_category" value="' . __('select','wplister') . '" >
@@ -102,13 +100,17 @@ class CategoriesMapTable extends WP_List_Table {
         
      function column_store_category( $item ) {
 
-        $id = $item['term_id'];
-        $tpl = '
+        $id   = $item['term_id'];
+        $name = $item['store_category_name'];
+        $name = apply_filters( 'wplister_get_store_category_name', $name, $item['store_category_id'] );
+
+        if ( $item['store_category_id'] && ! $name ) $name = '<span style="color:darkred;">' . __('Unknown category ID','wplister').': '.$item['store_category_id'] . '</span>';
+        $tpl  = '
         <div class="row-actions-wrapper" style="position:relative;">
             <p class="categorySelector" style="margin:0;">
                 <input type="hidden" name="wpl_e2e_store_category_id['.$id.']"   id="store_category_id_'.$id.'"   value="' . $item['store_category_id'] .'" class="" />
                 <!input type="text"   name="wpl_e2e_store_category_name['.$id.']" id="store_category_name_'.$id.'" value="' . $item['store_category_name'] . '" class="text_input" disabled="true" style="width:35%"/>
-                <span id="store_category_name_'.$id.'" class="text_input" >' . $item['store_category_name'] . '</span>
+                <span id="store_category_name_'.$id.'" class="text_input" >' . $name . '</span>
             </p>
             <span class="row-actions" id="sel_store_cat_id_'.$id.'" >
                 <input type="button" class="button-secondary btn_select_category" value="' . __('select','wplister') . '" >

@@ -41,6 +41,8 @@ class EbayController {
         $incPath = WPLISTER_PATH . '/includes/EbatNs';
         set_include_path( get_include_path() . ':' . $incPath );
 
+        // TODO: check if set_include_path() was successfull!
+
         // use autoloader to load EbatNs classes
         spl_autoload_register('WPL_Autoloader::autoloadEbayClasses');
 
@@ -110,8 +112,8 @@ class EbayController {
         $this->loadEbayClasses();
 
         $this->logger->info('initEbay()');
-        require_once 'EbatNs_ServiceProxy.php';
-        require_once 'EbatNs_Logger.php';
+        // require_once 'EbatNs_ServiceProxy.php';
+        // require_once 'EbatNs_Logger.php';
 
         // hide inevitable cURL warnings from SDK 
         // *** DISABLE FOR DEBUGGING ***
@@ -208,7 +210,7 @@ class EbayController {
 
     // get SessionID for Auth&Auth
     public function GetSessionID( $RuName ){ 
-        require_once 'GetSessionIDRequestType.php';
+        // require_once 'GetSessionIDRequestType.php';
 
         // prepare request
         $req = new GetSessionIDRequestType();
@@ -233,7 +235,7 @@ class EbayController {
         
     }
     public function FetchToken( $SessionID ){ 
-        require_once 'FetchTokenRequestType.php';
+        // require_once 'FetchTokenRequestType.php';
 
         // prepare request
         $req = new FetchTokenRequestType();
@@ -249,7 +251,7 @@ class EbayController {
     }
 
     public function fetchTokenExpirationTime( $SessionID ){ 
-        require_once 'GetTokenStatusRequestType.php';
+        // require_once 'GetTokenStatusRequestType.php';
 
         // prepare request
         $req = new GetTokenStatusRequestType();
@@ -306,6 +308,7 @@ class EbayController {
     public function loadPaymentOptions(){ 
         $sm = new EbayPaymentModel();
         $sm->downloadPaymentDetails( $this->session );      
+        $sm->downloadMinimumStartPrices( $this->session );      
     }
 
     // load available dispatch times
@@ -589,7 +592,7 @@ class EbayController {
 
     // GetNotificationPreferences
     public function GetNotificationPreferences(){ 
-        require_once 'GetNotificationPreferencesRequestType.php';
+        // require_once 'GetNotificationPreferencesRequestType.php';
 
         // prepare request
         $req = new GetNotificationPreferencesRequestType();
@@ -610,7 +613,7 @@ class EbayController {
 
     // SetNotificationPreferences
     public function SetNotificationPreferences(){ 
-        require_once 'SetNotificationPreferencesRequestType.php';
+        // require_once 'SetNotificationPreferencesRequestType.php';
 
         $app_url = admin_url().'admin-ajax.php?action=handle_ebay_notify';
 
@@ -727,9 +730,18 @@ class EbayController {
     }
 
     // test connection to ebay api by single GetItem request
+    // (used by import plugin until version 1.3.8)
     public function testConnection(){ 
-        #require_once 'GetItemRequestType.php';
-        require_once 'GeteBayOfficialTimeRequestType.php';
+        // require_once 'GeteBayOfficialTimeRequestType.php';
+        $req = new GeteBayOfficialTimeRequestType();
+        $res = $this->sp->GeteBayOfficialTime($req);
+        return ( $res );
+    }
+     
+    // get current time on ebay
+    public function getEbayTime(){ 
+        // require_once 'GetItemRequestType.php';
+        // require_once 'GeteBayOfficialTimeRequestType.php';
 
         // prepare request
         $req = new GeteBayOfficialTimeRequestType();
@@ -738,7 +750,15 @@ class EbayController {
         // send request
         $res = $this->sp->GeteBayOfficialTime($req);
 
-        // handle result
+        // process timestamp
+        if ( $res->Ack == 'Success' ) {
+            $ts = $res->Timestamp;              // 2013-06-06T07:45:19.898Z
+            $ts = str_replace('T', ' ', $ts);   // 2013-06-06 07:45:19.898Z
+            $ts = substr( $ts, 0, 19 );         // 2013-06-06 07:45:19
+            return $ts;
+        }
+
+        // return result on error
         return ( $res );
         
     }

@@ -112,7 +112,7 @@ class TransactionsTable extends WP_List_Table {
         
         //Build row actions
         $actions = array(
-            'view_invoice' => sprintf('<a href="?page=%s&action=%s&transaction=%s&width=600&height=470" class="thickbox">%s</a>',$_REQUEST['page'],'view_invoice',$item['id'],__('Details','wplister')),
+            'view_trx_details' => sprintf('<a href="?page=%s&action=%s&transaction=%s&width=600&height=470" class="thickbox">%s</a>',$_REQUEST['page'],'view_trx_details',$item['id'],__('Details','wplister')),
             // 'print_invoice' => sprintf('<a href="?page=%s&action=%s&transaction=%s" target="_blank">%s</a>',$_REQUEST['page'],'print_invoice',$item['id'],__('Invoice','wplister')),
             // 'create_order' => sprintf('<a href="?page=%s&action=%s&transaction=%s">%s</a>',$_REQUEST['page'],'create_order',$item['id'],__('Create Order','wplister')),
             // 'edit'      => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$_REQUEST['page'],'edit',$item['id'],__('Edit','wplister')),
@@ -128,9 +128,16 @@ class TransactionsTable extends WP_List_Table {
         // free version can't create orders
         if ( WPLISTER_LIGHT ) unset( $actions['create_order'] );
 
+        // item title
+        $title = $item['item_title'];
+        if ( $item['post_id'] ) {
+            $title .= ' <i style="color:silver">#'.$item['post_id'].'</i>';
+            $actions['edit'] = sprintf('<a href="post.php?action=%s&post=%s">%s</a>','edit',$item['post_id'],__('Edit Product','wplister'));
+        }
+
         //Return the title contents
         return sprintf('%1$s %2$s',
-            /*$1%s*/ $item['item_title'],
+            /*$1%s*/ $title,
             /*$2%s*/ $this->row_actions($actions)
         );
     }
@@ -218,7 +225,7 @@ class TransactionsTable extends WP_List_Table {
             'cb'        		=> '<input type="checkbox" />', //Render a checkbox instead of text
             'date_created'		=> __('Created at','wplister'),
             'item_id'  			=> __('eBay ID','wplister'),
-            'item_title'  		=> __('Title','wplister'),
+            'item_title'  		=> __('Product','wplister'),
             #'transaction_id'  	=> __('Transaction ID','wplister'),
             'price'				=> __('Price','wplister'),
             'quantity'			=> __('Quantity','wplister'),

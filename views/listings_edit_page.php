@@ -70,16 +70,41 @@
 							<div id="submitpost" class="submitbox">
 
 								<div id="misc-publishing-actions">
+
 									<div class="misc-pub-section">
 									<!-- optional revise item on save -->
 									<?php if ( ( $wpl_item['status'] == 'published' ) || ( $wpl_item['status'] == 'changed' ) ): ?>
 										<p><?php _e('Your changes to this item will only be updated on eBay when you revise this item.','wplister') ?></p>
 										<input type="checkbox" name="wpl_e2e_revise_item_on_save" value="yes" id="revise_item_on_save" />
 										<label for="revise_item_on_save"><?php _e('revise this item when saving','wplister') ?></label>
+									<?php elseif ( ( $wpl_item['status'] == 'ended' ) || ( $wpl_item['status'] == 'ended' ) ): ?>
+										<p><?php _e('This item has been ended.','wplister') ?></p>
 									<?php else: ?>
 										<p>This item has not been published yet.</p>
 									<?php endif; ?>
 									</div>
+
+									<div class="misc-pub-section">
+									<!-- optional revise item on save -->
+									<?php $history = maybe_unserialize( $wpl_item['history'] ); ?> 
+
+									<?php if ( isset($history['previous_ids']) ): ?>
+										<p>
+											<?php _e('Current item ID','wplister') ?>: <br>
+											<?php echo $wpl_item['ebay_id'] ?>
+										</p>
+										<p>
+											<?php _e('Previous item IDs','wplister') ?>:<br>
+											<?php 
+												if ( is_array($history['previous_ids']) )
+												foreach ($history['previous_ids'] as $prev_id ) {
+													echo "$prev_id <br>";
+												}
+											?>
+										</p>
+									<?php endif; ?>
+									</div>
+
 								</div>
 
 								<div id="major-publishing-actions">

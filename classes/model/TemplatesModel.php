@@ -248,13 +248,13 @@ class TemplatesModel extends WPL_Model {
 
 
 		// process simple text shortcodes (used for title as well)
-		$tpl_html = $this->processAllTextShortcodes( $item['post_id'], $tpl_html);
+		$tpl_html = $this->processAllTextShortcodes( $item['post_id'], $tpl_html );
 
 		// process custom fields
 		$tpl_html = $this->processCustomFields( $tpl_html );
 
 		// process ajax galleries
-		$tpl_html = $this->processGalleryShortcodes( $item['id'], $tpl_html);
+		$tpl_html = $this->processGalleryShortcodes( $item['id'], $tpl_html );
 
 
 		// handle images...
@@ -288,18 +288,7 @@ class TemplatesModel extends WPL_Model {
 
 		// handle all additional images
 		// [[additional_product_images]]
-		$imagelist = '';
-		if ( count($images) > 1 ) {
-
-			// loop all images
-			for ($i=0; $i < count($images); $i++) { 
-				$image_url = $images[$i];
-				$image_alt = basename( $images[$i] );
-				$imagelist .= '<a onmouseover="javascript:if (typeof wplOnThumbnailHover == \'function\') wplOnThumbnailHover(\''.$image_url.'\');return false;" href="#">';
-				$imagelist .= '<img class="wpl_thumb thumb_'.($i+1).'" src="'.$image_url.'" alt="'.$image_alt.'" /></a>'."\n";
-			}
-			
-		}		
+		$imagelist = $this->processThumbnailsShortcode( $images, $item );
 		$tpl_html = str_replace( '[[additional_product_images]]', $imagelist, $tpl_html );
 
 		// process wp shortcodes in listing template - if enabled
@@ -315,7 +304,40 @@ class TemplatesModel extends WPL_Model {
 	}
 
 
-	public function processAllTextShortcodes( $post_id, $tpl_html ) {
+	public function processThumbnailsShortcode( $images, $item ) {
+		
+		$html = '';
+		if ( ! count($images) > 1 ) return $html;
+
+		// get path to thumbnails.php
+		$view = WPLISTER_PATH.'/views/template/thumbnails.php';
+		if ( $item ) {
+			// if thumbnails.php exists in listing template, use it
+			$thumbnails_tpl_file = WPLISTER_PATH.'/../../' . $item['template'] . '/thumbnails.php';
+			if ( file_exists( $thumbnails_tpl_file ) ) $view = $thumbnails_tpl_file;
+		}
+
+		// fetch content
+		ob_start();
+			include( $view );
+			$html = ob_get_contents();
+		ob_end_clean();
+
+		// 	// loop all images
+		// 	for ($i=0; $i < count($images); $i++) { 
+		// 		$image_url  = $images[$i];
+		// 		$image_alt  = basename( $images[$i] );
+		// 		$js_hover   = "if (typeof wplOnThumbnailHover == 'function') wplOnThumbnailHover('".$image_url."');return false;";
+		// 		$js_click   = "if (typeof wplOnThumbnailClick == 'function') wplOnThumbnailClick('".$image_url."');return false;";
+		// 		$imagelist .= '<a onmouseover="'.$js_hover.'" onclick="'.$js_click.'" href="#">';
+		// 		$imagelist .= '<img class="wpl_thumb thumb_'.($i+1).'" src="'.$image_url.'" alt="'.$image_alt.'" /></a>'."\n";
+		// 	}
+
+		return $html;
+	}
+
+
+	public function processAllTextShortcodes( $post_id, $tpl_html, $max_length = false ) {
 
 		// product_category
 		$tpl_html = str_replace( '[[product_category]]', ProductWrapper::getProductCategoryName( $post_id ), $tpl_html );
@@ -333,10 +355,10 @@ class TemplatesModel extends WPL_Model {
 		$tpl_html = str_replace( '[[product_length]]', $length,  $tpl_html );		
 
 		// attributes
-		$tpl_html = $this->processAttributeShortcodes( $post_id, $tpl_html);
+		$tpl_html = $this->processAttributeShortcodes( $post_id, $tpl_html, $max_length );
 
 		// custom meta
-		$tpl_html = $this->processCustomMetaShortcodes( $post_id, $tpl_html);
+		$tpl_html = $this->processCustomMetaShortcodes( $post_id, $tpl_html, $max_length );
 
 		return $tpl_html;
 	}
@@ -379,11 +401,11 @@ class TemplatesModel extends WPL_Model {
 	}
 
 
-	public function processAttributeShortcodes( $post_id, $tpl_html ) {
+	public function processAttributeShortcodes( $post_id, $tpl_html, $max_length = false ) {
 
 		// attribute shortcodes i.e. [[attribute_Brand]]
 		$product_attributes = ProductWrapper::getAttributes( $post_id );
-		$this->logger->info('product_attributes: '.print_r($product_attributes,1));
+		$this->logger->debug('processAttributeShortcodes() - product_attributes: '.print_r($product_attributes,1));
 		if ( preg_match_all("/\\[\\[attribute_(.*)\\]\\]/uUsm", $tpl_html, $matches ) ) {
 
 			foreach ( $matches[1] as $attribute ) {
@@ -393,7 +415,15 @@ class TemplatesModel extends WPL_Model {
 				} else {					
 					$attribute_value = '';
 				}
-				$tpl_html = str_replace( '[[attribute_'.$attribute.']]', $attribute_value,  $tpl_html );		
+				$processed_html = str_replace( '[[attribute_'.$attribute.']]', $attribute_value,  $tpl_html );
+
+				// check if string exceeds max_length after processing shortcode
+				if ( $max_length && ( mb_strlen( $processed_html ) > $max_length ) ) {
+					$attribute_value = '';
+					$processed_html = str_replace( '[[attribute_'.$attribute.']]', $attribute_value,  $tpl_html );
+				}
+
+				$tpl_html = $processed_html;
 
 			}
 
@@ -413,13 +443,22 @@ class TemplatesModel extends WPL_Model {
 		return $tpl_html;
 	}
 
-	public function processCustomMetaShortcodes( $post_id, $tpl_html ) {
+	public function processCustomMetaShortcodes( $post_id, $tpl_html, $max_length = false ) {
 
 		// custom meta shortcodes i.e. [[meta_Name]]
 		if ( preg_match_all("/\\[\\[meta_(.*)\\]\\]/uUsm", $tpl_html, $matches ) ) {
 			foreach ( $matches[1] as $meta_name ) {
 				$meta_value = get_post_meta( $post_id, $meta_name, true );
-				$tpl_html = str_replace( '[[meta_'.$meta_name.']]', $meta_value,  $tpl_html );		
+				$processed_html = str_replace( '[[meta_'.$meta_name.']]', $meta_value,  $tpl_html );		
+
+				// check if string exceeds max_length after processing shortcode
+				if ( $max_length && ( mb_strlen( $processed_html ) > $max_length ) ) {
+					$meta_value = '';
+					$processed_html = str_replace( '[[meta_'.$meta_name.']]', $meta_value,  $tpl_html );		
+				}
+
+				$tpl_html = $processed_html;
+
 			}
 		}
 		return $tpl_html;

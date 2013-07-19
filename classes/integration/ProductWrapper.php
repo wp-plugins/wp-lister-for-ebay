@@ -44,7 +44,7 @@ class ProductWrapper {
 	static function setStock( $post_id, $stock ) {
 	}	
 	// decrease product stock
-	static function decreaseStockBy( $post_id, $by, $VariationSpecifics = array() ) {
+	static function decreaseStockBy( $post_id, $by, $VariationSpecifics = array(), $transaction_id = false ) {
 	}	
 	// increase product stock
 	static function increaseStockBy( $post_id, $by, $VariationSpecifics = array() ) {

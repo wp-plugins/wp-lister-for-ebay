@@ -118,6 +118,51 @@ class LogTable extends WP_List_Table {
             }
         }
 
+        if ( 'GetSellerTransactions' == $item['callname'] ) {
+            if ( preg_match("/<PageNumber>(.*)<\/PageNumber>/", $item['request'], $matches) ) {
+                $match = str_replace('<![CDATA[', '', $matches[1] );
+                $match = str_replace(']]>', '', $match );
+                $link .= ' - Page ' . strip_tags( $match );
+            }
+            if ( preg_match("/<ModTimeFrom>(.*)<\/ModTimeFrom>/", $item['request'], $matches) ) {
+                $match = str_replace('<![CDATA[', '', $matches[1] );
+                $match = str_replace(']]>', '', $match );
+                $link .= '<br>Since: ' . strip_tags( $match );
+            }
+            if ( preg_match("/<NumberOfDays>(.*)<\/NumberOfDays>/", $item['request'], $matches) ) {
+                $match = str_replace('<![CDATA[', '', $matches[1] );
+                $match = str_replace(']]>', '', $match );
+                $link .= '<br>Days: ' . strip_tags( $match );
+            }
+        }
+
+        if ( 'GetMyeBaySelling' == $item['callname'] ) {
+            if ( preg_match("/<SoldList>(.*)<\/SoldList>/", $item['request'], $matches) ) {
+                $link .= ' SoldList ';
+            }
+            if ( preg_match("/<ActiveList>(.*)<\/ActiveList>/", $item['request'], $matches) ) {
+                $link .= ' ActiveList ';
+            }
+            if ( preg_match("/<DurationInDays>(.*)<\/DurationInDays>/", $item['request'], $matches) ) {
+                $match = str_replace('<![CDATA[', '', $matches[1] );
+                $match = str_replace(']]>', '', $match );
+                $link .= ' (' . strip_tags( $match ) . ' days) ';
+            }
+            if ( preg_match("/<PageNumber>(.*)<\/PageNumber>/", $item['request'], $matches) ) {
+                $match = str_replace('<![CDATA[', '', $matches[1] );
+                $match = str_replace(']]>', '', $match );
+                $link .= ' - Page ' . strip_tags( $match );
+            }
+        }
+
+        if ( in_array( $item['callname'], array('GetCategorySpecifics','GetCategoryFeatures') ) ) {
+            if ( preg_match("/<CategoryID>(.*)<\/CategoryID>/", $item['request'], $matches) ) {
+                $match = str_replace('<![CDATA[', '', $matches[1] );
+                $match = str_replace(']]>', '', $match );
+                $link .= ' - ' . strip_tags( $match );
+            }
+        }
+
         if ( preg_match("/<ShortMessage>(.*)<\/ShortMessage>/", $item['response'], $matches) ) {
             $ShortMessage = $matches[1];
             if ( $item['success'] == 'Warning' ) {

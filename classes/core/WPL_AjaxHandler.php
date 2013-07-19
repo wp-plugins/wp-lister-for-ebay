@@ -431,7 +431,8 @@ class WPL_AjaxHandler extends WPL_Core {
 		$path = $_POST["dir"];	
 		$parent_cat_id = basename( $path );
 		$categories = EbayCategoriesModel::getChildrenOf( $parent_cat_id );		
-		
+		$categories = apply_filters( 'wplister_get_ebay_categories_node', $categories, $parent_cat_id, $path );
+
 		if( count($categories) > 0 ) { 
 			echo "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
 			// All dirs
@@ -460,6 +461,7 @@ class WPL_AjaxHandler extends WPL_Core {
 		$path = $_POST["dir"];	
 		$parent_cat_id = basename( $path );
 		$categories = EbayCategoriesModel::getChildrenOfStoreCategory( $parent_cat_id );		
+		$categories = apply_filters( 'wplister_get_store_categories_node', $categories, $parent_cat_id, $path );
 		
 		if( count($categories) > 0 ) { 
 			echo "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
@@ -495,7 +497,7 @@ class WPL_AjaxHandler extends WPL_Core {
 		// echo "<pre>";print_r($items);echo"</pre>";die();
 
 		// get from_item and template path
-		$view = WPLISTER_PATH.'/views/gallery.php';
+		$view = WPLISTER_PATH.'/views/template/gallery.php';
 		$from_item = $id ? $lm->getItem( $id ) : false;
 		if ( $from_item ) {
 			// if gallery.php exists in listing template, use it
@@ -538,8 +540,9 @@ class WPL_AjaxHandler extends WPL_Core {
 	// for manual test call: www.example.com/wp-admin/admin-ajax.php?action=handle_ebay_notify
 	public function ajax_handle_ebay_notify() {
 
-		require_once 'EbatNs_NotificationClient.php';
-		require_once 'EbatNs_ResponseError.php';
+		// TODO: call loadEbayClasses() instead
+		require_once WPLISTER_PATH . '/includes/EbatNs/' . 'EbatNs_NotificationClient.php';
+		require_once WPLISTER_PATH . '/includes/EbatNs/' . 'EbatNs_ResponseError.php';
 
 		$handler = new EbatNs_NotificationClient();
 		$body = file_get_contents('php://input');

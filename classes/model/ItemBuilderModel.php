@@ -101,7 +101,7 @@ class ItemBuilderModel extends WPL_Model {
 		if ( intval($profile_details['strikethrough_pricing']) != 0) {
 			if ( method_exists( ProductWrapper, 'getOriginalPrice' ) ) {
 				$original_price = ProductWrapper::getOriginalPrice( $post_id );
-				if ( $start_price != $original_price ) {
+				if ( ( $original_price ) && ( $start_price != $original_price ) ) {
 					$item->DiscountPriceInfo = new DiscountPriceInfoType();
 					$item->DiscountPriceInfo->OriginalRetailPrice = new AmountType();
 					$item->DiscountPriceInfo->OriginalRetailPrice->setTypeValue( $original_price );
@@ -117,10 +117,17 @@ class ItemBuilderModel extends WPL_Model {
 		if ($product_sku) $item->SKU = $product_sku;
 
 
-		// set UPC - if enabled
+		// set UPC from SKU - if enabled
 		if ( ($product_sku) && ( @$profile_details['use_sku_as_upc'] == '1' ) ) {
 			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setUPC( $product_sku );
+			$item->setProductListingDetails( $ProductListingDetails );
+		}
+
+		// set UPC from product - if provided
+		if ( $product_upc = get_post_meta( $post_id, '_ebay_upc', true ) ) {
+			$ProductListingDetails = new ProductListingDetailsType();
+			$ProductListingDetails->setUPC( $product_upc );
 			$item->setProductListingDetails( $ProductListingDetails );
 		}
 		
@@ -232,11 +239,18 @@ class ItemBuilderModel extends WPL_Model {
 		}
 
 		// item condition description
+		$condition_description = false;
 		if ( @$profile_details['condition_description'] != '' ) {
-			$item->setConditionDescription( $profile_details['condition_description'] );
+			$condition_description =  $profile_details['condition_description'];
 		}
 		if ( get_post_meta( $post_id, '_ebay_condition_description', true ) ) {
-			$item->setConditionDescription( get_post_meta( $post_id, '_ebay_condition_description', true ) );
+			$condition_description = get_post_meta( $post_id, '_ebay_condition_description', true );
+		}
+		if ( $condition_description ) {
+			// $templatesModel = new TemplatesModel( $p['template'] );
+			$templatesModel = new TemplatesModel();
+			$condition_description = $templatesModel->processAllTextShortcodes( $post_id, $condition_description );
+			$item->setConditionDescription( $condition_description );
 		}
 
 		// private listing
@@ -294,6 +308,7 @@ class ItemBuilderModel extends WPL_Model {
 	            // look up ebay category 
 	            if ( isset( $categories_map_ebay[ $term->term_id ] ) ) {
     		        $ebay_category_id = @$categories_map_ebay[ $term->term_id ];
+    		        $ebay_category_id = apply_filters( 'wplister_apply_ebay_category_map', $ebay_category_id, $post_id );
 	            }
 	            
 	            // check ebay category 
@@ -477,6 +492,7 @@ class ItemBuilderModel extends WPL_Model {
 				$add_price = $this->getDynamicShipping( $opt['add_price'], $post_id );
 				// if ( ( $price == '' ) || ( $opt['service_name'] == '' ) ) continue;
 				if ( $price == '' ) $price = 0;
+				if ( $opt['location'] == '' ) continue;
 				if ( $opt['service_name'] == '' ) continue;
 
 				$InternationalShippingServiceOptions = new InternationalShippingServiceOptionsType();
@@ -585,15 +601,18 @@ class ItemBuilderModel extends WPL_Model {
 		// get product attributes
 		$processed_attributes = array();
         $attributes = ProductWrapper::getAttributes( $listing['post_id'] );
-		$this->logger->info('product attributes: '.print_r($attributes,1));
+		$this->logger->info('product attributes: '. ( sizeof($attributes)>0 ? print_r($attributes,1) : '-- empty --' ) );
 
 
 		// apply item specifics from profile
 		$specifics = $listing['profile_data']['details']['item_specifics'];
-		$this->logger->info('item_specifics: '.print_r($specifics,1));
+		$this->logger->debug('item_specifics: '.print_r($specifics,1));
         foreach ($specifics as $spec) {
         	if ( $spec['value'] != '' ) {
+        		
         		$value = $spec['value'];
+        		if ( mb_strlen( $value ) > 50 ) continue;
+
 	            $NameValueList = new NameValueListType();
 		    	$NameValueList->setName ( $spec['name']  );
 	    		$NameValueList->setValue( $value );
@@ -606,6 +625,7 @@ class ItemBuilderModel extends WPL_Model {
 
         		$value = $attributes[ $spec['attribute'] ];
         		if ( '_sku' == $spec['attribute'] ) $value = ProductWrapper::getSKU( $listing['post_id'] );
+        		if ( mb_strlen( $value ) > 50 ) continue;
 
 	            $NameValueList = new NameValueListType();
 		    	$NameValueList->setName ( $spec['name']  );
@@ -626,6 +646,9 @@ class ItemBuilderModel extends WPL_Model {
     	// enabled again - mostly for free version
     	// TODO: make this an option (globally?)
         foreach ($attributes as $name => $value) {
+
+    		if ( mb_strlen( $value ) > 50 ) continue;
+
             $NameValueList = new NameValueListType();
 	    	$NameValueList->setName ( $name  );
     		$NameValueList->setValue( $value );
@@ -638,7 +661,7 @@ class ItemBuilderModel extends WPL_Model {
 
         if ( count($ItemSpecifics) > 0 ) {
     		$item->setItemSpecifics( $ItemSpecifics );        	
-			$this->logger->info("item specifics were added.");
+			$this->logger->info( count($ItemSpecifics) . "item specifics were added.");
         }
 
 		return $item;
@@ -722,7 +745,7 @@ class ItemBuilderModel extends WPL_Model {
         foreach ($tmpVariationSpecificsSet as $key => $value) {
         	$this->variationAttributes[] = $key;
         }
-        $this->logger->info('variationAttributes'.print_r($this->variationAttributes,1));
+        // $this->logger->info('variationAttributes: '.print_r($this->variationAttributes,1));
 
 
         // select *one* VariationSpecificsSet for Pictures set
@@ -924,6 +947,16 @@ class ItemBuilderModel extends WPL_Model {
 					}
 				} 
 
+				// VariationSpecifics values can't be longer than 50 characters
+				foreach ($var->VariationSpecifics->NameValueList as $spec) {
+					if ( strlen($spec->Value) > 50 ) {
+						$longMessage = __('eBay does not allow attribute values longer than 50 characters.','wplister');
+						$longMessage .= '<br>';
+						$longMessage .= __('You need to shorten this value:','wplister') . ' <code>'.$spec->Value.'</code>';
+						$success = false;
+					}
+				}
+
 			}
 
 			if ( ! $VariationsSkuAreUnique ) {
@@ -950,6 +983,28 @@ class ItemBuilderModel extends WPL_Model {
 			// StartPrice must be greater than 0
 			if ( intval($item->StartPrice) == 0 ) {
 				$longMessage = __('Price can not be zero.','wplister');
+				$success = false;
+			}
+
+			// check minimum start price if found
+			$min_prices = get_option( 'wplister_MinListingStartPrices', array() );
+			$listing_type = $item->ListingType ? $item->ListingType : 'FixedPriceItem';
+			if ( isset( $min_prices[ $listing_type ] ) ) {
+				$min_price = $min_prices[ $listing_type ];
+				if ( $item->StartPrice->value < $min_price ) {
+					$longMessage = sprintf( __('eBay requires a minimum price of %s for this listing type.','wplister'), $min_price );
+					$success = false;
+				}
+			}
+
+		}
+
+		// ItemSpecifics values can't be longer than 50 characters
+		foreach ($item->ItemSpecifics->NameValueList as $spec) {
+			if ( strlen($spec->Value) > 50 ) {
+				$longMessage = __('eBay does not allow attribute values longer than 50 characters.','wplister');
+				$longMessage .= '<br>';
+				$longMessage .= __('You need to shorten this value:','wplister') . ' <code>'.$spec->Value.'</code>';
 				$success = false;
 			}
 		}
@@ -1043,7 +1098,7 @@ class ItemBuilderModel extends WPL_Model {
 		$title = html_entity_decode( $title, ENT_QUOTES, 'UTF-8' );
 
         // limit item title to 80 characters
-        if ( strlen($title) > 80 ) $title = substr( $title, 0, 77 ) . '...';
+        if ( mb_strlen($title) > 80 ) $title = mb_substr( $title, 0, 77 ) . '...';
 
 		$this->logger->info('prepareTitle() out: ' . $title );
 		return $title;
@@ -1129,23 +1184,32 @@ class ItemBuilderModel extends WPL_Model {
 		);
 		$this->logger->debug( "getProductImagesURL( $id ) : " . print_r($results,1) );
         #echo "<pre>";print_r($results);echo"</pre>";#die();
+
+		// fetch images using default size
+		$size = get_option( 'wplister_default_image_size', 'full' );
 		
 		$images = array();
 		foreach($results as $row) {
-            // $url = wp_get_attachment_url( $row->id );
-            $url = $row->guid ? $row->guid : wp_get_attachment_url( $row->id );
+            // $url = wp_get_attachment_url( $row->id, $size );
+            $url = $row->guid ? $row->guid : wp_get_attachment_url( $row->id, $size );
 			$images[] = $url;
 		}
 
 		// support for WooCommerce 2.0 Product Gallery
+		if ( get_option( 'wplister_wc2_gallery_fallback','attached' ) == 'none' ) $images = array(); // discard images if fallback is disabled
 		$product_image_gallery = get_post_meta( $id, '_product_image_gallery', true );
 		if ( $product_image_gallery ) {
+			
+			// build clean array with main image as first item
 			$images = array();
+			$images[] = $this->getProductMainImageURL( $id );
+
 			$image_ids = explode(',', $product_image_gallery );
 			foreach ( $image_ids as $image_id ) {
-	            $url = wp_get_attachment_url( $image_id );
-				if ( $url ) $images[] = $url;
+	            $url = wp_get_attachment_url( $image_id, $size );
+				if ( $url && ! in_array($url, $images) ) $images[] = $url;
 			}
+			
 			$this->logger->info( "found WC2 product gallery images for product #$id " . print_r($images,1) );
 		}
 
@@ -1155,12 +1219,16 @@ class ItemBuilderModel extends WPL_Model {
 			// $this->logger->info( "SHOPP - getAllImages( $id ) : " . print_r($images,1) );
 		}
 
-		$filenames = array();
+		$product_images = array();
 		foreach($images as $imageurl) {
-			$filenames[] = $this->removeHttpsFromUrl( $imageurl );
+			$product_images[] = $this->removeHttpsFromUrl( $imageurl );
 		}
 
-		return $filenames;
+		// call wplister_product_images filter 
+		// hook into this from your WP theme's functions.php - this won't work in listing templates!
+		$product_images = apply_filters( 'wplister_product_images', $product_images, $id );
+
+		return $product_images;
 	}
 
 

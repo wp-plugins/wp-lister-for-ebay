@@ -256,6 +256,21 @@
 								Read more about eBay's Link policy <a href="http://pages.ebay.com/help/policies/listing-links.html" target="_blank">here</a>
 							</p>
 
+							<label for="wpl-default_image_size" class="text_label"><?php echo __('Default image size','wplister'); ?>:</label>
+							<select id="wpl-default_image_size" name="wpl_e2e_default_image_size" title="Uninstall" class=" required-entry select">
+								<option value="full"    <?php if ( $wpl_default_image_size == 'full'   ): ?>selected="selected"<?php endif; ?>><?php echo __('full','wplister'); ?></option>
+								<option value="large"   <?php if ( $wpl_default_image_size == 'large'  ): ?>selected="selected"<?php endif; ?>><?php echo __('large','wplister'); ?></option>
+							</select>
+
+							<label for="wpl-wc2_gallery_fallback" class="text_label"><?php echo __('Product Gallery','wplister'); ?>:</label>
+							<select id="wpl-wc2_gallery_fallback" name="wpl_e2e_wc2_gallery_fallback" title="Uninstall" class=" required-entry select">
+								<option value="attached" <?php if ( $wpl_wc2_gallery_fallback == 'attached' ): ?>selected="selected"<?php endif; ?>><?php echo __('use attached images if no Gallery found','wplister'); ?></option>
+								<option value="none"     <?php if ( $wpl_wc2_gallery_fallback == 'none'     ): ?>selected="selected"<?php endif; ?>><?php echo __('no fallback','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('If you find unwanted images in your listings try disabling this option.','wplister'); ?>
+							</p>
+
 						</div>
 					</div>
 
@@ -271,6 +286,7 @@
 							<p class="desc" style="display: block;">
 								<?php echo __('If you do not plan to use the inventory sync feature, you can safely list one product multiple times.','wplister'); ?>
 							</p>
+
 
 						</div>
 					</div>

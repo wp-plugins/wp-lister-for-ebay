@@ -28,8 +28,10 @@ class ListingsModel extends WPL_Model {
         $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'desc'; //If no order, default to asc
         $offset = ( $current_page - 1 ) * $per_page;
 
-        // filter listing_status
+        $join_sql  = '';
         $where_sql = '';
+
+        // filter listing_status
 		$listing_status = ( isset($_REQUEST['listing_status']) ? $_REQUEST['listing_status'] : 'all');
 		if ( $listing_status != 'all' ) {
 			$where_sql = "WHERE status = '".$listing_status."'";
@@ -38,9 +40,20 @@ class ListingsModel extends WPL_Model {
         // filter search_query
 		$search_query = ( isset($_REQUEST['s']) ? $_REQUEST['s'] : false);
 		if ( $search_query ) {
+			$join_sql = "
+				LEFT JOIN {$wpdb->prefix}ebay_profiles p  ON l.profile_id =  p.profile_id
+				LEFT JOIN {$wpdb->prefix}postmeta      pm ON l.post_id    = pm.post_id AND pm.meta_key = '_sku'
+			";
 			$where_sql = "
-				WHERE auction_title LIKE '%".$search_query."%'
-				   OR ebay_id = '".$search_query."'
+				WHERE l.auction_title LIKE '%".$search_query."%'
+				    OR l.template     LIKE '%".$search_query."%'
+				    OR p.profile_name LIKE '%".$search_query."%'
+					OR l.ebay_id          = '".$search_query."'
+					OR l.auction_type     = '".$search_query."'
+					OR l.listing_duration = '".$search_query."'
+					OR l.status           = '".$search_query."'
+					OR l.post_id          = '".$search_query."'
+					OR pm.meta_value      = '".$search_query."'
 			";
 		} 
 
@@ -48,7 +61,8 @@ class ListingsModel extends WPL_Model {
         // get items
 		$items = $wpdb->get_results("
 			SELECT *
-			FROM $this->tablename
+			FROM $this->tablename l
+            $join_sql 
             $where_sql
 			ORDER BY $orderby $order
             LIMIT $offset, $per_page
@@ -60,7 +74,9 @@ class ListingsModel extends WPL_Model {
 		} else {
 			$this->total_items = $wpdb->get_var("
 				SELECT COUNT(*)
-				FROM $this->tablename
+				FROM $this->tablename l
+	            $join_sql
+	            $where_sql
 				ORDER BY $orderby $order
 			");			
 		}
@@ -106,7 +122,7 @@ class ListingsModel extends WPL_Model {
 		");
 	}
 
-	function getItemByEbayID( $id ) {
+	function getItemByEbayID( $id, $decode_details = true ) {
 		global $wpdb;
 		$item = $wpdb->get_row("
 			SELECT *
@@ -114,7 +130,8 @@ class ListingsModel extends WPL_Model {
 			WHERE ebay_id = '$id'
 		");
 		if (!$item) return false;
-		
+		if (!$decode_details) return $item;
+
 		$item->profile_data = $this->decodeObject( $item->profile_data, true );
 		$item->details = $this->decodeObject( $item->details );
 
@@ -215,6 +232,13 @@ class ListingsModel extends WPL_Model {
 			$summary->$status = $row->total;
 		}
 
+		// count total items as well
+		$total_items = $wpdb->get_var("
+			SELECT COUNT( id ) AS total_items
+			FROM $this->tablename
+		");
+		$summary->total_items = $total_items;
+
 		return $summary;
 	}
 
@@ -292,6 +316,9 @@ class ListingsModel extends WPL_Model {
 		// or switch to AddItem if product level listing type is Chinese
 		$product_listing_type = get_post_meta( $listing_item['post_id'], '_ebay_auction_type', true );
         if ( $product_listing_type == 'Chinese' ) $useFixedPriceItem = false;
+
+        // never use FixedPriceItem if variations are disabled
+        if ( get_option( 'wplister_disable_variations' ) == '1' ) $useFixedPriceItem = false;
 
 		return $useFixedPriceItem;
 	} 
@@ -450,6 +477,11 @@ class ListingsModel extends WPL_Model {
 			$this->logger->info( "Item #$id has no stock, switching to endItem()" );
 			return $this->endItem( $id, $session );
 		}
+
+		// checkItem should run after check for zero quantity - not it shouldn't as VariationsHaveStock will be undefined
+		// TODO: separate quantity checks from checkItem() and run checkQuantity() first, maybe end item, if not then run other sanity checks
+		// (This helps users who use the import plugin and WP-Lister Pro but forgot to set a primary category in their profile)
+		// if ( ! $ibm->checkItem($item) ) return $ibm->result;
 		
 		// eBay Motors (beta)
 		if ( $item->Site == 'eBayMotors' ) $session->setSiteId( 100 );
@@ -634,6 +666,33 @@ class ListingsModel extends WPL_Model {
 	} // getListingFeeFromResponse()
 
 
+	public function getLatestDetails( $ebay_id, $session ) {
+		global $wpdb;
+
+		// get item data
+		// $item = $this->getItemByEbayID( $id );
+
+		// preparation
+		$this->initServiceProxy($session);
+
+		// $this->_cs->setHandler('ItemType', array(& $this, 'updateItemDetail'));
+
+		// download the shipping data
+		$req = new GetItemRequestType();
+        $req->setItemID( $ebay_id );
+
+		$res = $this->_cs->GetItem($req);		
+
+		// handle response and check if successful
+		if ( $this->handleResponse($res) ) {
+			$this->logger->info( "Item #$ebay_id was fetched from eBay... ".$res->ItemID );
+			return $res->Item;
+		} // call successful
+
+		return $this->result;
+
+	}
+
 	public function updateItemDetails( $id, $session ) {
 		global $wpdb;
 
@@ -679,6 +738,7 @@ class ListingsModel extends WPL_Model {
 
 
 		// check for an updated ItemID 
+
 		// if item was relisted manually on ebay.com
 		if ( $Detail->ListingDetails->RelistedItemID ) {
 		
@@ -690,6 +750,14 @@ class ListingsModel extends WPL_Model {
 
 			// update the listings ebay_id
 			$wpdb->update( $this->tablename, array( 'ebay_id' => $Detail->ListingDetails->RelistedItemID ), array( 'ebay_id' => $Detail->ItemID ) );
+
+		}
+
+		// if item was relisted through WP-Lister
+		if ( $Detail->RelistParentID ) {
+		
+			// keep item id in history
+			$this->addItemIdToHistory( $Detail->ItemID, $Detail->RelistParentID );
 
 		}
 
@@ -765,6 +833,7 @@ class ListingsModel extends WPL_Model {
 
 		switch ($type) {
 			case 'ending':
+				$wpdb->query("SET time_zone='+0:00'"); // tell SQL to use GMT
 				$where_sql = "WHERE status = 'published' AND end_date < NOW()";
 				$order_sql = "ORDER BY end_date DESC";
 				break;
@@ -824,6 +893,7 @@ class ListingsModel extends WPL_Model {
 			SELECT * 
 			FROM $this->tablename
 			WHERE status = 'selected'
+			   OR status = 'reselected'
 			ORDER BY id DESC
 		", ARRAY_A);		
 
@@ -911,6 +981,18 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
+	function getAllEndedWithProfile( $profile_id ) {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE status = 'ended'
+			  AND profile_id = '$profile_id'
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
 	function getAllPreparedWithTemplate( $template ) {
 		global $wpdb;	
 		$items = $wpdb->get_results("
@@ -949,6 +1031,7 @@ class ListingsModel extends WPL_Model {
 	}
 	function getAllPastEndDate() {
 		global $wpdb;	
+		$wpdb->query("SET time_zone='+0:00'"); // tell SQL to use GMT
 		$items = $wpdb->get_results("
 			SELECT id 
 			FROM $this->tablename
@@ -1001,6 +1084,7 @@ class ListingsModel extends WPL_Model {
 			SELECT * 
 			FROM $this->tablename
 			WHERE status = 'selected'
+			   OR status = 'reselected'
 			ORDER BY id DESC
 		", ARRAY_A);		
 
@@ -1030,10 +1114,27 @@ class ListingsModel extends WPL_Model {
 	public function reSelectListings( $ids ) {
 		global $wpdb;
 		foreach( $ids as $id ) {
-			$wpdb->update( $this->tablename, array( 'status' => 'selected' ), array( 'id' => $id ) );
+			$status = $this->getStatus( $id );
+			if ( $status == 'ended' ) {
+				$wpdb->update( $this->tablename, array( 'status' => 'reselected' ), array( 'id' => $id ) );
+			} else {
+				$wpdb->update( $this->tablename, array( 'status' => 'selected' ), array( 'id' => $id ) );
+			}
 		}
 	}
 
+
+	public function processSingleVariationTitle( $title, $variation_attributes ) {
+    	
+    	$title = trim( $title );
+    	if ( ! is_array( $variation_attributes ) ) return $title;
+
+    	foreach ( $variation_attributes as $attrib_name => $attrib_value ) { // wpec?
+    		$title .= ' - ' . $attrib_value;
+    	}
+
+    	return $title;
+	}
 
 	public function prepareListings( $ids ) {
 		foreach( $ids as $id ) {
@@ -1139,8 +1240,28 @@ class ListingsModel extends WPL_Model {
 		$ebay_id 	= $this->getEbayIDFromID( $id );
 		$post_title = get_the_title( $item['post_id'] );
 
-		// skip ended auctions
-		if ( $status == 'ended' ) return;
+		// skip ended auctions - or not, if you want to relist them...
+		// if ( $status == 'ended' ) return;
+
+		// use parent title for single (split) variation
+		if ( ProductWrapper::isSingleVariation( $post_id ) ) {
+			$parent_id = ProductWrapper::getVariationParent( $post_id );
+			$post_title = get_the_title( $parent_id );
+
+			// get variations
+    	    $variations = ProductWrapper::getVariations( $parent_id );
+
+    	    // find this variation in all variations of this parent
+    	    foreach ($variations as $var) {
+    	    	if ( $var['post_id'] == $post_id ) {
+
+	    	    	// append attribute values to title
+    	    		$post_title = $this->processSingleVariationTitle( $post_title, $var['variation_attributes'] );
+
+    	    	}
+    	    }
+
+		}
 
 		// gather profile data
 		$data = array();
@@ -1180,7 +1301,7 @@ class ListingsModel extends WPL_Model {
 			// process attribute shortcodes in title - like [[attribute_Brand]]
 			$templatesModel = new TemplatesModel();
 			// $this->logger->info('auction_title before processing: '.$data['auction_title'].'');
-			$data['auction_title'] = $templatesModel->processAllTextShortcodes( $item['post_id'], $data['auction_title'] );
+			$data['auction_title'] = $templatesModel->processAllTextShortcodes( $item['post_id'], $data['auction_title'], 80 );
 			$this->logger->info('auction_title after processing : '.$data['auction_title'].'');
 
 		}
@@ -1198,6 +1319,10 @@ class ListingsModel extends WPL_Model {
 		$data['status'] = 'prepared';
 		// except for already published items where it is 'changed'
 		if ( intval($ebay_id) > 0 ) $data['status'] = 'changed';
+		// ended items stay 'ended'
+		if ( $status == 'ended' ) $data['status'] = 'ended';
+		// reselected items have already been 'ended'
+		if ( $status == 'reselected' ) $data['status'] = 'ended';
 
 		// update auctions table
 		$wpdb->update( $this->tablename, $data, array( 'id' => $id ) );

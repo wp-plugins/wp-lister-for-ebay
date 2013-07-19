@@ -248,7 +248,7 @@ class ListingsTable extends WP_List_Table {
         if (($item['status'] != 'published' ) &&
             ($item['status'] != 'changed') &&
             ($item['status'] != 'ended')) unset( $actions['open'] );
-        if ( $item['status'] == 'ended' ) unset( $actions['edit'] );
+        // if ( $item['status'] == 'ended' ) unset( $actions['edit'] );
         if ( $item['status'] == 'ended' ) unset( $actions['preview_auction'] );
         if ( $item['status'] != 'ended' ) unset( $actions['delete'] );
         if ( $item['status'] != 'ended' ) unset( $actions['relist'] );
@@ -595,8 +595,9 @@ class ListingsTable extends WP_List_Table {
     // status filter links
     // http://wordpress.stackexchange.com/questions/56883/how-do-i-create-links-at-the-top-of-wp-list-table
     function get_views(){
-       $views = array();
-       $current = ( !empty($_REQUEST['listing_status']) ? $_REQUEST['listing_status'] : 'all');
+       $views    = array();
+       $current  = ( !empty($_REQUEST['listing_status']) ? $_REQUEST['listing_status'] : 'all');
+       $base_url = remove_query_arg( array( 'action', 'auction', 'listing_status' ) );
 
        // get listing status summary
        $lm = new ListingsModel();
@@ -604,39 +605,45 @@ class ListingsTable extends WP_List_Table {
 
        // All link
        $class = ($current == 'all' ? ' class="current"' :'');
-       $all_url = remove_query_arg('listing_status');
+       $all_url = remove_query_arg( 'listing_status', $base_url );
        $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
-       $views['all'] .= '<span class="count">('.$this->total_items.')</span>';
+       $views['all'] .= '<span class="count">('.$summary->total_items.')</span>';
 
        // prepared link
-       $prepared_url = add_query_arg('listing_status','prepared');
+       $prepared_url = add_query_arg( 'listing_status', 'prepared', $base_url );
        $class = ($current == 'prepared' ? ' class="current"' :'');
        $views['prepared'] = "<a href='{$prepared_url}' {$class} >".__('Prepared','wplister')."</a>";
        if ( isset($summary->prepared) ) $views['prepared'] .= '<span class="count">('.$summary->prepared.')</span>';
 
        // verified link
-       $verified_url = add_query_arg('listing_status','verified');
+       $verified_url = add_query_arg( 'listing_status', 'verified', $base_url );
        $class = ($current == 'verified' ? ' class="current"' :'');
        $views['verified'] = "<a href='{$verified_url}' {$class} >".__('Verified','wplister')."</a>";
        if ( isset($summary->verified) ) $views['verified'] .= '<span class="count">('.$summary->verified.')</span>';
 
        // published link
-       $published_url = add_query_arg('listing_status','published');
+       $published_url = add_query_arg( 'listing_status', 'published', $base_url );
        $class = ($current == 'published' ? ' class="current"' :'');
        $views['published'] = "<a href='{$published_url}' {$class} >".__('Published','wplister')."</a>";
        if ( isset($summary->published) ) $views['published'] .= '<span class="count">('.$summary->published.')</span>';
 
        // changed link
-       $changed_url = add_query_arg('listing_status','changed');
+       $changed_url = add_query_arg( 'listing_status', 'changed', $base_url );
        $class = ($current == 'changed' ? ' class="current"' :'');
        $views['changed'] = "<a href='{$changed_url}' {$class} >".__('Changed','wplister')."</a>";
        if ( isset($summary->changed) ) $views['changed'] .= '<span class="count">('.$summary->changed.')</span>';
 
        // ended link
-       $ended_url = add_query_arg('listing_status','ended');
+       $ended_url = add_query_arg( 'listing_status', 'ended', $base_url );
        $class = ($current == 'ended' ? ' class="current"' :'');
        $views['ended'] = "<a href='{$ended_url}' {$class} >".__('Ended','wplister')."</a>";
        if ( isset($summary->ended) ) $views['ended'] .= '<span class="count">('.$summary->ended.')</span>';
+
+       // sold link
+       $sold_url = add_query_arg( 'listing_status', 'sold', $base_url );
+       $class = ($current == 'sold' ? ' class="current"' :'');
+       $views['sold'] = "<a href='{$sold_url}' {$class} >".__('Sold','wplister')."</a>";
+       if ( isset($summary->sold) ) $views['sold'] .= '<span class="count">('.$summary->sold.')</span>';
 
        return $views;
     }    

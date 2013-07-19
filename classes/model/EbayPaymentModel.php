@@ -65,6 +65,32 @@ class EbayPaymentModel extends WPL_Model {
 	}
 	
 	
+	function downloadMinimumStartPrices($session)
+	{
+		$this->logger->info( "downloadMinimumStartPrices()" );
+		$this->initServiceProxy($session);
+		
+		// download ebay details 
+		$req = new GeteBayDetailsRequestType();
+        $req->setDetailName( 'ListingStartPriceDetails' );
+		
+		$res = $this->_cs->GeteBayDetails($req);
+
+		// handle response and check if successful
+		if ( $this->handleResponse($res) ) {
+
+			// save array of minimum start prices
+			$price_details = array();
+			foreach ($res->ListingStartPriceDetails as $Detail) {
+				$price_details[ $Detail->ListingType ] = $Detail->StartPrice->value;
+			}
+			
+			update_option('wplister_MinListingStartPrices', $price_details);
+
+		} // call successful
+				
+	}
+	
 	
 	
 	/* the following methods could go into another class, since they use wpdb instead of EbatNs_DatabaseProvider */

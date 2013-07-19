@@ -343,9 +343,16 @@ class TemplatesPage extends WPL_Page {
 		$result = file_put_contents($file_html, $tpl_html);
 		$result = file_put_contents($file_settings, json_encode( $settings ) );
 
+		// catch any errors about permissions, safe mode, etc.
+	    global $php_errormsg;
+		ini_set('track_errors', 1); 
+		if ( ! touch( $file_css ) ) {
+			$this->showMessage( $php_errormsg, true );				
+		}
+
 		// proper error handling
 		if ($result===false) {
-			$this->showMessage( "There was a problem saving your template.", true );	
+			$this->showMessage( "WP-Lister failed to save your template because it could not write to the file <pre>$file_css</pre> Please check the file and folder permissions and make sure that PHP safe_mode is disabled.", true );	
 		} else {
 			// hide double success message when adding new template
 			if ( !isset( $_REQUEST['wpl_add_new_template'] ) ) $this->showMessage( __('Template saved.','wplister') );
@@ -546,7 +553,7 @@ class TemplatesPage extends WPL_Page {
 
 		// proper error handling
 		if ($result===false) {
-			echo( "There was a problem saving your template." );	
+			echo( "There was a problem duplicating your template." );	
 		} else {
 			echo "success";
 		}

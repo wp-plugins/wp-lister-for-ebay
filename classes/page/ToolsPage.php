@@ -48,6 +48,14 @@ class ToolsPage extends WPL_Page {
 	}
 	
 
+	public function getCurrentSqlTime( $gmt = false ) {
+		global $wpdb;
+		if ( $gmt ) $wpdb->query("SET time_zone='+0:00'");
+		$sql_time = $wpdb->get_var("SELECT NOW()");
+		return $sql_time;
+	}
+	
+
 	public function onDisplayToolsPage() {
 		
 		WPL_Setup::checkSetup();
@@ -56,13 +64,31 @@ class ToolsPage extends WPL_Page {
 		if ( isset($_POST['action']) ) {
 			if ( check_admin_referer( 'e2e_tools_page' ) ) {
 
-				// test_connection
-				if ( $_POST['action'] == 'test_connection') {				
+				// check_ebay_time_offset
+				if ( $_POST['action'] == 'check_ebay_time_offset') {				
 					$this->initEC();
-					$debug = $this->EC->testConnection();
+					$ebay_time    = $this->EC->getEbayTime();
+					$php_time     = date( 'Y-m-d H:i:s', time() );
+					$sql_time     = $this->getCurrentSqlTime( false );
+					$sql_time_gmt = $this->getCurrentSqlTime( true );
+					
+					$ebay_time_ts = strtotime( substr($ebay_time,0,16) );
+					$sql_time_ts  = strtotime( substr( $sql_time,0,16) );
+					$time_diff    = $ebay_time_ts - $sql_time_ts;
+					$hours_offset = intval ($time_diff / 3600);
+
+					$msg  = '';
+					$msg .= 'eBay time GMT: '. $ebay_time . "<br>";
+					$msg .= 'SQL time GMT : '. $sql_time_gmt . "<br>";
+					$msg .= 'PHP time GMT : '. $php_time . "<br><br>";					
+					$msg .= 'Local SQL time: '. $sql_time . "<br>";
+					$msg .= 'Time difference: '.	human_time_diff( $ebay_time_ts, $sql_time_ts ) . "<!br>";					
+					$msg .= ' ( offset: '.	$hours_offset . " )<br>";					
+					$this->showMessage( $msg );
+
 					$this->EC->closeEbay();
 				}
-				// test_connection
+				// view_logfile
 				if ( $_POST['action'] == 'view_logfile') {				
 					$this->viewLogfile();
 				}

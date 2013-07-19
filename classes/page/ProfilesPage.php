@@ -68,98 +68,104 @@ class ProfilesPage extends WPL_Page {
 	public function onDisplayProfilesPage() {
 		WPL_Setup::checkSetup();
 	
+		// edit profile
+		if ( ( $this->requestAction() == 'edit' ) || ( $this->requestAction() == 'add_new_profile' ) ) {
+			return $this->displayEditPage();			
+		} 
+
+    	// Fetch, prepare, sort, and filter our table data...
+	    $profilesTable = $this->profilesTable;
+	    $profilesTable->prepare_items();
+
+		// process errors 		
+		// if ($this->IC->message) $this->showMessage( $this->IC->message,1 );
+		
+		$aData = array(
+			'plugin_url'				=> self::$PLUGIN_URL,
+			'message'					=> $this->message,
+
+			'profilesTable'				=> $profilesTable,
+		
+			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-profiles'
+		);
+		$this->display( 'profiles_page', $aData );
+		
+	}
+
+	public function displayEditPage() {
+	
 		// init model
 		$profilesModel = new ProfilesModel();
 
-		// edit profile
-		if ( ( $this->requestAction() == 'edit' ) || ( $this->requestAction() == 'add_new_profile' ) ) {
-
-			// get item
-			if ( $this->requestAction() == 'add_new_profile' ) {
-				$item = $profilesModel->newItem();
-			} else {
-				$item = $profilesModel->getItem( $_REQUEST['profile'] );
-			}
-			
-			// get ebay data
-			$payment_options           = EbayPaymentModel::getAll();
-			$loc_flat_shipping_options = EbayShippingModel::getAllLocal('flat');
-			$int_flat_shipping_options = EbayShippingModel::getAllInternational('flat');
-			$shipping_locations        = EbayShippingModel::getShippingLocations();
-			$countries                 = EbayShippingModel::getEbayCountries();
-			$template_files            = $this->getTemplatesList();
-			$store_categories          = $this->getStoreCategories();
-			$available_dispatch_times     = self::getOption('DispatchTimeMaxDetails');
-			$available_shipping_packages  = self::getOption('ShippingPackageDetails');
-			
-			$listingsModel = new ListingsModel();
-			$prepared_listings  = $listingsModel->getAllPreparedWithProfile( $item['profile_id'] );
-			$verified_listings  = $listingsModel->getAllVerifiedWithProfile( $item['profile_id'] );
-			$published_listings = $listingsModel->getAllPublishedWithProfile( $item['profile_id'] );
-
-
-			// do we have a primary category?
-			$details = $item['details'];
-			if ( intval( $details['ebay_category_1_id'] ) != 0 ) {
-				$primary_category_id = $details['ebay_category_1_id'];
-			} else {
-				// if not use default category
-			    $primary_category_id = self::getOption('default_ebay_category_id');
-			}
-
-			// build available conditions array
-			$available_conditions = false;
-			if ( isset( $item['conditions'][ $primary_category_id ] ) ) {
-				$available_conditions = $item['conditions'][ $primary_category_id ];
-			}
-
-			$aData = array(
-				'plugin_url'				=> self::$PLUGIN_URL,
-				'message'					=> $this->message,
-	
-				'item'                      => $item,
-				'payment_options'           => $payment_options,
-				'loc_flat_shipping_options' => $loc_flat_shipping_options,
-				'int_flat_shipping_options' => $int_flat_shipping_options,
-				'shipping_locations'        => $shipping_locations,
-				'countries'                 => $countries,
-				'template_files'            => $template_files,
-				'store_categories'          => $store_categories,
-				'prepared_listings'         => $prepared_listings,
-				'verified_listings'         => $verified_listings,
-				'published_listings'        => $published_listings,
-				'available_dispatch_times'  => $available_dispatch_times,
-				'available_conditions'  	=> $available_conditions,
-				'available_shipping_packages' => $available_shipping_packages,
-				
-				'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-profiles'
-			);
-			$this->display( 'profiles_edit_page', array_merge( $aData, $item ) );
-		
-		// show list
+		// get item
+		if ( $this->requestAction() == 'add_new_profile' ) {
+			$item = $profilesModel->newItem();
 		} else {
-
-		    //Create an instance of our package class...
-		    $profilesTable = $this->profilesTable;
-
-	    	//Fetch, prepare, sort, and filter our data...
-		    $profilesTable->prepare_items();
-	
-			// process errors 		
-			#if ($this->IC->message) $this->showMessage( $this->IC->message,1 );
-			
-			$aData = array(
-				'plugin_url'				=> self::$PLUGIN_URL,
-				'message'					=> $this->message,
-	
-				'profilesTable'				=> $profilesTable,
-			
-				'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-profiles'
-			);
-			$this->display( 'profiles_page', $aData );
+			$item = $profilesModel->getItem( $_REQUEST['profile'] );
+		}
 		
+		// get ebay data
+		$payment_options           = EbayPaymentModel::getAll();
+		$loc_flat_shipping_options = EbayShippingModel::getAllLocal('flat');
+		$int_flat_shipping_options = EbayShippingModel::getAllInternational('flat');
+		$shipping_locations        = EbayShippingModel::getShippingLocations();
+		$countries                 = EbayShippingModel::getEbayCountries();
+		$template_files            = $this->getTemplatesList();
+		$store_categories          = $this->getStoreCategories();
+
+		$available_dispatch_times     = self::getOption('DispatchTimeMaxDetails');
+		$available_shipping_packages  = self::getOption('ShippingPackageDetails');
+		
+		$listingsModel = new ListingsModel();
+		$prepared_listings  = $listingsModel->getAllPreparedWithProfile( $item['profile_id'] );
+		$verified_listings  = $listingsModel->getAllVerifiedWithProfile( $item['profile_id'] );
+		$published_listings = $listingsModel->getAllPublishedWithProfile( $item['profile_id'] );
+		$ended_listings     = $listingsModel->getAllEndedWithProfile( $item['profile_id'] );
+
+
+		// do we have a primary category?
+		$details = $item['details'];
+		if ( intval( $details['ebay_category_1_id'] ) != 0 ) {
+			$primary_category_id = $details['ebay_category_1_id'];
+		} else {
+			// if not use default category
+		    $primary_category_id = self::getOption('default_ebay_category_id');
 		}
 
+		// fetch updated available conditions array
+		$item['conditions'] = $this->fetchItemConditions( $primary_category_id, $item['profile_id'] );
+
+		// build available conditions array
+		$available_conditions = false;
+		if ( isset( $item['conditions'][ $primary_category_id ] ) ) {
+			$available_conditions = $item['conditions'][ $primary_category_id ];
+		}
+		// echo "<pre>";print_r($available_conditions);echo"</pre>";
+
+		$aData = array(
+			'plugin_url'				=> self::$PLUGIN_URL,
+			'message'					=> $this->message,
+
+			'item'                      => $item,
+			'payment_options'           => $payment_options,
+			'loc_flat_shipping_options' => $loc_flat_shipping_options,
+			'int_flat_shipping_options' => $int_flat_shipping_options,
+			'shipping_locations'        => $shipping_locations,
+			'countries'                 => $countries,
+			'template_files'            => $template_files,
+			'store_categories'          => $store_categories,
+			'prepared_listings'         => $prepared_listings,
+			'verified_listings'         => $verified_listings,
+			'published_listings'        => $published_listings,
+			'ended_listings'            => $ended_listings,
+			'available_dispatch_times'  => $available_dispatch_times,
+			'available_conditions'  	=> $available_conditions,
+			'available_shipping_packages' => $available_shipping_packages,
+			
+			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-profiles'
+		);
+		$this->display( 'profiles_edit_page', array_merge( $aData, $item ) );
+		
 	}
 
 	private function duplicateProfile() {
@@ -175,7 +181,8 @@ class ProfilesPage extends WPL_Page {
 
 	private function convertToDecimal( $price ) {
 		$price = str_replace(',', '.', $price );
-		$price = preg_replace( '/[^\d\.]/', '', $price );  
+		$price = str_replace('$', '', $price );
+		// $price = preg_replace( '/[^\d\.]/', '', $price );  
 		return $price;
 	}
 
@@ -202,6 +209,8 @@ class ProfilesPage extends WPL_Page {
 	private function saveProfile() {
 		global $wpdb;	
 
+		$profile_id	= $this->getValueFromPost( 'profile_id' );
+
 		// item details
 		$details = array();
 		foreach ( $_POST as $key => $val ) {
@@ -211,7 +220,6 @@ class ProfilesPage extends WPL_Page {
 			}
 		}
 		// print_r($details);die();
-
 
 		// handle flat and calculated shipping
 		$service_type = isset( $details['shipping_service_type'] ) ? $details['shipping_service_type'] : 'flat';
@@ -246,7 +254,7 @@ class ProfilesPage extends WPL_Page {
 		unset( $details['int_shipping_options_calc'] );
 
 		// fix entered prices
-		// $details = $this->fixProfilePrices( $details );
+		$details = $this->fixProfilePrices( $details );
 
 		// process item specifics
 		$item_specifics = array();
@@ -277,31 +285,15 @@ class ProfilesPage extends WPL_Page {
 		    $primary_category_id = self::getOption('default_ebay_category_id');
 		}
 
-
 		// do we have ConditionDetails for primary category?
-		if ( intval($this->getValueFromPost( 'profile_id' )) != 0 ) {
-			$saved_conditions = $wpdb->get_var('SELECT conditions FROM '.$wpdb->prefix.'ebay_profiles WHERE profile_id = '.$this->getValueFromPost( 'profile_id' ));
-			$saved_conditions = unserialize($saved_conditions);
-		}
-
-		if ( ( isset( $saved_conditions[ $primary_category_id ] ) ) && ( $saved_conditions[ $primary_category_id ] != 'none' ) ) {
-			// conditions for primary category are already saved
-			$conditions = $saved_conditions; 
-		} elseif ( intval( $primary_category_id ) != 0 ) {
-			// call GetCategoryFeatures for primary category
-			$this->initEC();
-			$conditions = $this->EC->getCategoryConditions( $primary_category_id );
-			$this->EC->closeEbay();
-		} else {
-			$conditions = array();
-		}
+		$conditions = $this->fetchItemConditions( $primary_category_id, $profile_id );
 
 
 		if ( WPLISTER_LIGHT ) $specifics = array();
 			
 		// sql columns
 		$item = array();
-		$item['profile_id'] 				= $this->getValueFromPost( 'profile_id' );
+		$item['profile_id'] 				= $profile_id;
 		$item['profile_name'] 				= $this->getValueFromPost( 'profile_name' );
 		$item['profile_description'] 		= $this->getValueFromPost( 'profile_description' );
 		$item['listing_duration'] 			= $this->getValueFromPost( 'listing_duration' );
@@ -359,6 +351,42 @@ class ProfilesPage extends WPL_Page {
 			$this->showMessage( sprintf( __('%s published items changed.','wplister'), count($items) ) );			
 		}
 		
+		// re-apply profile to all ended
+		if ( $this->getValueFromPost( 'apply_changes_to_all_ended' ) == 'yes' ) {
+			$items = $listingsModel->getAllEndedWithProfile( $item['profile_id'] );
+	        $listingsModel->applyProfileToNewListings( $profile, $items );
+			$this->showMessage( sprintf( __('%s ended items updated.','wplister'), count($items) ) );			
+		}
+		
+	}
+
+	
+	public function fetchItemConditions( $ebay_category_id, $profile_id ) {
+		global $wpdb;
+
+		if ( ! $profile_id ) return array();
+
+		// get saved conditions for profile
+		$saved_conditions = $wpdb->get_var('SELECT conditions FROM '.$wpdb->prefix.'ebay_profiles WHERE profile_id = '.$profile_id );
+		$saved_conditions = unserialize( $saved_conditions );
+
+		if ( ( isset( $saved_conditions[ $ebay_category_id ] ) ) && ( $saved_conditions[ $ebay_category_id ] != 'none' ) ) {
+
+			// conditions for primary category are already saved
+			$conditions = $saved_conditions; 
+
+		} elseif ( intval( $ebay_category_id ) != 0 ) {
+
+			// call GetCategoryFeatures for primary category
+			$this->initEC();
+			$conditions = $this->EC->getCategoryConditions( $ebay_category_id );
+			$this->EC->closeEbay();
+
+		} else {
+			$conditions = array();
+		}
+
+		return $conditions;
 	}
 
 	

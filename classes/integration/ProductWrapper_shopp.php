@@ -391,6 +391,11 @@ class ProductWrapper {
 		return false;
 	}	
 
+	// check if product is single variation (Woo)
+	static function isSingleVariation( $post_id ) {
+        return false;
+	}	
+	
 	
 }
 

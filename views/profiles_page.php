@@ -2,6 +2,13 @@
 
 <style type="text/css">
 	
+	td.column-profile_name a.title_link {
+		color: #555;
+	}
+	td.column-profile_name a.title_link:hover {
+		color: #D54E21;
+	}
+
 	th.column-profile_name {
 		width: 25%;
 	}
