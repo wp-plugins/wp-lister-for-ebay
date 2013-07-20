@@ -88,6 +88,92 @@ Already working on it. Expect it this summer.
 2. Profile Editor
 
 == Changelog ==
+= 1.2.3 =
+* added transaction history 
+* improved error handling when creating templates 
+* improved handling of available item conditions 
+
+= 1.2.2.16 =
+* improved listing filter - added search by SKU and product ID 
+* prevent listing title from growing beyond 80 chars by embedded attribute shortcodes 
+* skip item specifics values with more than 50 characters 
+* fixed custom product attributes 
+
+= 1.2.2.15 =
+* improved listing filter - search by profile, template, status, duration and more... 
+* fixed order creation for variable products 
+* fixed possible issue with multibyte values in details objects 
+
+= 1.2.2.14 =
+* create additional images thumbnails html from exchangeable thumbnails.php 
+* fixed possible php warning 
+
+= 1.2.2.13 =
+* improved products filter - on ebay / not on ebay views 
+* added option to hide products from "no on ebay" list 
+* cleaned up ebay options on edit product screen 
+
+= 1.2.2.12 =
+* fixed wrong order total on multiple item purchases 
+* added option to disable variations 
+* improved database log view 
+
+= 1.2.2.11 =
+* fixed listing title of split variations when when profile is applied 
+* add main image to list of additional images when WC2 Product Gallery is used 
+* added some hooks and filters for virtual categories 
+
+= 1.2.2.10 =
+* replace add to cart button in products archive if product is on auction 
+* process template shortcodes in condition description 
+* make profile and template titles clickable 
+
+= 1.2.2.9 =
+* fixed issue regarding inventory sync for variations (wp to ebay) 
+* fixed issue truncating listing titles on multibyte characters 
+* support for windows servers (beta) 
+
+= 1.2.2.8 =
+* new option to customize product details page if an item is currently on auction 
+* added import and export options for categories settings 
+
+= 1.2.2.7 =
+* fixed saving UPC field on edit products page 
+* check if item specifics values are longer than 50 characters 
+* added sold items filter on listings page 
+
+= 1.2.2.6 =
+* improved updating ended listings in order to relist 
+* improved revise on local sale processing 
+
+= 1.2.2.5 =
+* added UPC field on edit product page 
+* store previous item id when relisting an item 
+* fixed a possible blank screen when connecting to ebay 
+
+= 1.2.2.4 =
+* added gallery image size and fallback options 
+* fixed order total for multiple line item orders 
+
+= 1.2.2.3 =
+* fetch start price details from eBay and show warning if minimum price is not met 
+* use full size featured image by default 
+
+= 1.2.2.2 =
+* improved listing status filter 
+* added javascript click event for image thumbnails 
+* url encode image filename for EPS upload 
+* check if attribute values are longer than 50 characters 
+* fix profile prices - remove $ sign and convert decimal point 
+* fixed license deactivation after site migration 
+
+= 1.2.2.1 =
+* added new revise on update option on edit product screen 
+* added filter wplister_product_images 
+* fixed compatibility with Import from eBay plugin 1.3.8 and before 
+* fix stock status update for products with stock level management disabled 
+* force SQL to use GMT timezone when using NOW() 
+
 
 = 1.2.1.6 = 
 * fix for order total missing shipping fee 
