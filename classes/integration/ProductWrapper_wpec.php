@@ -339,6 +339,25 @@ class ProductWrapper {
 }
 
 
+// hook into save_post to mark listing as changed when a product is updated
+function wplister_on_wpec_product_quick_edit_save( $post_id, $post ) {
+
+	if ( !$_POST ) return $post_id;
+	if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
+	if ( is_int( wp_is_post_autosave( $post_id ) ) ) return;
+	if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
+	// if ( !isset($_POST['wpec_quick_edit_nonce']) || (isset($_POST['wpec_quick_edit_nonce']) && !wp_verify_nonce( $_POST['wpec_quick_edit_nonce'], 'wpec_quick_edit_nonce' ))) return $post_id;
+	if ( !current_user_can( 'edit_post', $post_id )) return $post_id;
+	if ( $post->post_type != 'wpsc-product' ) return $post_id;
+
+	$lm = new ListingsModel();
+	$lm->markItemAsModified( $post_id );
+
+}
+
+add_action( 'save_post', 'wplister_on_wpec_product_quick_edit_save', 10, 2 );
+
+
 
 
 

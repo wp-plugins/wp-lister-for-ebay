@@ -253,5 +253,33 @@ class WPL_Model {
     	return in_array( $plugin, (array) get_option( 'active_plugins', array() ) );
 	}
 
+	// custom mb_strlen implementation
+	public function mb_strlen( $string ) {
+
+		// use mb_strlen() if available
+		if ( function_exists('mb_strlen') ) return mb_strlen( $string );
+
+		// fallback if PHP was compiled without multibyte support
+		$length = preg_match_all( '(.)su', $string, $matches );
+    	return $length;
+
+	}
+
+	// custom mb_substr implementation
+	public function mb_substr( $string, $start, $length ) {
+
+		// use mb_substr() if available
+		if ( function_exists('mb_substr') ) return mb_substr( $string, $start, $length );
+
+		// fallback if PHP was compiled without multibyte support
+		// $string = substr( $string, $start, $length );
+
+		// snippet from http://www.php.net/manual/en/function.mb-substr.php#107698
+	    $string = join("", array_slice( preg_split("//u", $string, -1, PREG_SPLIT_NO_EMPTY), $start, $length ) );
+
+    	return $string;
+
+	}
+
 }
 

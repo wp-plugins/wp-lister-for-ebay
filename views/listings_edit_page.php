@@ -245,7 +245,7 @@
 							<input type="text" name="wpl_e2e_post_id" size="30" value="<?php echo $wpl_item['post_id']; ?>" class="text_input" />
 							<br class="clear" />
 
-							<label for="wpl-enable_dev_mode" class="text_label"><?php echo __('Update advances settings','wplister'); ?>:</label>
+							<label for="wpl-enable_dev_mode" class="text_label"><?php echo __('Update advanced settings','wplister'); ?>:</label>
 							<input type="checkbox" name="wpl_e2e_enable_dev_mode" id="wpl-enable_dev_mode" value="1" class="checkbox_input" />
 							<span style="line-height: 24px">
 								<?php echo __('Yes, I know what I am doing.','wplister'); ?>

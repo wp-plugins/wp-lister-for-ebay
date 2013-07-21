@@ -451,6 +451,24 @@ class WpLister_Product_MetaBox {
 			'value'			=> get_post_meta( $post->ID, '_ebay_auction_type', true )
 		) );
 
+		woocommerce_wp_select( array(
+			'id' 			=> 'wpl_ebay_listing_duration',
+			'label' 		=> __('Listing Duration', 'wplister'),
+			'options' 		=> array( 
+					''               => __('-- use profile setting --', 'wplister'),
+					'Days_1'         => '1 ' . __('Day', 'wplister'),
+					'Days_3'         => '3 ' . __('Days', 'wplister'),
+					'Days_5'         => '5 ' . __('Days', 'wplister'),
+					'Days_7'         => '7 ' . __('Days', 'wplister'),
+					'Days_10'        => '10 ' . __('Days', 'wplister'),
+					'Days_30'        => '30 ' . __('Days', 'wplister'),
+					'Days_60'        => '60 ' . __('Days', 'wplister'),
+					'Days_90'        => '90 ' . __('Days', 'wplister'),
+					'GTC'            =>  __('Good Till Canceled', 'wplister')
+				),
+			'value'			=> get_post_meta( $post->ID, '_ebay_listing_duration', true )
+		) );
+
 	}
 
 	function meta_box_advanced() {
@@ -513,6 +531,236 @@ class WpLister_Product_MetaBox {
 	
 	}
 
+	function showCategoryOptions() {
+		global $post;
+
+		// primary ebay category
+		$ebay_category_1_id   = get_post_meta( $post->ID, '_ebay_category_1_id', true );
+		$ebay_category_1_name = $ebay_category_1_id ? EbayCategoriesModel::getFullEbayCategoryName( $ebay_category_1_id ) : '-- default --';
+
+		// secondary ebay category
+		$ebay_category_2_id   = get_post_meta( $post->ID, '_ebay_category_2_id', true );
+		$ebay_category_2_name = $ebay_category_2_id ? EbayCategoriesModel::getFullEbayCategoryName( $ebay_category_2_id ) : '-- default --';
+
+		?>
+		<div style="position:relative; margin: 0 5px;">
+			<label for="wpl-text-ebay_category_1_name" class="text_label"><?php echo __('Primary eBay category','wplister'); ?></label>
+			<input type="hidden" name="wpl_ebay_category_1_id" id="ebay_category_id_1" value="<?php echo $ebay_category_1_id ?>" class="" />
+			<span  id="ebay_category_name_1" class="text_input" style="width:45%;float:left;"><?php echo $ebay_category_1_name ?></span>
+			<div class="category_row_actions">
+				<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_ebay_category" onclick="">
+				<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_ebay_category" onclick="">
+			</div>
+		</div>
+		<br style="clear:both" />
+		<div style="position:relative; margin: 0 5px;">
+			<label for="wpl-text-ebay_category_2_name" class="text_label"><?php echo __('Secondary eBay category','wplister'); ?></label>
+			<input type="hidden" name="wpl_ebay_category_2_id" id="ebay_category_id_2" value="<?php echo $ebay_category_2_id ?>" class="" />
+			<span  id="ebay_category_name_2" class="text_input" style="width:45%;float:left;"><?php echo $ebay_category_2_name ?></span>
+			<div class="category_row_actions">
+				<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_ebay_category" onclick="">
+				<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_ebay_category" onclick="">
+			</div>
+		</div>
+		<br style="clear:both" />
+
+		<!-- hidden ajax categories tree -->
+		<div id="ebay_categories_tree_wrapper">
+			<div id="ebay_categories_tree_container"></div>
+		</div>
+
+		<style type="text/css">
+
+			#ebay_categories_tree_wrapper,
+			#store_categories_tree_wrapper {
+				/*max-height: 320px;*/
+				/*margin-left: 35%;*/
+				overflow: auto;
+				width: 65%;
+				display: none;
+			}
+
+			#wplister-ebay-advanced .category_row_actions {
+				position: absolute;
+				top: 0;
+				right: 0;
+			}
+            #wplister-ebay-advanced .category_row_actions input { 
+            	width: auto; 
+            }
+
+
+			a.link_select_category {
+				float: right;
+				padding-top: 3px;
+				text-decoration: none;
+			}
+			a.link_remove_category {
+				padding-left: 3px;
+				text-decoration: none;
+			}
+			
+		</style>
+
+		<script type="text/javascript">
+
+			/* recusive function to gather the full category path names */
+	        function wpl_getCategoryPathName( pathArray, depth ) {
+				var pathname = '';
+				if (typeof depth == 'undefined' ) depth = 0;
+
+	        	// get name
+		        if ( depth == 0 ) {
+		        	var cat_name = jQuery('[rel=' + pathArray.join('\\\/') + ']').html();
+		        } else {
+			        var cat_name = jQuery('[rel=' + pathArray.join('\\\/') +'\\\/'+ ']').html();
+		        }
+
+		        // console.log('path...: ', pathArray.join('\\\/') );
+		        // console.log('catname: ', cat_name);
+		        // console.log('pathArray: ', pathArray);
+
+		        // strip last (current) item
+		        popped = pathArray.pop();
+		        // console.log('popped: ',popped);
+
+		        // call self with parent path
+		        if ( pathArray.length > 2 ) {
+			        pathname = wpl_getCategoryPathName( pathArray, depth + 1 ) + ' &raquo; ' + cat_name;
+		        } else if ( pathArray.length > 1 ) {
+			        pathname = cat_name;
+		        }
+
+		        return pathname;
+
+	        }
+
+			jQuery( document ).ready(
+				function () {
+
+
+					// select ebay category button
+					jQuery('input.btn_select_ebay_category').click( function(event) {
+						// var cat_id = jQuery(this).parent()[0].id.split('sel_ebay_cat_id_')[1];
+						e2e_selecting_cat = ('ebay_category_name_1' == jQuery(this).parent().parent().first().find('.text_input')[0].id) ? 1 : 2;
+
+						var tbHeight = tb_getPageSize()[1] - 120;
+						var tbURL = "#TB_inline?height="+tbHeight+"&width=500&inlineId=ebay_categories_tree_wrapper"; 
+	        			tb_show("Select a category", tbURL);  
+						
+					});
+					// remove ebay category button
+					jQuery('input.btn_remove_ebay_category').click( function(event) {
+						var cat_id = ('ebay_category_name_1' == jQuery(this).parent().parent().first().find('.text_input')[0].id) ? 1 : 2;
+						
+						jQuery('#ebay_category_id_'+cat_id).attr('value','');
+						jQuery('#ebay_category_name_'+cat_id).html('');
+					});
+			
+					// select store category button
+					jQuery('input.btn_select_store_category').click( function(event) {
+						// var cat_id = jQuery(this).parent()[0].id.split('sel_store_cat_id_')[1];
+						e2e_selecting_cat = ('store_category_name_1' == jQuery(this).parent().parent().first().find('.text_input')[0].id) ? 1 : 2;
+
+						var tbHeight = tb_getPageSize()[1] - 120;
+						var tbURL = "#TB_inline?height="+tbHeight+"&width=500&inlineId=store_categories_tree_wrapper"; 
+	        			tb_show("Select a category", tbURL);  
+						
+					});
+					// remove store category button
+					jQuery('input.btn_remove_store_category').click( function(event) {
+						var cat_id = ('store_category_name_1' == jQuery(this).parent().parent().first().find('.text_input')[0].id) ? 1 : 2;
+						
+						jQuery('#store_category_id_'+cat_id).attr('value','');
+						jQuery('#store_category_name_'+cat_id).html('');
+					});
+			
+			
+					// jqueryFileTree 1 - ebay categories
+				    jQuery('#ebay_categories_tree_container').fileTree({
+				        root: '/0/',
+				        script: ajaxurl+'?action=e2e_get_ebay_categories_tree',
+				        expandSpeed: 400,
+				        collapseSpeed: 400,
+				        loadMessage: 'loading eBay categories...',
+				        multiFolder: false
+				    }, function(catpath) {
+
+						// get cat id from full path
+				        var cat_id = catpath.split('/').pop(); // get last item - like php basename()
+
+				        // get name of selected category
+				        var cat_name = '';
+
+				        var pathname = wpl_getCategoryPathName( catpath.split('/') );
+						// console.log('pathname: ',pathname);
+				        
+				        // update fields
+				        jQuery('#ebay_category_id_'+e2e_selecting_cat).attr( 'value', cat_id );
+				        jQuery('#ebay_category_name_'+e2e_selecting_cat).html( pathname );
+				        
+				        // close thickbox
+				        tb_remove();
+
+				        // if ( e2e_selecting_cat == 1 ) {
+				        // 	updateItemSpecifics();
+				        // 	updateItemConditions();
+				        // }
+
+				    });
+		
+					// jqueryFileTree 2 - store categories
+				    jQuery('#store_categories_tree_container').fileTree({
+				        root: '/0/',
+				        script: ajaxurl+'?action=e2e_get_store_categories_tree',
+				        expandSpeed: 400,
+				        collapseSpeed: 400,
+				        loadMessage: 'loading store categories...',
+				        multiFolder: false
+				    }, function(catpath) {
+
+						// get cat id from full path
+				        var cat_id = catpath.split('/').pop(); // get last item - like php basename()
+
+				        // get name of selected category
+				        var cat_name = '';
+
+				        var pathname = wpl_getCategoryPathName( catpath.split('/') );
+						// console.log('pathname: ',pathname);
+				        
+				        // update fields
+				        jQuery('#store_category_id_'+e2e_selecting_cat).attr( 'value', cat_id );
+				        jQuery('#store_category_name_'+e2e_selecting_cat).html( pathname );
+				        
+				        // close thickbox
+				        tb_remove();
+
+				    });
+		
+
+
+				}
+			);
+		
+		
+		</script>
+
+		<?php
+
+	}
+
+	function enqueueFileTree() {
+
+		// jqueryFileTree
+		wp_register_style('jqueryFileTree_style', WPLISTER_URL.'/js/jqueryFileTree/jqueryFileTree.css' );
+		wp_enqueue_style('jqueryFileTree_style'); 
+
+		// jqueryFileTree
+		wp_register_script( 'jqueryFileTree', WPLISTER_URL.'/js/jqueryFileTree/jqueryFileTree.js', array( 'jquery' ) );
+		wp_enqueue_script( 'jqueryFileTree' );
+
+	}
+
 	function save_meta_box( $post_id, $post ) {
 
 		if ( isset( $_POST['wpl_ebay_title'] ) ) {
@@ -524,11 +772,14 @@ class WpLister_Product_MetaBox {
 			$wpl_ebay_payment_instructions  = esc_attr( @$_POST['wpl_ebay_payment_instructions'] );
 			$wpl_ebay_condition_description = esc_attr( @$_POST['wpl_ebay_condition_description'] );
 			$wpl_ebay_auction_type          = esc_attr( @$_POST['wpl_ebay_auction_type'] );
+			$wpl_ebay_listing_duration      = esc_attr( @$_POST['wpl_ebay_listing_duration'] );
 			$wpl_ebay_start_price           = esc_attr( @$_POST['wpl_ebay_start_price'] );
 			$wpl_ebay_reserve_price         = esc_attr( @$_POST['wpl_ebay_reserve_price'] );
 			$wpl_ebay_buynow_price          = esc_attr( @$_POST['wpl_ebay_buynow_price'] );
 			$wpl_ebay_upc          			= esc_attr( @$_POST['wpl_ebay_upc'] );
 			$wpl_ebay_hide_from_unlisted  	= esc_attr( @$_POST['wpl_ebay_hide_from_unlisted'] );
+			$wpl_ebay_category_1_id      	= esc_attr( @$_POST['wpl_ebay_category_1_id'] );
+			$wpl_ebay_category_2_id      	= esc_attr( @$_POST['wpl_ebay_category_2_id'] );
 
 			// Update order data
 			update_post_meta( $post_id, '_ebay_title', $wpl_ebay_title );
@@ -536,12 +787,15 @@ class WpLister_Product_MetaBox {
 			update_post_meta( $post_id, '_ebay_global_shipping', $wpl_ebay_global_shipping );
 			update_post_meta( $post_id, '_ebay_payment_instructions', $wpl_ebay_payment_instructions );
 			update_post_meta( $post_id, '_ebay_condition_description', $wpl_ebay_condition_description );
+			update_post_meta( $post_id, '_ebay_listing_duration', $wpl_ebay_listing_duration );
 			update_post_meta( $post_id, '_ebay_auction_type', $wpl_ebay_auction_type );
 			update_post_meta( $post_id, '_ebay_start_price', $wpl_ebay_start_price );
 			update_post_meta( $post_id, '_ebay_reserve_price', $wpl_ebay_reserve_price );
 			update_post_meta( $post_id, '_ebay_buynow_price', $wpl_ebay_buynow_price );
 			update_post_meta( $post_id, '_ebay_upc', $wpl_ebay_upc );
 			update_post_meta( $post_id, '_ebay_hide_from_unlisted', $wpl_ebay_hide_from_unlisted );
+			update_post_meta( $post_id, '_ebay_category_1_id', $wpl_ebay_category_1_id );
+			update_post_meta( $post_id, '_ebay_category_2_id', $wpl_ebay_category_2_id );
 
 		}
 

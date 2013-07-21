@@ -49,11 +49,13 @@ class ItemBuilderModel extends WPL_Model {
 		// build item
 		$item = new ItemType();
 
-		// Set Listing Properties
-		$item->ListingDuration = $p['listing_duration'];
+		// set quantity
 		$item->Quantity = $p['quantity'];
 
-		
+		// set listing duration
+		$product_listing_duration = get_post_meta( $post_id, '_ebay_listing_duration', true );
+		$item->ListingDuration = $product_listing_duration ? $product_listing_duration : $p['listing_duration'];
+
 		// omit ListingType when revising item
 		if ( ! $reviseItem ) {
 			$product_listing_type = get_post_meta( $post_id, '_ebay_auction_type', true );
@@ -289,7 +291,11 @@ class ItemBuilderModel extends WPL_Model {
 	public function buildCategories( $id, $item, $post_id, $profile_details ) {
 
 		// handle primary category
-		if ( intval($profile_details['ebay_category_1_id']) > 0 ) {
+		$ebay_category_1_id = get_post_meta( $post_id, '_ebay_category_1_id', true );
+		if ( intval( $ebay_category_1_id ) > 0 ) {
+			$item->PrimaryCategory = new CategoryType();
+			$item->PrimaryCategory->CategoryID = $ebay_category_1_id;
+		} elseif ( intval($profile_details['ebay_category_1_id']) > 0 ) {
 			$item->PrimaryCategory = new CategoryType();
 			$item->PrimaryCategory->CategoryID = $profile_details['ebay_category_1_id'];
 		} else {
@@ -339,7 +345,11 @@ class ItemBuilderModel extends WPL_Model {
 		}
 
 		// optional secondary category
-		if ( intval($profile_details['ebay_category_2_id']) > 0 ) {
+		$ebay_category_2_id = get_post_meta( $post_id, '_ebay_category_2_id', true );
+		if ( intval( $ebay_category_2_id ) > 0 ) {
+			$item->PrimaryCategory = new CategoryType();
+			$item->PrimaryCategory->CategoryID = $ebay_category_2_id;
+		} elseif ( intval($profile_details['ebay_category_2_id']) > 0 ) {
 			$item->SecondaryCategory = new CategoryType();
 			$item->SecondaryCategory->CategoryID = $profile_details['ebay_category_2_id'];
 		}
@@ -611,7 +621,7 @@ class ItemBuilderModel extends WPL_Model {
         	if ( $spec['value'] != '' ) {
         		
         		$value = $spec['value'];
-        		if ( mb_strlen( $value ) > 50 ) continue;
+        		if ( $this->mb_strlen( $value ) > 50 ) continue;
 
 	            $NameValueList = new NameValueListType();
 		    	$NameValueList->setName ( $spec['name']  );
@@ -625,7 +635,7 @@ class ItemBuilderModel extends WPL_Model {
 
         		$value = $attributes[ $spec['attribute'] ];
         		if ( '_sku' == $spec['attribute'] ) $value = ProductWrapper::getSKU( $listing['post_id'] );
-        		if ( mb_strlen( $value ) > 50 ) continue;
+        		if ( $this->mb_strlen( $value ) > 50 ) continue;
 
 	            $NameValueList = new NameValueListType();
 		    	$NameValueList->setName ( $spec['name']  );
@@ -647,7 +657,7 @@ class ItemBuilderModel extends WPL_Model {
     	// TODO: make this an option (globally?)
         foreach ($attributes as $name => $value) {
 
-    		if ( mb_strlen( $value ) > 50 ) continue;
+    		if ( $this->mb_strlen( $value ) > 50 ) continue;
 
             $NameValueList = new NameValueListType();
 	    	$NameValueList->setName ( $name  );
@@ -1098,7 +1108,7 @@ class ItemBuilderModel extends WPL_Model {
 		$title = html_entity_decode( $title, ENT_QUOTES, 'UTF-8' );
 
         // limit item title to 80 characters
-        if ( mb_strlen($title) > 80 ) $title = mb_substr( $title, 0, 77 ) . '...';
+        if ( $this->mb_strlen($title) > 80 ) $title = $this->mb_substr( $title, 0, 77 ) . '...';
 
 		$this->logger->info('prepareTitle() out: ' . $title );
 		return $title;

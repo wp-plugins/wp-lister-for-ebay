@@ -418,7 +418,7 @@ class TemplatesModel extends WPL_Model {
 				$processed_html = str_replace( '[[attribute_'.$attribute.']]', $attribute_value,  $tpl_html );
 
 				// check if string exceeds max_length after processing shortcode
-				if ( $max_length && ( mb_strlen( $processed_html ) > $max_length ) ) {
+				if ( $max_length && ( $this->mb_strlen( $processed_html ) > $max_length ) ) {
 					$attribute_value = '';
 					$processed_html = str_replace( '[[attribute_'.$attribute.']]', $attribute_value,  $tpl_html );
 				}
@@ -452,7 +452,7 @@ class TemplatesModel extends WPL_Model {
 				$processed_html = str_replace( '[[meta_'.$meta_name.']]', $meta_value,  $tpl_html );		
 
 				// check if string exceeds max_length after processing shortcode
-				if ( $max_length && ( mb_strlen( $processed_html ) > $max_length ) ) {
+				if ( $max_length && ( $this->mb_strlen( $processed_html ) > $max_length ) ) {
 					$meta_value = '';
 					$processed_html = str_replace( '[[meta_'.$meta_name.']]', $meta_value,  $tpl_html );		
 				}
