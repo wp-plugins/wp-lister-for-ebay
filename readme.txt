@@ -56,11 +56,11 @@ To find out more about the different versions have a look on this feature compar
 
 = Does WP-Lister work with all eBay sites? =
 
-Yes, WP-Lister works with all eBay sites.
+Yes, it does.
 
 = What are the requirements to run WP-Lister? =
 
-WP-Lister requires a recent version of WordPress (3.3+) with WooCommerce, WP e-Commerce, MarketPress or Shopp installed. Your server should run on Linux and have PHP 5.2 or better with cURL support.
+WP-Lister requires a recent version of WordPress (3.3+) with WooCommerce 1.6.6 or 2.x installed. Your server should run on Linux and have PHP 5.2 or better with cURL support.
 
 = I use products variations on my site but eBay doesn’t allow variations in the selected category. How can I find out in which categories variations are allowed? =
 
@@ -70,9 +70,9 @@ To learn more about variations and allowed categories you should visit this page
 
 WP-Lister is specifically designed to let you manage your products in WordPress - and list them from there on eBay. If you would like to use WP-Lister but you need to import all your items from eBay to WooCommerce first, you might want to use this plugin which we developed to get you started: http://www.wplab.com/plugins/import-from-ebay-to-woocommerce/
 
-= Any plans to support windows servers? =
+= Does WP-Lister support windows servers? =
 
-This has been requested by less than 2% of our users so far, so it's not top priority. Won't happen until support for Amazon has been implemented - which actually is top priority right now.
+The current version does run on windows servers, but this feature is still experimental.
 
 = Are there any more FAQ? =
 
