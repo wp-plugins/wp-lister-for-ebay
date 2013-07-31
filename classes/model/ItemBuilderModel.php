@@ -425,6 +425,16 @@ class ItemBuilderModel extends WPL_Model {
 
 	public function buildShipping( $id, $item, $post_id, $profile_details ) {
 
+		// check for custom product level shipping options
+		$product_shipping_service_type = get_post_meta( $post_id, '_ebay_shipping_service_type', true );
+		if ( ( $product_shipping_service_type != '' ) && ( $product_shipping_service_type != 'disabled' ) ) {
+			$profile_details['shipping_service_type']               = $product_shipping_service_type;
+			$profile_details['loc_shipping_options']                = get_post_meta( $post_id, '_ebay_loc_shipping_options', true );
+			$profile_details['int_shipping_options']                = get_post_meta( $post_id, '_ebay_int_shipping_options', true );
+			$profile_details['PackagingHandlingCosts']              = get_post_meta( $post_id, '_ebay_PackagingHandlingCosts', true );
+			$profile_details['InternationalPackagingHandlingCosts'] = get_post_meta( $post_id, '_ebay_InternationalPackagingHandlingCosts', true );
+		}
+
 		// handle flat and calc shipping
 		$this->logger->info('shipping_service_type: '.$profile_details['shipping_service_type'] );
 		// $isFlat = $profile_details['shipping_service_type'] != 'calc' ? true : false;
@@ -435,8 +445,8 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $service_type == '' )     $service_type = 'Flat';
 		if ( $service_type == 'flat' ) $service_type = 'Flat';
 		if ( $service_type == 'calc' ) $service_type = 'Calculated';
-		$isFlatLoc = ( in_array( $service_type, array('Flat','FlatDomesticCalculatedInternational') ) ) ? true : false;
-		$isFlatInt = ( in_array( $service_type, array('Flat','CalculatedDomesticFlatInternational') ) ) ? true : false;
+		$isFlatLoc = ( in_array( $service_type, array('Flat','FreightFlat','FlatDomesticCalculatedInternational') ) ) ? true : false;
+		$isFlatInt = ( in_array( $service_type, array('Flat','FreightFlat','CalculatedDomesticFlatInternational') ) ) ? true : false;
 		$isCalcLoc = ! $isFlatLoc;
 		$isCalcInt = ! $isFlatInt;
 
@@ -1135,6 +1145,10 @@ class ItemBuilderModel extends WPL_Model {
 
 	public function getProductMainImageURL( $post_id, $checking_parent = false ) {
 
+		// check if custom post meta field '_ebay_gallery_image_url' exists
+		if ( get_post_meta( $post_id, '_ebay_gallery_image_url', true ) ) {
+			return $this->removeHttpsFromUrl( get_post_meta( $post_id, '_ebay_gallery_image_url', true ) );
+		}
 		// check if custom post meta field 'ebay_image_url' exists
 		if ( get_post_meta( $post_id, 'ebay_image_url', true ) ) {
 			return $this->removeHttpsFromUrl( get_post_meta( $post_id, 'ebay_image_url', true ) );
@@ -1164,6 +1178,10 @@ class ItemBuilderModel extends WPL_Model {
 			}
 		}
 
+		// filter image_url hook
+		$image_url = apply_filters( 'wplister_get_product_main_image', $image_url, $post_id );
+
+		// if no main image found, check parent product
 		if ( ( $image_url == '' ) && ( ! $checking_parent ) ) {
 			// $parents = get_post_ancestors( $post_id );
 			$post = get_post($post_id);

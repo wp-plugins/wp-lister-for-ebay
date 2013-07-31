@@ -54,10 +54,13 @@ class WPL_WooFrontendIntegration {
 				}
 
 				// auction message
-				$msg = __('This item is currently on auction and will end in %s','wplister');
-				echo '<p>';
-				echo sprintf( $msg, human_time_diff( strtotime( $listing->end_date ) ) );
-				echo '</p>';
+				if ( $listing->end_date ) {
+					$msg = __('This item is currently on auction and will end in %s','wplister');
+					$msg = sprintf( $msg, human_time_diff( strtotime( $listing->end_date ) ) );
+				} else {
+					$msg = __('This item is currently on auction on eBay.','wplister');					
+				}
+				echo '<p>'.$msg.'</p>';
 
 				// view on ebay button
 				echo '<p>';
@@ -124,11 +127,17 @@ class WPL_WooFrontendIntegration {
 		$listings = $lm->getAllListingsFromPostID( $post_id );
 		foreach ($listings as $listing) {
 
-			// check listing type
-			if ( $listing->auction_type != 'Chinese') continue;
+			// check listing type on product level
+			if ( get_post_meta( $post_id, '_ebay_auction_type', true ) != 'Chinese' ) {
+
+				// check listing type on listing level
+				if ( $listing->auction_type != 'Chinese') continue;
+
+			}
 
 			// check end date
-			if ( strtotime( $listing->end_date ) < time() ) continue;
+			if ( $listing->end_date )
+				if ( strtotime( $listing->end_date ) < time() ) continue;
 
 			return $listing;
 		}

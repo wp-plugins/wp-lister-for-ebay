@@ -204,14 +204,22 @@ class EbayCategoriesModel extends WPL_Model {
 		}
 		$data['cat_name'] = $Category->CategoryName;
 		$data['level']    = $Category->CategoryLevel;
-		$data['leaf']     = $Category->LeafCategory;
-		$data['version']  = $this->_categoryVersion;
+		$data['leaf']     = $Category->LeafCategory ? $Category->LeafCategory : 0;
+		$data['version']  = $this->_categoryVersion ? $this->_categoryVersion : 0;
 		$data['site_id']  = $this->_siteid;
 		
 		// remove unrecognizable chars from category name
 		// $data['cat_name'] = trim(str_replace('?','', $data['cat_name'] ));
 
 		$wpdb->insert( $this->tablename, $data );
+		$mysql_error = mysql_error();
+		if ( $mysql_error ) {
+			$this->logger->error('failed to insert category '.$data['cat_id'] . ' - ' . $data['cat_name'] );
+			$this->logger->error('mysql said: '.$mysql_error );
+			$this->logger->error('data: '. print_r( $data, 1 ) );
+		} else {
+			$this->logger->info('category inserted() '.$data['cat_id'] . ' - ' . $data['cat_name'] );
+		}
 					
 		return true;
 	}

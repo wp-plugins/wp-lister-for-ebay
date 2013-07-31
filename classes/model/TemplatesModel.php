@@ -227,11 +227,16 @@ class TemplatesModel extends WPL_Model {
 			$item['post_content'] = preg_replace('#<a.*?>(.*)</a>#iU', '$1', $item['post_content'] );
  		}
 
+ 		// fixed whitespace pasted from ms word
+ 		// details: http://stackoverflow.com/questions/1431034/can-anyone-tell-me-what-this-ascii-character-is
+		$whitespace = chr(194).chr(160);
+		$item['post_content'] = str_replace( $whitespace, ' ', $item['post_content'] );
+
 
 		// replace shortcodes
 		$tpl_html = str_replace( '[[product_title]]', $ibm->prepareTitleAsHTML( $item['auction_title'] ), $tpl_html );
  		if ( 'off' == get_option( 'wplister_process_shortcodes', 'content' ) ) {
-	 		$tpl_html = str_replace( '[[product_content]]', $item['post_content'], $tpl_html );
+	 		$tpl_html = str_replace( '[[product_content]]', wpautop( $item['post_content'] ), $tpl_html );
  		} else {
 	 		$tpl_html = str_replace( '[[product_content]]', apply_filters('the_content', $item['post_content'] ), $tpl_html );
  		}
@@ -240,7 +245,7 @@ class TemplatesModel extends WPL_Model {
 
 		$tpl_html = str_replace( '[[product_excerpt]]', $listing->getRawPostExcerpt( $item['post_id'] ), $tpl_html );
 		$tpl_html = str_replace( '[[product_excerpt_nl2br]]', nl2br( $listing->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
-		$tpl_html = str_replace( '[[product_additional_content]]', $listing->getRawPostExcerpt( $item['post_id'] ), $tpl_html );
+		$tpl_html = str_replace( '[[product_additional_content]]', wpautop( $listing->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
 		$tpl_html = str_replace( '[[product_additional_content_nl2br]]', nl2br( $listing->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
 		
 		$tpl_html = str_replace( '[[product_price]]', number_format_i18n( floatval($item['price']), 2 ), $tpl_html );

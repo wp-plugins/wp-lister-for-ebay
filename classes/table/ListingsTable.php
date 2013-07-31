@@ -133,7 +133,7 @@ class ListingsTable extends WP_List_Table {
         $listing_title = $item['auction_title'];
 
         // limit item title to 80 characters
-        if ( strlen($listing_title) > 80 ) $listing_title = substr( $listing_title, 0, 77 ) . '...';
+        if ( ListingsModel::mb_strlen($listing_title) > 80 ) $listing_title = ListingsModel::mb_substr( $listing_title, 0, 77 ) . '...';
         
 
         // make title link to products edit page

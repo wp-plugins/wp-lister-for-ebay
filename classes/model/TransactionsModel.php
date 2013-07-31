@@ -105,7 +105,7 @@ class TransactionsModel extends WPL_Model {
 
 
 		// $req->DetailLevel = $Facet_DetailLevelCodeType->ReturnAll;
-		if ( ! is_ajax() ) $req->setDetailLevel('ReturnAll');
+		if ( ! $this->is_ajax() ) $req->setDetailLevel('ReturnAll');
 
 		// set pagination for first page
 		$items_per_page = 100; // should be set to 200 for production

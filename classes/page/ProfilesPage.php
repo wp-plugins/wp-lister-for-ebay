@@ -113,6 +113,16 @@ class ProfilesPage extends WPL_Page {
 		$template_files            = $this->getTemplatesList();
 		$store_categories          = $this->getStoreCategories();
 
+		$loc_calc_shipping_options = EbayShippingModel::getAllLocal('calculated');
+		$int_calc_shipping_options = EbayShippingModel::getAllInternational('calculated');
+		$available_attributes      = ProductWrapper::getAttributeTaxonomies();
+
+		// add attribute for SKU
+		$attrib = new stdClass();
+		$attrib->name = '_sku';
+		$attrib->label = 'SKU';
+		$available_attributes[] = $attrib;
+
 		$available_dispatch_times     = self::getOption('DispatchTimeMaxDetails');
 		$available_shipping_packages  = self::getOption('ShippingPackageDetails');
 		
@@ -150,6 +160,11 @@ class ProfilesPage extends WPL_Page {
 			'payment_options'           => $payment_options,
 			'loc_flat_shipping_options' => $loc_flat_shipping_options,
 			'int_flat_shipping_options' => $int_flat_shipping_options,
+			'loc_calc_shipping_options' => $loc_calc_shipping_options,
+			'int_calc_shipping_options' => $int_calc_shipping_options,
+			'available_attributes'      => $available_attributes,
+			'calc_shipping_enabled'	 	=> in_array( self::getOption('ebay_site_id'), array(0,2,15,100) ),
+			'default_ebay_category_id'	=> self::getOption('default_ebay_category_id'),
 			'shipping_locations'        => $shipping_locations,
 			'countries'                 => $countries,
 			'template_files'            => $template_files,
@@ -206,10 +221,7 @@ class ProfilesPage extends WPL_Page {
 		return $details;
 	}
 
-	private function saveProfile() {
-		global $wpdb;	
-
-		$profile_id	= $this->getValueFromPost( 'profile_id' );
+	public function getPreprocessedPostDetails() {
 
 		// item details
 		$details = array();
@@ -252,6 +264,15 @@ class ProfilesPage extends WPL_Page {
 		unset( $details['loc_shipping_options_calc'] );
 		unset( $details['int_shipping_options_flat'] );
 		unset( $details['int_shipping_options_calc'] );
+
+		return $details;
+	}
+
+	private function saveProfile() {
+		global $wpdb;	
+
+		$details    = $this->getPreprocessedPostDetails();
+		$profile_id = $this->getValueFromPost( 'profile_id' );
 
 		// fix entered prices
 		$details = $this->fixProfilePrices( $details );
@@ -446,6 +467,35 @@ class ProfilesPage extends WPL_Page {
 	    // wp_enqueue_script ( 'jquery-ui-dialog' ); 
 
 	}
+
+
+	public function wpl_generate_shipping_option_tags( $services, $selected_service ) {
+		?>
+
+		<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+		
+		<?php $lastShippingCategory = @$services[0]['ShippingCategory'] ?>
+		<optgroup label="<?php echo @$services[0]['ShippingCategory'] ?>">
+		
+		<?php foreach ($services as $service) : ?>
+			
+			<?php if ( $lastShippingCategory != $service['ShippingCategory'] ) : ?>
+			</optgroup>
+			<optgroup label="<?php echo $service['ShippingCategory'] ?>">
+			<?php $lastShippingCategory = $service['ShippingCategory'] ?>
+			<?php endif; ?>
+
+			<option value="<?php echo $service['service_name'] ?>" 
+				<?php if ( @$selected_service['service_name'] == $service['service_name'] ) : ?>
+					selected="selected"
+				<?php endif; ?>
+				><?php echo $service['service_description'] ?></option>
+		<?php endforeach; ?>
+		</optgroup>
+
+		<?php	
+	}
+
 
 
 }

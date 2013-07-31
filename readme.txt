@@ -88,6 +88,32 @@ Already working on it. Expect it this summer.
 2. Profile Editor
 
 == Changelog ==
+= 1.2.4 =
+* calculated shipping is no longer limited to WP-Lister Pro 
+
+= 1.2.3.3 =
+* added custom ebay gallery image to product level options 
+* added freight shipping option 
+* re-added warning if run on windows server
+* fixed local "view on ebay" button for imported auction type listings without end date 
+* fixed whitespace pasted from ms word and added wpautop filter to additional content 
+* fixed undefined function is_ajax error on WPeC 
+
+= 1.2.3.2 =
+* added filter wplister_get_product_main_image 
+* added beta support for qTranslate when preparing listings 
+* show proper message when trying to use bulk actions without a transaction selected
+* fixed possible mysql issue during categories update 
+
+= 1.2.3.1 =
+* added primary and secondary ebay category to product level options
+* added ebay shipping services to product level options
+* added listing duration to product level options
+* strip slashes from custom item specifics values in profile
+* improved handling of available item conditions
+* set listing status to changed when product is updated on WP e-Commerce
+* fallback for mb_strlen and mb_substr if PHP was compiled without multibyte support
+
 = 1.2.3 =
 * added transaction history 
 * improved error handling when creating templates 

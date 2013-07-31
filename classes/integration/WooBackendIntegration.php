@@ -387,6 +387,14 @@ class WpLister_Product_MetaBox {
 		$title = __('eBay options', 'wplister');
 		add_meta_box( 'wplister-ebay-details', $title, array( &$this, 'meta_box_basic' ), 'product', 'normal', 'default');
 
+		$title = __('Advanced eBay options', 'wplister');
+		add_meta_box( 'wplister-ebay-advanced', $title, array( &$this, 'meta_box_advanced' ), 'product', 'normal', 'default');
+
+		$title = __('eBay shipping options', 'wplister');
+		add_meta_box( 'wplister-ebay-shipping', $title, array( &$this, 'meta_box_shipping' ), 'product', 'normal', 'default');
+
+		$this->enqueueFileTree();
+
 	}
 
 	function meta_box_basic() {
@@ -491,6 +499,55 @@ class WpLister_Product_MetaBox {
         </style>
         <?php
 
+		woocommerce_wp_text_input( array(
+			'id' 			=> 'wpl_ebay_buynow_price',
+			'label' 		=> __('Buy Now Price', 'wplister'),
+			'placeholder' 	=> 'Buy Now Price',
+			'value'			=> get_post_meta( $post->ID, '_ebay_buynow_price', true )
+		) );
+
+		woocommerce_wp_text_input( array(
+			'id' 			=> 'wpl_ebay_reserve_price',
+			'label' 		=> __('Reserve Price', 'wplister'),
+			'placeholder' 	=> 'Reserve Price',
+			'description' 	=> __('The lowest price at which you are willing to sell the item. Not all categories support a reserve price.','wplister'),
+			'value'			=> get_post_meta( $post->ID, '_ebay_reserve_price', true )
+		) );
+
+		woocommerce_wp_text_input( array(
+			'id' 			=> 'wpl_ebay_upc',
+			'label' 		=> __('UPC', 'wplister'),
+			'placeholder' 	=> 'Enter a Universal Product Code (UPC) to use product details from the eBay catalog.',
+			'value'			=> get_post_meta( $post->ID, '_ebay_upc', true )
+		) );
+
+		woocommerce_wp_text_input( array(
+			'id' 			=> 'wpl_ebay_gallery_image_url',
+			'label' 		=> __('Gallery Image URL', 'wplister'),
+			'placeholder' 	=> 'Enter an URL if you want to use a custom gallery image on eBay.',
+			'value'			=> get_post_meta( $post->ID, '_ebay_gallery_image_url', true )
+		) );
+
+		woocommerce_wp_checkbox( array( 
+			'id'    => 'wpl_ebay_global_shipping', 
+			'label' => __('Global Shipping', 'wplister'),
+			'value' => get_post_meta( $post->ID, '_ebay_global_shipping', true )
+		) );
+
+		woocommerce_wp_checkbox( array( 
+			'id'    => 'wpl_ebay_hide_from_unlisted', 
+			'label' => __('Hide from eBay', 'wplister'),
+			'value' => get_post_meta( $post->ID, '_ebay_hide_from_unlisted', true )
+		) );
+
+		woocommerce_wp_textarea_input( array( 
+			'id'    => 'wpl_ebay_payment_instructions', 
+			'label' => __('Payment Instructions', 'wplister'),
+			'value' => get_post_meta( $post->ID, '_ebay_payment_instructions', true )
+		) );
+
+		$this->showCategoryOptions();
+
 
 		// woocommerce_wp_select( array(
 		// 	'id' 			=> 'wpl_ebay_condition_id',
@@ -533,6 +590,8 @@ class WpLister_Product_MetaBox {
 
 	function showCategoryOptions() {
 		global $post;
+
+		echo '<h2>'.  __('eBay categories','wplister') . '</h2>';
 
 		// primary ebay category
 		$ebay_category_1_id   = get_post_meta( $post->ID, '_ebay_category_1_id', true );
@@ -749,6 +808,82 @@ class WpLister_Product_MetaBox {
 
 	}
 
+	function meta_box_shipping() {
+		global $woocommerce, $post;
+
+        ?>
+        <style type="text/css">
+            #wplister-ebay-shipping label { 
+            	float: left;
+            	width:25%;
+            	line-height: 2em;
+            }
+            #wplister-ebay-shipping input { 
+            	/*width:74%; */
+            }
+            #wplister-ebay-shipping .description { 
+            	/*clear: both;*/
+            	/*margin-left: 25%;*/
+            }
+        </style>
+        <?php
+
+		$this->showShippingOptions();
+
+	}
+
+	function showShippingOptions() {
+		global $woocommerce, $post;
+
+		$wpl_loc_flat_shipping_options = EbayShippingModel::getAllLocal('flat');
+		$wpl_int_flat_shipping_options = EbayShippingModel::getAllInternational('flat');
+		$wpl_shipping_locations        = EbayShippingModel::getShippingLocations();
+		$wpl_countries                 = EbayShippingModel::getEbayCountries();
+
+		$wpl_loc_calc_shipping_options   = EbayShippingModel::getAllLocal('calculated');
+		$wpl_int_calc_shipping_options   = EbayShippingModel::getAllInternational('calculated');
+		$wpl_calc_shipping_enabled       = in_array( get_option('wplister_ebay_site_id'), array(0,2,15,100) );
+		$wpl_available_shipping_packages = get_option('wplister_ShippingPackageDetails');
+
+		// make sure that at least one payment and shipping option exist
+		$item_details['loc_shipping_options'] = ProfilesModel::fixShippingArray( get_post_meta( $post->ID, '_ebay_loc_shipping_options', true ) );
+		$item_details['int_shipping_options'] = ProfilesModel::fixShippingArray( get_post_meta( $post->ID, '_ebay_int_shipping_options', true ) );
+		
+		$item_details['PackagingHandlingCosts']              = get_post_meta( $post->ID, '_ebay_PackagingHandlingCosts', true );
+		$item_details['InternationalPackagingHandlingCosts'] = get_post_meta( $post->ID, '_ebay_InternationalPackagingHandlingCosts', true );
+		$item_details['shipping_service_type']               = get_post_meta( $post->ID, '_ebay_shipping_service_type', true );
+		if ( ! $item_details['shipping_service_type'] ) $item_details['shipping_service_type'] = 'disabled';
+
+		// echo '<h2>'.  __('Shipping Options','wplister') . '</h2>';
+		?>
+			<!-- service type selector -->
+			<label for="wpl-text-loc_shipping_service_type" class="text_label"><?php echo __('Custom shipping options','wplister'); ?></label>
+			<select name="wpl_e2e_shipping_service_type" id="wpl-text-loc_shipping_service_type" 
+					class="required-entry select select_shipping_type" style="width:auto;"
+					onchange="handleShippingTypeSelectionChange(this)">
+				<option value="disabled" <?php if ( @$item_details['shipping_service_type'] == 'disabled' ): ?>selected="selected"<?php endif; ?>><?php echo __('-- use profile setting --','wplister'); ?></option>
+				<option value="flat"     <?php if ( @$item_details['shipping_service_type'] == 'flat' ): ?>selected="selected"<?php endif; ?>><?php echo __('Use Flat Shipping','wplister'); ?></option>
+				<option value="calc"     <?php if ( @$item_details['shipping_service_type'] == 'calc' ): ?>selected="selected"<?php endif; ?>><?php echo __('Use Calculated Shipping','wplister'); ?></option>
+				<option value="FlatDomesticCalculatedInternational" <?php if ( @$item_details['shipping_service_type'] == 'FlatDomesticCalculatedInternational' ): ?>selected="selected"<?php endif; ?>><?php echo __('Use Flat Domestic and Calculated International Shipping','wplister'); ?></option>
+				<option value="CalculatedDomesticFlatInternational" <?php if ( @$item_details['shipping_service_type'] == 'CalculatedDomesticFlatInternational' ): ?>selected="selected"<?php endif; ?>><?php echo __('Use Calculated Domestic and Flat International Shipping','wplister'); ?></option>
+				<option value="FreightFlat" <?php if ( @$item_details['shipping_service_type'] == 'FreightFlat' ): ?>selected="selected"<?php endif; ?>><?php echo __('Use Freight Shipping','wplister'); ?></option>
+			</select>
+		<?php
+		
+		echo '<div class="ebay_shipping_options_wrapper">';
+		echo '<h2>'.  __('Domestic shipping','wplister') . '</h2>';
+		include( WPLISTER_PATH . '/views/profile/edit_shipping_loc.php' );
+
+		echo '<h2>'.  __('International shipping','wplister') . '</h2>';
+		include( WPLISTER_PATH . '/views/profile/edit_shipping_int.php' );
+		echo '</div>';
+
+		echo '<script>';
+		include( WPLISTER_PATH . '/views/profile/edit_shipping.js' );		
+		echo '</script>';
+		
+	}
+
 	function enqueueFileTree() {
 
 		// jqueryFileTree
@@ -780,6 +915,7 @@ class WpLister_Product_MetaBox {
 			$wpl_ebay_hide_from_unlisted  	= esc_attr( @$_POST['wpl_ebay_hide_from_unlisted'] );
 			$wpl_ebay_category_1_id      	= esc_attr( @$_POST['wpl_ebay_category_1_id'] );
 			$wpl_ebay_category_2_id      	= esc_attr( @$_POST['wpl_ebay_category_2_id'] );
+			$wpl_ebay_gallery_image_url   	= esc_attr( @$_POST['wpl_ebay_gallery_image_url'] );
 
 			// Update order data
 			update_post_meta( $post_id, '_ebay_title', $wpl_ebay_title );
@@ -796,6 +932,33 @@ class WpLister_Product_MetaBox {
 			update_post_meta( $post_id, '_ebay_hide_from_unlisted', $wpl_ebay_hide_from_unlisted );
 			update_post_meta( $post_id, '_ebay_category_1_id', $wpl_ebay_category_1_id );
 			update_post_meta( $post_id, '_ebay_category_2_id', $wpl_ebay_category_2_id );
+			update_post_meta( $post_id, '_ebay_gallery_image_url', $wpl_ebay_gallery_image_url );
+
+			// shipping options
+			$ebay_shipping_service_type = esc_attr( @$_POST['wpl_e2e_shipping_service_type'] );
+
+			if ( $ebay_shipping_service_type != 'disabled' ) {
+	
+				update_post_meta( $post_id, '_ebay_shipping_service_type', $ebay_shipping_service_type );
+
+				$details = ProfilesPage::getPreprocessedPostDetails();
+				update_post_meta( $post_id, '_ebay_loc_shipping_options', $details['loc_shipping_options'] );
+				update_post_meta( $post_id, '_ebay_int_shipping_options', $details['int_shipping_options'] );
+
+				update_post_meta( $post_id, '_ebay_shipping_package', esc_attr( @$_POST['wpl_e2e_shipping_package'] ) );
+				update_post_meta( $post_id, '_ebay_PackagingHandlingCosts', esc_attr( @$_POST['wpl_e2e_PackagingHandlingCosts'] ) );
+				update_post_meta( $post_id, '_ebay_InternationalPackagingHandlingCosts', esc_attr( @$_POST['wpl_e2e_InternationalPackagingHandlingCosts'] ) );
+
+			} else {
+
+				delete_post_meta( $post_id, '_ebay_loc_shipping_options' );
+				delete_post_meta( $post_id, '_ebay_int_shipping_options' );
+				delete_post_meta( $post_id, '_ebay_shipping_package' );
+				delete_post_meta( $post_id, '_ebay_PackagingHandlingCosts' );
+				delete_post_meta( $post_id, '_ebay_InternationalPackagingHandlingCosts' );
+
+			}
+			// echo "<pre>";print_r($_POST);echo"</pre>";die();
 
 		}
 

@@ -1147,13 +1147,21 @@ class ListingsModel extends WPL_Model {
 		
 		// get wp post record
 		$post = get_post( $post_id );
-		
+		$post_title   = $post_title ? $post_title : $post->post_title;
+		$post_content = $post_content ? $post_content : $post->post_content;
+
+		// support for qTranslate
+		if ( function_exists('qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage') ) {
+			$post_title   = qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage( $post_title );
+			$post_content = qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage( $post_content );			
+		}
+
 		// gather product data
-		$data['post_id'] = $post_id;
-		$data['auction_title'] = $post_title ? $post_title : $post->post_title;
-		$data['post_content'] = $post_content ? $post_content : $post->post_content;
-		$data['price'] = ProductWrapper::getPrice( $post_id );
-		$data['status'] = 'selected';
+		$data['post_id']       = $post_id;
+		$data['auction_title'] = $post_title;
+		$data['post_content']  = $post_content;
+		$data['price']         = ProductWrapper::getPrice( $post_id );
+		$data['status']        = 'selected';
 		
 		$this->logger->info('insert new auction '.$post_id.' - title: '.$data['auction_title']);
 		$this->logger->debug( print_r($post,1) );

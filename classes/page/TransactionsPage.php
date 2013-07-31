@@ -75,17 +75,25 @@ class TransactionsPage extends WPL_Page {
 		}
 		// handle update from eBay action
 		if ( $this->requestAction() == 'update' ) {
-			$this->initEC();
-			$this->EC->updateTransactionsFromEbay( $_REQUEST['transaction'] );
-			$this->EC->closeEbay();
-			$this->showMessage( __('Selected transactions were updated from eBay.','wplister') );
+			if ( isset( $_REQUEST['transaction'] ) ) {
+				$this->initEC();
+				$this->EC->updateTransactionsFromEbay( $_REQUEST['transaction'] );
+				$this->EC->closeEbay();
+				$this->showMessage( __('Selected transactions were updated from eBay.','wplister') );		
+			} else {
+				$this->showMessage( __('You need to select at least one item from the list below in order to use bulk actions.','wplister'),1 );						
+			}
 		}
 		// handle delete action
 		if ( $this->requestAction() == 'delete' ) {
-			$this->initEC();
-			$this->EC->deleteTransactions( $_REQUEST['transaction'] );
-			$this->EC->closeEbay();
-			$this->showMessage( __('Selected items were removed.','wplister') );
+			if ( isset( $_REQUEST['transaction'] ) ) {
+				$this->initEC();
+				$this->EC->deleteTransactions( $_REQUEST['transaction'] );
+				$this->EC->closeEbay();
+				$this->showMessage( __('Selected items were removed.','wplister') );
+			} else {
+				$this->showMessage( __('You need to select at least one item from the list below in order to use bulk actions.','wplister'),1 );						
+			}
 		}
 
 

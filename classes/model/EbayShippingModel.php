@@ -331,6 +331,10 @@ class EbayShippingModel extends WPL_Model {
 					$service['ShippingCategory'] = __('International services','wplister');
 					break;
 				
+				case 'EBAY_SHIPPING':
+					$service['ShippingCategory'] = __('eBay shipping services','wplister');
+					break;
+				
 				default:
 					# do nothing
 					break;

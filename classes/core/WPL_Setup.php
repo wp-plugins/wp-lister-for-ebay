@@ -11,6 +11,7 @@ class WPL_Setup extends WPL_Core {
 
 		// check for windows server
 		// if ( self::isWindowsServer() ) return false;
+		self::isWindowsServer( $page );
 
 		// create folders if neccessary
 		if ( self::checkFolders() ) return false;
@@ -660,18 +661,18 @@ class WPL_Setup extends WPL_Core {
 	}
 
 	// check server is running windows
-	public function isWindowsServer() {
+	public function isWindowsServer( $page ) {
+
+		if ( $page != 'settings' ) return;
 
 		if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 
 			$this->showMessage("
-				<b>Server requirements not met</b><br>
+				<b>Warning: Server requirements not met - this server runs on windows.</b><br>
 				<br>
-				Your server seems to run on Windows.<br>
 				WP-Lister currently only supports unixoid operating systems like Linux, FreeBSD and OS X.<br>
-				<br>
-				If you'd like to help make WP-Lister run on Windows, please contact us at info@wplab.com.
-			",1);
+				Support for windows servers is still experimental and should not be used on production sites!
+			");
 			return true;
 		}
 
