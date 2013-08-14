@@ -275,6 +275,9 @@ class WPL_WooBackendIntegration {
 		if ( $post->post_type != 'product' )
 			return;
 
+		// if product has been imported from ebay...
+		$this->wplister_product_submitbox_imported_status();
+
 		// check listing status
 		$listingsModel = new ListingsModel();
 		$status = $listingsModel->getStatusFromPostID( $post->ID );
@@ -321,6 +324,31 @@ class WPL_WooBackendIntegration {
 				) );
 
 			?>
+
+		</div>
+		<?php
+	}
+
+		// if product has been imported from ebay...
+	function wplister_product_submitbox_imported_status() {
+		global $post;
+		global $woocommerce;
+
+		$item_source = get_post_meta( $post->ID, '_ebay_item_source', true );
+		if ( ! $item_source ) return;
+
+		$ebay_id = get_post_meta( $post->ID, '_ebay_item_id', true );
+
+		?>
+
+		<div class="misc-pub-section" id="wplister-submit-options">
+
+			<?php _e( 'This product was imported', 'wplister' ); ?>
+				<!-- <b><?php echo $item->status; ?></b> &nbsp; -->
+				<a href="http://www.ebay.com/itm/<?php echo $ebay_id ?>" target="_blank" style="float:right;">
+					<?php echo __('View on eBay', 'wplister') ?>
+				</a>
+			<br>
 
 		</div>
 		<?php
@@ -384,13 +412,13 @@ class WpLister_Product_MetaBox {
 
 	function add_meta_box() {
 
-		$title = __('eBay options', 'wplister');
+		$title = __('eBay Options', 'wplister');
 		add_meta_box( 'wplister-ebay-details', $title, array( &$this, 'meta_box_basic' ), 'product', 'normal', 'default');
 
-		$title = __('Advanced eBay options', 'wplister');
+		$title = __('Advanced eBay Options', 'wplister');
 		add_meta_box( 'wplister-ebay-advanced', $title, array( &$this, 'meta_box_advanced' ), 'product', 'normal', 'default');
 
-		$title = __('eBay shipping options', 'wplister');
+		$title = __('eBay Shipping Options', 'wplister');
 		add_meta_box( 'wplister-ebay-shipping', $title, array( &$this, 'meta_box_shipping' ), 'product', 'normal', 'default');
 
 		$this->enqueueFileTree();
@@ -496,6 +524,15 @@ class WpLister_Product_MetaBox {
             	clear: both;
             	margin-left: 25%;
             }
+            #wplister-ebay-advanced h2 {
+            	padding-top: 0.5em;
+            	padding-bottom: 0.5em;
+            	margin-top: 1em;
+            	margin-bottom: 0;
+            	border-top: 1px solid #555;
+            	border-top: 2px dashed #ddd;
+            }
+
         </style>
         <?php
 
@@ -825,6 +862,15 @@ class WpLister_Product_MetaBox {
             	/*clear: both;*/
             	/*margin-left: 25%;*/
             }
+            #wplister-ebay-shipping .ebay_shipping_options_wrapper h2 {
+            	padding-top: 0.5em;
+            	padding-bottom: 0.5em;
+            	margin-top: 1em;
+            	margin-bottom: 0;
+            	border-top: 1px solid #555;
+            	border-top: 2px dashed #ddd;
+            }
+
         </style>
         <?php
 
@@ -951,6 +997,7 @@ class WpLister_Product_MetaBox {
 
 			} else {
 
+				delete_post_meta( $post_id, '_ebay_shipping_service_type' );
 				delete_post_meta( $post_id, '_ebay_loc_shipping_options' );
 				delete_post_meta( $post_id, '_ebay_int_shipping_options' );
 				delete_post_meta( $post_id, '_ebay_shipping_package' );

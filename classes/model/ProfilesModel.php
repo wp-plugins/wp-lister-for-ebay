@@ -17,6 +17,7 @@ class ProfilesModel extends WPL_Model {
 		$profiles = $wpdb->get_results("
 			SELECT * 
 			FROM $this->tablename
+			ORDER BY sort_order ASC, profile_name ASC
 		", ARRAY_A);		
 
 		foreach( $profiles as &$profile ) {
@@ -171,6 +172,7 @@ class ProfilesModel extends WPL_Model {
 		$results = $wpdb->get_results("
 			SELECT profile_id, profile_name 
 			FROM $this->tablename
+			ORDER BY sort_order ASC, profile_name ASC
 		");		
 
 		$profiles = array();
@@ -185,9 +187,12 @@ class ProfilesModel extends WPL_Model {
 	function getPageItems( $current_page, $per_page ) {
 		global $wpdb;
 
-        $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'profile_id'; //If no sort, default to title
-        $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'desc'; //If no order, default to asc
+        $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'profile_name'; //If no sort, default to title
+        $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'asc'; //If no order, default to asc
         $offset = ( $current_page - 1 ) * $per_page;
+
+        // regard sort order if sorted by profile name
+        if ( $orderby == 'profile_name' ) $orderby = 'sort_order '.$order.', profile_name';
 
         // get items
 		$items = $wpdb->get_results("

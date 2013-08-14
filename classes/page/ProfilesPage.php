@@ -319,6 +319,7 @@ class ProfilesPage extends WPL_Page {
 		$item['profile_description'] 		= $this->getValueFromPost( 'profile_description' );
 		$item['listing_duration'] 			= $this->getValueFromPost( 'listing_duration' );
 		$item['type']						= $this->getValueFromPost( 'auction_type' );
+		$item['sort_order'] 				= $this->getValueFromPost( 'sort_order' );
 		$item['details']			 		= json_encode( $details );		
 		$item['conditions']			 		= serialize( $conditions );		
 		$item['category_specifics']	 		= serialize( $specifics );		

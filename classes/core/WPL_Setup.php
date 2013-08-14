@@ -621,6 +621,53 @@ class WPL_Setup extends WPL_Core {
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
+		// upgrade to version 21  (1.2.2.16)
+		if ( 21 > $db_version ) {
+			$new_db_version = 21;
+
+			// create table: ebay_transactions
+			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_orders` (
+			  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+			  `order_id` varchar(128) DEFAULT NULL,
+			  `date_created` datetime DEFAULT NULL,
+			  `total` float DEFAULT NULL,
+			  `status` varchar(50) DEFAULT NULL,
+			  `post_id` int(11) DEFAULT NULL,
+			  `items` text,
+			  `details` text,
+			  `history` text,
+			  `buyer_userid` varchar(255) DEFAULT NULL,
+			  `buyer_name` varchar(255) DEFAULT NULL,
+			  `buyer_email` varchar(255) DEFAULT NULL,
+			  `eBayPaymentStatus` varchar(50) DEFAULT NULL,
+			  `CheckoutStatus` varchar(50) DEFAULT NULL,
+			  `ShippingService` varchar(50) DEFAULT NULL,
+			  `PaymentMethod` varchar(50) DEFAULT NULL,
+			  `ShippingAddress_City` varchar(50) DEFAULT NULL,
+			  `CompleteStatus` varchar(50) DEFAULT NULL,
+			  `LastTimeModified` datetime DEFAULT NULL,
+			  PRIMARY KEY (`id`)
+	  		);";
+			$wpdb->query($sql);
+
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+		// upgrade to version 22  (1.2.4.7)
+		if ( 22 > $db_version ) {
+			$new_db_version = 22;
+
+			// add column to ebay_profiles table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_profiles`
+			        ADD COLUMN `sort_order` int(11) NOT NULL AFTER `type`
+			";
+			$wpdb->query($sql);	#echo mysql_error();
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
 
 
 		// show update message

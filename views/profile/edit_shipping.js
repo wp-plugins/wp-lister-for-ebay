@@ -132,6 +132,42 @@
 
 				enumerateShippingTableFields();
 
+
+			    // 
+			    // Validation
+			    // 
+
+				// check required values on submit
+				// jQuery('input#publish').on('click', function() {
+				jQuery('form#post').on('submit', function() {
+					
+					// validate shipping options
+					var shipping_type = jQuery('.select_shipping_type')[0] ? jQuery('.select_shipping_type')[0].value : 'disabled';
+					if ( shipping_type == 'flat' || shipping_type == 'FreightFlat' || shipping_type == 'FlatDomesticCalculatedInternational' ) {
+
+						// local flat shipping price required
+						if ( jQuery('#loc_shipping_options_table_flat input.price_input')[0].value == '' ) {
+							alert('Please enter a shipping fee for eBay.'); return false;
+						}
+
+						// local flat shipping option required
+						if ( jQuery('#loc_shipping_options_table_flat .select_service_name')[0].value == '' ) {
+							alert('Please select at least one domestic shipping service for eBay.'); return false;
+						}
+
+					} else if ( shipping_type == 'calc' || shipping_type == 'CalculatedDomesticFlatInternational' ) {
+
+						// local calc shipping option required
+						if ( jQuery('#loc_shipping_options_table_calc .select_service_name')[0].value == '' ) {
+							alert('Please select at least one domestic shipping service for eBay.'); return false;
+						}						
+
+					}
+
+					return true;
+				})
+
+
 			}
 		);
 	

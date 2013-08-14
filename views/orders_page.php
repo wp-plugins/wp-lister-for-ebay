@@ -2,7 +2,7 @@
 
 <style type="text/css">
 
-	th.column-item_title {
+	th.column-details {
 		width: 25%;
 	}
 
@@ -10,7 +10,7 @@
 
 <div class="wrap">
 	<div class="icon32" style="background: url(<?php echo $wpl_plugin_url; ?>img/hammer-32x32.png) no-repeat;" id="wpl-icon"><br /></div>
-	<h2><?php echo __('Transactions','wplister') ?></h2>
+	<h2><?php echo __('Orders','wplister') ?></h2>
 	<?php echo $wpl_message ?>
 
 
@@ -20,27 +20,29 @@
         <!-- For plugins, we also need to ensure that the form posts back to our current page -->
         <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
         <!-- Now we can render the completed list table -->
-        <?php $wpl_transactionsTable->display() ?>
+        <?php $wpl_ordersTable->display() ?>
     </form>
 
 	<br style="clear:both;"/>
 
 
-	<?php if ( 'transaction' == get_option( 'wplister_ebay_update_mode', 'transaction' ) ) : ?>
+	<?php if ( 'order' == get_option( 'wplister_ebay_update_mode', 'transaction' ) ) : ?>
 	
-		<?php if ( wp_next_scheduled( 'wplister_update_auctions' ) ) : ?>
 		<p>
+		<?php if ( wp_next_scheduled( 'wplister_update_auctions' ) ) : ?>
 			<?php echo __('Next scheduled update','wplister'); ?>: 
 			<?php echo human_time_diff( wp_next_scheduled( 'wplister_update_auctions' ), current_time('timestamp',1) ) ?>
-		</p>
+		<?php else: ?>
+			<?php echo __('Automatic background updates are currently disabled.','wplister'); ?>
 		<?php endif; ?>
+		</p>
 
 		<form method="post" action="<?php echo $wpl_form_action; ?>">
 			<div class="submit" style="padding-top: 0; float: left;">
 				<?php #wp_nonce_field( 'e2e_tools_page' ); ?>
-				<input type="hidden" name="action" value="update_transactions" />
-				<input type="submit" value="<?php echo __('Update transactions','wplister') ?>" name="submit" class="button-secondary"
-					   title="<?php echo __('Update recent transactions from eBay.','wplister') ?>">
+				<input type="hidden" name="action" value="update_orders" />
+				<input type="submit" value="<?php echo __('Update orders','wplister') ?>" name="submit" class="button-secondary"
+					   title="<?php echo __('Update recent orders from eBay.','wplister') ?>">
 			</div>
 		</form>
 

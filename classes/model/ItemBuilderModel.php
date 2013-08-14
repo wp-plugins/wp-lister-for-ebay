@@ -534,7 +534,7 @@ class ItemBuilderModel extends WPL_Model {
 			// }
 		}
 		// only set international shipping if $intlShipping array contains one or more valid items
-		if ( @$intlShipping[0]['service_name'] != '' )
+		if ( isset( $intlShipping[0]['service_name'] ) && ( $intlShipping[0]['service_name'] != '' ) )
 			$shippingDetails->setInternationalShippingServiceOption($shippingInternational,null);
 
 		// set CalculatedShippingRate

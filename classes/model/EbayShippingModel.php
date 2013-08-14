@@ -72,7 +72,7 @@ class EbayShippingModel extends WPL_Model {
 		
 		$data['service_name']        = $Detail->ShippingService;
 		$data['service_description'] = $Detail->Description;
-		$data['international']       = $Detail->InternationalService;
+		$data['international']       = $Detail->InternationalService ? 1 : 0;
 		$data['version']             = $Detail->DetailVersion;	
 
 		$data['ShippingCategory']    = $Detail->ShippingCategory;

@@ -100,15 +100,16 @@ class LogPage extends WPL_Page {
 			$content = $this->display( 'log_details', array( 'row' => $row, 'version' => $this->get_plugin_version() ), false );
 
 			// build email
-			$to = 'support@wplab.com';
-			$subject = 'WP-Lister Debug Log Entry #'.$id;
+			$to = 'info@wplab.com';
+			$subject = 'WP-Lister log record #'.$id.' - '. str_replace( 'http://','', get_bloginfo('wpurl') );
 			$attachments = array();
 			$headers = '';
 			$message = $content;
 
-			$user_name  = $_REQUEST['user_name'];
+			$user_name  = $_REQUEST['user_name'] ? $_REQUEST['user_name'] : 'WP-Lister';
 			$user_email = $_REQUEST['user_email'];
 			$user_msg   = $_REQUEST['user_msg'];
+		    $headers = 'From: '.$user_name.' <'.$user_email.'>' . "\r\n";
 
 			$message .= '<hr>';
 			$message .= 'Name: '.$user_name.'<br>';
@@ -119,10 +120,10 @@ class LogPage extends WPL_Page {
 			add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
 			wp_mail($to, $subject, $message, $headers, $attachments);
 			
-			echo "<br>";
-			echo "Your log entry was sent to WP Lab.";
-			echo "<br><br>";
-			echo "Thank your for helping improve WP-Lister.";
+			echo '<br><div style="text-align:center;font-family:sans-serif;">';
+			echo 'Your log entry was sent to WP Lab.';
+			echo '<br><br>';
+			echo 'Thank you for helping us improve WP-Lister.</div>';
 
 		} else {
 			// display detail page

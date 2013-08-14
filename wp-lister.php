@@ -3,17 +3,17 @@
 Plugin Name: WP-Lister for eBay
 Plugin URI: http://www.wplab.com/plugins/wp-lister/
 Description: List your products on eBay the easy way.
-Version: 1.2.4
+Version: 1.2.5
 Author: Matthias Krok
 Author URI: http://www.wplab.com/ 
-Max WP Version: 3.5.1
+Max WP Version: 3.6
 Text Domain: wp-lister
 License: GPL2+
 */
 
 
 // include base classes
-define('WPLISTER_VERSION', '1.2.4' );
+define('WPLISTER_VERSION', '1.2.5' );
 define('WPLISTER_PATH', realpath( dirname(__FILE__) ) );
 define('WPLISTER_URL', plugins_url() . '/' . basename(dirname(__FILE__)) . '/' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Autoloader.php' );
@@ -71,6 +71,7 @@ class WPL_WPLister extends WPL_BasePlugin {
 			$this->pages['profiles']     = new ProfilesPage();
 			$this->pages['templates']    = new TemplatesPage();
 			$this->pages['transactions'] = new TransactionsPage();
+			$this->pages['orders']       = new EbayOrdersPage();
 			$this->pages['tools']        = new ToolsPage();
 			$this->pages['settings']     = new SettingsPage();
 			$this->pages['tutorial']     = new HelpPage();
@@ -162,7 +163,15 @@ class WPL_WPLister extends WPL_BasePlugin {
         $this->logger->info("WP-CRON: cron_update_auctions()");
 
 		$this->initEC();
-		$this->EC->loadTransactions();
+		
+		// decide if the old transactions update or the new orders update mode is to be used
+		$mode = get_option( 'wplister_ebay_update_mode', 'transaction' );
+		if ( $mode == 'order' ) {
+			$this->EC->updateEbayOrders(); // new
+		} else {
+			$this->EC->loadTransactions(); // old
+		}
+
 		$this->EC->updateListings();
 		$this->EC->closeEbay();
         $this->logger->info("WP-CRON: cron_update_auctions() finished");

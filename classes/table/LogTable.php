@@ -140,6 +140,9 @@ class LogTable extends WP_List_Table {
             if ( preg_match("/<SoldList>(.*)<\/SoldList>/", $item['request'], $matches) ) {
                 $link .= ' SoldList ';
             }
+            if ( preg_match("/<UnsoldList>(.*)<\/UnsoldList>/", $item['request'], $matches) ) {
+                $link .= ' UnsoldList ';
+            }
             if ( preg_match("/<ActiveList>(.*)<\/ActiveList>/", $item['request'], $matches) ) {
                 $link .= ' ActiveList ';
             }

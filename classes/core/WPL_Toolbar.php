@@ -42,6 +42,16 @@ class WPLister_Toolbar  {
 		);
 		$wp_admin_bar->add_node($args);
 
+		// Orders page
+		$args = array(
+			'id'    => 'wplister_orders',
+			'title' => __('Orders', 'wplister'),
+			'href'  => admin_url( 'admin.php?page=wplister-orders' ),
+			'parent'  => 'wplister_top',
+			'meta'  => array('class' => 'wplister-toolbar-page')
+		);
+		$wp_admin_bar->add_node($args);
+
 		// Settings page
 		$args = array(
 			'id'    => 'wplister_settings',
@@ -67,6 +77,16 @@ class WPLister_Toolbar  {
 			'id'    => 'wplister_settings_categories',
 			'title' => __('Categories', 'wplister'),
 			'href'  => admin_url( 'admin.php?page=wplister-settings&tab=categories' ),
+			'parent'  => 'wplister_settings',
+			'meta'  => array('class' => 'wplister-toolbar-page')
+		);
+		$wp_admin_bar->add_node($args);
+
+		// Settings - Advanced tab
+		$args = array(
+			'id'    => 'wplister_settings_advanced',
+			'title' => __('Advanced', 'wplister'),
+			'href'  => admin_url( 'admin.php?page=wplister-settings&tab=advanced' ),
 			'parent'  => 'wplister_settings',
 			'meta'  => array('class' => 'wplister-toolbar-page')
 		);

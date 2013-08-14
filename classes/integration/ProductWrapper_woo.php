@@ -8,7 +8,7 @@ class ProductWrapper {
 	const plugin = 'woo';
 	const post_type = 'product';
 	const taxonomy  = 'product_cat';
-	const menu_page_position = 57;
+	const menu_page_position = '57.26';
 	
 	// get custom post type
 	static function getPostType() {
@@ -173,6 +173,7 @@ class ProductWrapper {
 				}
 				if ( count( $terms ) > 0 ) {
 					$attribute_name = $woocommerce->attribute_label( $attribute['name'] );
+					$attribute_name = html_entity_decode( $attribute_name, ENT_QUOTES, 'UTF-8' ); // US Shoe Size (Men&#039;s) => US Shoe Size (Men's)
 					$attributes[ $attribute_name ] = $terms[0]->name;
 				}
 	
@@ -180,6 +181,7 @@ class ProductWrapper {
 
 				// handle custom product attributes
 				$attribute_name = $attribute['name'];
+				$attribute_name = html_entity_decode( $attribute_name, ENT_QUOTES, 'UTF-8' ); // US Shoe Size (Men&#039;s) => US Shoe Size (Men's)
 				$attributes[ $attribute_name ] = $attribute['value'];
 
 			}
@@ -280,6 +282,8 @@ class ProductWrapper {
 
 			$label = $woocommerce->attribute_label($name); 
 			if ($label == '') $label = $name;
+			$label = html_entity_decode( $label, ENT_QUOTES, 'UTF-8' ); // US Shoe Size (Men&#039;s) => US Shoe Size (Men's)
+			
 			$id   = "attribute_".sanitize_title($name);
 			$attribute_labels[ $id ] = $label;
 
@@ -315,7 +319,8 @@ class ProductWrapper {
 				// echo "<pre>";print_r($term);echo"</pre>";#die();
 				if ( $term ) {
 					// handle proper attribute taxonomies
-					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $term->name;
+					$term_name = html_entity_decode( $term->name, ENT_QUOTES, 'UTF-8' ); // US Shoe Size (Men&#039;s) => US Shoe Size (Men's)
+					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $term_name;
 				} elseif ( $value ) {
 					// handle fake custom product attributes
 					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $value;
@@ -368,7 +373,8 @@ class ProductWrapper {
 	
 						if ( $term ) {
 							// handle proper attribute taxonomies
-							$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $term->name;
+							$term_name = html_entity_decode( $term->name, ENT_QUOTES, 'UTF-8' ); // US Shoe Size (Men&#039;s) => US Shoe Size (Men's)
+							$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $term_name;
 							$variations[] = $newvar;			
 						}
 
@@ -386,6 +392,9 @@ class ProductWrapper {
 
 			
 		}
+
+        // global $wpl_logger;
+        // $wpl_logger->info( 'getVariations() result: '.print_r($variations,1));
 
 		return $variations;
 
@@ -438,11 +447,17 @@ class ProductWrapper {
 		$attributes = array();
 		foreach ($attribute_taxonomies as $tax) {
 			$attrib = new stdClass();
-			$attrib->name = $woocommerce->attribute_label( $tax );
-			$attrib->label = $woocommerce->attribute_label( $tax );
-			$attributes[] = $attrib;
+
+			// US Shoe Size (Men&#039;s) => US Shoe Size (Men's)
+			$attrib->name  = html_entity_decode( $woocommerce->attribute_label( $tax ), ENT_QUOTES, 'UTF-8' );
+			$attrib->label = html_entity_decode( $woocommerce->attribute_label( $tax ), ENT_QUOTES, 'UTF-8' );
+
+			$attributes[]  = $attrib;
 		}
 		// print_r($attributes);die();
+
+        // global $wpl_logger;
+        // $wpl_logger->info( 'getAttributeTaxonomies() result: '.print_r($attributes,1));
 
 		return $attributes;
 	}	

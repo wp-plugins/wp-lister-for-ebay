@@ -43,7 +43,12 @@ class WPL_WooFrontendIntegration {
 				$details = $this->getItemDetails( $listing->ebay_id );
 
 				if ( $details['BidCount'] == 0 ) {
-					if ( get_option( 'wplister_local_auction_display', 'off' ) == 'if_bid' ) return;
+					
+					// do nothing if "only if bids" is enabled and there are more than 12 hours left
+					$auction_display_mode = get_option( 'wplister_local_auction_display', 'off' );
+					$hours_left           = ( strtotime($listing->end_date) - gmdate('U') ) / 3600;
+					if ( ( $hours_left > 12 ) && ( $auction_display_mode == 'if_bid' ) ) return;
+
 					// start price
 					echo '<p itemprop="price" class="price startprice">'.__('Starting bid','wplister').': <span class="amount">'.woocommerce_price($listing->price).'</span></p>';
 				} else {

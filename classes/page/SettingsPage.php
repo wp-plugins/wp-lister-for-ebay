@@ -57,6 +57,11 @@ class SettingsPage extends WPL_Page {
 			$this->saveSettings();
 		}
 
+		// save advanced settings
+		if ( $this->requestAction() == 'save_wplister_advanced_settings' ) {
+			$this->saveAdvancedSettings();
+		}
+
 		// save category map
 		if ( $this->requestAction() == 'save_wplister_categories_map' ) {
 			$this->saveCategoriesSettings();
@@ -92,7 +97,8 @@ class SettingsPage extends WPL_Page {
         $default_tab = is_network_admin() ? 'license' : 'settings';
         $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : $default_tab;
         if ( 'categories' == $active_tab ) return $this->displayCategoriesPage();
-        if ( 'developer' == $active_tab ) return $this->displayDeveloperPage();
+        if ( 'developer'  == $active_tab ) return $this->displayDeveloperPage();
+        if ( 'advanced'   == $active_tab ) return $this->displayAdvancedSettingsPage();
 	
 		// action remove_token
 		if ( $this->requestAction() == 'remove_token' ) {
@@ -142,13 +148,14 @@ class SettingsPage extends WPL_Page {
 
 			'option_cron_auctions'		=> self::getOption( 'cron_auctions' ),
 			'option_cron_transactions'	=> self::getOption( 'cron_transactions' ),
-			'process_shortcodes'		=> self::getOption( 'process_shortcodes', 'content' ),
-			'remove_links'				=> self::getOption( 'remove_links', 'default' ),
-			'default_image_size'		=> self::getOption( 'default_image_size', 'full' ),
-			'wc2_gallery_fallback'		=> self::getOption( 'wc2_gallery_fallback', 'attached' ),
-			'hide_dupe_msg'				=> self::getOption( 'hide_dupe_msg' ),
-			'option_uninstall'			=> self::getOption( 'uninstall' ),
+			// 'process_shortcodes'		=> self::getOption( 'process_shortcodes', 'content' ),
+			// 'remove_links'			=> self::getOption( 'remove_links', 'default' ),
+			// 'default_image_size'		=> self::getOption( 'default_image_size', 'full' ),
+			// 'wc2_gallery_fallback'	=> self::getOption( 'wc2_gallery_fallback', 'attached' ),
+			// 'hide_dupe_msg'			=> self::getOption( 'hide_dupe_msg' ),
+			// 'option_uninstall'		=> self::getOption( 'uninstall' ),
 			'option_enable_ebay_motors'	=> self::getOption( 'enable_ebay_motors' ),
+			'option_ebay_update_mode'	=> self::getOption( 'ebay_update_mode' ),
 	
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'auth_url'					=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab='.$active_tab.'&action=wplRedirectToAuthURL',
@@ -185,6 +192,27 @@ class SettingsPage extends WPL_Page {
 		$this->display( 'settings_categories', $aData );
 	}
 
+
+	public function displayAdvancedSettingsPage() {
+
+		$aData = array(
+			'plugin_url'				=> self::$PLUGIN_URL,
+			'message'					=> $this->message,
+
+			'process_shortcodes'		=> self::getOption( 'process_shortcodes', 'content' ),
+			'remove_links'				=> self::getOption( 'remove_links', 'default' ),
+			'default_image_size'		=> self::getOption( 'default_image_size', 'full' ),
+			'wc2_gallery_fallback'		=> self::getOption( 'wc2_gallery_fallback', 'attached' ),
+			'hide_dupe_msg'				=> self::getOption( 'hide_dupe_msg' ),
+			'option_uninstall'			=> self::getOption( 'uninstall' ),
+			'option_foreign_transactions' => self::getOption( 'foreign_transactions' ),
+			'option_allow_backorders'   => self::getOption( 'allow_backorders', 0 ),
+
+			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
+			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab=advanced'
+		);
+		$this->display( 'settings_advanced', $aData );
+	}
 
 	public function displayDeveloperPage() {
 
@@ -234,8 +262,27 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'hide_dupe_msg',    	$this->getValueFromPost( 'hide_dupe_msg' ) );
 			self::updateOption( 'uninstall',			$this->getValueFromPost( 'option_uninstall' ) );
 			self::updateOption( 'enable_ebay_motors', 	$this->getValueFromPost( 'option_enable_ebay_motors' ) );
+			self::updateOption( 'ebay_update_mode', 	$this->getValueFromPost( 'option_ebay_update_mode' ) );
 
 			$this->handleCronSettings( $this->getValueFromPost( 'option_cron_auctions' ) );
+			$this->showMessage( __('Settings saved.','wplister') );
+		}
+	}
+
+	protected function saveAdvancedSettings() {
+
+		// TODO: check nonce
+		if ( isset( $_POST['wpl_e2e_option_uninstall'] ) ) {
+
+			self::updateOption( 'process_shortcodes', 	$this->getValueFromPost( 'process_shortcodes' ) );
+			self::updateOption( 'remove_links',     	$this->getValueFromPost( 'remove_links' ) );
+			self::updateOption( 'default_image_size',   $this->getValueFromPost( 'default_image_size' ) );
+			self::updateOption( 'wc2_gallery_fallback', $this->getValueFromPost( 'wc2_gallery_fallback' ) );
+			self::updateOption( 'hide_dupe_msg',    	$this->getValueFromPost( 'hide_dupe_msg' ) );
+			self::updateOption( 'uninstall',			$this->getValueFromPost( 'option_uninstall' ) );
+			self::updateOption( 'foreign_transactions',	$this->getValueFromPost( 'option_foreign_transactions' ) );
+			self::updateOption( 'allow_backorders',		$this->getValueFromPost( 'option_allow_backorders' ) );
+
 			$this->showMessage( __('Settings saved.','wplister') );
 		}
 	}
@@ -510,11 +557,11 @@ class SettingsPage extends WPL_Page {
         $this->logger->info("handleCronSettings( $schedule )");
 
         // remove scheduled event
-	    $timestamp = wp_next_scheduled( 'wplister_update_auctions' );
-    	wp_unschedule_event($timestamp, 'wplister_update_auctions' );
+	    $timestamp = wp_next_scheduled(  'wplister_update_auctions' );
+    	wp_unschedule_event( $timestamp, 'wplister_update_auctions' );
 
 		if ( !wp_next_scheduled( 'wplister_update_auctions' ) ) {
-			wp_schedule_event(time(), $schedule, 'wplister_update_auctions');
+			wp_schedule_event( time(), $schedule, 'wplister_update_auctions' );
 		}
         
 	}

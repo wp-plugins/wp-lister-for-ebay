@@ -68,17 +68,39 @@ WpLister.JobRunner = function () {
             // alert( "There was a problem fetching the job list. The server responded:\n\n" + e.responseText ); 
             console.log( "error", xhr, error ); 
             console.log( e.responseText ); 
+            console.log( "ajaxurl", ajaxurl ); 
+            console.log( "params", params ); 
         });
 
     }
 
     var runSubTask = function ( subtask ) {
 
+        // console.log('runSubTask(): ', subtask );
         var currentLogRow = jQuery('#wpl_logRow_'+self.currentTask);
 
         // logRow: set title
-        currentLogRow.find('.logRowTitle').html( subtask.displayName );
-        currentLogRow.find('.logRowTitle').html( 'running subtask...'.subtask.displayName );
+        // currentLogRow.find('.logRowTitle').html( subtask.displayName );
+        // currentLogRow.find('.logRowTitle').append( '<br>&nbsp;-&nbsp;' + subtask.displayName );
+
+
+        // create new log row for currentSubTask
+        var new_row = ' <div id="wpl_subTaskLogRow_'+self.currentTask+'_'+self.currentSubTask+'" class="logRow">' +
+                        '   <div class="logRowTitle"></div>' +
+                        '   <div class="logRowErrors"></div>' +
+                        '   <div class="logRowStatus"></div>' +
+                        '</div>';
+        jQuery('#jobs_log').append( new_row );
+        var currentSubTaskLogRow = jQuery('#wpl_subTaskLogRow_'+self.currentTask+'_'+self.currentSubTask);
+
+
+        // logRow: set title
+        currentSubTaskLogRow.find('.logRowTitle').html( '<span style="color:silver;padding-left:1em;">' + subtask.displayName + '</span>' );
+
+        // logRow: set status icon
+        var statusIconURL = wplister_url + "img/ajax-loader.gif";
+        currentSubTaskLogRow.find('.logRowStatus').html( '<img src="'+statusIconURL+'" />' );
+
 
         // run task
         // task.displayName = 'ID '+self.jobKey; // reset displayName
@@ -101,8 +123,8 @@ WpLister.JobRunner = function () {
                 var errors_label  = response.errors.length == 1 ? 'error' : 'errors';
             }
 
-            // update row status
-            // currentLogRow.find('.logRowStatus').html( '<img src="'+statusIconURL+'" />' );
+            // update subtask row status
+            currentSubTaskLogRow.find('.logRowStatus').html( '<img src="'+statusIconURL+'" />' );
 
             // prepare next subtask
             self.currentSubTask++;
@@ -112,6 +134,9 @@ WpLister.JobRunner = function () {
                 self.runSubTask( self.subtaskQueue[ self.currentSubTask ] );
 
             } else {
+
+                // update main task status
+                currentLogRow.find('.logRowStatus').html( '<img src="'+statusIconURL+'" />' );
 
                 // all subtasks complete
                 self.nextTask();
@@ -188,6 +213,7 @@ WpLister.JobRunner = function () {
     
                 self.subtaskQueue = response.subtasks;
                 self.currentSubTask = 0;
+
                 if ( self.subtaskQueue.length > 0 ) {
                     // run first subtask
                     self.runSubTask( self.subtaskQueue[ self.currentSubTask ] );
@@ -397,6 +423,7 @@ WpLister.JobRunner = function () {
         init: init,
         runJob: runJob,
         runTask: runTask,
+        runSubTask: runSubTask,
         nextTask: nextTask,
         completeJob: completeJob,
         updateProgressBar: updateProgressBar,

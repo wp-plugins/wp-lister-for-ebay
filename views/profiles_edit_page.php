@@ -346,7 +346,7 @@
 
 					// flat: local shipping price required
 					var shipping_type = jQuery('.select_shipping_type')[0] ? jQuery('.select_shipping_type')[0].value : 'flat';
-					if ( shipping_type == 'flat' ) || shipping_type == 'FreightFlat' ) || shipping_type == 'FlatDomesticCalculatedInternational' ) {
+					if ( shipping_type == 'flat' || shipping_type == 'FreightFlat' || shipping_type == 'FlatDomesticCalculatedInternational' ) {
 						// if ( jQuery('#loc_shipping_options_table_flat input.price_input')[0].value == '' ) {
 						// 	alert('Please enter a shipping fee.'); return false;
 						// }

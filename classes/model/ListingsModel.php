@@ -1137,9 +1137,13 @@ class ListingsModel extends WPL_Model {
 	}
 
 	public function prepareListings( $ids ) {
+		$listings = array();
 		foreach( $ids as $id ) {
-			$this->prepareProductForListing( $id );
+			if ( $listing_id = $this->prepareProductForListing( $id ) ) {
+				$listings[] = $listing_id;
+			}
 		}
+		return $listings;
 	}
 
 	public function prepareProductForListing( $post_id, $post_content = false, $post_title = false ) {
@@ -1149,6 +1153,9 @@ class ListingsModel extends WPL_Model {
 		$post = get_post( $post_id );
 		$post_title   = $post_title ? $post_title : $post->post_title;
 		$post_content = $post_content ? $post_content : $post->post_content;
+
+		// skip pending products and drafts
+		if ( $post->post_status != 'publish' ) return false;
 
 		// support for qTranslate
 		if ( function_exists('qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage') ) {

@@ -239,20 +239,30 @@ class ListingsTable extends WP_List_Table {
             $listing_title .= $variations_html;
         }
 
+
+        // show warning if backorders are enabled
+        if ( ProductWrapper::plugin == 'woo' ) {
+            $allows_backorders = get_post_meta( $item['post_id'], '_backorders', true );
+            if ( $allows_backorders == 'yes' || $allows_backorders == 'notify' ) {
+                $listing_title .= '<br><span style="color:darkred">This product allows backorders!</span>';
+            }
+        } 
+
+
         // disable some actions depending on status
-        if ( $item['status'] != 'published' ) unset( $actions['end_item'] );
-        if ( $item['status'] != 'prepared' ) unset( $actions['verify'] );
-        if ( $item['status'] != 'changed' ) unset( $actions['revise'] );
+        if ( $item['status'] != 'published' )   unset( $actions['end_item'] );
+        if ( $item['status'] != 'prepared' )    unset( $actions['verify'] );
+        if ( $item['status'] != 'changed' )     unset( $actions['revise'] );
         if (($item['status'] != 'prepared' ) &&
-            ($item['status'] != 'verified')) unset( $actions['publish2e'] );
+            ($item['status'] != 'verified'))    unset( $actions['publish2e'] );
         if (($item['status'] != 'published' ) &&
             ($item['status'] != 'changed') &&
-            ($item['status'] != 'ended')) unset( $actions['open'] );
-        // if ( $item['status'] == 'ended' ) unset( $actions['edit'] );
-        if ( $item['status'] == 'ended' ) unset( $actions['preview_auction'] );
-        if ( $item['status'] != 'ended' ) unset( $actions['delete'] );
-        if ( $item['status'] != 'ended' ) unset( $actions['relist'] );
-        if ( $item['status'] != 'relisted' ) unset( $actions['update'] );
+            ($item['status'] != 'ended'))       unset( $actions['open'] );
+        if ( $item['status'] == 'ended' )       unset( $actions['preview_auction'] );
+        if ( $item['status'] != 'ended' )       unset( $actions['delete'] );
+        if (($item['status'] != 'sold' ) &&
+            ($item['status'] != 'ended'))       unset( $actions['relist'] );
+        if ( $item['status'] != 'relisted' )    unset( $actions['update'] );
 
         //Return the title contents
         //return sprintf('%1$s <span style="color:silver">%2$s</span>%3$s',

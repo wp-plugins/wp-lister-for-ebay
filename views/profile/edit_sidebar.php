@@ -325,6 +325,10 @@
 							</select>
 							<br class="clear" />
 
+							<label for="wpl-text-sort_order" class="text_label"><?php echo __('Sort order','wplister'); ?>:</label>
+							<input type="text" name="wpl_e2e_sort_order" id="wpl-text-sort_order" value="<?php echo @$wpl_item['sort_order']; ?>" class="text_input" />
+							<br class="clear" />
+
 						</div>
 					</div>
 

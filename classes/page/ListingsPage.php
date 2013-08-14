@@ -45,14 +45,19 @@ class ListingsPage extends WPL_Page {
 
 			$listingsModel = new ListingsModel();
 			if ( ProductWrapper::plugin == 'shopp' ) {
-		        $listingsModel->prepareListings( $_REQUEST['selected'] );
+		        $listings = $listingsModel->prepareListings( $_REQUEST['selected'] );
 			} else {
-		        $listingsModel->prepareListings( $_REQUEST['post'] );
+		        $listings = $listingsModel->prepareListings( $_REQUEST['post'] );
 			}
 	        
-	        // redirect to listings page
-			wp_redirect( get_admin_url().'admin.php?page=wplister' );
-			exit();
+			if ( is_array($listings) && ( sizeof($listings) > 0 ) ) {
+	
+		        // redirect to listings page
+				wp_redirect( get_admin_url().'admin.php?page=wplister' );
+				exit();
+
+			}
+
 		}
 
 		if ( $this->requestAction() == 'reselect' ) {

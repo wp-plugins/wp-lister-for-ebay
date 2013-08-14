@@ -8,7 +8,7 @@ class ProductWrapper {
 	const plugin = 'wpec';
 	const post_type = 'wpsc-product';
 	const taxonomy  = 'wpsc_product_category';
-	const menu_page_position = 27;
+	const menu_page_position = '27.42';
 	
 	// get custom post type
 	static function getPostType() {

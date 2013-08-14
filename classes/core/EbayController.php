@@ -330,6 +330,18 @@ class EbayController {
         $tm->updateTransactions( $this->session, $days );
         return $tm;
     }
+    // update ebay orders (deprecated)
+    public function loadEbayOrders( $days = null ){ 
+        $m = new EbayOrdersModel();
+        $m->updateOrders( $this->session, $days );
+        return $m;
+    }
+    // update ebay orders (new)
+    public function updateEbayOrders( $days = false, $order_ids = false ){ 
+        $m = new EbayOrdersModel();
+        $m->updateOrders( $this->session, $days, 1, $order_ids );
+        return $m;
+    }
 
     // update listings
     public function updateListings(){ 

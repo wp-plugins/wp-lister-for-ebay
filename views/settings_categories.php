@@ -57,6 +57,13 @@
 	<?php include_once( dirname(__FILE__).'/settings_tabs.php' ); ?>
 	<?php echo $wpl_message ?>
 
+	<p>
+    	<?php echo __('This is where you can assign eBay categories to your all your WooCommerce product categories.','wplister') ?>
+    </p><p>
+    	<?php echo __('Once you selected a destination category for each local category, you can remove the category settings from your profile and WP-Lister will automatically select the category according to this list.','wplister') ?>
+    	<br>
+    	<?php echo __('In order to access item specifics and custom item conditions in a profile without a primary category it is recommended to select a default category at the bottom of this page.','wplister') ?>
+	</p>
 
 	<form method="post" action="<?php echo $wpl_form_action; ?>">
 		<input type="hidden" name="action" value="save_wplister_categories_map" >

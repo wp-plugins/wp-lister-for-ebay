@@ -96,26 +96,19 @@
 						</div>
 					</div>
 
-					<?php if ( ( ! is_multisite() ) || ( is_main_site() ) ) : ?>
-					<div class="postbox" id="UninstallSettingsBox">
-						<h3 class="hndle"><span><?php echo __('Uninstall on deactivation','wplister') ?></span></h3>
+					<div class="postbox" id="PayPalSettingsBox">
+						<h3 class="hndle"><span><?php echo __('PayPal','wplister') ?></span></h3>
 						<div class="inside">
 
-							<label for="wpl-option-uninstall" class="text_label"><?php echo __('Uninstall','wplister'); ?>:</label>
-							<select id="wpl-option-uninstall" name="wpl_e2e_option_uninstall" title="Uninstall" class=" required-entry select">
-								<option value="0" <?php if ( $wpl_option_uninstall != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
-								<option value="1" <?php if ( $wpl_option_uninstall == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
-							</select>
+							<label for="wpl-text_paypal_email-field" class="text_label"><?php echo __('PayPal account','wplister'); ?>:</label>
+							<input type="text" name="wpl_e2e_text_paypal_email" id="wpl-text_paypal_email-field" value="<?php echo $wpl_text_paypal_email; ?>" class="text_input" />
 							<p class="desc" style="display: block;">
-								<?php echo __('Enable to completely remove listings, transactions and settings when deactivating the plugin.','wplister'); ?><br><br>
-								<?php echo __('To remove your listing templates as well, please delete the folder <code>wp-content/uploads/wp-lister/templates/</code>.','wplister'); ?>
+								<?php echo __('To use PayPal you need to enter your PayPal address.','wplister'); ?>
 							</p>
 
 						</div>
 					</div>
-					<?php endif; ?>
 
-					<?php #include('profile/edit_sidebar.php') ?>
 				</div>
 			</div> <!-- #postbox-container-1 -->
 
@@ -182,6 +175,7 @@
 
 				<form method="post" id="settingsForm" action="<?php echo $wpl_form_action; ?>">
 					<input type="hidden" name="action" value="save_wplister_settings" >
+					<input type="hidden" name="wpl_e2e_text_paypal_email" id="wpl_text_paypal_email" value="<?php echo $wpl_text_paypal_email; ?>" >
 
 					<div class="postbox" id="ConnectionSettingsBox">
 						<h3 class="hndle"><span><?php echo __('eBay settings','wplister') ?></span></h3>
@@ -203,12 +197,6 @@
 								</select>
 							</div>
 
-							<label for="wpl-text-paypal_email" class="text_label"><?php echo __('PayPal Email adress','wplister'); ?>:</label>
-							<input type="text" name="wpl_e2e_text_paypal_email" id="wpl-text-paypal_email" value="<?php echo $wpl_text_paypal_email; ?>" class="text_input" />
-							<p class="desc" style="display: none;">
-								<?php echo __('To use PayPal you need to enter your PayPal adress.','wplister'); ?>
-							</p>
-
 						</div>
 					</div>
 
@@ -228,68 +216,19 @@
 							</select>
 
 
-						</div>
-					</div>
-
-					<div class="postbox" id="TemplateSettingsBox">
-						<h3 class="hndle"><span><?php echo __('Listing Templates','wplister') ?></span></h3>
-						<div class="inside">
-
-							<label for="wpl-process_shortcodes" class="text_label"><?php echo __('Shortcode processing','wplister'); ?>:</label>
-							<select id="wpl-process_shortcodes" name="wpl_e2e_process_shortcodes" title="Uninstall" class=" required-entry select">
-								<option value="off"     <?php if ( $wpl_process_shortcodes == 'off' ): ?>selected="selected"<?php endif; ?>><?php echo __('off','wplister'); ?></option>
-								<option value="content" <?php if ( $wpl_process_shortcodes == 'content' ): ?>selected="selected"<?php endif; ?>><?php echo __('only in product description','wplister'); ?></option>
-								<option value="full"    <?php if ( $wpl_process_shortcodes == 'full' ): ?>selected="selected"<?php endif; ?>><?php echo __('in description and listing template','wplister'); ?></option>
+							<label for="wpl-option-ebay_update_mode" class="text_label"><?php echo __('Update mode','wplister') ?></label>
+							<select id="wpl-option-ebay_update_mode" name="wpl_e2e_option_ebay_update_mode" title="Update mode" class=" required-entry select">
+								<option value="transaction" <?php if ( $wpl_option_ebay_update_mode == 'transaction' ): ?>selected="selected"<?php endif; ?>><?php echo __('Transaction','wplister'); ?> (default)</option>
+								<option value="order"       <?php if ( $wpl_option_ebay_update_mode == 'order'       ): ?>selected="selected"<?php endif; ?>><?php echo __('Order','wplister'); ?> (beta)</option>
 							</select>
 							<p class="desc" style="display: block;">
-								<?php echo __('Enable this if you want to use WordPress shortcodes in your product description or your listing template.','wplister'); ?><br>
-							</p>
-
-							<label for="wpl-remove_links" class="text_label"><?php echo __('Link handling','wplister'); ?>:</label>
-							<select id="wpl-remove_links" name="wpl_e2e_remove_links" title="Uninstall" class=" required-entry select">
-								<option value="default"   <?php if ( $wpl_remove_links == 'default'   ): ?>selected="selected"<?php endif; ?>><?php echo __('remove all links from description','wplister'); ?></option>
-								<option value="allow_all" <?php if ( $wpl_remove_links == 'allow_all' ): ?>selected="selected"<?php endif; ?>><?php echo __('allow all links','wplister'); ?></option>
-							</select>
-							<p class="desc" style="display: block;">
-								<?php echo __('WP-Lister does remove links from product descrptions by default to avoid violating the eBay Links policy.','wplister'); ?>
-								<?php echo __('Specifically you are not allowed to advertise products that you list on eBay by linking to their product pages on your site.','wplister'); ?>
-								Read more about eBay's Link policy <a href="http://pages.ebay.com/help/policies/listing-links.html" target="_blank">here</a>
-							</p>
-
-							<label for="wpl-default_image_size" class="text_label"><?php echo __('Default image size','wplister'); ?>:</label>
-							<select id="wpl-default_image_size" name="wpl_e2e_default_image_size" title="Uninstall" class=" required-entry select">
-								<option value="full"    <?php if ( $wpl_default_image_size == 'full'   ): ?>selected="selected"<?php endif; ?>><?php echo __('full','wplister'); ?></option>
-								<option value="large"   <?php if ( $wpl_default_image_size == 'large'  ): ?>selected="selected"<?php endif; ?>><?php echo __('large','wplister'); ?></option>
-							</select>
-
-							<label for="wpl-wc2_gallery_fallback" class="text_label"><?php echo __('Product Gallery','wplister'); ?>:</label>
-							<select id="wpl-wc2_gallery_fallback" name="wpl_e2e_wc2_gallery_fallback" title="Uninstall" class=" required-entry select">
-								<option value="attached" <?php if ( $wpl_wc2_gallery_fallback == 'attached' ): ?>selected="selected"<?php endif; ?>><?php echo __('use attached images if no Gallery found','wplister'); ?></option>
-								<option value="none"     <?php if ( $wpl_wc2_gallery_fallback == 'none'     ): ?>selected="selected"<?php endif; ?>><?php echo __('no fallback','wplister'); ?></option>
-							</select>
-							<p class="desc" style="display: block;">
-								<?php echo __('If you find unwanted images in your listings try disabling this option.','wplister'); ?>
+								Set this to "Order" to enable the new order processing and disable the old transaction processing mode.<br>
 							</p>
 
 						</div>
 					</div>
 
-					<div class="postbox" id="OtherSettingsBox">
-						<h3 class="hndle"><span><?php echo __('Misc options','wplister') ?></span></h3>
-						<div class="inside">
 
-							<label for="wpl-hide_dupe_msg" class="text_label"><?php echo __('Hide duplicates warning','wplister'); ?>:</label>
-							<select id="wpl-hide_dupe_msg" name="wpl_e2e_hide_dupe_msg" title="Uninstall" class=" required-entry select">
-								<option value=""  <?php if ( $wpl_hide_dupe_msg == ''  ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
-								<option value="1" <?php if ( $wpl_hide_dupe_msg == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes, I know what I am doing.','wplister'); ?></option>
-							</select>
-							<p class="desc" style="display: block;">
-								<?php echo __('If you do not plan to use the inventory sync feature, you can safely list one product multiple times.','wplister'); ?>
-							</p>
-
-
-						</div>
-					</div>
 
 
 				</form>
@@ -351,6 +290,10 @@
 
 				// save changes button
 				jQuery('#save_settings').click( function() {					
+
+					// handle input fields outside of form
+					var paypal_address = jQuery('#wpl-text_paypal_email-field').first().attr('value');
+					jQuery('#wpl_text_paypal_email').attr('value', paypal_address );
 
 					jQuery('#settingsForm').first().submit();
 					

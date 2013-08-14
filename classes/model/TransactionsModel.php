@@ -562,6 +562,14 @@ class TransactionsModel extends WPL_Model {
 			ORDER BY LastTimeModified DESC LIMIT 1
 		" );
 	}
+	function getDateOfLastCreatedTransaction() {
+		global $wpdb;
+		return $wpdb->get_var( "
+			SELECT date_created
+			FROM $this->tablename
+			ORDER BY date_created DESC LIMIT 1
+		" );
+	}
 
 	function deleteItem( $id ) {
 		global $wpdb;
