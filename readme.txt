@@ -89,10 +89,10 @@ Already working on it. Expect it this summer.
 2. Profile Editor
 
 == Changelog ==
-= 1.2.5
+= 1.2.5 =
 * minor cosmetic improvements
 
-= 1.2.4.7
+= 1.2.4.7 =
 * added custom sort order for profiles
 * display profiles ordered by profile name by default
 * changed "link to ebay" behavior to "only if there are bids on eBay or the auction ends within 12 hours"
@@ -100,30 +100,30 @@ Already working on it. Expect it this summer.
 * show image URL when upload to EPS failed
 * changed menu position to decimal to prevent colliding position ids
 
-= 1.2.4.6
+= 1.2.4.6 =
 * compatibility update for Import from eBay 1.3.16
 * added note and link to ebay for products which were imported from ebay
 
-= 1.2.4.5
+= 1.2.4.5 =
 * added validation for shipping services on product page
 * fixed missing validation for shipping services on profile page
 * fixed issue when disabling shipping service type on product level
 
-= 1.2.4.4
+= 1.2.4.4 =
 * added global option to allow backorders (off by default)
 * show warning if backorders are enabled on a product
 * fixed issue with attribute names containing an apostrophe
 
-= 1.2.4.3
+= 1.2.4.3 =
 * fixed paypal addess not being stored when updating settings
 * fixed order complete status (if new update was was enabled)
 * added description on categories settings page
 
-= 1.2.4.2
+= 1.2.4.2 =
 * fixed issue when preparing new listings
 * prevent importing an order for an already imported transaction
 
-= 1.2.4.1
+= 1.2.4.1 =
 * new update mode to process multiple line item orders instead of single transactions
 * added advanced settings tab and cleaned out general settings
 * skip pending products and drafts when preparing listings

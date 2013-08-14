@@ -252,6 +252,7 @@ class ProductWrapper {
 	// get all product variations
 	static function getVariations( $post_id ) {
 		global $woocommerce;
+		global $product; // make $product globally available for some badly coded themes...		
 
 		$product = self::getProduct( $post_id );
 		$available_variations = $product->get_available_variations();
