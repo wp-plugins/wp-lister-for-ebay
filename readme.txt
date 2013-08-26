@@ -89,6 +89,32 @@ Already working on it. Expect it this summer.
 2. Profile Editor
 
 == Changelog ==
+= 1.2.6.1 =
+* added tooltips to shipping options table headers 
+* added warning symbols for fixed quantity and backorders if inventory sync is enabled 
+* fixed issue when category mapping lead to the primary and secondary category being the same 
+* reset invalid token status when check for token expiry time succeeds 
+* minor visual alignment improvements 
+
+= 1.2.6 =
+* added tooltips to all settings and profile options 
+* dynamically hide some profile options when not applicable
+* increased range for [add_img_1] short code to 1-12 
+* hide empty log records by default 
+
+= 1.2.5.2 =
+* fixed issue when uploading variation images to EPS 
+* fixed default sort order on transactions and orders page 
+* added warning if more than 5 shipping services are selected when editing a profile 
+* added WC order notes to order details view 
+
+= 1.2.5.1 =
+* omit title and subtitle when revising an item that ends within 12 hours or has sales 
+* new connection check tool to test outgoing connections 
+* added check if PHP safe_mode is enabled 
+* fixed shipping options on product level 
+* fixed issue with variations for themes like Frenzy which hook into WC without proper data validation 
+
 = 1.2.5 =
 * minor cosmetic improvements
 
