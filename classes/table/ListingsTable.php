@@ -240,15 +240,6 @@ class ListingsTable extends WP_List_Table {
         }
 
 
-        // show warning if backorders are enabled
-        if ( ProductWrapper::plugin == 'woo' ) {
-            $allows_backorders = get_post_meta( $item['post_id'], '_backorders', true );
-            if ( $allows_backorders == 'yes' || $allows_backorders == 'notify' ) {
-                $listing_title .= '<br><span style="color:darkred">This product allows backorders!</span>';
-            }
-        } 
-
-
         // disable some actions depending on status
         if ( $item['status'] != 'published' )   unset( $actions['end_item'] );
         if ( $item['status'] != 'prepared' )    unset( $actions['verify'] );
@@ -287,20 +278,36 @@ class ListingsTable extends WP_List_Table {
             /*$1%s*/ $item['ebay_id'],
             /*$2%s*/ $this->row_actions($actions)
         );
+    }
+      
+    function column_quantity($item){
+
+        // get profile details
+        $profile_data = maybe_unserialize( $item['profile_data'] );
+
+        $quantity = $this->calculate_quantity( $item, $profile_data );
+        $message = '';
+
+
+        if ( $message ) $quantity .= '&nbsp;'.$message;
+
+        return $quantity;
 	}
 	  
-    function column_quantity($item){
+    function calculate_quantity( $item ) {
         
         // use profile quantity for flattened variations
-        $profile_data = maybe_unserialize( $item['profile_data'] );
+        // $profile_data = maybe_unserialize( $item['profile_data'] );
         if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
 
             if ( $item['quantity_sold'] > 0 ) {
                 $qty_available = $item['quantity'] - $item['quantity_sold'];
-                return $qty_available . ' / ' . $item['quantity'];
+                $quantity = $qty_available . ' / ' . $item['quantity'];
+            } else {
+                $quantity = $item['quantity']; 
             }
 
-            return $item['quantity']; 
+            return $quantity;
         }
 
 

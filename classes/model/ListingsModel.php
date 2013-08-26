@@ -302,6 +302,18 @@ class ListingsModel extends WPL_Model {
         return $with_additional_images;
 	}
 
+	function isUsingVariationImages( $id ) {
+		$this->logger->info( "isUsingVariationImages( $id ) " );
+
+		$listing_item = $this->getItem( $id );
+		$profile_details = $listing_item['profile_data']['details'];
+
+        $with_variation_images = isset( $profile_details['with_variation_images'] ) ? $profile_details['with_variation_images'] : false;
+        if ( $with_variation_images == '0' ) $with_variation_images = false;
+
+        return $with_variation_images;
+	}
+
 
 	
 	function listingUsesFixedPriceItem( $listing_item )

@@ -731,10 +731,16 @@ class EbayController {
         $res = $this->sp->GetTokenStatus($req);
 
         $expdate = $res->TokenStatus->ExpirationTime;
-        $expdate = str_replace('T', ' ', $expdate);
-        $expdate = str_replace('.000Z', '', $expdate);
 
-        update_option('wplister_ebay_token_expirationtime', $expdate);
+        if ( $expdate ) {
+
+            $expdate = str_replace('T', ' ', $expdate);
+            $expdate = str_replace('.000Z', '', $expdate);
+
+            update_option( 'wplister_ebay_token_expirationtime', $expdate );
+            update_option( 'wplister_ebay_token_is_invalid', false );
+
+        }
 
         // handle result
         return ( $expdate );

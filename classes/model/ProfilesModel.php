@@ -92,8 +92,7 @@ class ProfilesModel extends WPL_Model {
 			"title_prefix" => "",
 			"title_suffix" => "",
 			"vat_percent" => "",
-			"with_gallery_image" => "1",
-			"with_image" => "1"
+			"with_gallery_image" => "1"
 
 		);
 

@@ -274,9 +274,9 @@ class TemplatesModel extends WPL_Model {
 		// [[product_main_image_url]]
 		$tpl_html = str_replace( '[[product_main_image_url]]', $main_image, $tpl_html );
 		
-		// handle [[add_img_1]] to [[add_img_9]]
-		// and [[add_img_url_1]] to [[add_img_url_9]]
-		for ($i=0; $i < 9; $i++) { 
+		// handle [[add_img_1]] to [[add_img_12]]
+		// and [[add_img_url_1]] to [[add_img_url_12]]
+		for ($i=0; $i < 12; $i++) { 
 			
 			if ( isset( $images[ $i ] ) ) {
 				$img_url = $images[ $i ];

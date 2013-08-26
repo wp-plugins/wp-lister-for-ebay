@@ -356,7 +356,8 @@ class LogTable extends WP_List_Table {
         $offset = ( $current_page - 1 ) * $per_page;
 
         // handle filters
-        $where_sql = ' WHERE 1 = 1 ';
+        // $where_sql = ' WHERE 1 = 1 ';
+        $where_sql = " WHERE NOT callname = '' ";
 
         // views
         if ( isset( $_REQUEST['log_status'] ) ) {

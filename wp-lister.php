@@ -3,7 +3,7 @@
 Plugin Name: WP-Lister for eBay
 Plugin URI: http://www.wplab.com/plugins/wp-lister/
 Description: List your products on eBay the easy way.
-Version: 1.2.5
+Version: 1.2.6
 Author: Matthias Krok
 Author URI: http://www.wplab.com/ 
 Max WP Version: 3.6
@@ -13,7 +13,7 @@ License: GPL2+
 
 
 // include base classes
-define('WPLISTER_VERSION', '1.2.5' );
+define('WPLISTER_VERSION', '1.2.6' );
 define('WPLISTER_PATH', realpath( dirname(__FILE__) ) );
 define('WPLISTER_URL', plugins_url() . '/' . basename(dirname(__FILE__)) . '/' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Autoloader.php' );
@@ -27,6 +27,7 @@ require_once( WPLISTER_PATH . '/classes/core/WPL_AjaxHandler.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Setup.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Install_Uninstall.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Toolbar.php' );
+require_once( WPLISTER_PATH . '/classes/core/WPL_Functions.php' );
 require_once( WPLISTER_PATH . '/classes/core/EbayController.php' );
 
 // set up autoloader
@@ -155,6 +156,10 @@ class WPL_WPLister extends WPL_BasePlugin {
                 wp_dequeue_script( $script->handle );
             }
         }
+
+        // enqueue tipTip.js 
+        wp_register_script( 'jquery-tiptip', WPLISTER_URL . '/js/jquery-tiptip/jquery.tipTip.min.js', array( 'jquery' ), WPLISTER_VERSION, true );
+        wp_enqueue_script( 'jquery-tiptip' );
 
 	}
 	

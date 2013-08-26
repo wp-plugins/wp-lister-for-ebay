@@ -6,6 +6,9 @@ class WPL_Setup extends WPL_Core {
 	public function checkSetup( $page = false ) {
 		global $pagenow;
 
+		// check if safe mode is enabled
+		self::isPhpSafeMode();
+
 		// check if cURL is loaded
 		if ( ! self::isCurlLoaded() ) return false;
 
@@ -719,6 +722,23 @@ class WPL_Setup extends WPL_Core {
 				<br>
 				WP-Lister currently only supports unixoid operating systems like Linux, FreeBSD and OS X.<br>
 				Support for windows servers is still experimental and should not be used on production sites!
+			");
+			return true;
+		}
+
+		return false;
+	}
+
+	// check if PHP safe_mode is enabled
+	public function isPhpSafeMode() {
+
+        if ( ini_get('safe_mode') ) {
+
+			$this->showMessage("
+				<b>Warning: PHP safe mode is enabled.</b><br>
+				<br>
+				Your server seems to have PHP safe mode enabled, which can cause unexpected behaviour or prevent WP-Lister from working properly.<br>
+				PHP safe mode has been deprecated for years and will be completely removed in the next PHP version - so it is highly recommended to disable it or ask your hoster to do it for you.
 			");
 			return true;
 		}

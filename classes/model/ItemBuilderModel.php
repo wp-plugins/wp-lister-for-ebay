@@ -41,6 +41,8 @@ class ItemBuilderModel extends WPL_Model {
 		$product_sku     = ProductWrapper::getSKU( $post_id );
 		if ( trim($product_sku) == '' ) $product_sku = false;
 
+		// adjust profile details from product level options
+		$profile_details = $this->adjustProfileDetails( $id, $post_id, $profile_details );
 
 		// price has been calculated when applying the profile
 		$start_price  = $p['price'];
@@ -273,7 +275,7 @@ class ItemBuilderModel extends WPL_Model {
 				$item = $this->flattenVariations( $id, $item, $profile_details );	
 			} else {
 				// default: list as variations
-				$item = $this->buildVariations( $id, $item, $profile_details );	
+				$item = $this->buildVariations( $id, $item, $profile_details, $session );	
 			}
 		}
 	
@@ -283,10 +285,43 @@ class ItemBuilderModel extends WPL_Model {
 		// Set the Item Description
 		$item->Description = $this->getFinalHTML( $id );
 
+		// adjust item if this is a ReviseItem request
+		if ( $reviseItem ) {
+			$item = $this->adjustItemForRevision( $id, $item, $post_id, $profile_details, $p );			
+		}
 	
 		return $item;
 
 	} /* end of buildItem() */
+
+	// adjust item for ReviseItem request
+	public function adjustItemForRevision( $id, $item, $post_id, $profile_details, $p ) {
+
+		// check if title should be omitted:
+		// The title or subtitle cannot be changed if an auction-style listing has a bid or ends within 12 hours, 
+		// or a fixed price listing has a sale or a pending Best Offer.
+		if ( 'Chinese' == $p['auction_type'] ) {
+
+			// auction listing
+			$hours_left = ( strtotime($p['end_date']) - gmdate('U') ) / 3600;
+			if ( $hours_left < 12 ) {
+				$item->setTitle( null );
+				$item->setSubTitle( null );
+			}
+
+		} else {
+
+			// fixed price listing
+			if ( $p['quantity_sold'] > 0 ) {
+				$item->setTitle( null );
+				$item->setSubTitle( null );
+			}
+
+		}
+
+		return $item;
+
+	} /* end of adjustItemForRevision() */
 
 	public function buildCategories( $id, $item, $post_id, $profile_details ) {
 
@@ -337,7 +372,7 @@ class ItemBuilderModel extends WPL_Model {
 				$item->PrimaryCategory->CategoryID = $primary_category_id;
             }
 
-            if ( intval( $secondary_category_id ) > 0 ) {
+            if ( ( intval( $secondary_category_id ) > 0 ) && ( $secondary_category_id != $primary_category_id ) ) {
 				$item->SecondaryCategory = new CategoryType();
 				$item->SecondaryCategory->CategoryID = $secondary_category_id;
             }
@@ -347,8 +382,8 @@ class ItemBuilderModel extends WPL_Model {
 		// optional secondary category
 		$ebay_category_2_id = get_post_meta( $post_id, '_ebay_category_2_id', true );
 		if ( intval( $ebay_category_2_id ) > 0 ) {
-			$item->PrimaryCategory = new CategoryType();
-			$item->PrimaryCategory->CategoryID = $ebay_category_2_id;
+			$item->SecondaryCategory = new CategoryType();
+			$item->SecondaryCategory->CategoryID = $ebay_category_2_id;
 		} elseif ( intval($profile_details['ebay_category_2_id']) > 0 ) {
 			$item->SecondaryCategory = new CategoryType();
 			$item->SecondaryCategory->CategoryID = $profile_details['ebay_category_2_id'];
@@ -423,7 +458,8 @@ class ItemBuilderModel extends WPL_Model {
 	} /* end of buildCategories() */
 
 
-	public function buildShipping( $id, $item, $post_id, $profile_details ) {
+	// adjust profile details from product level options
+	public function adjustProfileDetails( $id, $post_id, $profile_details ) {
 
 		// check for custom product level shipping options
 		$product_shipping_service_type = get_post_meta( $post_id, '_ebay_shipping_service_type', true );
@@ -434,6 +470,13 @@ class ItemBuilderModel extends WPL_Model {
 			$profile_details['PackagingHandlingCosts']              = get_post_meta( $post_id, '_ebay_PackagingHandlingCosts', true );
 			$profile_details['InternationalPackagingHandlingCosts'] = get_post_meta( $post_id, '_ebay_InternationalPackagingHandlingCosts', true );
 		}
+
+		return $profile_details;
+
+	} /* end of adjustProfileDetails() */
+
+
+	public function buildShipping( $id, $item, $post_id, $profile_details ) {
 
 		// handle flat and calc shipping
 		$this->logger->info('shipping_service_type: '.$profile_details['shipping_service_type'] );
@@ -688,7 +731,7 @@ class ItemBuilderModel extends WPL_Model {
 
 	} /* end of buildItemSpecifics() */
 
-	public function buildVariations( $id, $item, $profile_details ) {
+	public function buildVariations( $id, $item, $profile_details, $session ) {
 
 		// build variations
 		$item->Variations = new VariationsType();
@@ -781,9 +824,15 @@ class ItemBuilderModel extends WPL_Model {
         	$VariationValue = $var['variation_attributes'][$VariationNameForPictures];
 
         	if ( in_array( $VariationValue, $VariationValuesForPictures ) ) {
+
+    			// upload image
+    			$image_url = $this->lm->uploadPictureToEPS( $var['image'], $id, $session );
+				if ( ! $image_url ) continue;
+				$this->logger->info( "using variation image: ".$image_url );
+
 		    	$VariationSpecificPictureSet = new VariationSpecificPictureSetType();
     	    	$VariationSpecificPictureSet->setVariationSpecificValue( $VariationValue );
-        		$VariationSpecificPictureSet->addPictureURL( $this->encodeUrl( $var['image'] ) );
+        		$VariationSpecificPictureSet->addPictureURL( $this->encodeUrl( $image_url ) );
 
 		        // only list variation images if enabled
         		if ( @$profile_details['with_variation_images'] != '0' ) {
@@ -878,6 +927,27 @@ class ItemBuilderModel extends WPL_Model {
 		</Variations>
 		*/
 
+	}
+
+	public function getVariationImages( $post_id ) {
+
+		// check if product has variations
+        if ( ! ProductWrapper::hasVariations( $post_id ) ) return array();
+
+		// get variations
+        $variations = ProductWrapper::getVariations( $post_id );
+        $variation_images = array();
+
+        foreach ( $variations as $var ) {
+
+        	if ( ! in_array( $var['image'], $variation_images ) ) {
+        		$variation_images[] = $this->removeHttpsFromUrl( $var['image'] );
+        	}
+
+        }
+		$this->logger->info("variation images: ".print_r($variation_images,1));
+
+        return $variation_images;
 	}
 
 

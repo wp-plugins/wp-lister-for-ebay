@@ -47,9 +47,14 @@
 						<div class="inside">
 
 							<div style="position:relative; margin: 0 5px;">
-								<label for="wpl-text-ebay_category_1_name" class="text_label"><?php echo __('Category','wplister'); ?> 1: <?php echo WPLISTER_LIGHT ? '*' : '' ?></label>
+								<label for="wpl-text-ebay_category_1_name" class="text_label">
+									<?php echo __('Primary eBay category','wplister'); ?> <?php echo WPLISTER_LIGHT ? '*' : '' ?>
+	                                <?php wplister_tooltip('Select the first (or only) category in which the item will be listed.<br><br>
+	                                						A number of listing features like available item conditions and item specifics depend on the primary category.<br><br>
+	                                						You can leave this empty if you assigned a primary eBay category to your local WooCommerce categories at WP-Lister &raquo; Settings &raquo; Categories. (Pro only)') ?>
+								</label>
 								<input type="hidden" name="wpl_e2e_ebay_category_1_id" id="ebay_category_id_1" value="<?php echo $item_details['ebay_category_1_id']; ?>" class="" />
-								<span  id="ebay_category_name_1" class="text_input" style="width:45%;float:left;"><?php echo $item_details['ebay_category_1_name']; ?></span>
+								<span  id="ebay_category_name_1" class="text_input" style="width:45%;float:left;line-height:2em;"><?php echo $item_details['ebay_category_1_name']; ?></span>
 								<div class="category_row_actions">
 									<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_ebay_category" onclick="">
 									<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_ebay_category" onclick="">
@@ -57,9 +62,13 @@
 							</div>
 							
 							<div style="position:relative; margin: 0 5px; clear:both">
-								<label for="wpl-text-ebay_category_2_name" class="text_label"><?php echo __('Category','wplister'); ?> 2:</label>
+								<label for="wpl-text-ebay_category_2_name" class="text_label">
+									<?php echo __('Secondary eBay category','wplister'); ?>
+	                                <?php wplister_tooltip('On the eBay UK, Ireland, Germany, Austria, Switzerland, and Italy sites you can list Store Inventory listings in two categories. On the eBay US and other sites, you cannot list Store Inventory listings in two categories.<br><br>
+	                                						You cannot list US eBay Motors vehicles in two categories. However, you can list Parts & Accessories in two categories. The Final Value Fee is based on the primary category in which the item is listed.') ?>
+								</label>
 								<input type="hidden" name="wpl_e2e_ebay_category_2_id" id="ebay_category_id_2" value="<?php echo $item_details['ebay_category_2_id']; ?>" class="" />
-								<span  id="ebay_category_name_2" class="text_input" style="width:45%;float:left;"><?php echo $item_details['ebay_category_2_name']; ?></span>
+								<span  id="ebay_category_name_2" class="text_input" style="width:45%;float:left;line-height:2em;"><?php echo $item_details['ebay_category_2_name']; ?></span>
 								<div class="category_row_actions">
 									<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_ebay_category" onclick="">
 									<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_ebay_category" onclick="">
@@ -81,9 +90,13 @@
 						<div class="inside">
 
 							<div style="position:relative; margin: 0 5px;">
-								<label for="wpl-text-store_category_1_name" class="text_label"><?php echo __('Store category','wplister'); ?> 1:</label>
+								<label for="wpl-text-store_category_1_name" class="text_label">
+									<?php echo __('Store category','wplister'); ?> 1
+                                	<?php wplister_tooltip('<b>Store category</b><br>A custom category that the seller created in their eBay Store.<br><br>
+                                							eBay Stores sellers can create up to three levels of custom categories for their stores. Items can only be listed in root categories, or categories that have no child categories (subcategories).') ?>
+								</label>
 								<input type="hidden" name="wpl_e2e_store_category_1_id" id="store_category_id_1" value="<?php echo $item_details['store_category_1_id']; ?>" class="" />
-								<span  id="store_category_name_1" class="text_input" style="width:45%;float:left;"><?php echo $item_details['store_category_1_name']; ?></span>
+								<span  id="store_category_name_1" class="text_input" style="width:45%;float:left;line-height:2em;"><?php echo $item_details['store_category_1_name']; ?></span>
 								<div class="category_row_actions">
 									<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_store_category" onclick="">
 									<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_store_category" onclick="">
@@ -91,9 +104,13 @@
 							</div>
 							
 							<div style="position:relative; margin: 0 5px; clear:both">
-								<label for="wpl-text-store_category_2_name" class="text_label"><?php echo __('Store category','wplister'); ?> 2:</label>
+								<label for="wpl-text-store_category_2_name" class="text_label">
+									<?php echo __('Store category','wplister'); ?> 2
+                                	<?php wplister_tooltip('<b>Store category</b><br>A custom category that the seller created in their eBay Store.<br><br>
+                                							eBay Stores sellers can create up to three levels of custom categories for their stores. Items can only be listed in root categories, or categories that have no child categories (subcategories).') ?>
+								</label>
 								<input type="hidden" name="wpl_e2e_store_category_2_id" id="store_category_id_2" value="<?php echo $item_details['store_category_2_id']; ?>" class="" />
-								<span  id="store_category_name_2" class="text_input" style="width:45%;float:left;"><?php echo $item_details['store_category_2_name']; ?></span>
+								<span  id="store_category_name_2" class="text_input" style="width:45%;float:left;line-height:2em;"><?php echo $item_details['store_category_2_name']; ?></span>
 								<div class="category_row_actions">
 									<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_store_category" onclick="">
 									<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_store_category" onclick="">

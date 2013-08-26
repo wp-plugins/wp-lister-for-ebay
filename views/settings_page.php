@@ -129,7 +129,7 @@
 									<li>
 										<form id="frmSetEbaySite" method="post" action="<?php echo $wpl_form_action; ?>">
 											<input type="hidden" name="action" value="save_ebay_site" >
-											<select id="wpl-text-ebay_site_id" name="wpl_e2e_text_ebay_site_id" title="Site" class="required-entry select" style="width:auto;float: right">
+											<select id="wpl-text-ebay_site_id" name="wpl_e2e_text_ebay_site_id" class="required-entry select" style="width:auto;float: right">
 												<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 												<?php foreach ($wpl_ebay_sites as $site_id => $site_name) : ?>
 													<option value="<?php echo $site_id ?>" <?php if ( $wpl_text_ebay_site_id == $site_id ): ?>selected="selected"<?php endif; ?>><?php echo $site_name ?></option>					
@@ -182,7 +182,7 @@
 						<div class="inside">
 
 							<label for="wpl-text-ebay_site_id" class="text_label"><?php echo __('eBay site','wplister'); ?>:</label>
-							<select id="wpl-text-ebay_site_id" name="wpl_e2e_text_ebay_site_id" title="Site" class=" required-entry select">
+							<select id="wpl-text-ebay_site_id" name="wpl_e2e_text_ebay_site_id" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 								<?php foreach ($wpl_ebay_sites as $site_id => $site_name) : ?>
 									<option value="<?php echo $site_id ?>" <?php if ( $wpl_text_ebay_site_id == $site_id ): ?>selected="selected"<?php endif; ?>><?php echo $site_name ?></option>					
@@ -191,7 +191,7 @@
 
 							<div id="wrap_enable_ebay_motors" style="<?php echo $wpl_text_ebay_site_id != 0 ? 'display:none' : '' ?>">
 								<label for="wpl-option-enable_ebay_motors" class="text_label"><?php echo __('Include eBay Motors','wplister') ?></label>
-								<select id="wpl-option-enable_ebay_motors" name="wpl_e2e_option_enable_ebay_motors" title="Handle stock" class=" required-entry select">
+								<select id="wpl-option-enable_ebay_motors" name="wpl_e2e_option_enable_ebay_motors" class=" required-entry select">
 									<option value="1" <?php if ( $wpl_option_enable_ebay_motors == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 									<option value="0" <?php if ( $wpl_option_enable_ebay_motors != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 								</select>
@@ -208,16 +208,22 @@
 						<div class="inside">
 							<p><?php echo __('Enable to update listings and transactions using WP-Cron.','wplister'); ?></p>
 
-							<label for="wpl-option-cron_auctions" class="text_label"><?php echo __('Update transactions','wplister') ?></label>
-							<select id="wpl-option-cron_auctions" name="wpl_e2e_option_cron_auctions" title="Updates" class=" required-entry select">
+							<label for="wpl-option-cron_auctions" class="text_label">
+								<?php echo __('Update interval','wplister') ?>
+                                <?php wplister_tooltip('Select how often WP-Lister should check for new sales on eBay.') ?>
+							</label>
+							<select id="wpl-option-cron_auctions" name="wpl_e2e_option_cron_auctions" class=" required-entry select">
 								<option value="" <?php if ( $wpl_option_cron_auctions == '' ): ?>selected="selected"<?php endif; ?>><?php echo __('manually','wplister') ?></option>
 								<option value="hourly" <?php if ( $wpl_option_cron_auctions == 'hourly' ): ?>selected="selected"<?php endif; ?>><?php echo __('hourly','wplister') ?></option>
 								<option value="daily" <?php if ( $wpl_option_cron_auctions == 'daily' ): ?>selected="selected"<?php endif; ?>><?php echo __('daily','wplister') ?></option>
 							</select>
 
 
-							<label for="wpl-option-ebay_update_mode" class="text_label"><?php echo __('Update mode','wplister') ?></label>
-							<select id="wpl-option-ebay_update_mode" name="wpl_e2e_option_ebay_update_mode" title="Update mode" class=" required-entry select">
+							<label for="wpl-option-ebay_update_mode" class="text_label">
+								<?php echo __('Update mode','wplister') ?>
+                                <?php wplister_tooltip('Set this to "Order" if you want to create a single WooCommerce order from a combined order on eBay. This is a transitory option which will be removed in future versions.') ?>
+							</label>
+							<select id="wpl-option-ebay_update_mode" name="wpl_e2e_option_ebay_update_mode" class=" required-entry select">
 								<option value="transaction" <?php if ( $wpl_option_ebay_update_mode == 'transaction' ): ?>selected="selected"<?php endif; ?>><?php echo __('Transaction','wplister'); ?> (default)</option>
 								<option value="order"       <?php if ( $wpl_option_ebay_update_mode == 'order'       ): ?>selected="selected"<?php endif; ?>><?php echo __('Order','wplister'); ?> (beta)</option>
 							</select>

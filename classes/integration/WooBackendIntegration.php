@@ -520,6 +520,9 @@ class WpLister_Product_MetaBox {
             #wplister-ebay-advanced input { 
             	width:74%; 
             }
+            #wplister-ebay-advanced input.checkbox { 
+            	width:auto; 
+            }
             #wplister-ebay-advanced .description { 
             	clear: both;
             	margin-left: 25%;
@@ -642,7 +645,7 @@ class WpLister_Product_MetaBox {
 		<div style="position:relative; margin: 0 5px;">
 			<label for="wpl-text-ebay_category_1_name" class="text_label"><?php echo __('Primary eBay category','wplister'); ?></label>
 			<input type="hidden" name="wpl_ebay_category_1_id" id="ebay_category_id_1" value="<?php echo $ebay_category_1_id ?>" class="" />
-			<span  id="ebay_category_name_1" class="text_input" style="width:45%;float:left;"><?php echo $ebay_category_1_name ?></span>
+			<span  id="ebay_category_name_1" class="text_input" style="width:45%;float:left;line-height:2em;"><?php echo $ebay_category_1_name ?></span>
 			<div class="category_row_actions">
 				<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_ebay_category" onclick="">
 				<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_ebay_category" onclick="">
@@ -652,7 +655,7 @@ class WpLister_Product_MetaBox {
 		<div style="position:relative; margin: 0 5px;">
 			<label for="wpl-text-ebay_category_2_name" class="text_label"><?php echo __('Secondary eBay category','wplister'); ?></label>
 			<input type="hidden" name="wpl_ebay_category_2_id" id="ebay_category_id_2" value="<?php echo $ebay_category_2_id ?>" class="" />
-			<span  id="ebay_category_name_2" class="text_input" style="width:45%;float:left;"><?php echo $ebay_category_2_name ?></span>
+			<span  id="ebay_category_name_2" class="text_input" style="width:45%;float:left;line-height:2em;"><?php echo $ebay_category_2_name ?></span>
 			<div class="category_row_actions">
 				<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_ebay_category" onclick="">
 				<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_ebay_category" onclick="">

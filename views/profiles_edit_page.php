@@ -54,16 +54,22 @@
 
 							<div id="titlediv" style="margin-bottom:5px;">
 								<div id="titlewrap">
-									<label for="wpl-text-profile_description" class="text_label"><?php echo __('Profile name','wplister'); ?>: *</label>
+									<label for="wpl-text-profile_description" class="text_label"><?php echo __('Profile name','wplister'); ?> *</label>
 									<input type="text" name="wpl_e2e_profile_name" size="30" value="<?php echo $wpl_item['profile_name']; ?>" id="title" autocomplete="off" style="width:65%;">
 								</div>
 							</div>
 
-							<label for="wpl-text-profile_description" class="text_label"><?php echo __('Profile description','wplister'); ?>:</label>
+							<label for="wpl-text-profile_description" class="text_label">
+								<?php echo __('Profile description','wplister'); ?>
+                                <?php wplister_tooltip('A profile description is optional and only used within WP-Lister.') ?>
+							</label>
 							<input type="text" name="wpl_e2e_profile_description" id="wpl-text-profile_description" value="<?php echo str_replace('"','&quot;', $wpl_item['profile_description'] ); ?>" class="text_input" />
 							<br class="clear" />
 
-							<label for="wpl-text-auction_type" class="text_label"><?php echo __('Type','wplister'); ?>: *</label>
+							<label for="wpl-text-auction_type" class="text_label">
+								<?php echo __('Type','wplister'); ?> *
+                                <?php wplister_tooltip('Select if you want to list your products as fixed price items or put them on auction. This can be overwritten on the product level.<br>Note: eBay does not allow changing the listing type for already published items.') ?>
+							</label>
 							<select id="wpl-text-auction_type" name="wpl_e2e_auction_type" title="Type" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 								<option value="Chinese" <?php if ( $item_details['auction_type'] == 'Chinese' ): ?>selected="selected"<?php endif; ?>><?php echo __('Auction','wplister'); ?></option>
@@ -75,32 +81,36 @@
 							</p>
 							<?php endif; ?>
 
-							<label for="wpl-text-start_price" class="text_label"><?php echo __('Price / Start price','wplister'); ?>:</label>
+							<label for="wpl-text-start_price" class="text_label">
+								<?php echo __('Price / Start price','wplister'); ?>
+                                <?php wplister_tooltip('You can adjust the price for fixed price listings - or the start price for auctions.<br>' . __('Leave this empty to use the product price as it is.','wplister') ) ?>
+							</label>
 							<input type="text" name="wpl_e2e_start_price" id="wpl-text-start_price" value="<?php echo $item_details['start_price']; ?>" class="text_input" />
 							<br class="clear" />
 
 							<div id="wpl-text-fixed_price_container">
-							<label for="wpl-text-fixed_price" class="text_label"><?php echo __('Buy Now Price','wplister'); ?>:</label>
+							<label for="wpl-text-fixed_price" class="text_label"><?php echo __('Buy Now Price','wplister'); ?></label>
 							<input type="text" name="wpl_e2e_fixed_price" id="wpl-text-fixed_price" value="<?php echo $item_details['fixed_price']; ?>" class="text_input" />
 							<br class="clear" />
 							</div>
 
 							<p class="desc" style="display: block;">
-								<?php echo __('Fixed price (199), percent (+10% / -10%) or fixed change (+5 / -5)','wplister'); ?><br>
-								<?php echo __('Leave this empty to use the product price as it is.','wplister'); ?>
+								<?php echo __('Fixed price (199), percent (+10% / -10%) or fixed change (+5 / -5)','wplister'); ?><!br>
+								<?php #echo __('Leave this empty to use the product price as it is.','wplister'); ?>
 							</p>
 
-							<label for="wpl-text-quantity" class="text_label"><?php echo __('Quantity','wplister'); ?>:</label>
+							<label for="wpl-text-quantity" class="text_label">
+								<?php echo __('Quantity','wplister'); ?>
+                                <?php wplister_tooltip('If you do not wish to list all available stock on eBay, you can overwrite the quantity here.<br>Use this with care - WP-Lister Pro can\'t sync the inventory properly if you enter a fixed quantity.') ?>
+							</label>
 							<input type="text" name="wpl_e2e_quantity" id="wpl-text-quantity" value="<?php echo $item_details['quantity']; ?>" class="text_input" />
 							<br class="clear" />
-							<p class="desc" style="display: block;">
-								<?php echo __('Leave this empty to list all available items.','wplister'); ?>
-								<?php 
-								?>
-							</p>
 
 
-							<label for="wpl-text-listing_duration" class="text_label"><?php echo __('Duration','wplister'); ?>: *</label>
+							<label for="wpl-text-listing_duration" class="text_label">
+								<?php echo __('Duration','wplister'); ?> *
+                                <?php wplister_tooltip('Set your desired listing duration. eBay fees for GTC (Good `Till Cancelled) listings will be charged every 30 days.') ?>
+							</label>
 							<select id="wpl-text-listing_duration" name="wpl_e2e_listing_duration" title="Duration" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 								<option value="Days_1" <?php if ( $wpl_item['listing_duration'] == 'Days_1' ): ?>selected="selected"<?php endif; ?>>1 <?php echo __('Day','wplister'); ?></option>
@@ -114,12 +124,17 @@
 								<option value="GTC" <?php if ( $wpl_item['listing_duration'] == 'GTC' ): ?>selected="selected"<?php endif; ?>><?php echo __('Good Till Canceled','wplister'); ?> (GTC)</option>
 							</select>
 							<br class="clear" />
+							<!--
 							<p class="desc" style="display: block;">
 								<?php echo __('GTC listings will be charged every 30 days.','wplister'); ?>
 							</p>
+							-->
 
 
-							<label for="wpl-text-condition_id" class="text_label"><?php echo __('Condition','wplister'); ?>: *</label>
+							<label for="wpl-text-condition_id" class="text_label">
+								<?php echo __('Condition','wplister'); ?> *
+                                <?php wplister_tooltip('The available item conditions depend on the primary eBay category.<br>Please select a primary category in order to load the available item conditions - or set a default primary category in the settings (WP-Lister Pro only).') ?>
+							</label>
 							<select id="wpl-text-condition_id" name="wpl_e2e_condition_id" title="Condition" class=" required-entry select">
 							<?php if ( isset( $wpl_available_conditions ) && is_array( $wpl_available_conditions ) ): ?>
 								<?php foreach ($wpl_available_conditions as $condition_id => $desc) : ?>
@@ -137,23 +152,28 @@
 							<?php endif; ?>
 							</select>
 							<br class="clear" />
-
-							<p class="desc" style="display: block;">
+							<p class="desc" style="display: none;">
 								<?php echo __('Available conditions may vary for different categories.','wplister'); ?>
 								<?php echo __('You should set the category first.','wplister'); ?>
 							</p>
 
 							<div id="wpl-text-condition_description_container">
-							<label for="wpl-text-condition_description" class="text_label"><?php echo __('Condition description','wplister'); ?>:</label>
+							<label for="wpl-text-condition_description" class="text_label">
+								<?php echo __('Condition description','wplister'); ?>
+                                <?php wplister_tooltip(__('This field should only be used to further clarify the condition of used items.','wplister')) ?>
+							</label>
 							<input type="text" name="wpl_e2e_condition_description" id="wpl-text-condition_description" value="<?php echo @$item_details['condition_description']; ?>" class="text_input" />
 							<br class="clear" />
-							<p class="desc" style="display: block;">
+							<p class="desc" style="display: none;">
 								<?php echo __('This field should only be used to further clarify the condition of used items.','wplister'); ?>
 							</p>
 							</div>
 
 
-							<label for="wpl-text-dispatch_time" class="text_label"><?php echo __('Handling time','wplister'); ?>: *</label>
+							<label for="wpl-text-dispatch_time" class="text_label">
+								<?php echo __('Handling time','wplister'); ?> *
+                                <?php wplister_tooltip( __('The maximum number of business days a seller commits to for shipping an item to domestic buyers after receiving a cleared payment.','wplister') ) ?>
+							</label>
 							<select id="wpl-text-dispatch_time" name="wpl_e2e_dispatch_time" title="Condition" class=" required-entry select">
 							<?php if ( isset( $wpl_available_dispatch_times ) && is_array( $wpl_available_dispatch_times ) ): ?>
 								<?php foreach ($wpl_available_dispatch_times as $dispatch_time => $desc) : ?>
@@ -167,10 +187,8 @@
 								<option value="1000" selected="selected"><?php echo __('New','wplister'); ?></option>
 							<?php endif; ?>
 							</select>
-
-
 							<br class="clear" />
-							<p class="desc" style="display: block;">
+							<p class="desc" style="display: none;">
 								<?php echo __('The maximum number of business days a seller commits to for shipping an item to domestic buyers after receiving a cleared payment.','wplister'); ?>
 							</p>
 	
@@ -186,7 +204,7 @@
 						<h3><span><?php echo __('Payment methods','wplister'); ?></span></h3>
 						<div class="inside">
 
-							<label for="wpl-text-payment_options" class="text_label"><?php echo __('Payment methods','wplister'); ?>: *</label>
+							<label for="wpl-text-payment_options" class="text_label"><?php echo __('Payment methods','wplister'); ?> *</label>
 							<table id="payment_options_table" style="width:65%;">
 								
 								<?php foreach ($item_details['payment_options'] as $service) : ?>
@@ -219,7 +237,12 @@
 							<br class="clear" />
 
 
-							<label for="wpl-text-payment_instructions" class="text_label"><?php echo __('Payment instructions','wplister'); ?>:</label>
+							<label for="wpl-text-payment_instructions" class="text_label">
+								<?php echo __('Payment instructions','wplister'); ?>
+                                <?php wplister_tooltip('Payment instructions from the seller to the buyer. These instructions appear on eBay\'s View Item page and on eBay\'s checkout page when the buyer pays for the item. <br><br>
+														Sellers usually use this field to specify payment instructions, how soon the item will shipped, feedback instructions, and other reminders that the buyer should be aware of when they bid on or buy an item.<br>
+														Note: eBay only allows a maximum of 500 characters.') ?>
+							</label>
 							<textarea name="wpl_e2e_payment_instructions" id="wpl-text-payment_instructions" class="textarea"><?php echo stripslashes( @$item_details['payment_instructions'] ); ?></textarea>
 							<br class="clear" />
 
@@ -228,10 +251,13 @@
 
 
 					<div class="postbox" id="ReturnsSettingsBox">
-						<h3><span><?php echo __('Returns settings','wplister'); ?></span></h3>
+						<h3><span><?php echo __('Return Policy','wplister'); ?></span></h3>
 						<div class="inside">
 
-							<label for="wpl-text-returns_accepted" class="text_label"><?php echo __('Returns settings','wplister'); ?>:</label>
+							<label for="wpl-text-returns_accepted" class="text_label">
+								<?php echo __('Enable return policy','wplister'); ?>
+                                <?php wplister_tooltip('Enable this to include a return policy in your listings. Most categories on most eBay sites require the seller to include a return policy.') ?>
+							</label>
 							<select id="wpl-text-returns_accepted" name="wpl_e2e_returns_accepted" title="Returns" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 								<option value="1" <?php if ( $item_details['returns_accepted'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
@@ -239,7 +265,12 @@
 							</select>
 							<br class="clear" />
 
-							<label for="wpl-text-returns_within" class="text_label"><?php echo __('Returns within','wplister'); ?>:</label>
+							<div id="returns_details_container">
+
+							<label for="wpl-text-returns_within" class="text_label">
+								<?php echo __('Returns within','wplister'); ?>
+                                <?php wplister_tooltip('The buyer can return the item within this period of time from the day they receive the item. Use the description field to explain the policy details.') ?>
+							</label>
 							<select id="wpl-text-returns_within" name="wpl_e2e_returns_within" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 								<option value="Days_10" <?php if ( $item_details['returns_within'] == 'Days_10' ): ?>selected="selected"<?php endif; ?>>10 <?php echo __('days','wplister'); ?></option>
@@ -249,7 +280,10 @@
 							</select>
 							<br class="clear" />
 
-							<label for="wpl-text-RestockingFee" class="text_label"><?php echo __('Restocking fee','wplister'); ?>:</label>
+							<label for="wpl-text-RestockingFee" class="text_label">
+								<?php echo __('Restocking fee','wplister'); ?>
+                                <?php wplister_tooltip('This value indicates the restocking fee charged by the seller for returned items.') ?>
+							</label>
 							<select id="wpl-text-RestockingFee" name="wpl_e2e_RestockingFee" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 								<option value="NoRestockingFee" <?php if ( @$item_details['RestockingFee'] == 'NoRestockingFee' ): ?>selected="selected"<?php endif; ?>><?php echo __('No restocking fee','wplister'); ?></option>
@@ -259,9 +293,14 @@
 							</select>
 							<br class="clear" />
 
-							<label for="wpl-text-returns_description" class="text_label"><?php echo __('Returns description','wplister'); ?>:</label>
+							<label for="wpl-text-returns_description" class="text_label">
+								<?php echo __('Returns description','wplister'); ?>
+                                <?php wplister_tooltip('A detailed description of your return policy.<br>eBay uses this text string as-is in the Return Policy section of the View Item page. Avoid HTML.') ?>
+							</label>
 							<textarea name="wpl_e2e_returns_description" id="wpl-text-returns_description" class="textarea"><?php echo stripslashes( $item_details['returns_description'] ); ?></textarea>
 							<br class="clear" />
+
+							</div>
 
 						</div>
 					</div>
@@ -316,6 +355,67 @@
 				});
 				jQuery('#wpl-text-condition_id').change();
 
+				// set Return Policy details visibility
+				jQuery('#wpl-text-returns_accepted').change(function() {
+  					if ( jQuery('#wpl-text-returns_accepted').val() == 1 ) {
+  						jQuery('#returns_details_container').slideDown(200);
+  					} else {
+  						jQuery('#returns_details_container').slideUp(200);
+  					}
+				});
+				jQuery('#wpl-text-returns_accepted').change();
+
+
+				// set Tax Mode options visibility
+				jQuery('#wpl-text-tax_mode').change(function() {
+  					if ( jQuery('#wpl-text-tax_mode').val() == 'fix' ) {
+  						jQuery('#tax_mode_fixed_options_container').show();
+  					} else {
+  						jQuery('#tax_mode_fixed_options_container').hide();
+  					}
+				});
+				jQuery('#wpl-text-tax_mode').change();
+
+				// set Subtitle options visibility
+				jQuery('#wpl-text-subtitle_enabled').change(function() {
+  					if ( jQuery('#wpl-text-subtitle_enabled').val() == 1 ) {
+  						jQuery('#subtitle_options_container').show();
+  					} else {
+  						jQuery('#subtitle_options_container').hide();
+  					}
+				});
+				jQuery('#wpl-text-subtitle_enabled').change();
+
+				// set Best Offer options visibility
+				jQuery('#wpl-text-bestoffer_enabled').change(function() {
+  					if ( jQuery('#wpl-text-bestoffer_enabled').val() == 1 ) {
+  						jQuery('#best_offer_options_container').slideDown(200);
+  					} else {
+  						jQuery('#best_offer_options_container').slideUp(200);
+  					}
+				});
+				jQuery('#wpl-text-bestoffer_enabled').change();
+
+				// set Schedule Time details visibility
+				jQuery('#wpl-text-schedule_time').change(function() {
+  					if ( jQuery('#wpl-text-schedule_time').val() != '' ) {
+  						jQuery('#schedule_time_details_container').show();
+  					} else {
+  						jQuery('#schedule_time_details_container').hide();
+  					}
+				});
+				jQuery('#wpl-text-schedule_time').change();
+
+				// set Auto Relist options visibility
+				jQuery('#wpl-text-sellingmanager_enabled').change(function() {
+  					if ( jQuery('#wpl-text-sellingmanager_enabled').val() == 1 ) {
+  						jQuery('#auto_relist_options_container').slideDown(200);
+  					} else {
+  						jQuery('#auto_relist_options_container').slideUp(200);
+  					}
+				});
+				jQuery('#wpl-text-sellingmanager_enabled').change();
+
 
 			    // 
 			    // Validation
@@ -354,11 +454,28 @@
 						if ( jQuery('#loc_shipping_options_table_flat .select_service_name')[0].value == '' ) {
 							alert('Please select at least one domestic shipping service.'); return false;
 						}
+						if ( jQuery('#loc_shipping_options_table_flat .select_service_name').length > 5 ) {
+							alert('You have selected more than 5 local shipping services, which is not allowed by eBay.'); return false;
+						}
 					} else {
 						// local calc shipping option required
 						if ( jQuery('#loc_shipping_options_table_calc .select_service_name')[0].value == '' ) {
 							alert('Please select at least one domestic shipping service.'); return false;
 						}						
+						if ( jQuery('#loc_shipping_options_table_calc .select_service_name').length > 5 ) {
+							alert('You have selected more than 5 local shipping services, which is not allowed by eBay.'); return false;
+						}
+					}
+
+					// max 5 shipping service options
+					if ( shipping_type == 'flat' || shipping_type == 'FreightFlat' || shipping_type == 'CalculatedDomesticFlatInternational' ) {
+						if ( jQuery('#int_shipping_options_table_flat .select_service_name').length > 5 ) {
+							alert('You have selected more than 5 international shipping services, which is not allowed by eBay.'); return false;
+						}
+					} else {
+						if ( jQuery('#int_shipping_options_table_calc .select_service_name').length > 5 ) {
+							alert('You have selected more than 5 international shipping services, which is not allowed by eBay.'); return false;
+						}
 					}
 
 					// payment method required

@@ -135,17 +135,48 @@ class EbayOrdersPage extends WPL_Page {
 		// get ebay_order record
 		$ebay_order = $ordersModel->getItem( $id );
 		
+		// get WooCommerce order
+		$wc_order_notes = $this->get_order_notes( $ebay_order['post_id'] );
+
 		// get auction item record
 		// $listingsModel = new ListingsModel();		
 		// $auction_item = $listingsModel->getItemByEbayID( $ebay_order['item_id'] );
 		
 		$aData = array(
 			'ebay_order'				=> $ebay_order,
+			'wc_order_notes'			=> $wc_order_notes,
 			// 'auction_item'			=> $auction_item
 		);
 		$this->display( 'order_details', $aData );
 		
 	}
+
+	public function get_order_notes( $id ) {
+
+		$notes = array();
+
+		$args = array(
+			'post_id' => $id,
+			'approve' => 'approve',
+			'type' => ''
+		);
+
+		remove_filter('comments_clauses', 'woocommerce_exclude_order_comments');
+
+		$comments = get_comments( $args );
+
+		foreach ($comments as $comment) :
+			// $is_customer_note = get_comment_meta($comment->comment_ID, 'is_customer_note', true);
+			// $comment->comment_content = make_clickable($comment->comment_content);
+			$notes[] = $comment;
+		endforeach;
+
+		add_filter('comments_clauses', 'woocommerce_exclude_order_comments');
+
+		return (array) $notes;
+
+	}
+
 
 
 }

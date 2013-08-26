@@ -4,10 +4,22 @@
 							<table id="int_shipping_options_table_flat" class="service_table_flat service_table" style="">
 								
 								<tr>
-									<th><?php echo __('Destination','wplister'); ?></th>
-									<th><?php echo __('Shipping service','wplister'); ?></th>
-									<th><?php echo __('First item cost','wplister'); ?></th>
-									<th><?php echo __('Additional items cost','wplister'); ?></th>
+									<th>
+										<?php echo __('Destination','wplister'); ?>
+		                                <?php wplister_tooltip('The international location or region to where the item seller will ship the item.') ?>
+									</th>
+									<th>
+										<?php echo __('Shipping service','wplister'); ?>
+		                                <?php wplister_tooltip('The international shipping service being offered by the seller to ship an item to a buyer.<br>A seller can offer up to four domestic shipping services and up to five international shipping services.') ?>
+									</th>
+									<th>
+										<?php echo __('First item cost','wplister'); ?>
+		                                <?php wplister_tooltip('The cost to ship a single item. Enter zero to enable free shipping. This field is required.') ?>
+									</th>
+									<th>
+										<?php echo __('Additional items cost','wplister'); ?>
+		                                <?php wplister_tooltip('The cost of shipping each additional item beyond the first item.<br>This is required if the listing is for multiple items. For single-item listings, it should be zero (or is defaulted to zero if left blank).') ?>
+									</th>
 									<th>&nbsp;</th>
 								</tr>
 
@@ -50,8 +62,14 @@
 							<table id="int_shipping_options_table_calc" class="service_table_calc service_table" style="">
 								
 								<tr>
-									<th><?php echo __('Shipping service','wplister'); ?></th>
-									<th><?php echo __('Destination','wplister'); ?></th>
+									<th>
+										<?php echo __('Shipping service','wplister'); ?>
+		                                <?php wplister_tooltip('The international shipping service being offered by the seller to ship an item to a buyer.<br>A seller can offer up to four domestic shipping services and up to five international shipping services.') ?>
+									</th>
+									<th>
+										<?php echo __('Destination','wplister'); ?>
+		                                <?php wplister_tooltip('The international location or region to where the item seller will ship the item.') ?>
+									</th>
 									<!-- <th><?php echo __('Package','wplister'); ?></th> -->
 									<!-- <th><?php echo __('Handling fee','wplister'); ?></th> -->
 									<th>&nbsp;</th>
@@ -93,7 +111,10 @@
 								class="button-secondary button-add-shipping-option">
 
 							<div class="service_table_calc int_service_table_calc" style="border-top:1px solid #ccc; margin-top:10px; padding-top:10px;">
-								<label class="text_label"><?php echo __('Packaging and handling costs','wplister'); ?>:</label>
+								<label class="text_label">
+									<?php echo __('Packaging and handling costs','wplister'); ?>:
+		                            <?php wplister_tooltip('Fees a seller might assess for the shipping of the item (in addition to whatever the shipping service might charge).') ?>
+								</label>
 								<input type="text" name="wpl_e2e_InternationalPackagingHandlingCosts" 
 									value="<?php echo @$item_details['InternationalPackagingHandlingCosts']; ?>" class="" />								
 							</div>

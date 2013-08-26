@@ -157,6 +157,36 @@
     <?php endif; ?>
     
            
+    <?php if ( is_array( $wpl_wc_order_notes ) ) : ?>
+
+        <h2>Order Notes</h2>
+
+        <table width="100%" border="0">
+            <tr><th>            
+                <?php echo __('Date','wplister') ?> 
+            </th><th>
+                <?php echo __('Time','wplister') ?> 
+            </th><th>
+                <?php echo __('Message','wplister') ?> 
+            </th></tr>
+
+            <?php foreach ( $wpl_wc_order_notes as $record ) : ?>
+
+                <tr><td width="16%">                      
+                    <?php echo date( get_option( 'date_format' ), strtotime($record->comment_date) ) ?> 
+                </td><td width="12%">                      
+                    <?php echo date( 'H:i:s', strtotime($record->comment_date) ) ?> 
+                </td><td>
+                    <?php echo $record->comment_content ?> 
+                </td></tr>
+
+            <?php endforeach; ?>
+
+        </table>
+
+    <?php endif; ?>
+    
+           
     <pre><?php #print_r( $d ); ?></pre>
     <pre><?php #print_r( $wpl_auction_item ); ?></pre>
     <pre><?php #print_r( $wpl_ebay_order ); ?></pre>
