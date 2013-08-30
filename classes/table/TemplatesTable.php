@@ -100,8 +100,17 @@ class TemplatesTable extends WP_List_Table {
      **************************************************************************/
     function column_template_name($item){
         
+        // get current page with paging as url param
+        $page = $_REQUEST['page'];
+        if ( isset( $_REQUEST['paged'] )) $page .= '&paged='.$_REQUEST['paged'];
+
+        // handle preview target
+        $preview_target = get_option( 'wplister_preview_in_new_tab' ) == 1 ? '_blank' : '_self';
+        $preview_class  = get_option( 'wplister_preview_in_new_tab' ) == 1 ? '' : 'thickbox';
+
         //Build row actions
         $actions = array(
+            'preview_template' => sprintf('<a href="?page=%s&action=%s&template=%s&width=820&height=550" target="%s" class="%s">%s</a>',$page,'preview_template',$item['template_id'],$preview_target,$preview_class,__('Preview','wplister')),
             'edit'      => sprintf('<a href="?page=%s&action=%s&template=%s">%s</a>',$_REQUEST['page'],'edit',$item['template_id'],__('Edit','wplister')),
             'duplicate' => sprintf('<a href="#" onclick="wpl_duplicate_tpl(\'%s\');return false;">%s</a>',$item['template_id'],__('Duplicate','wplister')),
             'delete_listing_template'    => sprintf('<a href="?page=%s&action=%s&template=%s">%s</a>',$_REQUEST['page'],'delete_listing_template',$item['template_id'],__('Delete','wplister')),

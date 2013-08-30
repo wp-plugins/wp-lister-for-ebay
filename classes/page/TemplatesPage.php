@@ -19,6 +19,7 @@ class TemplatesPage extends WPL_Page {
 
 		add_action('wp_ajax_wpl_get_tpl_css', array( &$this, 'ajax_wpl_get_tpl_css' ));
 
+		$this->handleSubmitOnInit();
 	}
 
 	public function onWpAdminMenu() {
@@ -47,6 +48,16 @@ class TemplatesPage extends WPL_Page {
 			$templatesModel = new TemplatesModel();
 			$templates = $templatesModel->deleteTemplate( $_REQUEST['template'] );	
 			$this->showMessage( "Template deleted: ".$_REQUEST['template'] );	
+		}
+
+	}
+
+	public function handleSubmitOnInit() {
+
+		// handle preview action
+		if ( $this->requestAction() == 'preview_template' ) {
+			$this->previewTemplate( $_REQUEST['template'] );
+			exit();
 		}
 
 	}
@@ -361,6 +372,17 @@ class TemplatesPage extends WPL_Page {
 			if ( '3' == self::getOption('setup_next_step') ) self::updateOption('setup_next_step', 4);
 
 		}
+
+	}
+
+
+	public function previewTemplate( $template_id ) {
+	
+		// init model
+		$ibm = new ItemBuilderModel();
+		$preview_html = $ibm->getPreviewHTML( $template_id );
+		echo $preview_html;
+		exit();		
 
 	}
 

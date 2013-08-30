@@ -431,16 +431,19 @@ class ToolsPage extends WPL_Page {
 		$this->runEbayChecks();
 
 
+		// try PayPal
+		$url = 'https://www.paypal.com/cgi-bin/webscr';
+		$this->results->successPaypal = $this->checkUrl( $url, 'PayPal' );
+
 		// try wordpress.org
 		$url = 'http://www.wordpress.org/';
 		$this->results->successWordPress = $this->checkUrl( $url, 'WordPress.org' );
 
 		// try PayPal
-		if ( ! $this->results->successWordPress ) {
-			$url = 'https://www.paypal.com/cgi-bin/webscr';
-			$this->results->successPaypal = $this->checkUrl( $url, 'PayPal' );
-		}
-
+		// if ( ! $this->results->successWordPress ) {
+		// 	$url = 'https://www.paypal.com/cgi-bin/webscr';
+		// 	$this->results->successPaypal = $this->checkUrl( $url, 'PayPal' );
+		// }
 
 		// try update.wplab.com
 		$url = 'http://update.wplab.de/api/';

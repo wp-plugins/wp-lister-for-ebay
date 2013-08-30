@@ -147,8 +147,8 @@
 							<?php elseif ( $wpl_available_conditions == 'none' ) : ?>
 								<option value="none" selected="selected"><?php echo __('none','wplister'); ?></option>
 							<?php else: ?>
-								<option value="1000" selected="selected"><?php echo __('New','wplister'); ?></option>
-								<option value="3000" selected="selected"><?php echo __('Used','wplister'); ?></option>
+								<option value="1000" <?php echo $item_details['condition_id'] == 1000 ? 'selected="selected"' : '' ?> ><?php echo __('New','wplister'); ?></option>
+								<option value="3000" <?php echo $item_details['condition_id'] == 3000 ? 'selected="selected"' : '' ?> ><?php echo __('Used','wplister'); ?></option>
 							<?php endif; ?>
 							</select>
 							<br class="clear" />

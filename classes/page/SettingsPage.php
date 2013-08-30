@@ -148,12 +148,6 @@ class SettingsPage extends WPL_Page {
 
 			'option_cron_auctions'		=> self::getOption( 'cron_auctions' ),
 			'option_cron_transactions'	=> self::getOption( 'cron_transactions' ),
-			// 'process_shortcodes'		=> self::getOption( 'process_shortcodes', 'content' ),
-			// 'remove_links'			=> self::getOption( 'remove_links', 'default' ),
-			// 'default_image_size'		=> self::getOption( 'default_image_size', 'full' ),
-			// 'wc2_gallery_fallback'	=> self::getOption( 'wc2_gallery_fallback', 'attached' ),
-			// 'hide_dupe_msg'			=> self::getOption( 'hide_dupe_msg' ),
-			// 'option_uninstall'		=> self::getOption( 'uninstall' ),
 			'option_enable_ebay_motors'	=> self::getOption( 'enable_ebay_motors' ),
 			'option_ebay_update_mode'	=> self::getOption( 'ebay_update_mode' ),
 	
@@ -207,6 +201,7 @@ class SettingsPage extends WPL_Page {
 			'option_uninstall'			=> self::getOption( 'uninstall' ),
 			'option_foreign_transactions' => self::getOption( 'foreign_transactions' ),
 			'option_allow_backorders'   => self::getOption( 'allow_backorders', 0 ),
+			'option_preview_in_new_tab' => self::getOption( 'preview_in_new_tab', 0 ),
 
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab=advanced'
@@ -255,12 +250,6 @@ class SettingsPage extends WPL_Page {
 			
 			self::updateOption( 'cron_auctions',		$this->getValueFromPost( 'option_cron_auctions' ) );
 			self::updateOption( 'cron_transactions',	$this->getAnswerFromPost( 'option_cron_transactions' ) );
-			self::updateOption( 'process_shortcodes', 	$this->getValueFromPost( 'process_shortcodes' ) );
-			self::updateOption( 'remove_links',     	$this->getValueFromPost( 'remove_links' ) );
-			self::updateOption( 'default_image_size',   $this->getValueFromPost( 'default_image_size' ) );
-			self::updateOption( 'wc2_gallery_fallback', $this->getValueFromPost( 'wc2_gallery_fallback' ) );
-			self::updateOption( 'hide_dupe_msg',    	$this->getValueFromPost( 'hide_dupe_msg' ) );
-			self::updateOption( 'uninstall',			$this->getValueFromPost( 'option_uninstall' ) );
 			self::updateOption( 'enable_ebay_motors', 	$this->getValueFromPost( 'option_enable_ebay_motors' ) );
 			self::updateOption( 'ebay_update_mode', 	$this->getValueFromPost( 'option_ebay_update_mode' ) );
 
@@ -281,6 +270,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'hide_dupe_msg',    	$this->getValueFromPost( 'hide_dupe_msg' ) );
 			self::updateOption( 'uninstall',			$this->getValueFromPost( 'option_uninstall' ) );
 			self::updateOption( 'foreign_transactions',	$this->getValueFromPost( 'option_foreign_transactions' ) );
+			self::updateOption( 'preview_in_new_tab',	$this->getValueFromPost( 'option_preview_in_new_tab' ) );
 			self::updateOption( 'allow_backorders',		$this->getValueFromPost( 'option_allow_backorders' ) );
 
 			$this->showMessage( __('Settings saved.','wplister') );

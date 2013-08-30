@@ -113,6 +113,21 @@ class ListingsModel extends WPL_Model {
 		return $item;
 	}
 
+	function getItemForPreview() {
+		global $wpdb;
+		$item = $wpdb->get_row("
+			SELECT *
+			FROM $this->tablename
+			ORDER BY id DESC
+			LIMIT 1
+		", ARRAY_A);
+
+		if ( !empty($item) ) $item['profile_data'] = $this->decodeObject( $item['profile_data'], true );
+		// $item['details'] = $this->decodeObject( $item['details'] );
+
+		return $item;
+	}
+
 	function deleteItem( $id ) {
 		global $wpdb;
 		$wpdb->query("

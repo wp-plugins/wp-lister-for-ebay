@@ -1212,6 +1212,27 @@ class ItemBuilderModel extends WPL_Model {
 		return $html;
 	}
 
+	public function getPreviewHTML( $template_id, $id = false ) {
+		
+		// get item data
+		$item = $this->lm->getItemForPreview();
+		if ( ! $item ) {
+			return '<div style="text-align:center; margin-top:5em;">You need to prepare at least one listing in order to preview a listing template.</div>';
+		}
+
+		// use latest post_content from product
+		$post = get_post( $item['post_id'] );
+		if ( ! empty($post->post_content) ) $item['post_content'] = $post->post_content;
+
+		// load template
+		if ( ! $template_id ) $template_id = $item['template'];
+		$template = new TemplatesModel( $template_id );
+		$html = $template->processItem( $item );
+
+		// return html
+		return $html;
+	}
+
 
 	public function getProductMainImageURL( $post_id, $checking_parent = false ) {
 

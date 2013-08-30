@@ -258,6 +258,9 @@ class TemplatesModel extends WPL_Model {
 		// process custom fields
 		$tpl_html = $this->processCustomFields( $tpl_html );
 
+		// process embedded code
+		$tpl_html = $this->processEmbeddedCode( $tpl_html );
+
 		// process ajax galleries
 		$tpl_html = $this->processGalleryShortcodes( $item['id'], $tpl_html );
 
@@ -443,6 +446,23 @@ class TemplatesModel extends WPL_Model {
 		foreach ( $this->fields as $field ) {
 			$tpl_html = str_replace( '[['.$field->slug.']]', $field->value,  $tpl_html );		
 			$tpl_html = str_replace(  '$'.$field->slug.'', $field->value,  $tpl_html );		
+		}
+
+		return $tpl_html;
+	}
+
+	public function processEmbeddedCode( $tpl_html ) {
+
+		// convert iframes to js
+		if ( preg_match_all("/<iframe.*iframe>/uiUsm", $tpl_html, $matches ) ) {
+			foreach ( $matches[0] as $iframe_html ) {
+
+				$converted_iframe = addslashes( $iframe_html );
+				$converted_iframe = str_ireplace('iframe', 'if"+"ra"+"me', $converted_iframe );
+				$iframe_js = '<script>document.write("' . $converted_iframe . '");</script>';
+				$tpl_html = str_replace( $iframe_html, $iframe_js,  $tpl_html );		
+
+			}
 		}
 
 		return $tpl_html;

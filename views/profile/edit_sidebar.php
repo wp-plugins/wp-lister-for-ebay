@@ -359,7 +359,7 @@
 
 							<label for="wpl-text-strikethrough_pricing" class="text_label">
 								<?php echo __('Strikethrough price','wplister'); ?>
-                                <?php wplister_tooltip('Enable this if you want to list products which have a sale price in WooCommerce, but you want the regular price be displayed on eBay as the original retail price / strikethrough price.') ?>
+                                <?php wplister_tooltip('Enable this if you want to list products which have a sale price in WooCommerce, but you want the regular price be displayed on eBay as the original retail price / strikethrough price.<br>This is currently available on the US, UK, and DE sites only.') ?>
 							</label>
 							<select id="wpl-text-strikethrough_pricing" name="wpl_e2e_strikethrough_pricing" title="Fetch the UPC value from the products SKU" class=" required-entry select">
 								<option value="1" <?php if ( @$item_details['strikethrough_pricing'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>

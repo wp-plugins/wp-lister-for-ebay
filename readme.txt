@@ -89,6 +89,18 @@ Already working on it. Expect it this summer.
 2. Profile Editor
 
 == Changelog ==
+= 1.2.7 =
+* added template preview feature 
+* added option to open listing preview in new tab 
+* automatically convert iframe tags to allow embedding YouTube videos 
+
+= 1.2.6.2 =
+* show warning if item details are missing and display "Update from eBay" link 
+* added note regarding ebay sites where STP / MAP are available 
+* fixed issue saving profile condition when no category was selected 
+* fixed possible issue when saving settings 
+* removed line break from thumbnails.php 
+
 = 1.2.6.1 =
 * added tooltips to shipping options table headers 
 * added warning symbols for fixed quantity and backorders if inventory sync is enabled 

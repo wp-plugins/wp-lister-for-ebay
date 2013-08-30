@@ -188,6 +188,18 @@
 								<?php echo __('Should WP-Lister mark a product as out of stock even when it has backorders enabled?','wplister'); ?><br>
 							</p>
 
+							<label for="wpl-option-preview_in_new_tab" class="text_label">
+								<?php echo __('Open preview in new tab','wplister') ?>
+                                <?php wplister_tooltip('WP-Lister uses a Thickbox modal window to display the preview by default. However, this can cause issues in rare cases where you embed some JavaScript code (like NivoSlider) - or you might just want more screen estate to preview your listings.') ?>
+							</label>
+							<select id="wpl-option-preview_in_new_tab" name="wpl_e2e_option_preview_in_new_tab" class="required-entry select">
+								<option value="0" <?php if ( $wpl_option_preview_in_new_tab != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
+								<option value="1" <?php if ( $wpl_option_preview_in_new_tab == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Select if you want the listing preview open in a new tab by default.','wplister'); ?><br>
+							</p>
+
 						</div>
 					</div>
 

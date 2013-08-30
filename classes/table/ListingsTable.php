@@ -114,18 +114,22 @@ class ListingsTable extends WP_List_Table {
         $page = $_REQUEST['page'];
         if ( isset( $_REQUEST['paged'] )) $page .= '&paged='.$_REQUEST['paged'];
 
+        // handle preview target
+        $preview_target = get_option( 'wplister_preview_in_new_tab' ) == 1 ? '_blank' : '_self';
+        $preview_class  = get_option( 'wplister_preview_in_new_tab' ) == 1 ? '' : 'thickbox';
+
         //Build row actions
         $actions = array(
-            'preview_auction' => sprintf('<a href="?page=%s&action=%s&auction=%s&width=820&height=550" class="thickbox">%s</a>',$page,'preview_auction',$item['id'],__('Preview','wplister')),
+            'preview_auction' => sprintf('<a href="?page=%s&action=%s&auction=%s&width=820&height=550" target="%s" class="%s">%s</a>',$page,'preview_auction',$item['id'],$preview_target,$preview_class,__('Preview','wplister')),
             'edit'           => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'edit',$item['id'],__('Edit','wplister')),
             'verify'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'verify',$item['id'],__('Verify','wplister')),
             'publish2e'       => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'publish2e',$item['id'],__('Publish','wplister')),
             'open'            => sprintf('<a href="%s" target="_blank">%s</a>',$item['ViewItemURL'],__('View on eBay','wplister')),
             'revise'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'revise',$item['id'],__('Revise','wplister')),
             'end_item'        => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'end_item',$item['id'],__('End Listing','wplister')),
-            'update'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'update',$item['id'],__('Update','wplister')),
             #'open'           => sprintf('<a href="%s" target="_blank">%s</a>',$item['ViewItemURL'],__('Open in new tab','wplister')),
             'relist'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'relist',$item['id'],__('Relist','wplister')),
+            'update'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'update',$item['id'],__('Update from eBay','wplister')),
             'delete'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete',$item['id'],__('Delete','wplister')),
         );
 
@@ -240,6 +244,22 @@ class ListingsTable extends WP_List_Table {
         }
 
 
+        // show warning if GetItem seems to have failed
+        $needs_update = false;
+        if ( $item['ebay_id'] ) {
+            if ( $item['ViewItemURL'] == '' || $item['details'] == '' ) {
+
+                // add warning message
+                $tip_msg = 'There seems to be something wrong with this listing. Please click the <i>Update from eBay</i> link below to fetch the current details from eBay.';
+                $img_url  = WPLISTER_URL . '/img/error.gif';
+                $listing_title .= '&nbsp;<img src="'.$img_url.'" style="height:12px; padding:0;" class="tips" data-tip="'.$tip_msg.'"/>&nbsp;';
+
+                // remove View on eBay ink
+                unset( $actions['open'] );
+                $needs_update = true;
+            }
+        } 
+
         // disable some actions depending on status
         if ( $item['status'] != 'published' )   unset( $actions['end_item'] );
         if ( $item['status'] != 'prepared' )    unset( $actions['verify'] );
@@ -253,7 +273,8 @@ class ListingsTable extends WP_List_Table {
         if ( $item['status'] != 'ended' )       unset( $actions['delete'] );
         if (($item['status'] != 'sold' ) &&
             ($item['status'] != 'ended'))       unset( $actions['relist'] );
-        if ( $item['status'] != 'relisted' )    unset( $actions['update'] );
+        if (($item['status'] != 'relisted' ) && 
+           ( $needs_update == false ) )         unset( $actions['update'] );
 
         //Return the title contents
         //return sprintf('%1$s <span style="color:silver">%2$s</span>%3$s',
