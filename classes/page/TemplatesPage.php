@@ -217,6 +217,7 @@ class TemplatesPage extends WPL_Page {
 			'prepared_listings'         => $prepared_listings,
 			'verified_listings'         => $verified_listings,
 			'published_listings'        => $published_listings,
+			'disable_wysiwyg_editor'    => self::getOption( 'disable_wysiwyg_editor', 0 ),
 			
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-templates'
 		);
@@ -517,8 +518,11 @@ class TemplatesPage extends WPL_Page {
 			exit;				
 		}
 		
-		// tpl_dir is the full path to the template
+		// tpl_dir is the full path to the duplicated template
 		$tpl_dir = $templates_dir . $dirname;
+
+		// src_tpl_dir is the full path to the original template
+		$src_tpl_dir = $templates_dir . $template_id;
 
 		// if folder exists, append '-1', '-2', .. '-99'
 		if ( is_dir( $tpl_dir ) ) {
@@ -547,12 +551,14 @@ class TemplatesPage extends WPL_Page {
 		$file_header				= $tpl_dir . '/header.php';
 		$file_footer				= $tpl_dir . '/footer.php';
 		$file_functions				= $tpl_dir . '/functions.php';
+		$file_config				= $tpl_dir . '/config.json';
 		
 		$tpl_html	 				= $templatesModel->getHTML();
 		$tpl_css	 				= $templatesModel->getCSS();
 		$tpl_header	 				= $templatesModel->getHeader();
 		$tpl_footer	 				= $templatesModel->getFooter();
 		$tpl_functions	 			= $templatesModel->getFunctions();
+		$tpl_config	 				= file_exists( $src_tpl_dir . '/config.json' ) ? file_get_contents( $src_tpl_dir . '/config.json') : false;
 		
 		$template_name 				= stripslashes( $this->getValueFromPost( 'template_name'  ) );
 		$template_description 		= stripslashes( $this->getValueFromPost( 'template_description'  ) );
@@ -571,7 +577,8 @@ class TemplatesPage extends WPL_Page {
 		$result = file_put_contents($file_functions , $tpl_functions);
 		$result = file_put_contents($file_footer , $tpl_footer);
 		$result = file_put_contents($file_header , $tpl_header);
-		$result = file_put_contents($file_html, $tpl_html);
+		$result = file_put_contents($file_html, $tpl_html);		
+		if ( $tpl_config ) $result = file_put_contents($file_config, $tpl_config);
 
 		// proper error handling
 		if ($result===false) {

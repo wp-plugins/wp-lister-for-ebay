@@ -202,6 +202,7 @@ class SettingsPage extends WPL_Page {
 			'option_foreign_transactions' => self::getOption( 'foreign_transactions' ),
 			'option_allow_backorders'   => self::getOption( 'allow_backorders', 0 ),
 			'option_preview_in_new_tab' => self::getOption( 'preview_in_new_tab', 0 ),
+			'option_disable_wysiwyg_editor' => self::getOption( 'disable_wysiwyg_editor', 0 ),
 
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab=advanced'
@@ -271,6 +272,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'uninstall',			$this->getValueFromPost( 'option_uninstall' ) );
 			self::updateOption( 'foreign_transactions',	$this->getValueFromPost( 'option_foreign_transactions' ) );
 			self::updateOption( 'preview_in_new_tab',	$this->getValueFromPost( 'option_preview_in_new_tab' ) );
+			self::updateOption( 'disable_wysiwyg_editor',	$this->getValueFromPost( 'option_disable_wysiwyg_editor' ) );
 			self::updateOption( 'allow_backorders',		$this->getValueFromPost( 'option_allow_backorders' ) );
 
 			$this->showMessage( __('Settings saved.','wplister') );

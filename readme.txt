@@ -89,6 +89,12 @@ Already working on it. Expect it this summer.
 2. Profile Editor
 
 == Changelog ==
+= 1.2.7.1 =
+* added option to disable the WP wysiwyg editor for editing listing templates 
+* fixed issue when listing variations with individual variation images on the free version of WP-Lister 
+* only show order history section in order details if an order in WooCommerce has been created 
+* copy template config when duplicating listing templates 
+
 = 1.2.7 =
 * added template preview feature 
 * added option to open listing preview in new tab 

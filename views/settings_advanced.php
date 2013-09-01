@@ -200,6 +200,18 @@
 								<?php echo __('Select if you want the listing preview open in a new tab by default.','wplister'); ?><br>
 							</p>
 
+							<label for="wpl-option-disable_wysiwyg_editor" class="text_label">
+								<?php echo __('Disable WYSIWYG editor','wplister') ?>
+                                <?php wplister_tooltip('Depending in your listing template content, you might want to disable the built in WP editor to edit your template content.') ?>
+							</label>
+							<select id="wpl-option-disable_wysiwyg_editor" name="wpl_e2e_option_disable_wysiwyg_editor" class="required-entry select">
+								<option value="0" <?php if ( $wpl_option_disable_wysiwyg_editor != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
+								<option value="1" <?php if ( $wpl_option_disable_wysiwyg_editor == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Select the editor you want to use to edit listing templates.','wplister'); ?><br>
+							</p>
+
 						</div>
 					</div>
 

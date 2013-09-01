@@ -136,7 +136,7 @@ class EbayOrdersPage extends WPL_Page {
 		$ebay_order = $ordersModel->getItem( $id );
 		
 		// get WooCommerce order
-		$wc_order_notes = $this->get_order_notes( $ebay_order['post_id'] );
+		$wc_order_notes = $ebay_order['post_id'] ? $this->get_order_notes( $ebay_order['post_id'] ) : false;
 
 		// get auction item record
 		// $listingsModel = new ListingsModel();		

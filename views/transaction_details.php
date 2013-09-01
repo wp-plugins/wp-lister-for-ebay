@@ -18,7 +18,7 @@
     <table width="100%" border="0">
         <tr>
             <td width="20%">            
-                <b>Datum:</b>
+                <b>Date:</b>
             </td><td>
                 <?php echo $wpl_transaction['date_created'] ?>
             </td>

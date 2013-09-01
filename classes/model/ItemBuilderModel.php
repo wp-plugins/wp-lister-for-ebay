@@ -825,8 +825,9 @@ class ItemBuilderModel extends WPL_Model {
 
         	if ( in_array( $VariationValue, $VariationValuesForPictures ) ) {
 
-    			// upload image
-    			$image_url = $this->lm->uploadPictureToEPS( $var['image'], $id, $session );
+    			$image_url = $var['image'];
+
+
 				if ( ! $image_url ) continue;
 				$this->logger->info( "using variation image: ".$image_url );
 

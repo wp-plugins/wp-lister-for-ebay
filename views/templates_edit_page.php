@@ -3,6 +3,7 @@
 <script src="<?php echo $wpl_plugin_url; ?>/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 <script src="<?php echo $wpl_plugin_url; ?>/js/ace/mode-scss.js" type="text/javascript" charset="utf-8"></script>
 <script src="<?php echo $wpl_plugin_url; ?>/js/ace/mode-php.js" type="text/javascript" charset="utf-8"></script>
+<script src="<?php echo $wpl_plugin_url; ?>/js/ace/mode-html.js" type="text/javascript" charset="utf-8"></script>
 <script src="<?php echo $wpl_plugin_url; ?>/js/ace/theme-chrome.js" type="text/javascript" charset="utf-8"></script>
 
 <style type="text/css">
@@ -28,6 +29,7 @@
 
 
 	/* edit styles */
+	#html_editor,
 	#styles_editor,
 	#header_editor,
 	#footer_editor,
@@ -37,6 +39,7 @@
 		position: relative;
 		border: 1px solid #ccc;
 	}
+	#html_editor,
 	#styles_editor {
 		height: 420px;
 	}
@@ -329,7 +332,7 @@
 				<div class="meta-box-sortables ui-sortable">
 					
 
-					<div class="postbox" id="GeneralSettingsBox">
+					<div class="postbox" id="TemplateSettingsBox">
 						<h3 class="hndle"><span><?php echo __('Template settings','wplister'); ?></span></h3>
 						<div class="inside">
 
@@ -363,37 +366,52 @@
 						</div>
 					</div>
 
-				    <?php 
+					<?php if ( $wpl_disable_wysiwyg_editor != 1 ) : ?>
 
-				    	// template stylesheet url
-				    	$stylesheet 	 = WP_CONTENT_DIR . $wpl_item['template_path'] . '/style.css';
-				    	$stylesheet_url  = WP_CONTENT_URL . $wpl_item['template_path'] . '/style.css' . '?ver='.@filemtime( $stylesheet );
+					    <?php 
+					    	// template stylesheet url
+					    	$stylesheet 	 = WP_CONTENT_DIR . $wpl_item['template_path'] . '/style.css';
+					    	$stylesheet_url  = WP_CONTENT_URL . $wpl_item['template_path'] . '/style.css' . '?ver='.@filemtime( $stylesheet );
 
-				    	// get parsed stylesheet (v2)
-				    	$stylesheet_url  = 'admin-ajax.php?action=wpl_get_tpl_css&tpl=' . $wpl_item['template_id'] . '&ver='.@filemtime( $stylesheet );
-				    	
-				    	// $stylesheet_url = str_replace(' ', urlencode(' '), $stylesheet_url);
-				    	if ( $wpl_add_new_template ) $stylesheet_url = $wpl_plugin_url . '/templates/default/default.css';
-				    	// echo "loading stylesheet $stylesheet_url <br>";
+					    	// get parsed stylesheet (v2)
+					    	$stylesheet_url  = 'admin-ajax.php?action=wpl_get_tpl_css&tpl=' . $wpl_item['template_id'] . '&ver='.@filemtime( $stylesheet );
+					    	
+					    	// $stylesheet_url = str_replace(' ', urlencode(' '), $stylesheet_url);
+					    	if ( $wpl_add_new_template ) $stylesheet_url = $wpl_plugin_url . '/templates/default/default.css';
+					    	// echo "loading stylesheet $stylesheet_url <br>";
 
-				        // unstyle editor content
-				        add_filter( 'mce_css', create_function('', 'return "'.$stylesheet_url.'";') ); 
+					        // unstyle editor content
+					        add_filter( 'mce_css', create_function('', 'return "'.$stylesheet_url.'";') ); 
 
-				        // default settings
-				        $settings = array( 
-				            'wpautop' => false, 
-				            'media_buttons'=>true,
-				            'teeny'=>false, 
-				            'textarea_name' => 'wpl_e2e_tpl_html' 
-				        );
-				    ?>
-				    <div id="wp-editor-wrapper">
-				        <!-- <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" /> -->
-				        <!-- <input type="hidden" name="action" value="saveListingTemplate" /> -->
-				        <input type="hidden" name="wpl_e2e_filename" value="<?php echo $wpl_item['template_path'] ?>" />
-				        <?php wp_editor( $wpl_html, 'tpl_html', $settings ); ?> 
-				    </div>
-				    <p>&nbsp;</p>
+					        // default settings
+					        $settings = array( 
+					            'wpautop' => false, 
+					            'media_buttons'=>true,
+					            'teeny'=>false, 
+					            'textarea_name' => 'wpl_e2e_tpl_html' 
+					        );
+					    ?>
+					    <div id="wp-editor-wrapper">
+					        <!-- <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" /> -->
+					        <!-- <input type="hidden" name="action" value="saveListingTemplate" /> -->
+					        <input type="hidden" name="wpl_e2e_filename" value="<?php echo $wpl_item['template_path'] ?>" />
+					        <?php wp_editor( $wpl_html, 'tpl_html', $settings ); ?> 
+					    </div>
+					    <p><i>Note: You can disable the WYSIWYG editor at WP-Lister &raquo; Settings &raquo; Advanced.</i></p>
+					    <p>&nbsp;</p>
+					
+					<?php else: ?>
+
+					    <h2>Template Content</h2>
+
+					    <div id="html-editor-wrapper">
+					    	<textarea name="wpl_e2e_tpl_html"><?php echo $wpl_html ?></textarea>
+					    	<div id="html_editor"></div>
+					    </div>
+					    <p><i>You have disabled the WYSIWYG editor.</i></p>
+					    <p>&nbsp;</p>
+				    
+					<?php endif; ?>
 				    
 				    <h2>Stylesheet</h2>
 
@@ -456,6 +474,30 @@
 
 	<?php if ( get_option('wplister_log_level') > 6 ): ?>
 	<pre><?php print_r($wpl_item); ?></pre>
+	<?php endif; ?>
+
+	<?php if ( $wpl_disable_wysiwyg_editor == 1 ) : ?>
+	<script type="text/javascript">
+		jQuery( document ).ready( function () {
+
+			    var html_editor = ace.edit("html_editor");
+			    var html_textarea = jQuery('textarea[name="wpl_e2e_tpl_html"]').hide();
+
+			    html_editor.setTheme("ace/theme/chrome");
+			    html_editor.setShowPrintMargin( false );
+
+			    var HtmlMode = require("ace/mode/html").Mode;
+			    html_editor.getSession().setMode(new HtmlMode());
+	
+			    // connect editors with textareas
+			    html_editor.getSession().setValue(html_textarea.val());
+
+			    html_editor.getSession().on('change', function(){
+					html_textarea.val(html_editor.getSession().getValue());
+				});
+
+		});	
+	</script>
 	<?php endif; ?>
 
 
