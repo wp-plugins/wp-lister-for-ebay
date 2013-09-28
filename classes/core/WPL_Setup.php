@@ -671,6 +671,21 @@ class WPL_Setup extends WPL_Core {
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
+		// upgrade to version 23  (1.2.7.3)
+		if ( 23 > $db_version ) {
+			$new_db_version = 23;
+
+			// fetch user defined shipping discount profiles
+			if ( get_option('wplister_ebay_token') != '' ) {
+				$this->initEC();
+				$result = $this->EC->loadShippingDiscountProfiles();
+				$this->EC->closeEbay();		
+			}
+			
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
 
 
 		// show update message

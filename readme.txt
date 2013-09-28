@@ -89,6 +89,34 @@ Already working on it. Expect it this summer.
 2. Profile Editor
 
 == Changelog ==
+= 1.2.8 =
+* added clear log button and show current db log size
+* updated german localization 
+
+= 1.2.7.6 =
+* fetch available returns within options from selected eBay site when updating eBay details
+* show warning if local category is mapped to non-leaf ebay category on category mappings page 
+
+= 1.2.7.5 =
+* fixed wrong quantity issue when revising variable products that were imported from eBay 
+* fixed check for changed shipping address on orders and transactions
+* use wp_localize_script to allow translation of javascript code 
+
+= 1.2.7.4 =
+* update billing address when updating an order or transaction 
+* show either transactions or orders page in menu and toolbar 
+* fixed tooltip display issue on Firefox 
+
+= 1.2.7.3 =
+* added support for shipping discount profiles (beta) 
+* improved link removal for multiple links per line
+* fixed possible issue on processing GetItem results (on some MySQL servers)
+
+= 1.2.7.2 =
+* added option to set local timezone 
+* convert order creation date from UTC to local time 
+* update shipping address when updating an order or transaction 
+
 = 1.2.7.1 =
 * added option to disable the WP wysiwyg editor for editing listing templates 
 * fixed issue when listing variations with individual variation images on the free version of WP-Lister 

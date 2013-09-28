@@ -337,14 +337,6 @@ class TransactionsModel extends WPL_Model {
 
 	}
 
-	// convert 2013-02-14T08:00:58.000Z to 2013-02-14 08:00:58
-	function convertEbayDateToSql( $ebay_date ) {
-		$search = array( 'T', '.000Z' );
-		$replace = array( ' ', '' );
-		$sql_date = str_replace( $search, $replace, $ebay_date );
-		return $sql_date;
-	}
-
 	function mapItemDetailToDB( $Detail ) {
 		//#type $Detail TransactionType
 

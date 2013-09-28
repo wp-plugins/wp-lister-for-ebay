@@ -194,6 +194,53 @@ class EbayShippingModel extends WPL_Model {
 	}
 	
 	
+	
+	function downloadShippingDiscountProfiles($session)
+	{
+		$this->logger->info( "downloadShippingDiscountProfiles()" );
+		$this->initServiceProxy($session);
+		
+		// download shipping discount profiles 
+		$req = new GetShippingDiscountProfilesRequestType();
+		
+		$res = $this->_cs->GetShippingDiscountProfiles($req);
+
+		// handle response and check if successful
+		if ( $this->handleResponse($res) ) {
+
+			// save array of discount profiles 
+			$shipping_discount_profiles = array();
+			// echo "<pre>";print_r($res);echo"</pre>";#die();
+
+			// FlatShippingDiscount
+			foreach ($res->FlatShippingDiscount->DiscountProfile as $Detail) {
+				$profile = new stdClass();
+				$profile->DiscountProfileID        = $Detail->DiscountProfileID;
+				$profile->DiscountProfileName      = $Detail->DiscountProfileName != '' ? $Detail->DiscountProfileName : 'default';
+				$profile->EachAdditionalAmount     = $Detail->EachAdditionalAmount->value;
+				$profile->EachAdditionalAmountOff  = $Detail->EachAdditionalAmountOff->value;
+				$profile->EachAdditionalPercentOff = $Detail->EachAdditionalPercentOff->value;
+				$shipping_discount_profiles['FlatShippingDiscount'][ $Detail->DiscountProfileID ] = $profile;
+			}
+
+			// CalculatedShippingDiscount
+			foreach ($res->CalculatedShippingDiscount->DiscountProfile as $Detail) {
+				$profile = new stdClass();
+				$profile->DiscountProfileID        = $Detail->DiscountProfileID;
+				$profile->DiscountProfileName      = $Detail->DiscountProfileName != '' ? $Detail->DiscountProfileName : 'default';
+				$profile->EachAdditionalAmount     = $Detail->EachAdditionalAmount->value;
+				$profile->EachAdditionalAmountOff  = $Detail->EachAdditionalAmountOff->value;
+				$profile->EachAdditionalPercentOff = $Detail->EachAdditionalPercentOff->value;
+				$shipping_discount_profiles['CalculatedShippingDiscount'][ $Detail->DiscountProfileID ] = $profile;
+			}			
+			
+			update_option('wplister_ShippingDiscountProfiles', $shipping_discount_profiles);
+
+		} // call successful
+				
+	}
+	
+	
 
 
 	

@@ -894,10 +894,25 @@ class WpLister_Product_MetaBox {
 		$wpl_calc_shipping_enabled       = in_array( get_option('wplister_ebay_site_id'), array(0,2,15,100) );
 		$wpl_available_shipping_packages = get_option('wplister_ShippingPackageDetails');
 
+		// fetch available shipping discount profiles
+		$wpl_shipping_flat_profiles = array();
+		$wpl_shipping_calc_profiles = array();
+	    $ShippingDiscountProfiles = get_option('wplister_ShippingDiscountProfiles', array() );
+		if ( isset( $ShippingDiscountProfiles['FlatShippingDiscount'] ) ) {
+			$wpl_shipping_flat_profiles = $ShippingDiscountProfiles['FlatShippingDiscount'];
+		}
+		if ( isset( $ShippingDiscountProfiles['CalculatedShippingDiscount'] ) ) {
+			$wpl_shipping_calc_profiles = $ShippingDiscountProfiles['CalculatedShippingDiscount'];
+		}
+
 		// make sure that at least one payment and shipping option exist
 		$item_details['loc_shipping_options'] = ProfilesModel::fixShippingArray( get_post_meta( $post->ID, '_ebay_loc_shipping_options', true ) );
 		$item_details['int_shipping_options'] = ProfilesModel::fixShippingArray( get_post_meta( $post->ID, '_ebay_int_shipping_options', true ) );
 		
+		$item_details['shipping_loc_calc_profile']           = get_post_meta( $post->ID, '_ebay_shipping_loc_calc_profile', true );
+		$item_details['shipping_loc_flat_profile']           = get_post_meta( $post->ID, '_ebay_shipping_loc_flat_profile', true );
+		$item_details['shipping_int_calc_profile']           = get_post_meta( $post->ID, '_ebay_shipping_int_calc_profile', true );
+		$item_details['shipping_int_flat_profile']           = get_post_meta( $post->ID, '_ebay_shipping_int_flat_profile', true );
 		$item_details['PackagingHandlingCosts']              = get_post_meta( $post->ID, '_ebay_PackagingHandlingCosts', true );
 		$item_details['InternationalPackagingHandlingCosts'] = get_post_meta( $post->ID, '_ebay_InternationalPackagingHandlingCosts', true );
 		$item_details['shipping_service_type']               = get_post_meta( $post->ID, '_ebay_shipping_service_type', true );
@@ -998,6 +1013,11 @@ class WpLister_Product_MetaBox {
 				update_post_meta( $post_id, '_ebay_PackagingHandlingCosts', esc_attr( @$_POST['wpl_e2e_PackagingHandlingCosts'] ) );
 				update_post_meta( $post_id, '_ebay_InternationalPackagingHandlingCosts', esc_attr( @$_POST['wpl_e2e_InternationalPackagingHandlingCosts'] ) );
 
+				update_post_meta( $post_id, '_ebay_shipping_loc_flat_profile', esc_attr( @$_POST['wpl_e2e_shipping_loc_flat_profile'] ) );
+				update_post_meta( $post_id, '_ebay_shipping_int_flat_profile', esc_attr( @$_POST['wpl_e2e_shipping_int_flat_profile'] ) );
+				update_post_meta( $post_id, '_ebay_shipping_loc_calc_profile', esc_attr( @$_POST['wpl_e2e_shipping_loc_calc_profile'] ) );
+				update_post_meta( $post_id, '_ebay_shipping_int_calc_profile', esc_attr( @$_POST['wpl_e2e_shipping_int_calc_profile'] ) );
+
 			} else {
 
 				delete_post_meta( $post_id, '_ebay_shipping_service_type' );
@@ -1006,6 +1026,10 @@ class WpLister_Product_MetaBox {
 				delete_post_meta( $post_id, '_ebay_shipping_package' );
 				delete_post_meta( $post_id, '_ebay_PackagingHandlingCosts' );
 				delete_post_meta( $post_id, '_ebay_InternationalPackagingHandlingCosts' );
+				delete_post_meta( $post_id, '_ebay_shipping_loc_flat_profile' );
+				delete_post_meta( $post_id, '_ebay_shipping_int_flat_profile' );
+				delete_post_meta( $post_id, '_ebay_shipping_loc_calc_profile' );
+				delete_post_meta( $post_id, '_ebay_shipping_int_calc_profile' );
 
 			}
 			// echo "<pre>";print_r($_POST);echo"</pre>";die();

@@ -212,6 +212,20 @@
 								<?php echo __('Select the editor you want to use to edit listing templates.','wplister'); ?><br>
 							</p>
 
+							<label for="wpl-option-local_timezone" class="text_label">
+								<?php echo __('Local timezone','wplister') ?>
+                                <?php wplister_tooltip('This is currently used to convert the order creation date from UTC to local time.') ?>
+							</label>
+							<select id="wpl-option-local_timezone" name="wpl_e2e_option_local_timezone" class="required-entry select">
+								<option value="">-- <?php echo __('no timezone selected','wplister'); ?> --</option>
+								<?php foreach ($wpl_timezones as $tz_id => $tz_name) : ?>
+									<option value="<?php echo $tz_id ?>" <?php if ( $wpl_option_local_timezone == $tz_id ): ?>selected="selected"<?php endif; ?>><?php echo $tz_name ?></option>					
+								<?php endforeach; ?>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Select your local timezone.','wplister'); ?><br>
+							</p>
+
 						</div>
 					</div>
 

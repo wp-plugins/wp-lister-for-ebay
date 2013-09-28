@@ -402,6 +402,18 @@ class EbayCategoriesModel extends WPL_Model {
 		return $value;		
 	}
 
+	function getCategoryType( $id ) {
+		global $wpdb;	
+		$this->tablename = $wpdb->prefix . self::table;
+		$value = $wpdb->get_var("
+			SELECT leaf 
+			FROM $this->tablename
+			WHERE cat_id = '$id'
+		");		
+
+		return $value ? 'leaf' : 'parent';		
+	}
+
 	function getChildrenOf( $id ) {
 		global $wpdb;	
 		$this->tablename = $wpdb->prefix . self::table;
@@ -425,6 +437,18 @@ class EbayCategoriesModel extends WPL_Model {
 		");		
 
 		return $value;		
+	}
+	function getStoreCategoryType( $id ) {
+		global $wpdb;	
+		// $this->tablename = $wpdb->prefix . self::table;
+		$this->tablename = $wpdb->prefix . 'ebay_store_categories';
+		$value = $wpdb->get_var("
+			SELECT leaf 
+			FROM $this->tablename
+			WHERE cat_id = '$id'
+		");		
+
+		return $value ? 'leaf' : 'parent';		
 	}
 	function getChildrenOfStoreCategory( $id ) {
 		global $wpdb;	

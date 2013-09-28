@@ -91,6 +91,40 @@ class EbayPaymentModel extends WPL_Model {
 				
 	}
 	
+	function downloadReturnPolicyDetails($session)
+	{
+		$this->logger->info( "downloadReturnPolicyDetails()" );
+		$this->initServiceProxy($session);
+		
+		// download ebay details 
+		$req = new GeteBayDetailsRequestType();
+        $req->setDetailName( 'ReturnPolicyDetails' );
+		
+		$res = $this->_cs->GeteBayDetails($req);
+
+		// handle response and check if successful
+		if ( $this->handleResponse($res) ) {
+
+			// save array of ReturnsWithin options
+			$ReturnsWithinOptions = array();
+			foreach ($res->ReturnPolicyDetails->ReturnsWithin as $Detail) {
+				$ReturnsWithinOptions[ $Detail->ReturnsWithinOption ] = $Detail->Description;
+			}
+			
+			update_option('wplister_ReturnsWithinOptions', $ReturnsWithinOptions);
+
+			// save array of ShippingCostPaidBy options
+			$ShippingCostPaidByOptions = array();
+			foreach ($res->ReturnPolicyDetails->ShippingCostPaidBy as $Detail) {
+				$ShippingCostPaidByOptions[ $Detail->ShippingCostPaidByOption ] = $Detail->Description;
+			}
+			
+			update_option('wplister_ShippingCostPaidByOptions', $ShippingCostPaidByOptions);
+
+		} // call successful
+				
+	}
+	
 	
 	
 	/* the following methods could go into another class, since they use wpdb instead of EbatNs_DatabaseProvider */

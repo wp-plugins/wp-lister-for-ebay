@@ -761,7 +761,11 @@ class ListingsModel extends WPL_Model {
 		$this->logger->debug('Detail: '.print_r($Detail,1) );
 		$this->logger->debug('data: '.print_r($data,1) );
 
-		$wpdb->update( $this->tablename, $data, array( 'ebay_id' => $Detail->ItemID ) );
+		$result = $wpdb->update( $this->tablename, $data, array( 'ebay_id' => $Detail->ItemID ) );
+		if ( $result === false ) {
+			$this->logger->info('sql: '.$wpdb->last_query );
+			$this->logger->info( mysql_error() );		
+		}
 
 
 		// check for an updated ItemID 
@@ -801,8 +805,8 @@ class ListingsModel extends WPL_Model {
 		$data['auction_title'] 		= $Detail->Title;
 		$data['auction_type'] 		= $Detail->ListingType;
 		$data['listing_duration'] 	= $Detail->ListingDuration;
-		$data['date_published'] 	= $Detail->ListingDetails->StartTime;
-		$data['end_date'] 			= $Detail->ListingDetails->EndTime;
+		$data['date_published']     = $this->convertEbayDateToSql( $Detail->ListingDetails->StartTime );
+		$data['end_date']     		= $this->convertEbayDateToSql( $Detail->ListingDetails->EndTime );
 		$data['price'] 				= $Detail->SellingStatus->CurrentPrice->value;
 		$data['quantity_sold'] 		= $Detail->SellingStatus->QuantitySold;
 		$data['quantity'] 			= $Detail->Quantity;

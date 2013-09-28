@@ -224,7 +224,9 @@ class TemplatesModel extends WPL_Model {
  		if ( 'default' == get_option( 'wplister_remove_links', 'default' ) ) {
 			/* $item['post_content'] = preg_replace('#<a.*?>([^<]*)</a>#i', '$1', $item['post_content'] ); */
 			// regex improved to work in cases like <a ...><b>text</b></a>
-			$item['post_content'] = preg_replace('#<a.*?>(.*)</a>#iU', '$1', $item['post_content'] );
+			/* $item['post_content'] = preg_replace('#<a.*?>(.*)</a>#iU', '$1', $item['post_content'] ); */
+			// improved for multiple links per line case
+			$item['post_content'] = preg_replace('#<a.*?>(.*?)</a>#i', ' $1 ', $item['post_content'] );
  		}
 
  		// fixed whitespace pasted from ms word

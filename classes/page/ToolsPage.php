@@ -225,10 +225,20 @@ class ToolsPage extends WPL_Page {
         wp_enqueue_script('jquery-ui-core');
         wp_enqueue_script('jquery-ui-progressbar');
 
-		// jqueryFileTree
+		// JobRunner
 		wp_register_script( 'wpl_JobRunner', self::$PLUGIN_URL.'/js/classes/JobRunner.js', array( 'jquery', 'jquery-ui-core', 'jquery-ui-progressbar' ), WPLISTER_VERSION );
 		wp_enqueue_script( 'wpl_JobRunner' );
 
+		wp_localize_script('wpl_JobRunner', 'wpl_JobRunner_i18n', array(
+				'msg_loading_tasks' 	=> __('fetching list of tasks', 'wplister').'...',
+				'msg_estimating_time' 	=> __('estimating time left', 'wplister').'...',
+				'msg_finishing_up' 		=> __('finishing up', 'wplister').'...',
+				'msg_all_completed' 	=> __('All {0} tasks have been completed.', 'wplister'),
+				'msg_processing' 		=> __('processing {0} of {1}', 'wplister'),
+				'msg_time_left' 		=> __('about {0} remaining', 'wplister'),
+				'footer_dont_close' 	=> __("Please don't close this window until all tasks are completed.", 'wplister')
+			)
+		);
 
 	    // jQuery UI Dialog
     	// wp_enqueue_style( 'wp-jquery-ui-dialog' );

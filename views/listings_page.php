@@ -112,20 +112,20 @@
 		
 				// ask again before ending items
 				jQuery('.row-actions .end_item a').on('click', function() {
-					return confirm("<?php echo __('Are you sure you want to end this listing?.','wplister') ?>");
+					return confirm("<?php echo __('Are you sure you want to end this listing?','wplister') ?>");
 				})
 	
 				// ask again before relisting items
 				jQuery('.row-actions .relist a').on('click', function() {
-					return confirm("<?php echo __('Are you sure you want to relist this ended listing?.','wplister') ?>");
+					return confirm("<?php echo __('Are you sure you want to relist this ended listing?','wplister') ?>");
 				})
 	
 				// ask again before deleting items
 				jQuery('.row-actions .delete a').on('click', function() {
-					return confirm("<?php echo __('Are you sure you want to remove this listing from WP-Lister?.','wplister') ?>");
+					return confirm("<?php echo __('Are you sure you want to remove this listing from WP-Lister?','wplister') ?>");
 				})
 				jQuery('#wpl_dupe_details a.delete').on('click', function() {
-					return confirm("<?php echo __('Are you sure you want to remove this listing from WP-Lister?.','wplister') ?>");
+					return confirm("<?php echo __('Are you sure you want to remove this listing from WP-Lister?','wplister') ?>");
 				})
 	
 			}

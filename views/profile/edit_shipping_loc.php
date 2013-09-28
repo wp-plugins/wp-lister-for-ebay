@@ -103,11 +103,41 @@
 
 
 								<label class="text_label">
+									<?php echo __('Shipping discount profile','wplister'); ?>
+		                            <?php wplister_tooltip('<b>Shipping Discount Profile</b><br>If you have created shipping discount profiles in your eBay account you can select one of them here to allow more control over shipping fees for combined orders.') ?>
+								</label>
+								<select name="wpl_e2e_shipping_loc_calc_profile" id="wpl-shipping_loc_calc_profile" 
+										title="Type" class="required-entry select select_shipping_loc_calc_profile" style="width:auto">
+									<option value="">-- <?php echo __('no discount profile','wplister') ?> --</option>
+									<?php foreach ($wpl_shipping_calc_profiles as $shipping_profile) : ?>
+										<option value="<?php echo $shipping_profile->DiscountProfileID ?>" <?php if ( @$item_details['shipping_loc_calc_profile'] == $shipping_profile->DiscountProfileID ): ?>selected="selected"<?php endif; ?>><?php echo $shipping_profile->DiscountProfileName ?></option>
+									<?php endforeach; ?>
+								</select>
+								<br class="clear" />
+
+
+								<label class="text_label">
 									<?php echo __('Packaging and handling costs','wplister'); ?>
 		                            <?php wplister_tooltip('Fees a seller might assess for the shipping of the item (in addition to whatever the shipping service might charge).') ?>
 								</label>
 								<input type="text" name="wpl_e2e_PackagingHandlingCosts" 
 									value="<?php echo @$item_details['PackagingHandlingCosts']; ?>" class="" />
+								
+							</div>
+
+							<div class="service_table_flat loc_service_table_flat" style="border-top:1px solid #ccc; margin-top:10px; padding-top:10px;">
+
+								<label class="text_label">
+									<?php echo __('Shipping discount profile','wplister'); ?>
+		                            <?php wplister_tooltip('<b>Shipping Discount Profile</b><br>If you have created shipping discount profiles in your eBay account you can select one of them here to allow more control over shipping fees for combined orders.') ?>
+								</label>
+								<select name="wpl_e2e_shipping_loc_flat_profile" id="wpl-shipping_loc_flat_profile" 
+										title="Type" class="required-entry select select_shipping_loc_flat_profile" style="width:auto">
+									<option value="">-- <?php echo __('no discount profile','wplister') ?> --</option>
+									<?php foreach ($wpl_shipping_flat_profiles as $shipping_profile) : ?>
+										<option value="<?php echo $shipping_profile->DiscountProfileID ?>" <?php if ( @$item_details['shipping_loc_flat_profile'] == $shipping_profile->DiscountProfileID ): ?>selected="selected"<?php endif; ?>><?php echo $shipping_profile->DiscountProfileName ?></option>
+									<?php endforeach; ?>
+								</select>
 								
 							</div>
 

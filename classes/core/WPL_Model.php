@@ -281,5 +281,61 @@ class WPL_Model {
 
 	}
 
+	// convert 2013-02-14T08:00:58.000Z to 2013-02-14 08:00:58
+	public function convertEbayDateToSql( $ebay_date ) {
+		$search = array( 'T', '.000Z' );
+		$replace = array( ' ', '' );
+		$sql_date = str_replace( $search, $replace, $ebay_date );
+		return $sql_date;
+	}
+
+
+	public function convertTimestampToLocalTime( $timestamp ) {
+
+		// set this to the time zone provided by the user
+		$tz = get_option('wplister_local_timezone');
+		if ( ! $tz ) $tz = 'Europe/London';
+		 
+		// create the DateTimeZone object for later
+		$dtzone = new DateTimeZone($tz);
+		 
+		// first convert the timestamp into a string representing the local time
+		$time = date('r', $timestamp);
+		 
+		// now create the DateTime object for this time
+		$dtime = new DateTime($time);
+		 
+		// convert this to the user's timezone using the DateTimeZone object
+		$dtime->setTimeZone($dtzone);
+		 
+		// print the time using your preferred format
+		// $time = $dtime->format('g:i A m/d/y');
+		$time = $dtime->format('Y-m-d H:i:s'); // SQL date format
+
+		return $time;
+	}
+
+	public function convertLocalTimeToTimestamp( $time ) {
+
+		// time to convert (just an example)
+		// $time = 'Tuesday, April 21, 2009 2:32:46 PM';
+		 
+		// set this to the time zone provided by the user
+		$tz = get_option('wplister_local_timezone');
+		if ( ! $tz ) $tz = 'Europe/London';
+		 
+		// create the DateTimeZone object for later
+		$dtzone = new DateTimeZone($tz);
+		 
+		// now create the DateTime object for this time and user time zone
+		$dtime = new DateTime($time, $dtzone);
+		 
+		// print the timestamp
+		$timestamp = $dtime->format('U');
+
+		return $timestamp;
+	}
+
+
 }
 

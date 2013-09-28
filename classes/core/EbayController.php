@@ -302,6 +302,7 @@ class EbayController {
         $sm->downloadShippingDetails( $this->session );
         $sm->downloadDispatchTimes( $this->session );      
         $sm->downloadShippingPackages( $this->session );      
+        $sm->downloadShippingDiscountProfiles( $this->session );      
     }
 
     // load shipping services and insert to db
@@ -309,6 +310,7 @@ class EbayController {
         $sm = new EbayPaymentModel();
         $sm->downloadPaymentDetails( $this->session );      
         $sm->downloadMinimumStartPrices( $this->session );      
+        $sm->downloadReturnPolicyDetails( $this->session );      
     }
 
     // load available dispatch times
@@ -321,6 +323,12 @@ class EbayController {
     public function loadShippingPackages(){ 
         $sm = new EbayShippingModel();
         return $sm->downloadShippingPackages( $this->session );      
+    }
+
+    // load available shipping discount profiles
+    public function loadShippingDiscountProfiles(){ 
+        $sm = new EbayShippingModel();
+        return $sm->downloadShippingDiscountProfiles( $this->session );      
     }
 
 

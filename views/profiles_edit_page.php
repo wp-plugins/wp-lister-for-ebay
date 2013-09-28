@@ -272,11 +272,23 @@
                                 <?php wplister_tooltip('The buyer can return the item within this period of time from the day they receive the item. Use the description field to explain the policy details.') ?>
 							</label>
 							<select id="wpl-text-returns_within" name="wpl_e2e_returns_within" class=" required-entry select">
+							<?php $ReturnsWithinOptions = get_option('wplister_ReturnsWithinOptions') ?>
+							<?php if ( isset( $ReturnsWithinOptions ) && is_array( $ReturnsWithinOptions ) ): ?>
+								<?php foreach ($ReturnsWithinOptions as $option_id => $desc) : ?>
+									<option value="<?php echo $option_id ?>" 
+										<?php if ( $item_details['returns_within'] == $option_id ) : ?>
+											selected="selected"
+										<?php endif; ?>
+										><?php echo $desc ?></option>
+								<?php endforeach; ?>
+							<?php else: ?>
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 								<option value="Days_10" <?php if ( $item_details['returns_within'] == 'Days_10' ): ?>selected="selected"<?php endif; ?>>10 <?php echo __('days','wplister'); ?></option>
 								<option value="Days_14" <?php if ( $item_details['returns_within'] == 'Days_14' ): ?>selected="selected"<?php endif; ?>>14 <?php echo __('days','wplister'); ?></option>
 								<option value="Days_30" <?php if ( $item_details['returns_within'] == 'Days_30' ): ?>selected="selected"<?php endif; ?>>30 <?php echo __('days','wplister'); ?></option>
 								<option value="Days_60" <?php if ( $item_details['returns_within'] == 'Days_60' ): ?>selected="selected"<?php endif; ?>>60 <?php echo __('days','wplister'); ?></option>
+								<option value="Months_1" <?php if ( $item_details['returns_within'] == 'Months_1' ): ?>selected="selected"<?php endif; ?>>3 <?php echo __('month','wplister'); ?></option>
+							<?php endif; ?>
 							</select>
 							<br class="clear" />
 

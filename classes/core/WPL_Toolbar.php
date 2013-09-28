@@ -42,15 +42,32 @@ class WPLister_Toolbar  {
 		);
 		$wp_admin_bar->add_node($args);
 
-		// Orders page
-		$args = array(
-			'id'    => 'wplister_orders',
-			'title' => __('Orders', 'wplister'),
-			'href'  => admin_url( 'admin.php?page=wplister-orders' ),
-			'parent'  => 'wplister_top',
-			'meta'  => array('class' => 'wplister-toolbar-page')
-		);
-		$wp_admin_bar->add_node($args);
+		$mode = get_option( 'wplister_ebay_update_mode', 'transaction' );
+		if ( $mode == 'order' ) {
+
+			// Orders page
+			$args = array(
+				'id'    => 'wplister_orders',
+				'title' => __('Orders', 'wplister'),
+				'href'  => admin_url( 'admin.php?page=wplister-orders' ),
+				'parent'  => 'wplister_top',
+				'meta'  => array('class' => 'wplister-toolbar-page')
+			);
+			$wp_admin_bar->add_node($args);
+
+		} else {
+
+			// Transactions page
+			$args = array(
+				'id'    => 'wplister_transactions',
+				'title' => __('Transactions', 'wplister'),
+				'href'  => admin_url( 'admin.php?page=wplister-transactions' ),
+				'parent'  => 'wplister_top',
+				'meta'  => array('class' => 'wplister-toolbar-page')
+			);
+			$wp_admin_bar->add_node($args);
+
+		}
 
 		// Settings page
 		$args = array(

@@ -152,6 +152,18 @@ class ProfilesPage extends WPL_Page {
 		}
 		// echo "<pre>";print_r($available_conditions);echo"</pre>";
 
+		// fetch available shipping discount profiles
+		$shipping_flat_profiles = array();
+		$shipping_calc_profiles = array();
+	    $ShippingDiscountProfiles = self::getOption('ShippingDiscountProfiles', array() );
+		if ( isset( $ShippingDiscountProfiles['FlatShippingDiscount'] ) ) {
+			$shipping_flat_profiles = $ShippingDiscountProfiles['FlatShippingDiscount'];
+		}
+		if ( isset( $ShippingDiscountProfiles['CalculatedShippingDiscount'] ) ) {
+			$shipping_calc_profiles = $ShippingDiscountProfiles['CalculatedShippingDiscount'];
+		}
+		// echo "<pre>";print_r($shipping_flat_profiles);echo"</pre>";
+
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,
 			'message'					=> $this->message,
@@ -176,6 +188,8 @@ class ProfilesPage extends WPL_Page {
 			'available_dispatch_times'  => $available_dispatch_times,
 			'available_conditions'  	=> $available_conditions,
 			'available_shipping_packages' => $available_shipping_packages,
+			'shipping_flat_profiles'  	=> $shipping_flat_profiles,
+			'shipping_calc_profiles'  	=> $shipping_calc_profiles,
 			
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-profiles'
 		);

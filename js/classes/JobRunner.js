@@ -161,7 +161,8 @@ WpLister.JobRunner = function () {
     var runTask = function ( task ) {
 
         // estimate time left
-        var time_left = 'estimating time left...';
+        // var time_left = 'estimating time left...';
+        var time_left = wpl_JobRunner_i18n.msg_estimating_time;
         if (self.currentTask == 0) {
             self.time_started = new Date().getTime() / 1000;
         } else {
@@ -170,14 +171,18 @@ WpLister.JobRunner = function () {
             time_estimated = time_running / self.currentTask * self.jobsQueue.length;
             time_left = time_estimated - time_running;
             if ( time_left > 60 ) {
-                time_left = 'about '+Math.round(time_left/60)+' min. remaining';
+                time_left = Math.round(time_left/60) + ' min.';
             } else {
-                time_left = 'about '+Math.round(time_left)+' sec. remaining';
+                time_left = Math.round(time_left) + ' sec.';
             }
+            // time_left = 'about {0} remaining'.format( time_left )
+            time_left = wpl_JobRunner_i18n.msg_time_left.format( time_left )
         }
 
         // update message
-        jQuery('#jobs_message').html('processing '+(self.currentTask+1)+' of '+self.jobsQueue.length + ' - ' + time_left);
+        // var processing_msg = 'processing {0} of {1}'.format( self.currentTask+1, self.jobsQueue.length );
+        var processing_msg = wpl_JobRunner_i18n.msg_processing.format( self.currentTask+1, self.jobsQueue.length );
+        jQuery('#jobs_message').html( processing_msg + ' - ' + time_left );
         this.updateProgressBar( (self.currentTask + 1) / self.jobsQueue.length );
 
         // create new log row for currentTask
@@ -283,7 +288,8 @@ WpLister.JobRunner = function () {
                         self.runTask( self.jobsQueue[ self.currentTask ] );
                     } else {
                         // all tasks complete
-                        jQuery('#jobs_message').html('finishing up...');
+                        // jQuery('#jobs_message').html('finishing up...');
+                        jQuery('#jobs_message').html( wpl_JobRunner_i18n.msg_finishing_up );
                         self.completeJob();
                     }
 
@@ -330,7 +336,8 @@ WpLister.JobRunner = function () {
         } else {
 
             // all tasks complete
-            jQuery('#jobs_message').html('finishing up...');
+            // jQuery('#jobs_message').html('finishing up...');
+            jQuery('#jobs_message').html( wpl_JobRunner_i18n.msg_finishing_up );
             self.completeJob();
 
         }
@@ -357,7 +364,9 @@ WpLister.JobRunner = function () {
             // jQuery('#jobs_window .btn_close').show();
 
             if ( self.jobsQueue.length > 0 ) {
-                jQuery('#job_bottom_notice').html( 'All ' + self.jobsQueue.length + ' tasks have been completed.' );
+                // jQuery('#job_bottom_notice').html( 'All ' + self.jobsQueue.length + ' tasks have been completed.' );
+                // jQuery('#job_bottom_notice').html( 'All {0} tasks have been completed.'.format( self.jobsQueue.length ) );
+                jQuery('#job_bottom_notice').html( wpl_JobRunner_i18n.msg_all_completed.format( self.jobsQueue.length ) );
 
                 // if there were any tasks completed, refresh the current page when closing the jobs window
                 jQuery('#jobs_window .btn_close').click( function(event) {
@@ -398,8 +407,10 @@ WpLister.JobRunner = function () {
         var tbURL = "#TB_inline?height="+tbHeight+"&width=500&modal=true&inlineId=jobs_window_container"; 
         jQuery('#jobs_log').html('').css('height', tbHeight - 130 );
         jQuery('#jobs_title').html( title );
-        jQuery('#jobs_message').html('fetching list of tasks...');
-        jQuery('#job_bottom_notice').html( "Please don't close this window until all tasks are completed." );
+        // jQuery('#jobs_message').html('fetching list of tasks...');
+        jQuery('#jobs_message').html( wpl_JobRunner_i18n.msg_loading_tasks );
+        // jQuery('#job_bottom_notice').html( "Please don't close this window until all tasks are completed." );
+        jQuery('#job_bottom_notice').html( wpl_JobRunner_i18n.footer_dont_close );
 
         // init progressbar
         jQuery("#progressbar").progressbar({ value: 0.01 });
@@ -456,4 +467,19 @@ WpLister.JobRunner = function () {
         });
     }
 })( jQuery );
+
+
+// implement String.format()
+// http://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format
+if (!String.prototype.format) {
+    String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) { 
+            return typeof args[number] != 'undefined'
+                ? args[number]
+                : match
+            ;
+        });
+    };
+}
 

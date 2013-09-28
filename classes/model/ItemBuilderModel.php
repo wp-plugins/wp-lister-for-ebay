@@ -616,6 +616,32 @@ class ItemBuilderModel extends WPL_Model {
 			$shippingDetails->setCalculatedShippingRate( $calculatedShippingRate );
 		}
 
+
+		// set local shipping discount profile
+		if ( $isFlatLoc ) {
+			$local_profile_id = isset( $profile_details['shipping_loc_flat_profile'] ) ?  $profile_details['shipping_loc_flat_profile'] : false;			
+			if ( $custom_profile_id = get_post_meta( $post_id, '_ebay_shipping_loc_flat_profile', true ) ) $local_profile_id = $custom_profile_id;
+		} else {
+			$local_profile_id = isset( $profile_details['shipping_loc_calc_profile'] ) ?  $profile_details['shipping_loc_calc_profile'] : false;						
+			if ( $custom_profile_id = get_post_meta( $post_id, '_ebay_shipping_loc_calc_profile', true ) ) $local_profile_id = $custom_profile_id;
+		}
+		if ( $local_profile_id ) {
+			$shippingDetails->setShippingDiscountProfileID( $local_profile_id );
+		}
+
+		// set international shipping discount profile
+		if ( $isFlatLoc ) {
+			$int_profile_id = isset( $profile_details['shipping_int_flat_profile'] ) ?  $profile_details['shipping_int_flat_profile'] : false;			
+			if ( $custom_profile_id = get_post_meta( $post_id, '_ebay_shipping_int_flat_profile', true ) ) $int_profile_id = $custom_profile_id;
+		} else {
+			$int_profile_id = isset( $profile_details['shipping_int_calc_profile'] ) ?  $profile_details['shipping_int_calc_profile'] : false;						
+			if ( $custom_profile_id = get_post_meta( $post_id, '_ebay_shipping_int_calc_profile', true ) ) $int_profile_id = $custom_profile_id;
+		}
+		if ( $int_profile_id ) {
+			$shippingDetails->setInternationalShippingDiscountProfileID( $int_profile_id );
+		}
+
+
 		// global shipping
 		if ( @$profile_details['global_shipping'] == 1 ) {
 			$shippingDetails->setGlobalShipping( true ); // available since api version 781
@@ -749,7 +775,8 @@ class ItemBuilderModel extends WPL_Model {
 			$newvar->StartPrice = $this->lm->applyProfilePrice( $var['price'], $profile_details['start_price'] );
 
         	// handle variation quantity - if no quantity set in profile
-        	if ( intval( $item->Quantity ) == 0 ) {
+        	// if ( intval( $item->Quantity ) == 0 ) {
+        	if ( intval( $profile_details['quantity'] ) == 0 ) {
         		$newvar->Quantity   = intval( $var['stock'] );
         	} else {
 	        	$newvar->Quantity 	= $item->Quantity;

@@ -46,6 +46,10 @@
 			</div>
 		</form>
 
+		<div class="submit" style="padding-top: 0; float: right;">
+			<a href="admin.php?page=wplister-transactions" class="button-secondary" title="View transactions from before switching to orders"><?php echo __('View transactions','wplister') ?></a>
+		</div>
+
 	<?php endif; ?>
 
 

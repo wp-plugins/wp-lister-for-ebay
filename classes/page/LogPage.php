@@ -44,6 +44,11 @@ class LogPage extends WPL_Page {
 			}
 		}
 
+		if ( $this->requestAction() == 'wpl_clear_ebay_log' ) {
+			$this->clearLog();
+			$this->showMessage( __('Database log has been cleared.','wplister') );
+		}
+
 	}
 
 	function addScreenOptions() {
@@ -77,6 +82,7 @@ class LogPage extends WPL_Page {
 
 			// 'logs'						=> $logs,
 			'logTable'					=> $logTable,
+			'tableSize'					=> $this->getTableSize(),
 	
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-log'
 		);
@@ -134,10 +140,39 @@ class LogPage extends WPL_Page {
 
 	}
 
+	public function getTableSize() {
+		global $wpdb;
+		$dbname = $wpdb->dbname;
+		$table  = $wpdb->prefix.'ebay_log';
+
+		$sql = "
+			SELECT round(((data_length + index_length) / 1024 / 1024), 1) AS 'size' 
+			FROM information_schema.TABLES 
+			WHERE table_schema = '$dbname'
+			  AND table_name = '$table' ";
+		// echo "<pre>";print_r($sql);echo"</pre>";#die();
+
+		$size = $wpdb->get_var($sql);
+		if ( mysql_error() ) echo 'Error in deleteLogEntry(): '.mysql_error();
+
+		return $size;
+	}
+
 	public function deleteLogEntry( $id ) {
 		global $wpdb;
 		$wpdb->delete( $wpdb->prefix.'ebay_log',  array( 'id' => $id ) );
 		if ( mysql_error() ) echo 'Error in deleteLogEntry(): '.mysql_error();
+	}
+
+	public function clearLog() {
+		global $wpdb;
+		$table = $wpdb->prefix.'ebay_log';
+
+		$wpdb->query("DELETE FROM $table");
+		if ( mysql_error() ) echo 'Error in clearLog(): '.mysql_error();
+
+		$wpdb->query("OPTIMIZE TABLE $table");
+		if ( mysql_error() ) echo 'Error in clearLog(): '.mysql_error();
 	}
 
 
