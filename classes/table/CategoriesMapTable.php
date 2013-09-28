@@ -78,7 +78,7 @@ class CategoriesMapTable extends WP_List_Table {
 
         $id   = $item['term_id'];
         $name = $item['ebay_category_name'];
-        $leaf = EbayCategoriesModel::getCategoryType($id) == 'leaf' ? true : false;
+        $leaf = EbayCategoriesModel::getCategoryType( $item['ebay_category_id'] ) == 'leaf' ? true : false;
         $name = apply_filters( 'wplister_get_ebay_category_name', $name, $item['ebay_category_id'] );
 
         if ( $item['ebay_category_id'] && ! $name ) $name = '<span style="color:darkred;">' . __('Unknown category ID','wplister').': '.$item['ebay_category_id'] . '</span>';
@@ -105,7 +105,7 @@ class CategoriesMapTable extends WP_List_Table {
 
         $id   = $item['term_id'];
         $name = $item['store_category_name'];
-        $leaf = EbayCategoriesModel::getStoreCategoryType($id) == 'leaf' ? true : false;
+        $leaf = EbayCategoriesModel::getStoreCategoryType( $item['store_category_id'] ) == 'leaf' ? true : false;
         $name = apply_filters( 'wplister_get_store_category_name', $name, $item['store_category_id'] );
 
         if ( $item['store_category_id'] && ! $name ) $name = '<span style="color:darkred;">' . __('Unknown category ID','wplister').': '.$item['store_category_id'] . '</span>';
