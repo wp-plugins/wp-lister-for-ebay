@@ -196,6 +196,14 @@ class ItemBuilderModel extends WPL_Model {
 				$item->ReturnPolicy->RestockingFeeValueOption = $profile_details['RestockingFee'];
 			}
 
+			if ( ( isset($profile_details['ShippingCostPaidBy']) ) && ( $profile_details['ShippingCostPaidBy'] != '' ) ) {
+				$item->ReturnPolicy->ShippingCostPaidByOption = $profile_details['ShippingCostPaidBy'];
+			}
+
+			if ( ( isset($profile_details['RefundOption']) ) && ( $profile_details['RefundOption'] != '' ) ) {
+				$item->ReturnPolicy->RefundOption = $profile_details['RefundOption'];
+			}
+
 		} else {
 			$item->ReturnPolicy->ReturnsAcceptedOption = 'ReturnsNotAccepted';
 		}			
@@ -290,6 +298,14 @@ class ItemBuilderModel extends WPL_Model {
 			$item = $this->adjustItemForRevision( $id, $item, $post_id, $profile_details, $p );			
 		}
 	
+		// add UUID to prevent duplicate AddItem or RelistItem calls
+		if ( ! $reviseItem ) {
+			// build UUID from listing Title, product_id and today's date and hour
+			$uuid_src = $item->Title . $post_id . date('Y-m-d h');
+			$item->setUUID( md5( $uuid_src ) );
+			$this->logger->info('UUID src: '.$uuid_src);
+		}
+
 		return $item;
 
 	} /* end of buildItem() */
@@ -490,6 +506,7 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $service_type == 'calc' ) $service_type = 'Calculated';
 		$isFlatLoc = ( in_array( $service_type, array('Flat','FreightFlat','FlatDomesticCalculatedInternational') ) ) ? true : false;
 		$isFlatInt = ( in_array( $service_type, array('Flat','FreightFlat','CalculatedDomesticFlatInternational') ) ) ? true : false;
+		$hasWeight = ( in_array( $service_type, array('Calculated','FreightFlat','FlatDomesticCalculatedInternational','CalculatedDomesticFlatInternational') ) ) ? true : false;
 		$isCalcLoc = ! $isFlatLoc;
 		$isCalcInt = ! $isFlatInt;
 
@@ -516,7 +533,8 @@ class ItemBuilderModel extends WPL_Model {
 			// set shipping costs for flat services
 			if ( $isFlatLoc ) {
 				$ShippingServiceOptions->setShippingServiceCost( $price );		
-				if ( $price == 0 ) $ShippingServiceOptions->setFreeShipping( true );
+				// FreeShipping is only allowed for the first shipping service
+				if ( ( $price == 0 ) && ( $pr == 1 ) ) $ShippingServiceOptions->setFreeShipping( true );
 
 				// price for additonal items
 				if ( trim( $add_price ) == '' ) {
@@ -524,6 +542,11 @@ class ItemBuilderModel extends WPL_Model {
 				} else {
 					$ShippingServiceOptions->setShippingServiceAdditionalCost( $add_price );
 				}				
+			} else {
+				// enable FreeShipping option for calculated shipping services if specified in profile or product meta
+				$free_shipping_enabled = isset( $profile_details['shipping_loc_enable_free_shipping'] ) ? $profile_details['shipping_loc_enable_free_shipping'] : false;			
+				$free_shipping_enabled = $free_shipping_enabled || get_post_meta( $post_id, '_ebay_shipping_loc_enable_free_shipping', true );
+				if ( ( $free_shipping_enabled ) && ( $pr == 1 ) ) $ShippingServiceOptions->setFreeShipping( true );
 			}
 
 			$localShippingServices[]=$ShippingServiceOptions;
@@ -616,6 +639,27 @@ class ItemBuilderModel extends WPL_Model {
 			$shippingDetails->setCalculatedShippingRate( $calculatedShippingRate );
 		}
 
+		// set ShippingPackageDetails
+		if ( $hasWeight ) {
+			$shippingPackageDetails = new ShipPackageDetailsType();
+			
+			list( $weight_major, $weight_minor ) = ProductWrapper::getEbayWeight( $post_id );
+			$shippingPackageDetails->setWeightMajor( floatval( $weight_major) );
+			$shippingPackageDetails->setWeightMinor( floatval( $weight_minor) );
+
+			$dimensions = ProductWrapper::getDimensions( $post_id );
+			if ( trim( @$dimensions['width']  ) != '' ) $shippingPackageDetails->setPackageWidth( $dimensions['width'] );
+			if ( trim( @$dimensions['length'] ) != '' ) $shippingPackageDetails->setPackageLength( $dimensions['length'] );
+			if ( trim( @$dimensions['height'] ) != '' ) $shippingPackageDetails->setPackageDepth( $dimensions['height'] );
+
+			// debug
+			// $weight = ProductWrapper::getWeight( $post_id ) ;
+			// $this->logger->info('weight: '.print_r($weight,1));
+			// $this->logger->info('dimensions: '.print_r($dimensions,1));
+
+			$item->setShippingPackageDetails( $shippingPackageDetails );
+		}
+
 
 		// set local shipping discount profile
 		if ( $isFlatLoc ) {
@@ -642,6 +686,20 @@ class ItemBuilderModel extends WPL_Model {
 		}
 
 
+		// ShipToLocations - product level only for now
+		if ( is_array( $ShipToLocations = maybe_unserialize( get_post_meta( $post_id, '_ebay_shipping_ShipToLocations', true ) ) ) ) {
+			foreach ( $ShipToLocations as $location ) {
+				$item->addShipToLocations( $location );
+			}
+		}
+
+		// ExcludeShipToLocations - product level only for now
+		if ( is_array( $ExcludeShipToLocations = maybe_unserialize( get_post_meta( $post_id, '_ebay_shipping_ExcludeShipToLocations', true ) ) ) ) {
+			foreach ( $ExcludeShipToLocations as $location ) {
+				$shippingDetails->addExcludeShipToLocation( $location );
+			}
+		}
+
 		// global shipping
 		if ( @$profile_details['global_shipping'] == 1 ) {
 			$shippingDetails->setGlobalShipping( true ); // available since api version 781
@@ -656,6 +714,11 @@ class ItemBuilderModel extends WPL_Model {
 		}
 		if ( trim( get_post_meta( $post_id, '_ebay_payment_instructions', true ) ) != '' ) {
 			$shippingDetails->setPaymentInstructions( nl2br( get_post_meta( $post_id, '_ebay_payment_instructions', true ) ) );
+		}
+
+		// COD cost
+		if ( isset( $profile_details['cod_cost'] ) && trim( $profile_details['cod_cost'] ) ) {
+			$shippingDetails->setCODCost( $profile_details['cod_cost'] );
 		}
 		
 		// check if we have local pickup only
@@ -852,7 +915,7 @@ class ItemBuilderModel extends WPL_Model {
 
         	if ( in_array( $VariationValue, $VariationValuesForPictures ) ) {
 
-    			$image_url = $var['image'];
+    			$image_url = $this->encodeUrl( $var['image'] );
 
 
 				if ( ! $image_url ) continue;
@@ -860,7 +923,7 @@ class ItemBuilderModel extends WPL_Model {
 
 		    	$VariationSpecificPictureSet = new VariationSpecificPictureSetType();
     	    	$VariationSpecificPictureSet->setVariationSpecificValue( $VariationValue );
-        		$VariationSpecificPictureSet->addPictureURL( $this->encodeUrl( $image_url ) );
+        		$VariationSpecificPictureSet->addPictureURL( $image_url );
 
 		        // only list variation images if enabled
         		if ( @$profile_details['with_variation_images'] != '0' ) {
@@ -955,7 +1018,7 @@ class ItemBuilderModel extends WPL_Model {
 		</Variations>
 		*/
 
-	}
+	} /* end of buildVariations() */
 
 	public function getVariationImages( $post_id ) {
 
@@ -1043,12 +1106,13 @@ class ItemBuilderModel extends WPL_Model {
 			$VariationsHaveStock = false;
 			$VariationsSkuArray = array();
 			$VariationsSkuAreUnique = true;
+			$VariationsSkuMissing = false;
 
 			// check each variation
 			foreach ($item->Variations->Variation as $var) {
 				
 				// StartPrice must be greater than 0
-				if ( intval($var->StartPrice) == 0 ) {
+				if ( floatval($var->StartPrice) == 0 ) {
 					$longMessage = __('Some variations seem to have no price.','wplister');
 					$success = false;
 				}
@@ -1063,7 +1127,9 @@ class ItemBuilderModel extends WPL_Model {
 					} else {
 						$VariationsSkuArray[] = $var->SKU;
 					}
-				} 
+				} else {
+					$VariationsSkuMissing = true;
+				}
 
 				// VariationSpecifics values can't be longer than 50 characters
 				foreach ($var->VariationSpecifics->NameValueList as $spec) {
@@ -1087,6 +1153,13 @@ class ItemBuilderModel extends WPL_Model {
 				// $success = false;
 			}
 
+			if ( $VariationsSkuMissing ) {
+				$longMessage = __('Some variations are missing a SKU.','wplister');
+				$longMessage .= '<br>';
+				$longMessage .= __('It is required to assign a unique SKU to each variation to prevent inventory sync issues.','wplister');
+				// $success = false;
+			}
+
 			if ( ! $VariationsHaveStock ) {
 				$longMessage = __('None of these variations are in stock.','wplister');
 				$success = false;
@@ -1099,7 +1172,7 @@ class ItemBuilderModel extends WPL_Model {
 			// item has no variations
 
 			// StartPrice must be greater than 0
-			if ( intval($item->StartPrice) == 0 ) {
+			if ( floatval($item->StartPrice) == 0 ) {
 				$longMessage = __('Price can not be zero.','wplister');
 				$success = false;
 			}
@@ -1277,13 +1350,14 @@ class ItemBuilderModel extends WPL_Model {
 		if ( ! function_exists('get_post_thumbnail_id')) 
 		require_once( ABSPATH . 'wp-includes/post-thumbnail-template.php');
 
+		// get main product image (post thumbnail)
 		$large_image_url = ProductWrapper::getImageURL( $post_id );
-		if ( $large_image_url ) {
+		// if ( $large_image_url ) {
 			$image_url = $large_image_url;
-		} else {
-			$images = $this->getProductImagesURL( $post_id );
-			$image_url = @$images[0];
-		}
+		// } else {
+		// 	$images = $this->getProductImagesURL( $post_id ); // disabled as it could lead to infinite recursion issue
+		// 	$image_url = @$images[0];
+		// }
 
 		// check if featured image comes from nextgen gallery
 		if ( $this->is_plugin_active('nextgen-gallery/nggallery.php') ) {

@@ -10,6 +10,9 @@ class WPL_WooFrontendIntegration {
 		add_action( 'woocommerce_single_product_summary', array( &$this, 'show_single_product_info' ), 10 );
 		add_filter( 'woocommerce_loop_add_to_cart_link', array( &$this, 'handle_add_to_cart_link' ), 10, 3 );
 
+		// add item compatibility table tab
+        add_filter( 'woocommerce_product_tabs', array( &$this, 'add_custom_product_tabs' ) );
+
 	}
 
 
@@ -150,6 +153,96 @@ class WPL_WooFrontendIntegration {
 		return false;
 
 	} // is_on_auction()
+
+    public function add_custom_product_tabs( $tabs ) {
+		global $post;
+
+		// check if compatibility tab is enabled
+		if ( ! get_option( 'wplister_enable_item_compat_tab', 1 ) ) return $tabs;
+
+		// don't add tab if there is no compatibility list
+		$compatibility_list   = get_post_meta( $post->ID, '_ebay_item_compatibility_list', true );
+		if ( ( ! is_array($compatibility_list) ) || ( sizeof($compatibility_list) == 0 ) ) return $tabs;
+
+        $tabs[ 'ebay_item_compatibility_list' ] = array(
+                'title'    => __('Compatibility','wplister'),
+                'priority' => 25,
+                'callback' => array( $this, 'showCompatibilityList' ),
+                // 'content'  => $tab['content'],  // custom field
+        );
+
+        return $tabs;
+    }
+
+
+	function showCompatibilityList() {
+		global $post;
+
+		// primary ebay category
+		$compatibility_list   = get_post_meta( $post->ID, '_ebay_item_compatibility_list', true );
+		$compatibility_names  = get_post_meta( $post->ID, '_ebay_item_compatibility_names', true );
+		#echo "<pre>";print_r($compatibility_names);echo"</pre>";#die();
+
+		// return if there is no compatibility list
+		if ( ( ! is_array($compatibility_list) ) || ( sizeof($compatibility_list) == 0 ) ) return;
+
+		do_action( 'wplister_before_item_compatibility_list', $post->ID );
+
+		echo '<h2>'.  __('Item Compatibility List','wplister') . '</h2>';
+
+		?>
+			<table class="ebay_item_compatibility_list">
+
+				<tr>
+					<?php foreach ($compatibility_names as $name) : ?>
+
+						<th><?php echo $name ?></th>
+
+					<?php endforeach; ?>
+
+					<th>	
+						<?php echo 'Notes' ?>
+					</th>
+
+				</tr>
+
+				<?php foreach ($compatibility_list as $comp) : ?>
+
+					<tr>
+						<?php foreach ($compatibility_names as $name) : ?>
+
+							<td><?php echo $comp->applications[ $name ]->value ?></td>
+
+						<?php endforeach; ?>
+
+						<td><?php echo $comp->notes ?></td>
+
+					</tr>
+					
+				<?php endforeach; ?>
+
+			</table>
+
+			<style type="text/css">
+
+				.ebay_item_compatibility_list {
+					width: 100%;
+				}
+				.ebay_item_compatibility_list tr th {
+					text-align: left;
+					border-bottom: 3px double #bbb;
+				}
+				.ebay_item_compatibility_list tr td {
+					border-bottom: 1px solid #ccc;
+				}
+				
+			</style>
+
+		<?php
+
+		do_action( 'wplister_after_item_compatibility_list', $post->ID );
+
+	}
 
 
 } // class WPL_WooFrontendIntegration

@@ -1,6 +1,6 @@
 === WP-Lister for eBay ===
 Contributors: wp-lab
-Tags: ebay, products, export
+Tags: ebay, woocommerce, products, export
 Requires at least: 3.3
 Tested up to: 3.6
 Stable tag: trunk
@@ -89,6 +89,117 @@ Already working on it. Expect it this summer.
 2. Profile Editor
 
 == Changelog ==
+= 1.3.1 =
+* stable release
+* see http://www.wplab.com/whats-new-in-wp-lister-pro-1-3/ ‎for what's new in 1.3
+
+= 1.3.0.17 =
+* fixed shipping fee in created orders
+* only enable auto complete option if default order status is not completed
+* include sales record number in order comments
+* added instructions regarding shipping service priority error #21915307
+
+= 1.3.0.16 =
+* fixed issue of orders not being marked as shipped when no tracking details were provided
+* added support for RefundOption
+* added instructions regarding promotional sale / selling manager error 219422
+* fixed issue when custom menu label contains spaces
+* support for MP6
+
+= 1.3.0.15 =
+* added search box and status views on order page
+* added support for shipping cost paid by option in profile (return policy)
+* added instructions regarding item specifics on error #21916519
+* fixed possible issue saving a profile when mysql is in strict mode
+
+= 1.3.0.14 =
+* added support for cash on delivery fee if available
+* improved site changed message with button to update ebay data
+
+= 1.3.0.13 =
+* added update schedule status box on settings page - show warning if wp_cron has been disabled
+* added action hooks for 3rd party developers: wplister_revise_item, wplister_revise_inventory_status and wplister_product_has_changed
+
+= 1.3.0.12 =
+* new feature: locked listings only have their inventory status synced while other changes are ignored
+* fixed possible errors during transaction update
+* fixed possible php warning when saving profile
+
+= 1.3.0.11 =
+* improved eBay inventory status update during checkout - requires variations to have a SKU
+* added warnings if variations have no SKU
+* added filter wplister_ebay_price to enable custom price rounding code
+* prevent error if history data has been corrupted
+
+= 1.3.0.10 =
+* send package weight and dimensions when freight shipping is used
+* fixed profile not being re-applied when revise listing on update option was checked
+* added dedicated free shipping option to enable free shipping when using calculated shipping services
+* added check license activation button
+* added custom update notification and check
+
+= 1.3.0.9 =
+* added option to show item compatibility list as new tab on single product page
+* fixed possible display of ebay error messages during checkout if ajax was disabled
+* fixed issue when price is less than one currency unit
+* improved license page and renamed to updates
+
+= 1.3.0.8 =
+* added errors section to log record view
+* added option to auto complete ebay sales when order status is changed to completed
+* added options to disable WooCommerce email notifications when new orders are created by WP-Lister
+
+= 1.3.0.7 =
+* new listing archive to clean out the listings view without having to delete historical data
+* added metabox to WooCommerce orders created in the new "orders" mode
+* fixed issue when previewing a listing template with embedded widgets
+* fix inventory sync for variations in order update mode
+* fixed email generation for ebay orders by implementing a custom WC_Product_Ebay class
+* fixed order creation when cost-of-goods plugin is enabled and foreign listings imported in order update mode
+* fixed "create orders when purchase has been completed" option
+* fixed ebay column on products page when listing was deleted
+
+= 1.3.0.6 =
+* added maximum quantity profile option (Thanks Shawn!)
+* fixed "Free shipping is only applicable to the first shipping service" warning
+* send UUID to prevent duplicate AddItem or RelistItem calls
+
+= 1.3.0.5 =
+* added warning that update mode "Order" only works on WooCommerce 2.0
+* use proper url for View on eBay link for imported products (edit product page)
+* fixed possible recursion issue when products have no featured image assigned
+
+= 1.3.0.4 =
+* mark listing as ended if revise action fails with error #291 (Auction ended)
+* fixed item status change from sold to changed when product was modified after being sold
+* fixed tooltip on edit products page
+
+= 1.3.0.3 =
+* added option to enable inventory management on external products
+* show imported item compatibility list on edit product page (no editing yet)
+* cleaned up advanced settings page
+
+= 1.3.0.2 =
+* added option to create ebay customers as WordPress users when creating orders
+* create orders by default only when ebay purchase has been completed
+* added option to create order immediatly in advanced settings
+
+= 1.3.0.1 =
+* new permission management to control who has access to WP-Lister and is allowed to publish listings
+* added option to customize WP-Lister main menu label
+* create orders by default only when ebay purchase has been completed - can be changed in advanced settings
+
+= 1.2.8.2 =
+* fixed issue regarding variation images when upload to EPS is enabled
+* added option to force using built-in XML formatter to display log records
+* fixed php warning in XML_Beautifier
+
+= 1.2.8.1 =
+* fixed php warning on variations without proper attributes
+* fixed php error on grouped products
+* fixed order total in created WooCommerce orders in transaction mode
+* fixed non-leaf category warning
+
 = 1.2.8 =
 * added clear log button and show current db log size
 * updated german localization 

@@ -12,10 +12,11 @@ class SettingsPage extends WPL_Page {
 		// parent::onWpInit();
 
 		// custom (raw) screen options for settings page
-		add_screen_options_panel('wplister_setting_options', '', array( &$this, 'renderSettingsOptions'), 'wp-lister_page_wplister-settings' );
+		add_screen_options_panel('wplister_setting_options', '', array( &$this, 'renderSettingsOptions'), $this->main_admin_menu_slug.'_page_wplister-settings' );
 
 		// Add custom screen options
-		add_action( "load-wp-lister_page_wplister-".self::slug, array( &$this, 'addScreenOptions' ) );
+		$load_action = "load-".$this->main_admin_menu_slug."_page_wplister-".self::slug;
+		add_action( $load_action, array( &$this, 'addScreenOptions' ) );
 
 		// network admin page
 		add_action( 'network_admin_menu', array( &$this, 'onWpAdminMenu' ) ); 
@@ -26,7 +27,7 @@ class SettingsPage extends WPL_Page {
 		parent::onWpAdminMenu();
 
 		add_submenu_page( self::ParentMenuId, $this->getSubmenuPageTitle( 'Settings' ), __('Settings','wplister'), 
-						  'manage_options', $this->getSubmenuId( 'settings' ), array( &$this, 'onDisplaySettingsPage' ) );
+						  'manage_ebay_options', $this->getSubmenuId( 'settings' ), array( &$this, 'onDisplaySettingsPage' ) );
 	}
 
 	function addScreenOptions() {
@@ -189,6 +190,9 @@ class SettingsPage extends WPL_Page {
 
 	public function displayAdvancedSettingsPage() {
 
+        $wp_roles = new WP_Roles();
+        // echo "<pre>";print_r($wp_roles);echo"</pre>";#die();
+
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,
 			'message'					=> $this->message,
@@ -203,8 +207,12 @@ class SettingsPage extends WPL_Page {
 			'option_allow_backorders'   => self::getOption( 'allow_backorders', 0 ),
 			'option_preview_in_new_tab' => self::getOption( 'preview_in_new_tab', 0 ),
 			'option_disable_wysiwyg_editor' => self::getOption( 'disable_wysiwyg_editor', 0 ),
+			'enable_item_compat_tab' 	=> self::getOption( 'enable_item_compat_tab', 1 ),
 			'option_local_timezone' 	=> self::getOption( 'local_timezone', '' ),
+			'text_admin_menu_label' 	=> self::getOption( 'admin_menu_label', 'WP-Lister' ),
 			'timezones' 				=> self::get_timezones(),
+            'available_roles'           => $wp_roles->role_names,
+            'wp_roles'         			=> $wp_roles->roles,
 
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab=advanced'
@@ -222,6 +230,7 @@ class SettingsPage extends WPL_Page {
 			'ajax_error_handling'		=> self::getOption( 'ajax_error_handling', 'halt' ),
 			'disable_variations'		=> self::getOption( 'disable_variations', 0 ),
 			'log_record_limit'			=> self::getOption( 'log_record_limit', 4096 ),
+			'xml_formatter'				=> self::getOption( 'xml_formatter', 'default' ),
 
 			'text_ebay_token'			=> self::getOption( 'ebay_token' ),
 			'text_log_level'			=> self::getOption( 'log_level' ),
@@ -242,10 +251,18 @@ class SettingsPage extends WPL_Page {
 		if ( isset( $_POST['wpl_e2e_text_ebay_site_id'] ) ) {
 
 			// reminder to update categories when site id changes
+			$changed_site_id = false;
 			$old_ebay_site_id = self::getOption( 'ebay_site_id' );
 			if ( $old_ebay_site_id != $this->getValueFromPost( 'text_ebay_site_id' ) ) {
-				$this->showMessage( __('You switched to a different eBay site. Please make sure that you update eBay details on the Tools page.','wplister') );
-				// self::updateOption( 'site_id_changed', '1' );
+				// $msg  = __('You switched to a different eBay site. Please make sure that you update eBay details on the Tools page.','wplister');
+				$msg  = '<p>';
+				$msg .= __('You switched to a different eBay site.','wplister') . ' ';
+				$msg .= __('Please update site specific eBay details like categories, shipping services and payment options.','wplister');
+				$msg .= '&nbsp;&nbsp;';
+				$msg .= '<a id="btn_update_ebay_data" class="button-secondary wpl_job_button">' . __('Update eBay data','wplister') . '</a>';
+				$msg .= '</p>';
+				$this->showMessage( $msg );
+				$changed_site_id = true;
 			}
 
 			self::updateOption( 'ebay_site_id',			$this->getValueFromPost( 'text_ebay_site_id' ) );
@@ -257,7 +274,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'ebay_update_mode', 	$this->getValueFromPost( 'option_ebay_update_mode' ) );
 
 			$this->handleCronSettings( $this->getValueFromPost( 'option_cron_auctions' ) );
-			$this->showMessage( __('Settings saved.','wplister') );
+			if ( ! $changed_site_id ) $this->showMessage( __('Settings saved.','wplister') );
 		}
 	}
 
@@ -265,6 +282,47 @@ class SettingsPage extends WPL_Page {
 
 		// TODO: check nonce
 		if ( isset( $_POST['wpl_e2e_option_uninstall'] ) ) {
+
+        	$wp_roles = new WP_Roles();
+        	$available_roles = $wp_roles->role_names;
+
+        	// echo "<pre>";print_r($wp_roles);echo"</pre>";die();
+
+			$wpl_caps = array(
+				'manage_ebay_listings'  => 'Manage Listings',
+				'manage_ebay_options'   => 'Manage Settings',
+				'prepare_ebay_listings' => 'Prepare Listings',
+				'publish_ebay_listings' => 'Publish Listings',
+			);
+
+			// echo "<pre>";print_r($_POST['wpl_permissions']);echo"</pre>";die();
+			$permissions = $_POST['wpl_permissions'];
+
+			foreach ( $available_roles as $role => $role_name ) {
+
+				// admin permissions can't be modified
+				if ( $role == 'administrator' ) continue;
+
+				// get the the role object
+				$role_object = get_role( $role );
+
+				foreach ( $wpl_caps as $capability_name => $capability_title ) {
+
+					if ( isset( $permissions[ $role ][ $capability_name ] ) ) {
+
+						// add capability to this role
+						$role_object->add_cap( $capability_name );
+
+					} else {
+
+						// remove capability from this role
+						$role_object->remove_cap( $capability_name );
+
+					}
+				
+				}
+
+			}
 
 			self::updateOption( 'process_shortcodes', 	$this->getValueFromPost( 'process_shortcodes' ) );
 			self::updateOption( 'remove_links',     	$this->getValueFromPost( 'remove_links' ) );
@@ -275,8 +333,10 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'foreign_transactions',	$this->getValueFromPost( 'option_foreign_transactions' ) );
 			self::updateOption( 'preview_in_new_tab',	$this->getValueFromPost( 'option_preview_in_new_tab' ) );
 			self::updateOption( 'disable_wysiwyg_editor',	$this->getValueFromPost( 'option_disable_wysiwyg_editor' ) );
+			self::updateOption( 'enable_item_compat_tab', 	$this->getValueFromPost( 'enable_item_compat_tab' ) );
 			self::updateOption( 'local_timezone',		$this->getValueFromPost( 'option_local_timezone' ) );
 			self::updateOption( 'allow_backorders',		$this->getValueFromPost( 'option_allow_backorders' ) );
+			self::updateOption( 'admin_menu_label',		$this->getValueFromPost( 'text_admin_menu_label' ) );
 
 			$this->showMessage( __('Settings saved.','wplister') );
 		}
@@ -366,7 +426,9 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'ajax_error_handling',	$this->getValueFromPost( 'ajax_error_handling' ) );
 			self::updateOption( 'disable_variations',	$this->getValueFromPost( 'disable_variations' ) );
 			self::updateOption( 'log_record_limit',		$this->getValueFromPost( 'log_record_limit' ) );
+			self::updateOption( 'xml_formatter',		$this->getValueFromPost( 'xml_formatter' ) );
 
+			$this->handleChangedUpdateChannel();
 
 			// new manual token ?
 			if ( $oldToken != $this->getValueFromPost( 'text_ebay_token' ) ) {
@@ -381,6 +443,11 @@ class SettingsPage extends WPL_Page {
 			$this->showMessage( __('Settings updated.','wplister') );
 
 		}
+	}
+	
+	protected function handleChangedUpdateChannel() {
+
+
 	}
 	
 	protected function loadProductCategories() {

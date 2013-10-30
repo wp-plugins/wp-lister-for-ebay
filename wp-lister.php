@@ -3,7 +3,7 @@
 Plugin Name: WP-Lister for eBay
 Plugin URI: http://www.wplab.com/plugins/wp-lister/
 Description: List your products on eBay the easy way.
-Version: 1.2.8
+Version: 1.3.1
 Author: Matthias Krok
 Author URI: http://www.wplab.com/ 
 Max WP Version: 3.6
@@ -13,7 +13,7 @@ License: GPL2+
 
 
 // include base classes
-define('WPLISTER_VERSION', '1.2.8' );
+define('WPLISTER_VERSION', '1.3.1' );
 define('WPLISTER_PATH', realpath( dirname(__FILE__) ) );
 define('WPLISTER_URL', plugins_url() . '/' . basename(dirname(__FILE__)) . '/' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Autoloader.php' );
@@ -28,6 +28,7 @@ require_once( WPLISTER_PATH . '/classes/core/WPL_Setup.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Install_Uninstall.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Toolbar.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Functions.php' );
+require_once( WPLISTER_PATH . '/classes/core/WPL_API_Hooks.php' );
 require_once( WPLISTER_PATH . '/classes/core/EbayController.php' );
 
 // set up autoloader
@@ -49,6 +50,9 @@ class WPL_WPLister extends WPL_BasePlugin {
 		
 		if ( is_admin() ) {
 			require_once( WPLISTER_PATH . '/classes/integration/WooBackendIntegration.php' );
+			require_once( WPLISTER_PATH . '/classes/integration/WooProductMetaBox.php' );
+			require_once( WPLISTER_PATH . '/classes/integration/WooOrderMetaBox.php' );
+			if ( ProductWrapper::plugin == 'woo' ) require_once( WPLISTER_PATH . '/classes/integration/WooEbayProduct.php' );
 			$oInstall 	= new WPLister_Install( __FILE__ );
 			$oUninstall = new WPLister_Uninstall( __FILE__ );
 			$this->loadPages();
@@ -107,6 +111,8 @@ class WPL_WPLister extends WPL_BasePlugin {
 			add_action( 'admin_print_styles', array( &$this, 'printProductsPageStyles' ) );
 		}
 		add_action( 'admin_print_styles', array( &$this, 'printOrdersPageStyles' ) );
+
+		$this->checkPermissions();
 	}
 	
 	public function onWpPrintStyles() {
@@ -119,6 +125,7 @@ class WPL_WPLister extends WPL_BasePlugin {
 	// add custom bulk action 'prepare_auction' for cpt products
 	// should be called by 'admin_footer' action
 	public function modifyProductsBulkActionMenu() {	
+		if ( ! current_user_can( 'prepare_ebay_listings' ) ) return;
 		?>
 	    <script type="text/javascript">
     	    jQuery(document).ready(function() {

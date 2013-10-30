@@ -52,6 +52,8 @@
 		   title="<?php echo __('Verify all prepared items with eBay and get listing fees.','wplister') ?>"
 			><?php echo __('Verify all prepared items','wplister'); ?></a>
 
+		<?php if ( current_user_can( 'publish_ebay_listings' ) ) : ?>
+
 		<a id="btn_publish_all_verified_items" class="btn_publish_all_verified_items button-secondary wpl_job_button"
 		   title="<?php echo __('Publish all verified items on eBay.','wplister') ?>"
 			><?php echo __('Publish all verified items','wplister'); ?></a>
@@ -61,8 +63,10 @@
 			><?php echo __('Revise all changed items','wplister'); ?></a>
 
 		<a id="btn_update_all_published_items" class="btn_update_all_published_items button-secondary wpl_job_button"
-		   title="<?php echo __('Update all published items from eBay.','wplister') ?>"
+		   title="<?php echo __('Update all published items from eBay.','wplister') .' '. 'Note: This will only update the listing items in WP-Lister. Products in WooCommerce will not be affected.' ?>"
 			><?php echo __('Update all published items','wplister'); ?></a>
+
+		<?php endif; ?>
 
 	</div>
 

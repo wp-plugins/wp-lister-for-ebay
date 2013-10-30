@@ -91,7 +91,7 @@ class PHPTail {
 					body {
 						font-family: monospace;
 					}
-					#grepKeyword, #settings { 
+					#grepKeyword, #settings, #clearLog { 
 						font-size: 80%; 
 					}
 					.float {
@@ -157,6 +157,14 @@ class PHPTail {
 						$("#grepKeyword").click(function(){
 							$( "#settings" ).dialog('open');
 							$("#grepKeyword").removeClass('ui-state-focus');
+						});
+						
+						$("#clearLog").button();
+						$("#clearLog").click(function(){
+							documentHeight = 0; 
+							scrollPosition = 0; 
+							$("#results").html('');
+							$("#clearLog").removeClass('ui-state-focus');
 						});
 						
 						
@@ -230,6 +238,7 @@ class PHPTail {
 				</div>
 				<div class="float">
 					<button id="grepKeyword">Settings</button>
+					<button id="clearLog">Clear</button>
 					<span>Tailing file: <?php echo $this->log; ?></span> (<?php echo round(filesize($this->log)/1024,2); ?> kb) | <span id="grepspan">keyword: ""</span> | <span id="invertspan"></span>
 				</div>
 				<div id="results">

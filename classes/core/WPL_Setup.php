@@ -19,6 +19,9 @@ class WPL_Setup extends WPL_Core {
 		// create folders if neccessary
 		if ( self::checkFolders() ) return false;
 
+		// check for updates
+		self::checkForUpdates();
+
 		// check for multisite installation
 		// if ( self::checkMultisite() ) return false;
 
@@ -133,6 +136,25 @@ class WPL_Setup extends WPL_Core {
 				// $this->showMessage( __('Log entries cleaned: ','wplister') . $delete_count );
 			}
 		}
+	}
+
+
+	// update permissions
+	public function updatePermissions() {
+
+		$roles = array('administrator', 'shop_manager', 'super_admin');
+		foreach ($roles as $role) {
+			$role =& get_role($role);
+			if ( empty($role) )
+				continue;
+	 
+			$role->add_cap('manage_ebay_listings');
+			$role->add_cap('manage_ebay_options');
+			$role->add_cap('prepare_ebay_listings');
+			$role->add_cap('publish_ebay_listings');
+
+		}
+
 	}
 
 
@@ -686,6 +708,60 @@ class WPL_Setup extends WPL_Core {
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
+		// upgrade to version 24  (1.3.0.12)
+		if ( 24 > $db_version ) {
+			$new_db_version = 24;
+
+			// add column to ebay_profiles table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
+			        ADD COLUMN `locked` int(11) NOT NULL AFTER `status`
+			";
+			$wpdb->query($sql);	#echo mysql_error();
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+		// upgrade to version 25  (1.3.0.12)
+		if ( 25 > $db_version ) {
+			$new_db_version = 25;
+
+			// fetch all imported items
+			$sql = "SELECT post_id FROM `{$wpdb->prefix}postmeta` WHERE meta_key = '_ebay_item_source' AND meta_value = 'imported' ";
+			$items = $wpdb->get_results($sql);	echo mysql_error();
+
+			// lock all imported items
+			foreach ($items as $item) {
+				$wpdb->query( "UPDATE `{$wpdb->prefix}ebay_auctions` SET locked = '1' WHERE post_id = '".$item->post_id."' AND status = 'published' " );	echo mysql_error();
+			}
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+		// upgrade to version 26 (1.3.0.12)
+		if ( 26 > $db_version ) {
+			$new_db_version = 26;
+
+			// set column type to mediumtext in table: ebay_auctions
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
+			        CHANGE history history MEDIUMTEXT ";
+			$wpdb->query($sql);	#echo mysql_error();
+			
+			// set column type to mediumtext in table: ebay_orders
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_orders`
+			        CHANGE history history MEDIUMTEXT ";
+			$wpdb->query($sql);	#echo mysql_error();
+			
+			// set column type to mediumtext in table: ebay_transactions
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
+			        CHANGE history history MEDIUMTEXT ";
+			$wpdb->query($sql);	#echo mysql_error();
+			
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
 
 
 		// show update message
@@ -786,6 +862,11 @@ class WPL_Setup extends WPL_Core {
 		}
 
 		return false;
+	}
+
+
+	// check for updates
+	public function checkForUpdates() {
 	}
 
 

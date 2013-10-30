@@ -204,31 +204,14 @@ class EbayOrdersModel extends WPL_Model {
 		// map OrderType to DB columns
 		$data = $this->mapItemDetailToDB( $Detail );
 		if (!$data) return true;
+		// $this->logger->info( 'handleOrderType() mapped data: '.print_r( $data, 1 ) );
 
-
-		// check if item has variation 
-		$hasVariations = false;
-		$VariationSpecifics = array();
-        if ( is_object( @$Detail->Variation ) ) {
-			foreach ($Detail->Variation->VariationSpecifics as $spec) {
-                $VariationSpecifics[ $spec->Name ] = $spec->Value[0];
-            }
-			$hasVariations = true;
-        } 
-
-		// handle variation
-		if ( $hasVariations ) {
-			// use variation title
-			// $data['item_title'] = $Detail->Variation->VariationTitle;
-		}
-
-
-		$this->insertOrUpdate( $data, $hasVariations, $VariationSpecifics );
+		$this->insertOrUpdate( $data, $Detail );
 
 		// this will remove item from result
 		return true;
 	}
-	function insertOrUpdate( $data, $hasVariations, $VariationSpecifics ) {
+	function insertOrUpdate( $data, $Detail ) {
 		global $wpdb;
 
 		// try to get existing order by order id
@@ -237,8 +220,9 @@ class EbayOrdersModel extends WPL_Model {
 		if ( $order ) {
 
 			// update existing order
-			$this->logger->info( 'update order #'.$data['order_id'].' for item #'.$data['item_id'] );
+			$this->logger->info( 'update order #'.$data['order_id'] );
 			$wpdb->update( $this->tablename, $data, array( 'order_id' => $data['order_id'] ) );
+			$insert_id = $order['id'];
 
 
 			$this->addToReport( 'updated', $data );
@@ -246,7 +230,7 @@ class EbayOrdersModel extends WPL_Model {
 		} else {
 		
 			// create new order
-			$this->logger->info( 'insert order #'.$data['order_id'].' for item #'.$data['item_id'] );
+			$this->logger->info( 'insert order #'.$data['order_id'] );
 			$result = $wpdb->insert( $this->tablename, $data );
 			if ( ! $result ) {
 				$this->logger->error( 'insert order failed - MySQL said: '.$wpdb->last_error );
@@ -255,11 +239,21 @@ class EbayOrdersModel extends WPL_Model {
 			}
 			$Details       = maybe_unserialize( $data['details'] );
 			$order_post_id = false;
-			$id            = $wpdb->insert_id;
-			// $this->logger->info( 'insert_id: '.$id );
+			$insert_id     = $wpdb->insert_id;
+			// $this->logger->info( 'insert_id: '.$insert_id );
 
 			// process order line items
 			foreach ( $Details->TransactionArray as $Transaction ) {
+
+				// check if item has variation 
+				$hasVariations = false;
+				$VariationSpecifics = array();
+		        if ( is_object( @$Transaction->Variation ) ) {
+					foreach ($Transaction->Variation->VariationSpecifics as $spec) {
+		                $VariationSpecifics[ $spec->Name ] = $spec->Value[0];
+		            }
+					$hasVariations = true;
+		        } 
 
 				// update listing sold quantity and status
 				$this->processListingItem( $data['order_id'], $Transaction->Item->ItemID, $Transaction->QuantityPurchased, $data, $VariationSpecifics );
@@ -273,6 +267,8 @@ class EbayOrdersModel extends WPL_Model {
 		}
 
 	} // insertOrUpdate()
+
+
 
 
 	// update listing sold quantity and status
@@ -342,6 +338,22 @@ class EbayOrdersModel extends WPL_Model {
 		// init with empty array
 		$history = maybe_unserialize( $history );
 		if ( ! $history ) $history = array();
+
+		// prevent fatal error if $history is not an array
+		if ( ! is_array( $history ) ) {
+			$this->logger->error( "invalid history value in EbayOrdersModel::addHistory(): ".$history);
+
+			// build history record
+			$rec = new stdClass();
+			$rec->action  = 'reset_history';
+			$rec->msg     = 'Corrupted history data was cleared';
+			$rec->details = array();
+			$rec->success = 'ERROR';
+			$rec->time    = time();
+
+			$history = array();
+			$history[] = $record;
+		}
 
 		// add record
 		$history[] = $record;
@@ -537,6 +549,18 @@ class EbayOrdersModel extends WPL_Model {
 		return $order;
 	}
 
+	function getOrderByPostID( $post_id ) {
+		global $wpdb;
+
+		$order = $wpdb->get_row( "
+			SELECT *
+			FROM $this->tablename
+			WHERE post_id = '$post_id'
+		", ARRAY_A );
+
+		return $order;
+	}
+
 	function getDateOfLastOrder() {
 		global $wpdb;
 		$lastdate = $wpdb->get_var( "
@@ -577,6 +601,30 @@ class EbayOrdersModel extends WPL_Model {
 		echo mysql_error();
 	}
 
+	function getStatusSummary() {
+		global $wpdb;
+		$result = $wpdb->get_results("
+			SELECT CompleteStatus, count(*) as total
+			FROM $this->tablename
+			GROUP BY CompleteStatus
+		");
+
+		$summary = new stdClass();
+		foreach ($result as $row) {
+			$CompleteStatus = $row->CompleteStatus;
+			$summary->$CompleteStatus = $row->total;
+		}
+
+		// count total items as well
+		$total_items = $wpdb->get_var("
+			SELECT COUNT( id ) AS total_items
+			FROM $this->tablename
+		");
+		$summary->total_items = $total_items;
+
+		return $summary;
+	}
+
 
 	function getPageItems( $current_page, $per_page ) {
 		global $wpdb;
@@ -585,10 +633,36 @@ class EbayOrdersModel extends WPL_Model {
         $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'desc'; //If no order, default to asc
         $offset = ( $current_page - 1 ) * $per_page;
 
+        $join_sql  = '';
+        $where_sql = '';
+
+        // filter order_status
+		$order_status = ( isset($_REQUEST['order_status']) ? $_REQUEST['order_status'] : 'all');
+		if ( $order_status != 'all' ) {
+			$where_sql = "WHERE CompleteStatus = '".$order_status."' ";
+		} 
+
+        // filter search_query
+		$search_query = ( isset($_REQUEST['s']) ? $_REQUEST['s'] : false);
+		if ( $search_query ) {
+			$where_sql = "
+				WHERE  o.buyer_name   LIKE '%".$search_query."%'
+					OR o.items        LIKE '%".$search_query."%'
+					OR o.buyer_userid     = '".$search_query."'
+					OR o.buyer_email      = '".$search_query."'
+					OR o.order_id         = '".$search_query."'
+					OR o.post_id          = '".$search_query."'
+					OR o.ShippingAddress_City LIKE '%".$search_query."%'
+			";
+		} 
+
+
         // get items
 		$items = $wpdb->get_results("
 			SELECT *
-			FROM $this->tablename
+			FROM $this->tablename o
+            $join_sql 
+            $where_sql
 			ORDER BY $orderby $order
             LIMIT $offset, $per_page
 		", ARRAY_A);
@@ -599,7 +673,9 @@ class EbayOrdersModel extends WPL_Model {
 		} else {
 			$this->total_items = $wpdb->get_var("
 				SELECT COUNT(*)
-				FROM $this->tablename
+				FROM $this->tablename o
+	            $join_sql 
+    	        $where_sql
 				ORDER BY $orderby $order
 			");			
 		}

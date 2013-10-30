@@ -121,16 +121,19 @@ class ListingsTable extends WP_List_Table {
         //Build row actions
         $actions = array(
             'preview_auction' => sprintf('<a href="?page=%s&action=%s&auction=%s&width=820&height=550" target="%s" class="%s">%s</a>',$page,'preview_auction',$item['id'],$preview_target,$preview_class,__('Preview','wplister')),
-            'edit'           => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'edit',$item['id'],__('Edit','wplister')),
+            'edit'            => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'edit',$item['id'],__('Edit','wplister')),
+            'lock'            => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'lock',$item['id'],__('Lock','wplister')),
+            'unlock'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'unlock',$item['id'],__('Unlock','wplister')),
             'verify'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'verify',$item['id'],__('Verify','wplister')),
             'publish2e'       => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'publish2e',$item['id'],__('Publish','wplister')),
             'open'            => sprintf('<a href="%s" target="_blank">%s</a>',$item['ViewItemURL'],__('View on eBay','wplister')),
             'revise'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'revise',$item['id'],__('Revise','wplister')),
             'end_item'        => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'end_item',$item['id'],__('End Listing','wplister')),
             #'open'           => sprintf('<a href="%s" target="_blank">%s</a>',$item['ViewItemURL'],__('Open in new tab','wplister')),
-            'relist'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'relist',$item['id'],__('Relist','wplister')),
+            'relist'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'relist',$item['id'],__('Relist','wplister')),
             'update'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'update',$item['id'],__('Update from eBay','wplister')),
-            'delete'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete',$item['id'],__('Delete','wplister')),
+            'delete'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete',$item['id'],__('Delete','wplister')),
+            'archive'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'archive',$item['id'],__('Archive','wplister')),
         );
 
         $profile_data = maybe_unserialize( $item['profile_data'] );
@@ -152,15 +155,85 @@ class ListingsTable extends WP_List_Table {
             $listing_title = '<a class="product_title_link" href="admin.php?page=shopp-products&id='.$item['post_id'].'">'.$listing_title.'</a>';
         }
 
-        // show variations
+        // show locked indicator
+        if ( @$item['locked'] ) {
+            $tip_msg = 'This listing is currently locked.<br>Only inventory changes will be updated, other changes will be ignored.';
+            $img_url  = WPLISTER_URL . '/img/lock-1.png';
+            $listing_title .= '&nbsp;<img src="'.$img_url.'" style="height:11px; padding:0;" class="tips" data-tip="'.$tip_msg.'"/>&nbsp;';
+        } 
+
+
+        // show warning if GetItem seems to have failed
+        $needs_update = false;
+        if ( $item['ebay_id'] ) {
+            if ( $item['ViewItemURL'] == '' || $item['details'] == '' ) {
+
+                // add warning message
+                $tip_msg = 'There seems to be something wrong with this listing. Please click the <i>Update from eBay</i> link below to fetch the current details from eBay.';
+                $img_url  = WPLISTER_URL . '/img/error.gif';
+                $listing_title .= '&nbsp;<img src="'.$img_url.'" style="height:12px; padding:0;" class="tips" data-tip="'.$tip_msg.'"/>&nbsp;';
+
+                // remove View on eBay ink
+                unset( $actions['open'] );
+                $needs_update = true;
+            }
+        } 
+
+        // add variations link
+        $listing_title .= $this->generateVariationsHtmlLink( $item, $profile_data );
+
+
+        // disable some actions depending on status
+        if ( $item['status'] != 'published' )   unset( $actions['lock'] );
+        if ( $item['status'] != 'published' )   unset( $actions['end_item'] );
+        if ( $item['status'] != 'prepared' )    unset( $actions['verify'] );
+        if ( $item['status'] != 'changed' )     unset( $actions['revise'] );
+        if (($item['status'] != 'prepared' ) &&
+            ($item['status'] != 'verified'))    unset( $actions['publish2e'] );
+        if (($item['status'] != 'published' ) &&
+            ($item['status'] != 'changed') &&
+            ($item['status'] != 'ended'))       unset( $actions['open'] );
+        if ( $item['status'] == 'ended' )       unset( $actions['preview_auction'] );
+        if ( $item['status'] != 'ended' )       unset( $actions['archive'] );
+        if ( $item['status'] != 'archived' )    unset( $actions['delete'] );
+        if (($item['status'] != 'sold' ) &&
+            ($item['status'] != 'ended'))       unset( $actions['relist'] );
+        if (($item['status'] != 'relisted' ) && 
+           ( $needs_update == false ) )         unset( $actions['update'] );
+
+        if (   $item['locked'] )                unset( $actions['lock'] );
+        if (   $item['locked'] )                unset( $actions['edit'] );
+        if ( ! $item['locked'] )                unset( $actions['unlock'] );
+
+
+        if ( ! current_user_can( 'publish_ebay_listings' ) ) {
+            unset( $actions['publish2e'] );
+            unset( $actions['revise'] );
+            unset( $actions['end_item'] );
+            unset( $actions['relist'] );
+            unset( $actions['delete'] );
+        }
+
+        //Return the title contents
+        //return sprintf('%1$s <span style="color:silver">%2$s</span>%3$s',
+        return sprintf('%1$s %2$s',
+            /*$1%s*/ $listing_title,
+            /*$2%s*/ //$item['profile_id'],
+            /*$3%s*/ $this->row_actions($actions)
+        );
+    }
+
+    function generateVariationsHtmlLink( $item, $profile_data ){
+        $variations_html = ' ';
+
+        // check for variations
         if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
-            $listing_title .= ' (<a href="#" onClick="jQuery(\'#pvars_'.$item['id'].'\').toggle();return false;">&raquo;Variations</a>)<br>';
-            // $listing_title .= '<pre>'.print_r( ProductWrapper::getVariations( $item['post_id'] ), 1 )."</pre>";
-            $variations = ProductWrapper::getVariations( $item['post_id'] );
 
             $listingsModel = new ListingsModel();
+            $variations    = ProductWrapper::getVariations( $item['post_id'] );
 
-            $variations_html = '<div id="pvars_'.$item['id'].'" class="variations_list" style="display:none;margin-bottom:10px;">';
+            $variations_html .= '(<a href="#" onClick="jQuery(\'#pvars_'.$item['id'].'\').toggle();return false;">&raquo;Variations</a>)<br>';
+            $variations_html .= '<div id="pvars_'.$item['id'].'" class="variations_list" style="display:none;margin-bottom:10px;">';
 
             // show variation mode message
             if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
@@ -179,6 +252,8 @@ class ListingsTable extends WP_List_Table {
                     $variations_html .= '</th><th>';
                 }
             }
+            $variations_html .= __('SKU','wplister');
+            $variations_html .= '</th><th>';
             $variations_html .= __('Price','wplister');
             $variations_html .= '</th></tr>';
 
@@ -198,6 +273,11 @@ class ListingsTable extends WP_List_Table {
                 // $variations_html .= '('.$var['sku'].') ';
                 // $variations_html .= '('.$var['image'].') ';
                 
+                // column: SKU
+                $variations_html .= '<td>';
+                $variations_html .= $var['sku'] ? $var['sku'] : '<span style="color:darkred">SKU is missing!</span';
+                $variations_html .= '</td>';
+
                 // last column: price
                 $variations_html .= '<td align="right">';
                 $price = $listingsModel->applyProfilePrice( $var['price'], $profile_data['details']['start_price'] );
@@ -239,52 +319,12 @@ class ListingsTable extends WP_List_Table {
                 $variations_html .= '</table>';
             }
 
-
             $variations_html .= '</div>';
-            $listing_title .= $variations_html;
         }
 
+        return $variations_html;
 
-        // show warning if GetItem seems to have failed
-        $needs_update = false;
-        if ( $item['ebay_id'] ) {
-            if ( $item['ViewItemURL'] == '' || $item['details'] == '' ) {
-
-                // add warning message
-                $tip_msg = 'There seems to be something wrong with this listing. Please click the <i>Update from eBay</i> link below to fetch the current details from eBay.';
-                $img_url  = WPLISTER_URL . '/img/error.gif';
-                $listing_title .= '&nbsp;<img src="'.$img_url.'" style="height:12px; padding:0;" class="tips" data-tip="'.$tip_msg.'"/>&nbsp;';
-
-                // remove View on eBay ink
-                unset( $actions['open'] );
-                $needs_update = true;
-            }
-        } 
-
-        // disable some actions depending on status
-        if ( $item['status'] != 'published' )   unset( $actions['end_item'] );
-        if ( $item['status'] != 'prepared' )    unset( $actions['verify'] );
-        if ( $item['status'] != 'changed' )     unset( $actions['revise'] );
-        if (($item['status'] != 'prepared' ) &&
-            ($item['status'] != 'verified'))    unset( $actions['publish2e'] );
-        if (($item['status'] != 'published' ) &&
-            ($item['status'] != 'changed') &&
-            ($item['status'] != 'ended'))       unset( $actions['open'] );
-        if ( $item['status'] == 'ended' )       unset( $actions['preview_auction'] );
-        if ( $item['status'] != 'ended' )       unset( $actions['delete'] );
-        if (($item['status'] != 'sold' ) &&
-            ($item['status'] != 'ended'))       unset( $actions['relist'] );
-        if (($item['status'] != 'relisted' ) && 
-           ( $needs_update == false ) )         unset( $actions['update'] );
-
-        //Return the title contents
-        //return sprintf('%1$s <span style="color:silver">%2$s</span>%3$s',
-        return sprintf('%1$s %2$s',
-            /*$1%s*/ $listing_title,
-            /*$2%s*/ //$item['profile_id'],
-            /*$3%s*/ $this->row_actions($actions)
-        );
-    }
+    } // generateVariationsHtmlLink()
 
     function column_ebay_id_DISABLED($item){
 
@@ -443,6 +483,10 @@ class ListingsTable extends WP_List_Table {
             case 'ended':
                 $color = '#777';
                 $value = __('ended','wplister');
+                break;
+            case 'archived':
+                $color = '#777';
+                $value = __('archived','wplister');
                 break;
             case 'imported':
                 $color = 'orange';
@@ -603,8 +647,26 @@ class ListingsTable extends WP_List_Table {
             'revise'    => __('Revise items','wplister'),
             'end_item'  => __('End listings','wplister'),
             'relist'    => __('Re-list ended items','wplister'),
-            'delete'    => __('Delete listings','wplister')
+            'lock'      => __('Lock listings','wplister'),
+            'unlock'    => __('Unlock listings','wplister'),
+            'archive'   => __('Move to archive','wplister'),
+            'delete'    => __('Delete listings','wplister'),
         );
+
+        if ( ! current_user_can( 'publish_ebay_listings' ) ) {
+            unset( $actions['publish2e'] );
+            unset( $actions['revise'] );
+            unset( $actions['end_item'] );
+            unset( $actions['relist'] );
+            unset( $actions['delete'] );
+        }
+
+        if ( isset($_GET['listing_status']) && ( $_GET['listing_status'] == 'archived' ) ) {
+            unset( $actions['archive'] );
+        } else {
+            unset( $actions['delete'] );            
+        }
+
         return $actions;
     }
     
@@ -678,6 +740,12 @@ class ListingsTable extends WP_List_Table {
        $views['ended'] = "<a href='{$ended_url}' {$class} >".__('Ended','wplister')."</a>";
        if ( isset($summary->ended) ) $views['ended'] .= '<span class="count">('.$summary->ended.')</span>';
 
+       // archived link
+       $archived_url = add_query_arg( 'listing_status', 'archived', $base_url );
+       $class = ($current == 'archived' ? ' class="current"' :'');
+       $views['archived'] = "<a href='{$archived_url}' {$class} >".__('Archived','wplister')."</a>";
+       if ( isset($summary->archived) ) $views['archived'] .= '<span class="count">('.$summary->archived.')</span>';
+
        // sold link
        $sold_url = add_query_arg( 'listing_status', 'sold', $base_url );
        $class = ($current == 'sold' ? ' class="current"' :'');
@@ -696,9 +764,13 @@ class ListingsTable extends WP_List_Table {
                title="<?php echo __('Verify all prepared items with eBay and get listing fees.','wplister') ?>"
                 ><?php echo __('Verify all prepared items','wplister'); ?></a>
 
+            <?php if ( current_user_can( 'publish_ebay_listings' ) ) : ?>
+
             <a class="btn_publish_all_verified_items button-secondary wpl_job_button"
                title="<?php echo __('Publish all verified items on eBay.','wplister') ?>"
                 ><?php echo __('Publish all verified items','wplister'); ?></a>
+
+            <?php endif; ?>
 
         </div>
         <?php

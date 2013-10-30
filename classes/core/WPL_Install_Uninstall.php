@@ -86,6 +86,7 @@ class WPLister_Install {
 		WPL_WPLister::addOption( 'log_to_db',			'0' );
 		WPL_WPLister::addOption( 'uninstall',			'0' );
 		WPL_WPLister::addOption( 'db_version',			'1' );
+		WPL_WPLister::addOption( 'ebay_update_mode',	'order' );
 
 		WPL_WPLister::addOption( 'setup_next_step',		'1' );
 

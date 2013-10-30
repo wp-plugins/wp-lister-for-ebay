@@ -122,7 +122,9 @@ class TransactionsTable extends WP_List_Table {
             $actions['create_order'] = sprintf('<a href="?page=%s&action=%s&transaction=%s">%s</a>',$_REQUEST['page'],'create_order',$item['id'],__('Create Order','wplister'));
         } else {
             $actions['edit_order'] = sprintf('<a href="post.php?action=%s&post=%s">%s</a>','edit',$item['wp_order_id'],__('View Order','wplister'));
-            $actions['edit_order'] .= ' #'.$item['wp_order_id'];
+
+            $order = new WC_Order( $item['wp_order_id'] );
+            if ( $order ) $actions['edit_order'] .= ' '.$order->get_order_number();
         }
 
         // free version can't create orders

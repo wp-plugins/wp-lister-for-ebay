@@ -12,7 +12,8 @@ class ProfilesPage extends WPL_Page {
 		// parent::onWpInit();
 
 		// Add custom screen options
-		add_action( "load-wp-lister_page_wplister-".self::slug, array( &$this, 'addScreenOptions' ) );
+		$load_action = "load-".$this->main_admin_menu_slug."_page_wplister-".self::slug;
+		add_action( $load_action, array( &$this, 'addScreenOptions' ) );
 
 		// handle save profile
 		if ( $this->requestAction() == 'save_profile' ) {
@@ -152,6 +153,12 @@ class ProfilesPage extends WPL_Page {
 		}
 		// echo "<pre>";print_r($available_conditions);echo"</pre>";
 
+		// check if COD is available on the selected site
+		$cod_available = false;
+		foreach ( $payment_options as $po ) {
+			if ( 'COD' == $po['payment_name'] ) $cod_available = true;
+		}
+
 		// fetch available shipping discount profiles
 		$shipping_flat_profiles = array();
 		$shipping_calc_profiles = array();
@@ -190,6 +197,7 @@ class ProfilesPage extends WPL_Page {
 			'available_shipping_packages' => $available_shipping_packages,
 			'shipping_flat_profiles'  	=> $shipping_flat_profiles,
 			'shipping_calc_profiles'  	=> $shipping_calc_profiles,
+			'cod_available'  			=> $cod_available,
 			
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-profiles'
 		);
@@ -222,11 +230,13 @@ class ProfilesPage extends WPL_Page {
 		if ( isset( $details['bo_minimum_price'] ) ) $details['bo_minimum_price'] = $this->convertToDecimal( $details['bo_minimum_price'] );
 		if ( isset( $details['bo_autoaccept_price'] ) ) $details['bo_autoaccept_price'] = $this->convertToDecimal( $details['bo_autoaccept_price'] );
 
+		if ( is_array( $details['loc_shipping_options'] ) )
 		foreach ($details['loc_shipping_options'] as $key => &$option) {
 			if ( isset( $option['price'] )) $option['price'] = $this->convertToDecimal( $option['price'] );
 			if ( isset( $option['add_price'] )) $option['add_price'] = $this->convertToDecimal( $option['add_price'] );
 		}
 
+		if ( is_array( $details['int_shipping_options'] ) )
 		foreach ($details['int_shipping_options'] as $key => &$option) {
 			if ( isset( $option['price'] )) $option['price'] = $this->convertToDecimal( $option['price'] );
 			if ( isset( $option['add_price'] )) $option['add_price'] = $this->convertToDecimal( $option['add_price'] );
@@ -273,11 +283,17 @@ class ProfilesPage extends WPL_Page {
 				break;
 		}
 
+		// handle free shipping option
+		$loc_free_shipping = strstr( 'calc', strtolower($service_type) ) ? $details['shipping_loc_calc_free_shipping'] : $details['shipping_loc_flat_free_shipping'];
+		$details['shipping_loc_enable_free_shipping'] = $loc_free_shipping;
+
 		// clean details array
 		unset( $details['loc_shipping_options_flat'] );
 		unset( $details['loc_shipping_options_calc'] );
 		unset( $details['int_shipping_options_flat'] );
 		unset( $details['int_shipping_options_calc'] );
+		unset( $details['shipping_loc_calc_free_shipping'] );
+		unset( $details['shipping_loc_flat_free_shipping'] );
 
 		return $details;
 	}
@@ -333,7 +349,7 @@ class ProfilesPage extends WPL_Page {
 		$item['profile_description'] 		= $this->getValueFromPost( 'profile_description' );
 		$item['listing_duration'] 			= $this->getValueFromPost( 'listing_duration' );
 		$item['type']						= $this->getValueFromPost( 'auction_type' );
-		$item['sort_order'] 				= $this->getValueFromPost( 'sort_order' );
+		$item['sort_order'] 				= intval( $this->getValueFromPost( 'sort_order' ) );
 		$item['details']			 		= json_encode( $details );		
 		$item['conditions']			 		= serialize( $conditions );		
 		$item['category_specifics']	 		= serialize( $specifics );		

@@ -12,7 +12,8 @@ class TemplatesPage extends WPL_Page {
 		// parent::onWpInit();
 
 		// Add custom screen options
-		add_action( "load-wp-lister_page_wplister-".self::slug, array( &$this, 'addScreenOptions' ) );
+		$load_action = "load-".$this->main_admin_menu_slug."_page_wplister-".self::slug;
+		add_action( $load_action, array( &$this, 'addScreenOptions' ) );
 
 		add_action('wp_ajax_wpl_get_copy_template_form', array( &$this, 'ajax_wpl_get_copy_template_form' ));
 		add_action('wp_ajax_wpl_duplicate_template', array( &$this, 'ajax_wpl_duplicate_template' ));

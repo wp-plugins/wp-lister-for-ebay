@@ -397,6 +397,9 @@ class TemplatesModel extends WPL_Model {
 			if ( isset($_REQUEST['action']) && $_REQUEST['action'] == 'preview_auction' ) {
 				$html = '<iframe id="wpl_widget_new_listings" class="wpl_gallery" style="height:175px;width:100%;border:none;" src="'.$url.'" border="0"></iframe>';
 			}
+			if ( isset($_REQUEST['action']) && $_REQUEST['action'] == 'preview_template' ) {
+				$html = '<iframe id="wpl_widget_new_listings" class="wpl_gallery" style="height:175px;width:100%;border:none;" src="'.$url.'" border="0"></iframe>';
+			}
 
 			// this is how the ebay billboard app does it:
 			// (for reference only)
@@ -536,6 +539,7 @@ class TemplatesModel extends WPL_Model {
             // first column: quantity
             $variations_html .= '<tr>';
 
+            if ( is_array( $variations[0]['variation_attributes'] ) ) 
             foreach ($variations[0]['variation_attributes'] as $name => $value) {
                 $variations_html .= '<th>';
                 $variations_html .= $name;

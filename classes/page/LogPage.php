@@ -12,14 +12,16 @@ class LogPage extends WPL_Page {
 		// parent::onWpInit();
 
 		// Add custom screen options
-		add_action( "load-wp-lister_page_wplister-".self::slug, array( &$this, 'addScreenOptions' ) );
+		// add_action( "load-wp-lister_page_wplister-".self::slug, array( &$this, 'addScreenOptions' ) );
+		$load_action = "load-".$this->main_admin_menu_slug."_page_wplister-".self::slug;
+		add_action( $load_action, array( &$this, 'addScreenOptions' ) );
 
 	}
 
 	public function onWpAdminMenu() {
 		parent::onWpAdminMenu();
 
-		if ( current_user_can('administrator') && ( self::getOption( 'log_to_db' ) == '1' ) ) {
+		if ( current_user_can('manage_ebay_options') && ( self::getOption( 'log_to_db' ) == '1' ) ) {
 			add_submenu_page( self::ParentMenuId, $this->getSubmenuPageTitle( 'Logs' ), __('Logs','wplister'), 
 							  self::ParentPermissions, $this->getSubmenuId( 'log' ), array( &$this, 'onDisplayLogPage' ) );
 		}
@@ -113,8 +115,8 @@ class LogPage extends WPL_Page {
 			$message = $content;
 
 			$user_name  = $_REQUEST['user_name'] ? $_REQUEST['user_name'] : 'WP-Lister';
-			$user_email = $_REQUEST['user_email'];
-			$user_msg   = $_REQUEST['user_msg'];
+			$user_email = sanitize_email( $_REQUEST['user_email'] );
+			$user_msg   = stripslashes( $_REQUEST['user_msg'] );
 		    $headers = 'From: '.$user_name.' <'.$user_email.'>' . "\r\n";
 
 			$message .= '<hr>';

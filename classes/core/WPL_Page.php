@@ -17,6 +17,9 @@ class WPL_Page extends WPL_Core {
 		self::$PLUGIN_URL = WPLISTER_URL;
 		self::$PLUGIN_DIR = WPLISTER_PATH;
 
+		$this->main_admin_menu_label = get_option( 'wplister_admin_menu_label', 'WP-Lister' );
+		$this->main_admin_menu_slug  = sanitize_key( str_replace(' ', '-', $this->main_admin_menu_label ) );
+
 		add_action( 'admin_menu', 			array( &$this, 'onWpAdminMenu' ), 20 );
 
 		if ( is_admin() ) {

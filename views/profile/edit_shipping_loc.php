@@ -115,6 +115,17 @@
 								</select>
 								<br class="clear" />
 
+								<label class="text_label">
+									<?php echo __('Enable free shipping','wplister'); ?>
+		                            <?php wplister_tooltip('Free shipping can only be enabled for the first shipping service in the list.') ?>
+								</label>
+								<select name="wpl_e2e_shipping_loc_calc_free_shipping" id="wpl-shipping_loc_calc_free_shipping" 
+										title="Type" class="required-entry select select_shipping_loc_calc_free_shipping" style="width:auto">
+									<option value="0" <?php if ( @$item_details['shipping_loc_enable_free_shipping'] != 1 ): ?>selected="selected"<?php endif; ?> ><?php echo __('No','wplister') ?></option>
+									<option value="1" <?php if ( @$item_details['shipping_loc_enable_free_shipping'] == 1 ): ?>selected="selected"<?php endif; ?> ><?php echo __('Yes','wplister') ?></option>
+								</select>
+								<br class="clear" />
+
 
 								<label class="text_label">
 									<?php echo __('Packaging and handling costs','wplister'); ?>
@@ -138,6 +149,17 @@
 										<option value="<?php echo $shipping_profile->DiscountProfileID ?>" <?php if ( @$item_details['shipping_loc_flat_profile'] == $shipping_profile->DiscountProfileID ): ?>selected="selected"<?php endif; ?>><?php echo $shipping_profile->DiscountProfileName ?></option>
 									<?php endforeach; ?>
 								</select>
+								<br class="clear" />
+
+								<label class="text_label">
+									<?php echo __('Enable free shipping','wplister'); ?>
+		                            <?php wplister_tooltip('Free shipping can only be enabled for the first shipping service in the list.') ?>
+								</label>
+								<select name="wpl_e2e_shipping_loc_flat_free_shipping" id="wpl-shipping_loc_flat_free_shipping" 
+										title="Type" class="required-entry select select_shipping_loc_flat_free_shipping" style="width:auto">
+									<option value="0" <?php if ( @$item_details['shipping_loc_enable_free_shipping'] != 1 ): ?>selected="selected"<?php endif; ?> ><?php echo __('No','wplister') ?></option>
+									<option value="1" <?php if ( @$item_details['shipping_loc_enable_free_shipping'] == 1 ): ?>selected="selected"<?php endif; ?> ><?php echo __('Yes','wplister') ?></option>
+								</select>
+								<br class="clear" />
 								
 							</div>
-

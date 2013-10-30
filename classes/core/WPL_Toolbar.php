@@ -109,16 +109,6 @@ class WPLister_Toolbar  {
 		);
 		$wp_admin_bar->add_node($args);
 
-		// Settings - License tab
-		$args = array(
-			'id'    => 'wplister_settings_license',
-			'title' => __('License', 'wplister'),
-			'href'  => admin_url( 'admin.php?page=wplister-settings&tab=license' ),
-			'parent'  => 'wplister_settings',
-			'meta'  => array('class' => 'wplister-toolbar-page')
-		);
-		$wp_admin_bar->add_node($args);
-
 		// Settings - Developer tab
 		$args = array(
 			'id'    => 'wplister_settings_developer',
@@ -129,8 +119,18 @@ class WPLister_Toolbar  {
 		);
 		$wp_admin_bar->add_node($args);
 
+		// Settings - License tab
+		$args = array(
+			'id'    => 'wplister_settings_license',
+			'title' => __('Updates', 'wplister'),
+			'href'  => admin_url( 'admin.php?page=wplister-settings&tab=license' ),
+			'parent'  => 'wplister_settings',
+			'meta'  => array('class' => 'wplister-toolbar-page')
+		);
+		$wp_admin_bar->add_node($args);
 
-		if ( current_user_can('administrator') && ( get_option( 'wplister_log_to_db' ) == '1' ) ) {
+
+		if ( current_user_can('manage_ebay_options') && ( get_option( 'wplister_log_to_db' ) == '1' ) ) {
 		
 			// Logs page
 			$args = array(
@@ -145,7 +145,7 @@ class WPLister_Toolbar  {
 		}
 
 		// admin only from here on
-		if ( ! current_user_can('administrator') ) return;
+		if ( ! current_user_can('manage_ebay_listings') ) return;
 
 		// product page
 		global $post;
@@ -200,7 +200,8 @@ class WPLister_Toolbar  {
 
 			}
 
-			$this->addPrepareActions( $wp_admin_bar, $post_id );
+			if ( current_user_can('prepare_ebay_listings') );
+				$this->addPrepareActions( $wp_admin_bar, $post_id );
 
 
 		} // if is product page

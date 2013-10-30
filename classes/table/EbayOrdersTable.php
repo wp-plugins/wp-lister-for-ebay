@@ -115,11 +115,14 @@ class EbayOrdersTable extends WP_List_Table {
             // 'edit'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$_REQUEST['page'],'edit',$item['id'],__('Edit','wplister')),
         );
 
+
         if ( @$item['post_id'] == 0 ) {
             $actions['create_order'] = sprintf('<a href="?page=%s&action=%s&ebay_order=%s">%s</a>',$_REQUEST['page'],'create_order',$item['id'],__('Create Order','wplister'));
         } else {
             $actions['edit_order'] = sprintf('<a href="post.php?action=%s&post=%s">%s</a>','edit',$item['post_id'],__('View Order','wplister'));
-            $actions['edit_order'] .= ' #'.$item['post_id'];
+
+            $order = new WC_Order( $item['post_id'] );
+            if ( $order ) $actions['edit_order'] .= ' '.$order->get_order_number();
         }
 
         // free version can't create orders
@@ -307,6 +310,38 @@ class EbayOrdersTable extends WP_List_Table {
         
     }
     
+
+    // status filter links
+    // http://wordpress.stackexchange.com/questions/56883/how-do-i-create-links-at-the-top-of-wp-list-table
+    function get_views(){
+       $views    = array();
+       $current  = ( !empty($_REQUEST['order_status']) ? $_REQUEST['order_status'] : 'all');
+       $base_url = remove_query_arg( array( 'action', 'order', 'order_status' ) );
+
+       // get order status summary
+       $om = new EbayOrdersModel();
+       $summary = $om->getStatusSummary();
+
+       // All link
+       $class = ($current == 'all' ? ' class="current"' :'');
+       $all_url = remove_query_arg( 'order_status', $base_url );
+       $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
+       $views['all'] .= '<span class="count">('.$summary->total_items.')</span>';
+
+       // Completed link
+       $Completed_url = add_query_arg( 'order_status', 'Completed', $base_url );
+       $class = ($current == 'Completed' ? ' class="current"' :'');
+       $views['Completed'] = "<a href='{$Completed_url}' {$class} >".__('Completed','wplister')."</a>";
+       if ( isset($summary->Completed) ) $views['Completed'] .= '<span class="count">('.$summary->Completed.')</span>';
+
+       // Active link
+       $Active_url = add_query_arg( 'order_status', 'Active', $base_url );
+       $class = ($current == 'Active' ? ' class="current"' :'');
+       $views['Active'] = "<a href='{$Active_url}' {$class} >".__('Active','wplister')."</a>";
+       if ( isset($summary->Active) ) $views['Active'] .= '<span class="count">('.$summary->Active.')</span>';
+
+       return $views;
+    }    
     
     /** ************************************************************************
      * REQUIRED! This is where you prepare your data for display. This method will

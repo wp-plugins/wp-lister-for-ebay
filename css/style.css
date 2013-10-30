@@ -288,3 +288,29 @@ img.tips {
 	border-left-color: #a2678c;
 }
 
+
+/* MP6 */
+.admin-color-mp6 div.update-nag {
+	border-left: 4px solid #ffba00;
+}
+
+.admin-color-mp6 #wpl-sandbox-reminder-wrap a.show-settings {
+	padding: 1px 0 0 10px;
+}
+
+.admin-color-mp6 #wpl-sandbox-reminder-wrap {
+	height: 23px;
+	padding: 3px 6px;
+	margin: 0 0 0 6px;
+}
+
+.admin-color-mp6 #wpl-sandbox-reminder-wrap a:after {
+	content: '';
+	margin-right: 5px;
+}
+
+/* non-MP6 */
+div.update-nag {
+	text-align: left;
+}
+

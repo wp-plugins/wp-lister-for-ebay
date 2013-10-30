@@ -324,6 +324,22 @@ class TransactionsModel extends WPL_Model {
 		$history = maybe_unserialize( $history );
 		if ( ! $history ) $history = array();
 
+		// prevent fatal error if $history is not an array
+		if ( ! is_array( $history ) ) {
+			$this->logger->error( "invalid history value in TransactionsModel::addHistory(): ".$history);
+
+			// build history record
+			$rec = new stdClass();
+			$rec->action  = 'reset_history';
+			$rec->msg     = 'Corrupted history data was cleared';
+			$rec->details = array();
+			$rec->success = 'ERROR';
+			$rec->time    = time();
+
+			$history = array();
+			$history[] = $record;
+		}
+
 		// add record
 		$history[] = $record;
 

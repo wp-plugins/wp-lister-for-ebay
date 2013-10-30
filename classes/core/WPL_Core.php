@@ -16,7 +16,7 @@ class WPL_Core {
 
 	const ParentTitle		= 'WP-Lister';
 	const ParentName		= 'eBay';
-	const ParentPermissions	= 'edit_pages';
+	const ParentPermissions	= 'manage_ebay_listings';
 	const ParentMenuId		= 'wplister';
 	
 	const InputPrefix 		= 'wpl_e2e_';

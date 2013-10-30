@@ -96,6 +96,27 @@
 						</div>
 					</div>
 
+					<?php if ( get_option( 'wplister_cron_auctions' ) ) : ?>
+					<div class="postbox" id="UpdateScheduleBox">
+						<h3 class="hndle"><span><?php echo __('Update Schedule','wplister') ?></span></h3>
+						<div class="inside">
+
+							<p>
+							<?php if ( wp_next_scheduled( 'wplister_update_auctions' ) ) : ?>
+								<?php echo __('Next scheduled update','wplister'); ?>: 
+								<?php echo human_time_diff( wp_next_scheduled( 'wplister_update_auctions' ), current_time('timestamp',1) ) ?>
+							<?php else: ?>
+								<span style="color:darkred; font-weight:bold">
+									Warning: Update schedule is disabled.
+								</span></p><p>
+								Please click the "Save Settings" button above in order to reset the update schedule.
+							<?php endif; ?>
+							</p>
+
+						</div>
+					</div>
+					<?php endif; ?>
+
 					<div class="postbox" id="PayPalSettingsBox">
 						<h3 class="hndle"><span><?php echo __('PayPal','wplister') ?></span></h3>
 						<div class="inside">
@@ -224,11 +245,17 @@
                                 <?php wplister_tooltip('Set this to "Order" if you want to create a single WooCommerce order from a combined order on eBay. This is a transitory option which will be removed in future versions.') ?>
 							</label>
 							<select id="wpl-option-ebay_update_mode" name="wpl_e2e_option_ebay_update_mode" class=" required-entry select">
-								<option value="transaction" <?php if ( $wpl_option_ebay_update_mode == 'transaction' ): ?>selected="selected"<?php endif; ?>><?php echo __('Transaction','wplister'); ?> (default)</option>
-								<option value="order"       <?php if ( $wpl_option_ebay_update_mode == 'order'       ): ?>selected="selected"<?php endif; ?>><?php echo __('Order','wplister'); ?> (beta)</option>
+								<option value="transaction" <?php if ( $wpl_option_ebay_update_mode == 'transaction' ): ?>selected="selected"<?php endif; ?>><?php echo __('Transaction','wplister'); ?> (legacy)</option>
+								<option value="order"       <?php if ( $wpl_option_ebay_update_mode == 'order'       ): ?>selected="selected"<?php endif; ?>><?php echo __('Order','wplister'); ?> (default)</option>
 							</select>
 							<p class="desc" style="display: block;">
 								Set this to "Order" to enable the new order processing and disable the old transaction processing mode.<br>
+
+								<?php global $woocommerce; ?>
+								<?php if ( ( isset($woocommerce->version) ) && ( version_compare( $woocommerce->version, '2.0' ) < 0 ) ) : ?>
+									<span style="color:darkred;">Warning: You need to update to WooCommerce 2.0 to use the new "Order" update mode.<br></span>
+								<?php endif; ?>
+								
 							</p>
 
 						</div>

@@ -151,3 +151,27 @@
 								
 							</div>
 
+							<?php if ( isset( $item_details['ShipToLocations'] ) && is_array( $item_details['ShipToLocations'] ) ) : ?>
+							<div class="" style="border-top:1px solid #ccc; margin-top:10px; padding-top:10px;">
+
+								<label class="text_label">
+									<?php echo __('Ship to locations','wplister'); ?>
+		                            <?php wplister_tooltip('These locations have been imported from eBay and can currently not be modified within WP-Lister.') ?>
+								</label>
+								<input type="text" name="wpl_e2e_ShipToLocations" disabled="true"
+									value="<?php echo join(', ', $item_details['ShipToLocations'] ) ?>" class="disabled" style="width:70%"/>
+								<?php #foreach ( $item_details['ShipToLocations'] as $location ) : ?>
+									<?php #echo $location ?>
+								<?php #endforeach; ?>
+								<br class="clear" />
+								
+								<label class="text_label">
+									<?php echo __('Exclude locations','wplister'); ?>
+		                            <?php wplister_tooltip('These locations have been imported from eBay and can currently not be modified within WP-Lister.') ?>
+								</label>
+								<input type="text" name="wpl_e2e_ExcludeShipToLocations" disabled="true"
+									value="<?php echo join(', ', $item_details['ExcludeShipToLocations'] ) ?>" class="disabled" style="width:70%"/>
+								<br class="clear" />
+
+							</div>
+							<?php endif; ?>

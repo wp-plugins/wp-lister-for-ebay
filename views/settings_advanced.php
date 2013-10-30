@@ -2,13 +2,6 @@
 
 <style type="text/css">
 	
-	#AuthSettingsBox ol li {
-		margin-bottom: 25px;
-	}
-	#AuthSettingsBox ol li > small {
-		margin-left: 4px;
-	}
-
 	#side-sortables .postbox input.text_input,
 	#side-sortables .postbox select.select {
 	    width: 50%;
@@ -88,6 +81,70 @@
 			</div> <!-- #postbox-container-1 -->
 
 
+			<!-- #postbox-container-3 -->
+			<?php if ( ( ! is_multisite() ) || ( is_main_site() ) ) : ?>
+			<div id="postbox-container-3" class="postbox-container">
+				<div class="meta-box-sortables ui-sortable">
+					
+					<div class="postbox" id="PermissionsSettingsBox">
+						<h3 class="hndle"><span><?php echo __('Roles and Capabilities','wplister') ?></span></h3>
+						<div class="inside">
+
+							<?php
+								$wpl_caps = array(
+									'manage_ebay_listings'  => 'Manage Listings',
+									'manage_ebay_options'   => 'Manage Settings',
+									'prepare_ebay_listings' => 'Prepare Listings',
+									'publish_ebay_listings' => 'Publish Listings',
+								);
+							?>
+
+							<table style="width:100%">
+                            <?php foreach ($wpl_available_roles as $role => $role_name) : ?>
+                            	<tr>
+                            		<th style="text-align: left">
+		                                <?php echo $role_name; ?>
+		                            </th>
+
+		                            <?php foreach ($wpl_caps as $cap => $cap_name ) : ?>
+                            		<td>
+		                                <input type="checkbox" 
+		                                    	name="wpl_permissions[<?php echo $role ?>][<?php echo $cap ?>]" 
+		                                       	id="wpl_permissions_<?php echo $role.'_'.$cap ?>" class="checkbox_cap" 
+		                                       	<?php if ( isset( $wpl_wp_roles[ $role ]['capabilities'][ $cap ] ) ) : ?>
+		                                       		checked
+		                                   		<?php endif; ?>
+		                                       	/>
+		                                       	<label for="wpl_permissions_<?php echo $role.'_'.$cap ?>">
+				                               		<?php echo $cap_name; ?>
+				                               	</label>
+			                            </td>
+		                            <?php endforeach; ?>
+
+		                        </tr>
+
+                                <!--
+                                <input type="text" 
+                                       name="role_discount[<?php echo $role ?>]" 
+                                       id="role_discount_<?php echo $role ?>" class="text_input" 
+                                       placeholder="Enter percentage"
+                                       value="<?php echo @$wpl_role_discounts[$role] ?>"/>
+                                -->
+
+                            	</tr>
+                            <?php endforeach; ?>
+                        	</table>
+
+
+						</div>
+					</div>
+
+					<?php #include('profile/edit_sidebar.php') ?>
+				</div>
+			</div> <!-- #postbox-container-1 -->
+			<?php endif; ?>
+
+
 			<!-- #postbox-container-2 -->
 			<div id="postbox-container-2" class="postbox-container">
 				<div class="meta-box-sortables ui-sortable">
@@ -148,44 +205,17 @@
 						</div>
 					</div>
 
-					<div class="postbox" id="OtherSettingsBox">
-						<h3 class="hndle"><span><?php echo __('Misc options','wplister') ?></span></h3>
+					<div class="postbox" id="UISettingsBox">
+						<h3 class="hndle"><span><?php echo __('User Interface','wplister') ?></span></h3>
 						<div class="inside">
 
-							<label for="wpl-hide_dupe_msg" class="text_label">
-								<?php echo __('Hide duplicates warning','wplister'); ?>
-                                <?php wplister_tooltip('Technically, WP-Lister allows you to list the same product multiple times on eBay - in order to increase your visibility. However, this is not recommended as WP-Lister Pro would not be able to decrease the stock on eBay accordingly when the product is sold in WooCommerce.') ?>
+							<label for="wpl-text-admin_menu_label" class="text_label">
+								<?php echo __('Menu label','wplister') ?>
+                                <?php wplister_tooltip('You can change the main admin menu label in your dashboard from WP-Lister to anything you like.') ?>
 							</label>
-							<select id="wpl-hide_dupe_msg" name="wpl_e2e_hide_dupe_msg" class="required-entry select">
-								<option value=""  <?php if ( $wpl_hide_dupe_msg == ''  ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (recommended)</option>
-								<option value="1" <?php if ( $wpl_hide_dupe_msg == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes, I know what I am doing.','wplister'); ?></option>
-							</select>
+							<input type="text" name="wpl_e2e_text_admin_menu_label" id="wpl-text-admin_menu_label" value="<?php echo $wpl_text_admin_menu_label; ?>" class="text_input" />
 							<p class="desc" style="display: block;">
-								<?php echo __('If you do not plan to use the inventory sync feature, you can safely list one product multiple times.','wplister'); ?>
-							</p>
-
-							<label for="wpl-option-foreign_transactions" class="text_label">
-								<?php echo __('Handle foreign transactions','wplister') ?>
-                                <?php wplister_tooltip('WP-Lister is designed to process a sale on eBay only if it "knows" the sold item (ie. the listing was created by WP-Lister itself). Disable this on your own risk.') ?>
-							</label>
-							<select id="wpl-option-foreign_transactions" name="wpl_e2e_option_foreign_transactions" class="required-entry select">
-								<option value="0" <?php if ( $wpl_option_foreign_transactions != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Skip','wplister'); ?> (recommended)</option>
-								<option value="1" <?php if ( $wpl_option_foreign_transactions == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Import','wplister'); ?></option>
-							</select>
-							<p class="desc" style="display: block;">
-								<?php echo __('Transactions for items which were not listed with WP-Lister are skipped by default.','wplister'); ?><br>
-							</p>
-
-							<label for="wpl-option-allow_backorders" class="text_label">
-								<?php echo __('Ignore backorders','wplister') ?>
-                                <?php wplister_tooltip('Since eBay relies on each item having a definitive quantity, allowing backorders for WooCommerce products can cause issues when the last item is sold. WP-Lister can force WooCommerce to mark an product as out of stock when the quantity reaches zero, even with backorders allowed.') ?>
-							</label>
-							<select id="wpl-option-allow_backorders" name="wpl_e2e_option_allow_backorders" class="required-entry select">
-								<option value="0" <?php if ( $wpl_option_allow_backorders != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (recommended)</option>
-								<option value="1" <?php if ( $wpl_option_allow_backorders == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
-							</select>
-							<p class="desc" style="display: block;">
-								<?php echo __('Should WP-Lister mark a product as out of stock even when it has backorders enabled?','wplister'); ?><br>
+								<?php echo __('Customize the main admin menu label of WP-Lister.','wplister'); ?><br>
 							</p>
 
 							<label for="wpl-option-preview_in_new_tab" class="text_label">
@@ -212,6 +242,26 @@
 								<?php echo __('Select the editor you want to use to edit listing templates.','wplister'); ?><br>
 							</p>
 
+							<label for="wpl-hide_dupe_msg" class="text_label">
+								<?php echo __('Hide duplicates warning','wplister'); ?>
+                                <?php wplister_tooltip('Technically, WP-Lister allows you to list the same product multiple times on eBay - in order to increase your visibility. However, this is not recommended as WP-Lister Pro would not be able to decrease the stock on eBay accordingly when the product is sold in WooCommerce.') ?>
+							</label>
+							<select id="wpl-hide_dupe_msg" name="wpl_e2e_hide_dupe_msg" class="required-entry select">
+								<option value=""  <?php if ( $wpl_hide_dupe_msg == ''  ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (recommended)</option>
+								<option value="1" <?php if ( $wpl_hide_dupe_msg == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes, I know what I am doing.','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('If you do not plan to use the inventory sync feature, you can safely list one product multiple times.','wplister'); ?>
+							</p>
+
+						</div>
+					</div>
+
+
+					<div class="postbox" id="OtherSettingsBox">
+						<h3 class="hndle"><span><?php echo __('Misc options','wplister') ?></span></h3>
+						<div class="inside">
+
 							<label for="wpl-option-local_timezone" class="text_label">
 								<?php echo __('Local timezone','wplister') ?>
                                 <?php wplister_tooltip('This is currently used to convert the order creation date from UTC to local time.') ?>
@@ -225,6 +275,43 @@
 							<p class="desc" style="display: block;">
 								<?php echo __('Select your local timezone.','wplister'); ?><br>
 							</p>
+
+							<label for="wpl-enable_item_compat_tab" class="text_label">
+								<?php echo __('Enable Item Compatibility tab','wplister'); ?>
+                                <?php wplister_tooltip('Item compatibility lists are currently only created for imported products. Future versions of WP-Lister Pro will allow to define compatibility lists in WooCommerce.') ?>
+							</label>
+							<select id="wpl-enable_item_compat_tab" name="wpl_e2e_enable_item_compat_tab" class="required-entry select">
+								<option value=""  <?php if ( $wpl_enable_item_compat_tab == ''  ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+								<option value="1" <?php if ( $wpl_enable_item_compat_tab == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?> (default)</option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Show eBay Item Compatibility List as new tab on single product page.','wplister'); ?>
+							</p>
+
+							<label for="wpl-option-foreign_transactions" class="text_label">
+								<?php echo __('Handle foreign transactions','wplister') ?>
+                                <?php wplister_tooltip('WP-Lister is designed to process a sale on eBay only if it "knows" the sold item (ie. the listing was created by WP-Lister itself). Disable this on your own risk.') ?>
+							</label>
+							<select id="wpl-option-foreign_transactions" name="wpl_e2e_option_foreign_transactions" class="required-entry select">
+								<option value="0" <?php if ( $wpl_option_foreign_transactions != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Skip','wplister'); ?> (recommended)</option>
+								<option value="1" <?php if ( $wpl_option_foreign_transactions == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Import','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Transactions for items which were not listed with WP-Lister are skipped by default.','wplister'); ?><br>
+							</p>
+
+							<label for="wpl-option-allow_backorders" class="text_label">
+								<?php echo __('Ignore backorders','wplister') ?>
+                                <?php wplister_tooltip('Since eBay relies on each item having a definitive quantity, allowing backorders for WooCommerce products can cause issues when the last item is sold. WP-Lister can force WooCommerce to mark an product as out of stock when the quantity reaches zero, even with backorders allowed.') ?>
+							</label>
+							<select id="wpl-option-allow_backorders" name="wpl_e2e_option_allow_backorders" class="required-entry select">
+								<option value="0" <?php if ( $wpl_option_allow_backorders != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (recommended)</option>
+								<option value="1" <?php if ( $wpl_option_allow_backorders == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Should WP-Lister mark a product as out of stock even when it has backorders enabled?','wplister'); ?><br>
+							</p>
+
 
 						</div>
 					</div>

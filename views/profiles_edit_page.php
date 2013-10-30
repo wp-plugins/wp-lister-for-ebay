@@ -100,10 +100,17 @@
 							</p>
 
 							<label for="wpl-text-quantity" class="text_label">
-								<?php echo __('Quantity','wplister'); ?>
+								<?php echo __('Fixed quantity','wplister'); ?>
                                 <?php wplister_tooltip('If you do not wish to list all available stock on eBay, you can overwrite the quantity here.<br>Use this with care - WP-Lister Pro can\'t sync the inventory properly if you enter a fixed quantity.') ?>
 							</label>
 							<input type="text" name="wpl_e2e_quantity" id="wpl-text-quantity" value="<?php echo $item_details['quantity']; ?>" class="text_input" />
+							
+							<label for="wpl-text-max-max_quantity" class="text_label">
+								<?php echo __('Maximum quantity','wplister'); ?>
+                                <?php wplister_tooltip('If you wish to limit your available stock on eBay, you can set a maximum quantity here.<br>Use this where you want to create demand or when you have listing limitation. This option will not limit fixed quantities.') ?>
+							</label>
+							<input type="number" name="wpl_e2e_max_quantity" id="wpl-text-max_quantity" value="<?php echo @$item_details['max_quantity']; ?>" class="text_input" placeholder="0" step="any" min="0" />
+							
 							<br class="clear" />
 
 
@@ -237,6 +244,15 @@
 							<br class="clear" />
 
 
+							<?php if ( $wpl_cod_available ) : ?>
+							<label for="wpl-text-cod_cost" class="text_label">
+								<?php echo __('Cash on delivery fee','wplister'); ?>
+                                <?php wplister_tooltip('Provide the additional fee you want to charge for cash on delivery.') ?>
+							</label>
+							<input type="text" name="wpl_e2e_cod_cost" id="wpl-text-cod_cost" value="<?php echo @$item_details['cod_cost']; ?>" class="text_input" />
+							<br class="clear" />
+							<?php endif; ?>
+
 							<label for="wpl-text-payment_instructions" class="text_label">
 								<?php echo __('Payment instructions','wplister'); ?>
                                 <?php wplister_tooltip('Payment instructions from the seller to the buyer. These instructions appear on eBay\'s View Item page and on eBay\'s checkout page when the buyer pays for the item. <br><br>
@@ -289,6 +305,31 @@
 								<option value="Days_60" <?php if ( $item_details['returns_within'] == 'Days_60' ): ?>selected="selected"<?php endif; ?>>60 <?php echo __('days','wplister'); ?></option>
 								<option value="Months_1" <?php if ( $item_details['returns_within'] == 'Months_1' ): ?>selected="selected"<?php endif; ?>>3 <?php echo __('month','wplister'); ?></option>
 							<?php endif; ?>
+							</select>
+							<br class="clear" />
+
+							<label for="wpl-text-ShippingCostPaidBy" class="text_label">
+								<?php echo __('Shipping cost paid by','wplister'); ?>
+                                <?php wplister_tooltip('The party who pays the shipping cost for a returned item.') ?>
+							</label>
+							<select id="wpl-text-ShippingCostPaidBy" name="wpl_e2e_ShippingCostPaidBy" class=" required-entry select">
+								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+								<option value="Buyer"  <?php if ( @$item_details['ShippingCostPaidBy'] == 'Buyer'  ): ?>selected="selected"<?php endif; ?>><?php echo __('Buyer','wplister'); ?></option>
+								<option value="Seller" <?php if ( @$item_details['ShippingCostPaidBy'] == 'Seller' ): ?>selected="selected"<?php endif; ?>><?php echo __('Seller','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
+							<label for="wpl-text-RefundOption" class="text_label">
+								<?php echo __('Refund option','wplister'); ?>
+                                <?php wplister_tooltip('Indicates how the seller will compensate the buyer for a returned item. Use the description field to explain the policy details. Not applicable on EU sites.') ?>
+							</label>
+							<select id="wpl-text-RefundOption" name="wpl_e2e_RefundOption" class=" required-entry select">
+								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+								<option value="Exchange"  <?php if ( @$item_details['RefundOption'] == 'Exchange'  ): ?>selected="selected"<?php endif; ?>><?php echo ('Exchange'); ?></option>
+								<option value="MerchandiseCredit" <?php if ( @$item_details['RefundOption'] == 'MerchandiseCredit' ): ?>selected="selected"<?php endif; ?>><?php echo ('Merchandise Credit'); ?></option>
+								<option value="MoneyBack"  <?php if ( @$item_details['RefundOption'] == 'MoneyBack'  ): ?>selected="selected"<?php endif; ?>><?php echo ('Money Back'); ?></option>
+								<option value="MoneyBackOrExchange" <?php if ( @$item_details['RefundOption'] == 'MoneyBackOrExchange' ): ?>selected="selected"<?php endif; ?>><?php echo ('Money Back or Exchange'); ?></option>
+								<option value="MoneyBackOrReplacement"  <?php if ( @$item_details['RefundOption'] == 'MoneyBackOrReplacement'  ): ?>selected="selected"<?php endif; ?>><?php echo ('Money Back or Replacement'); ?></option>
 							</select>
 							<br class="clear" />
 

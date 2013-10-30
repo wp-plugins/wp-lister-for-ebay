@@ -14,7 +14,7 @@ class ToolsPage extends WPL_Page {
 		// parent::onWpInit();
 
 		// custom (raw) screen options for tools page
-		add_screen_options_panel('wplister_setting_options', '', array( &$this, 'renderSettingsOptions'), 'wp-lister_page_wplister-tools' );
+		add_screen_options_panel('wplister_setting_options', '', array( &$this, 'renderSettingsOptions'), $this->main_admin_menu_slug.'_page_wplister-tools' );
 
 		// load styles and scripts for this page only
 		add_action( 'admin_print_styles', array( &$this, 'onWpPrintStyles' ) );
@@ -81,6 +81,11 @@ class ToolsPage extends WPL_Page {
 				if ( $_REQUEST['action'] == 'view_logfile') {				
 					$this->viewLogfile();
 				}
+				// wplister_clear_log
+				if ( $_REQUEST['action'] == 'wplister_clear_log') {				
+					$this->clearLogfile();
+					$this->showMessage('Log file was cleared.');
+				}
 				// GetTokenStatus
 				if ( $_REQUEST['action'] == 'GetTokenStatus') {				
 					$this->initEC();
@@ -138,6 +143,7 @@ class ToolsPage extends WPL_Page {
 	
 
 	public function onDisplayToolsPage() {
+		global $wpl_logger;
 		WPL_Setup::checkSetup();
 
 		$this->handleActions();
@@ -148,6 +154,7 @@ class ToolsPage extends WPL_Page {
 			'results'					=> isset($this->results) ? $this->results : '',
 			'resultsHtml'				=> isset($this->resultsHtml) ? $this->resultsHtml : '',
 			'debug'						=> isset($debug) ? $debug : '',
+			'log_size'					=> file_exists($wpl_logger->file) ? filesize($wpl_logger->file) : '',
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-tools'
 		);
 		$this->display( 'tools_page', $aData );
@@ -187,6 +194,11 @@ class ToolsPage extends WPL_Page {
 		echo "<br>logfile: " . $wpl_logger->file . "<br>";
 		echo "</pre>";
 
+	}
+
+	public function clearLogfile() {
+		global $wpl_logger;
+		file_put_contents( $wpl_logger->file, '' );
 	}
 
 	public function renderSettingsOptions() {

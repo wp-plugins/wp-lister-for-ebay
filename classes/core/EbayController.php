@@ -424,6 +424,34 @@ class EbayController {
         
     }
 
+    // call ReviseInventoryStatus on selected cart items
+    public function reviseInventoryForCartItems( $cart_items ){ 
+        
+        $sm = new ListingsModel();
+        if ( ! is_array( $cart_items ) ) return;
+        
+        foreach( $cart_items as $item ) {
+            $this->lastResults[] = $sm->reviseInventoryStatus( $item->listing_id, $this->session, $item );  
+        }
+        
+        $this->processLastResults();
+    }
+
+    // call ReviseInventoryStatus on selected products
+    public function reviseInventoryForProducts( $product_ids ){ 
+
+        if ( ! is_array( $product_ids ) && ! is_numeric( $product_ids ) ) return; 
+        if ( ! is_array( $product_ids ) ) $product_ids = array( $product_ids );
+        
+        $lm = new ListingsModel();
+        foreach( $product_ids as $post_id ) {
+            $listing_id = $lm->getListingIDFromPostID( $post_id );
+            $this->lastResults[] = $lm->reviseInventoryStatus( $listing_id, $this->session, false );  
+        }
+        
+        $this->processLastResults();
+    }
+
     // call AddItem on selected items
     public function sendItemsToEbay( $id ){ 
         
@@ -502,15 +530,15 @@ class EbayController {
     // delete selected items
     public function deleteListings( $id ){ 
         
-        $sm = new ListingsModel();
+        // $sm = new ListingsModel();
 
-        if ( is_array( $id )) {
-            foreach( $id as $single_id ) {
-                $sm->deleteItem( $single_id );  
-            }
-        } else {
-            $sm->deleteItem( $id );         
-        }
+        // if ( is_array( $id )) {
+        //     foreach( $id as $single_id ) {
+        //         $sm->deleteItem( $single_id );  
+        //     }
+        // } else {
+        //     $sm->deleteItem( $id );         
+        // }
         
     }
 

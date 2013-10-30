@@ -33,9 +33,9 @@ class ListingsPage extends WPL_Page {
 	// }
 
 	public function onWpTopAdminMenu() {
-
-		$page_id = add_menu_page( self::ParentTitle, __('WP-Lister','wplister'), self::ParentPermissions, 
+		$page_id = add_menu_page( self::ParentTitle, $this->main_admin_menu_label, self::ParentPermissions, 
 					   self::ParentMenuId, array( $this, 'onDisplayListingsPage' ), $this->getImageUrl( 'hammer-16x16.png' ), ProductWrapper::menu_page_position );
+		// $page_id: toplevel_page_wplister
 	}
 
 	public function handleSubmitOnInit() {
@@ -266,10 +266,73 @@ class ListingsPage extends WPL_Page {
 			}
 			// handle delete action
 			if ( $this->requestAction() == 'delete' ) {
-				$this->initEC();
-				$this->EC->deleteListings( $_REQUEST['auction'] );
-				$this->EC->closeEbay();
+
+		        $lm = new ListingsModel();
+		        $id = $_REQUEST['auction'];
+
+		        if ( is_array( $id )) {
+		            foreach( $id as $single_id ) {
+		                $lm->deleteItem( $single_id );  
+		            }
+		        } else {
+		            $lm->deleteItem( $id );         
+		        }
+
 				$this->showMessage( __('Selected items were removed.','wplister') );
+			}
+
+			// handle archive action
+			if ( $this->requestAction() == 'archive' ) {
+
+		        $lm = new ListingsModel();
+		        $id = $_REQUEST['auction'];
+		        $data = array( 'status' => 'archived' );
+
+		        if ( is_array( $id )) {
+		            foreach( $id as $single_id ) {
+		                $lm->updateListing( $single_id, $data );
+		            }
+		        } else {
+		            $lm->updateListing( $id, $data );
+		        }
+
+				$this->showMessage( __('Selected items were archived.','wplister') );
+			}
+
+			// handle lock action
+			if ( $this->requestAction() == 'lock' ) {
+
+		        $lm = new ListingsModel();
+		        $id = $_REQUEST['auction'];
+		        $data = array( 'locked' => true );
+
+		        if ( is_array( $id )) {
+		            foreach( $id as $single_id ) {
+		                $lm->updateListing( $single_id, $data );
+		            }
+		        } else {
+		            $lm->updateListing( $id, $data );
+		        }
+
+				$this->showMessage( __('Selected items were locked.','wplister') );
+			}
+
+			// handle unlock action
+			if ( $this->requestAction() == 'unlock' ) {
+
+		        $lm = new ListingsModel();
+		        $id = $_REQUEST['auction'];
+		        $data = array( 'locked' => false );
+
+		        if ( is_array( $id )) {
+		            foreach( $id as $single_id ) {
+		                $lm->updateListing( $single_id, $data );
+		            }
+		        } else {
+		            $lm->updateListing( $id, $data );
+		        }
+
+				$this->showMessage( __('Selected items were unlocked.','wplister') );
 			}
 
 			// handle toolbar action - prepare listing from product
@@ -307,7 +370,7 @@ class ListingsPage extends WPL_Page {
 	        $summary = $listingsModel->getStatusSummary();
 
 	        // check for changed items and display reminder
-	        if ( isset($summary->changed) ) {
+	        if ( isset($summary->changed) && current_user_can( 'publish_ebay_listings' ) ) {
 				$msg  = '<p>';
 				$msg .= sprintf( __('WP-Lister has found %s changed item(s) which need to be revised on eBay to apply their latest changes.','wplister'), $summary->changed );
 				// $msg .= '<br><br>';
@@ -438,7 +501,8 @@ class ListingsPage extends WPL_Page {
 					$msg .= '<br>';
 					if ( in_array( $listing->status, array( 'prepared', 'verified', 'ended' ) ) ) {
 						$delete_link = sprintf('<a class="delete" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete',$listing->id,__('Click to remove this listing','wplister'));
-						$msg .= '&nbsp;&nbsp;&nbsp;'.$delete_link;
+						$archive_link = sprintf('<a class="archive" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'archive',$listing->id,__('Click to move to archive','wplister'));
+						$msg .= '&nbsp;&nbsp;&nbsp;'.$archive_link;
 						$msg .= '<br>';
 					}
 				}

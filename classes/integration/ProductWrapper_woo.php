@@ -198,7 +198,7 @@ class ProductWrapper {
 	
 	// check if product has variations
 	static function hasVariations( $post_id ) {
-		
+
 		$product = self::getProduct( $post_id );
 		if ( $product->product_type == 'variable' ) return true;
 
@@ -255,6 +255,8 @@ class ProductWrapper {
 		global $product; // make $product globally available for some badly coded themes...		
 
 		$product = self::getProduct( $post_id );
+		if ( $product->product_type != 'variable' ) return array();
+
 		$available_variations = $product->get_available_variations();
 		$variation_attributes = $product->get_variation_attributes();
 

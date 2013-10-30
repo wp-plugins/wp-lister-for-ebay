@@ -125,6 +125,7 @@ class WPL_Model {
 		$errors = array();
 
 		// if ( ! is_object($res) ) return false;
+		$this->handle_error_code = null;
 
 		// echo errors and warnings - call can be successful but with warnings
 		if ( $res->getErrors() )
@@ -148,6 +149,14 @@ class WPL_Model {
 				$longMessage .= '<br>'. 'Below you find an explaination as to what triggered the above error:';
 			}
 			
+			// #291 - Auction ended / You are not allowed to revise ended listings.
+			if ( $error->getErrorCode() == 291 ) { 
+				// change status from Error to Warning to allow post processing of this error
+				$res->setAck('Warning');
+				$this->handle_error_code = 291;
+				$longMessage .= '<br><br>'. '<b>Note:</b> Listing status was changed to ended.';				
+			}
+			
 			// #302 - Invalid auction listing type
 			if ( $error->getErrorCode() == 302 ) { 
 				$longMessage .= '<br><br>'. '<b>Note:</b> eBay does not allow changing the listing type of an active listing.';
@@ -164,11 +173,47 @@ class WPL_Model {
 				update_option( 'wplister_ebay_token_is_invalid', true );
 			}
 			
+			// #21916519 - Error: Listing is missing required item specific(s)
+			if ( $error->getErrorCode() == 21916519 ) { 
+				// $longMessage .= '<br><br>'. '<b>How to add item specifics to your eBay listings</b>'.'<br>';
+				$longMessage .= '<br><br>'. '<b>Why am I seeing this error message?</b>'.'<br>';
+				$longMessage .= 'eBay requires sellers to provide these item specifics (product attributes) for the selected primary category.'.'<br>';
+				$longMessage .= '<br>';
+				$longMessage .= 'You have two options to add item specifics to your listings:'.'<!br>';
+				$longMessage .= '<ol>';
+				$longMessage .= '<li>Create product attributes with the exact same name as required by eBay.'.'</li>';
+				if ( WPLISTER_LIGHT ) :
+					$longMessage .= '<li>Upgrade to WP-Lister Pro where you can define item specifics in your profile. You can either enter fixed values or map existing WooCommerce product attributes to eBay item specifics.'.'</li>';
+				else :
+					$longMessage .= '<li>Define item specifics in your listing profile where you can either enter fixed values or map WooCommerce product attributes to eBay item specifics.'.'</li>';
+				endif;
+				$longMessage .= '</ol>';
+				$longMessage .= 'More detailed information about item specifics in WP-Lister Pro can be found here: ';
+				$longMessage .= '<a href="http://www.wplab.com/list-your-products-with-item-specifics-recommended-by-ebay/" target="_blank">http://www.wplab.com/list-your-products-with-item-specifics-recommended-by-ebay/</a>';
+			}
+			
+			// #219422   - Error: Invalid PromotionalSale item / Item format does not qualify for promotional sale
+			// #21916391 - Error: Not an Active SM subscriber  / "user" is not subscribed to Selling Manager.
+			if ( ( $error->getErrorCode() == 219422 ) || ( $error->getErrorCode() == 21916391 ) ) { 
+				$longMessage .= '<br><br>'. '<b>Why am I seeing this error message?</b>'.'<br>';
+				$longMessage .= 'You might not be allowed to use eBay\'s <i>Selling Manager Pro</i>.'.'<br>';
+				$longMessage .= '<br>';
+				$longMessage .= 'If you see this error when listing a new item on eBay it will still be listed, ';
+				$longMessage .= 'but you should disable the <i>Auto Relist</i> option in your listing profile in the box labeled "Selling Manager Pro" in order to make this error message disappear.';
+			}
+			
+			// #21915307 - Warning: Shipping Service - Pickup is set as last service.
+			if ( $error->getErrorCode() == 21915307 ) { 
+				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
+				$longMessage .= 'The warning above can be misleading. What eBay actually means is: ';
+				$longMessage .= 'If there are two or more services and one is "pickup", "pickup" must not be specified as the first service.';
+			}
+			
 
 			// some errors like #240 may return an extra ErrorParameters array
 			// deactivated for now since a copy of this will be found in $res->getMessage()
 			// if ( isset( $error->ErrorParameters ) ) { 
-			// 	$extraMsg  = '<div id="message" class="updated" style="display:block !important;"><p>';
+			// 	$extraMsg  = '<div id="message" class="updated update-nag" style="display:block !important;"><p>';
 			// 	$extraMsg .= print_r( $error->ErrorParameters, 1 );
 			// 	$extraMsg .= '</p></div>';
 			// 	if ( ! $this->is_ajax() ) echo $extraMsg;
@@ -177,7 +222,7 @@ class WPL_Model {
 			// }
 
 			// display error message - if this is not an ajax request
-			$class = ( $error->SeverityCode == 'Error') ? 'error' : 'updated';
+			$class = ( $error->SeverityCode == 'Error') ? 'error' : 'updated update-nag';
 			$htmlMsg  = '<div id="message" class="'.$class.'" style="display:block !important;"><p>';
 			$htmlMsg .= '<b>' . $error->SeverityCode . ': ' . $shortMessage . '</b>' . ' (#'  . $error->getErrorCode() . ') ';
 			$htmlMsg .= '<br>' . $longMessage . '';
@@ -198,7 +243,7 @@ class WPL_Model {
 
 		// some errors like #240 may trigger an extra Message field returned in the response
 		if ( $res->getMessage() ) { 
-			$extraMsg  = '<div id="message" class="updated" style="display:block !important;">';
+			$extraMsg  = '<div id="message" class="updated update-nag" style="display:block !important;">';
 			$extraMsg .= $res->getMessage();
 			$extraMsg .= '</div>';
 			if ( ! $this->is_ajax() ) echo $extraMsg;
@@ -233,7 +278,7 @@ class WPL_Model {
 	} // handleResponse()
 
 	function is_ajax() {
-		return defined( 'DOING_AJAX' ) && DOING_AJAX;
+		return ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'WOOCOMMERCE_CHECKOUT' ) && WOOCOMMERCE_CHECKOUT ) ;
 	}
 
 	// check if given WordPress plugin is active

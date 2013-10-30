@@ -47,6 +47,26 @@ $req = $wpl_row->request;
 $res = $wpl_row->response;
 $id  = $wpl_row->id;
 
+// check for errors and warnings
+$errors = '';
+if ( preg_match_all("/<ShortMessage>(.*)<\/ShortMessage>/", $res, $matches_sm) ) {
+ 	
+ 	preg_match_all("/<SeverityCode>(.*)<\/SeverityCode>/", $res, $matches_sc );
+ 	preg_match_all("/<ErrorCode>(.*)<\/ErrorCode>/", $res, $matches_ec );
+	preg_match_all("/<LongMessage>(.*)<\/LongMessage>/", $res, $matches_lm);
+
+	foreach ($matches_sm[1] as $key => $sm ) {
+		// if ( $key == 0 ) continue;
+		if ( $key != 0 ) $errors .= '<br>';
+		$ec = $matches_ec[1][$key];
+		$sc = $matches_sc[1][$key];
+		$lm = $matches_lm[1][$key];
+		$errors .= '<b>'.$sc.':</b> ';
+		$errors .= $sm . ' ('.$ec.')<br>';
+		$errors .= $lm.'<br>';
+	}
+
+}
 
 // hide Description content for better readability
 if ( @$_GET['desc'] != 'show' ) {
@@ -57,7 +77,7 @@ if ( @$_GET['desc'] != 'show' ) {
 
 // try to include PEAR and hide php warnings on fail
 @include_once ('PEAR.php');
-if ( class_exists('PEAR') ) {
+if ( class_exists('PEAR') && ( 'custom' != get_option( 'wplister_xml_formatter', 'default' ) ) ) {
 	// add XML dir to include path
 	$incPath = WPLISTER_PATH.'/includes';
 	set_include_path( get_include_path() . ':' . $incPath );
@@ -104,6 +124,9 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
         	background-color: #eee;
         	border: 1px solid #ccc;
         	padding: 20px;
+        }
+        pre.errors {
+			white-space: pre-wrap;
         }
         #support_request_wrap {
         	margin-top: 15px;
@@ -162,6 +185,11 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
 
     <h3>Request URL</h3>
     <pre><?php echo $url ?></pre>
+
+    <?php if ( $errors ) : ?>
+	    <h3>Errors</h3>
+    	<pre class="errors"><?php echo $errors ?></pre>
+	<?php endif; ?>
 
     <h3>Request</h3>
     <pre><?php echo $req ?></pre>

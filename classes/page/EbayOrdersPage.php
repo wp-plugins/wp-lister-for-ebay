@@ -12,7 +12,8 @@ class EbayOrdersPage extends WPL_Page {
 		// parent::onWpInit();
 
 		// Add custom screen options
-		add_action( "load-wp-lister_page_wplister-".self::slug, array( &$this, 'addScreenOptions' ) );
+		$load_action = "load-".$this->main_admin_menu_slug."_page_wplister-".self::slug;
+		add_action( $load_action, array( &$this, 'addScreenOptions' ) );
 
 		// handle actions
 		$this->handleActionsOnInit();

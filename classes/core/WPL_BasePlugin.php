@@ -39,6 +39,20 @@ class WPL_BasePlugin extends WPL_Core {
 	}
 
 
+	// check if permissions require updating 
+	function checkPermissions() {
+
+		$role = get_role( 'administrator' );
+
+		// check if admin has manage_ebay_options capability
+		if ( ! isset( $role->capabilities['manage_ebay_options'] ) ) {
+
+	  		WPL_Setup::updatePermissions();
+
+		}
+
+	} // checkPermissions()
+
 
 }
 

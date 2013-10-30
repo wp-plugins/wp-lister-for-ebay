@@ -134,18 +134,6 @@
 						</form>
 						<br style="clear:both;"/>
 
-
-						<!-- View debug log - if enabled --> 
-						<?php if ( get_option('wplister_log_level') > 1 ): ?>
-						<form method="post" action="admin-ajax.php" target="_blank">
-								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
-								<input type="hidden" name="action" value="wplister_tail_log" />
-								<input type="submit" value="<?php echo __('View debug log','wplister'); ?>" name="submit" class="button-secondary">
-								<p><?php echo __('Open logfile viewer in new tab','wplister'); ?></p>
-						</form>
-						<br style="clear:both;"/>
-						<?php endif; ?>
-
 						<!-- Get token expiration date --> 
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
@@ -154,6 +142,29 @@
 								<p><?php echo __('Get token expiration date','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
+
+
+						<!-- View debug log - if enabled --> 
+						<?php if ( get_option('wplister_log_level') > 1 ): ?>
+
+						<form method="post" action="admin-ajax.php" target="_blank">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="wplister_tail_log" />
+								<input type="submit" value="<?php echo __('View debug log','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('Open logfile viewer in new tab','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="wplister_clear_log" />
+								<input type="submit" value="<?php echo __('Clear debug log','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('Current log file size','wplister'); ?>: <?php echo round($wpl_log_size/1024/1024,1) ?> mb</p>
+						</form>
+						<br style="clear:both;"/>
+
+						<?php endif; ?>
+
 
 						<!--
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
