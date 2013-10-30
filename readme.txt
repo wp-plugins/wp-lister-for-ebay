@@ -90,8 +90,7 @@ Already working on it. Expect it this summer.
 
 == Changelog ==
 = 1.3.1 =
-* stable release
-* see http://www.wplab.com/whats-new-in-wp-lister-pro-1-3/ ‎for what's new in 1.3
+* first stable release since 1.2.8
 
 = 1.3.0.17 =
 * fixed shipping fee in created orders
