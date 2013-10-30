@@ -30,6 +30,7 @@ require_once( WPLISTER_PATH . '/classes/core/WPL_Toolbar.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Functions.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_API_Hooks.php' );
 require_once( WPLISTER_PATH . '/classes/core/EbayController.php' );
+require_once( WPLISTER_PATH . '/classes/integration/WooFrontendIntegration.php' );
 
 // set up autoloader
 spl_autoload_register('WPL_Autoloader::autoload');
