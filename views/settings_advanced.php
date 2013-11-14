@@ -288,17 +288,6 @@
 								<?php echo __('Show eBay Item Compatibility List as new tab on single product page.','wplister'); ?>
 							</p>
 
-							<label for="wpl-option-foreign_transactions" class="text_label">
-								<?php echo __('Handle foreign transactions','wplister') ?>
-                                <?php wplister_tooltip('WP-Lister is designed to process a sale on eBay only if it "knows" the sold item (ie. the listing was created by WP-Lister itself). Disable this on your own risk.') ?>
-							</label>
-							<select id="wpl-option-foreign_transactions" name="wpl_e2e_option_foreign_transactions" class="required-entry select">
-								<option value="0" <?php if ( $wpl_option_foreign_transactions != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Skip','wplister'); ?> (recommended)</option>
-								<option value="1" <?php if ( $wpl_option_foreign_transactions == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Import','wplister'); ?></option>
-							</select>
-							<p class="desc" style="display: block;">
-								<?php echo __('Transactions for items which were not listed with WP-Lister are skipped by default.','wplister'); ?><br>
-							</p>
 
 							<label for="wpl-option-allow_backorders" class="text_label">
 								<?php echo __('Ignore backorders','wplister') ?>
@@ -311,7 +300,6 @@
 							<p class="desc" style="display: block;">
 								<?php echo __('Should WP-Lister mark a product as out of stock even when it has backorders enabled?','wplister'); ?><br>
 							</p>
-
 
 						</div>
 					</div>

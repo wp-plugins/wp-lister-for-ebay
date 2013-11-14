@@ -163,3 +163,23 @@
 								<br class="clear" />
 								
 							</div>
+
+
+							<?php if ( isset( $wpl_seller_shipping_profiles ) && is_array( $wpl_seller_shipping_profiles ) ): ?>
+							<label for="wpl-text-seller_shipping_profile_id" class="text_label">
+								<?php echo __('Shipping profile','wplister'); ?> (beta)
+                                <?php wplister_tooltip('Instead of setting your shipping details in WP-Lister you can select a predefined shipping profile from your eBay account.') ?>
+							</label>
+							<select id="wpl-text-seller_shipping_profile_id" name="wpl_e2e_seller_shipping_profile_id" class=" required-entry select">
+								<option value="">-- <?php echo __('no profile','wplister'); ?> --</option>
+								<?php foreach ($wpl_seller_shipping_profiles as $seller_profile ) : ?>
+									<option value="<?php echo $seller_profile->ProfileID ?>" 
+										<?php if ( @$item_details['seller_shipping_profile_id'] == $seller_profile->ProfileID ) : ?>
+											selected="selected"
+										<?php endif; ?>
+										><?php echo $seller_profile->ProfileName . ' - ' . $seller_profile->ShortSummary ?></option>
+								<?php endforeach; ?>
+							</select>
+							<br class="clear" />
+							<?php endif; ?>
+

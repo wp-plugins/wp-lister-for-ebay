@@ -121,6 +121,13 @@ class WPL_Setup extends WPL_Core {
 			// $this->showMessage( __('Your UserID is','wplister') . $UserID );
 		}
 		
+		// fetch user details if not done yet
+		if ( ( self::getOption('ebay_token') != '' ) && ( ! self::getOption('ebay_seller_profiles_enabled') ) ) {
+			$this->initEC();
+			$this->EC->GetUserPreferences();
+			$this->EC->closeEbay();
+		}
+		
 	}
 
 

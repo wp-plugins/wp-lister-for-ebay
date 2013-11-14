@@ -150,7 +150,7 @@ class SettingsPage extends WPL_Page {
 			'option_cron_auctions'		=> self::getOption( 'cron_auctions' ),
 			'option_cron_transactions'	=> self::getOption( 'cron_transactions' ),
 			'option_enable_ebay_motors'	=> self::getOption( 'enable_ebay_motors' ),
-			'option_ebay_update_mode'	=> self::getOption( 'ebay_update_mode' ),
+			'option_ebay_update_mode'	=> self::getOption( 'ebay_update_mode', 'order' ),
 	
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'auth_url'					=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab='.$active_tab.'&action=wplRedirectToAuthURL',
@@ -389,6 +389,7 @@ class SettingsPage extends WPL_Page {
 						self::updateOption( 'sandbox_enabled',	$this->getValueFromPost( 'option_sandbox_enabled' ) );
 						$this->initEC();
 						$UserID = $this->EC->GetUser();
+						$this->EC->GetUserPreferences();
 						$this->EC->closeEbay();
 						$this->showMessage( __('Enabled sandbox mode.','wplister') . ' ' .
 											sprintf( "Your token for %s was restored.", $UserID ) );
@@ -410,6 +411,7 @@ class SettingsPage extends WPL_Page {
 						self::updateOption( 'sandbox_enabled',	$this->getValueFromPost( 'option_sandbox_enabled' ) );
 						$this->initEC();
 						$UserID = $this->EC->GetUser();
+						$this->EC->GetUserPreferences();
 						$this->EC->closeEbay();
 						$this->showMessage( __('Switched to production mode.','wplister') . ' ' .
 											sprintf( "Your token for %s was restored.", $UserID ) );
@@ -435,6 +437,7 @@ class SettingsPage extends WPL_Page {
 				self::updateOption( 'ebay_token', $this->getValueFromPost( 'text_ebay_token' ) );
 				$this->initEC();
 				$UserID = $this->EC->GetUser();
+				$this->EC->GetUserPreferences();
 				$this->EC->closeEbay();
 				$this->showMessage( __('Your token was changed.','wplister') );
 				$this->showMessage( __('Your UserID is','wplister') . ' ' . $UserID );

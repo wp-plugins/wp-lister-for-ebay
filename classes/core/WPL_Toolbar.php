@@ -42,7 +42,7 @@ class WPLister_Toolbar  {
 		);
 		$wp_admin_bar->add_node($args);
 
-		$mode = get_option( 'wplister_ebay_update_mode', 'transaction' );
+		$mode = get_option( 'wplister_ebay_update_mode', 'order' );
 		if ( $mode == 'order' ) {
 
 			// Orders page

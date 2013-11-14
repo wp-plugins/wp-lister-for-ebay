@@ -335,13 +335,15 @@ class EbayShippingModel extends WPL_Model {
 	}
 
 	function getShippingLocations() {
-		$locations = unserialize( get_option( 'wplister_ShippingLocationDetails' ) );
+		$locations = maybe_unserialize( get_option( 'wplister_ShippingLocationDetails' ) );
 		// $this->logger->info('wplister_ShippingLocationDetails'.print_r($locations,1));
+		if ( ! is_array($locations) ) return array();
 		return $locations;
 	}
 	function getEbayCountries() {
-		$countries = unserialize( get_option( 'wplister_CountryDetails' ) );
+		$countries = maybe_unserialize( get_option( 'wplister_CountryDetails' ) );
 		// $this->logger->info('wplister_CountryDetails'.print_r($countries,1));
+		if ( ! is_array($countries) ) return array();
 		asort($countries);
 		return $countries;
 	}

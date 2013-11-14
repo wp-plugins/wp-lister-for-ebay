@@ -26,7 +26,7 @@
 	<br style="clear:both;"/>
 
 
-	<?php if ( 'transaction' == get_option( 'wplister_ebay_update_mode', 'transaction' ) ) : ?>
+	<?php if ( 'transaction' == get_option( 'wplister_ebay_update_mode', 'order' ) ) : ?>
 	
 		<?php if ( wp_next_scheduled( 'wplister_update_auctions' ) ) : ?>
 		<p>

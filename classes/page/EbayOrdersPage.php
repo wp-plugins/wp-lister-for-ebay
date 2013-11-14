@@ -22,7 +22,7 @@ class EbayOrdersPage extends WPL_Page {
 	public function onWpAdminMenu() {
 		parent::onWpAdminMenu();
 
-		if ( 'order' != get_option( 'wplister_ebay_update_mode', 'transaction' ) ) return;
+		if ( 'order' != get_option( 'wplister_ebay_update_mode', 'order' ) ) return;
 
 		add_submenu_page( self::ParentMenuId, $this->getSubmenuPageTitle( 'Orders' ), __('Orders','wplister'), 
 						  self::ParentPermissions, $this->getSubmenuId( 'orders' ), array( &$this, 'onDisplayEbayOrdersPage' ) );

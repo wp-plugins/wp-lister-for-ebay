@@ -99,6 +99,7 @@ class ToolsPage extends WPL_Page {
 				if ( $_REQUEST['action'] == 'GetUser') {				
 					$this->initEC();
 					$UserID = $this->EC->GetUser();
+					$this->EC->GetUserPreferences();
 					$this->EC->closeEbay();
 					$this->showMessage( __('Your UserID is','wplister') . ' ' . $UserID );
 				}
@@ -129,6 +130,22 @@ class ToolsPage extends WPL_Page {
 					$msg .= '&nbsp;&nbsp;';
 					$msg .= '<a href="#" onclick="jQuery(\'#transaction_report\').toggle();return false;">'.__('show details','wplister').'</a>';
 					$msg .= $tm->getHtmlReport();
+					$this->showMessage( $msg );
+				}
+	
+				// update_ebay_orders
+				if ( $_POST['action'] == 'update_ebay_orders_30') {				
+					$this->initEC();
+					$om = $this->EC->loadEbayOrders( 30 );
+					$this->EC->updateListings();
+					$this->EC->closeEbay();
+
+					// show report
+					$msg  = $om->count_total .' '. __('Orders were loaded from eBay.','wplister') . '<br>';
+					$msg .= __('Timespan','wplister') .': '. $om->getHtmlTimespan();
+					$msg .= '&nbsp;&nbsp;';
+					$msg .= '<a href="#" onclick="jQuery(\'#ebay_order_report\').toggle();return false;">'.__('show details','wplister').'</a>';
+					$msg .= $om->getHtmlReport();
 					$this->showMessage( $msg );
 				}
 	

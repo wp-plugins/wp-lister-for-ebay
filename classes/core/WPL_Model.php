@@ -209,6 +209,10 @@ class WPL_Model {
 				$longMessage .= 'If there are two or more services and one is "pickup", "pickup" must not be specified as the first service.';
 			}
 			
+			// #21917092 - Warning: Requested Quantity revision is redundant.
+			if ( $error->getErrorCode() == 21917092 ) { 
+			}
+			
 
 			// some errors like #240 may return an extra ErrorParameters array
 			// deactivated for now since a copy of this will be found in $res->getMessage()
@@ -271,11 +275,29 @@ class WPL_Model {
 		$this->result->success = $success;
 		$this->result->errors  = $errors;
 
+		$this->save_last_result();
 		// $this->logger->info('handleResponse() - result: '.print_r($this->result,1));
 
 		return $success;
 
 	} // handleResponse()
+
+	function save_last_result() {
+		// make sure we are updating a product
+		if ( ! isset($_POST['action'])    || $_POST['action']    != 'editpost' ) return;
+		if ( ! isset($_POST['post_type']) || $_POST['post_type'] != 'product'  ) return;
+		if ( ! isset($_POST['post_ID']) ) return;
+		$post_id = $_POST['post_ID'];
+
+		// fetch last results
+		$update_results = get_option( 'wplister_last_product_update_results', array() );
+		if ( ! is_array($update_results) ) $update_results = array();
+
+		// update last results
+		$update_results[ $post_id ] = $this->result;
+		update_option( 'wplister_last_product_update_results', $update_results );
+
+	} // save_last_result()
 
 	function is_ajax() {
 		return ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'WOOCOMMERCE_CHECKOUT' ) && WOOCOMMERCE_CHECKOUT ) ;

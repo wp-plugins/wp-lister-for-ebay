@@ -14,6 +14,9 @@ class WPL_WooBackendIntegration {
 		// hook into save_post to mark listing as changed when a product is updated
 		add_action( 'save_post', array( &$this, 'wplister_on_woocommerce_product_quick_edit_save' ), 10, 2 );
 
+		// show messages when listing was updated from edit product page
+		add_action( 'post_updated_messages', array( &$this, 'wplister_product_updated_messages' ), 20, 1 );
+
 		// custom views for products table
 		add_filter( 'parse_query', array( &$this, 'wplister_woocommerce_admin_product_filter_query' ) );
 		add_filter( 'views_edit-product', array( &$this, 'wplister_add_woocommerce_product_views' ) );
@@ -463,5 +466,38 @@ class WPL_WooBackendIntegration {
 	} // save_meta_box()
 
 
+
+	function wplister_product_updated_messages( $messages ) {
+		global $post, $post_ID;
+
+		// fetch last results
+		$update_results = get_option( 'wplister_last_product_update_results', array() );
+		if ( ! is_array($update_results) ) $update_results = array();
+
+		// do nothing if no result for this product exists
+		if ( ! isset( $update_results[ $post_ID ] ) ) return $messages;
+
+		$success = $update_results[ $post_ID ]->success;
+		$errors  = $update_results[ $post_ID ]->errors;
+
+		foreach ($errors as $error) {
+			if ( $error->ErrorCode != 21917092 )
+				echo $error->HtmlMessage;
+		}
+
+		// add message
+		if ( $success )
+			$messages['product'][1] = sprintf( __( 'Product and eBay listing were updated. <a href="%s">View Product</a>', 'wplister' ), esc_url( get_permalink($post_ID) ) );
+
+		// unset last result
+		unset( $update_results[ $post_ID ] );
+		update_option( 'wplister_last_product_update_results', $update_results );
+
+		return $messages;
+	}
+
+
+
 } // class WPL_WooBackendIntegration
+global $WPL_WooBackendIntegration;
 $WPL_WooBackendIntegration = new WPL_WooBackendIntegration();

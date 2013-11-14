@@ -176,6 +176,51 @@
 					</div>
 
 
+					<div class="postbox" id="QuantityBox">
+						<h3><span><?php echo __('Quantity Override','wplister'); ?></span></h3>
+						<div class="inside">
+
+							<?php $custom_quantity_enabled = ( $item_details['quantity'] ||  $item_details['max_quantity'] ) ? 1 : 0; ?>
+							<label for="wpl-custom_quantity_enabled" class="text_label">
+								<?php echo __('Quantity','wplister'); ?>
+                                <?php wplister_tooltip('By default WP-Lister uses the current stock level quantity from WooCommerce and keep it in sync with eBay automatically.<br>If you wish to use a custom quantity, you can do so - but please keep in mind that the inventory sync might not work as expected!') ?>
+							</label>
+							<select id="wpl-custom_quantity_enabled" name="wpl_e2e_custom_quantity_enabled" class="select">
+								<option value=""  <?php if ( $custom_quantity_enabled != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('auto sync','wplister'); ?></option>
+								<option value="1" <?php if ( $custom_quantity_enabled == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('custom qty','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
+							<div id="wpl-custom_quantity_container">
+
+								<label for="wpl-text-max-max_quantity" class="text_label">
+									<?php #echo __('Maximum quantity','wplister'); ?>
+									<?php echo __('Max. quantity','wplister'); ?>
+	                                <?php wplister_tooltip('If you wish to limit your available stock on eBay, you can set a maximum quantity here.<br>Use this where you want to create demand or when you have listing limitation. This option will not limit fixed quantities.') ?>
+								</label>
+								<input type="number" name="wpl_e2e_max_quantity" id="wpl-text-max_quantity" value="<?php echo @$item_details['max_quantity']; ?>" class="text_input" placeholder="0" step="any" min="0" />
+								<br class="clear" />
+								
+								<label for="wpl-text-quantity" class="text_label">
+									<?php echo __('Fixed quantity','wplister'); ?>
+	                                <?php wplister_tooltip('If you do not use stock management in WooCommerce, you can set a fixed quantity here.<br>Use this with care - WP-Lister Pro can\'t sync the inventory properly if you enter a fixed quantity.') ?>
+								</label>
+								<input type="number" name="wpl_e2e_quantity" id="wpl-text-quantity" value="<?php echo $item_details['quantity']; ?>" class="text_input" placeholder="0" step="any" min="0" />
+								<br class="clear" />
+
+								<p class="x-desc" style="display: block;">
+									<?php #echo __('Leave this empty to list all available items.','wplister'); ?>
+									<?php #echo __('"Fixed quantity" should be empty to use inventory sync, "Maximum quantity" is effective only with inventory sync.','wplister'); ?>
+									<?php echo __('Custom quantities to not apply to locked listings.','wplister'); ?>
+									<?php echo __('Leave this empty to use inventory sync!','wplister'); ?>
+								</p>
+
+							</div>
+	
+						</div>
+					</div>
+
+
 					<div class="postbox" id="TemplatesBox">
 						<h3><span><?php echo __('Template','wplister'); ?></span></h3>
 						<div class="inside">

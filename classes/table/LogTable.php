@@ -118,7 +118,7 @@ class LogTable extends WP_List_Table {
             }
         }
 
-        if ( 'GetSellerTransactions' == $item['callname'] ) {
+        if ( ( 'GetOrders' == $item['callname'] ) || ( 'GetSellerTransactions' == $item['callname'] ) ) {
             if ( preg_match("/<PageNumber>(.*)<\/PageNumber>/", $item['request'], $matches) ) {
                 $match = str_replace('<![CDATA[', '', $matches[1] );
                 $match = str_replace(']]>', '', $match );
@@ -176,6 +176,20 @@ class LogTable extends WP_List_Table {
         }
 
         return $link;
+    }
+
+    function column_ebay_id($item) {
+
+        // use ebay_id column if set
+        if ( $item['ebay_id'] ) return $item['ebay_id'];
+
+        // check for ItemID in request
+        if ( preg_match("/<ItemID>(.*)<\/ItemID>/", $item['request'], $matches) ) {
+            $match = str_replace('<![CDATA[', '', $matches[1] );
+            $match = str_replace(']]>', '', $match );
+            return $match;
+        }
+
     }
 
     function column_cb($item){

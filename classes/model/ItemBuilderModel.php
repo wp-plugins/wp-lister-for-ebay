@@ -29,249 +29,69 @@ class ItemBuilderModel extends WPL_Model {
 	{
 
 		// fetch record from db
-		$p               = $this->lm->getItem( $id );
-		$post_id 		 = $p['post_id'];
-		$profile_details = $p['profile_data']['details'];
+		$listing         = $this->lm->getItem( $id );
+		$post_id 		 = $listing['post_id'];
+		$profile_details = $listing['profile_data']['details'];
 		$hasVariations   = ProductWrapper::hasVariations( $post_id );
-		
-		$images          = $this->getProductImagesURL( $post_id );
-		$main_image      = $this->getProductMainImageURL( $post_id );
-		if ( ( trim($main_image) == '' ) && ( sizeof($images) > 0 ) ) $main_image = $images[0];
-		
-		$product_sku     = ProductWrapper::getSKU( $post_id );
-		if ( trim($product_sku) == '' ) $product_sku = false;
-
+		$isVariation     = ProductWrapper::isSingleVariation( $post_id );
+			
 		// adjust profile details from product level options
 		$profile_details = $this->adjustProfileDetails( $id, $post_id, $profile_details );
 
-		// price has been calculated when applying the profile
-		$start_price  = $p['price'];
 
-
-		// build item
+		// create Item
 		$item = new ItemType();
 
 		// set quantity
-		$item->Quantity = $p['quantity'];
+		$item->Quantity = $listing['quantity'];
+
+		// set listing title
+		$item->Title = $this->prepareTitle( $listing['auction_title'] );
+
+		// set listing description
+		$item->Description = $this->getFinalHTML( $id );
 
 		// set listing duration
 		$product_listing_duration = get_post_meta( $post_id, '_ebay_listing_duration', true );
-		$item->ListingDuration = $product_listing_duration ? $product_listing_duration : $p['listing_duration'];
+		$item->ListingDuration = $product_listing_duration ? $product_listing_duration : $listing['listing_duration'];
 
 		// omit ListingType when revising item
 		if ( ! $reviseItem ) {
 			$product_listing_type = get_post_meta( $post_id, '_ebay_auction_type', true );
-			$item->ListingType = $product_listing_type ? $product_listing_type : $p['auction_type'];
+			$item->ListingType = $product_listing_type ? $product_listing_type : $listing['auction_type'];
 		}
 
-		// support for WooCommerce Name Your Price plugin
-		$nyp_enabled = get_post_meta( $post_id, '_nyp', true ) == 'yes' ? true : false;
-		if ( $nyp_enabled ) {
-			$suggested_price = get_post_meta( $post_id, '_suggested_price', true );
-			if ( $suggested_price ) $start_price = $suggested_price;
+
+		// set eBay Site
+		$item = $this->setEbaySite( $item, $session );			
+
+		// add prices
+		$item = $this->buildPrices( $id, $item, $post_id, $profile_details, $listing );			
+
+		// add images
+		$item = $this->buildImages( $id, $item, $post_id, $profile_details, $session );			
+
+
+		// if this is a split variation, use parent post_id for all further processing
+		if ( $isVariation ) {
+			$post_id = ProductWrapper::getVariationParent( $post_id );
 		}
 
-		// handle StartPrice on product level
-		if ( $product_start_price = get_post_meta( $post_id, '_ebay_start_price', true ) ) {
-			$start_price  = $product_start_price;
-		}
 
-		// Set the Listing Starting Price and Buy It Now Price
-		$item->StartPrice = new AmountType();
-		$item->StartPrice->setTypeValue( $start_price );
-		$item->StartPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
+		// add various options from $profile_details
+		$item = $this->buildProfileOptions( $item, $profile_details );			
 
-		// optional BuyItNow price
-		if ( intval($profile_details['fixed_price']) != 0) {
-			$buynow_price = $this->lm->applyProfilePrice( $p['price'], $profile_details['fixed_price'] );
-			$item->BuyItNowPrice = new AmountType();
-			$item->BuyItNowPrice->setTypeValue( $buynow_price );
-			$item->BuyItNowPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
-		}
-		if ( $buynow_price = get_post_meta( $post_id, '_ebay_buynow_price', true ) ) {
-			$item->BuyItNowPrice = new AmountType();
-			$item->BuyItNowPrice->setTypeValue( $buynow_price );
-			$item->BuyItNowPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
-		}
+		// add various options that depend on $profile_details and $post_id
+		$item = $this->buildProductOptions( $id, $item, $post_id, $profile_details );			
 
-		// optional ReservePrice
-		if ( $product_reserve_price = get_post_meta( $post_id, '_ebay_reserve_price', true ) ) {
-			$item->ReservePrice = new AmountType();
-			$item->ReservePrice->setTypeValue( $product_reserve_price );
-			$item->ReservePrice->setTypeAttribute('currencyID', $profile_details['currency'] );
-		}
-
-		// optional DiscountPriceInfo.OriginalRetailPrice
-		if ( intval($profile_details['strikethrough_pricing']) != 0) {
-			if ( method_exists( ProductWrapper, 'getOriginalPrice' ) ) {
-				$original_price = ProductWrapper::getOriginalPrice( $post_id );
-				if ( ( $original_price ) && ( $start_price != $original_price ) ) {
-					$item->DiscountPriceInfo = new DiscountPriceInfoType();
-					$item->DiscountPriceInfo->OriginalRetailPrice = new AmountType();
-					$item->DiscountPriceInfo->OriginalRetailPrice->setTypeValue( $original_price );
-					$item->DiscountPriceInfo->OriginalRetailPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
-				}
-			}
-		}
-
-		// Set the Item Title
-		$item->Title = $this->prepareTitle( $p['auction_title'] );
-
-		// SKU - omit if empty
-		if ($product_sku) $item->SKU = $product_sku;
-
-
-		// set UPC from SKU - if enabled
-		if ( ($product_sku) && ( @$profile_details['use_sku_as_upc'] == '1' ) ) {
-			$ProductListingDetails = new ProductListingDetailsType();
-			$ProductListingDetails->setUPC( $product_sku );
-			$item->setProductListingDetails( $ProductListingDetails );
-		}
-
-		// set UPC from product - if provided
-		if ( $product_upc = get_post_meta( $post_id, '_ebay_upc', true ) ) {
-			$ProductListingDetails = new ProductListingDetailsType();
-			$ProductListingDetails->setUPC( $product_upc );
-			$item->setProductListingDetails( $ProductListingDetails );
-		}
-		
-
-		// handle product image
-		$item->PictureDetails = new PictureDetailsType();
-		$item->PictureDetails->setGalleryURL( $this->encodeUrl( $main_image ) );
-		$item->PictureDetails->addPictureURL( $this->encodeUrl( $main_image ) );
-		if ( $profile_details['with_gallery_image'] ) $item->PictureDetails->GalleryType = 'Gallery';
-        
-
-
-
-		// handle VAT (percent)
-		if ( $profile_details['tax_mode'] == 'fix' ) {
-			$item->VATDetails = new VATDetailsType();
-			$item->VATDetails->VATPercent = floatval( $profile_details['vat_percent'] );
-		}
-
-		// use Sales Tax Table
-		if ( $profile_details['tax_mode'] == 'ebay_table' ) {
-			$item->UseTaxTable = true;
-		}
-
-		// Set Local Info
-		$item->Currency = $profile_details['currency'];
-		$item->Country = $profile_details['country'];
-		$item->Location = $profile_details['location'];
-		$item->DispatchTimeMax = $profile_details['dispatch_time'];
-
-		// item condition
-		if ( $profile_details['condition_id'] != 'none' ) {
-			$item->ConditionID = $profile_details['condition_id'];
-		}
-
-		// postal code
-		if ( $profile_details['postcode'] != '' ) {
-			$item->PostalCode = $profile_details['postcode'];
-		}
-
-		// set eBay site from global site iD
-		// http://developer.ebay.com/DevZone/XML/docs/Reference/eBay/types/SiteCodeType.html
-		$site_id = $session->getSiteId();
-		$sites = EbayController::getEbaySites();
-		$site_name = $sites[$site_id];
-		$item->Site = $site_name; 
-
-
-		#$item->setSubTitle('Brandneuer iPod Mini!');
-		#$item->setListingEnhancement('Highlight');
-		$item->setHitCounter( $profile_details['counter_style'] );
-
-
-		// ReturnPolicy
-		$item->ReturnPolicy = new ReturnPolicyType();
-		if ( $profile_details['returns_accepted'] == 1 ) {
-			$item->ReturnPolicy->ReturnsAcceptedOption = 'ReturnsAccepted';
-			$item->ReturnPolicy->ReturnsWithinOption   = $profile_details['returns_within'];
-			$item->ReturnPolicy->Description           = stripslashes( $profile_details['returns_description'] );
-
-			if ( ( isset($profile_details['RestockingFee']) ) && ( $profile_details['RestockingFee'] != '' ) ) {
-				$item->ReturnPolicy->RestockingFeeValueOption = $profile_details['RestockingFee'];
-			}
-
-			if ( ( isset($profile_details['ShippingCostPaidBy']) ) && ( $profile_details['ShippingCostPaidBy'] != '' ) ) {
-				$item->ReturnPolicy->ShippingCostPaidByOption = $profile_details['ShippingCostPaidBy'];
-			}
-
-			if ( ( isset($profile_details['RefundOption']) ) && ( $profile_details['RefundOption'] != '' ) ) {
-				$item->ReturnPolicy->RefundOption = $profile_details['RefundOption'];
-			}
-
-		} else {
-			$item->ReturnPolicy->ReturnsAcceptedOption = 'ReturnsNotAccepted';
-		}			
-
-
-		// Set Payment Methods
-		// $item->PaymentMethods[] = 'PersonalCheck';
-		// $item->PaymentMethods[] = 'PayPal';
-		// $item->PayPalEmailAddress = 'youraccount@yourcompany.com';
-		foreach ( $profile_details['payment_options'] as $payment_method ) {
-
-			if ( $payment_method['payment_name'] == '' ) continue;			
-
-			# BuyerPaymentMethodCodeType
-			$item->addPaymentMethods( $payment_method['payment_name'] );
-			if ( $payment_method['payment_name'] == 'PayPal' ) {
-				$item->PayPalEmailAddress = get_option( 'wplister_paypal_email' );
-			}
-		}
-
-		// add subtitle if enabled
-		if ( @$profile_details['subtitle_enabled'] == 1 ) {
-			
-			// check if custom post meta field '_ebay_subtitle' exists
-			if ( get_post_meta( $post_id, '_ebay_subtitle', true ) ) {
-				$subtitle = get_post_meta( $post_id, '_ebay_subtitle', true );
-			} elseif ( get_post_meta( $post_id, 'ebay_subtitle', true ) ) {
-				$subtitle = get_post_meta( $post_id, 'ebay_subtitle', true );
-			} else {
-				// check for custom subtitle from profile
-				$subtitle = @$profile_details['custom_subtitle'];
-			}
-
-			// if empty use product excerpt
-			if ( $subtitle == '' ) {
-				$the_post = get_post( $post_id );
-				$subtitle = strip_tags( $the_post->post_excerpt );
-			}
-			
-			// limit to 55 chars to avoid error
-			$subtitle = substr( $subtitle, 0, 55 );
-
-			$item->setSubTitle( $subtitle );			
-			$this->logger->debug( 'setSubTitle: '.$subtitle );
-		}
-
-		// item condition description
-		$condition_description = false;
-		if ( @$profile_details['condition_description'] != '' ) {
-			$condition_description =  $profile_details['condition_description'];
-		}
-		if ( get_post_meta( $post_id, '_ebay_condition_description', true ) ) {
-			$condition_description = get_post_meta( $post_id, '_ebay_condition_description', true );
-		}
-		if ( $condition_description ) {
-			// $templatesModel = new TemplatesModel( $p['template'] );
-			$templatesModel = new TemplatesModel();
-			$condition_description = $templatesModel->processAllTextShortcodes( $post_id, $condition_description );
-			$item->setConditionDescription( $condition_description );
-		}
-
-		// private listing
-		if ( @$profile_details['private_listing'] == 1 ) {
-			$item->setPrivateListing( true );
-		}
+		// add payment and return options
+		$item = $this->buildPayment( $item, $profile_details );			
 
 		// add shipping services and options
 		$item = $this->buildShipping( $id, $item, $post_id, $profile_details );			
+
+		// add seller profiles
+		$item = $this->buildSellerProfiles( $id, $item, $post_id, $profile_details );			
 
 		// add ebay categories and store categories
 		$item = $this->buildCategories( $id, $item, $post_id, $profile_details );			
@@ -280,22 +100,19 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $hasVariations ) {
 			if ( @$profile_details['variations_mode'] == 'flat' ) {
 				// don't build variations - list as flat item
-				$item = $this->flattenVariations( $id, $item, $profile_details );	
+				$item = $this->flattenVariations( $id, $item, $post_id, $profile_details );	
 			} else {
 				// default: list as variations
-				$item = $this->buildVariations( $id, $item, $profile_details, $session );	
+				$item = $this->buildVariations( $id, $item, $profile_details, $listing, $session );	
 			}
 		}
 	
 		// add item specifics (attributes) - after variations
-		$item = $this->buildItemSpecifics( $id, $item );			
-
-		// Set the Item Description
-		$item->Description = $this->getFinalHTML( $id );
+		$item = $this->buildItemSpecifics( $id, $item, $listing );			
 
 		// adjust item if this is a ReviseItem request
 		if ( $reviseItem ) {
-			$item = $this->adjustItemForRevision( $id, $item, $post_id, $profile_details, $p );			
+			$item = $this->adjustItemForRevision( $id, $item, $profile_details, $listing );			
 		}
 	
 		// add UUID to prevent duplicate AddItem or RelistItem calls
@@ -311,15 +128,15 @@ class ItemBuilderModel extends WPL_Model {
 	} /* end of buildItem() */
 
 	// adjust item for ReviseItem request
-	public function adjustItemForRevision( $id, $item, $post_id, $profile_details, $p ) {
+	public function adjustItemForRevision( $id, $item, $profile_details, $listing ) {
 
 		// check if title should be omitted:
 		// The title or subtitle cannot be changed if an auction-style listing has a bid or ends within 12 hours, 
 		// or a fixed price listing has a sale or a pending Best Offer.
-		if ( 'Chinese' == $p['auction_type'] ) {
+		if ( 'Chinese' == $listing['auction_type'] ) {
 
 			// auction listing
-			$hours_left = ( strtotime($p['end_date']) - gmdate('U') ) / 3600;
+			$hours_left = ( strtotime($listing['end_date']) - gmdate('U') ) / 3600;
 			if ( $hours_left < 12 ) {
 				$item->setTitle( null );
 				$item->setSubTitle( null );
@@ -328,7 +145,7 @@ class ItemBuilderModel extends WPL_Model {
 		} else {
 
 			// fixed price listing
-			if ( $p['quantity_sold'] > 0 ) {
+			if ( $listing['quantity_sold'] > 0 ) {
 				$item->setTitle( null );
 				$item->setSubTitle( null );
 			}
@@ -338,6 +155,19 @@ class ItemBuilderModel extends WPL_Model {
 		return $item;
 
 	} /* end of adjustItemForRevision() */
+
+	public function setEbaySite( $item, $session ) {
+
+		// set eBay site from global site iD
+		// http://developer.ebay.com/DevZone/XML/docs/Reference/eBay/types/SiteCodeType.html
+		$site_id = $session->getSiteId();
+		$sites = EbayController::getEbaySites();
+		$site_name = $sites[$site_id];
+		$item->Site = $site_name; 
+
+		return $item;
+
+	} /* end of setEbaySite() */
 
 	public function buildCategories( $id, $item, $post_id, $profile_details ) {
 
@@ -462,8 +292,8 @@ class ItemBuilderModel extends WPL_Model {
 
 
 		// adjust Site if required - eBay Motors (beta)
-		$lm = new EbayCategoriesModel();
-		$primary_category = $lm->getItem( $item->PrimaryCategory->CategoryID );
+		$cm = new EbayCategoriesModel();
+		$primary_category = $cm->getItem( $item->PrimaryCategory->CategoryID );
 		if ( $primary_category['site_id'] == 100 ) {
 			$item->setSite('eBayMotors');
 			// echo "<pre>";print_r($primary_category);echo"</pre>";die();
@@ -476,6 +306,25 @@ class ItemBuilderModel extends WPL_Model {
 
 	// adjust profile details from product level options
 	public function adjustProfileDetails( $id, $post_id, $profile_details ) {
+
+		// use parent post_id for split variations
+		if ( ProductWrapper::isSingleVariation( $post_id ) ) {
+			$post_id = ProductWrapper::getVariationParent( $post_id );
+		}
+
+		// check for custom product level condition options
+		if ( get_post_meta( $post_id, '_ebay_condition_id', true ) )
+			$profile_details['condition_id']			= get_post_meta( $post_id, '_ebay_condition_id', true );
+		if ( get_post_meta( $post_id, '_ebay_condition_description', true ) )
+			$profile_details['condition_description']	= get_post_meta( $post_id, '_ebay_condition_description', true );
+
+		// check for custom product level seller profiles
+		if ( get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true ) )
+			$profile_details['seller_shipping_profile_id']			= get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true );
+		if ( get_post_meta( $post_id, '_ebay_seller_payment_profile_id', true ) )
+			$profile_details['seller_payment_profile_id']			= get_post_meta( $post_id, '_ebay_seller_payment_profile_id', true );
+		if ( get_post_meta( $post_id, '_ebay_seller_return_profile_id', true ) )
+			$profile_details['seller_return_profile_id']			= get_post_meta( $post_id, '_ebay_seller_return_profile_id', true );
 
 		// check for custom product level shipping options
 		$product_shipping_service_type = get_post_meta( $post_id, '_ebay_shipping_service_type', true );
@@ -490,6 +339,266 @@ class ItemBuilderModel extends WPL_Model {
 		return $profile_details;
 
 	} /* end of adjustProfileDetails() */
+
+
+	public function buildSellerProfiles( $id, $item, $post_id, $profile_details ) {
+
+		$SellerProfiles = new SellerProfilesType();
+
+		if ( @$profile_details['seller_shipping_profile_id'] ) {
+			$SellerProfiles->SellerShippingProfile = new SellerShippingProfileType();
+			$SellerProfiles->SellerShippingProfile->setShippingProfileID( $profile_details['seller_shipping_profile_id'] );
+		}
+
+		if ( @$profile_details['seller_payment_profile_id'] ) {
+			$SellerProfiles->SellerPaymentProfile = new SellerPaymentProfileType();
+			$SellerProfiles->SellerPaymentProfile->setPaymentProfileID( $profile_details['seller_payment_profile_id'] );
+		}
+
+		if ( @$profile_details['seller_return_profile_id'] ) {
+			$SellerProfiles->SellerReturnProfile = new SellerReturnProfileType();
+			$SellerProfiles->SellerReturnProfile->setReturnProfileID( $profile_details['seller_return_profile_id'] );
+		}
+
+		$item->setSellerProfiles( $SellerProfiles );
+
+		return $item;
+	} /* end of buildSellerProfiles() */
+
+
+	public function buildPrices( $id, $item, $post_id, $profile_details, $listing ) {
+
+		// price has been calculated when applying the profile
+		$start_price  = $listing['price'];
+
+		// support for WooCommerce Name Your Price plugin
+		$nyp_enabled = get_post_meta( $post_id, '_nyp', true ) == 'yes' ? true : false;
+		if ( $nyp_enabled ) {
+			$suggested_price = get_post_meta( $post_id, '_suggested_price', true );
+			if ( $suggested_price ) $start_price = $suggested_price;
+		}
+
+		// handle StartPrice on product level
+		if ( $product_start_price = get_post_meta( $post_id, '_ebay_start_price', true ) ) {
+			$start_price  = $product_start_price;
+		}
+
+		// Set the Listing Starting Price and Buy It Now Price
+		$item->StartPrice = new AmountType();
+		$item->StartPrice->setTypeValue( $start_price );
+		$item->StartPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
+
+		// optional BuyItNow price
+		if ( intval($profile_details['fixed_price']) != 0) {
+			$buynow_price = $this->lm->applyProfilePrice( $listing['price'], $profile_details['fixed_price'] );
+			$item->BuyItNowPrice = new AmountType();
+			$item->BuyItNowPrice->setTypeValue( $buynow_price );
+			$item->BuyItNowPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
+		}
+		if ( $buynow_price = get_post_meta( $post_id, '_ebay_buynow_price', true ) ) {
+			$item->BuyItNowPrice = new AmountType();
+			$item->BuyItNowPrice->setTypeValue( $buynow_price );
+			$item->BuyItNowPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
+		}
+
+		// optional ReservePrice
+		if ( $product_reserve_price = get_post_meta( $post_id, '_ebay_reserve_price', true ) ) {
+			$item->ReservePrice = new AmountType();
+			$item->ReservePrice->setTypeValue( $product_reserve_price );
+			$item->ReservePrice->setTypeAttribute('currencyID', $profile_details['currency'] );
+		}
+
+		// optional DiscountPriceInfo.OriginalRetailPrice
+		if ( intval($profile_details['strikethrough_pricing']) != 0) {
+			if ( method_exists( ProductWrapper, 'getOriginalPrice' ) ) {
+				$original_price = ProductWrapper::getOriginalPrice( $post_id );
+				if ( ( $original_price ) && ( $start_price != $original_price ) ) {
+					$item->DiscountPriceInfo = new DiscountPriceInfoType();
+					$item->DiscountPriceInfo->OriginalRetailPrice = new AmountType();
+					$item->DiscountPriceInfo->OriginalRetailPrice->setTypeValue( $original_price );
+					$item->DiscountPriceInfo->OriginalRetailPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
+				}
+			}
+		}
+
+	
+
+
+
+		return $item;
+	} /* end of buildPrices() */
+
+
+	public function buildImages( $id, $item, $post_id, $profile_details, $session ) {
+
+		$images          = $this->getProductImagesURL( $post_id );
+		$main_image      = $this->getProductMainImageURL( $post_id );
+		if ( ( trim($main_image) == '' ) && ( sizeof($images) > 0 ) ) $main_image = $images[0];
+
+
+		// handle product image
+		$item->PictureDetails = new PictureDetailsType();
+		$item->PictureDetails->setGalleryURL( $this->encodeUrl( $main_image ) );
+		$item->PictureDetails->addPictureURL( $this->encodeUrl( $main_image ) );
+		if ( $profile_details['with_gallery_image'] ) $item->PictureDetails->GalleryType = 'Gallery';
+        
+
+		return $item;
+	} /* end of buildImages() */
+
+
+	public function buildProductOptions( $id, $item, $post_id, $profile_details ) {
+
+		// add SKU - omit if empty
+		$product_sku = ProductWrapper::getSKU( $post_id );
+		if ( trim( $product_sku ) == '' ) $product_sku = false;
+
+		if ( $product_sku ) $item->SKU = $product_sku;
+
+		// set UPC from SKU - if enabled
+		if ( ($product_sku) && ( @$profile_details['use_sku_as_upc'] == '1' ) ) {
+			$ProductListingDetails = new ProductListingDetailsType();
+			$ProductListingDetails->setUPC( $product_sku );
+			$item->setProductListingDetails( $ProductListingDetails );
+		}
+
+		// set UPC from product - if provided
+		if ( $product_upc = get_post_meta( $post_id, '_ebay_upc', true ) ) {
+			$ProductListingDetails = new ProductListingDetailsType();
+			$ProductListingDetails->setUPC( $product_upc );
+			$item->setProductListingDetails( $ProductListingDetails );
+		}
+
+
+		// add subtitle if enabled
+		if ( @$profile_details['subtitle_enabled'] == 1 ) {
+			
+			// check if custom post meta field '_ebay_subtitle' exists
+			if ( get_post_meta( $post_id, '_ebay_subtitle', true ) ) {
+				$subtitle = get_post_meta( $post_id, '_ebay_subtitle', true );
+			} elseif ( get_post_meta( $post_id, 'ebay_subtitle', true ) ) {
+				$subtitle = get_post_meta( $post_id, 'ebay_subtitle', true );
+			} else {
+				// check for custom subtitle from profile
+				$subtitle = @$profile_details['custom_subtitle'];
+			}
+
+			// if empty use product excerpt
+			if ( $subtitle == '' ) {
+				$the_post = get_post( $post_id );
+				$subtitle = strip_tags( $the_post->post_excerpt );
+			}
+			
+			// limit to 55 chars to avoid error
+			$subtitle = substr( $subtitle, 0, 55 );
+
+			$item->setSubTitle( $subtitle );			
+			$this->logger->debug( 'setSubTitle: '.$subtitle );
+		}
+
+		// item condition description
+		$condition_description = false;
+		if ( @$profile_details['condition_description'] != '' ) {
+			$condition_description =  $profile_details['condition_description'];
+			$templatesModel = new TemplatesModel();
+			$condition_description = $templatesModel->processAllTextShortcodes( $post_id, $condition_description );
+			$item->setConditionDescription( $condition_description );
+		}
+
+		return $item;
+	} /* end of buildProductOptions() */
+
+
+	public function buildProfileOptions( $item, $profile_details ) {
+
+		// Set Local Info
+		$item->Currency = $profile_details['currency'];
+		$item->Country = $profile_details['country'];
+		$item->Location = $profile_details['location'];
+		$item->DispatchTimeMax = $profile_details['dispatch_time'];
+
+		// item condition
+		if ( $profile_details['condition_id'] != 'none' ) {
+			$item->ConditionID = $profile_details['condition_id'];
+		}
+
+		// postal code
+		if ( $profile_details['postcode'] != '' ) {
+			$item->PostalCode = $profile_details['postcode'];
+		}
+
+		// handle VAT (percent)
+		if ( $profile_details['tax_mode'] == 'fix' ) {
+			$item->VATDetails = new VATDetailsType();
+			$item->VATDetails->VATPercent = floatval( $profile_details['vat_percent'] );
+		}
+
+		// use Sales Tax Table
+		if ( $profile_details['tax_mode'] == 'ebay_table' ) {
+			$item->UseTaxTable = true;
+		}
+
+		// private listing
+		if ( @$profile_details['private_listing'] == 1 ) {
+			$item->setPrivateListing( true );
+		}
+
+		$item->setHitCounter( $profile_details['counter_style'] );
+		// $item->setListingEnhancement('Highlight');
+
+
+
+		return $item;
+	} /* end of buildProfileOptions() */
+
+
+	public function buildPayment( $item, $profile_details ) {
+
+		// Set Payment Methods
+		// $item->PaymentMethods[] = 'PersonalCheck';
+		// $item->PaymentMethods[] = 'PayPal';
+		// $item->PayPalEmailAddress = 'youraccount@yourcompany.com';
+		foreach ( $profile_details['payment_options'] as $payment_method ) {
+
+			if ( $payment_method['payment_name'] == '' ) continue;			
+
+			# BuyerPaymentMethodCodeType
+			$item->addPaymentMethods( $payment_method['payment_name'] );
+			if ( $payment_method['payment_name'] == 'PayPal' ) {
+				$item->PayPalEmailAddress = get_option( 'wplister_paypal_email' );
+			}
+		}
+
+        // handle require immediate payment option
+        if ( @$profile_details['autopay'] == '1' ) {
+			$item->setAutoPay( true );
+        }
+
+		// ReturnPolicy
+		$item->ReturnPolicy = new ReturnPolicyType();
+		if ( $profile_details['returns_accepted'] == 1 ) {
+			$item->ReturnPolicy->ReturnsAcceptedOption = 'ReturnsAccepted';
+			$item->ReturnPolicy->ReturnsWithinOption   = $profile_details['returns_within'];
+			$item->ReturnPolicy->Description           = stripslashes( $profile_details['returns_description'] );
+
+			if ( ( isset($profile_details['RestockingFee']) ) && ( $profile_details['RestockingFee'] != '' ) ) {
+				$item->ReturnPolicy->RestockingFeeValueOption = $profile_details['RestockingFee'];
+			}
+
+			if ( ( isset($profile_details['ShippingCostPaidBy']) ) && ( $profile_details['ShippingCostPaidBy'] != '' ) ) {
+				$item->ReturnPolicy->ShippingCostPaidByOption = $profile_details['ShippingCostPaidBy'];
+			}
+
+			if ( ( isset($profile_details['RefundOption']) ) && ( $profile_details['RefundOption'] != '' ) ) {
+				$item->ReturnPolicy->RefundOption = $profile_details['RefundOption'];
+			}
+
+		} else {
+			$item->ReturnPolicy->ReturnsAcceptedOption = 'ReturnsNotAccepted';
+		}			
+
+		return $item;
+	} /* end of buildPayment() */
 
 
 	public function buildShipping( $id, $item, $post_id, $profile_details ) {
@@ -742,13 +851,13 @@ class ItemBuilderModel extends WPL_Model {
 
 	} /* end of buildShipping() */
 
-	public function buildItemSpecifics( $id, $item ) {
+	public function buildItemSpecifics( $id, $item, $listing ) {
 
     	// new ItemSpecifics
     	$ItemSpecifics = new NameValueListArrayType();
 
 		// get listing data
-		$listing = $this->lm->getItem( $id );
+		// $listing = $this->lm->getItem( $id );
 
 		// get product attributes
 		$processed_attributes = array();
@@ -820,14 +929,14 @@ class ItemBuilderModel extends WPL_Model {
 
 	} /* end of buildItemSpecifics() */
 
-	public function buildVariations( $id, $item, $profile_details, $session ) {
+	public function buildVariations( $id, $item, $profile_details, $listing, $session ) {
 
 		// build variations
 		$item->Variations = new VariationsType();
 
 		// get product variations
-		$p = $this->lm->getItem( $id );
-        $variations = ProductWrapper::getVariations( $p['post_id'] );
+		// $listing = $this->lm->getItem( $id );
+        $variations = ProductWrapper::getVariations( $listing['post_id'] );
 
         // loop each combination
         foreach ($variations as $var) {
@@ -1042,11 +1151,11 @@ class ItemBuilderModel extends WPL_Model {
 	}
 
 
-	public function flattenVariations( $id, $item, $profile_details ) {
+	public function flattenVariations( $id, $item, $post_id, $profile_details ) {
 
 		// get product variations
-		$p = $this->lm->getItem( $id );
-        $variations = ProductWrapper::getVariations( $p['post_id'] );
+		// $p = $this->lm->getItem( $id );
+        $variations = ProductWrapper::getVariations( $post_id );
 		$this->logger->info("flattenVariations($id)");
 
 		// fetch first variations start price

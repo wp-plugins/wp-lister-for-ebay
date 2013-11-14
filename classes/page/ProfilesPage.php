@@ -198,6 +198,10 @@ class ProfilesPage extends WPL_Page {
 			'shipping_flat_profiles'  	=> $shipping_flat_profiles,
 			'shipping_calc_profiles'  	=> $shipping_calc_profiles,
 			'cod_available'  			=> $cod_available,
+			'seller_profiles_enabled'	=> get_option('wplister_ebay_seller_profiles_enabled'),
+			'seller_shipping_profiles'	=> get_option('wplister_ebay_seller_shipping_profiles'),
+			'seller_payment_profiles'	=> get_option('wplister_ebay_seller_payment_profiles'),
+			'seller_return_profiles'	=> get_option('wplister_ebay_seller_return_profiles'),
 			
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-profiles'
 		);
@@ -327,6 +331,11 @@ class ProfilesPage extends WPL_Page {
 			$details['fixed_price'] = '';
 		}
 
+		// fix quantities
+		if ( ! $details['custom_quantity_enabled'] ) {
+			$details['quantity']     = '';
+			$details['max_quantity'] = '';
+		}
 		
 		// do we have a primary category?
 		if ( intval( $details['ebay_category_1_id'] ) != 0 ) {

@@ -68,14 +68,6 @@ class WpLister_Product_MetaBox {
 		) );
 
 		woocommerce_wp_text_input( array(
-			'id' 			=> 'wpl_ebay_condition_description',
-			'label' 		=> __('Condition description', 'wplister'),
-			'placeholder' 	=> 'Condition description',
-			'description' 	=> __('This field should only be used to further clarify the condition of used items.','wplister'),
-			'value'			=> get_post_meta( $post->ID, '_ebay_condition_description', true )
-		) );
-
-		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_start_price',
 			'label' 		=> __('Price / Start Price', 'wplister'),
 			'placeholder' 	=> 'Start Price',
@@ -111,7 +103,78 @@ class WpLister_Product_MetaBox {
 			'value'			=> get_post_meta( $post->ID, '_ebay_listing_duration', true )
 		) );
 
+		$this->showItemConditionOptions();
+
 	}
+
+	function showItemConditionOptions() {
+		global $woocommerce, $post;
+
+		// default conditions - used when no primary category has been selected
+		$default_conditions = array( 
+			''     => __('-- use profile setting --', 'wplister'),
+			'1000' => __('New', 'wplister'),
+			'3000' => __('Used', 'wplister')
+		);
+
+		// do we have a primary category?
+		if ( get_post_meta( $post->ID, '_ebay_category_1_id', true ) ) {
+			$primary_category_id = get_post_meta( $post->ID, '_ebay_category_1_id', true );
+		} else {
+			// if not use default category
+		    $primary_category_id = get_option('wplister_default_ebay_category_id');
+		}
+
+		// fetch updated available conditions array
+		$item_conditions = $this->fetchItemConditions( $primary_category_id );
+
+		// check if conditions are available for this category - or fall back to default
+		if ( isset( $item_conditions[ $primary_category_id ] ) ) {
+			$available_conditions = $item_conditions[ $primary_category_id ];
+		} else {
+			$available_conditions = $default_conditions;
+		}
+
+		woocommerce_wp_select( array(
+			'id' 			=> 'wpl_ebay_condition_id',
+			'label' 		=> __('Condition', 'wplister'),
+			'options' 		=> $available_conditions,
+			// 'description' 	=> __('Available conditions may vary for different categories.','wplister'),
+			'value'			=> get_post_meta( $post->ID, '_ebay_condition_id', true )
+		) );
+
+		woocommerce_wp_text_input( array(
+			'id' 			=> 'wpl_ebay_condition_description',
+			'label' 		=> __('Condition description', 'wplister'),
+			'placeholder' 	=> 'Condition description',
+			'description' 	=> __('This field should only be used to further clarify the condition of used items.','wplister'),
+			'value'			=> get_post_meta( $post->ID, '_ebay_condition_description', true )
+		) );
+
+	}
+
+	public function fetchItemConditions( $ebay_category_id ) {
+		global $wpdb;
+		global $oWPL_WPLister;
+
+		if ( ! $ebay_category_id ) return array();
+
+		$transient_key = 'wplister_ebay_item_conditions_'.$ebay_category_id;
+
+		$conditions = get_transient( $transient_key );
+		if ( empty( $conditions ) ){
+		   
+			// fetch ebay conditions and update transient
+			$oWPL_WPLister->initEC();
+			$conditions = $oWPL_WPLister->EC->getCategoryConditions( $ebay_category_id );
+			$oWPL_WPLister->EC->closeEbay();
+
+			set_transient( $transient_key, $conditions, 24 * 60 * 60 );
+		}
+
+		return $conditions;
+	}
+
 
 	function meta_box_advanced() {
 		global $woocommerce, $post;
@@ -200,45 +263,10 @@ class WpLister_Product_MetaBox {
 			$this->enabledInventoryOnExternalProducts();
 		}
 
-
-		// woocommerce_wp_select( array(
-		// 	'id' 			=> 'wpl_ebay_condition_id',
-		// 	'label' 		=> __('Listing Type', 'wplister'),
-		// 	'options' 		=> array( 
-		// 			''               => __('-- use profile setting --', 'wplister'),
-		// 			'Chinese'        => __('Auction', 'wplister'),
-		// 			'FixedPriceItem' => __('Fixed Price', 'wplister')
-		// 		),
-		// 	'value'			=> get_post_meta( $post->ID, '_ebay_condition_id', true )
-		// ) );
-
-		/*
-		?>
-
-			<label for="wpl-text-condition_id" class="text_label"><?php echo __('Condition','wplister'); ?>: *</label>
-			<select id="wpl-text-condition_id" name="wpl_e2e_condition_id" title="Condition" class=" required-entry select">
-			<?php if ( isset( $wpl_available_conditions ) && is_array( $wpl_available_conditions ) ): ?>
-				<?php foreach ($wpl_available_conditions as $condition_id => $desc) : ?>
-					<option value="" selected="selected"><?php echo __('none','wplister'); ?></option>
-					<option value="<?php echo $condition_id ?>" 
-						<?php if ( $item_details['condition_id'] == $condition_id ) : ?>
-							selected="selected"
-						<?php endif; ?>
-						><?php echo $desc ?></option>
-				<?php endforeach; ?>
-			<?php else: ?>
-				<option value="" selected="selected"><?php echo __('-- use profile setting --','wplister'); ?></option>
-				<option value="1000" selected="selected"><?php echo __('New','wplister'); ?></option>
-			<?php endif; ?>
-			</select>
-			<br class="clear" />
-
-		<?php
-		*/
-
 		// woocommerce_wp_checkbox( array( 'id' => 'wpl_update_ebay_on_save', 'wrapper_class' => 'update_ebay', 'label' => __('Update on save?', 'wplister') ) );
 	
 	}
+
 
 	function showCategoryOptions() {
 		global $post;
@@ -536,6 +564,11 @@ class WpLister_Product_MetaBox {
 		$wpl_calc_shipping_enabled       = in_array( get_option('wplister_ebay_site_id'), array(0,2,15,100) );
 		$wpl_available_shipping_packages = get_option('wplister_ShippingPackageDetails');
 
+		$wpl_seller_profiles_enabled	= get_option('wplister_ebay_seller_profiles_enabled');
+		$wpl_seller_shipping_profiles	= get_option('wplister_ebay_seller_shipping_profiles');
+		$wpl_seller_payment_profiles	= get_option('wplister_ebay_seller_payment_profiles');
+		$wpl_seller_return_profiles		= get_option('wplister_ebay_seller_return_profiles');
+
 		// fetch available shipping discount profiles
 		$wpl_shipping_flat_profiles = array();
 		$wpl_shipping_calc_profiles = array();
@@ -615,6 +648,7 @@ class WpLister_Product_MetaBox {
 			$wpl_ebay_global_shipping       = esc_attr( @$_POST['wpl_ebay_global_shipping'] );
 			$wpl_ebay_payment_instructions  = esc_attr( @$_POST['wpl_ebay_payment_instructions'] );
 			$wpl_ebay_condition_description = esc_attr( @$_POST['wpl_ebay_condition_description'] );
+			$wpl_ebay_condition_id 			= esc_attr( @$_POST['wpl_ebay_condition_id'] );
 			$wpl_ebay_auction_type          = esc_attr( @$_POST['wpl_ebay_auction_type'] );
 			$wpl_ebay_listing_duration      = esc_attr( @$_POST['wpl_ebay_listing_duration'] );
 			$wpl_ebay_start_price           = esc_attr( @$_POST['wpl_ebay_start_price'] );
@@ -631,6 +665,7 @@ class WpLister_Product_MetaBox {
 			update_post_meta( $post_id, '_ebay_subtitle', $wpl_ebay_subtitle );
 			update_post_meta( $post_id, '_ebay_global_shipping', $wpl_ebay_global_shipping );
 			update_post_meta( $post_id, '_ebay_payment_instructions', $wpl_ebay_payment_instructions );
+			update_post_meta( $post_id, '_ebay_condition_id', $wpl_ebay_condition_id );
 			update_post_meta( $post_id, '_ebay_condition_description', $wpl_ebay_condition_description );
 			update_post_meta( $post_id, '_ebay_listing_duration', $wpl_ebay_listing_duration );
 			update_post_meta( $post_id, '_ebay_auction_type', $wpl_ebay_auction_type );

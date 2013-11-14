@@ -120,7 +120,7 @@ class ListingsTable extends WP_List_Table {
 
         //Build row actions
         $actions = array(
-            'preview_auction' => sprintf('<a href="?page=%s&action=%s&auction=%s&width=820&height=550" target="%s" class="%s">%s</a>',$page,'preview_auction',$item['id'],$preview_target,$preview_class,__('Preview','wplister')),
+            'preview_auction' => sprintf('<a href="?page=%s&action=%s&auction=%s&width=820&height=550&TB_iframe=true" target="%s" class="%s">%s</a>',$page,'preview_auction',$item['id'],$preview_target,$preview_class,__('Preview','wplister')),
             'edit'            => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'edit',$item['id'],__('Edit','wplister')),
             'lock'            => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'lock',$item['id'],__('Lock','wplister')),
             'unlock'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'unlock',$item['id'],__('Unlock','wplister')),
@@ -557,6 +557,11 @@ class ListingsTable extends WP_List_Table {
         return get_post_meta( $item['post_id'], '_sku', true );
     }
     
+    // optional column - can be activated by filter
+    function column_weight($item){
+        return ProductWrapper::getWeight( $item['post_id'] );
+    }
+    
     /** ************************************************************************
      * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
      * is given special treatment when columns are processed. It ALWAYS needs to
@@ -597,13 +602,23 @@ class ListingsTable extends WP_List_Table {
             'quantity'			=> __('Quantity','wplister'),
             'quantity_sold'		=> __('Sold','wplister'),
             'price'				=> __('Price','wplister'),
-            'fees'				=> __('Fees','wplister'),
+            'fees'              => __('Fees','wplister'),
+            // 'weight'			=> __('Weight','wplister'),
             'date_published'	=> __('Created at','wplister'),
             'end_date'          => __('Ends at','wplister'),
             'profile'           => __('Profile','wplister'),
             'template'          => __('Template','wplister'),
             'status'		 	=> __('Status','wplister')
         );
+
+        // usage:
+        // add_filter( 'wplister_listing_columns', 'my_custom_wplister_columns' );
+        // function my_custom_wplister_columns( $columns ) {
+        //     $columns['weight'] = 'Weight';
+        //     return $columns;
+        // }
+        $columns = apply_filters( 'wplister_listing_columns', $columns );
+
         return $columns;
     }
     

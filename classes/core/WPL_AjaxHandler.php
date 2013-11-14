@@ -156,7 +156,7 @@ class WPL_AjaxHandler extends WPL_Core {
 				$response->task 	= $task;
 				$response->errors   = $results[0]->errors;
 				$response->success  = $results[0]->success;
-				
+			
 				$this->returnJSON( $response );
 				exit();
 			
@@ -202,6 +202,42 @@ class WPL_AjaxHandler extends WPL_Core {
 				$this->initEC();
 				$results = $this->EC->updateItemsFromEbay( $task['id'] );
 				$this->EC->closeEbay();
+
+				// build response
+				$response = new stdClass();
+				$response->job  	= $job;
+				$response->task 	= $task;
+				$response->errors   = $results[0]->errors;
+				$response->success  = $results[0]->success;
+				
+				$this->returnJSON( $response );
+				exit();
+			
+			case 'endItem':
+				
+				// call EbayController
+				$this->initEC();
+				$results = $this->EC->endItemsOnEbay( $task['id'] );
+				$this->EC->closeEbay();
+				$this->handleSubTasksInResults( $results, $job, $task );
+
+				// build response
+				$response = new stdClass();
+				$response->job  	= $job;
+				$response->task 	= $task;
+				$response->errors   = $results[0]->errors;
+				$response->success  = $results[0]->success;
+				
+				$this->returnJSON( $response );
+				exit();
+			
+			case 'relistItem':
+				
+				// call EbayController
+				$this->initEC();
+				$results = $this->EC->relistItems( $task['id'] );
+				$this->EC->closeEbay();
+				$this->handleSubTasksInResults( $results, $job, $task );
 
 				// build response
 				$response = new stdClass();
@@ -267,6 +303,12 @@ class WPL_AjaxHandler extends WPL_Core {
 		if ( ! isset( $_REQUEST['job'] ) ) return false;
 		$jobname = $_REQUEST['job'];
 
+		// check if an array of listing IDs was provided
+        $lm = new ListingsModel();
+		$listing_ids = ( isset( $_REQUEST['listing_ids'] ) && is_array( $_REQUEST['listing_ids'] ) ) ? $_REQUEST['listing_ids'] : false;
+		if ( $listing_ids ) 
+	        $items = $lm->getItemsByIdArray( $listing_ids );
+
 		// handle job name
 		switch ( $jobname ) {
 			case 'updateEbayData':
@@ -293,11 +335,47 @@ class WPL_AjaxHandler extends WPL_Core {
 				$this->returnJSON( $response );
 				exit();
 			
+			case 'verifyItems':
+				
+		        $response = $this->_create_bulk_listing_job( 'verifyItem', $items, $jobname );
+				$this->returnJSON( $response );
+				exit();
+			
+			case 'publishItems':
+				
+		        $response = $this->_create_bulk_listing_job( 'publishItem', $items, $jobname );
+				$this->returnJSON( $response );
+				exit();
+			
+			case 'reviseItems':
+				
+		        $response = $this->_create_bulk_listing_job( 'reviseItem', $items, $jobname );
+				$this->returnJSON( $response );
+				exit();
+			
+			case 'updateItems':
+				
+		        $response = $this->_create_bulk_listing_job( 'updateItem', $items, $jobname );
+				$this->returnJSON( $response );
+				exit();
+			
+			case 'endItems':
+				
+		        $response = $this->_create_bulk_listing_job( 'endItem', $items, $jobname );
+				$this->returnJSON( $response );
+				exit();
+			
+			case 'relistItems':
+				
+		        $response = $this->_create_bulk_listing_job( 'relistItem', $items, $jobname );
+				$this->returnJSON( $response );
+				exit();
+			
 			case 'verifyAllPreparedItems':
 				
 				// get prepared items
-		        $sm = new ListingsModel();
-		        $items = $sm->getAllPrepared();
+		        $lm = new ListingsModel();
+		        $items = $lm->getAllPrepared();
 		        
 		        // create job from items and send response
 		        $response = $this->_create_bulk_listing_job( 'verifyItem', $items, $jobname );
@@ -307,8 +385,8 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'publishAllVerifiedItems':
 				
 				// get verified items
-		        $sm = new ListingsModel();
-		        $items = $sm->getAllVerified();
+		        $lm = new ListingsModel();
+		        $items = $lm->getAllVerified();
 		        
 		        // create job from items and send response
 		        $response = $this->_create_bulk_listing_job( 'publishItem', $items, $jobname );
@@ -318,8 +396,8 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'reviseAllChangedItems':
 				
 				// get changed items
-		        $sm = new ListingsModel();
-		        $items = $sm->getAllChanged();
+		        $lm = new ListingsModel();
+		        $items = $lm->getAllChanged();
 		        
 		        // create job from items and send response
 		        $response = $this->_create_bulk_listing_job( 'reviseItem', $items, $jobname );
@@ -329,8 +407,8 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'updateAllPublishedItems':
 				
 				// get published items
-		        $sm = new ListingsModel();
-		        $items = $sm->getAllPublished();
+		        $lm = new ListingsModel();
+		        $items = $lm->getAllPublished();
 		        
 		        // create job from items and send response
 		        $response = $this->_create_bulk_listing_job( 'updateItem', $items, $jobname );

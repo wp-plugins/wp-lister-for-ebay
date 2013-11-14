@@ -2,11 +2,15 @@
 
 <style type="text/css">
 	
-	#AuthSettingsBox ol li {
-		margin-bottom: 25px;
+	#side-sortables .postbox input.text_input,
+	#side-sortables .postbox select.select {
+	    width: 50%;
 	}
-	#AuthSettingsBox ol li > small {
-		margin-left: 4px;
+	#side-sortables .postbox label.text_label {
+	    width: 45%;
+	}
+	#side-sortables .postbox p.desc {
+	    margin-left: 5px;
 	}
 
 </style>
@@ -17,13 +21,51 @@
 	<?php include_once( dirname(__FILE__).'/settings_tabs.php' ); ?>
 	<?php echo $wpl_message ?>
 
-	<div style="width:60%;min-width:640px;" class="postbox-container">
-		<div class="metabox-holder">
-			<div class="meta-box-sortables ui-sortable">
+	<form method="post" id="settingsForm" action="<?php echo $wpl_form_action; ?>">
+
+	<div id="poststuff">
+		<div id="post-body" class="metabox-holder columns-2">
+
+			<div id="postbox-container-1" class="postbox-container">
+				<div id="side-sortables" class="meta-box">
 
 
-				<form method="post" action="<?php echo $wpl_form_action; ?>">
-					<input type="hidden" name="action" value="save_wplister_devsettings" >
+					<!-- first sidebox -->
+					<div class="postbox" id="submitdiv">
+						<!--<div title="Click to toggle" class="handlediv"><br></div>-->
+						<h3><span><?php echo __('Update','wplister'); ?></span></h3>
+						<div class="inside">
+
+							<div id="submitpost" class="submitbox">
+
+								<div id="misc-publishing-actions">
+									<div class="misc-pub-section">
+										<p><?php echo __('This page contains some special options intended for developers and debugging.','wplister') ?></p>
+									</div>
+								</div>
+
+								<div id="major-publishing-actions">
+									<div id="publishing-action">
+										<input type="hidden" name="action" value="save_wplister_devsettings" >
+										<input type="submit" value="<?php echo __('Save Settings','wplister'); ?>" id="save_settings" class="button-primary" name="save">
+									</div>
+									<div class="clear"></div>
+								</div>
+
+							</div>
+
+						</div>
+					</div>
+
+
+				</div>
+			</div> <!-- #postbox-container-1 -->
+
+
+			<!-- #postbox-container-2 -->
+			<div id="postbox-container-2" class="postbox-container">
+				<div class="meta-box-sortables ui-sortable">
+
 
 					<div class="postbox" id="SandboxSettingsBox">
 						<h3 class="hndle"><span><?php echo __('eBay Sandbox','wplister') ?></span></h3>
@@ -31,10 +73,14 @@
 
 							<p>
 								<?php echo __('The eBay sandbox allows you to list items to a testing area free of charge.','wplister'); ?>
-								<?php echo __('To use the sandbox, you need to create a dedicated sandbox account and connect WP-Lister with it.','wplister'); ?>
-								<?php echo __('After enabling sandbox mode click "Change Account" and authenticate WP-Lister using your sandbox account.','wplister'); ?>
+								<?php echo __('This is feature intended for developers only and not recommended for end users.','wplister'); ?><br>
 							</p>
-							<label for="wpl-option-sandbox_enabled" class="text_label"><?php echo __('Sandbox enabled','wplister') ?></label>
+							<label for="wpl-option-sandbox_enabled" class="text_label">
+								<?php echo __('Sandbox enabled','wplister') ?>
+								<?php $tip_msg  = __('To use the sandbox, you need to create a dedicated sandbox account and connect WP-Lister with it.','wplister'); ?>
+								<?php $tip_msg .= __('After enabling sandbox mode click "Change Account" and authenticate WP-Lister using your sandbox account.','wplister'); ?>
+                                <?php wplister_tooltip($tip_msg) ?>
+							</label>
 							<select id="wpl-option-sandbox_enabled" name="wpl_e2e_option_sandbox_enabled" title="Sandbox" class=" required-entry select">
 								<option value="1" <?php if ( $wpl_option_sandbox_enabled == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( $wpl_option_sandbox_enabled != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
@@ -43,14 +89,14 @@
 						</div>
 					</div>
 
-
-
-
 					<div class="postbox" id="DbLoggingBox">
 						<h3 class="hndle"><span><?php echo __('Logging','wplister') ?></span></h3>
 						<div class="inside">
 
-							<label for="wpl-option-log_to_db" class="text_label"><?php echo __('Log to database','wplister'); ?>:</label>
+							<label for="wpl-option-log_to_db" class="text_label">
+								<?php echo __('Log to database','wplister'); ?>
+                                <?php wplister_tooltip('If you have any issues or want support to look into a specific error message from eBay then please enable logging, repeat the steps and send the resulting log record to support.') ?>
+							</label>
 							<select id="wpl-option-log_to_db" name="wpl_e2e_option_log_to_db" title="Logging" class=" required-entry select">
 								<option value="1" <?php if ( $wpl_option_log_to_db == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( $wpl_option_log_to_db != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
@@ -59,14 +105,20 @@
 								<?php echo __('Enable to log all communication with eBay to the database.','wplister'); ?>
 							</p>
 
-							<label for="wpl-option-log_record_limit" class="text_label"><?php echo __('Log entry size limit','wplister'); ?>:</label>
+							<label for="wpl-option-log_record_limit" class="text_label">
+								<?php echo __('Log entry size limit','wplister'); ?>
+                                <?php wplister_tooltip('Limit the maximum size of a single log record. The default value is 4k.') ?>
+							</label>
 							<select id="wpl-option-log_record_limit" name="wpl_e2e_log_record_limit" class=" required-entry select">
 								<option value="4096"  <?php if ( $wpl_log_record_limit == '4096' ):  ?>selected="selected"<?php endif; ?>>4 kb</option>
 								<option value="8192"  <?php if ( $wpl_log_record_limit == '8192' ):  ?>selected="selected"<?php endif; ?>>8 kb</option>
 								<option value="64000" <?php if ( $wpl_log_record_limit == '64000' ): ?>selected="selected"<?php endif; ?>>64 kb</option>
 							</select>
 
-							<label for="wpl-option-xml_formatter" class="text_label"><?php echo __('XML Beautifier','wplister'); ?>:</label>
+							<label for="wpl-option-xml_formatter" class="text_label">
+								<?php echo __('XML Beautifier','wplister'); ?>
+                                <?php wplister_tooltip('Select which XML formatter should be used to display log records.') ?>
+							</label>
 							<select id="wpl-option-xml_formatter" name="wpl_e2e_xml_formatter" class=" required-entry select">
 								<option value="default" <?php if ( $wpl_xml_formatter == 'default' ): ?>selected="selected"<?php endif; ?>>default</option>
 								<option value="custom"  <?php if ( $wpl_xml_formatter == 'custom' ):  ?>selected="selected"<?php endif; ?>>use built in XML formatter</option>
@@ -79,26 +131,29 @@
 						<h3 class="hndle"><span><?php echo __('Debug options','wplister') ?></span></h3>
 						<div class="inside">
 
-							<label for="wpl-option-ajax_error_handling" class="text_label"><?php echo __('Handle 404 errors for admin-ajax.php','wplister'); ?>:</label>
+							<p>
+								Warning: These options are for debugging purposes only. Please do not change them unless WP Lab support told you to do so.
+							</p>
+
+							<label for="wpl-option-ajax_error_handling" class="text_label">
+								<?php echo __('Handle 404 errors for admin-ajax.php','wplister'); ?>
+								<?php $tip_msg = __('404 errors for admin-ajax.php should actually never happen and are generally a sign of incorrect server configuration.','wplister') .' '. __('This setting is just a workaround. You should consider moving to a proper hosting provider instead.','wplister'); ?>
+                                <?php wplister_tooltip($tip_msg) ?>
+							</label>
 							<select id="wpl-option-ajax_error_handling" name="wpl_e2e_ajax_error_handling" class=" required-entry select">
 								<option value="halt" <?php if ( $wpl_ajax_error_handling == 'halt' ): ?>selected="selected"<?php endif; ?>><?php echo __('Halt on error','wplister'); ?></option>
 								<option value="skip" <?php if ( $wpl_ajax_error_handling == 'skip' ): ?>selected="selected"<?php endif; ?>><?php echo __('Continue with next item','wplister'); ?></option>
 								<option value="retry" <?php if ( $wpl_ajax_error_handling == 'retry' ): ?>selected="selected"<?php endif; ?>><?php echo __('Try again','wplister'); ?></option>
 							</select>
-							<p class="desc" style="display: block;">
-								<?php echo __('404 errors for admin-ajax.php should actually never happen and are generally a sign of incorrect server configuration.','wplister'); ?>
-								<?php echo __('This setting is just a workaround. You should consider moving to a proper hosting provider instead.','wplister'); ?>
-							</p>
 
-							<label for="wpl-option-disable_variations" class="text_label"><?php echo __('Disable variations','wplister'); ?>:</label>
+							<label for="wpl-option-disable_variations" class="text_label">
+								<?php echo __('Disable variations','wplister'); ?>
+                                <?php wplister_tooltip('This is intended to work around an issue with the eBay API and will force using AddItem instead of AddFixedPriceItem, RelistItem instead of RelistFixedPriceItem, etc.<br>Do not enable this unless you do not want to list variations!') ?>
+							</label>
 							<select id="wpl-option-disable_variations" name="wpl_e2e_disable_variations" class=" required-entry select">
 								<option value="0" <?php if ( $wpl_disable_variations == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 								<option value="1" <?php if ( $wpl_disable_variations == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
-							<p class="desc" style="display: block;">
-								This is intended to work around an issue with the eBay API and will force using AddItem instead of AddFixedPriceItem, RelistItem instead of RelistFixedPriceItem, etc.<br>
-								Don't enable this unless you do not want to list variations.
-							</p>
 
 						</div>
 					</div>
@@ -107,7 +162,7 @@
 						<h3 class="hndle"><span><?php echo __('Debug options','wplister') ?></span></h3>
 						<div class="inside">
 
-							<label for="wpl-text-log_level" class="text_label"><?php echo __('Log to logfile','wplister'); ?>:</label>
+							<label for="wpl-text-log_level" class="text_label"><?php echo __('Log to logfile','wplister'); ?></label>
 							<select id="wpl-text-log_level" name="wpl_e2e_text_log_level" title="Logging" class=" required-entry select">
 								<option value=""> -- <?php echo __('no logfile','wplister'); ?> -- </option>
 								<option value="2" <?php if ( $wpl_text_log_level == '2' ): ?>selected="selected"<?php endif; ?>>Error</option>
@@ -125,7 +180,7 @@
 								<?php endif; ?>
 							</p>
 
-							<label for="wpl-text-ebay_token" class="text_label"><?php echo __('eBay token','wplister'); ?>:</label>
+							<label for="wpl-text-ebay_token" class="text_label"><?php echo __('eBay token','wplister'); ?></label>
 							<input type="text" name="wpl_e2e_text_ebay_token" id="wpl-text-ebay_token" value="<?php echo $wpl_text_ebay_token; ?>" class="text_input" />
 							<p class="desc" style="display: block;">
 								<?php #echo __('To use this application you need to generate an eBay token.','wplister'); ?>
@@ -135,17 +190,23 @@
 						</div>
 					</div>
 
+					<!--
 					<div class="submit" style="padding-top: 0; float: right;">
 						<input type="submit" value="<?php echo __('Save Settings','wplister') ?>" name="submit" class="button-primary">
 					</div>
-				</form>
+					-->
 
 
-			</div>
-		</div>
-	</div>
+				</div> <!-- .meta-box-sortables -->
+			</div> <!-- #postbox-container-1 -->
 
 
+
+		</div> <!-- #post-body -->
+		<br class="clear">
+	</div> <!-- #poststuff -->
+
+	</form>
 
 
 </div>

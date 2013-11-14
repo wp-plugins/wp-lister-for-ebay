@@ -23,7 +23,7 @@ class TransactionsPage extends WPL_Page {
 		parent::onWpAdminMenu();
 
 		$page = isset( $_GET['page'] ) ? $_GET['page'] : '';
-		if ( ( $page != 'wplister-transactions') && ( 'transaction' != get_option( 'wplister_ebay_update_mode', 'transaction' ) ) ) return;
+		if ( ( $page != 'wplister-transactions') && ( 'transaction' != get_option( 'wplister_ebay_update_mode', 'order' ) ) ) return;
 
 		add_submenu_page( self::ParentMenuId, $this->getSubmenuPageTitle( 'Transactions' ), __('Transactions','wplister'), 
 						  self::ParentPermissions, $this->getSubmenuId( 'transactions' ), array( &$this, 'onDisplayTransactionsPage' ) );

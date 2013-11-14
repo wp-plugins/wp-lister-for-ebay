@@ -363,7 +363,7 @@ class ListingsModel extends WPL_Model {
 	{
 		// skip this item if item status not allowed
 		$allowed_statuses = array( 'prepared', 'verified' );
-		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return false;
+		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return $this->result;
 
 		// build item
 		$ibm = new ItemBuilderModel();
@@ -426,7 +426,7 @@ class ListingsModel extends WPL_Model {
 	{
 		// skip this item if item status not allowed
 		$allowed_statuses = array( 'ended', 'sold' );
-		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return false;
+		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return $this->result;
 
 		// build item
 		$ibm = new ItemBuilderModel();
@@ -492,7 +492,7 @@ class ListingsModel extends WPL_Model {
 	{
 		// skip this item if item status not allowed
 		$allowed_statuses = array( 'published', 'changed' );
-		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return false;
+		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return $this->result;
 
 		// check if product has variations
 		$listing_item = $this->getItem( $id );
@@ -573,14 +573,15 @@ class ListingsModel extends WPL_Model {
 	{
 		// skip this item if item status not allowed
 		$allowed_statuses = array( 'published', 'changed' );
-		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return false;
+		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return $this->result;
 
 		// check listing type and if product has variations 
 		$listing_item = $this->getItem( $id );
+		$post_id = $listing_item['post_id'];
 
 		// check listing type - ignoring best offer etc...
 		$useFixedPriceItem = ( 'FixedPriceItem' == $listing_item['auction_type'] ) ? true : false;
-		$product_listing_type = get_post_meta( $listing_item['post_id'], '_ebay_auction_type', true );
+		$product_listing_type = get_post_meta( $post_id, '_ebay_auction_type', true );
         if ( $product_listing_type == 'Chinese' ) $useFixedPriceItem = false;
 
 		// ReviseInventoryStatus only works on FixedPriceItems so use ReviseItem otherwise
@@ -589,11 +590,14 @@ class ListingsModel extends WPL_Model {
 			return $this->reviseItem( $id, $session, true );			
 		}
 
-		// check for variation
-		$isVariable = ( $cart_item && is_object($cart_item) && $cart_item->variation_id ) ? true : false;
+		// check for single variation in cart
+		$isVariationInCart = ( $cart_item && is_object($cart_item) && $cart_item->variation_id ) ? true : false;
 
-		// fall back to reviseItem if variable product without SKU
-		if ( $isVariable && ! $cart_item->sku ) {
+		// check for variable product (update all variations)
+		$isVariableProduct = ProductWrapper::hasVariations( $post_id );
+
+		// fall back to reviseItem if cart variation without SKU
+		if ( $isVariationInCart && ! $cart_item->sku ) {
 			$this->logger->info( "Item #$id has variations, switching to reviseItem()" );
 			return $this->reviseItem( $id, $session, true );			
 		}
@@ -604,35 +608,59 @@ class ListingsModel extends WPL_Model {
 			return $this->endItem( $id, $session );
 		}
 
-
-		// preparation - set up new ServiceProxy with given session
-		$this->initServiceProxy($session);
-
-		// set ItemID
-		$stat = new InventoryStatusType();
-		$stat->setItemID( $this->getEbayIDFromID($id) );
 												
-		// set quantity
-		if ( $isVariable && $cart_item->sku ) {
+		// set inventory status
+		if ( $isVariableProduct ) {
 
-			// get stock level for this variation
-			$variation_qty = get_post_meta( $cart_item->variation_id, '_stock', true );
-			$stat->setQuantity( $variation_qty );
-			$stat->setSKU( $cart_item->sku );
+			// get all variations
+			$variations = ProductWrapper::getVariations( $post_id );
+			// echo "<pre>";print_r($variations);echo"</pre>";die();	
+
+			// calc number of requests
+			$batch_size = 4;
+			// $requests_required = intval( sizeof($variations) / $batch_size ) + 1;
+
+			// revise inventory of up to 4 variations at a time
+			for ( $offset=0; $offset < sizeof($variations); $offset += $batch_size ) { 
+
+				// revise inventory status
+				$res = $this->reviseVariableInventoryStatus( $id, $post_id, $session, $variations, $offset, $batch_size );		
+
+			}
 
 		} else {
-			$stat->setQuantity( $listing_item['quantity'] );
+
+			// preparation - set up new ServiceProxy with given session
+			$this->initServiceProxy($session);
+
+			// build request
+			$req = new ReviseInventoryStatusRequestType(); 
+
+			// set ItemID
+			$stat = new InventoryStatusType();
+			$stat->setItemID( $this->getEbayIDFromID($id) );
+
+			if ( $isVariationInCart && $cart_item->sku ) {
+
+				// get stock level for this variation in cart
+				$variation_qty = get_post_meta( $cart_item->variation_id, '_stock', true );
+				$stat->setQuantity( $variation_qty );
+				$stat->setSKU( $cart_item->sku );
+				$req->addInventoryStatus( $stat );
+				$this->logger->info( "Revising inventory status for cart variation #$id ($post_id) - sku: ".$stat->SKU." - qty: ".$stat->Quantity );
+
+			} else {
+				// default - simple product
+				$stat->setQuantity( $listing_item['quantity'] );
+				$req->addInventoryStatus( $stat );
+				$this->logger->info( "Revising inventory status #$id ($post_id) - qty: ".$stat->Quantity );
+			}
+
+			// revise inventory
+			$this->logger->debug( "Request: ".print_r($req,1) );
+			$res = $this->_cs->ReviseInventoryStatus($req); 
+
 		}
-
-		// build request
-		$req = new ReviseInventoryStatusRequestType(); 
-		$req->addInventoryStatus( $stat );
-		
-		// revise inventory
-		$this->logger->info( "Revising inventory status #$id - qty: ".$stat->Quantity );
-		$this->logger->debug( "Request: ".print_r($req,1) );
-		$res = $this->_cs->ReviseInventoryStatus($req); 
-
 
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
@@ -653,10 +681,48 @@ class ListingsModel extends WPL_Model {
 	} // reviseInventoryStatus()
 
 
+	private function reviseVariableInventoryStatus( $id, $post_id, $session, $variations, $offset = 0, $batch_size = 4 ) {
+		$this->logger->info( "reviseVariableInventoryStatus() #$id - variations: ".sizeof($variations)." - offset: ".$offset );
+
+		// preparation - set up new ServiceProxy with given session
+		$this->initServiceProxy($session);
+
+		// build request
+		$req = new ReviseInventoryStatusRequestType(); 
+
+		// set ItemID
+		$stat = new InventoryStatusType();
+		$stat->setItemID( $this->getEbayIDFromID($id) );
+
+		// slice variations array
+		$variations = array_slice( $variations, $offset, $batch_size );
+
+		foreach ( $variations as $var ) {
+
+			$stat = new InventoryStatusType();
+			$stat->setItemID( $this->getEbayIDFromID($id) );
+			$stat->setSKU( $var['sku'] );
+			$stat->setQuantity( $var['stock'] );
+			// $stat->setPrice( $var['price'] );
+
+			$req->addInventoryStatus( $stat );
+			$this->logger->info( "Revising inventory status for product variation #$id ($post_id) - sku: ".$stat->SKU." - qty: ".$stat->Quantity );
+		}
+
+		// revise inventory
+		$this->logger->debug( "Request: ".print_r($req,1) );
+		$res = $this->_cs->ReviseInventoryStatus($req); 
+
+		return $res;
+
+	} // reviseVariableInventoryStatus()
+
+
 	function checkStockLevel( $listing_item ) {
 
 		$post_id         = $listing_item['post_id'];
 		$profile_details = $listing_item['profile_data']['details'];
+		$locked          = $listing_item['locked'];
 
 		if ( ProductWrapper::hasVariations( $post_id ) ) {
 
@@ -673,8 +739,8 @@ class ListingsModel extends WPL_Model {
 
 		}
 
-		// fixed profile quantity will always be in stock
-    	if ( intval( $profile_details['quantity'] ) > 0 ) $stock = $profile_details['quantity'];
+		// fixed profile quantity will always be in stock - except for locked items
+    	if ( ! $locked && ( intval( $profile_details['quantity'] ) > 0 ) ) $stock = $profile_details['quantity'];
 		$this->logger->info( "checkStockLevel() result: ".$stock );
 
 		return ( intval($stock) > 0 ) ? $stock : false;
@@ -686,7 +752,7 @@ class ListingsModel extends WPL_Model {
 	{
 		// skip this item if item status not allowed
 		$allowed_statuses = array( 'prepared', 'verified' );
-		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return false;
+		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return $this->result;
 
 		// build item
 		$ibm = new ItemBuilderModel();
@@ -746,7 +812,7 @@ class ListingsModel extends WPL_Model {
 	{
 		// skip this item if item status not allowed
 		$allowed_statuses = array( 'published', 'changed' );
-		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return false;
+		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return $this->result;
 
 		// preparation - set up new ServiceProxy with given session
 		$this->initServiceProxy($session);
@@ -790,7 +856,30 @@ class ListingsModel extends WPL_Model {
 		} else {
 			$this->logger->info("skipped item $id with status ".$item['status']);
 			$this->logger->debug("allowed_statuses: ".print_r($allowed_statuses,1) );
-			$this->showMessage( sprintf( 'Skipped %s item "%s" as its listing status is not %s', $item['status'], $item['auction_title'], join( $allowed_statuses, ' or ' ) ), false, true );
+			$msg = sprintf( 'Skipped %s item "%s" as its listing status is neither %s', $item['status'], $item['auction_title'], join( $allowed_statuses, ' nor ' ) );
+			if ( sizeof($allowed_statuses) == 1 )
+				$msg = sprintf( 'Skipped %s item "%s" as its listing status is not %s', $item['status'], $item['auction_title'], join( $allowed_statuses, ' or ' ) );
+
+			if ( $this->is_ajax() ) {
+				$this->showMessage( $msg, true, false );
+			} else {
+				$this->showMessage( $msg, true, true );				
+			}
+
+			// create error object
+			$errorObj = new stdClass();
+			$errorObj->SeverityCode = 'Info';
+			$errorObj->ErrorCode 	= 102;
+			$errorObj->ShortMessage = 'Invalid listing status';
+			$errorObj->LongMessage 	= $this->message;
+			$errorObj->HtmlMessage 	= $this->message;
+			// $errors[] = $errorObj;
+
+			// save results as local property
+			$this->result = new stdClass();
+			$this->result->success = false;
+			$this->result->errors  = array( $errorObj );
+
 			return false;
 		}
 
@@ -1206,6 +1295,22 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
+	function getItemsByIdArray( $listing_ids ) {
+		global $wpdb;	
+		if ( ! is_array( $listing_ids )  ) return array();
+		if ( sizeof( $listing_ids ) == 0 ) return array();
+
+		$where = ' id = ' . join( ' OR id = ', $listing_ids);
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE $where
+			ORDER BY id DESC
+		", ARRAY_A);		
+		echo mysql_error();
+
+		return $items;		
+	}
 
 	function getAllDuplicateProducts() {
 		global $wpdb;	
@@ -1267,6 +1372,8 @@ class ListingsModel extends WPL_Model {
 		$listing_id = $this->getListingIDFromPostID( $post_id );
         $this->reapplyProfileToItem( $listing_id );
 
+        return $listing_id;
+        
 		// set published items to changed
 		// $wpdb->update( $this->tablename, array( 'status' => 'changed' ), array( 'status' => 'published', 'post_id' => $post_id ) );
 
@@ -1513,6 +1620,9 @@ class ListingsModel extends WPL_Model {
 
 		// locked items simply keep their status
 		if ( @$item['locked'] ) $data['status'] = $item['status'];
+		// except for selected items which shouldn't be locked in the first place
+		if ( $status == 'selected' ) $data['status'] = 'prepared';
+
 
 		// update auctions table
 		$wpdb->update( $this->tablename, $data, array( 'id' => $id ) );

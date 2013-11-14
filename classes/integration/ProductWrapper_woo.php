@@ -196,6 +196,25 @@ class ProductWrapper {
 		// )
 	}	
 	
+	// check if product is a single variation (that has been split)
+	// static function isVariation( $post_id ) {
+
+	// 	$product = self::getProduct( $post_id );
+	// 	if ( $product->product_type == 'variation' ) return true;
+
+	// 	return false;
+
+	// }	
+	// get parent post_id for a single variation
+	// static function getParentID( $post_id ) {
+
+	// 	$product = self::getProduct( $post_id );
+	// 	if ( $product->product_type == 'variation' ) return $product->post->parent_id;
+
+	// 	return false;
+
+	// }	
+
 	// check if product has variations
 	static function hasVariations( $post_id ) {
 

@@ -249,7 +249,11 @@
 								<option value="order"       <?php if ( $wpl_option_ebay_update_mode == 'order'       ): ?>selected="selected"<?php endif; ?>><?php echo __('Order','wplister'); ?> (default)</option>
 							</select>
 							<p class="desc" style="display: block;">
-								Set this to "Order" to enable the new order processing and disable the old transaction processing mode.<br>
+								<?php if ( $wpl_option_ebay_update_mode == 'transaction' ): ?>
+									Set this to "Order" to enable the new order processing and disable the old transaction processing mode.<br>
+								<?php else: ?>
+									Note: Once you enabled the new order processing mode you should not switch back to transaction mode.<br>
+								<?php endif; ?>
 
 								<?php global $woocommerce; ?>
 								<?php if ( ( isset($woocommerce->version) ) && ( version_compare( $woocommerce->version, '2.0' ) < 0 ) ) : ?>

@@ -37,6 +37,9 @@ class EbayController {
         // we want to be patient when talking to ebay
         if( ! ini_get('safe_mode') ) set_time_limit(600);
 
+        ini_set( 'mysql.connect_timeout', 600 );
+        ini_set( 'default_socket_timeout', 600 );
+
         // add EbatNs folder to include path - required for SDK
         $incPath = WPLISTER_PATH . '/includes/EbatNs';
         set_include_path( get_include_path() . ':' . $incPath );
@@ -311,6 +314,10 @@ class EbayController {
         $sm->downloadPaymentDetails( $this->session );      
         $sm->downloadMinimumStartPrices( $this->session );      
         $sm->downloadReturnPolicyDetails( $this->session );      
+
+        // update user details
+        $this->GetUser();
+        $this->GetUserPreferences();
     }
 
     // load available dispatch times
@@ -714,6 +721,70 @@ class EbayController {
         // handle result
         return ( print_r( $res, 1 ) );
         
+    }
+
+
+
+    // GetUserPreferences
+    public function GetUserPreferences(){ 
+
+        // prepare request
+        $req = new GetUserPreferencesRequestType();
+        $req->setShowSellerProfilePreferences( true );
+        // $req->setShowSellerExcludeShipToLocationPreference( true );
+
+        // send request
+        $res = $this->sp->GetUserPreferences($req);
+        // echo "<pre>";print_r($res);echo"</pre>";#die();
+
+        $SellerProfileOptedIn = $res->SellerProfilePreferences->SellerProfileOptedIn;
+        update_option('wplister_ebay_seller_profiles_enabled', $SellerProfileOptedIn ? 'yes' : 'no' );
+
+        $profiles = $res->getSellerProfilePreferences()->getSupportedSellerProfiles()->getSupportedSellerProfile();
+        // echo "<pre>";print_r($profiles);echo"</pre>";#die();
+
+        // if ( $SellerProfileOptedIn ) {
+        if ( sizeof( $res->SellerProfilePreferences->SupportedSellerProfiles->SupportedSellerProfile ) > 0 ) {
+            
+            $seller_shipping_profiles = array();
+            $seller_payment_profiles = array();
+            $seller_return_profiles = array();
+
+            foreach ( $res->SellerProfilePreferences->SupportedSellerProfiles->SupportedSellerProfile as $profile ) {
+            
+                $seller_profile = new stdClass();
+                $seller_profile->ProfileID    = $profile->ProfileID;
+                $seller_profile->ProfileName  = $profile->ProfileName;
+                $seller_profile->ProfileType  = $profile->ProfileType;
+                $seller_profile->ShortSummary = $profile->ShortSummary;
+                
+                switch ( $profile->ProfileType ) {
+                    case 'SHIPPING':
+                        $seller_shipping_profiles[] = $seller_profile;
+                        break;
+                    
+                    case 'PAYMENT':
+                        $seller_payment_profiles[] = $seller_profile;
+                        break;
+                    
+                    case 'RETURN_POLICY':
+                        $seller_return_profiles[] = $seller_profile;
+                        break;
+                }
+
+            }
+            update_option('wplister_ebay_seller_shipping_profiles', $seller_shipping_profiles);
+            update_option('wplister_ebay_seller_payment_profiles', $seller_payment_profiles);
+            update_option('wplister_ebay_seller_return_profiles', $seller_return_profiles);
+
+        } else {
+            delete_option( 'wplister_ebay_seller_shipping_profiles' );
+            delete_option( 'wplister_ebay_seller_payment_profiles' );
+            delete_option( 'wplister_ebay_seller_return_profiles' );
+        }
+
+        delete_option( 'wplister_ebay_seller_profiles' );
+
     }
 
 

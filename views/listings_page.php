@@ -131,6 +131,63 @@
 				jQuery('#wpl_dupe_details a.delete').on('click', function() {
 					return confirm("<?php echo __('Are you sure you want to remove this listing from WP-Lister?','wplister') ?>");
 				})
+
+				// handle bulk actions click
+				jQuery(".bulkactions input[type='submit']").on('click', function() {
+					
+					if ( 'doaction'  == this.id ) var selected_action = jQuery("select[name='action']").first().val();
+					if ( 'doaction2' == this.id ) var selected_action = jQuery("select[name='action2']").first().val();
+
+					// console.log( this.id );
+					// console.log('action',selected_action);
+
+					// create array of selected listing IDs
+					var item_ids = [];
+					var checked_items = jQuery(".check-column input:checked[name='auction[]']");
+					checked_items.each( function(index, checkbox) {
+						 item_ids.push( checkbox.value );
+						 // console.log( 'checked listing ID', checkbox.value );
+					});
+					// console.log( item_ids );
+
+					// check if any items were selected
+					if ( item_ids.length > 0 ) {
+						var params = {
+							'listing_ids': item_ids
+						}
+
+						if ( 'verify' == selected_action ) {
+							WpLister.JobRunner.runJob( 'verifyItems', 'Verifying selected items...', params );
+							return false;
+						}
+						if ( 'publish2e' == selected_action ) {
+							WpLister.JobRunner.runJob( 'publishItems', 'Publishing selected items...', params );
+							return false;
+						}
+						if ( 'revise' == selected_action ) {
+							WpLister.JobRunner.runJob( 'reviseItems', 'Revising selected items...', params );
+							return false;
+						}
+						if ( 'update' == selected_action ) {
+							WpLister.JobRunner.runJob( 'updateItems', 'Updating selected items...', params );
+							return false;
+						}
+
+						if ( 'end_item' == selected_action ) {
+							WpLister.JobRunner.runJob( 'endItems', 'Ending selected items...', params );
+							return false;
+						}
+						if ( 'relist' == selected_action ) {
+							WpLister.JobRunner.runJob( 'relistItems', 'Relisting selected items...', params );
+							return false;
+						}
+
+					}
+
+					return true;
+
+				})
+
 	
 			}
 		);

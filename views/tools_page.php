@@ -85,9 +85,23 @@
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="GetUser" />
 								<input type="submit" value="<?php echo __('Update user details','wplister'); ?>" name="submit" class="button-secondary">
-								<p><?php echo __('Update account details from eBay','wplister'); ?></p>
+								<p><?php echo __('Update account details from eBay','wplister'); ?> 
+									<?php echo __('and update your seller profiles for shipping, payment and return policy.','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
+
+						<?php if ( 'order' == get_option( 'wplister_ebay_update_mode', 'order' ) ) : ?>
+
+						<!-- Update eBay orders --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="update_ebay_orders_30" />
+								<input type="submit" value="<?php echo __('Update eBay orders','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('This will load all orders within 30 days from eBay.','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
+						<?php else: ?>
 
 						<!-- Update eBay transactions --> 
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
@@ -97,6 +111,8 @@
 								<p><?php echo __('This will load all transactions within 30 days from eBay.','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
+
+						<?php endif; ?>
 
 					</div>
 				</div> <!-- postbox -->
@@ -235,6 +251,23 @@
 		<br style="clear:both;"/>
 
 		<?php phpinfo() ?>
+
+
+		<!-- mysql show variables -->
+		<?php 
+			global $wpdb;
+			$mysql_variables = $wpdb->get_results('SHOW VARIABLES');
+		?>
+		<table>
+			<?php foreach ($mysql_variables as $var) : ?>
+				<tr>
+					<td><?php echo $var->Variable_name ?></td>
+					<td><?php echo $var->Value ?></td>
+				</tr>
+			<?php endforeach; ?>
+		</table>
+
+
 	<?php endif; ?>
 
 	<?php

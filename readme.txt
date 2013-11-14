@@ -2,7 +2,7 @@
 Contributors: wp-lab
 Tags: ebay, woocommerce, products, export
 Requires at least: 3.3
-Tested up to: 3.6
+Tested up to: 3.7.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -13,12 +13,12 @@ List products from WordPress on eBay. The easy way.
 
 WP-Lister connects your WooCommerce shop with your eBay Store. You can select multiple products right from your products page, select a profile to apply a set of predefined options and list them all on eBay with just a few clicks.
 
-We worked hard to make WP-Lister easy to use but flexible. The workflow of listing items requires not a single click more than neccessary. Due to its tight integration in WordPress, your client will not have to learn anything new as he will feel right at home.
+We worked hard to make WP-Lister easy to use but flexible. The workflow of listing items requires not a single click more than neccessary. Due to its tight integration in WordPress you will feel right at home.
 
 = Features =
 
-* list any number of items at once
-* set up a profile once and apply to any number of products
+* list any number of items
+* create listing profiles and apply multiple products
 * verify items and get listing fees before actually listing them
 * choose categories from eBay and your eBay Store
 * national and international shipping options
@@ -81,7 +81,7 @@ Yes, there are more questions and answers on http://www.wplab.com/plugins/wp-lis
 
 = Any plans for WP-Lister for Amazon? =
 
-Already working on it. Expect it this summer.
+Already working on it. Expect it this year.
 
 == Screenshots ==
 
@@ -89,6 +89,56 @@ Already working on it. Expect it this summer.
 2. Profile Editor
 
 == Changelog ==
+= 1.3.2 =
+* per product item condition
+* support for CSV import plugins
+* seller profiles (shipping, payment, return policy)
+* various bug fixes and stability improvements - see details below
+
+= 1.3.1.9 =
+* fixed manual inventory status updates for locked variable products
+* show messages and errors when revising a product from the edit product page
+* try to find existing order by OrderID and TransactionID before creating new woo order
+* added optional weight column to listings table
+
+= 1.3.1.8 =
+* added support for WooCommerce Product CSV Import Suite
+* added support for Woo Product Importer plugin
+
+= 1.3.1.7 =
+* added support for seller profiles on product level
+* fixed an issue with eBay Motors which was introduced in 1.3.1.4
+
+= 1.3.1.6 =
+* ignore fixed quantity profile option for locked items (to prevent accidentally disabling inventory sync for imported items)
+* fixed currency display in transaction details
+* hide custom quantity profile options by default to make it clear that these are not required and should be used with care
+* support for WP-Lister for Amazon (sync inventory between eBay and Amazon)<br>
+
+= 1.3.1.5 =
+* fixed fatal php error when uploading images to EPS which was introduced in 1.3.1.4
+* attempt to reconnect to database when mysql server has gone away
+
+= 1.3.1.4 =
+* changed default timespan for updating orders to one day
+* fixed issue with product level options for split variations
+* fixed possible issue with listing preview when external scripts were loaded
+* increase mysql connection timeout to prevent "server has gone away" errors on some servers
+
+= 1.3.1.3 =
+* process bulk actions on selected listings using ajax to prevent timeout issues
+* update user preferences when updating ebay data
+* added option to update orders on tools page
+* cleaned up advanced and developers settings
+
+= 1.3.1.2 =
+* added item condition option on edit product page
+* implemented support for seller profiles (shipping, payment, return policy)
+
+= 1.3.1.1 =
+* fixed issue where locked items could get stuck when selecting a different profile
+* minor bugfixes
+
 = 1.3.1 =
 * first stable release since 1.2.8
 

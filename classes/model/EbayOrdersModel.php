@@ -95,9 +95,9 @@ class EbayOrdersModel extends WPL_Model {
 			$this->logger->info('ModTimeFrom: '.$req->ModTimeFrom);
 			$this->logger->info('ModTimeTo: '.$req->ModTimeTo);
 
-		// fallback: last 7 days (max allowed by ebay: 30 days)
+		// fallback: one day (max allowed by ebay: 30 days)
 		} else {
-			$days = 7;
+			$days = 1;
 			$req->NumberOfDays  = $days;
 			$this->NumberOfDays = $days;
 			$this->logger->info('NumberOfDays (fallback): '.$req->NumberOfDays);
@@ -199,7 +199,7 @@ class EbayOrdersModel extends WPL_Model {
 	function handleOrderType( $type, & $Detail ) {
 		//global $wpdb;
 		//#type $Detail OrderType
-		$this->logger->info( 'handleOrderType()'.print_r( $Detail, 1 ) );
+		// $this->logger->info( 'handleOrderType()'.print_r( $Detail, 1 ) );
 
 		// map OrderType to DB columns
 		$data = $this->mapItemDetailToDB( $Detail );
@@ -269,6 +269,22 @@ class EbayOrdersModel extends WPL_Model {
 	} // insertOrUpdate()
 
 
+
+
+	// check if woocommcer order exists and has not been moved to the trash
+	function wooOrderExists( $post_id ) {
+
+		$_order = new WC_Order();
+		if ( $_order->get_order( $post_id ) ) {
+
+			if ( $_order->post_status != 'publish' ) return false;
+
+			return $_order->id;
+
+		}
+
+		return false;
+	} // wooOrderExists()
 
 
 	// update listing sold quantity and status
@@ -413,7 +429,7 @@ class EbayOrdersModel extends WPL_Model {
         // save GetOrders reponse in details
 		$data['details'] = $this->encodeObject( $Detail );
 
-		$this->logger->info( "IMPORTED order #".$Detail->OrderID );							
+		$this->logger->info( "IMPORTING order #".$Detail->OrderID );							
 
 		return $data;
 	}

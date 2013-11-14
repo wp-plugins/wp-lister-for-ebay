@@ -27,7 +27,7 @@ WpLister.JobRunner = function () {
 
     }
 
-    var runJob = function ( jobname, title ) {
+    var runJob = function ( jobname, title, extra_params ) {
         
         // show jobs window
         this.showWindow( title );
@@ -38,6 +38,11 @@ WpLister.JobRunner = function () {
             job: jobname,
             nonce: 'TODO'
         };
+
+        if ( extra_params && extra_params.listing_ids ) {
+            params.listing_ids = extra_params.listing_ids;
+        }
+
         var jqxhr = jQuery.getJSON( ajaxurl, params )
         .success( function( response ) { 
 

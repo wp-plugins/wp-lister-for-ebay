@@ -121,7 +121,7 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
             </td><td>
-                <?php echo number_format_i18n( $wpl_auction_item->price, 2 ) ?> &euro;
+                <?php echo woocommerce_price( $wpl_auction_item->price ) ?>
             </td></tr>
         </table>
     <?php else: ?>

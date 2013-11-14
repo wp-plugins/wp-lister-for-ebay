@@ -36,6 +36,10 @@ class WPL_EbatNs_Logger{
 		global $wpdb;
 		$data = array();
 
+		// check if MySQL server has gone away and reconnect if required
+		if ( ! mysql_ping() )
+			$wpdb->db_connect();
+
 		// extract Ack status from response
 		if ( $subject == 'Response' ) {
 			if ( preg_match("/<Ack>(.*)<\/Ack>/", $msg, $matches) ) {

@@ -99,20 +99,6 @@
 								<?php #echo __('Leave this empty to use the product price as it is.','wplister'); ?>
 							</p>
 
-							<label for="wpl-text-quantity" class="text_label">
-								<?php echo __('Fixed quantity','wplister'); ?>
-                                <?php wplister_tooltip('If you do not wish to list all available stock on eBay, you can overwrite the quantity here.<br>Use this with care - WP-Lister Pro can\'t sync the inventory properly if you enter a fixed quantity.') ?>
-							</label>
-							<input type="text" name="wpl_e2e_quantity" id="wpl-text-quantity" value="<?php echo $item_details['quantity']; ?>" class="text_input" />
-							
-							<label for="wpl-text-max-max_quantity" class="text_label">
-								<?php echo __('Maximum quantity','wplister'); ?>
-                                <?php wplister_tooltip('If you wish to limit your available stock on eBay, you can set a maximum quantity here.<br>Use this where you want to create demand or when you have listing limitation. This option will not limit fixed quantities.') ?>
-							</label>
-							<input type="number" name="wpl_e2e_max_quantity" id="wpl-text-max_quantity" value="<?php echo @$item_details['max_quantity']; ?>" class="text_input" placeholder="0" step="any" min="0" />
-							
-							<br class="clear" />
-
 
 							<label for="wpl-text-listing_duration" class="text_label">
 								<?php echo __('Duration','wplister'); ?> *
@@ -198,7 +184,7 @@
 							<p class="desc" style="display: none;">
 								<?php echo __('The maximum number of business days a seller commits to for shipping an item to domestic buyers after receiving a cleared payment.','wplister'); ?>
 							</p>
-	
+
 						</div>
 					</div>
 
@@ -261,6 +247,24 @@
 							</label>
 							<textarea name="wpl_e2e_payment_instructions" id="wpl-text-payment_instructions" class="textarea"><?php echo stripslashes( @$item_details['payment_instructions'] ); ?></textarea>
 							<br class="clear" />
+
+							<?php if ( isset( $wpl_seller_payment_profiles ) && is_array( $wpl_seller_payment_profiles ) ): ?>
+							<label for="wpl-text-seller_payment_profile_id" class="text_label">
+								<?php echo __('Payment profile','wplister'); ?> (beta)
+                                <?php wplister_tooltip('Instead of setting your payment details in WP-Lister you can select a predefined payment profile from your eBay account.') ?>
+							</label>
+							<select id="wpl-text-seller_payment_profile_id" name="wpl_e2e_seller_payment_profile_id" class=" required-entry select">
+								<option value="">-- <?php echo __('no profile','wplister'); ?> --</option>
+								<?php foreach ($wpl_seller_payment_profiles as $seller_profile ) : ?>
+									<option value="<?php echo $seller_profile->ProfileID ?>" 
+										<?php if ( @$item_details['seller_payment_profile_id'] == $seller_profile->ProfileID ) : ?>
+											selected="selected"
+										<?php endif; ?>
+										><?php echo $seller_profile->ProfileName . ' - ' . $seller_profile->ShortSummary ?></option>
+								<?php endforeach; ?>
+							</select>
+							<br class="clear" />
+							<?php endif; ?>
 
 						</div>
 					</div>
@@ -354,6 +358,24 @@
 							<br class="clear" />
 
 							</div>
+
+							<?php if ( isset( $wpl_seller_return_profiles ) && is_array( $wpl_seller_return_profiles ) ): ?>
+							<label for="wpl-text-seller_return_profile_id" class="text_label">
+								<?php echo __('Return policy profile','wplister'); ?> (beta)
+                                <?php wplister_tooltip('Instead of setting your return policy details in WP-Lister you can select a predefined return policy profile from your eBay account.') ?>
+							</label>
+							<select id="wpl-text-seller_return_profile_id" name="wpl_e2e_seller_return_profile_id" class=" required-entry select">
+								<option value="">-- <?php echo __('no profile','wplister'); ?> --</option>
+								<?php foreach ($wpl_seller_return_profiles as $seller_profile ) : ?>
+									<option value="<?php echo $seller_profile->ProfileID ?>" 
+										<?php if ( @$item_details['seller_return_profile_id'] == $seller_profile->ProfileID ) : ?>
+											selected="selected"
+										<?php endif; ?>
+										><?php echo $seller_profile->ProfileName . ' - ' . $seller_profile->ShortSummary ?></option>
+								<?php endforeach; ?>
+							</select>
+							<br class="clear" />
+							<?php endif; ?>
 
 						</div>
 					</div>
@@ -468,6 +490,16 @@
   					}
 				});
 				jQuery('#wpl-text-sellingmanager_enabled').change();
+
+				// set custom quantity options visibility
+				jQuery('#wpl-custom_quantity_enabled').change(function() {
+  					if ( jQuery('#wpl-custom_quantity_enabled').val() != '' ) {
+  						jQuery('#wpl-custom_quantity_container').show();
+  					} else {
+  						jQuery('#wpl-custom_quantity_container').hide();
+  					}
+				});
+				jQuery('#wpl-custom_quantity_enabled').change();
 
 
 			    // 
