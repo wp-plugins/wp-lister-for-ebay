@@ -29,12 +29,19 @@
 
 	<!-- show log table -->
 	<?php $wpl_logTable->views(); ?>
+
+    <form id="logs-filter" method="get" action="<?php echo $wpl_form_action; ?>" >
+        <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
+        <input type="hidden" name="paged" value="<?php echo isset( $_REQUEST['paged'] ) ? $_REQUEST['paged'] : '-1' ?>" />
+        <input type="hidden" name="log_status" value="<?php echo isset( $_REQUEST['log_status'] ) ? $_REQUEST['log_status'] : '' ?>" />
+		<?php $wpl_logTable->search_box(__('Search','wplister'), 'log-search-input'); ?>
+    </form>
+
     <!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
-    <form id="profiles-filter" method="post" action="<?php echo $wpl_form_action; ?>" >
+    <form id="logs-tableform" method="get" action="<?php echo $wpl_form_action; ?>" >
         <!-- For plugins, we also need to ensure that the form posts back to our current page -->
         <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
         <!-- Now we can render the completed list table -->
-		<?php $wpl_logTable->search_box(__('Search','wplister'), 'log-search-input'); ?>
         <?php $wpl_logTable->display() ?>
     </form>
 

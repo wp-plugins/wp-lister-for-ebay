@@ -135,13 +135,24 @@
 								Warning: These options are for debugging purposes only. Please do not change them unless WP Lab support told you to do so.
 							</p>
 
+							<label for="wpl-option-php_error_handling" class="text_label">
+								<?php echo __('PHP error handling','wplister'); ?>
+                                <?php wplister_tooltip('Please leave this set to Production unless told otherwise by support.') ?>
+							</label>
+							<select id="wpl-option-php_error_handling" name="wpl_e2e_php_error_handling" class=" required-entry select">
+								<option value="0" <?php if ( $wpl_php_error_handling == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('Production Mode','wplister'); ?> (default)</option>
+								<option value="1" <?php if ( $wpl_php_error_handling == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Show all errors','wplister'); ?></option>
+								<option value="2" <?php if ( $wpl_php_error_handling == '2' ): ?>selected="selected"<?php endif; ?>><?php echo __('Show errors on shutdown','wplister'); ?></option>
+								<option value="3" <?php if ( $wpl_php_error_handling == '3' ): ?>selected="selected"<?php endif; ?>><?php echo __('Show all errors on shutdown','wplister'); ?></option>
+							</select>
+
 							<label for="wpl-option-ajax_error_handling" class="text_label">
-								<?php echo __('Handle 404 errors for admin-ajax.php','wplister'); ?>
+								<?php echo __('AJAX error handling','wplister'); ?>
 								<?php $tip_msg = __('404 errors for admin-ajax.php should actually never happen and are generally a sign of incorrect server configuration.','wplister') .' '. __('This setting is just a workaround. You should consider moving to a proper hosting provider instead.','wplister'); ?>
                                 <?php wplister_tooltip($tip_msg) ?>
 							</label>
 							<select id="wpl-option-ajax_error_handling" name="wpl_e2e_ajax_error_handling" class=" required-entry select">
-								<option value="halt" <?php if ( $wpl_ajax_error_handling == 'halt' ): ?>selected="selected"<?php endif; ?>><?php echo __('Halt on error','wplister'); ?></option>
+								<option value="halt" <?php if ( $wpl_ajax_error_handling == 'halt' ): ?>selected="selected"<?php endif; ?>><?php echo __('Halt on error','wplister'); ?> (default)</option>
 								<option value="skip" <?php if ( $wpl_ajax_error_handling == 'skip' ): ?>selected="selected"<?php endif; ?>><?php echo __('Continue with next item','wplister'); ?></option>
 								<option value="retry" <?php if ( $wpl_ajax_error_handling == 'retry' ): ?>selected="selected"<?php endif; ?>><?php echo __('Try again','wplister'); ?></option>
 							</select>
@@ -151,7 +162,7 @@
                                 <?php wplister_tooltip('This is intended to work around an issue with the eBay API and will force using AddItem instead of AddFixedPriceItem, RelistItem instead of RelistFixedPriceItem, etc.<br>Do not enable this unless you do not want to list variations!') ?>
 							</label>
 							<select id="wpl-option-disable_variations" name="wpl_e2e_disable_variations" class=" required-entry select">
-								<option value="0" <?php if ( $wpl_disable_variations == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+								<option value="0" <?php if ( $wpl_disable_variations == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
 								<option value="1" <?php if ( $wpl_disable_variations == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 

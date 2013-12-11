@@ -136,7 +136,7 @@ class WPL_Setup extends WPL_Core {
 	public function cleanDB() {
 		global $wpdb;
 
-		if ( ( @$_GET['page'] == 'wplister-settings' ) && ( self::getOption('log_to_db') == '1' ) ) {
+		if ( isset( $_GET['page'] ) && ( $_GET['page'] == 'wplister-settings' ) && ( self::getOption('log_to_db') == '1' ) ) {
 			$delete_count = $wpdb->get_var('SELECT count(id) FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 MONTH )');
 			if ( $delete_count ) {
 				$wpdb->query('DELETE FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 MONTH )');
@@ -205,7 +205,7 @@ class WPL_Setup extends WPL_Core {
 			  PRIMARY KEY  (`id`)
 			);";
 			#dbDelta($sql);
-			$wpdb->query($sql);
+			$wpdb->query($sql);	echo mysql_error();
 						
 			// create table: ebay_categories
 			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_categories` (
@@ -219,7 +219,7 @@ class WPL_Setup extends WPL_Core {
 			  KEY `cat_id` (`cat_id`),
 			  KEY `parent_cat_id` (`parent_cat_id`)		
 			);";
-			$wpdb->query($sql);
+			$wpdb->query($sql);	echo mysql_error();
 						
 			// create table: ebay_store_categories
 			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_store_categories` (
@@ -242,7 +242,7 @@ class WPL_Setup extends WPL_Core {
 			  `payment_description` varchar(255) DEFAULT NULL,
 			  `version` int(11) DEFAULT NULL	
 			);";
-			$wpdb->query($sql);
+			$wpdb->query($sql);	echo mysql_error();
 						
 			// create table: ebay_profiles
 			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_profiles` (
@@ -255,7 +255,7 @@ class WPL_Setup extends WPL_Core {
 			  `conditions` text,
 			  PRIMARY KEY  (`profile_id`)	
 			);";
-			$wpdb->query($sql);
+			$wpdb->query($sql);	echo mysql_error();
 						
 			// create table: ebay_shipping
 			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_shipping` (
@@ -266,7 +266,7 @@ class WPL_Setup extends WPL_Core {
 			  `international` tinyint(4) DEFAULT NULL,
 			  `version` int(11) DEFAULT NULL	
 			);";
-			$wpdb->query($sql);
+			$wpdb->query($sql);	echo mysql_error();
 			
 			// create table: ebay_transactions
 			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_transactions` (
@@ -292,7 +292,7 @@ class WPL_Setup extends WPL_Core {
 			  `LastTimeModified` datetime DEFAULT NULL,
 			  PRIMARY KEY (`id`)
 	  		);";
-			$wpdb->query($sql);
+			$wpdb->query($sql);	echo mysql_error();
 			
 			// create table: ebay_log
 			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_log` (
@@ -307,7 +307,7 @@ class WPL_Setup extends WPL_Core {
 			  `user_id` int(11) DEFAULT NULL,	
 			  PRIMARY KEY (`id`)	
 			);";
-			$wpdb->query($sql);
+			$wpdb->query($sql);	echo mysql_error();
 
 
 			// $db_version = $new_db_version;
@@ -347,12 +347,12 @@ class WPL_Setup extends WPL_Core {
 			// rename column in table: ebay_categories
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_categories`
 			        CHANGE wpsc_category_id wp_term_id INTEGER ";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 
 			// rename column in table: ebay_store_categories
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_store_categories`
 			        CHANGE wpsc_category_id wp_term_id INTEGER ";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 			
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -365,12 +365,12 @@ class WPL_Setup extends WPL_Core {
 			// set column type to bigint in table: ebay_store_categories
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_store_categories`
 			        CHANGE cat_id cat_id BIGINT ";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 			
 			// set column type to bigint in table: ebay_store_categories
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_store_categories`
 			        CHANGE parent_cat_id parent_cat_id BIGINT ";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 			
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -415,7 +415,7 @@ class WPL_Setup extends WPL_Core {
 			        ADD COLUMN `isCalculated` int(10) UNSIGNED NOT NULL DEFAULT 0 AFTER `international`, 
 			        ADD COLUMN `isFlat` int(10) UNSIGNED NOT NULL DEFAULT 0 AFTER `international`;
 			";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 			
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -442,7 +442,7 @@ class WPL_Setup extends WPL_Core {
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_profiles`
 			        ADD COLUMN `category_specifics` text DEFAULT NULL;
 			";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 			
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -467,7 +467,7 @@ class WPL_Setup extends WPL_Core {
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
 			        ADD COLUMN `wp_order_id` int(10) UNSIGNED NOT NULL DEFAULT 0 AFTER `post_id`
 			";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 	
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -539,7 +539,7 @@ class WPL_Setup extends WPL_Core {
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
 			        ADD COLUMN `OrderLineItemID` varchar(64) DEFAULT NULL AFTER `transaction_id`
 			";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 	
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -553,7 +553,7 @@ class WPL_Setup extends WPL_Core {
 			$sql = "DELETE FROM `{$wpdb->prefix}ebay_transactions`
 			        WHERE transaction_id = 0
 			";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 	
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -567,7 +567,7 @@ class WPL_Setup extends WPL_Core {
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_categories`
 			        ADD COLUMN `site_id` int(10) UNSIGNED DEFAULT NULL AFTER `wp_term_id`
 			";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 	
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -581,7 +581,7 @@ class WPL_Setup extends WPL_Core {
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
 			        ADD COLUMN `history` TEXT AFTER `fees`
 			";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 	
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -609,17 +609,17 @@ class WPL_Setup extends WPL_Core {
 			// set column type to bigint in table: ebay_auctions
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
 			        CHANGE post_id post_id BIGINT ";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 			
 			// set column type to bigint in table: ebay_transactions
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
 			        CHANGE post_id post_id BIGINT ";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 			
 			// set column type to bigint in table: ebay_transactions
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
 			        CHANGE wp_order_id wp_order_id BIGINT ";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 			
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -633,7 +633,7 @@ class WPL_Setup extends WPL_Core {
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
 			        ADD COLUMN `eps` TEXT AFTER `history`
 			";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 	
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -647,7 +647,7 @@ class WPL_Setup extends WPL_Core {
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
 			        ADD COLUMN `history` TEXT AFTER `details`
 			";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 	
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -657,7 +657,7 @@ class WPL_Setup extends WPL_Core {
 		if ( 21 > $db_version ) {
 			$new_db_version = 21;
 
-			// create table: ebay_transactions
+			// create table: ebay_orders
 			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_orders` (
 			  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
 			  `order_id` varchar(128) DEFAULT NULL,
@@ -680,7 +680,7 @@ class WPL_Setup extends WPL_Core {
 			  `LastTimeModified` datetime DEFAULT NULL,
 			  PRIMARY KEY (`id`)
 	  		);";
-			$wpdb->query($sql);
+			$wpdb->query($sql);	echo mysql_error();
 
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -694,7 +694,7 @@ class WPL_Setup extends WPL_Core {
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_profiles`
 			        ADD COLUMN `sort_order` int(11) NOT NULL AFTER `type`
 			";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 	
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -723,7 +723,7 @@ class WPL_Setup extends WPL_Core {
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
 			        ADD COLUMN `locked` int(11) NOT NULL AFTER `status`
 			";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 	
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
@@ -732,18 +732,65 @@ class WPL_Setup extends WPL_Core {
 		// upgrade to version 25  (1.3.0.12)
 		if ( 25 > $db_version ) {
 			$new_db_version = 25;
+			$batch_size = 1000;
 
 			// fetch all imported items
 			$sql = "SELECT post_id FROM `{$wpdb->prefix}postmeta` WHERE meta_key = '_ebay_item_source' AND meta_value = 'imported' ";
-			$items = $wpdb->get_results($sql);	echo mysql_error();
+			$imported_products = $wpdb->get_col($sql);	echo mysql_error();
+			$total_number_of_products = sizeof( $imported_products );
 
-			// lock all imported items
-			foreach ($items as $item) {
-				$wpdb->query( "UPDATE `{$wpdb->prefix}ebay_auctions` SET locked = '1' WHERE post_id = '".$item->post_id."' AND status = 'published' " );	echo mysql_error();
+			if ( $total_number_of_products > $batch_size ) {
+				
+				// get current offset
+				$db_upgrade_offset = intval( self::getOption('db_upgrade_offset') );
+
+				// extract current batch
+				$imported_products = array_slice( $imported_products, $db_upgrade_offset, $batch_size );
+
+				// lock all imported imported_products
+				$where_sql = " 1 = 0 ";
+				foreach ($imported_products as $post_id) {
+					$where_sql .= " OR post_id = '$post_id' ";
+				}
+				$sql = "UPDATE `{$wpdb->prefix}ebay_auctions` SET locked = '1' WHERE ( $where_sql ) AND status = 'published' ";
+				$wpdb->query( $sql );	echo mysql_error();
+
+				// increase offset
+				self::updateOption('db_upgrade_offset', $db_upgrade_offset + $batch_size );
+
+				// check if more batches
+				if ( $total_number_of_products > $db_upgrade_offset + $batch_size ) {
+
+					$count_processed = min( $db_upgrade_offset + $batch_size, $total_number_of_products );
+					$msg  = __('WP-Lister database upgrade is in progress', 'wplister');
+					$msg .= ' - ' . $count_processed . ' of ' . $total_number_of_products . ' items processed.';								
+					self::showMessage($msg);
+					return;
+
+				} else {
+
+					// last batch finished
+					delete_option( 'wplister_db_upgrade_offset' );
+					update_option('wplister_db_version', $new_db_version);
+					$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';				
+
+				}
+
+			} else {
+				// normal mode - lock all at once
+
+				// lock all imported imported_products
+				$where_sql = " 1 = 0 ";
+				foreach ($imported_products as $post_id) {
+					$where_sql .= " OR post_id = '$post_id' ";
+				}
+				$sql = "UPDATE `{$wpdb->prefix}ebay_auctions` SET locked = '1' WHERE ( $where_sql ) AND status = 'published' ";
+				$wpdb->query( $sql );	echo mysql_error();
+
+				update_option('wplister_db_version', $new_db_version);
+				$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';				
 			}
-	
-			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+
 		}
 
 		// upgrade to version 26 (1.3.0.12)
@@ -753,26 +800,92 @@ class WPL_Setup extends WPL_Core {
 			// set column type to mediumtext in table: ebay_auctions
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
 			        CHANGE history history MEDIUMTEXT ";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 			
 			// set column type to mediumtext in table: ebay_orders
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_orders`
 			        CHANGE history history MEDIUMTEXT ";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 			
 			// set column type to mediumtext in table: ebay_transactions
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
 			        CHANGE history history MEDIUMTEXT ";
-			$wpdb->query($sql);	#echo mysql_error();
+			$wpdb->query($sql);	echo mysql_error();
 			
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
+		// upgrade to version 27  (1.3.2.5)
+		if ( 27 > $db_version ) {
+			$new_db_version = 27;
+
+			// add columns to ebay_categories table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_categories`
+			        ADD COLUMN `specifics` text AFTER `cat_name`,
+			        ADD COLUMN `conditions` text AFTER `cat_name`
+			";
+			$wpdb->query($sql);	echo mysql_error();
+	
+			// add columns to ebay_auctions table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
+			        ADD COLUMN `parent_id` bigint(20) NOT NULL AFTER `post_id`,
+			        ADD COLUMN `variations` text AFTER `details`
+			";
+			$wpdb->query($sql);	echo mysql_error();
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+		// upgrade to version 28  (1.3.2.10)
+		if ( 28 > $db_version ) {
+			$new_db_version = 28;
+
+			// create table: ebay_messages
+			$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_messages` (
+			  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+			  `message_id` varchar(128) DEFAULT NULL,
+			  `received_date` datetime DEFAULT NULL,
+			  `subject` varchar(255) DEFAULT NULL,
+			  `sender` varchar(255) DEFAULT NULL,
+			  `flag_read` varchar(1) DEFAULT NULL,
+			  `flag_replied` varchar(1) DEFAULT NULL,
+			  `flag_flagged` varchar(1) DEFAULT NULL,
+			  `item_title` varchar(255) DEFAULT NULL,
+			  `item_id` bigint(255) DEFAULT NULL,
+			  `folder_id` bigint(255) DEFAULT NULL,
+			  `msg_text` text,
+			  `msg_content` text,
+			  `details` text,
+			  `expiration_date` datetime DEFAULT NULL,
+			  `response_url` varchar(255) DEFAULT NULL,
+			  `status` varchar(50) DEFAULT NULL,
+			  PRIMARY KEY (`id`)
+	  		);";
+			$wpdb->query($sql);	echo mysql_error();
+
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+		// upgrade to version 29  (1.3.2.12)
+		if ( 29 > $db_version ) {
+			$new_db_version = 29;
+
+			// add columns to ebay_auctions table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
+			        ADD COLUMN `relist_date` datetime DEFAULT NULL AFTER `end_date`
+			";
+			$wpdb->query($sql);	echo mysql_error();
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
 
 
 		// show update message
-		if ( ($msg) && (!$hide_message) ) $this->showMessage($msg);		
+		if ( ($msg) && (!$hide_message) ) self::showMessage($msg);		
 
 		#debug: update_option('wplister_db_version', 0);
 		

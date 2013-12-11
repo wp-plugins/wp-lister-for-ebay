@@ -25,6 +25,18 @@
 		margin-right: 5px;
 	}
 
+	#TB_window table.variations_table {
+		width: 99%
+	}
+	#TB_window table.variations_table th {
+		border-bottom: 1px solid #aaa;
+		padding: 4px 9px;
+	}
+	#TB_window table.variations_table td {
+		border-bottom: 1px solid #ccc;
+		padding: 4px 9px;
+	}
+
 </style>
 
 <div class="wrap">
@@ -195,7 +207,7 @@
 	</script>
 
 
-	<?php if ( @$_GET['action'] == 'verifyPreparedItemsNow' ) : ?>
+	<?php if ( isset( $_GET['action'] ) && ( $_GET['action'] == 'verifyPreparedItemsNow' ) ) : ?>
 		<script type="text/javascript">
 			jQuery( document ).ready( function () {	
 				// auto start verify job

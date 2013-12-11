@@ -45,7 +45,12 @@ class ListingsTable extends WP_List_Table {
         $profilesModel = new ProfilesModel();
         $this->profiles = $profilesModel->getAllNames();
     }
-    
+
+    function getProfileData( $item ) {
+        $lm = new ListingsModel();
+        $profile_data = $lm->decodeObject( $item['profile_data'], true );
+        return $profile_data;        
+    }    
     
     /** ************************************************************************
      * Recommended. This method is called when the parent class can't find a method
@@ -136,7 +141,7 @@ class ListingsTable extends WP_List_Table {
             'archive'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'archive',$item['id'],__('Archive','wplister')),
         );
 
-        $profile_data = maybe_unserialize( $item['profile_data'] );
+        $profile_data  = $this->getProfileData( $item );
         $listing_title = $item['auction_title'];
 
         // limit item title to 80 characters
@@ -145,19 +150,19 @@ class ListingsTable extends WP_List_Table {
         
 
         // make title link to products edit page
-        if ( ProductWrapper::plugin == 'woo' ) {
-            $listing_title = '<a class="product_title_link" href="post.php?post='.$item['post_id'].'&action=edit">'.$listing_title.'</a>';
-        } elseif ( ProductWrapper::plugin == 'jigo' ) {
-            $listing_title = '<a class="product_title_link" href="post.php?post='.$item['post_id'].'&action=edit">'.$listing_title.'</a>';
-        } elseif ( ProductWrapper::plugin == 'wpec' ) {
-            $listing_title = '<a class="product_title_link" href="post.php?post='.$item['post_id'].'&action=edit">'.$listing_title.'</a>';
-        } elseif ( ProductWrapper::plugin == 'shopp' ) {
-            $listing_title = '<a class="product_title_link" href="admin.php?page=shopp-products&id='.$item['post_id'].'">'.$listing_title.'</a>';
-        }
+        $post_id = @$item['parent_id'] ? $item['parent_id'] : $item['post_id'];
+        $listing_title = '<a class="product_title_link" href="post.php?post='.$post_id.'&action=edit">'.$listing_title.'</a>';
+
+        // show single (split) variation indicator
+        if ( @$item['parent_id'] > 0 ) {
+            $tip_msg = 'This is a single split variation.';
+            $img_url  = WPLISTER_URL . '/img/info.png';
+            $listing_title .= '&nbsp;<img src="'.$img_url.'" style="height:11px; padding:0;" class="tips" data-tip="'.$tip_msg.'"/>&nbsp;';
+        } 
 
         // show locked indicator
         if ( @$item['locked'] ) {
-            $tip_msg = 'This listing is currently locked.<br>Only inventory changes will be updated, other changes will be ignored.';
+            $tip_msg = 'This listing is currently locked.<br>Only inventory changes and prices will be updated, other changes will be ignored.';
             $img_url  = WPLISTER_URL . '/img/lock-1.png';
             $listing_title .= '&nbsp;<img src="'.$img_url.'" style="height:11px; padding:0;" class="tips" data-tip="'.$tip_msg.'"/>&nbsp;';
         } 
@@ -232,7 +237,31 @@ class ListingsTable extends WP_List_Table {
             $listingsModel = new ListingsModel();
             $variations    = ProductWrapper::getVariations( $item['post_id'] );
 
-            $variations_html .= '(<a href="#" onClick="jQuery(\'#pvars_'.$item['id'].'\').toggle();return false;">&raquo;Variations</a>)<br>';
+            // check variations cache
+            $result = $listingsModel->matchCachedVariations( $item );
+            if ( $result && $result->success ) 
+                $variations = $result->variations;
+            // echo "<pre>";print_r($result);echo"</pre>";#die();
+
+
+            // show warning if not variations found
+            if ( ! is_array($variations) || ! sizeof($variations) ) {
+                $img_url  = WPLISTER_URL . '/img/error.gif';
+                $variations_html .= '(<a href="#" onClick="jQuery(\'#pvars_'.$item['id'].'\').toggle();return false;">&raquo;Variations</a>)<!br>';
+                $variations_html .= '&nbsp;<img src="'.$img_url.'" style="height:12px; padding:0;"/>&nbsp;<br>';
+                $variations_html .= '<b style="color:darkred">No variations found.</b><br>';
+                $variations_html .= '<div id="pvars_'.$item['id'].'" class="variations_list" style="display:none;margin-bottom:10px;">';
+                $variations_html .= 'Please read the <a href="http://www.wplab.com/plugins/wp-lister/faq/#Variations" target="_blank">FAQ</a> or contact support.';
+                $variations_html .= '</div>';
+                return $variations_html;
+            }
+
+            // get max_quantity from profile
+            $max_quantity = ( isset( $profile_data['details']['max_quantity'] ) && intval( $profile_data['details']['max_quantity'] )  > 0 ) ? $profile_data['details']['max_quantity'] : PHP_INT_MAX ; 
+
+            // add Variations link and container
+            $variations_html .= '(<a href="#TB_inline?width=600&inlineId=pvars_'.$item['id'].'" class="thickbox">&raquo;</a>';
+            $variations_html .= '<a href="#" onClick="jQuery(\'#pvars_'.$item['id'].'\').toggle();return false;">Variations</a>)<br>';
             $variations_html .= '<div id="pvars_'.$item['id'].'" class="variations_list" style="display:none;margin-bottom:10px;">';
 
             // show variation mode message
@@ -240,20 +269,21 @@ class ListingsTable extends WP_List_Table {
                 $variations_html .= '<p><b>' . __('These variations will be listed as a single item.','wplister') . '</b></p>';
             }
 
-            $variations_html .= '<table style="margin-bottom: 8px;">';
+            $variations_html .= '<table class="variations_table" style="margin-bottom: 8px;">';
 
             // header
             $variations_html .= '<tr><th>';
             $variations_html .= '&nbsp;';
             $variations_html .= '</th><th>';
-            if ( is_array( $variations[0]['variation_attributes'] ) ) {
-                foreach ($variations[0]['variation_attributes'] as $name => $value) {
+            $first_variation = reset( $variations );
+            if ( is_array( $first_variation['variation_attributes'] ) ) {
+                foreach ($first_variation['variation_attributes'] as $name => $value) {
                     $variations_html .= $name;
                     $variations_html .= '</th><th>';
                 }
             }
             $variations_html .= __('SKU','wplister');
-            $variations_html .= '</th><th>';
+            $variations_html .= '</th><th align="right">';
             $variations_html .= __('Price','wplister');
             $variations_html .= '</th></tr>';
 
@@ -261,7 +291,7 @@ class ListingsTable extends WP_List_Table {
 
                 // first column: quantity
                 $variations_html .= '<tr><td align="right">';
-                $variations_html .= intval( $var['stock'] ) . '&nbsp;x';
+                $variations_html .= min( $max_quantity, intval( $var['stock'] ) ) . '&nbsp;x';
                 $variations_html .= '</td>';
 
                 foreach ($var['variation_attributes'] as $name => $value) {
@@ -276,6 +306,7 @@ class ListingsTable extends WP_List_Table {
                 // column: SKU
                 $variations_html .= '<td>';
                 $variations_html .= $var['sku'] ? $var['sku'] : '<span style="color:darkred">SKU is missing!</span';
+                $variations_html .= $var['is_default'] ? ' *' : '';
                 $variations_html .= '</td>';
 
                 // last column: price
@@ -326,7 +357,7 @@ class ListingsTable extends WP_List_Table {
 
     } // generateVariationsHtmlLink()
 
-    function column_ebay_id_DISABLED($item){
+    function column_ebay_id_DISABLED($item) {
 
         //Build row actions
         #if ( intval($item['ebay_id']) > 0)
@@ -345,7 +376,7 @@ class ListingsTable extends WP_List_Table {
     function column_quantity($item){
 
         // get profile details
-        $profile_data = maybe_unserialize( $item['profile_data'] );
+        $profile_data = $this->getProfileData( $item );
 
         $quantity = $this->calculate_quantity( $item, $profile_data );
         $message = '';
@@ -356,10 +387,9 @@ class ListingsTable extends WP_List_Table {
         return $quantity;
 	}
 	  
-    function calculate_quantity( $item ) {
+    function calculate_quantity( $item, $profile_data ) {
         
         // use profile quantity for flattened variations
-        // $profile_data = maybe_unserialize( $item['profile_data'] );
         if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
 
             if ( $item['quantity_sold'] > 0 ) {
@@ -409,6 +439,7 @@ class ListingsTable extends WP_List_Table {
         if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
 
             $variations = ProductWrapper::getVariations( $item['post_id'] );
+            if ( ! is_array($variations) || ! sizeof($variations) ) return '';
 
             $price_min = 1000000; // one million should be a high enough ceiling
             $price_max = 0;
@@ -420,12 +451,11 @@ class ListingsTable extends WP_List_Table {
 
             // apply price modifiers
             $listingsModel = new ListingsModel();
-            $profile_data = maybe_unserialize( $item['profile_data'] );
+            $profile_data = $this->getProfileData( $item );
             $price_min = $listingsModel->applyProfilePrice( $price_min, $profile_data['details']['start_price'] );
             $price_max = $listingsModel->applyProfilePrice( $price_max, $profile_data['details']['start_price'] );
 
             // use lowest price for flattened variations
-            $profile_data = maybe_unserialize( $item['profile_data'] );
             if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
                 return $this->number_format( $price_min, 2 );
             }
@@ -443,21 +473,33 @@ class ListingsTable extends WP_List_Table {
     
     function column_end_date($item) {
 
-        $profile_data = maybe_unserialize( $item['profile_data'] );
+        $profile_data = $this->getProfileData( $item );
         
         if ( $item['date_finished'] ) {
             $date = $item['date_finished'];
             $value = mysql2date( get_option('date_format'), $date );
-            return '<span style="color:darkgreen">'.$value.'</span>';
+            $html = '<span style="color:darkgreen">'.$value.'</span>';
         } elseif ( ( is_array($profile_data['details']) ) && ( 'GTC' == $profile_data['details']['listing_duration'] ) ) {
             $value = 'GTC';
-            return '<span style="color:silver">'.$value.'</span>';
+            $html = '<span style="color:silver">'.$value.'</span>';
     	} else {
 			$date = $item['end_date'];
 	    	$value = mysql2date( get_option('date_format'), $date );
-			return '<span>'.$value.'</span>';
+			$html = '<span>'.$value.'</span>';
     	}
 
+        if ( @$item['relist_date'] ) {
+            $relist_date = $item['relist_date'];
+            $relist_ts   = strtotime( $item['relist_date'] );
+            $relist_time = mysql2date( get_option('time_format'), $relist_date );
+            if ( $relist_ts < time() ) {
+                $html .= '<br><span style="color:darkred">Relist at: '.$relist_time.'</span>';
+            } else {
+                $html .= '<br><span style="color:silver">Relist at: '.$relist_time.'</span>';                
+            }
+        }
+
+        return $html;
 	}
 	  
 	

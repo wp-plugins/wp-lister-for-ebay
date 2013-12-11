@@ -121,7 +121,17 @@ class EbayController {
         // hide inevitable cURL warnings from SDK 
         // *** DISABLE FOR DEBUGGING ***
         $this->error_reporting_level = error_reporting();
-        error_reporting( E_ERROR );
+        $this->logger->info( 'original error reporting level: '.$this->error_reporting_level );
+
+        // regard php_error_handling option
+        // first bit (1) will show all php errors if set
+        if ( 1 & get_option( 'wplister_php_error_handling', 0 ) ) {
+            error_reporting( E_ALL | E_STRICT );            
+        } else {
+            // only show fatal errors (default)
+            error_reporting( E_ERROR );            
+        }
+        $this->logger->info( 'new error reporting level: '.error_reporting() );
 
         $this->siteId = $site_id;
         $this->sandbox = $sandbox_enabled;
@@ -208,6 +218,7 @@ class EbayController {
     public function closeEbay(){ 
         // restore error reporting level 
         error_reporting( $this->error_reporting_level );
+        // $this->logger->info( 'switched back error reporting level to: '.error_reporting() );
     }
  
 
@@ -357,11 +368,25 @@ class EbayController {
         $m->updateOrders( $this->session, $days, 1, $order_ids );
         return $m;
     }
+    // update ebay messages
+    public function updateEbayMessages( $days = false, $order_ids = false ){ 
+        $m = new EbayMessagesModel();
+        $m->updateMessages( $this->session, $days, 1, $order_ids );
+        return $m;
+    }
 
     // update listings
+    // - update ended listings
+    // - process auto relist schedule
     public function updateListings(){ 
         $lm = new ListingsModel();
         $lm->updateEndedListings( $this->session );
+
+        $this->processAutoRelistSchedule();
+    }
+
+    // process listings scheduled for auto relist
+    public function processAutoRelistSchedule(){ 
     }
 
     // get category conditions
@@ -508,6 +533,26 @@ class EbayController {
             $this->processLastResults();
         } else {
             $this->lastResults[] = $sm->relistItem( $id, $this->session );          
+            $this->processLastResults();
+            return $this->lastResults;
+        }
+        
+    }
+
+
+    // call autoRelistItem on selected items - quick relist without any changes
+    public function autoRelistItems( $id ){ 
+        $this->logger->info('EC::autoRelistItems('.$id.')');
+        
+        $sm = new ListingsModel();
+
+        if ( is_array( $id )) {
+            foreach( $id as $single_id ) {
+                $this->lastResults[] = $sm->autoRelistItem( $single_id, $this->session );   
+            }
+            $this->processLastResults();
+        } else {
+            $this->lastResults[] = $sm->autoRelistItem( $id, $this->session );          
             $this->processLastResults();
             return $this->lastResults;
         }
@@ -852,6 +897,13 @@ class EbayController {
         // handle result
         return ( $expdate );
         
+    }
+
+    // GetApiAccessRules
+    public function GetApiAccessRules(){ 
+        $req = new GetApiAccessRulesRequestType();
+        $res = $this->sp->GetApiAccessRules($req);
+        return ( $res );       
     }
 
     // test connection to ebay api by single GetItem request

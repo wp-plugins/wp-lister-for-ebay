@@ -13,6 +13,9 @@ class WPLister_Toolbar  {
 	// custom toolbar bar
 	function customize_toolbar( $wp_admin_bar ) {
 
+		// check if current user can manage listings
+		if ( ! current_user_can('manage_ebay_listings') ) return;
+
 		// top level 'eBay'
 		$args = array(
 			'id'    => 'wplister_top',
@@ -69,66 +72,69 @@ class WPLister_Toolbar  {
 
 		}
 
-		// Settings page
-		$args = array(
-			'id'    => 'wplister_settings',
-			'title' => __('Settings', 'wplister'),
-			'href'  => admin_url( 'admin.php?page=wplister-settings' ),
-			'parent'  => 'wplister_top',
-			'meta'  => array('class' => 'wplister-toolbar-page')
-		);
-		$wp_admin_bar->add_node($args);
+		if ( current_user_can('manage_ebay_options') ) {
 
-		// Settings - General tab
-		$args = array(
-			'id'    => 'wplister_settings_general',
-			'title' => __('General Settings', 'wplister'),
-			'href'  => admin_url( 'admin.php?page=wplister-settings' ),
-			'parent'  => 'wplister_settings',
-			'meta'  => array('class' => 'wplister-toolbar-page')
-		);
-		$wp_admin_bar->add_node($args);
+			// Settings page
+			$args = array(
+				'id'    => 'wplister_settings',
+				'title' => __('Settings', 'wplister'),
+				'href'  => admin_url( 'admin.php?page=wplister-settings' ),
+				'parent'  => 'wplister_top',
+				'meta'  => array('class' => 'wplister-toolbar-page')
+			);
+			$wp_admin_bar->add_node($args);
 
-		// Settings - Categories tab
-		$args = array(
-			'id'    => 'wplister_settings_categories',
-			'title' => __('Categories', 'wplister'),
-			'href'  => admin_url( 'admin.php?page=wplister-settings&tab=categories' ),
-			'parent'  => 'wplister_settings',
-			'meta'  => array('class' => 'wplister-toolbar-page')
-		);
-		$wp_admin_bar->add_node($args);
+			// Settings - General tab
+			$args = array(
+				'id'    => 'wplister_settings_general',
+				'title' => __('General Settings', 'wplister'),
+				'href'  => admin_url( 'admin.php?page=wplister-settings' ),
+				'parent'  => 'wplister_settings',
+				'meta'  => array('class' => 'wplister-toolbar-page')
+			);
+			$wp_admin_bar->add_node($args);
 
-		// Settings - Advanced tab
-		$args = array(
-			'id'    => 'wplister_settings_advanced',
-			'title' => __('Advanced', 'wplister'),
-			'href'  => admin_url( 'admin.php?page=wplister-settings&tab=advanced' ),
-			'parent'  => 'wplister_settings',
-			'meta'  => array('class' => 'wplister-toolbar-page')
-		);
-		$wp_admin_bar->add_node($args);
+			// Settings - Categories tab
+			$args = array(
+				'id'    => 'wplister_settings_categories',
+				'title' => __('Categories', 'wplister'),
+				'href'  => admin_url( 'admin.php?page=wplister-settings&tab=categories' ),
+				'parent'  => 'wplister_settings',
+				'meta'  => array('class' => 'wplister-toolbar-page')
+			);
+			$wp_admin_bar->add_node($args);
 
-		// Settings - Developer tab
-		$args = array(
-			'id'    => 'wplister_settings_developer',
-			'title' => __('Developer', 'wplister'),
-			'href'  => admin_url( 'admin.php?page=wplister-settings&tab=developer' ),
-			'parent'  => 'wplister_settings',
-			'meta'  => array('class' => 'wplister-toolbar-page')
-		);
-		$wp_admin_bar->add_node($args);
+			// Settings - Advanced tab
+			$args = array(
+				'id'    => 'wplister_settings_advanced',
+				'title' => __('Advanced', 'wplister'),
+				'href'  => admin_url( 'admin.php?page=wplister-settings&tab=advanced' ),
+				'parent'  => 'wplister_settings',
+				'meta'  => array('class' => 'wplister-toolbar-page')
+			);
+			$wp_admin_bar->add_node($args);
 
-		// Settings - License tab
-		$args = array(
-			'id'    => 'wplister_settings_license',
-			'title' => __('Updates', 'wplister'),
-			'href'  => admin_url( 'admin.php?page=wplister-settings&tab=license' ),
-			'parent'  => 'wplister_settings',
-			'meta'  => array('class' => 'wplister-toolbar-page')
-		);
-		$wp_admin_bar->add_node($args);
+			// Settings - Developer tab
+			$args = array(
+				'id'    => 'wplister_settings_developer',
+				'title' => __('Developer', 'wplister'),
+				'href'  => admin_url( 'admin.php?page=wplister-settings&tab=developer' ),
+				'parent'  => 'wplister_settings',
+				'meta'  => array('class' => 'wplister-toolbar-page')
+			);
+			$wp_admin_bar->add_node($args);
 
+			// Settings - License tab
+			$args = array(
+				'id'    => 'wplister_settings_license',
+				'title' => __('Updates', 'wplister'),
+				'href'  => admin_url( 'admin.php?page=wplister-settings&tab=license' ),
+				'parent'  => 'wplister_settings',
+				'meta'  => array('class' => 'wplister-toolbar-page')
+			);
+			$wp_admin_bar->add_node($args);
+
+		} // if current_user_can('manage_ebay_options')
 
 		if ( current_user_can('manage_ebay_options') && ( get_option( 'wplister_log_to_db' ) == '1' ) ) {
 		
@@ -143,9 +149,6 @@ class WPLister_Toolbar  {
 			$wp_admin_bar->add_node($args);
 
 		}
-
-		// admin only from here on
-		if ( ! current_user_can('manage_ebay_listings') ) return;
 
 		// product page
 		global $post;
@@ -200,7 +203,7 @@ class WPLister_Toolbar  {
 
 			}
 
-			if ( current_user_can('prepare_ebay_listings') );
+			if ( current_user_can('prepare_ebay_listings') )
 				$this->addPrepareActions( $wp_admin_bar, $post_id );
 
 

@@ -143,24 +143,52 @@
 					
 					// validate shipping options
 					var shipping_type = jQuery('.select_shipping_type')[0] ? jQuery('.select_shipping_type')[0].value : 'disabled';
-					if ( shipping_type == 'flat' || shipping_type == 'FreightFlat' || shipping_type == 'FlatDomesticCalculatedInternational' ) {
+					var seller_profile = jQuery('#wpl-text-seller_shipping_profile_id')[0] ? jQuery('#wpl-text-seller_shipping_profile_id')[0].value : false;
 
-						// local flat shipping price required
-						if ( jQuery('#loc_shipping_options_table_flat input.price_input')[0].value == '' ) {
-							alert('Please enter a shipping fee for eBay.'); return false;
+					if ( ! seller_profile ) {
+
+						// check domestic shipping options
+						if ( shipping_type == 'flat' || shipping_type == 'FreightFlat' || shipping_type == 'FlatDomesticCalculatedInternational' ) {
+
+							// local flat shipping option required
+							if ( jQuery('#loc_shipping_options_table_flat .select_service_name')[0].value == '' ) {
+								alert('Please select at least one domestic shipping service for eBay.'); return false;
+							}
+	
+							// local flat shipping price required
+							if ( jQuery('#loc_shipping_options_table_flat input.price_input')[0].value == '' ) {
+								alert('Please enter a shipping fee for eBay.'); return false;
+							}
+
+							// max 5 shipping service options
+							if ( jQuery('#loc_shipping_options_table_flat .select_service_name').length > 5 ) {
+								alert('You have selected more than 5 local shipping services, which is not allowed by eBay.'); return false;
+							}
+
+						} else if ( shipping_type == 'calc' || shipping_type == 'CalculatedDomesticFlatInternational' ) {
+
+							// local calc shipping option required
+							if ( jQuery('#loc_shipping_options_table_calc .select_service_name')[0].value == '' ) {
+								alert('Please select at least one domestic shipping service for eBay.'); return false;
+							}						
+
+							// max 5 shipping service options
+							if ( jQuery('#loc_shipping_options_table_calc .select_service_name').length > 5 ) {
+								alert('You have selected more than 5 local shipping services, which is not allowed by eBay.'); return false;
+							}
+
 						}
 
-						// local flat shipping option required
-						if ( jQuery('#loc_shipping_options_table_flat .select_service_name')[0].value == '' ) {
-							alert('Please select at least one domestic shipping service for eBay.'); return false;
+						// max 5 international shipping service options
+						if ( shipping_type == 'flat' || shipping_type == 'FreightFlat' || shipping_type == 'CalculatedDomesticFlatInternational' ) {
+							if ( jQuery('#int_shipping_options_table_flat .select_service_name').length > 5 ) {
+								alert('You have selected more than 5 international shipping services, which is not allowed by eBay.'); return false;
+							}
+						} else if ( shipping_type == 'calc' || shipping_type == 'FlatDomesticCalculatedInternational' ) {
+							if ( jQuery('#int_shipping_options_table_calc .select_service_name').length > 5 ) {
+								alert('You have selected more than 5 international shipping services, which is not allowed by eBay.'); return false;
+							}
 						}
-
-					} else if ( shipping_type == 'calc' || shipping_type == 'CalculatedDomesticFlatInternational' ) {
-
-						// local calc shipping option required
-						if ( jQuery('#loc_shipping_options_table_calc .select_service_name')[0].value == '' ) {
-							alert('Please select at least one domestic shipping service for eBay.'); return false;
-						}						
 
 					}
 

@@ -2,7 +2,7 @@
 Contributors: wp-lab
 Tags: ebay, woocommerce, products, export
 Requires at least: 3.3
-Tested up to: 3.7.1
+Tested up to: 3.8
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -61,7 +61,7 @@ Yes, it does.
 
 = What are the requirements to run WP-Lister? =
 
-WP-Lister requires a recent version of WordPress (3.3+) with WooCommerce 1.6.6 or 2.x installed. Your server should run on Linux and have PHP 5.2 or better with cURL support.
+WP-Lister requires a recent version of WordPress (3.3+) with WooCommerce 2.x installed. Your server should run on Linux and have PHP 5.2 or better with cURL support.
 
 = I use products variations on my site but eBay doesn’t allow variations in the selected category. How can I find out in which categories variations are allowed? =
 
@@ -81,7 +81,7 @@ Yes, there are more questions and answers on http://www.wplab.com/plugins/wp-lis
 
 = Any plans for WP-Lister for Amazon? =
 
-Already working on it. Expect it this year.
+Already working on it. Expect it soon.
 
 == Screenshots ==
 
@@ -89,6 +89,97 @@ Already working on it. Expect it this year.
 2. Profile Editor
 
 == Changelog ==
+= 1.3.3 =
+* hide toolbar if user can’t manage listings
+* added support for WooCommerce Sequential Order Numbers Pro 1.5.x
+* fixed possible issue when upgrading from version 1.2.x with a huge number of imported products
+
+= 1.3.2.16 =
+* improved log record search feature
+* added check for duplicate orders and warning message
+* don't mark locked items as changed when listing template is updated
+* don’t change listing status of archived items when updating product
+* fixed ajax error when revising locked variations without changes
+* fixed advanced setting update on multisite network
+
+= 1.3.2.15 =
+* fixed issue when relisting an ended auction as fixed price
+* fixed shipping package option on edit product page
+* fixed issue of split variations not being updated when the product is changed in WooCommerce
+* prevent UUID issue when ending and relisting an item within a short time period
+
+= 1.3.2.14 =
+* fixed View on eBay button and error message for prepared auctions
+* prevent deleting profiles which are still applied to listings
+* improved error message if template file could not be found
+* show optional ErrorParameters from ebay response
+* added ajax shutdown handler to display fatal errors on shutdown
+
+= 1.3.2.13 =
+* implemented native auto relist feature (beta)
+
+= 1.3.2.12 =
+* set maxlength attribute for custom ebay title and subtitle input fields on edit product page
+* fixed possible fatal error caused by weird UTF characters returns description
+* fixed missing shipping weight for flattened variations
+* regard default variation and remove variation attributes from item specifics for flattened variations
+
+= 1.3.2.11 =
+* fixed disabling best offer option on published listings
+* added php error handling option to developers settings
+* added update timespan option for manual order updates
+
+= 1.3.2.10 =
+* explain error 488 - Duplicate UUID used
+* fixed product galleries for split variations
+* fixed custom ebay titles for split variations
+* added link to open variations table in thickbox
+
+= 1.3.2.9 =
+* improved listing eBay catalog items by UPC
+* fixed listings not being marked as changed when products are update via bulk edit
+* fixed issue when updating variable products through WooCommerce Product CSV Import Suite
+* added test if max_execution_time is ignored by server on tools page
+* measure task execution time and show message if a http error occurs after 30 seconds
+* adjusted CSS for WP 3.8
+
+= 1.3.2.8 =
+* speed and stability improvements when updating locked variable products
+* fixed missing css styles on edit profile page
+
+= 1.3.2.7 =
+* fixed javascript error on edit product page when no primary category was selected
+* fixed thickbox window width on edit product page
+
+= 1.3.2.6 =
+* fixed javascript error on profile page
+
+= 1.3.2.5 =
+* fixed issue with item specifics for split variations
+* improved splitting variations and indicate single variations in listings table
+* improved item specifics on product level
+* added wplister_custom_attributes filter to allow adding virtual attributes to pull item specifics values from custom meta fields
+
+= 1.3.2.4 =
+* added support for item specifics on product level
+* update price as well as quantity when revising locked items
+
+= 1.3.2.3 =
+* added support for ShipToLocations and ExcludeShipToLocations
+* fixed saving seller shipping profile on edit product page
+* prevent user from deleting transactions / orders
+
+= 1.3.2.2 =
+* fixed issue with variations out of stock if "hide out of stock items" option was enabled in WooCommerce inventory settings
+* added descrription to explain eBay error 21916543 (ExternalPictureURL server not available)
+
+= 1.3.2.1 =
+* added auto replenish profile option (beta)
+* implemented max. quantity support for variations and locked items
+* fixed issue when assign a different profile to published listings
+* show warming and link to faq when no variations are found on a variable product
+* show mysql errors during update process
+
 = 1.3.2 =
 * per product item condition
 * support for CSV import plugins

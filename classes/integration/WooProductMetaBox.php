@@ -55,7 +55,8 @@ class WpLister_Product_MetaBox {
 			'id' 			=> 'wpl_ebay_title',
 			'label' 		=> __('Listing title', 'wplister'),
 			'placeholder' 	=> 'Custom listing title',
-			'description' 	=> '',
+			'description' 	=> __('Leave empty to generate title from product name. Maximum length: 80 characters','wplister'),
+			'custom_attributes' => array( 'maxlength' => 80 ),
 			'value'			=> get_post_meta( $post->ID, '_ebay_title', true )
 		) );
 
@@ -63,7 +64,8 @@ class WpLister_Product_MetaBox {
 			'id' 			=> 'wpl_ebay_subtitle',
 			'label' 		=> __('Listing subtitle', 'wplister'),
 			'placeholder' 	=> 'Custom listing subtitle',
-			'description' 	=> __('Leave empty to use the product excerpt. Will be cut after 55 characters.','wplister'),
+			'description' 	=> __('Leave empty to use the product excerpt. Maximum length: 55 characters','wplister'),
+			'custom_attributes' => array( 'maxlength' => 55 ),
 			'value'			=> get_post_meta( $post->ID, '_ebay_subtitle', true )
 		) );
 
@@ -257,6 +259,7 @@ class WpLister_Product_MetaBox {
 		) );
 
 		$this->showCategoryOptions();
+		$this->showItemSpecifics();
 		WPL_WooFrontEndIntegration::showCompatibilityList();
 
 		if ( get_option( 'wplister_external_products_inventory' ) == 1 ) {
@@ -266,7 +269,6 @@ class WpLister_Product_MetaBox {
 		// woocommerce_wp_checkbox( array( 'id' => 'wpl_update_ebay_on_save', 'wrapper_class' => 'update_ebay', 'label' => __('Update on save?', 'wplister') ) );
 	
 	}
-
 
 	function showCategoryOptions() {
 		global $post;
@@ -384,7 +386,7 @@ class WpLister_Product_MetaBox {
 						e2e_selecting_cat = ('ebay_category_name_1' == jQuery(this).parent().parent().first().find('.text_input')[0].id) ? 1 : 2;
 
 						var tbHeight = tb_getPageSize()[1] - 120;
-						var tbURL = "#TB_inline?height="+tbHeight+"&width=500&inlineId=ebay_categories_tree_wrapper"; 
+						var tbURL = "#TB_inline?height="+tbHeight+"&width=640&inlineId=ebay_categories_tree_wrapper"; 
 	        			tb_show("Select a category", tbURL);  
 						
 					});
@@ -402,7 +404,7 @@ class WpLister_Product_MetaBox {
 						e2e_selecting_cat = ('store_category_name_1' == jQuery(this).parent().parent().first().find('.text_input')[0].id) ? 1 : 2;
 
 						var tbHeight = tb_getPageSize()[1] - 120;
-						var tbURL = "#TB_inline?height="+tbHeight+"&width=500&inlineId=store_categories_tree_wrapper"; 
+						var tbURL = "#TB_inline?height="+tbHeight+"&width=640&inlineId=store_categories_tree_wrapper"; 
 	        			tb_show("Select a category", tbURL);  
 						
 					});
@@ -441,10 +443,10 @@ class WpLister_Product_MetaBox {
 				        // close thickbox
 				        tb_remove();
 
-				        // if ( e2e_selecting_cat == 1 ) {
-				        // 	updateItemSpecifics();
+				        if ( e2e_selecting_cat == 1 ) {
+				        	updateItemSpecifics();
 				        // 	updateItemConditions();
-				        // }
+				        }
 
 				    });
 		
@@ -486,6 +488,9 @@ class WpLister_Product_MetaBox {
 
 		<?php
 
+	}
+
+	function showItemSpecifics() {
 	}
 
 	function enabledInventoryOnExternalProducts() {
@@ -588,9 +593,11 @@ class WpLister_Product_MetaBox {
 		$item_details['shipping_loc_flat_profile']           = get_post_meta( $post->ID, '_ebay_shipping_loc_flat_profile', true );
 		$item_details['shipping_int_calc_profile']           = get_post_meta( $post->ID, '_ebay_shipping_int_calc_profile', true );
 		$item_details['shipping_int_flat_profile']           = get_post_meta( $post->ID, '_ebay_shipping_int_flat_profile', true );
+		$item_details['seller_shipping_profile_id']          = get_post_meta( $post->ID, '_ebay_seller_shipping_profile_id', true );
 		$item_details['PackagingHandlingCosts']              = get_post_meta( $post->ID, '_ebay_PackagingHandlingCosts', true );
 		$item_details['InternationalPackagingHandlingCosts'] = get_post_meta( $post->ID, '_ebay_InternationalPackagingHandlingCosts', true );
 		$item_details['shipping_service_type']               = get_post_meta( $post->ID, '_ebay_shipping_service_type', true );
+		$item_details['shipping_package']   				 = get_post_meta( $post->ID, '_ebay_shipping_package', true );
 		$item_details['shipping_loc_enable_free_shipping']   = get_post_meta( $post->ID, '_ebay_shipping_loc_enable_free_shipping', true );
 		$item_details['ShipToLocations']   					 = get_post_meta( $post->ID, '_ebay_shipping_ShipToLocations', true );
 		$item_details['ExcludeShipToLocations']   			 = get_post_meta( $post->ID, '_ebay_shipping_ExcludeShipToLocations', true );
@@ -635,6 +642,14 @@ class WpLister_Product_MetaBox {
 		// jqueryFileTree
 		wp_register_script( 'jqueryFileTree', WPLISTER_URL.'/js/jqueryFileTree/jqueryFileTree.js', array( 'jquery' ) );
 		wp_enqueue_script( 'jqueryFileTree' );
+
+		// mustache template engine
+		wp_register_script( 'mustache', WPLISTER_URL.'/js/template/mustache.js', array( 'jquery' ) );
+		wp_enqueue_script( 'mustache' );
+
+		// jQuery UI Autocomplete
+		wp_enqueue_script( 'jquery-ui-button' );
+		wp_enqueue_script( 'jquery-ui-autocomplete' );
 
 	}
 
@@ -697,9 +712,13 @@ class WpLister_Product_MetaBox {
 				update_post_meta( $post_id, '_ebay_shipping_int_flat_profile', esc_attr( @$_POST['wpl_e2e_shipping_int_flat_profile'] ) );
 				update_post_meta( $post_id, '_ebay_shipping_loc_calc_profile', esc_attr( @$_POST['wpl_e2e_shipping_loc_calc_profile'] ) );
 				update_post_meta( $post_id, '_ebay_shipping_int_calc_profile', esc_attr( @$_POST['wpl_e2e_shipping_int_calc_profile'] ) );
+				update_post_meta( $post_id, '_ebay_seller_shipping_profile_id', esc_attr( @$_POST['wpl_e2e_seller_shipping_profile_id'] ) );
 				
 				$loc_free_shipping = strstr( 'calc', strtolower($ebay_shipping_service_type) ) ? @$_POST['wpl_e2e_shipping_loc_calc_free_shipping'] : @$_POST['wpl_e2e_shipping_loc_flat_free_shipping'];
 				update_post_meta( $post_id, '_ebay_shipping_loc_enable_free_shipping', $loc_free_shipping );
+
+				update_post_meta( $post_id, '_ebay_shipping_ShipToLocations', @$_POST['wpl_e2e_ShipToLocations'] );
+				update_post_meta( $post_id, '_ebay_shipping_ExcludeShipToLocations', @$_POST['wpl_e2e_ExcludeShipToLocations'] );
 
 			} else {
 
@@ -715,6 +734,7 @@ class WpLister_Product_MetaBox {
 				delete_post_meta( $post_id, '_ebay_shipping_int_calc_profile' );
 
 			}
+
 
 		}
 

@@ -26,6 +26,9 @@ class WPL_API_Hooks extends WPL_Core {
 		add_action( 'wp_ajax_woo-product-importer-ajax',      array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );
 		add_action( 'wp_ajax_woocommerce_csv_import_request', array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );
 
+		// example of using wplister_custom_attributes filter to add SKU as a virtual attribute
+		add_filter( 'wplister_custom_attributes', array( &$this, 'wplister_custom_attributes' ), 10, 1 );
+
 	}
 	
 	
@@ -94,6 +97,8 @@ class WPL_API_Hooks extends WPL_Core {
 	 */
 
 	function handle_third_party_ajax_csv_import() {
+		global $wpl_logger;
+		$wpl_logger->info("CSV import mode ENABLED");
 
 		// disable default action for save_post
 		global $WPL_WooBackendIntegration;
@@ -109,20 +114,33 @@ class WPL_API_Hooks extends WPL_Core {
 
 	// collect changed product IDs
 	function collect_updated_products( $post_id, $post ) {
+		// global $wpl_logger;
+		// $wpl_logger->info("collect_updated_products( $post_id )");
 
 		if ( !$_POST ) return $post_id;
 		// if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
 		// if( is_int( wp_is_post_autosave( $post_id ) ) ) return;
 		// if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
-		if ( !current_user_can( 'edit_post', $post_id )) return $post_id;
-		if ( $post->post_type != 'product' ) return $post_id;
+		if ( ! current_user_can( 'edit_post', $post_id )) return $post_id;
+		if ( ! in_array( $post->post_type, array( 'product', 'product_variation' ) ) ) return $post_id;
+
+		// if this is a single variation use parent_id 
+		// if ( $parent_id = ProductWrapper::getVariationParent( $post_id ) ) {
+		if ( $post->post_type == 'product_variation' ) {
+			$parent_id = ProductWrapper::getVariationParent( $post_id );
+			// $wpl_logger->info("single variation found - use parent $parent_id for $post_id");
+			$post_id = $parent_id;
+		}
 
 		// get queue
 		$collected_products = get_option( 'wplister_updated_products_queue', array() );
 		if ( ! is_array( $collected_products ) ) $collected_products = array();
 
-		// add product_id to queue
-		$collected_products[] = $post_id;
+		// add product_id to queue - if it doesn't exist
+		if ( ! in_array( $post_id, $collected_products ) )
+			$collected_products[] = $post_id;
+
+		// $wpl_logger->info("collected products".print_r($collected_products,1));
 
 		// update queue
 		update_option( 'wplister_updated_products_queue', $collected_products );
@@ -134,6 +152,10 @@ class WPL_API_Hooks extends WPL_Core {
 		$collected_products = get_option( 'wplister_updated_products_queue', array() );
 		if ( ! is_array( $collected_products ) ) $collected_products = array();
 
+		// DEBUG
+		// global $wpl_logger;
+		// $wpl_logger->info("update_products_on_shutdown() - collected_products: ".print_r($collected_products,1));
+
 		// mark each queued product as modified
 		foreach ($collected_products as $post_id ) {
 			do_action( 'wplister_product_has_changed', $post_id );
@@ -144,6 +166,17 @@ class WPL_API_Hooks extends WPL_Core {
 
 	}
 
+	// example of using wplister_custom_attributes filter to add SKU as a virtual attribute 
+	function wplister_custom_attributes( $attributes ) {
+
+		$attributes[] = array(
+			'label'    => 'SKU',
+			'id'       => '_sku',
+			'meta_key' => '_sku'
+		);
+
+		return $attributes;
+	}	
 
 }
 

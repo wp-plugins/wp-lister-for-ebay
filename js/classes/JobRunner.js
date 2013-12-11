@@ -215,6 +215,10 @@ WpLister.JobRunner = function () {
             task: task,
             nonce: 'TODO'
         };
+
+        // remember start time
+        self.currentTaskStartTime = new Date().getTime();
+
         // var jqxhr = jQuery.getJSON( ajaxurl, params )
         var jqxhr = jQuery.post( ajaxurl, params, null, 'json' )
         .success( function( response ) { 
@@ -240,8 +244,12 @@ WpLister.JobRunner = function () {
                 var errors_label  = response.errors.length == 1 ? 'error' : 'errors';
             }
 
+            // calculate processing time for completed task
+            self.currentTaskEndTime = new Date().getTime()
+            var currentTaskProcessingTime  = ( self.currentTaskEndTime - self.currentTaskStartTime ) / 1000; // time in seconds
+
             // update row status
-            currentLogRow.find('.logRowStatus').html( '<img src="'+statusIconURL+'" />' );
+            currentLogRow.find('.logRowStatus').html( '<img src="'+statusIconURL+'" title="Task runtime: '+(parseFloat(currentTaskProcessingTime).toFixed(1))+' sec." />' );
 
             // handle errors
             if ( response.errors.length > 0 ) {
@@ -266,15 +274,36 @@ WpLister.JobRunner = function () {
 
         })
         .error( function(e,xhr,error) { 
+            // calculate processing time for completed task
+            self.currentTaskEndTime = new Date().getTime()
+            var currentTaskProcessingTime  = ( self.currentTaskEndTime - self.currentTaskStartTime ) / 1000; // time in seconds
+
             // update row status
             var statusIconURL = wplister_url + "img/icon-error.png";                
-            currentLogRow.find('.logRowStatus').html( '<img src="'+statusIconURL+'" />' );
+            currentLogRow.find('.logRowStatus').html( '<img src="'+statusIconURL+'" title="Task runtime: '+(parseFloat(currentTaskProcessingTime).toFixed(1))+' sec." />' );
 
             // default error handling mode: skip
             // if ( typeof wplister_ajax_error_handling === 'undefined' ) wplister_ajax_error_handling = 'skip';
 
-            // dont get fooled by 404 or 500 errors for admin-ajax.php
-            if ( ( e.status == 404 ) || ( e.status == 500 ) ) {
+            // check if this error could be cause by 30 sec. timeout
+            if ( ( 30 < currentTaskProcessingTime ) && ( currentTaskProcessingTime < 35 ) ) {
+                var logMsg = '<div class="logRow" style="height:auto;">';
+                logMsg += '<b>Note:</b> The following error was returned after '+(parseFloat(currentTaskProcessingTime).toFixed(1))+' seconds - which indicates that your server might have a hard execution time limit of 30 seconds.';
+                logMsg += '<br><br>Please visit WP-Lister &raquo; Tools and test the PHP time out on your server before contacting support.';
+                logMsg += '</div>';
+                jQuery('#jobs_log').append( logMsg );
+            }
+            // check if this error could be cause by 60 sec. timeout
+            if ( ( 60 < currentTaskProcessingTime ) && ( currentTaskProcessingTime < 65 ) ) {
+                var logMsg = '<div class="logRow" style="height:auto;">';
+                logMsg += '<b>Note:</b> The following error was returned after '+(parseFloat(currentTaskProcessingTime).toFixed(1))+' seconds - which indicates that your server might have a hard execution time limit of 60 seconds.';
+                logMsg += '<br><br>Please visit WP-Lister &raquo; Tools and test the PHP time out on your server before contacting support.';
+                logMsg += '</div>';
+                jQuery('#jobs_log').append( logMsg );
+            }
+
+            // dont get fooled by 403, 404 or 500 errors for admin-ajax.php
+            if ( ( e.status == 403 ) || ( e.status == 404 ) || ( e.status == 500 ) ) {
 
 
                 if ( ( wplister_ajax_error_handling == 'retry') && ( self.retryCount < 5 ) ) {
@@ -301,7 +330,10 @@ WpLister.JobRunner = function () {
                 } else { // halt
 
                     // halt task processing
-                    jQuery('#jobs_log').append( "A problem occured while processing this task. The server responded with code " + e.status + ": " + e.responseText + "<br>" );
+                    var logMsg = '<div class="logRow" style="height:auto;">';
+                    logMsg += 'A problem occured while processing this task. The server responded with HTTP code ' + e.status + ' and returned:<br>' + e.responseText + '<br>';
+                    logMsg += '</div>';
+                    jQuery('#jobs_log').append( logMsg );
                     jQuery('#jobs_window .btn_close').show();
 
                 }

@@ -300,7 +300,11 @@ class TemplatesPage extends WPL_Page {
 			$items = $listingsModel->getAllPublishedWithTemplate( $dirname );
 			if ( ! empty( $items ) ) {
 		        foreach ($items as $item) {
-			        $listingsModel->updateListing( $item['id'], array('status' => 'changed') );
+
+		        	// don't mark locked items as changed
+		        	if ( ! $item['locked'] )
+			        	$listingsModel->updateListing( $item['id'], array('status' => 'changed') );
+			        
 		        }
 				$this->showMessage( sprintf( __('%s published items marked as changed.','wplister'), count($items) ) );			
 			}

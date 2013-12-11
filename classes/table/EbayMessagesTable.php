@@ -25,7 +25,7 @@ if(!class_exists('WP_List_Table')){
  * 
  * Our theme for this list table is going to be profiles.
  */
-class TransactionsTable extends WP_List_Table {
+class EbayMessagesTable extends WP_List_Table {
 
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
@@ -36,8 +36,8 @@ class TransactionsTable extends WP_List_Table {
                 
         //Set parent defaults
         parent::__construct( array(
-            'singular'  => 'transaction',     //singular name of the listed records
-            'plural'    => 'transactions',    //plural name of the listed records
+            'singular'  => 'ebay_message',     //singular name of the listed records
+            'plural'    => 'messages',    //plural name of the listed records
             'ajax'      => false        //does this table support ajax?
         ) );
         
@@ -67,21 +67,16 @@ class TransactionsTable extends WP_List_Table {
      **************************************************************************/
     function column_default($item, $column_name){
         switch($column_name){
+            case 'message_id':
+            case 'subject':
+            case 'sender':
             case 'item_id':
-            case 'transaction_id':
-            case 'quantity':
-            case 'buyer_userid':
-            case 'buyer_name':
-            case 'PaymentMethod':
-            case 'eBayPaymentStatus':
-            case 'CheckoutStatus':
-            case 'CompleteStatus':
+            case 'item_title':
+            case 'flag_read':
             case 'status':
                 return $item[$column_name];
-            case 'price':
-                return number_format( $item[$column_name], 2, ',', '.' );
-            case 'date_created':
-            case 'LastTimeModified':
+            case 'received_date':
+            case 'expiration_date':
             	// use date format from wp
                 $date = mysql2date( get_option('date_format'), $item[$column_name] );
                 $time = mysql2date( 'H:i', $item[$column_name] );
@@ -108,33 +103,21 @@ class TransactionsTable extends WP_List_Table {
      * @param array $item A singular item (one full row's worth of data)
      * @return string Text to be placed inside the column <td> (profile title only)
      **************************************************************************/
-    function column_item_title($item){
+    function column_details($item){
         
         //Build row actions
         $actions = array(
-            'view_trx_details' => sprintf('<a href="?page=%s&action=%s&transaction=%s&width=600&height=470" class="thickbox">%s</a>',$_REQUEST['page'],'view_trx_details',$item['id'],__('Details','wplister')),
-            // 'print_invoice' => sprintf('<a href="?page=%s&action=%s&transaction=%s" target="_blank">%s</a>',$_REQUEST['page'],'print_invoice',$item['id'],__('Invoice','wplister')),
-            // 'create_order' => sprintf('<a href="?page=%s&action=%s&transaction=%s">%s</a>',$_REQUEST['page'],'create_order',$item['id'],__('Create Order','wplister')),
-            // 'edit'      => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$_REQUEST['page'],'edit',$item['id'],__('Edit','wplister')),
+            'view_ebay_message_details' => sprintf('<a href="?page=%s&action=%s&ebay_message=%s&width=600&height=470" class="thickbox">%s</a>',$_REQUEST['page'],'view_ebay_message_details',$item['id'],__('Details','wplister')),
+            'reply_on_ebay' => sprintf('<a href="%s" target="_blank">%s</a>',$item['response_url'],__('Reply on eBay','wplister')),
+            // 'load_message' => sprintf('<a href="?page=%s&action=%s&ebay_message=%s">%s</a>',$_REQUEST['page'],'load_message',$item['id'],__('Create Message','wplister')),
         );
 
-        if ( $item['wp_order_id'] == 0 ) {
-            $actions['create_order'] = sprintf('<a href="?page=%s&action=%s&transaction=%s">%s</a>',$_REQUEST['page'],'create_order',$item['id'],__('Create Order','wplister'));
-        } else {
-            $actions['edit_order'] = sprintf('<a href="post.php?action=%s&post=%s">%s</a>','edit',$item['wp_order_id'],__('View Order','wplister'));
-
-            $order = new WC_Order( $item['wp_order_id'] );
-            if ( $order ) $actions['edit_order'] .= ' '.$order->get_order_number();
-        }
-
-        // free version can't create orders
-        if ( WPLISTER_LIGHT ) unset( $actions['create_order'] );
-
+        if ( ! $item['response_url'] ) unset( $actions['reply_on_ebay'] );
+        
         // item title
-        $title = $item['item_title'];
-        if ( $item['post_id'] ) {
-            $title .= ' <i style="color:silver">#'.$item['post_id'].'</i>';
-            $actions['edit'] = sprintf('<a href="post.php?action=%s&post=%s">%s</a>','edit',$item['post_id'],__('Edit Product','wplister'));
+        $title = $item['subject'];
+        if ( $item['sender'] ) {
+            $title .= ' <i style="color:silver">'.$item['sender'].'</i>';
         }
 
         //Return the title contents
@@ -144,38 +127,34 @@ class TransactionsTable extends WP_List_Table {
         );
     }
 
-    function column_item_id($item){
+    function column_item_title($item){
         //Return buyer name and ID
         return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
-            /*$1%s*/ $item['item_id'],
-            /*$2%s*/ $item['transaction_id']
+            /*$1%s*/ $item['item_title'],
+            /*$2%s*/ $item['item_id']
         );
     }
-    function column_buyer_name($item){
-        //Return buyer name and ID
-        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
-            /*$1%s*/ $item['buyer_name'],
-            /*$2%s*/ $item['buyer_userid']
-        );
-    }
-    function column_PaymentMethod($item){
-        //Return buyer name and ID
-        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
-            /*$1%s*/ $item['PaymentMethod'],
-            /*$2%s*/ $item['eBayPaymentStatus']
-        );
+
+    function column_flag_read($item){
+        switch( $item['flag_read'] ){
+            case 1:
+                return 'R';
+                break;
+            default:
+                return 'U';
+        }
     }
 
     function column_CompleteStatus($item){
 
         switch( $item['CompleteStatus'] ){
-            case 'InComplete':
+            case 'Unread':
                 $color = 'darkorange';
-                $value = __('InComplete','wplister');
+                $value = __('Unread','wplister');
 				break;
-            case 'Complete':
+            case 'Read':
                 $color = 'green';
-                $value = __('Complete','wplister');
+                $value = __('Read','wplister');
 				break;
             default:
                 $color = 'black';
@@ -225,20 +204,16 @@ class TransactionsTable extends WP_List_Table {
     function get_columns(){
         $columns = array(
             'cb'        		=> '<input type="checkbox" />', //Render a checkbox instead of text
-            'date_created'		=> __('Created at','wplister'),
-            'item_id'  			=> __('eBay ID','wplister'),
+            'received_date'     => __('Received at','wplister'),
+            // 'sender'            => __('Sender','wplister'),
+            'details'           => __('Subject','wplister'),
+            // 'subject'           => __('Subject','wplister'),
+            // 'item_id'  			=> __('eBay ID','wplister'),
             'item_title'  		=> __('Product','wplister'),
-            #'transaction_id'  	=> __('Transaction ID','wplister'),
-            'price'				=> __('Price','wplister'),
-            'quantity'			=> __('Quantity','wplister'),
-            #'buyer_userid'		=> __('User ID','wplister'),
-            'buyer_name'		=> __('Name','wplister'),
-            'PaymentMethod'		=> __('Payment method','wplister'),
-            #'eBayPaymentStatus'	=> __('Payment status','wplister'),
-            #'CheckoutStatus'	=> __('Checkout status','wplister'),
-            'CompleteStatus'	=> __('Status','wplister'),
-            #'status'		 	=> __('Status','wplister'),
-            'LastTimeModified'	=> __('Last change','wplister')
+            'flag_read'         => '&nbsp;', // __('Read','wplister'),
+            'message_id'        => __('Message ID','wplister'),
+            // 'status'		 	=> __('Status','wplister'),
+            'expiration_date'	=> __('Expires at','wplister')
         );
         return $columns;
     }
@@ -259,8 +234,8 @@ class TransactionsTable extends WP_List_Table {
      **************************************************************************/
     function get_sortable_columns() {
         $sortable_columns = array(
-            'date_created'  	=> array('date_created',false),     //true means its already sorted
-            'LastTimeModified' 	=> array('LastTimeModified',false)
+            'received_date'  	=> array('received_date',false),     //true means its already sorted
+            'expiration_date' 	=> array('expiration_date',false)
         );
         return $sortable_columns;
     }
@@ -276,17 +251,17 @@ class TransactionsTable extends WP_List_Table {
      * the table automatically on display().
      * 
      * Also note that list tables are not automatically wrapped in <form> elements,
-     * so you will need to create those manually in order for bulk actions to function.
+     * so you will need to create those manually in message for bulk actions to function.
      * 
      * @return array An associative array containing all the bulk actions: 'slugs'=>'Visible Titles'
      **************************************************************************/
     function get_bulk_actions() {
         $actions = array(
-            'update' 	=> __('Update transaction from eBay','wplister'),
-            'delete'    => __('Delete','wplister')
+            'update' 	=> __('Update selected messages from eBay','wplister'),
+            'delete'    => __('Delete selected messages','wplister')
         );
 
-        // delete transactions is only for developers
+        // delete messages is only for developers
         if ( ! get_option('wplister_log_level') )
             unset( $actions['delete'] );
 
@@ -316,6 +291,38 @@ class TransactionsTable extends WP_List_Table {
         
     }
     
+
+    // status filter links
+    // http://wordpress.stackexchange.com/questions/56883/how-do-i-create-links-at-the-top-of-wp-list-table
+    function get_views(){
+       $views    = array();
+       $current  = ( !empty($_REQUEST['message_status']) ? $_REQUEST['message_status'] : 'all');
+       $base_url = remove_query_arg( array( 'action', 'message', 'message_status' ) );
+
+       // get message status summary
+       $om = new EbayMessagesModel();
+       $summary = $om->getStatusSummary();
+
+       // All link
+       $class = ($current == 'all' ? ' class="current"' :'');
+       $all_url = remove_query_arg( 'message_status', $base_url );
+       $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
+       $views['all'] .= '<span class="count">('.$summary->total_items.')</span>';
+
+       // Read link
+       $Read_url = add_query_arg( 'message_status', 'Read', $base_url );
+       $class = ($current == 'Read' ? ' class="current"' :'');
+       $views['Read'] = "<a href='{$Read_url}' {$class} >".__('Read','wplister')."</a>";
+       if ( isset($summary->Read) ) $views['Read'] .= '<span class="count">('.$summary->Read.')</span>';
+
+       // Unread link
+       $Unread_url = add_query_arg( 'message_status', 'Unread', $base_url );
+       $class = ($current == 'Unread' ? ' class="current"' :'');
+       $views['Unread'] = "<a href='{$Unread_url}' {$class} >".__('Unread','wplister')."</a>";
+       if ( isset($summary->Unread) ) $views['Unread'] .= '<span class="count">('.$summary->Unread.')</span>';
+
+       return $views;
+    }    
     
     /** ************************************************************************
      * REQUIRED! This is where you prepare your data for display. This method will
@@ -338,15 +345,15 @@ class TransactionsTable extends WP_List_Table {
                         
         // get pagination state
         $current_page = $this->get_pagenum();
-        $per_page = $this->get_items_per_page('transactions_per_page', 20);
+        $per_page = $this->get_items_per_page('messages_per_page', 20);
         
         // define columns
         $this->_column_headers = $this->get_column_info();
         
         // fetch profiles from model
-        $transactionsModel = new TransactionsModel();
-        $this->items = $transactionsModel->getPageItems( $current_page, $per_page );
-        $total_items = $transactionsModel->total_items;
+        $messagesModel = new EbayMessagesModel();
+        $this->items = $messagesModel->getPageItems( $current_page, $per_page );
+        $total_items = $messagesModel->total_items;
 
         // register our pagination options & calculations.
         $this->set_pagination_args( array(

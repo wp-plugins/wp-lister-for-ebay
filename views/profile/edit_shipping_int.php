@@ -151,27 +151,34 @@
 								
 							</div>
 
-							<?php if ( isset( $item_details['ShipToLocations'] ) && is_array( $item_details['ShipToLocations'] ) ) : ?>
+							<?php #if ( isset( $item_details['ShipToLocations'] ) && is_array( $item_details['ShipToLocations'] ) ) : ?>
 							<div class="" style="border-top:1px solid #ccc; margin-top:10px; padding-top:10px;">
 
 								<label class="text_label">
 									<?php echo __('Ship to locations','wplister'); ?>
-		                            <?php wplister_tooltip('These locations have been imported from eBay and can currently not be modified within WP-Lister.') ?>
+		                            <?php wplister_tooltip('Select the locations you want to ship to. (optional)') ?>
 								</label>
-								<input type="text" name="wpl_e2e_ShipToLocations" disabled="true"
-									value="<?php echo @join(', ', $item_details['ShipToLocations'] ) ?>" class="disabled" style="width:70%"/>
-								<?php #foreach ( $item_details['ShipToLocations'] as $location ) : ?>
-									<?php #echo $location ?>
-								<?php #endforeach; ?>
+								<select multiple="multiple" class="chosen_select" id="wpl_e2e_ShipToLocations" name="wpl_e2e_ShipToLocations[]" data-placeholder="Select locations" style="width: 65%;">
+									<?php
+										foreach ( $wpl_shipping_locations as $location => $desc )
+											echo '<option value="' . $location . '" ' . selected( ! empty( $item_details['ShipToLocations'] ) && in_array( $location, $item_details['ShipToLocations'] ), true ) . '>' . $desc . '</option>';
+									?>
+								</select>
 								<br class="clear" />
 								
 								<label class="text_label">
 									<?php echo __('Exclude locations','wplister'); ?>
-		                            <?php wplister_tooltip('These locations have been imported from eBay and can currently not be modified within WP-Lister.') ?>
+		                            <?php wplister_tooltip('Select the locations you do not want to ship to. (optional)') ?>
 								</label>
-								<input type="text" name="wpl_e2e_ExcludeShipToLocations" disabled="true"
-									value="<?php echo @join(', ', $item_details['ExcludeShipToLocations'] ) ?>" class="disabled" style="width:70%"/>
+								<select multiple="multiple" class="chosen_select" id="wpl_e2e_ExcludeShipToLocations" name="wpl_e2e_ExcludeShipToLocations[]" data-placeholder="Select locations" style="width: 65%;">
+									<?php
+										foreach ( $wpl_shipping_locations as $location => $desc )
+											echo '<option value="' . $location . '" ' . selected( ! empty( $item_details['ExcludeShipToLocations'] ) && in_array( $location, $item_details['ExcludeShipToLocations'] ), true ) . '>' . $desc . '</option>';
+									?>
+								</select>
 								<br class="clear" />
 
+
+
 							</div>
-							<?php endif; ?>
+							<?php #endif; ?>

@@ -274,9 +274,18 @@
 	</form>
 
 
-	<?php if ( get_option('wplister_log_level') > 6 ): ?>
-	<pre><?php #print_r($wpl_int_shipping_options); ?></pre>
-	<pre><?php print_r($wpl_item); ?></pre>
+	<?php if ( isset($_GET['debug']) || ( get_option('wplister_log_level') > 6 ) ): ?>
+		<pre><?php #print_r($wpl_int_shipping_options); ?></pre>
+		<pre><?php print_r(maybe_unserialize( $wpl_item['details'] ) ); ?></pre>
+		<pre><?php #print_r($wpl_item); ?></pre>
+		<pre><?php 
+			$details = maybe_unserialize( $wpl_item['details'] ); 
+			if ( is_array( $details->Variations->Variation ) )
+			foreach ($details->Variations->Variation as $var) {
+				// echo "<pre>";print_r($var);echo"</pre>";#die(); 	
+				echo $var->SKU . ' - ' . $var->Quantity . '<br>';
+			} 
+		?></pre>
 	<?php endif; ?>
 
 

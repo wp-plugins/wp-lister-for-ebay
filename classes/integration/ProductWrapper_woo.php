@@ -276,9 +276,19 @@ class ProductWrapper {
 		$product = self::getProduct( $post_id );
 		if ( $product->product_type != 'variable' ) return array();
 
-		$available_variations = $product->get_available_variations();
-		$variation_attributes = $product->get_variation_attributes();
+		// force all variations to show, regardless if woocommerce_hide_out_of_stock_items is yes or no
+		// by forcing visibility to true
+		add_filter( 'woocommerce_product_is_visible', array( 'ProductWrapper', 'returnTrue' ), 999, 2 );
 
+		$available_variations  = $product->get_available_variations();
+		$variation_attributes  = $product->get_variation_attributes();
+		$default_attributes    = $product->get_variation_default_attributes();
+		$has_default_variation = false;
+
+		// remove filter again
+		remove_filter( 'woocommerce_product_is_visible', array( 'ProductWrapper', 'returnTrue' ), 999, 2 );
+
+		// echo "<pre>";print_r($default_attributes);echo"</pre>";
 		// echo "<pre>";print_r($available_variations);die();echo"</pre>";
 		// echo "<pre>";print_r($variation_attributes);die();echo"</pre>";
 		// (
@@ -343,6 +353,7 @@ class ProductWrapper {
 					// handle proper attribute taxonomies
 					$term_name = html_entity_decode( $term->name, ENT_QUOTES, 'UTF-8' ); // US Shoe Size (Men&#039;s) => US Shoe Size (Men's)
 					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $term_name;
+					$value = $term->slug;
 				} elseif ( $value ) {
 					// handle fake custom product attributes
 					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $value;
@@ -353,6 +364,15 @@ class ProductWrapper {
 					$attributes_without_values[] = $key;
 					// echo "no value found for $key<br>";
 				}
+
+				// check for default variation
+				if ( isset( $default_attributes[ $taxonomy ] ) && $default_attributes[ $taxonomy ] == $value ) {
+					$newvar['is_default']  = true;
+					$has_default_variation = true;
+				} else {
+					$newvar['is_default']  = false;
+				}
+
 			}
 			// $newvar['group_name'] = $attribute_labels[ $key ]; #deprecated
 			
@@ -412,6 +432,10 @@ class ProductWrapper {
 
 			}
 
+			// if no default variation was found, make the first on default
+			if ( ! $has_default_variation && sizeof($variations) ) {
+				$variations[0]['is_default'] = true;
+			}
 			
 		}
 
@@ -436,6 +460,7 @@ class ProductWrapper {
 		            [stock] => 
 		            [weight] => 
 		            [sku] => 
+		            [is_default] => true
 		            [image] => http://www.example.com/wp-content/uploads/2011/09/days-end.jpg
 		        )
 
@@ -451,12 +476,17 @@ class ProductWrapper {
 		            [stock] => 
 		            [weight] => 
 		            [sku] => 
+		            [is_default] => false
 		            [image] => http://www.example.com/wp-content/uploads/2011/09/days-end.jpg
 		        )
 
 		*/		
 
 	}	
+
+	static function returnTrue( $param1, $param2 = false ) {
+		return true;
+	}
 
 	// get a list of all available attribute names
 	static function getAttributeTaxonomies() {

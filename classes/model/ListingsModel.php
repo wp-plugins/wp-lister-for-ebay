@@ -224,6 +224,16 @@ class ListingsModel extends WPL_Model {
 		");
 		return $items;
 	}
+	function getAllListingsFromParentID( $post_id ) {
+		global $wpdb;
+		$items = $wpdb->get_results("
+			SELECT *
+			FROM $this->tablename
+			WHERE parent_id = '$post_id'
+			ORDER BY id DESC
+		");
+		return $items;
+	}
 	function getViewItemURLFromPostID( $post_id ) {
 		global $wpdb;
 		$item = $wpdb->get_var("
@@ -335,6 +345,101 @@ class ListingsModel extends WPL_Model {
 	}
 
 
+    function matchCachedVariations( $item, $filter_unchanged = false ) {
+        $success   = true;
+        $new_count = 0;
+
+        // make sure we have an actual listing item
+        if ( is_numeric( $item ) ) $item = $this->getItem( $item );
+        if ( ! $item ) return false;
+
+        $cached_variations  = maybe_unserialize( $item['variations'] );
+        $product_variations = ProductWrapper::getVariations( $item['post_id'] );
+
+        // TODO: update cache
+        if ( empty($cached_variations) ) return false;
+
+        // loop product variations (what we want listed)
+        foreach ( $product_variations as $key => $pv ) {
+            
+            // check if variation exists in cache
+            if ( $cv = $this->checkIfVariationExistsInCache( $pv, $cached_variations ) ) {
+
+            	// check if price or quantity have changed - if told to do so
+            	if ( $filter_unchanged ) {
+            		if ( ! $this->checkIfVariationInventoryHasChanged( $pv, $cv ) ) {
+            			// remove unchanged variations from the list
+	                    unset( $product_variations[ $key ] );
+            		}
+            	}
+
+            } else {
+
+                // check stock level
+                if ( $pv['stock'] > 0 ) {
+
+                    $new_count++;
+                    $success = false;
+
+                    // $this->logger->debug('found NEW variation: '.print_r( $pv, 1 ) );
+                    $this->logger->info( 'found NEW variation: '.$pv['sku'] );
+
+                } else {
+                    // no stock, so just remove from list
+                    unset( $product_variations[ $key ] );
+                    $this->logger->info( 'removed out of stock variation: '.$pv['sku'] );
+                }
+
+            }
+
+        }
+
+        $result = new stdClass();
+        $result->success    = $success;
+        $result->new_count  = $new_count;
+        $result->variations = $product_variations;
+
+        return $result;
+    } // matchCachedVariations()
+
+    function checkIfVariationExistsInCache( $pv, &$cached_variations ) {
+
+        // loop cached variations
+        foreach ( $cached_variations as $key => $cv ) {
+            
+            // compare SKU
+            if ( $pv['sku'] == $cv['sku'] ) {
+
+                // remove from list 
+                unset( $cached_variations[ $key ] );
+
+                // $this->logger->info('matched variation by SKU: '.$cv['sku'] );
+                return $cv;
+            }
+
+        }
+
+        return false;
+    } // checkIfVariationExistsInCache()
+
+    function checkIfVariationInventoryHasChanged( $pv, $cv ) {
+
+        // compare stock level
+        if ( $pv['stock'] != $cv['stock'] ) {
+            $this->logger->info('found changed stock level for variation: '.$cv['sku'] );
+            return true;        	
+        }
+        
+        // compare price
+        if ( $pv['price'] != $cv['price'] ) {
+            $this->logger->info('found changed price for variation: '.$cv['sku'] );
+            return true;        	
+        }
+        
+        return false;
+    } // checkIfVariationInventoryHasChanged()
+
+
 	
 	function listingUsesFixedPriceItem( $listing_item )
 	{
@@ -348,6 +453,13 @@ class ListingsModel extends WPL_Model {
 		// or switch to AddItem if product level listing type is Chinese
 		$product_listing_type = get_post_meta( $listing_item['post_id'], '_ebay_auction_type', true );
         if ( $product_listing_type == 'Chinese' ) $useFixedPriceItem = false;
+
+        // or switch to AddItem when relisting an ended auction as fixed price
+        $ItemDetails = $this->decodeObject( $listing_item['details'] );
+        if ( $ItemDetails && is_object( $ItemDetails ) ) {
+        	if ( $ItemDetails->ListingType == 'Chinese' )
+ 				$useFixedPriceItem = false;        	
+        }
 
         // never use FixedPriceItem if variations are disabled
         if ( get_option( 'wplister_disable_variations' ) == '1' ) $useFixedPriceItem = false;
@@ -488,6 +600,70 @@ class ListingsModel extends WPL_Model {
 
 	} // relistItem()
 
+	function autoRelistItem( $id, $session )
+	{
+		// skip this item if item status not allowed
+		$allowed_statuses = array( 'ended', 'sold' );
+		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return $this->result;
+
+		// build item
+		$ibm  = new ItemBuilderModel();
+		$item = new ItemType();
+		$item = $ibm->setEbaySite( $item, $session );			
+
+		// eBay Motors (beta)
+		if ( $item->Site == 'eBayMotors' ) $session->setSiteId( 100 );
+
+		// preparation - set up new ServiceProxy with given session
+		$this->initServiceProxy($session);
+
+		// add old ItemID for relisting
+		$listing_item = $this->getItem( $id );
+		$item->setItemID( $listing_item['ebay_id'] );
+
+		// switch to FixedPriceItem if product has variations
+		$this->logger->info( "Auto-Relisting #$id (ItemID ".$listing_item['ebay_id'].") - ".$item->Title );
+		if ( $this->listingUsesFixedPriceItem( $listing_item ) ) {
+
+			$req = new RelistFixedPriceItemRequestType(); 
+			$req->setItem($item);
+			
+			$this->logger->debug( "Request: ".print_r($req,1) );
+			$res = $this->_cs->RelistFixedPriceItem($req); 
+
+		} else {
+
+			$req = new RelistItemRequestType(); 
+			$req->setItem($item);
+			
+			$this->logger->debug( "Request: ".print_r($req,1) );
+			$res = $this->_cs->RelistItem($req); 
+
+		}
+
+		// handle response and check if successful
+		if ( $this->handleResponse($res) ) {
+
+			// save new ebay ID and details to db
+			$listingFee = $this->getListingFeeFromResponse( $res );
+			$data['ebay_id']     = $res->ItemID;
+			$data['fees']        = $listingFee;
+			$data['status']      = 'published';
+			$data['relist_date'] = NULL;
+			$this->updateListing( $id, $data );
+			
+			// get details like ViewItemURL from ebay automatically
+			$this->updateItemDetails( $id, $session );
+			$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
+
+			$this->logger->info( "Item #$id auto-relisted on ebay, NEW ItemID is ".$res->ItemID );
+
+		} // call successful
+
+		return $this->result;
+
+	} // autoRelistItem()
+
 	function reviseItem( $id, $session, $force_full_update = false )
 	{
 		// skip this item if item status not allowed
@@ -558,7 +734,7 @@ class ListingsModel extends WPL_Model {
 			$this->updateListing( $id, $data );
 			
 			// get details like ViewItemURL from ebay automatically
-			#$this->updateItemDetails( $id, $session );
+			$this->updateItemDetails( $id, $session );
 			$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
 
 			$this->logger->info( "Item #$id was revised, ItemID is ".$res->ItemID );
@@ -577,6 +753,7 @@ class ListingsModel extends WPL_Model {
 
 		// check listing type and if product has variations 
 		$listing_item = $this->getItem( $id );
+		$profile_details = $listing_item['profile_data']['details'];
 		$post_id = $listing_item['post_id'];
 
 		// check listing type - ignoring best offer etc...
@@ -598,7 +775,7 @@ class ListingsModel extends WPL_Model {
 
 		// fall back to reviseItem if cart variation without SKU
 		if ( $isVariationInCart && ! $cart_item->sku ) {
-			$this->logger->info( "Item #$id has variations, switching to reviseItem()" );
+			$this->logger->info( "Item #$id has variations without SKU, switching to reviseItem()" );
 			return $this->reviseItem( $id, $session, true );			
 		}
 
@@ -608,6 +785,8 @@ class ListingsModel extends WPL_Model {
 			return $this->endItem( $id, $session );
 		}
 
+        // get max_quantity from profile
+        $max_quantity = ( isset( $profile_details['max_quantity'] ) && intval( $profile_details['max_quantity'] )  > 0 ) ? $profile_details['max_quantity'] : PHP_INT_MAX ; 
 												
 		// set inventory status
 		if ( $isVariableProduct ) {
@@ -615,6 +794,25 @@ class ListingsModel extends WPL_Model {
 			// get all variations
 			$variations = ProductWrapper::getVariations( $post_id );
 			// echo "<pre>";print_r($variations);echo"</pre>";die();	
+
+            // check variations cache
+            $result = $this->matchCachedVariations( $listing_item, $filter_unchanged = true );
+            if ( $result && $result->success ) 
+                $variations = $result->variations;
+
+            // if there are new variations, fall back to reviseItem
+            if ( $result && ! $result->success ) {
+				$this->logger->info( "Item #$id has NEW variations, switching to reviseItem()" );
+				return $this->reviseItem( $id, $session, true );			
+            }
+
+            // do nothing if no changed variations found
+            if ( sizeof( $variations ) == 0 ) {
+				$this->logger->info( "Item #$id has NO CHANGED variations - skipping revise request..." );
+				$this->result->success = true;
+				$this->result->errors = false;
+            	return $this->result;
+            }
 
 			// calc number of requests
 			$batch_size = 4;
@@ -624,7 +822,7 @@ class ListingsModel extends WPL_Model {
 			for ( $offset=0; $offset < sizeof($variations); $offset += $batch_size ) { 
 
 				// revise inventory status
-				$res = $this->reviseVariableInventoryStatus( $id, $post_id, $session, $variations, $offset, $batch_size );		
+				$res = $this->reviseVariableInventoryStatus( $id, $post_id, $session, $variations, $max_quantity, $offset, $batch_size );		
 
 			}
 
@@ -644,14 +842,15 @@ class ListingsModel extends WPL_Model {
 
 				// get stock level for this variation in cart
 				$variation_qty = get_post_meta( $cart_item->variation_id, '_stock', true );
-				$stat->setQuantity( $variation_qty );
+				$stat->setQuantity( min( $max_quantity, $variation_qty ) );
 				$stat->setSKU( $cart_item->sku );
 				$req->addInventoryStatus( $stat );
 				$this->logger->info( "Revising inventory status for cart variation #$id ($post_id) - sku: ".$stat->SKU." - qty: ".$stat->Quantity );
 
 			} else {
 				// default - simple product
-				$stat->setQuantity( $listing_item['quantity'] );
+				$stat->setQuantity( min( $max_quantity, $listing_item['quantity'] ) );
+				$stat->setStartPrice( $listing_item['price'] );
 				$req->addInventoryStatus( $stat );
 				$this->logger->info( "Revising inventory status #$id ($post_id) - qty: ".$stat->Quantity );
 			}
@@ -681,7 +880,7 @@ class ListingsModel extends WPL_Model {
 	} // reviseInventoryStatus()
 
 
-	private function reviseVariableInventoryStatus( $id, $post_id, $session, $variations, $offset = 0, $batch_size = 4 ) {
+	private function reviseVariableInventoryStatus( $id, $post_id, $session, $variations, $max_quantity, $offset = 0, $batch_size = 4 ) {
 		$this->logger->info( "reviseVariableInventoryStatus() #$id - variations: ".sizeof($variations)." - offset: ".$offset );
 
 		// preparation - set up new ServiceProxy with given session
@@ -702,8 +901,8 @@ class ListingsModel extends WPL_Model {
 			$stat = new InventoryStatusType();
 			$stat->setItemID( $this->getEbayIDFromID($id) );
 			$stat->setSKU( $var['sku'] );
-			$stat->setQuantity( $var['stock'] );
-			// $stat->setPrice( $var['price'] );
+			$stat->setQuantity( min( $max_quantity, $var['stock'] ) );
+			$stat->setStartPrice( $var['price'] );
 
 			$req->addInventoryStatus( $stat );
 			$this->logger->info( "Revising inventory status for product variation #$id ($post_id) - sku: ".$stat->SKU." - qty: ".$stat->Quantity );
@@ -712,6 +911,33 @@ class ListingsModel extends WPL_Model {
 		// revise inventory
 		$this->logger->debug( "Request: ".print_r($req,1) );
 		$res = $this->_cs->ReviseInventoryStatus($req); 
+
+		// process result and update variation cache
+		$this->logger->debug( "ReviseInventoryStatus response node: ".print_r($res->getInventoryStatus(),1) );
+		$InventoryStatusNodes = $res->getInventoryStatus();
+		if ( is_array($InventoryStatusNodes) ) {
+
+			$listing_item = $this->getItem( $id );	
+			$variations = maybe_unserialize( $listing_item['variations'] );	
+			foreach ( $InventoryStatusNodes as $node ) {
+
+				// find variation in cache
+				$key = $node->SKU;
+
+				// update variations cache
+				if ( isset( $variations[$key] ) ) {
+					$variations[$key]['stock'] = $node->Quantity; 
+					$variations[$key]['price'] = $node->StartPrice->value; 
+				}
+
+				// if zero stock, remove from cache - eBay does the same
+				if ( $node->Quantity == 0 )	unset( $variations[$key] );
+
+			}
+			$this->updateListing( $id, array( 'variations' => maybe_serialize( $variations ) ) );
+
+		}
+
 
 		return $res;
 
@@ -950,7 +1176,7 @@ class ListingsModel extends WPL_Model {
 
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
-			$this->logger->info( "Item #$id was updated from eBay, ItemID is ".$res->ItemID );
+			$this->logger->info( "Item #$id was updated from eBay, ItemID is ".$item['ebay_id'] );
 		} // call successful
 
 		return $this->result;
@@ -972,8 +1198,8 @@ class ListingsModel extends WPL_Model {
 
 		$result = $wpdb->update( $this->tablename, $data, array( 'ebay_id' => $Detail->ItemID ) );
 		if ( $result === false ) {
-			$this->logger->info('sql: '.$wpdb->last_query );
-			$this->logger->info( mysql_error() );		
+			$this->logger->error('sql: '.$wpdb->last_query );
+			$this->logger->error( mysql_error() );		
 		}
 
 
@@ -1005,7 +1231,7 @@ class ListingsModel extends WPL_Model {
 		#$this->logger->info( mysql_error() );
 
 		return true;
-	}
+	} // updateItemDetail()
 
 	function mapItemDetailToDB( $Detail )
 	{
@@ -1022,8 +1248,29 @@ class ListingsModel extends WPL_Model {
 		$data['ViewItemURL'] 		= $Detail->ListingDetails->ViewItemURL;
 		$data['GalleryURL'] 		= $Detail->PictureDetails->GalleryURL;
 
-		// if this item has variations, we don't update quantity
+		// check if this item has variations
 		if ( count( @$Detail->Variations->Variation ) > 0 ) {
+
+			$variations = array();
+			foreach ($Detail->Variations->Variation as $Variation ) {
+				$new_var = array();
+				$new_var['sku']      = $Variation->SKU;
+				$new_var['price']    = $Variation->StartPrice->value;
+				$new_var['stock']    = $Variation->Quantity;
+
+				$new_var['variation_attributes'] = array();
+				foreach ( $Variation->VariationSpecifics as $VariationSpecifics ) {
+					$name = $VariationSpecifics->Name;
+					$new_var['variation_attributes'][ $name ] = $VariationSpecifics->Value[0]; 
+				}
+				
+				$key = $Variation->SKU;
+				$variations[$key] = $new_var;
+			}
+			$data['variations'] = maybe_serialize( $variations );
+			// echo "<pre>";print_r($variations);echo"</pre>";
+
+			// if this item has variations, we don't update quantity
 			unset( $data['quantity'] );
 			$this->logger->info('skip quantity for variation #'.$Detail->ItemID );
 		}
@@ -1038,29 +1285,41 @@ class ListingsModel extends WPL_Model {
 		$data['details'] = $this->encodeObject( $Detail );
 
 		return $data;
-	}
+	} // mapItemDetailToDB()
 
 
 
 	public function updateListing( $id, $data ) {
 		global $wpdb;
 
+		// handle NULL values
+		foreach ($data as $key => $value) {
+			if ( NULL === $value ) {
+				$wpdb->query( "UPDATE {$this->tablename} SET $key = NULL WHERE id = $id" );
+				$this->logger->info('SQL to set NULL value: '.$wpdb->last_query );
+				$this->logger->info( mysql_error() );
+				unset( $data[$key] );
+			}
+		}
+
 		// update
 		$wpdb->update( $this->tablename, $data, array( 'id' => $id ) );
 
-		#$this->logger->info('sql: '.$wpdb->last_query );
-		#$this->logger->info( mysql_error() );
+		$this->logger->info('sql: '.$wpdb->last_query );
+		$this->logger->info( mysql_error() );
 	}
 
 
 	public function updateEndedListings( $sm = false ) {
 		global $wpdb;
 
+		// set listing status to ended for all listings with an end_date in the past
 		$items = $this->getAllPastEndDate();
 
 		foreach ($items as $item) {
 			$wpdb->update( $this->tablename, array( 'status' => 'ended' ), array( 'id' => $item['id'] ) );
 		}
+
 
 		#$this->logger->info('sql: '.$wpdb->last_query );
 		#$this->logger->info( mysql_error() );
@@ -1124,6 +1383,9 @@ class ListingsModel extends WPL_Model {
 			LIMIT $limit
 		", ARRAY_A);		
 
+		if ( $type == 'ending' )
+			$wpdb->query("SET time_zone='SYSTEM'"); // revert back to original
+
 		return $items;		
 	}
 
@@ -1134,6 +1396,7 @@ class ListingsModel extends WPL_Model {
 			FROM $this->tablename
 			WHERE status = 'selected'
 			   OR status = 'reselected'
+			   OR status = 'changed_profile'
 			ORDER BY id DESC
 		", ARRAY_A);		
 
@@ -1191,6 +1454,45 @@ class ListingsModel extends WPL_Model {
 			SELECT * 
 			FROM $this->tablename
 			WHERE status = 'archived'
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
+	function getAllEnded() {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE status = 'ended'
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
+	function getAllScheduled( $pending_only = false ) {
+		global $wpdb;	
+
+		// by default only return pending listings - relist dates in the past
+		$condition = $pending_only ? 'AND relist_date < NOW()' : ''; 
+
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE status = 'ended'
+			  AND relist_date IS NOT NULL
+			  $condition
+			ORDER BY relist_date ASC
+		", ARRAY_A);		
+
+		return $items;		
+	}
+	function getAllWithProfile( $profile_id ) {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE profile_id = '$profile_id'
 			ORDER BY id DESC
 		", ARRAY_A);		
 
@@ -1292,6 +1594,7 @@ class ListingsModel extends WPL_Model {
 			  AND end_date < NOW()
 			ORDER BY id DESC
 		", ARRAY_A);		
+		$wpdb->query("SET time_zone='SYSTEM'"); // revert back to original
 
 		return $items;		
 	}
@@ -1354,6 +1657,7 @@ class ListingsModel extends WPL_Model {
 			FROM $this->tablename
 			WHERE status = 'selected'
 			   OR status = 'reselected'
+			   OR status = 'changed_profile'
 			ORDER BY id DESC
 		", ARRAY_A);		
 
@@ -1368,9 +1672,26 @@ class ListingsModel extends WPL_Model {
 	public function markItemAsModified( $post_id ) {
 		global $wpdb;	
 
-		// $listingsModel = new ListingsModel();
+		// get single listing for post_id
 		$listing_id = $this->getListingIDFromPostID( $post_id );
         $this->reapplyProfileToItem( $listing_id );
+
+        // process all listings for post_id
+		$listings = $this->getAllListingsFromPostID( $post_id );
+        if ( is_array( $listings ) && ( sizeof( $listings ) > 1 ) ) {
+        	foreach ( $listings as $listing_item ) {
+		        $this->reapplyProfileToItem( $listing_item->id );
+        	}
+        }
+
+        // process split variations - fetched by parent_id
+		$listings = $this->getAllListingsFromParentID( $post_id );
+        if ( is_array( $listings ) ) {
+        	foreach ( $listings as $listing_item ) {
+		        $this->reapplyProfileToItem( $listing_item->id );
+				$this->logger->info('reapplied profile to SPLIT variation for post_id '.$post_id.' - listing_id: '.$listing_item->id );
+        	}
+        }
 
         return $listing_id;
         
@@ -1386,7 +1707,9 @@ class ListingsModel extends WPL_Model {
 		global $wpdb;
 		foreach( $ids as $id ) {
 			$status = $this->getStatus( $id );
-			if ( $status == 'ended' ) {
+			if ( ( $status == 'published' ) || ( $status == 'changed' ) ) {
+				$wpdb->update( $this->tablename, array( 'status' => 'changed_profile' ), array( 'id' => $id ) );
+			} elseif ( $status == 'ended' ) {
 				$wpdb->update( $this->tablename, array( 'status' => 'reselected' ), array( 'id' => $id ) );
 			} else {
 				$wpdb->update( $this->tablename, array( 'status' => 'selected' ), array( 'id' => $id ) );
@@ -1417,7 +1740,7 @@ class ListingsModel extends WPL_Model {
 		return $listings;
 	}
 
-	public function prepareProductForListing( $post_id, $post_content = false, $post_title = false ) {
+	public function prepareProductForListing( $post_id, $post_content = false, $post_title = false, $parent_id = false ) {
 		global $wpdb;
 		
 		// get wp post record
@@ -1436,6 +1759,7 @@ class ListingsModel extends WPL_Model {
 
 		// gather product data
 		$data['post_id']       = $post_id;
+		$data['parent_id']     = $parent_id;
 		$data['auction_title'] = $post_title;
 		$data['post_content']  = $post_content;
 		$data['price']         = ProductWrapper::getPrice( $post_id );
@@ -1540,6 +1864,10 @@ class ListingsModel extends WPL_Model {
 			$parent_id = ProductWrapper::getVariationParent( $post_id );
 			$post_title = get_the_title( $parent_id );
 
+			// check if parent product has a custom eBay title set
+			if ( get_post_meta( $parent_id, '_ebay_title', true ) ) 
+				$post_title = trim( get_post_meta( $parent_id, '_ebay_title', true ) );
+
 			// get variations
     	    $variations = ProductWrapper::getVariations( $parent_id );
 
@@ -1564,6 +1892,7 @@ class ListingsModel extends WPL_Model {
 		$data['quantity'] 			= $profile['details']['quantity'];
 		$data['date_created'] 		= date( 'Y-m-d H:i:s' );
 		$data['profile_data'] 		= $this->encodeObject( $profile );
+		// echo "<pre>";print_r($data);echo"</pre>";die();
 		
 		// add prefix and suffix to product title
 		if ( $update_title ) {
@@ -1602,7 +1931,7 @@ class ListingsModel extends WPL_Model {
 		$data['price'] = ProductWrapper::getPrice( $post_id );
 		$data['price']  = $this->applyProfilePrice( $data['price'], $profile['details']['start_price'] );
 		
-		// fetch product stock if no quantity set in profile
+		// fetch product stock if no quantity set in profile - and apply max_quantity limit
 		if ( intval( $data['quantity'] ) == 0 ) {
 			$max = ( isset( $profile['details']['max_quantity'] ) && intval( $profile['details']['max_quantity'] )  > 0 ) ? $profile['details']['max_quantity'] : PHP_INT_MAX ; 
 			$data['quantity'] = min( $max , intval( ProductWrapper::getStock( $post_id ) ) );						
@@ -1611,18 +1940,26 @@ class ListingsModel extends WPL_Model {
 		// default new status is 'prepared'
 		$data['status'] = 'prepared';
 		// except for already published items where it is 'changed'
-		if ( intval($ebay_id) > 0 ) $data['status'] = 'changed';
+		if ( intval($ebay_id) > 0 ) 		$data['status'] = 'changed';
+		
 		// ended items stay 'ended' and sold items stay sold
-		if ( $status == 'ended' ) $data['status'] = 'ended';
-		if ( $status == 'sold'  ) $data['status'] = 'sold';
+		if ( $status == 'ended' ) 			$data['status'] = 'ended';
+		if ( $status == 'sold'  ) 			$data['status'] = 'sold';
+		if ( $status == 'archived' ) 		$data['status'] = 'archived';
 		// reselected items have already been 'ended'
-		if ( $status == 'reselected' ) $data['status'] = 'ended';
+		if ( $status == 'reselected' ) 		$data['status'] = 'ended';
 
 		// locked items simply keep their status
-		if ( @$item['locked'] ) $data['status'] = $item['status'];
+		if ( @$item['locked'] ) 			$data['status'] = $item['status'];
 		// except for selected items which shouldn't be locked in the first place
-		if ( $status == 'selected' ) $data['status'] = 'prepared';
+		if ( $status == 'selected' ) 		$data['status'] = 'prepared';
+		if ( $status == 'changed_profile' ) $data['status'] = 'changed';
 
+		// debug
+		if ( $status != $data['status'] ) {
+			$this->logger->info('applyProfileToItem('.$id.') old status: '.$status );
+			$this->logger->info('applyProfileToItem('.$id.') new status: '.$data['status'] );
+		}
 
 		// update auctions table
 		$wpdb->update( $this->tablename, $data, array( 'id' => $id ) );

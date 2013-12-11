@@ -494,8 +494,6 @@ class ToolsPage extends WPL_Page {
 			$this->results->successWplabWeb = $this->checkUrl( $url, 'WP Lab web server' );
 		}
 
-
-
         // now the same with cURL
         // $response = $this->sendCurlRequest( $url );
 
@@ -509,6 +507,11 @@ class ToolsPage extends WPL_Page {
 		// } else {
             // $this->showMessage( 'Error while contacting api.ebay.com via cURL: ' . $response['error_string'], 1 );
 		// }
+
+		// call GetApiAccessRules
+		$this->initEC();
+		$result = $this->EC->GetApiAccessRules();
+		$this->EC->closeEbay();
 
 	}
 

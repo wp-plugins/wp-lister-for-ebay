@@ -290,27 +290,33 @@ img.tips {
 
 
 /* MP6 */
+.version-3-8     div.update-nag,
 .admin-color-mp6 div.update-nag {
 	border-left: 4px solid #ffba00;
 }
 
+.version-3-8     #wpl-sandbox-reminder-wrap a.show-settings,
 .admin-color-mp6 #wpl-sandbox-reminder-wrap a.show-settings {
-	padding: 1px 0 0 10px;
+	padding: 0 0 0 10px;
 }
 
+.version-3-8     #wpl-sandbox-reminder-wrap,
 .admin-color-mp6 #wpl-sandbox-reminder-wrap {
-	height: 23px;
+	height: 22px;
 	padding: 3px 6px;
 	margin: 0 0 0 6px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
+.version-3-8     #wpl-sandbox-reminder-wrap a:after,
 .admin-color-mp6 #wpl-sandbox-reminder-wrap a:after {
 	content: '';
 	margin-right: 5px;
 }
 
 /* non-MP6 */
-div.update-nag {
+div#message.updated.update-nag {
 	text-align: left;
 }
 

@@ -277,13 +277,19 @@ class LogTable extends WP_List_Table {
        $class = ($current == 'all' ? ' class="current"' :'');
        $all_url = remove_query_arg('log_status');
        $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
-       $views['all'] .= '<span class="count">('.$this->total_items.')</span>';
+       $views['all'] .= '<span class="count">('.$this->all_status_count.')</span>';
 
        // Success link
        $Success_url = add_query_arg('log_status','Success');
        $class = ($current == 'Success' ? ' class="current"' :'');
        $views['Success'] = "<a href='{$Success_url}' {$class} >".__('Successful','wplister')."</a>";
        if ( isset($summary->Success) ) $views['Success'] .= '<span class="count">('.$summary->Success.')</span>';
+
+       // Warning link
+       $Warning_url = add_query_arg('log_status','Warning');
+       $class = ($current == 'Warning' ? ' class="current"' :'');
+       $views['Warning'] = "<a href='{$Warning_url}' {$class} >".__('Warnings','wplister')."</a>";
+       if ( isset($summary->Warning) ) $views['Warning'] .= '<span class="count">('.$summary->Warning.')</span>';
 
        // Failure link
        $Failure_url = add_query_arg('log_status','Failure');
@@ -304,16 +310,24 @@ class LogTable extends WP_List_Table {
         
     function getStatusSummary() {
         global $wpdb;
+
+        // process search query
+        $where_sql = " WHERE NOT callname = '' ";
+        $where_sql = $this->add_searchquery_to_where_sql( $where_sql );
+
         $result = $wpdb->get_results("
             SELECT success as status, count(*) as total
             FROM {$wpdb->prefix}ebay_log
+            $where_sql
             GROUP BY status
         ");
 
+        $this->all_status_count = 0;
         $summary = new stdClass();
         foreach ($result as $row) {
             $status = $row->status ? $row->status : 'unknown';
             $summary->$status = $row->total;
+            $this->all_status_count += $row->total;
         }
 
         return $summary;
@@ -360,6 +374,43 @@ class LogTable extends WP_List_Table {
     }
 
 
+    function add_searchquery_to_where_sql( $where_sql ) {
+
+        if ( isset( $_REQUEST['s'] ) && ( $_REQUEST['s'] ) ) {
+
+            $query = esc_sql( $_REQUEST['s'] );
+
+            // enable deep search by default - make sure not to miss anything
+            // if ( isset( $_REQUEST['deep'] ) ) {
+            if ( true ) {
+
+                // deep: search full request and response
+                $where_sql .= " 
+                    AND ( 
+                            ( request LIKE '%$query%' ) OR 
+                            ( response LIKE '%$query%' ) 
+                        )
+                ";
+
+            } else {
+
+                // fast: search callname and ebay_id only
+                $where_sql .= " 
+                    AND ( 
+                            ( callname = '$query' ) OR 
+                            ( ebay_id = '$query' AND ebay_id > 0 ) 
+                        )
+                ";
+
+            }
+
+        }
+        // echo "<pre>";print_r($where_sql);echo"</pre>";die();
+
+        return $where_sql;
+    }
+
+
     function getPageItems( $current_page, $per_page ) {
         global $wpdb;
 
@@ -373,27 +424,19 @@ class LogTable extends WP_List_Table {
         // $where_sql = ' WHERE 1 = 1 ';
         $where_sql = " WHERE NOT callname = '' ";
 
+        // search box
+        $where_sql = $this->add_searchquery_to_where_sql( $where_sql );
+
         // views
         if ( isset( $_REQUEST['log_status'] ) ) {
             $status = $_REQUEST['log_status'];
-            if ( in_array( $status, array('Success','Failure','unknown') ) ) {
+            if ( in_array( $status, array('Success','Warning','Failure','unknown') ) ) {
                 if ( $status == 'unknown' ) {
                     $where_sql .= " AND success IS NULL ";
                 } else {
                     $where_sql .= " AND success = '$status' ";
                 }
             }
-        }
-
-        // search box
-        if ( isset( $_REQUEST['s'] ) ) {
-            $query = esc_sql( $_REQUEST['s'] );
-            $where_sql .= " AND ( 
-                                    ( callname = '$query' ) OR 
-                                    ( ebay_id = '$query' ) 
-                                )
-                            AND NOT ebay_id = 0
-                            ";
         }
 
 
@@ -405,6 +448,7 @@ class LogTable extends WP_List_Table {
             ORDER BY $orderby $order
             LIMIT $offset, $per_page
         ", ARRAY_A);
+        // echo "<pre>";print_r($wpdb->last_query);echo"</pre>";#die();
         
         // get total items count - if needed
         if ( ( $current_page == 1 ) && ( count( $items ) < $per_page ) ) {

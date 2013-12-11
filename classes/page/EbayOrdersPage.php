@@ -62,9 +62,13 @@ class EbayOrdersPage extends WPL_Page {
 
 		// handle update ALL from eBay action
 		if ( $this->requestAction() == 'update_orders' ) {
+
+			// regard update options
+			$days = is_numeric( $_REQUEST['wpl_number_of_days'] ) ? $_REQUEST['wpl_number_of_days'] : false;
+
 			$this->initEC();
 			// $tm = $this->EC->loadEbayOrders();
-			$tm = $this->EC->updateEbayOrders();
+			$tm = $this->EC->updateEbayOrders( $days );
 			$this->EC->updateListings();
 			$this->EC->closeEbay();
 
@@ -110,6 +114,8 @@ class EbayOrdersPage extends WPL_Page {
 		}
 
 
+		// show warning if duplicate orders found
+		$this->checkForDuplicates();
 
 	    //Create an instance of our package class...
 	    $ordersTable = new EbayOrdersTable();
@@ -128,6 +134,27 @@ class EbayOrdersPage extends WPL_Page {
 		$this->display( 'orders_page', $aData );
 		
 
+	}
+
+
+	public function checkForDuplicates() {
+
+		// show warning if duplicate products found
+		$om = new EbayOrdersModel();
+		$duplicateOrders = $om->getAllDuplicateOrders();
+		if ( ! empty($duplicateOrders) ) {
+			// built message
+			$msg  = '<p><b>Warning: '.__('There are duplicate orders for','wplister').' '.join(',',$duplicateOrders).'</b>';
+			$msg .= '<br>';
+			$msg .= 'This can happen when the scheduled order update is triggered twice at the same time - which is a rare <a href="http://wordpress.stackexchange.com/a/122805" target="_blank">race condition issue</a> in the WordPress scheduling system WP-Cron.';
+			$msg .= '<br><br>';
+			$msg .= 'To prevent this from happening again, it is recommended to use the ';
+			$msg .= '<a href="http://wordpress.org/plugins/wp-cron-control/" target="_blank">WP-Cron Control</a> ';
+			$msg .= 'plugin to set up a dedicated cron job on your server and ';
+			$msg .= '<a href="http://bloglow.com/tutorials/how-to-and-why-you-should-disable-wordpress-cron/" target="_blank">disable WP-Cron entirely</a>.';
+			$msg .= '</p>';
+			$this->showMessage( $msg, 1 );				
+		}
 	}
 
 	public function showOrderDetails( $id ) {

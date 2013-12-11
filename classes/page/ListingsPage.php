@@ -175,10 +175,15 @@ class ListingsPage extends WPL_Page {
 
 		// edit listing
 		} elseif ( $this->requestAction() == 'edit' ) {
-		
+
 			// get item
 			$listingsModel = new ListingsModel();
 			$item = $listingsModel->getItem( $_REQUEST['auction'] );
+
+			// unserialize details
+			$this->initEC();
+			// $item['details'] = maybe_unserialize( $item['details'] );
+			// echo "<pre>";print_r($item);echo"</pre>";die();
 			
 			// get ebay data
 			$countries			 	= EbayShippingModel::getEbayCountries();

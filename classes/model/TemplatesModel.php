@@ -204,7 +204,7 @@ class TemplatesModel extends WPL_Model {
         	$variations_html = $this->getVariationsHTML( $item );
 
         	// add variations table to item description
-        	if ( @$item['profile_data']['details']['add_variations_table'] ) {
+        	if ( isset($item['profile_data']['details']['add_variations_table']) && $item['profile_data']['details']['add_variations_table'] ) {
         		$item['post_content'] .= $variations_html;
         	}
 
@@ -215,7 +215,7 @@ class TemplatesModel extends WPL_Model {
     	$addons_html = $this->getAddonsHTML( $item );
 
     	// add addons table to item description
-    	if ( @$item['profile_data']['details']['add_variations_table'] ) {
+    	if ( isset($item['profile_data']['details']['add_variations_table']) && $item['profile_data']['details']['add_variations_table'] ) {
     		$item['post_content'] .= $addons_html;
     	}
 
@@ -527,7 +527,7 @@ class TemplatesModel extends WPL_Model {
 	function getVariationsHTML( $item ) {
 
         $listingsModel = new ListingsModel();
-        $profile_data = maybe_unserialize( $item['profile_data'] );
+        $profile_data = $listingsModel->decodeObject( $item['profile_data'], true );
         $variations = ProductWrapper::getVariations( $item['post_id'] );
 
         $variations_html = '<div class="variations_list" style="margin:10px 0;">';
@@ -539,8 +539,9 @@ class TemplatesModel extends WPL_Model {
             // first column: quantity
             $variations_html .= '<tr>';
 
-            if ( is_array( $variations[0]['variation_attributes'] ) ) 
-            foreach ($variations[0]['variation_attributes'] as $name => $value) {
+            $first_variation = reset( $variations );
+            if ( is_array( $first_variation['variation_attributes'] ) ) 
+            foreach ($first_variation['variation_attributes'] as $name => $value) {
                 $variations_html .= '<th>';
                 $variations_html .= $name;
                 $variations_html .= '</th>';
@@ -638,7 +639,17 @@ class TemplatesModel extends WPL_Model {
 	public function getDynamicContent( $sFile, $inaData = array() ) {
 
 		if ( !is_file( $sFile ) ) {
-			$this->showMessage("File not found: ".$sFile,1,1);
+
+			// check if there is a problem with the uploads folder
+			$upload_dir = wp_upload_dir();
+			if ( $upload_dir['error'] ) {
+				$this->showMessage( "There seems to be a problem with your uploads folder: ".$upload_dir['error'], 1, true );
+			}
+
+			$msg  = "The template file <code>".basename($sFile)."</code> could not found at: <code>".$sFile."</code>";
+			$msg .= "<br><br>Please check your upload folder permissions or contact support.";
+			$this->showMessage( $msg ,1,1);
+
 			return false;
 		}
 		

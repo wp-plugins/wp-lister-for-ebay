@@ -228,6 +228,7 @@ class SettingsPage extends WPL_Page {
 
 			'update_channel'			=> self::getOption( 'update_channel', 'stable' ),
 			'ajax_error_handling'		=> self::getOption( 'ajax_error_handling', 'halt' ),
+			'php_error_handling'		=> self::getOption( 'php_error_handling', 0 ),
 			'disable_variations'		=> self::getOption( 'disable_variations', 0 ),
 			'log_record_limit'			=> self::getOption( 'log_record_limit', 4096 ),
 			'xml_formatter'				=> self::getOption( 'xml_formatter', 'default' ),
@@ -281,7 +282,7 @@ class SettingsPage extends WPL_Page {
 	protected function saveAdvancedSettings() {
 
 		// TODO: check nonce
-		if ( isset( $_POST['wpl_e2e_option_uninstall'] ) ) {
+		if ( isset( $_POST['wpl_e2e_process_shortcodes'] ) ) {
 
         	$wp_roles = new WP_Roles();
         	$available_roles = $wp_roles->role_names;
@@ -426,6 +427,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'log_to_db',			$this->getValueFromPost( 'option_log_to_db' ) );
 			self::updateOption( 'sandbox_enabled',		$this->getValueFromPost( 'option_sandbox_enabled' ) );
 			self::updateOption( 'ajax_error_handling',	$this->getValueFromPost( 'ajax_error_handling' ) );
+			self::updateOption( 'php_error_handling',	$this->getValueFromPost( 'php_error_handling' ) );
 			self::updateOption( 'disable_variations',	$this->getValueFromPost( 'disable_variations' ) );
 			self::updateOption( 'log_record_limit',		$this->getValueFromPost( 'log_record_limit' ) );
 			self::updateOption( 'xml_formatter',		$this->getValueFromPost( 'xml_formatter' ) );

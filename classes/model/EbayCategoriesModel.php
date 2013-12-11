@@ -62,6 +62,7 @@ class EbayCategoriesModel extends WPL_Model {
 		$data['version'] = $this->_categoryVersion;
 		$data['site_id'] = $this->_siteid;
 		$wpdb->update( $this->tablename, $data, array( 'parent_cat_id' => '0') );
+        echo mysql_error();
 
 		// include other update tasks
 		$tasks = array();
@@ -103,6 +104,7 @@ class EbayCategoriesModel extends WPL_Model {
 
 		// fetch the data back from the db and add a task for each top-level id
 		$rows = $wpdb->get_results( "select cat_id, cat_name from $this->tablename where parent_cat_id=0", ARRAY_A );
+        echo mysql_error();
 		foreach ($rows as $row)
 		{
 			$this->logger->info('adding task for category #'.$row['cat_id'] . ' - '.$row['cat_name']);

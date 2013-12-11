@@ -19,9 +19,45 @@ class WPL_BasePlugin extends WPL_Core {
 
 		// required for saving custom screen options 
 		add_filter('set-screen-option', array( &$this, 'set_screen_option_handler' ), 100, 3);
+
+		$this->initErrorHandler();
 	}
 	
-	
+	// init error handler
+	public function initErrorHandler() {
+
+		if ( ! is_admin() ) return;
+		if ( ! self::getOption( 'php_error_handling' ) ) return;
+
+        // regard error handling option
+        // second bit (2) will register shutdown handler if set
+        if ( 2 & get_option( 'wplister_php_error_handling', 0 ) )
+			register_shutdown_function( array( $this, 'shutdown_handler' ) );			
+
+	}
+
+	function shutdown_handler() {
+		// remember not to call external functions or methods from a shutdown handler as they might or might not be executed.
+
+		// get last error
+	    $error = error_get_last();
+	    if( $error == NULL ) return;
+
+		// check if is ajax - doesn't work as it should yet...
+		$is_ajax = ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'WOOCOMMERCE_CHECKOUT' ) && WOOCOMMERCE_CHECKOUT );
+		if ( $is_ajax ) echo "/* ";
+
+	    // if fatal error
+	    if( $error['type'] === E_ERROR ) {
+	        // fatal error has occured
+	        echo "<pre>FATAL ERROR:\n";print_r($error);echo"</pre>";
+	    } else {
+		    // general info about last error... 
+    	    echo "<pre>OK - last error was: \n";print_r($error);echo"</pre>";
+	    }
+
+		if ( $is_ajax ) echo " */";
+	}
 	
 	// add link to settings on plugins page
 	public function onWpPluginActionLinks( $inaLinks, $insFile ) {

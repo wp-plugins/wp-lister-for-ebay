@@ -55,7 +55,7 @@ class WPL_Model {
 		#$this->logger->info('json_encode - output: '.$str);
 		#$this->logger->info('json_last_error(): '.json_last_error() );
 
-		if ( $str = '{}' ) return serialize( $obj );
+		if ( $str == '{}' ) return serialize( $obj );
 		else return $str;
 	}	
 	
@@ -66,6 +66,7 @@ class WPL_Model {
 		if ( $loadEbayClasses ) EbayController::loadEbayClasses();
 
 		if ( $str == '' ) return false; 
+		if ( is_object($str) || is_array($str) ) return $str;
 
 		// json_decode
 		$obj = json_decode( $str, $assoc );
@@ -209,6 +210,21 @@ class WPL_Model {
 				$longMessage .= 'If there are two or more services and one is "pickup", "pickup" must not be specified as the first service.';
 			}
 			
+			// #21916543 - Error: ExternalPictureURL server not available.
+			if ( $error->getErrorCode() == 21916543 ) { 
+				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
+				$longMessage .= 'eBay tried to fetch an image from your website but your server did not respond in time.<br>';
+				$longMessage .= 'This could be a temporary issue with eBay, but it could as well indicate problems with your server. ';
+				$longMessage .= 'You should wait a few hours and see if this issue disappears, but if it persists you should consider moving to a better hosting provider.';
+			}
+			
+			// #488 - Error: Duplicate UUID used.
+			if ( $error->getErrorCode() == 488 ) { 
+				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
+				$longMessage .= 'You probably tried to list the same product twice within a short time period.<br>';
+				$longMessage .= 'Please wait for about one hour and you will be able to list this product again. ';
+			}
+			
 			// #21917092 - Warning: Requested Quantity revision is redundant.
 			if ( $error->getErrorCode() == 21917092 ) { 
 			}
@@ -230,6 +246,14 @@ class WPL_Model {
 			$htmlMsg  = '<div id="message" class="'.$class.'" style="display:block !important;"><p>';
 			$htmlMsg .= '<b>' . $error->SeverityCode . ': ' . $shortMessage . '</b>' . ' (#'  . $error->getErrorCode() . ') ';
 			$htmlMsg .= '<br>' . $longMessage . '';
+
+			// handle optional ErrorParameters
+			if ( ! empty( $error->ErrorParameters ) ) {
+				foreach ( $error->ErrorParameters as $param ) {
+					$htmlMsg .= '<br><code>' . $param . '</code>';
+				}
+			}
+
 			$htmlMsg .= '</p></div>';
 			// $htmlMsg .= $extraMsg;
 			if ( ! $this->is_ajax() ) echo $htmlMsg;

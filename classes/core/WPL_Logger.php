@@ -33,11 +33,17 @@ class WPL_Logger{
 			}
 			$this->strdate = 'Y/m/d H:i:s';
 			
-			if (@$_REQUEST['action'] == 'heartbeat') return;
-			if (@$_REQUEST['action'] == 'wplister_tail_log') return;
+			$action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : '';
+			if ( $action == 'heartbeat' ) return;
+			if ( $action == 'wplister_tail_log' ) return;
 
 			// $this->debug('Start Session:'.print_r($_SERVER,1));
-			$this->info( $_SERVER['REQUEST_METHOD'].': '.$_SERVER['QUERY_STRING'] . ' - ' . @$_POST['action'] .' - '. @$_POST['do'] );
+			$this->info( 
+				$_SERVER['REQUEST_METHOD'] . ': ' . 
+				$_SERVER['QUERY_STRING'] . ' - ' . 
+				( isset( $_POST['action'] ) ? $_POST['action'] : '' ) .' - '. 
+				( isset( $_POST['do'] ) ? $_POST['do'] : '' )  
+			);
 
 		}
 

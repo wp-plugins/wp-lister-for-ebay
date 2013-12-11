@@ -12,7 +12,8 @@ class WPL_WooBackendIntegration {
 		add_action( 'manage_product_posts_custom_column', array( &$this, 'wplister_woocommerce_custom_product_columns' ), 3 );
 
 		// hook into save_post to mark listing as changed when a product is updated
-		add_action( 'save_post', array( &$this, 'wplister_on_woocommerce_product_quick_edit_save' ), 10, 2 );
+		add_action( 'save_post', array( &$this, 'wplister_on_woocommerce_product_bulk_edit_save' ), 20, 2 );
+		add_action( 'save_post', array( &$this, 'wplister_on_woocommerce_product_quick_edit_save' ), 20, 2 );
 
 		// show messages when listing was updated from edit product page
 		add_action( 'post_updated_messages', array( &$this, 'wplister_product_updated_messages' ), 20, 1 );
@@ -132,12 +133,12 @@ class WPL_WooBackendIntegration {
 	}
 
 
-	// hook into save_post to mark listing as changed when a product is updated
+	// hook into save_post to mark listing as changed when a product is updated via quick edit
 	function wplister_on_woocommerce_product_quick_edit_save( $post_id, $post ) {
 
 		if ( !$_POST ) return $post_id;
 		if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
-		if( is_int( wp_is_post_autosave( $post_id ) ) ) return;
+		if ( is_int( wp_is_post_autosave( $post_id ) ) ) return;
 		if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
 		// if ( !isset($_POST['woocommerce_quick_edit_nonce']) || (isset($_POST['woocommerce_quick_edit_nonce']) && !wp_verify_nonce( $_POST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ))) return $post_id;
 		if ( !current_user_can( 'edit_post', $post_id )) return $post_id;
@@ -156,6 +157,24 @@ class WPL_WooBackendIntegration {
 		// $woocommerce->clear_product_transients( $post_id );
 	}
 	// add_action( 'save_post', 'wplister_on_woocommerce_product_quick_edit_save', 10, 2 );
+
+
+	// hook into save_post to mark listing as changed when a product is updated via bulk update
+	function wplister_on_woocommerce_product_bulk_edit_save( $post_id, $post ) {
+
+		if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
+		if ( is_int( wp_is_post_autosave( $post_id ) ) ) return;
+		if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
+		if ( ! isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) || ! wp_verify_nonce( $_REQUEST['woocommerce_bulk_edit_nonce'], 'woocommerce_bulk_edit_nonce' ) ) return $post_id;
+		if ( ! current_user_can( 'edit_post', $post_id ) ) return $post_id;
+		if ( $post->post_type != 'product' ) return $post_id;
+
+		// $lm = new ListingsModel();
+		// $lm->markItemAsModified( $post_id );
+		do_action( 'wplister_product_has_changed', $post_id );
+
+	}
+	// add_action( 'save_post', 'wplister_on_woocommerce_product_bulk_edit_save', 10, 2 );
 
 
 
@@ -339,7 +358,7 @@ class WPL_WooBackendIntegration {
 
         // show locked indicator
         if ( @$item->locked ) {
-            $tip_msg = 'This listing is currently locked.<br>Only inventory changes will be updated, other changes will be ignored.';
+            $tip_msg = 'This listing is currently locked.<br>Only inventory changes and prices will be updated, other changes will be ignored.';
             $img_url = WPLISTER_URL . '/img/lock-1.png';
             $locktip = '<img src="'.$img_url.'" style="height:11px; padding:0;" class="tips" data-tip="'.$tip_msg.'"/>&nbsp;';
         } 
@@ -369,15 +388,15 @@ class WPL_WooBackendIntegration {
 
 			<?php
 
-				$tip = __('Revise eBay listing when updating the product', 'wplister') . '. '; 
-				$tip .= __('If the product is out of stock, the listing will be ended on eBay.', 'wplister');
-				$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
-
 				// prevent wp_kses_post() from removing the data-tip attribute
 				global $allowedposttags;
 				$allowedposttags['img']['data-tip'] = true;
 
 				if ( $item->locked ) {
+
+					$tip = 'This listing is locked. WP-Lister will update prices and stock levels automatically on eBay when updating the product.<br>'; 
+					$tip .= __('If the product is out of stock, the listing will be ended on eBay.', 'wplister');
+					$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 
 					woocommerce_wp_checkbox( array( 
 						'id'    => 'wpl_ebay_revise_on_update', 
@@ -387,6 +406,10 @@ class WPL_WooBackendIntegration {
 					) );
 
 				} else {
+
+					$tip = __('Revise eBay listing when updating the product', 'wplister') . '. '; 
+					$tip .= __('If the product is out of stock, the listing will be ended on eBay.', 'wplister');
+					$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 
 					woocommerce_wp_checkbox( array( 
 						'id'    => 'wpl_ebay_revise_on_update', 
@@ -481,8 +504,12 @@ class WPL_WooBackendIntegration {
 		$errors  = $update_results[ $post_ID ]->errors;
 
 		foreach ($errors as $error) {
-			if ( $error->ErrorCode != 21917092 )
+			// hide redundant warnings like:
+			// 21917092 - Warning: Requested Quantity revision is redundant.
+			// 21916620 - Warning: Variations with quantity '0' will be removed
+			if ( ! in_array( $error->ErrorCode, array( 21917091, 21917092, 21916620 ) ) )
 				echo $error->HtmlMessage;
+			
 		}
 
 		// add message

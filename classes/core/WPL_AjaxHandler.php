@@ -56,6 +56,29 @@ class WPL_AjaxHandler extends WPL_Core {
 		exit();
 	}
 	
+	function shutdown_handler() {
+		global $wpl_shutdown_handler_enabled;
+		if ( ! $wpl_shutdown_handler_enabled ) return;
+
+		// check for fatal error
+        $error = error_get_last();
+        if ($error['type'] === E_ERROR) {
+
+	        $logmsg  = "<br><br>";
+	        $logmsg .= "<b>There has been a fatal PHP error - the server said:</b><br>";
+	        $logmsg .= '<span style="color:darkred">'.$error['message']."</span><br>";
+	        $logmsg .= "In file: <code>".$error['file']."</code> (line ".$error['line'].")<br>";
+
+	        $logmsg .= "<br>";
+	        $logmsg .= "<b>Please contact support in order to resolve this.</b><br>";
+	        $logmsg .= "If this error is related to memory limits or timeouts, you need to contact your server administrator or hosting provider.<br>";
+	        echo $logmsg;
+
+		} 
+		// debug all errors
+		// echo "<br>Last error: <pre>".print_r($error,1)."</pre>"; 
+	}
+
 	// run single task
 	public function jobs_run_task() {
 
@@ -65,6 +88,11 @@ class WPL_AjaxHandler extends WPL_Core {
 
 		$job  = $_REQUEST['job'];
 		$task = $_REQUEST['task'];
+
+		// register shutdown handler
+		global $wpl_shutdown_handler_enabled;
+		$wpl_shutdown_handler_enabled = true;
+		register_shutdown_function( array( $this, 'shutdown_handler' ) );
 
 		$this->logger->info('running task: '.print_r($task,1));
 
@@ -499,6 +527,8 @@ class WPL_AjaxHandler extends WPL_Core {
 	}
 
 	public function returnJSON( $data ) {
+		global $wpl_shutdown_handler_enabled;
+		$wpl_shutdown_handler_enabled = false;
 		header('content-type: application/json; charset=utf-8');
 		echo json_encode( $data );
 	}

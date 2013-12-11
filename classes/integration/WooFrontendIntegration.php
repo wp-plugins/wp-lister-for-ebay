@@ -143,6 +143,10 @@ class WPL_WooFrontendIntegration {
 
 			}
 
+			// check status
+			if ( ! in_array( $listing->status, array('published','changed') ) )
+				 continue;
+
 			// check end date
 			if ( $listing->end_date )
 				if ( strtotime( $listing->end_date ) < time() ) continue;

@@ -318,6 +318,7 @@ class EbayOrdersModel extends WPL_Model {
 		$this->addHistory( $order_id, 'reduce_stock', $history_message, $history_details );
 
 
+
 		// mark listing as sold when last item is sold
 		if ( $quantity_sold == $quantity_total ) {
 			$wpdb->update( $wpdb->prefix.'ebay_auctions', 
@@ -326,8 +327,6 @@ class EbayOrdersModel extends WPL_Model {
 			);
 			$this->logger->info( 'marked item #'.$ebay_id.' as SOLD ');
 		}
-
-
 
 	} // processListingItem()
 
@@ -575,6 +574,26 @@ class EbayOrdersModel extends WPL_Model {
 		", ARRAY_A );
 
 		return $order;
+	}
+
+	function getAllDuplicateOrders() {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT order_id, COUNT(*) c
+			FROM $this->tablename
+			GROUP BY order_id 
+			HAVING c > 1
+		", OBJECT_K);		
+
+		if ( ! empty($items) ) {
+			$order = array();
+			foreach ($items as &$item) {
+				$orders[] = $item->order_id;
+			}
+			$items = $orders;
+		}
+
+		return $items;		
 	}
 
 	function getDateOfLastOrder() {

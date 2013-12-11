@@ -119,10 +119,21 @@ class ProfilesPage extends WPL_Page {
 		$available_attributes      = ProductWrapper::getAttributeTaxonomies();
 
 		// add attribute for SKU
-		$attrib = new stdClass();
-		$attrib->name = '_sku';
-		$attrib->label = 'SKU';
-		$available_attributes[] = $attrib;
+		// $attrib = new stdClass();
+		// $attrib->name = '_sku';
+		// $attrib->label = 'SKU';
+		// $available_attributes[] = $attrib;
+
+		// process custom attributes
+		$custom_attributes = apply_filters( 'wplister_custom_attributes', array() );
+		foreach ( $custom_attributes as $attrib ) {
+
+			$new_attribute = new stdClass();
+			$new_attribute->name  = $attrib['id'];
+			$new_attribute->label = $attrib['label'];
+			$available_attributes[] = $new_attribute;
+
+		}
 
 		$available_dispatch_times     = self::getOption('DispatchTimeMaxDetails');
 		$available_shipping_packages  = self::getOption('ShippingPackageDetails');
@@ -472,6 +483,11 @@ class ProfilesPage extends WPL_Page {
 		wp_register_style('jqueryFileTree_style', self::$PLUGIN_URL.'/js/jqueryFileTree/jqueryFileTree.css' );
 		wp_enqueue_style('jqueryFileTree_style'); 
 
+		// load styles for chosen.js
+		global $woocommerce;
+		if ( is_object($woocommerce) )
+ 			wp_enqueue_style( 'woocommerce_admin_styles', $woocommerce->plugin_url() . '/assets/css/admin.css' );
+
 		// testing:
 		// jQuery UI theme - for progressbar
 		// wp_register_style('jQueryUITheme', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/cupertino/jquery-ui.css');
@@ -492,6 +508,10 @@ class ProfilesPage extends WPL_Page {
 		// mustache template engine
 		wp_register_script( 'mustache', self::$PLUGIN_URL.'/js/template/mustache.js', array( 'jquery' ) );
 		wp_enqueue_script( 'mustache' );
+
+		// enqueue chosen.js from WooCommerce
+      	// wp_enqueue_script( 'ajax-chosen' );
+	   	wp_enqueue_script( 'chosen' );
 
 		// jQuery UI Autocomplete
 		wp_enqueue_script( 'jquery-ui-button' );

@@ -69,7 +69,7 @@ if ( preg_match_all("/<ShortMessage>(.*)<\/ShortMessage>/", $res, $matches_sm) )
 }
 
 // hide Description content for better readability
-if ( @$_GET['desc'] != 'show' ) {
+if ( ( ! isset( $_GET['desc'] ) ) || ( $_GET['desc'] != 'show' ) ) {
 	$description_link = '<a href="admin.php?page=wplister&action=display_log_entry&desc=show&log_id='.$id.'">show description</a>';
 	$req = preg_replace( "/<Description>.*<\/Description>/uUsm", "<Description> ... ___desc___ ... </Description>", $req );
 }

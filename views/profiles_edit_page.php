@@ -325,7 +325,7 @@
 
 							<label for="wpl-text-RefundOption" class="text_label">
 								<?php echo __('Refund option','wplister'); ?>
-                                <?php wplister_tooltip('Indicates how the seller will compensate the buyer for a returned item. Use the description field to explain the policy details. Not applicable on EU sites.') ?>
+                                <?php wplister_tooltip('Indicates how the seller will compensate the buyer for a returned item. Use the description field to explain the policy details. Not applicable on AU and EU sites.') ?>
 							</label>
 							<select id="wpl-text-RefundOption" name="wpl_e2e_RefundOption" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
@@ -409,6 +409,10 @@
 		jQuery( document ).ready(
 			function () {
 
+				// enable chosen.js
+				jQuery("select.chosen_select").chosen();
+				
+
 				// hide fixed price field for fixed price listings
 				// (fixed price listings only use StartPrice)
 				jQuery('#wpl-text-auction_type').change(function() {
@@ -482,11 +486,21 @@
 				jQuery('#wpl-text-schedule_time').change();
 
 				// set Auto Relist options visibility
+				jQuery('#wpl-text-autorelist_enabled').change(function() {
+  					if ( jQuery('#wpl-text-autorelist_enabled').val() == 1 ) {
+  						jQuery('#autorelist_options_container').slideDown(200);
+  					} else {
+  						jQuery('#autorelist_options_container').slideUp(200);
+  					}
+				});
+				jQuery('#wpl-text-autorelist_enabled').change();
+
+				// set Selling Manager Pro options visibility
 				jQuery('#wpl-text-sellingmanager_enabled').change(function() {
   					if ( jQuery('#wpl-text-sellingmanager_enabled').val() == 1 ) {
-  						jQuery('#auto_relist_options_container').slideDown(200);
+  						jQuery('#sm_auto_relist_options_container').slideDown(200);
   					} else {
-  						jQuery('#auto_relist_options_container').slideUp(200);
+  						jQuery('#sm_auto_relist_options_container').slideUp(200);
   					}
 				});
 				jQuery('#wpl-text-sellingmanager_enabled').change();
@@ -529,42 +543,61 @@
 					}
 
 
-					// flat: local shipping price required
-					var shipping_type = jQuery('.select_shipping_type')[0] ? jQuery('.select_shipping_type')[0].value : 'flat';
-					if ( shipping_type == 'flat' || shipping_type == 'FreightFlat' || shipping_type == 'FlatDomesticCalculatedInternational' ) {
-						// if ( jQuery('#loc_shipping_options_table_flat input.price_input')[0].value == '' ) {
-						// 	alert('Please enter a shipping fee.'); return false;
-						// }
-						// local flat shipping option required
-						if ( jQuery('#loc_shipping_options_table_flat .select_service_name')[0].value == '' ) {
-							alert('Please select at least one domestic shipping service.'); return false;
+					// validate shipping options
+					var shipping_type = jQuery('.select_shipping_type')[0] ? jQuery('.select_shipping_type')[0].value : 'disabled';
+					var seller_profile = jQuery('#wpl-text-seller_shipping_profile_id')[0] ? jQuery('#wpl-text-seller_shipping_profile_id')[0].value : false;
+
+					if ( ! seller_profile ) {
+
+						// check domestic shipping options
+						if ( shipping_type == 'flat' || shipping_type == 'FreightFlat' || shipping_type == 'FlatDomesticCalculatedInternational' ) {
+
+							// local flat shipping option required
+							if ( jQuery('#loc_shipping_options_table_flat .select_service_name')[0].value == '' ) {
+								alert('Please select at least one domestic shipping service for eBay.'); return false;
+							}
+	
+							// local flat shipping price required
+							if ( jQuery('#loc_shipping_options_table_flat input.price_input')[0].value == '' ) {
+								alert('Please enter a shipping fee for eBay.'); return false;
+							}
+
+							// max 5 shipping service options
+							if ( jQuery('#loc_shipping_options_table_flat .select_service_name').length > 5 ) {
+								alert('You have selected more than 5 local shipping services, which is not allowed by eBay.'); return false;
+							}
+
+						} else if ( shipping_type == 'calc' || shipping_type == 'CalculatedDomesticFlatInternational' ) {
+
+							// local calc shipping option required
+							if ( jQuery('#loc_shipping_options_table_calc .select_service_name')[0].value == '' ) {
+								alert('Please select at least one domestic shipping service for eBay.'); return false;
+							}						
+
+							// max 5 shipping service options
+							if ( jQuery('#loc_shipping_options_table_calc .select_service_name').length > 5 ) {
+								alert('You have selected more than 5 local shipping services, which is not allowed by eBay.'); return false;
+							}
+
 						}
-						if ( jQuery('#loc_shipping_options_table_flat .select_service_name').length > 5 ) {
-							alert('You have selected more than 5 local shipping services, which is not allowed by eBay.'); return false;
+
+						// max 5 international shipping service options
+						if ( shipping_type == 'flat' || shipping_type == 'FreightFlat' || shipping_type == 'CalculatedDomesticFlatInternational' ) {
+							if ( jQuery('#int_shipping_options_table_flat .select_service_name').length > 5 ) {
+								alert('You have selected more than 5 international shipping services, which is not allowed by eBay.'); return false;
+							}
+						} else if ( shipping_type == 'calc' || shipping_type == 'FlatDomesticCalculatedInternational' ) {
+							if ( jQuery('#int_shipping_options_table_calc .select_service_name').length > 5 ) {
+								alert('You have selected more than 5 international shipping services, which is not allowed by eBay.'); return false;
+							}
 						}
-					} else {
-						// local calc shipping option required
-						if ( jQuery('#loc_shipping_options_table_calc .select_service_name')[0].value == '' ) {
-							alert('Please select at least one domestic shipping service.'); return false;
-						}						
-						if ( jQuery('#loc_shipping_options_table_calc .select_service_name').length > 5 ) {
-							alert('You have selected more than 5 local shipping services, which is not allowed by eBay.'); return false;
-						}
+
 					}
 
-					// max 5 shipping service options
-					if ( shipping_type == 'flat' || shipping_type == 'FreightFlat' || shipping_type == 'CalculatedDomesticFlatInternational' ) {
-						if ( jQuery('#int_shipping_options_table_flat .select_service_name').length > 5 ) {
-							alert('You have selected more than 5 international shipping services, which is not allowed by eBay.'); return false;
-						}
-					} else {
-						if ( jQuery('#int_shipping_options_table_calc .select_service_name').length > 5 ) {
-							alert('You have selected more than 5 international shipping services, which is not allowed by eBay.'); return false;
-						}
-					}
 
 					// payment method required
-					if ( jQuery('#payment_options_table select')[0].value == '' ) {
+					var seller_payment_profile = jQuery('#wpl-text-seller_payment_profile_id')[0] ? jQuery('#wpl-text-seller_payment_profile_id')[0].value : false;
+					if ( ( ! seller_payment_profile ) && ( jQuery('#payment_options_table select')[0].value == '' ) ) {
 						alert('Please select at least one payment method.'); return false;
 					}
 

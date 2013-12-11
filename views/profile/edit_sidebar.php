@@ -180,7 +180,7 @@
 						<h3><span><?php echo __('Quantity Override','wplister'); ?></span></h3>
 						<div class="inside">
 
-							<?php $custom_quantity_enabled = ( $item_details['quantity'] ||  $item_details['max_quantity'] ) ? 1 : 0; ?>
+							<?php $custom_quantity_enabled = ( @$item_details['quantity'] || @$item_details['max_quantity'] ) ? 1 : 0; ?>
 							<label for="wpl-custom_quantity_enabled" class="text_label">
 								<?php echo __('Quantity','wplister'); ?>
                                 <?php wplister_tooltip('By default WP-Lister uses the current stock level quantity from WooCommerce and keep it in sync with eBay automatically.<br>If you wish to use a custom quantity, you can do so - but please keep in mind that the inventory sync might not work as expected!') ?>
@@ -214,6 +214,7 @@
 									<?php echo __('Custom quantities to not apply to locked listings.','wplister'); ?>
 									<?php echo __('Leave this empty to use inventory sync!','wplister'); ?>
 								</p>
+
 
 							</div>
 	
@@ -319,10 +320,10 @@
 							<br class="clear" />
 
 							<label for="wpl-text-with_variation_images" class="text_label">
-								<?php echo __('Variation images','wplister'); ?>
+								<?php echo __('Var. images','wplister'); ?>
                                 <?php wplister_tooltip('Enable this if you have assigned different product images to your variations.<br>Note: eBay accepts variation images only for a single attribute.<br>So if you sell T-Shirts in different colors and sizes, you can have a different image for each color, but (unlike WooCommerce) not for each size at the same time.') ?>
 							</label>
-							<select id="wpl-text-with_variation_images" name="wpl_e2e_with_variation_images" title="Variation images" class=" required-entry select">
+							<select id="wpl-text-with_variation_images" name="wpl_e2e_with_variation_images" class=" required-entry select">
 								<option value="1" <?php if ( @$item_details['with_variation_images'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( @$item_details['with_variation_images'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 							</select>
@@ -406,7 +407,7 @@
 								<?php echo __('Strikethrough price','wplister'); ?>
                                 <?php wplister_tooltip('Enable this if you want to list products which have a sale price in WooCommerce, but you want the regular price be displayed on eBay as the original retail price / strikethrough price.<br>This is currently available on the US, UK, and DE sites only.') ?>
 							</label>
-							<select id="wpl-text-strikethrough_pricing" name="wpl_e2e_strikethrough_pricing" title="Fetch the UPC value from the products SKU" class=" required-entry select">
+							<select id="wpl-text-strikethrough_pricing" name="wpl_e2e_strikethrough_pricing" class=" required-entry select">
 								<option value="1" <?php if ( @$item_details['strikethrough_pricing'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( @$item_details['strikethrough_pricing'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 							</select>

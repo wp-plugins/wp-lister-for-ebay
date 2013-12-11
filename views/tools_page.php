@@ -58,6 +58,90 @@
 		</div>
 	<?php endif; ?>
 
+
+
+	<?php if ( @$_REQUEST['action'] == 'check_max_execution_time' ): ?>
+
+		<div id="message" class="updated" style="display:block !important;">
+			<p>
+				<?php
+
+					// shutdown handler to log last error
+					function wpl_timeout_shutdown_handler() { 
+						global $wpl_timeout_shutdown_handler_enabled;
+						if ( ! $wpl_timeout_shutdown_handler_enabled ) return;
+
+						// write to log
+						$filename = WP_CONTENT_DIR . '/uploads/wplister_shutdown.log';
+						touch( $filename );
+
+				        $error = error_get_last();
+				        if ($error['type'] === E_ERROR) {
+					        $logmsg = "PHP was shut down./n";
+					        $logmsg = "Last error: ".print_r($error,1);
+							file_put_contents( $filename, $logmsg );
+
+							echo "<br>PHP was shut down. Log file has been written to: $filename"; 
+						}
+
+						echo "<br>Last error: ".print_r($error,1)."<br>"; 
+					}
+
+					// register shutdown handler
+					global $wpl_timeout_shutdown_handler_enabled;
+					$wpl_timeout_shutdown_handler_enabled = true;
+					register_shutdown_function('wpl_timeout_shutdown_handler');
+					
+					// enable to debug
+					// set_time_limit(1); // quit after 1 sec.	
+
+					// get current setting
+					$max_execution_time = ini_get('max_execution_time'); 
+					if ( ! $max_execution_time ) $max_execution_time = 42;
+
+					echo "The current value of <code>max_execution_time</code> on your server is <b>$max_execution_time seconds</b>.<br>";
+					echo "So please wait just as long - if your server regarding this setting, you should see the same number of dots:<br>";
+
+					for ($sec=0; $sec < $max_execution_time; $sec++) { 
+						sleep(1);
+						// echo $sec."<br>";
+						echo ".";
+						ob_flush();
+					}
+
+					$wpl_timeout_shutdown_handler_enabled = false;
+					echo "<br>";
+					echo "OK, this script ran $sec seconds.<br>";
+					if ( $sec == $max_execution_time )
+						echo "Everthing seems to be all right.<br>";
+				?>
+			</p>
+		</div>
+
+	<?php endif; ?>
+
+	<?php if ( @$_REQUEST['action'] == 'wpl_clear_shutdown_log' ): ?>
+		<?php unlink( WP_CONTENT_DIR . '/uploads/wplister_shutdown.log' ) ?>
+	<?php endif; ?>
+
+	<?php if ( file_exists( WP_CONTENT_DIR . '/uploads/wplister_shutdown.log' ) ): ?>
+		<div id="message" class="updated" style="display:block !important;">
+			<p>
+				Shutdown log record:
+				<pre><?php echo file_get_contents( WP_CONTENT_DIR . '/uploads/wplister_shutdown.log' ) ?></pre>
+				<!-- <a href="<?php echo $wpl_form_action ?>&action=wpl_clear_shutdown_log">clear log</a> -->
+				<form method="post" action="<?php echo $wpl_form_action; ?>">
+					<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+					<input type="hidden" name="action" value="wpl_clear_shutdown_log" />
+					<input type="submit" value="<?php echo __('Clear log','wplister'); ?>" name="submit" class="button-secondary">
+				</form>
+				<br style="clear:both;"/>
+			</p>
+		</div>		
+	<?php endif; ?>
+
+
+
 	<div style="width:640px;" class="postbox-container">
 		<div class="metabox-holder">
 			<div class="meta-box-sortables ui-sortable">
@@ -129,6 +213,20 @@
 								<input type="hidden" name="action" value="check_ebay_connection" />
 								<input type="submit" value="<?php echo __('Test eBay connection','wplister'); ?>" name="submit" class="button-secondary">
 								<p><?php echo __('Test connection to eBay API','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
+						<!-- check PHP max_execution_time --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="check_max_execution_time" />
+								<input type="submit" value="<?php echo __('Test PHP time limit','wplister'); ?>" name="submit" class="button-secondary">
+								<p>
+									<?php echo __('Test if your server regards the PHP max_execution_time setting','wplister'); ?><br>
+									<small>
+										This action is supposed to run for <?php echo ini_get('max_execution_time'); ?> seconds. If you get a timeout error <i>before</i> this time has passed, you need to contact your server admin.
+									</small>
+								</p>
 						</form>
 						<br style="clear:both;"/>
 
@@ -229,6 +327,7 @@
 		<pre><?php print_r($wpl_debug); ?></pre>
 	<?php endif; ?>
 
+
 	<?php if ( @$_REQUEST['action'] == 'curl_debug' ): ?>
 		
 		<?php if( extension_loaded('curl') ) : ?>
@@ -266,6 +365,13 @@
 				</tr>
 			<?php endforeach; ?>
 		</table>
+
+		<?php 
+			if ( ini_get('disable_functions') )
+				echo "PHP disable_functions: ".ini_get('disable_functions')."<br>\n";
+			if ( ini_get('disable_classes') )
+				echo "PHP disable_classes: ".ini_get('disable_classes')."<br>\n";
+		?>
 
 
 	<?php endif; ?>

@@ -116,6 +116,15 @@ class ProfilesModel extends WPL_Model {
 
 	function deleteItem( $id ) {
 		global $wpdb;
+
+		// check if there are listings using this profile
+		$lm = new ListingsModel();
+		$listings = $lm->getAllWithProfile( $id );
+		if ( ! empty($listings) ) {
+			$this->showMessage('This profile is applied to '.count($listings).' listings and can not be deleted.',1,1);
+			return false;
+		}
+
 		$wpdb->query("
 			DELETE
 			FROM $this->tablename
