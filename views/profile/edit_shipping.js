@@ -13,8 +13,8 @@
 				jQuery('#int_shipping_options_table_calc').show();
 				jQuery('#loc_shipping_options_table_calc').hide();
 				jQuery('#int_shipping_options_table_flat').hide();
-				jQuery('.int_service_table_calc').show();
 				jQuery('.loc_service_table_calc').hide();
+				jQuery('.int_service_table_calc').show();
 			} else if ( serviceType == 'CalculatedDomesticFlatInternational') {
 				jQuery('#loc_shipping_options_table_flat').hide();
 				jQuery('#int_shipping_options_table_calc').hide();
@@ -37,8 +37,8 @@
 				jQuery('.int_service_table_calc').hide();
 				jQuery('.loc_service_table_calc').hide();
 			} else {
-				jQuery('.service_table_flat').show();
 				jQuery('.service_table_calc').hide();
+				jQuery('.service_table_flat').show();
 			}
 
 			if ( serviceType == 'disabled') {
@@ -60,6 +60,9 @@
 		// handle add shipping service table row
 		function handleAddShippingServiceRow( mode ) {
 			
+			// disable chosen before cloning fields
+			jQuery("select.chosen_select").chosen('destroy');
+
 			var shipping_type = jQuery('.select_shipping_type')[0] ? jQuery('.select_shipping_type')[0].value : 'flat';
 			if ( shipping_type == 'flat' ) {
 				var serviceTable_id = mode == 'local' ? '#loc_shipping_options_table_flat' : '#int_shipping_options_table_flat';
@@ -79,6 +82,9 @@
 			// serviceTable.find('tr.row').last().find('.select_shipping_type').change();
 
 			enumerateShippingTableFields();
+
+			// enable chosen.js again
+			jQuery("select.chosen_select").chosen();
 
 		}
 
@@ -105,7 +111,7 @@
 				// location / destinaton
 				fields = jQuery(item).find('.select_location');
 				for (var i = fields.length - 1; i >= 0; i--) {
-					jQuery(fields[i]).attr('name','wpl_e2e_'+thisDest+'_shipping_options_'+thisType+'['+i+'][location]');
+					jQuery(fields[i]).attr('name','wpl_e2e_'+thisDest+'_shipping_options_'+thisType+'['+i+'][location][]');
 				};
 
 				// price field

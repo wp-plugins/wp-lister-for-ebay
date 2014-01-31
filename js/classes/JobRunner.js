@@ -511,6 +511,7 @@ WpLister.JobRunner = function () {
 if (!String.prototype.format) {
     String.prototype.format = function() {
         var args = arguments;
+        if (typeof this.replace !== 'function') return false;
         return this.replace(/{(\d+)}/g, function(match, number) { 
             return typeof args[number] != 'undefined'
                 ? args[number]

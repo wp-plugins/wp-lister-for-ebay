@@ -72,6 +72,16 @@ class WPLister_Toolbar  {
 
 		}
 
+		// Tools page
+		$args = array(
+			'id'    => 'wplister_tools',
+			'title' => __('Tools', 'wplister'),
+			'href'  => admin_url( 'admin.php?page=wplister-tools' ),
+			'parent'  => 'wplister_top',
+			'meta'  => array('class' => 'wplister-toolbar-page')
+		);
+		$wp_admin_bar->add_node($args);
+
 		if ( current_user_can('manage_ebay_options') ) {
 
 			// Settings page

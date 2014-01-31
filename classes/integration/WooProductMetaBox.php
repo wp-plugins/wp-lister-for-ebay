@@ -198,6 +198,9 @@ class WpLister_Product_MetaBox {
             	clear: both;
             	margin-left: 25%;
             }
+            #wplister-ebay-advanced .wpl_ebay_hide_from_unlisted_field .description { 
+            	margin-left: 0;
+            }
             #wplister-ebay-advanced h2 {
             	padding-top: 0.5em;
             	padding-bottom: 0.5em;
@@ -247,9 +250,10 @@ class WpLister_Product_MetaBox {
 		) );
 
 		woocommerce_wp_checkbox( array( 
-			'id'    => 'wpl_ebay_hide_from_unlisted', 
-			'label' => __('Hide from eBay', 'wplister'),
-			'value' => get_post_meta( $post->ID, '_ebay_hide_from_unlisted', true )
+			'id'    		=> 'wpl_ebay_hide_from_unlisted', 
+			'label' 		=> __('Hide from eBay', 'wplister'),
+			'description' 	=> __('Hide this product from the list of products currently not listed on eBay.','wplister'),
+			'value' 		=> get_post_meta( $post->ID, '_ebay_hide_from_unlisted', true )
 		) );
 
 		woocommerce_wp_textarea_input( array( 

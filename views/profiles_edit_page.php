@@ -89,7 +89,10 @@
 							<br class="clear" />
 
 							<div id="wpl-text-fixed_price_container">
-							<label for="wpl-text-fixed_price" class="text_label"><?php echo __('Buy Now Price','wplister'); ?></label>
+							<label for="wpl-text-fixed_price" class="text_label">
+								<?php echo __('Buy Now Price','wplister'); ?>
+                                <?php wplister_tooltip('Set a Buy Now Price to enable the Buy Now option for your listing.<br>You can set a custom Buy Now Price on the edit product page as well.' ) ?>
+							</label>
 							<input type="text" name="wpl_e2e_fixed_price" id="wpl-text-fixed_price" value="<?php echo $item_details['fixed_price']; ?>" class="text_input" />
 							<br class="clear" />
 							</div>
@@ -302,7 +305,7 @@
 										><?php echo $desc ?></option>
 								<?php endforeach; ?>
 							<?php else: ?>
-								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+								<option value="">-- <?php echo __('not specified','wplister'); ?> --</option>
 								<option value="Days_10" <?php if ( $item_details['returns_within'] == 'Days_10' ): ?>selected="selected"<?php endif; ?>>10 <?php echo __('days','wplister'); ?></option>
 								<option value="Days_14" <?php if ( $item_details['returns_within'] == 'Days_14' ): ?>selected="selected"<?php endif; ?>>14 <?php echo __('days','wplister'); ?></option>
 								<option value="Days_30" <?php if ( $item_details['returns_within'] == 'Days_30' ): ?>selected="selected"<?php endif; ?>>30 <?php echo __('days','wplister'); ?></option>
@@ -317,9 +320,20 @@
                                 <?php wplister_tooltip('The party who pays the shipping cost for a returned item.') ?>
 							</label>
 							<select id="wpl-text-ShippingCostPaidBy" name="wpl_e2e_ShippingCostPaidBy" class=" required-entry select">
-								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+							<?php $ShippingCostPaidByOptions = get_option('wplister_ShippingCostPaidByOptions') ?>
+							<?php if ( isset( $ShippingCostPaidByOptions ) && is_array( $ShippingCostPaidByOptions ) ): ?>
+								<?php foreach ($ShippingCostPaidByOptions as $option_id => $desc) : ?>
+									<option value="<?php echo $option_id ?>" 
+										<?php if ( $item_details['ShippingCostPaidBy'] == $option_id ) : ?>
+											selected="selected"
+										<?php endif; ?>
+										><?php echo $desc ?></option>
+								<?php endforeach; ?>
+							<?php else: ?>
+								<option value="">-- <?php echo __('not specified','wplister'); ?> --</option>
 								<option value="Buyer"  <?php if ( @$item_details['ShippingCostPaidBy'] == 'Buyer'  ): ?>selected="selected"<?php endif; ?>><?php echo __('Buyer','wplister'); ?></option>
 								<option value="Seller" <?php if ( @$item_details['ShippingCostPaidBy'] == 'Seller' ): ?>selected="selected"<?php endif; ?>><?php echo __('Seller','wplister'); ?></option>
+							<?php endif; ?>
 							</select>
 							<br class="clear" />
 
@@ -328,7 +342,7 @@
                                 <?php wplister_tooltip('Indicates how the seller will compensate the buyer for a returned item. Use the description field to explain the policy details. Not applicable on AU and EU sites.') ?>
 							</label>
 							<select id="wpl-text-RefundOption" name="wpl_e2e_RefundOption" class=" required-entry select">
-								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+								<option value="">-- <?php echo __('not specified','wplister'); ?> --</option>
 								<option value="Exchange"  <?php if ( @$item_details['RefundOption'] == 'Exchange'  ): ?>selected="selected"<?php endif; ?>><?php echo ('Exchange'); ?></option>
 								<option value="MerchandiseCredit" <?php if ( @$item_details['RefundOption'] == 'MerchandiseCredit' ): ?>selected="selected"<?php endif; ?>><?php echo ('Merchandise Credit'); ?></option>
 								<option value="MoneyBack"  <?php if ( @$item_details['RefundOption'] == 'MoneyBack'  ): ?>selected="selected"<?php endif; ?>><?php echo ('Money Back'); ?></option>
@@ -342,7 +356,7 @@
                                 <?php wplister_tooltip('This value indicates the restocking fee charged by the seller for returned items.') ?>
 							</label>
 							<select id="wpl-text-RestockingFee" name="wpl_e2e_RestockingFee" class=" required-entry select">
-								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+								<option value="">-- <?php echo __('not specified','wplister'); ?> --</option>
 								<option value="NoRestockingFee" <?php if ( @$item_details['RestockingFee'] == 'NoRestockingFee' ): ?>selected="selected"<?php endif; ?>><?php echo __('No restocking fee','wplister'); ?></option>
 								<option value="Percent_10" <?php if ( @$item_details['RestockingFee'] == 'Percent_10' ): ?>selected="selected"<?php endif; ?>>10 <?php echo __('percent','wplister'); ?></option>
 								<option value="Percent_15" <?php if ( @$item_details['RestockingFee'] == 'Percent_15' ): ?>selected="selected"<?php endif; ?>>15 <?php echo __('percent','wplister'); ?></option>

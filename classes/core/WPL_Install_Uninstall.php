@@ -80,8 +80,7 @@ class WPLister_Install {
 		WPL_WPLister::addOption( 'sandbox_enabled',		'0' );
 		
 		WPL_WPLister::addOption( 'paypal_email',		'' );
-		WPL_WPLister::addOption( 'cron_auctions',		'Y' );
-		WPL_WPLister::addOption( 'cron_transactions',	'Y' );
+		WPL_WPLister::addOption( 'cron_auctions',		'' );
 		WPL_WPLister::addOption( 'log_level',			'' );
 		WPL_WPLister::addOption( 'log_to_db',			'0' );
 		WPL_WPLister::addOption( 'uninstall',			'0' );

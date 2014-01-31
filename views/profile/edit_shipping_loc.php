@@ -164,6 +164,19 @@
 								
 							</div>
 
+							<div class="service_table_flat service_table_calc" >
+
+								<label class="text_label">
+									<?php echo __('Promotional shipping discount','wplister'); ?>
+		                            <?php wplister_tooltip('This specifies whether to offer the promotional shipping discount for domestic shipping services (only applicable if the seller has a promotional shipping discount in effect at the moment.') ?>
+								</label>
+								<select name="wpl_e2e_PromotionalShippingDiscount" id="wpl-PromotionalShippingDiscount" 
+										title="Type" class="required-entry select select_PromotionalShippingDiscount" style="width:auto">
+									<option value="0" <?php if ( @$item_details['PromotionalShippingDiscount'] != 1 ): ?>selected="selected"<?php endif; ?> ><?php echo __('No','wplister') ?></option>
+									<option value="1" <?php if ( @$item_details['PromotionalShippingDiscount'] == 1 ): ?>selected="selected"<?php endif; ?> ><?php echo __('Yes','wplister') ?></option>
+								</select>
+								
+							</div>
 
 							<?php if ( isset( $wpl_seller_shipping_profiles ) && is_array( $wpl_seller_shipping_profiles ) ): ?>
 							<label for="wpl-text-seller_shipping_profile_id" class="text_label">

@@ -9,6 +9,12 @@ class WPL_Setup extends WPL_Core {
 		// check if safe mode is enabled
 		self::isPhpSafeMode();
 
+		// check if incomatible plugins are active
+		self::checkPlugins();
+
+		// check if a recent version of WooCommerce is installed
+		self::checkWooCommerce();
+
 		// check if cURL is loaded
 		if ( ! self::isCurlLoaded() ) return false;
 
@@ -21,6 +27,12 @@ class WPL_Setup extends WPL_Core {
 
 		// check for updates
 		self::checkForUpdates();
+
+		// check if cron is working properly
+		self::checkCron();
+
+		// check database after migration
+		// self::checkDatabase();
 
 		// check for multisite installation
 		// if ( self::checkMultisite() ) return false;
@@ -127,7 +139,20 @@ class WPL_Setup extends WPL_Core {
 			$this->EC->GetUserPreferences();
 			$this->EC->closeEbay();
 		}
-		
+
+		// fetch token expiration date if not done yet
+		if ( ( self::getOption('ebay_token') != '' ) && ( ! self::getOption('ebay_token_expirationtime') ) ) {
+			$this->initEC();
+			$expdate = $this->EC->GetTokenStatus();
+			$this->EC->closeEbay();
+			// $msg = __('Your token will expire on','wplister') . ' ' . $expdate; 
+			// $msg .= ' (' . human_time_diff( strtotime($expdate) ) . ' from now)';
+			// $this->showMessage( $msg );
+		}
+				
+		// check token expiration date
+		self::checkToken();
+
 	}
 
 
@@ -883,6 +908,14 @@ class WPL_Setup extends WPL_Core {
 			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
+		// upgrade to version 30  (1.3.4.5)
+		if ( 30 > $db_version ) {
+
+			// automatically switch old sites from transaction to order mode
+			update_option('wplister_ebay_update_mode', 'order');
+			update_option('wplister_db_version', 30);
+		}
+
 
 		// show update message
 		if ( ($msg) && (!$hide_message) ) self::showMessage($msg);		
@@ -958,6 +991,59 @@ class WPL_Setup extends WPL_Core {
 	}
 
 
+	// checks for incompatible plugins
+	public function checkPlugins() {
+
+		// Plugin Name: iThemes Slideshow
+		// Plugin URI: http://ithemes.com/purchase/displaybuddy/
+		// Version: 2.0.23
+		if ( class_exists('pluginbuddy_slideshow') ) {
+
+			$this->showMessage("
+				<b>Warning: An incompatible plugin was found.</b><br>
+				<br>
+				You seem to have the <i>iThemes Slideshow</i> plugin installed, which is known to cause issues with WP-Lister.<br>
+				Version 2.0.23 of this plugin will slow down loading the listings page if you are using variations. This can render the entire listings page inaccessible, so please deactivate this plugin.
+			");
+			return false;
+
+		}
+
+	}
+
+	// check if a recent version of WooCommerce is installed
+	public function checkWooCommerce() {
+
+		// check if WooCommerce is installed
+		if ( ! defined('WOOCOMMERCE_VERSION') && ! defined('WC_VERSION') ){
+
+			$this->showMessage("
+				<b>WooCommerce is not installed.</b><br>
+				<br>
+				WP-Lister requires <a href='http://wordpress.org/plugins/woocommerce/' target='_blank'>WooCommerce</a> to be installed.<br>
+			",1);
+			return false;
+
+		}
+
+		// check if WooCommerce is up to date
+		$required_version    = '2.0.0';
+		$woocommerce_version = defined('WC_VERSION') ? WC_VERSION : WOOCOMMERCE_VERSION;
+		if ( version_compare( $woocommerce_version, $required_version ) < 0 ) {
+
+			$this->showMessage("
+				<b>Warning: Your WooCommerce version is outdated.</b><br>
+				<br>
+				WP-Lister requires WooCommerce $required_version to be installed. You are using WooCommerce $woocommerce_version.<br>
+				You should always keep your site and plugins updated.<br>
+			",1);
+			return false;
+
+		}
+
+	}
+
+
 	// checks for multisite network
 	public function checkMultisite() {
 
@@ -988,6 +1074,54 @@ class WPL_Setup extends WPL_Core {
 	// check for updates
 	public function checkForUpdates() {
 	}
+
+
+	// check if WP_Cron is working properly
+	public function checkCron() {
+	}
+
+
+	// check if database has been corrupted during migration 
+	public function checkDatabase() {
+		global $wpdb;
+
+		$rows_null_count = $wpdb->get_var("SELECT count(id) FROM ".$wpdb->prefix."ebay_auctions WHERE relist_date = '0000-00-00 00:00:00' OR date_finished = '0000-00-00 00:00:00'  ");
+		if ( $rows_null_count ) {
+			$wpdb->query("UPDATE ".$wpdb->prefix."ebay_auctions SET date_created   = NULL WHERE date_created   = '0000-00-00 00:00:00' ");
+			$wpdb->query("UPDATE ".$wpdb->prefix."ebay_auctions SET date_published = NULL WHERE date_published = '0000-00-00 00:00:00' ");
+			$wpdb->query("UPDATE ".$wpdb->prefix."ebay_auctions SET end_date       = NULL WHERE end_date       = '0000-00-00 00:00:00' ");
+			$wpdb->query("UPDATE ".$wpdb->prefix."ebay_auctions SET relist_date    = NULL WHERE relist_date    = '0000-00-00 00:00:00' ");
+			$wpdb->query("UPDATE ".$wpdb->prefix."ebay_auctions SET date_finished  = NULL WHERE date_finished  = '0000-00-00 00:00:00' ");
+			$this->showMessage( __('Repaired DB rows: ','wplister') . $rows_null_count );
+			echo mysql_error();
+		}
+
+	}
+
+
+	// check token expiration date
+	public function checkToken() {
+
+		$expdate = get_option( 'wplister_ebay_token_expirationtime' );
+
+		if ( ! $expdate ) return;
+		if ( ! $exptime = strtotime($expdate) ) return;
+		$two_weeks_from_now = time() + 3600 * 24 * 7 * 2;
+
+		if ( $exptime < $two_weeks_from_now ) {
+
+			$this->showMessage( 
+				'<p>'
+				. '<b>Warning: '. __('Your token will expire on','wplister') . ' ' . $expdate
+				. ' (in ' . human_time_diff( strtotime($expdate) ) . ') '.'</b>'
+				. '<br><br>'
+				. 'You need to re-authenticate WP-Lister with eBay. To do so, please click the "Change account" button on Settings page and follow the instructions.'
+				. '</p>'
+			,1);
+
+		}
+
+	} // checkToken()
 
 
 	// check folders

@@ -115,14 +115,19 @@ class EbayOrdersTable extends WP_List_Table {
             // 'edit'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$_REQUEST['page'],'edit',$item['id'],__('Edit','wplister')),
         );
 
+        // try to find created order
+        $order = false;
+        if ( $item['post_id'] ) {
+            $order = new WC_Order( $item['post_id'] );
+            if ( ! $order->id ) $order = false;
+        }
 
-        if ( @$item['post_id'] == 0 ) {
+        // create or edit order link
+        if ( ! $order ) {
             $actions['create_order'] = sprintf('<a href="?page=%s&action=%s&ebay_order=%s">%s</a>',$_REQUEST['page'],'create_order',$item['id'],__('Create Order','wplister'));
         } else {
             $actions['edit_order'] = sprintf('<a href="post.php?action=%s&post=%s">%s</a>','edit',$item['post_id'],__('View Order','wplister'));
-
-            $order = new WC_Order( $item['post_id'] );
-            if ( $order ) $actions['edit_order'] .= ' '.$order->get_order_number();
+            $actions['edit_order'] .= ' '.$order->get_order_number();
         }
 
         // free version can't create orders
@@ -161,10 +166,30 @@ class EbayOrdersTable extends WP_List_Table {
         );
     }
     function column_PaymentMethod($item){
-        //Return buyer name and ID
-        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
+
+        switch( $item['eBayPaymentStatus'] ){
+            case 'NoPaymentFailure':
+                $color = 'silver';
+                $value = __('Payment complete','wplister');
+                break;
+            case 'PayPalPaymentInProcess':
+                $color = 'darkorange';
+                $value = __('Payment in Progress','wplister');
+                break;
+            case 'BuyerECheckBounced':
+                $color = 'darkred';
+                $value = __('The buyer\'s eCheck bounced','wplister');
+                break;
+            default:
+                $color = 'darkorange';
+                $value = $item['eBayPaymentStatus'];
+        }
+
+        // return formatted html
+        return sprintf('<span>%1$s</span><br><span style="color:%2$s">%3$s</span>',
             /*$1%s*/ $item['PaymentMethod'],
-            /*$2%s*/ $item['eBayPaymentStatus']
+            /*$2%s*/ $color,
+            /*$3%s*/ $value
         );
     }
 
@@ -174,20 +199,21 @@ class EbayOrdersTable extends WP_List_Table {
             case 'Active':
                 $color = 'darkorange';
                 $value = __('Active','wplister');
-				break;
+                break;
             case 'Completed':
                 $color = 'green';
                 $value = __('Completed','wplister');
-				break;
+                break;
             default:
                 $color = 'black';
                 $value = $item['CompleteStatus'];
         }
 
-        //Return the title contents
-        return sprintf('<span style="color:%1$s">%2$s</span><br><span style="color:silver">%3$s</span>',
+        // return formatted html
+        return sprintf('<span style="color:%1$s">%2$s</span><br><span style="color:%3$s">%4$s</span>',
             /*$1%s*/ $color,
             /*$2%s*/ $value,
+            /*$2%s*/ 'silver',
             /*$2%s*/ $item['CheckoutStatus']
         );
 	}

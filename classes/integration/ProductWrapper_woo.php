@@ -106,7 +106,7 @@ class ProductWrapper {
 	// get name of main product category
 	static function getProductCategoryName( $post_id ) {
 		$terms = get_the_terms($post_id, "product_cat");
-		if ( ! $terms ) return '';
+		if ( ! $terms || ! is_array($terms) ) return '';
 		$category_name = $terms[0]->name;
 		return $category_name;
 	}	
@@ -219,7 +219,7 @@ class ProductWrapper {
 	static function hasVariations( $post_id ) {
 
 		$product = self::getProduct( $post_id );
-		if ( $product->product_type == 'variable' ) return true;
+		if ( $product && $product->product_type == 'variable' ) return true;
 
 		// $variations = $product->get_available_variations();
 		// if ( ! is_array($variations) ) return false;

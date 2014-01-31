@@ -229,6 +229,13 @@ class WPL_Model {
 			if ( $error->getErrorCode() == 21917092 ) { 
 			}
 			
+			// #90002 - soap-fault: org.xml.sax.SAXParseException: The element type "Description" must be terminated by the matching end-tag "</Description>".
+			if ( $error->getErrorCode() == 90002 ) { 
+				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
+				$longMessage .= 'Your listing template probably contains CDATA tags which can not be used in a listing description.<br>';
+				$longMessage .= 'Please remove all CDATA tags from your listing template and try again - or contact support. ';
+			}
+			
 
 			// some errors like #240 may return an extra ErrorParameters array
 			// deactivated for now since a copy of this will be found in $res->getMessage()
@@ -271,7 +278,8 @@ class WPL_Model {
 
 		// some errors like #240 may trigger an extra Message field returned in the response
 		if ( $res->getMessage() ) { 
-			$extraMsg  = '<div id="message" class="updated update-nag" style="display:block !important;">';
+			$class = ( $res->getAck() == 'Failure') ? 'error' : 'updated update-nag';
+			$extraMsg  = '<div id="message" class="'.$class.'" style="display:block !important;">';
 			$extraMsg .= $res->getMessage();
 			$extraMsg .= '</div>';
 			if ( ! $this->is_ajax() ) echo $extraMsg;
@@ -299,7 +307,9 @@ class WPL_Model {
 		$this->result->success = $success;
 		$this->result->errors  = $errors;
 
-		$this->save_last_result();
+		// save last result - except for GetItem calls which usually follow ReviseItem calls
+		if ( 'GetItemResponseType' != get_class($res) )
+			$this->save_last_result();
 		// $this->logger->info('handleResponse() - result: '.print_r($this->result,1));
 
 		return $success;
@@ -324,7 +334,7 @@ class WPL_Model {
 	} // save_last_result()
 
 	function is_ajax() {
-		return ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'WOOCOMMERCE_CHECKOUT' ) && WOOCOMMERCE_CHECKOUT ) ;
+		return ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'WOOCOMMERCE_CHECKOUT' ) && WOOCOMMERCE_CHECKOUT ) || ( isset($_POST['action']) && ( $_POST['action'] == 'editpost' ) ) ;
 	}
 
 	// check if given WordPress plugin is active

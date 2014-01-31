@@ -1,8 +1,8 @@
 === WP-Lister for eBay ===
 Contributors: wp-lab
 Tags: ebay, woocommerce, products, export
-Requires at least: 3.3
-Tested up to: 3.8
+Requires at least: 3.6
+Tested up to: 3.8.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -33,8 +33,9 @@ We worked hard to make WP-Lister easy to use but flexible. The workflow of listi
 * german
 * french
 * italian
-* french
 * korean
+* latvian
+* bulgarian
 
 To make WP-Lister available in more languages, we will provide a free license for WP-Lister Pro for everyone who will provide and maintain a new localization.
 
@@ -50,7 +51,7 @@ To find out more about the different versions have a look on this feature compar
 
 == Installation ==
 
-1. Install WP-Lister for eBay either via the WordPress.org plugin directory, or by uploading the files to your server
+1. Install WP-Lister for eBay either via the WordPress.org plugin repository, or by uploading the files to your server
 2. After activating the plugin, visit the new page WP-Lister and follow the setup instructions. 
 
 == Frequently Asked Questions ==
@@ -61,7 +62,7 @@ Yes, it does.
 
 = What are the requirements to run WP-Lister? =
 
-WP-Lister requires a recent version of WordPress (3.3+) with WooCommerce 2.x installed. Your server should run on Linux and have PHP 5.2 or better with cURL support.
+WP-Lister requires a recent version of WordPress (3.6+) with WooCommerce 2.x installed. Your server should run on Linux and have PHP 5.2 or better with cURL support.
 
 = I use products variations on my site but eBay doesn’t allow variations in the selected category. How can I find out in which categories variations are allowed? =
 
@@ -89,6 +90,108 @@ Already working on it. Expect it soon.
 2. Profile Editor
 
 == Changelog ==
+= 1.3.5 =
+* various improvements and fixes - read the full changelog below
+
+= 1.3.4.11 =
+* improved payment status on orders page
+* fixed issue with IncludePrefilledItemInformation not being set
+* compare variations price range (min / max) when running inventory check
+* changed delete action parameters to avoid conflicts
+* added wplister_relist_item action hook
+
+= 1.3.4.10 =
+* use site specific ShippingCostPaidBy options in profile
+* strip invalid XML characters from listing description
+* fixed variations cache for items with sales
+* fixed empty IncludePrefilledItemInformation tag
+* improved inventory check for variable products and custom quantities
+
+= 1.3.4.9 =
+* update ShippingPackageDetails with weight and dimensions of first variations
+* fixed revising variable listings where both SKU and attributes were modified
+* fixed issue with wpstagecoach
+* WP 3.8.1 style adjustments and layout updates
+* improved php error handling debug options
+* show warning if WooCommerce is missing or outdated
+
+= 1.3.4.8 =
+* added inventory check on tools page - check price and stock for all published listings
+* added option to mark listings as changed which were found by inventory check
+* show warning on non-existing products on listings page and inventory check
+* fixed calculating wrong VAT and store correct order total tax
+
+= 1.3.4.7 =
+* added option to mark locked listings as changed when updating a profile
+* added message to deactivate the free version before installing WP-Lister Pro
+* fixed order creation and VAT on WooCommerce 2.0 (was WC 2.1 only)
+* fixed shipping cost in created WooCommerce orders
+
+= 1.3.4.6 =
+* check token expiration date and show warning if token expires in less than two weeka
+* calculate VAT when creating WooCommerce orders for VAT enabled listings
+* improved listings table - search by previous ebay id
+* improved orders table - check if order has been deleted
+* automatically switch old sites from transaction to order mode
+* fixed possible issue of locked, reselected listings being stuck
+* fixed incorrect cron job warning after fresh install
+
+= 1.3.4.5 =
+* added support for Woocommerce CSV importer
+* added option to show link to ebay for all products - auctions and fixed price
+* improved auto-complete order option - do not send seller feedback if default feedback text is empty
+* mark ended listings as sold if no stock remains
+
+= 1.3.4.4 =
+* allow multiple shipping locations per international shipping service
+* show warning if incompatible plugins detected (iThemes Slideshow)
+* explain SOAP error 920002 caused by CDATA tags
+* force UTF-8 for listing preview
+
+= 1.3.4.3 =
+* automatically reapply profile before relisting an ended item
+* prevent running multiple cron jobs at the same time
+
+= 1.3.4.2 =
+* improved dynamic price parser to allow relative and absolute change at the same time (+10%+5)
+* experimental support for WooCommerce Amazon Affiliates plugin (called via do-cron.php)
+* log cURL errors messages like "Couldn't resolve host"
+
+= 1.3.4.1 =
+* added promotional shipping discount profile options
+* added schedule minute profile option
+* experimental support for WP All Import plugin
+* don’t mark sold listings as ended when processing ended listings
+
+= 1.3.4 =
+* improved listing preview
+* added ebay links for prepared, verified and ended items on edit product page
+* added bulgarian translation
+* tested with WooCommerce 2.1 beta
+
+= 1.3.3.3 =
+* improved updating locked variable items and messages on edit product page
+* improved result of out of stock check on tools page
+* added move to archive link for sold duplicates
+* show product level start price in listings table
+* fixed php warning on WooCommerce 2.1
+* fixed issue when deleting wp content
+
+= 1.3.3.2 =
+* fixed issue when revising (ending) variation listings that are out of stock
+* added option to skip orders from foreign ebay sites
+* prevent editing of recommended item specifics names
+* use total stock quantity for flattened variations
+
+= 1.3.3.1 =
+* added bold title profile option
+* added gallery type profile option
+* added profile option to disable including prefilled product information for catalog products listed by UPC
+* added check for out of stock products in WooCommerce on tools page
+* reschedule cron job if missing - and show warning once
+* added tooltips on license page
+* added log refresh button
+
 = 1.3.3 =
 * hide toolbar if user can’t manage listings
 * added support for WooCommerce Sequential Order Numbers Pro 1.5.x

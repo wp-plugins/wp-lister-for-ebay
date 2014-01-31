@@ -50,6 +50,7 @@ class ListingsModel extends WPL_Model {
 				WHERE l.auction_title LIKE '%".$search_query."%'
 				    OR l.template     LIKE '%".$search_query."%'
 				    OR p.profile_name LIKE '%".$search_query."%'
+				    OR l.history      LIKE '%".$search_query."%'
 					OR l.ebay_id          = '".$search_query."'
 					OR l.auction_type     = '".$search_query."'
 					OR l.listing_duration = '".$search_query."'
@@ -145,6 +146,24 @@ class ListingsModel extends WPL_Model {
 			SELECT *
 			FROM $this->tablename
 			WHERE ebay_id = '$id'
+		");
+		if (!$item) return false;
+		if (!$decode_details) return $item;
+
+		$item->profile_data = $this->decodeObject( $item->profile_data, true );
+		$item->details = $this->decodeObject( $item->details );
+
+		return $item;
+	}
+
+	// find listing by current or previous item ID
+	function findItemByEbayID( $id, $decode_details = true ) {
+		global $wpdb;
+		$item = $wpdb->get_row("
+			SELECT *
+			FROM $this->tablename
+			WHERE ebay_id = '$id'
+			   OR history LIKE '%$id%'
 		");
 		if (!$item) return false;
 		if (!$decode_details) return $item;
@@ -344,7 +363,91 @@ class ListingsModel extends WPL_Model {
         return $with_variation_images;
 	}
 
+	// check if there are existing variations on eBay which do not exist in WooCommerce and need to be deleted
+    function fixDeletedVariations( $item, $listing_item ) {
 
+        $cached_variations  = maybe_unserialize( $listing_item['variations'] );
+        if ( empty($cached_variations) ) return $item;
+
+        // loop cached variations
+        foreach ($cached_variations as $key => $var) {
+        	
+        	if ( ! $this->checkIfVariationExistsInItem( $var, $item ) ) {
+
+        		// build new variation to be deleted
+	        	$newvar = new VariationType();
+
+	        	// set quantity to zero - effectively remove variations that have sales
+	        	$newvar->Quantity = 0;
+				// $newvar->StartPrice = $var['price'];
+
+				// handle sku
+	        	if ( $var['sku'] != '' ) {
+	        		$newvar->SKU = $var['sku'];
+	        	}
+
+	        	// add VariationSpecifics (v2)
+	        	$VariationSpecifics = new NameValueListArrayType();
+	            foreach ($var['variation_attributes'] as $name => $value) {
+		            $NameValueList = new NameValueListType();
+	    	    	$NameValueList->setName ( $name  );
+	        		$NameValueList->setValue( $value );
+		        	$VariationSpecifics->addNameValueList( $NameValueList );
+	            }
+	        	$newvar->setVariationSpecifics( $VariationSpecifics );
+
+	        	// tell eBay to delete this variation - only possible for items without sales
+	        	$newvar->setDelete( true );
+
+				$item->Variations->addVariation( $newvar );
+                $this->logger->info('added variation to be deleted: '.print_r($newvar,1) );
+
+                // TODO: update VariationSpecificsSet ?
+        	}
+        }
+
+    	return $item;
+	}
+
+    function checkIfVariationExistsInItem( $variation, $item ) {
+    	$variation_attributes = $variation['variation_attributes'];
+
+        // loop cached variations
+        foreach ( $item->Variations->Variation as $Variation ) {
+            $found_match = true;
+
+            // compare variation attributes
+        	foreach ($Variation->VariationSpecifics->NameValueList as $spec) {
+        		$name = $spec->Name;
+        		$val  = $spec->Value;
+        		if ( isset( $variation_attributes[ $name ] ) ) {
+
+        			if ( $variation_attributes[ $name ] == $val ) {
+	                	// $this->logger->info('found matching name value pair: '.print_r($spec,1) );
+        				// $found_match = true;
+        			} else {
+	                	// $this->logger->info('variation spec value does not match with "'.$variation_attributes[ $name ].'": '.print_r($spec,1) );
+        				$found_match = false;
+        			}
+
+        		} else {
+                	// $this->logger->info('variation spec name does not exist "'.$name.'" does not exist in attributes: '.print_r($variation_attributes,1) );
+    				$found_match = false;        			
+        		}
+        	}
+
+            if ( $found_match ) {
+                // $this->logger->info('found matching variation by attributes: '.print_r($Variation->VariationSpecifics->NameValueList,1) );
+                return true;
+            }
+
+        }
+
+        return false;
+    } // checkIfVariationExistsInItem()
+
+
+	// check if there are new variations in WooCommerce which do not exist in the cache
     function matchCachedVariations( $item, $filter_unchanged = false ) {
         $success   = true;
         $new_count = 0;
@@ -382,12 +485,12 @@ class ListingsModel extends WPL_Model {
                     $success = false;
 
                     // $this->logger->debug('found NEW variation: '.print_r( $pv, 1 ) );
-                    $this->logger->info( 'found NEW variation: '.$pv['sku'] );
+                    // $this->logger->info( 'found NEW variation: '.$pv['sku'] );
 
                 } else {
                     // no stock, so just remove from list
                     unset( $product_variations[ $key ] );
-                    $this->logger->info( 'removed out of stock variation: '.$pv['sku'] );
+                    // $this->logger->info( 'removed out of stock variation: '.$pv['sku'] );
                 }
 
             }
@@ -417,10 +520,35 @@ class ListingsModel extends WPL_Model {
                 return $cv;
             }
 
+            // compare variation attributes
+            if ( serialize( $pv['variation_attributes'] ) == serialize( $cv['variation_attributes'] ) ) {
+
+                // remove from list 
+                unset( $cached_variations[ $key ] );
+
+                $this->logger->info('matched variation by attributes: '.serialize($cv['variation_attributes']) );
+                return $cv;
+            }
+
         }
 
         return false;
     } // checkIfVariationExistsInCache()
+
+    function generateVariationKeyFromAttributes( $variation_attributes ) {
+        // $this->logger->info('generateVariationKeyFromAttributes() called: '.print_r($variation_attributes,1) );
+
+    	// sort attributes alphabetically
+    	ksort( $variation_attributes );
+    	$key = '';
+
+    	foreach ($variation_attributes as $attribute => $value) {
+    		$key .= $attribute.'__'.$value.'|';
+    	}
+
+        $this->logger->info('generateVariationKeyFromAttributes() returned: '.$key );
+        return $key;
+    } // generateVariationKeyFromAttributes()
 
     function checkIfVariationInventoryHasChanged( $pv, $cv ) {
 
@@ -539,6 +667,9 @@ class ListingsModel extends WPL_Model {
 		// skip this item if item status not allowed
 		$allowed_statuses = array( 'ended', 'sold' );
 		if ( ! $this->itemHasAllowedStatus( $id, $allowed_statuses ) ) return $this->result;
+
+		// reapply profile before relisting an ended item
+        $this->reapplyProfileToItem( $id );
 
 		// build item
 		$ibm = new ItemBuilderModel();
@@ -683,7 +814,10 @@ class ListingsModel extends WPL_Model {
 		// build item
 		$ibm = new ItemBuilderModel();
 		$item = $ibm->buildItem( $id, $session, true );
-		if ( ! $ibm->checkItem($item) ) return $ibm->result;
+		if ( ! $ibm->checkItem( $item, true ) ) return $ibm->result;
+
+		// check for variations to be deleted
+		$item = $this->fixDeletedVariations( $item, $listing_item );
 
 		// if quantity is zero, end item instead
 		if ( ( $item->Quantity == 0 ) && ( ! $ibm->VariationsHaveStock ) ) {
@@ -814,6 +948,12 @@ class ListingsModel extends WPL_Model {
             	return $this->result;
             }
 
+            // check if all variations have unique SKUs
+			if ( ! $this->checkVariationSKUs( $variations ) ) {
+				$this->logger->info( "Item #$id does not have unique SKUs, switching to reviseItem()" );
+				return $this->reviseItem( $id, $session, true );			
+			}
+
 			// calc number of requests
 			$batch_size = 4;
 			// $requests_required = intval( sizeof($variations) / $batch_size ) + 1;
@@ -913,8 +1053,8 @@ class ListingsModel extends WPL_Model {
 		$res = $this->_cs->ReviseInventoryStatus($req); 
 
 		// process result and update variation cache
-		$this->logger->debug( "ReviseInventoryStatus response node: ".print_r($res->getInventoryStatus(),1) );
-		$InventoryStatusNodes = $res->getInventoryStatus();
+		$InventoryStatusNodes = method_exists($res, 'getInventoryStatus') ? $res->getInventoryStatus() : false;
+		$this->logger->debug( "ReviseInventoryStatus response node: ".print_r( $InventoryStatusNodes, 1) );
 		if ( is_array($InventoryStatusNodes) ) {
 
 			$listing_item = $this->getItem( $id );	
@@ -922,6 +1062,7 @@ class ListingsModel extends WPL_Model {
 			foreach ( $InventoryStatusNodes as $node ) {
 
 				// find variation in cache
+				// ReviseInventoryStatus is only used if there are SKUs, so we don't need to generate key from attributes (which are not provided in the result anyway)
 				$key = $node->SKU;
 
 				// update variations cache
@@ -944,7 +1085,39 @@ class ListingsModel extends WPL_Model {
 	} // reviseVariableInventoryStatus()
 
 
+	function checkVariationSKUs( $variations ) {
+		$VariationsSkuAreUnique = true;
+		$VariationsSkuMissing   = false;
+		$VariationsSkuArray     = array();
+
+		// check each variation
+		foreach ($variations as $var) {
+			
+			// SKUs must be unique - if present
+			if ( ($var['sku']) != '' ) {
+				if ( in_array( $var['sku'], $VariationsSkuArray )) {
+					$VariationsSkuAreUnique = false;
+				} else {
+					$VariationsSkuArray[] = $var['sku'];
+				}
+			} else {
+				$VariationsSkuMissing = true;
+			}
+
+		}
+
+		if ( $VariationsSkuMissing )
+			return false;
+
+		if ( ! $VariationsSkuAreUnique )
+			return false;
+
+		return true;
+	} // checkVariationSKUs()
+
+
 	function checkStockLevel( $listing_item ) {
+		if ( ! is_array( $listing_item) ) $listing_item = (array) $listing_item;
 
 		$post_id         = $listing_item['post_id'];
 		$profile_details = $listing_item['profile_data']['details'];
@@ -1063,6 +1236,11 @@ class ListingsModel extends WPL_Model {
 			// save ebay ID and fees to db
 			$data['end_date'] = $res->EndTime;
 			$data['status'] = 'ended';
+
+			// mark as sold if no stock remaining
+			if ( ! $this->checkStockLevel( $item ) )
+				$data['status'] = 'sold';
+
 			$this->updateListing( $id, $data );
 			
 			$this->logger->info( "Item #$id was ended manually. " );
@@ -1164,7 +1342,7 @@ class ListingsModel extends WPL_Model {
 		// preparation
 		$this->initServiceProxy($session);
 
-		$this->_cs->setHandler('ItemType', array(& $this, 'updateItemDetail'));
+		$this->_cs->setHandler('ItemType', array(& $this, 'handleItemDetail'));
 
 		// download the shipping data
 		$req = new GetItemRequestType();
@@ -1184,7 +1362,7 @@ class ListingsModel extends WPL_Model {
 	}
 
 
-	function updateItemDetail($type, & $Detail)
+	function handleItemDetail($type, & $Detail)
 	{
 		global $wpdb;
 		
@@ -1231,7 +1409,7 @@ class ListingsModel extends WPL_Model {
 		#$this->logger->info( mysql_error() );
 
 		return true;
-	} // updateItemDetail()
+	} // handleItemDetail()
 
 	function mapItemDetailToDB( $Detail )
 	{
@@ -1256,7 +1434,7 @@ class ListingsModel extends WPL_Model {
 				$new_var = array();
 				$new_var['sku']      = $Variation->SKU;
 				$new_var['price']    = $Variation->StartPrice->value;
-				$new_var['stock']    = $Variation->Quantity;
+				$new_var['stock']    = $Variation->Quantity - $Variation->SellingStatus->QuantitySold;
 
 				$new_var['variation_attributes'] = array();
 				foreach ( $Variation->VariationSpecifics as $VariationSpecifics ) {
@@ -1264,10 +1442,15 @@ class ListingsModel extends WPL_Model {
 					$new_var['variation_attributes'][ $name ] = $VariationSpecifics->Value[0]; 
 				}
 				
+				// use SKU as array key - or generate key from attributes
 				$key = $Variation->SKU;
+				if ( ! $key ) $key = $this->generateVariationKeyFromAttributes( $new_var['variation_attributes'] );
+
+				// add variation to cache
 				$variations[$key] = $new_var;
 			}
 			$data['variations'] = maybe_serialize( $variations );
+			$this->logger->info('updated variations cache: '.print_r($variations,1) );
 			// echo "<pre>";print_r($variations);echo"</pre>";
 
 			// if this item has variations, we don't update quantity
@@ -1278,6 +1461,12 @@ class ListingsModel extends WPL_Model {
 		// set status to ended if end_date is in the past
 		if ( time() > mysql2date('U', $data['end_date']) ) {
 			$data['status'] 		= 'ended';
+
+			// but mark as sold if no stock remaining
+			$lm = new ListingsModel();
+			$item = $lm->getItemByEbayID( $data['ebay_id'] );
+			if ( $item && ! $this->checkStockLevel( $item ) ) $data['status'] = 'sold';
+
 		} else {
 			$data['status'] 		= 'published';			
 		}
@@ -1546,6 +1735,18 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
+	function getAllLockedWithProfile( $profile_id ) {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE locked = '1'
+			  AND profile_id = '$profile_id'
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
 	function getAllPreparedWithTemplate( $template ) {
 		global $wpdb;	
 		$items = $wpdb->get_results("
@@ -1589,6 +1790,7 @@ class ListingsModel extends WPL_Model {
 			SELECT id 
 			FROM $this->tablename
 			WHERE NOT status = 'ended'
+			  AND NOT status = 'sold'
 			  AND NOT status = 'archived'
 			  AND NOT listing_duration = 'GTC'
 			  AND end_date < NOW()
@@ -1785,7 +1987,6 @@ class ListingsModel extends WPL_Model {
 	}
 
 	function calculateProfilePrice( $product_price, $profile_price ) {
-	
 		$this->logger->debug('calculateProfilePrice(): '.$product_price.' - '.$profile_price );
 
 		// remove all spaces from profile setting
@@ -1794,56 +1995,52 @@ class ListingsModel extends WPL_Model {
 		// return product price if profile is empty
 		if ( $profile_price == '' ) return $product_price;
 	
-		// handle percent
-		if ( preg_match('/\%/',$profile_price) ) {
+		// parse percent syntax
+		// examples: +10% | -10% | 90%
+		if ( preg_match('/([\+\-]?)([0-9\.]+)(\%)/',$profile_price, $matches) ) {
 			$this->logger->debug('percent mode');
-		
-			// parse percent syntax
-			if ( preg_match('/([\+\-]?)([0-9\.]+)(\%)/',$profile_price, $matches) ) {
-				$this->logger->debug('matches:' . print_r($matches,1) );
+			$this->logger->debug('matches:' . print_r($matches,1) );
 
-				$modifier = $matches[1];
-				$value = $matches[2];
-				
-				if ($modifier == '+') {
-					return $product_price + ( $product_price * $value/100 );							
-				} elseif ($modifier == '-') {
-					return $product_price - ( $product_price * $value/100 );				
-				} else {
-					return ( $product_price * $value/100 );
-				}
+			$modifier      = $matches[1];
+			$value         = $matches[2];
+			$fullexpr      = $matches[1].$matches[2].$matches[3];
+			$profile_price = str_replace( $fullexpr, '', $profile_price ); // remove matched expression from profile price
 			
+			if ($modifier == '+') {
+				$product_price = $product_price + ( $product_price * $value/100 );							
+			} elseif ($modifier == '-') {
+				$product_price = $product_price - ( $product_price * $value/100 );				
 			} else {
-				// no valid syntax
-				return $product_price;		
-			}
-						
-		} else {
-
-			$this->logger->debug('value mode');
-		
-			// parse value syntax
-			if ( preg_match('/([\+\-]?)([0-9\.]+)/',$profile_price, $matches) ) {
-				$this->logger->debug('matches:' . print_r($matches,1) );
-
-				$modifier = $matches[1];
-				$value = $matches[2];
-				
-				if ($modifier == '+') {
-					return $product_price + $value;				
-				} elseif ($modifier == '-') {
-					return $product_price - $value;				
-				} else {
-					return $value;
-				}
-			
-			} else {
-				// no valid syntax
-				return $product_price;		
+				$product_price =                  ( $product_price * $value/100 );
 			}
 		
 		}
+						
+		// return product price if profile is empty - or has been emptied
+		if ( $profile_price == '' ) return $product_price;
 
+
+		// parse value syntax
+		// examples: +5 | -5 | 5
+		if ( preg_match('/([\+\-]?)([0-9\.]+)/',$profile_price, $matches) ) {
+			$this->logger->debug('value mode');
+			$this->logger->debug('matches:' . print_r($matches,1) );
+
+			$modifier = $matches[1];
+			$value = $matches[2];
+			
+			if ($modifier == '+') {
+				$product_price = $product_price + $value;				
+			} elseif ($modifier == '-') {
+				$product_price = $product_price - $value;				
+			} else {
+				$product_price =                  $value;
+			}
+		
+		}
+	
+		return $product_price;		
+	
 	} // calculateProfilePrice()
 
 	public function applyProfileToItem( $profile, $item, $update_title = true ) {
@@ -1939,6 +2136,7 @@ class ListingsModel extends WPL_Model {
 		
 		// default new status is 'prepared'
 		$data['status'] = 'prepared';
+
 		// except for already published items where it is 'changed'
 		if ( intval($ebay_id) > 0 ) 		$data['status'] = 'changed';
 		
@@ -1946,13 +2144,19 @@ class ListingsModel extends WPL_Model {
 		if ( $status == 'ended' ) 			$data['status'] = 'ended';
 		if ( $status == 'sold'  ) 			$data['status'] = 'sold';
 		if ( $status == 'archived' ) 		$data['status'] = 'archived';
-		// reselected items have already been 'ended'
-		if ( $status == 'reselected' ) 		$data['status'] = 'ended';
 
 		// locked items simply keep their status
-		if ( @$item['locked'] ) 			$data['status'] = $item['status'];
+		if ( @$item['locked'] ) 			$data['status'] = $status;
+
+		// but if apply_changes_to_all_locked checkbox is ticked, even locked published items will be marked as 'changed'
+		if ( @$item['locked'] && ($status == 'published') && isset($_POST['wpl_e2e_apply_changes_to_all_locked']) )
+											$data['status'] = 'changed';
+
 		// except for selected items which shouldn't be locked in the first place
 		if ( $status == 'selected' ) 		$data['status'] = 'prepared';
+		// and reselected items which have already been 'ended'
+		if ( $status == 'reselected' ) 		$data['status'] = 'ended';
+		// and items which have already been 'changed' and now had a new profile applied
 		if ( $status == 'changed_profile' ) $data['status'] = 'changed';
 
 		// debug

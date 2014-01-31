@@ -58,6 +58,24 @@
 					</div>
 
 
+
+					<?php if ( $expdate = get_option( 'wplister_ebay_token_expirationtime' ) ) : ?>
+					<div class="postbox" id="TokenExpiryBox">
+						<h3 class="hndle"><span><?php echo __('eBay Token','wplister') ?></span></h3>
+						<div class="inside">
+
+							<p>
+								<?php echo sprintf( __('Your token will expire in %s.','wplister'), human_time_diff( strtotime($expdate) ) ) ?>
+								<!-- expdate <?php echo $expdate ?> -->
+							</p>
+							<p>
+								<?php echo __('When it expires, you will need to re-authenticate WP-Lister with your eBay account.','wplister') ?>
+							</p>
+
+						</div>
+					</div>
+					<?php endif; ?>
+
 				</div>
 			</div> <!-- #postbox-container-1 -->
 
@@ -141,9 +159,10 @@
 							</label>
 							<select id="wpl-option-php_error_handling" name="wpl_e2e_php_error_handling" class=" required-entry select">
 								<option value="0" <?php if ( $wpl_php_error_handling == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('Production Mode','wplister'); ?> (default)</option>
-								<option value="1" <?php if ( $wpl_php_error_handling == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Show all errors','wplister'); ?></option>
-								<option value="2" <?php if ( $wpl_php_error_handling == '2' ): ?>selected="selected"<?php endif; ?>><?php echo __('Show errors on shutdown','wplister'); ?></option>
-								<option value="3" <?php if ( $wpl_php_error_handling == '3' ): ?>selected="selected"<?php endif; ?>><?php echo __('Show all errors on shutdown','wplister'); ?></option>
+								<option value="1" <?php if ( $wpl_php_error_handling == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Show all errors inline','wplister'); ?></option>
+								<option value="2" <?php if ( $wpl_php_error_handling == '2' ): ?>selected="selected"<?php endif; ?>><?php echo __('Show fatal errors on shutdown','wplister'); ?></option>
+								<option value="3" <?php if ( $wpl_php_error_handling == '3' ): ?>selected="selected"<?php endif; ?>><?php echo __('Show errors inline and on shutdown','wplister'); ?></option>
+								<option value="6" <?php if ( $wpl_php_error_handling == '6' ): ?>selected="selected"<?php endif; ?>><?php echo __('Show fatal and non-fatal errors on shutdown','wplister'); ?></option>
 							</select>
 
 							<label for="wpl-option-ajax_error_handling" class="text_label">

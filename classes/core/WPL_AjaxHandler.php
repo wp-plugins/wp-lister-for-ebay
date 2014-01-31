@@ -515,7 +515,7 @@ class WPL_AjaxHandler extends WPL_Core {
 
 		// build response
 		$response = new stdClass();
-		$response->msg    = $job->item['job_name'].' comleted';
+		$response->msg    = $job->item['job_name'].' completed';
 		$response->error    = '';
 		$response->success  = true;
 		$response->job_key = $job->key;

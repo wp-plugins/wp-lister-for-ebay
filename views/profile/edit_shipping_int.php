@@ -26,6 +26,15 @@
 								<?php foreach ($item_details['int_shipping_options'] as $service) : ?>
 								<tr class="row">
 									<td>
+										<?php if ( ! isset( $service['location'] ) ) $service['location'] = ''; // prevent undefined index warning on old profiles ?>
+										<?php $service['location'] = is_array( $service['location'] ) ? $service['location'] : array( $service['location'] ); ?>
+										<select multiple="multiple" class="chosen_select select_location" id="" name="wpl_e2e_int_shipping_options_flat[][location][]" data-placeholder="Select locations" style="">
+											<?php
+												foreach ( $wpl_shipping_locations as $location => $desc )
+													echo '<option value="' . $location . '" ' . selected( ! empty( $service['location'] ) && in_array( $location, $service['location'] ), true ) . '>' . $desc . '</option>';
+											?>
+										</select>
+										<!--
 										<select name="wpl_e2e_int_shipping_options_flat[][location]" 
 												title="Location" class="required-entry select select_location" style="width:100%;">
 											<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
@@ -37,6 +46,7 @@
 													><?php echo $desc ?></option>
 											<?php endforeach; ?>
 										</select>
+										-->
 									</td><td>
 										<!-- flat shipping services -->
 										<select name="wpl_e2e_int_shipping_options_flat[][service_name]" 
@@ -84,6 +94,14 @@
 										<?php ProfilesPage::wpl_generate_shipping_option_tags( $wpl_int_calc_shipping_options, $service ) ?>											
 										</select>
 									</td><td>
+										<?php $service['location'] = is_array( $service['location'] ) ? $service['location'] : array( $service['location'] ); ?>
+										<select multiple="multiple" class="chosen_select select_location" id="" name="wpl_e2e_int_shipping_options_calc[][location][]" data-placeholder="Select locations" style="">
+											<?php
+												foreach ( $wpl_shipping_locations as $location => $desc )
+													echo '<option value="' . $location . '" ' . selected( ! empty( $service['location'] ) && in_array( $location, $service['location'] ), true ) . '>' . $desc . '</option>';
+											?>
+										</select>
+										<!--
 										<select name="wpl_e2e_int_shipping_options_calc[][location]" 
 												title="Location" class="required-entry select select_location" style="width:100%;">
 											<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
@@ -95,6 +113,7 @@
 													><?php echo $desc ?></option>
 											<?php endforeach; ?>
 										</select>
+										-->
 									</td><td>
 										<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary" 
 											onclick="jQuery(this).parent().parent().remove();" />
@@ -147,6 +166,20 @@
 									<?php foreach ($wpl_shipping_flat_profiles as $shipping_profile) : ?>
 										<option value="<?php echo $shipping_profile->DiscountProfileID ?>" <?php if ( @$item_details['shipping_int_flat_profile'] == $shipping_profile->DiscountProfileID ): ?>selected="selected"<?php endif; ?>><?php echo $shipping_profile->DiscountProfileName ?></option>
 									<?php endforeach; ?>
+								</select>
+								
+							</div>
+
+							<div class="service_table_flat service_table_calc" >
+
+								<label class="text_label">
+									<?php echo __('Promotional shipping discount','wplister'); ?>
+		                            <?php wplister_tooltip('This specifies whether to offer the promotional shipping discount for international shipping services (only applicable if the seller has a promotional shipping discount in effect at the moment.') ?>
+								</label>
+								<select name="wpl_e2e_InternationalPromotionalShippingDiscount" id="wpl-InternationalPromotionalShippingDiscount" 
+										title="Type" class="required-entry select select_InternationalPromotionalShippingDiscount" style="width:auto">
+									<option value="0" <?php if ( @$item_details['InternationalPromotionalShippingDiscount'] != 1 ): ?>selected="selected"<?php endif; ?> ><?php echo __('No','wplister') ?></option>
+									<option value="1" <?php if ( @$item_details['InternationalPromotionalShippingDiscount'] == 1 ): ?>selected="selected"<?php endif; ?> ><?php echo __('Yes','wplister') ?></option>
 								</select>
 								
 							</div>

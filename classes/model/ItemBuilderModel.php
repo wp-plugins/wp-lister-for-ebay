@@ -113,6 +113,8 @@ class ItemBuilderModel extends WPL_Model {
 		// adjust item if this is a ReviseItem request
 		if ( $reviseItem ) {
 			$item = $this->adjustItemForRevision( $id, $item, $profile_details, $listing );			
+		} else {
+			$item = $this->buildSchedule( $item, $profile_details );						
 		}
 	
 		// add UUID to prevent duplicate AddItem or RelistItem calls
@@ -446,7 +448,11 @@ class ItemBuilderModel extends WPL_Model {
 		$item->PictureDetails = new PictureDetailsType();
 		$item->PictureDetails->setGalleryURL( $this->encodeUrl( $main_image ) );
 		$item->PictureDetails->addPictureURL( $this->encodeUrl( $main_image ) );
-		if ( $profile_details['with_gallery_image'] ) $item->PictureDetails->GalleryType = 'Gallery';
+		
+		// handle gallery type
+		$gallery_type = isset( $profile_details['gallery_type'] ) ? $profile_details['gallery_type'] : 'Gallery';
+		$gallery_type = in_array( $gallery_type, array('Gallery','Plus','Featured') ) ? $gallery_type : 'Gallery';
+		if ( $profile_details['with_gallery_image'] ) $item->PictureDetails->GalleryType = $gallery_type;
         
 
 		return $item;
@@ -461,13 +467,16 @@ class ItemBuilderModel extends WPL_Model {
 
 		if ( $product_sku ) $item->SKU = $product_sku;
 
+		// include prefilled info by default
+		$include_prefilled_info = isset( $profile_details['include_prefilled_info'] ) ? (bool)$profile_details['include_prefilled_info'] : true;  
+
 		// set UPC from SKU - if enabled
 		if ( ($product_sku) && ( @$profile_details['use_sku_as_upc'] == '1' ) ) {
 			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setUPC( $product_sku );
 			$ProductListingDetails->setListIfNoProduct( true );
 			$ProductListingDetails->setIncludeStockPhotoURL( true );
-			$ProductListingDetails->setIncludePrefilledItemInformation( true );
+			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
 			$ProductListingDetails->setUseFirstProduct( true );
 			// $ProductListingDetails->setUseStockPhotoURLAsGallery( true );
 			$item->setProductListingDetails( $ProductListingDetails );
@@ -479,7 +488,7 @@ class ItemBuilderModel extends WPL_Model {
 			$ProductListingDetails->setUPC( $product_upc );
 			$ProductListingDetails->setListIfNoProduct( true );
 			$ProductListingDetails->setIncludeStockPhotoURL( true );
-			$ProductListingDetails->setIncludePrefilledItemInformation( true );
+			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
 			$ProductListingDetails->setUseFirstProduct( true );
 			$item->setProductListingDetails( $ProductListingDetails );
 		}
@@ -558,6 +567,11 @@ class ItemBuilderModel extends WPL_Model {
 			$item->setPrivateListing( true );
 		}
 
+		// bold title
+		if ( @$profile_details['bold_title'] == 1 ) {
+			$item->setListingEnhancement('BoldTitle');
+		}
+
 		$item->setHitCounter( $profile_details['counter_style'] );
 		// $item->setListingEnhancement('Highlight');
 
@@ -565,6 +579,14 @@ class ItemBuilderModel extends WPL_Model {
 
 		return $item;
 	} /* end of buildProfileOptions() */
+
+
+	// schedule listing
+	public function buildSchedule( $item, $profile_details ) {
+
+
+		return $item;
+	} /* end of buildSchedule() */
 
 
 	public function buildPayment( $item, $profile_details ) {
@@ -708,6 +730,15 @@ class ItemBuilderModel extends WPL_Model {
 				$InternationalShippingServiceOptions = new InternationalShippingServiceOptionsType();
 				$InternationalShippingServiceOptions->setShippingService( $opt['service_name'] );
 				$InternationalShippingServiceOptions->setShippingServicePriority($pr);
+				// $InternationalShippingServiceOptions->setShipToLocation( $opt['location'] );
+				if ( is_array( $opt['location'] ) ) {
+					foreach ( $opt['location'] as $location ) {
+						$InternationalShippingServiceOptions->addShipToLocation( $location );
+					}
+				} else {
+					$InternationalShippingServiceOptions->setShipToLocation( $opt['location'] );
+				}
+
 				$InternationalShippingServiceOptions->setShipToLocation( $opt['location'] );
 
 				// set shipping costs for flat services
@@ -808,6 +839,16 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $int_profile_id ) {
 			$shippingDetails->setInternationalShippingDiscountProfileID( $int_profile_id );
 		}
+
+		// PromotionalShippingDiscount
+		$PromotionalShippingDiscount = isset( $profile_details['PromotionalShippingDiscount'] ) ?  $profile_details['PromotionalShippingDiscount'] : false;						
+		if ( $PromotionalShippingDiscount == '1' )
+			$shippingDetails->setPromotionalShippingDiscount( true );
+
+		// InternationalPromotionalShippingDiscount
+		$InternationalPromotionalShippingDiscount = isset( $profile_details['InternationalPromotionalShippingDiscount'] ) ?  $profile_details['InternationalPromotionalShippingDiscount'] : false;						
+		if ( $InternationalPromotionalShippingDiscount == '1' ) 
+			$shippingDetails->setInternationalPromotionalShippingDiscount( true );
 
 
 		// ShipToLocations 
@@ -953,7 +994,7 @@ class ItemBuilderModel extends WPL_Model {
 
         if ( count($ItemSpecifics) > 0 ) {
     		$item->setItemSpecifics( $ItemSpecifics );        	
-			$this->logger->info( count($ItemSpecifics) . "item specifics were added.");
+			$this->logger->info( count($ItemSpecifics) . " item specifics were added.");
         }
 
 		return $item;
@@ -1094,7 +1135,7 @@ class ItemBuilderModel extends WPL_Model {
             $first_variation = reset( $variations );
 			$weight_major = $first_variation['weight_major'];
 			$weight_minor = $first_variation['weight_minor'];
-			$dimensions = $first_variation['dimensions'];
+			$dimensions   = $first_variation['dimensions'];
 
 			$item->ShippingDetails->CalculatedShippingRate->setWeightMajor( floatval( $weight_major ) );
 			$item->ShippingDetails->CalculatedShippingRate->setWeightMinor( floatval( $weight_minor ) );
@@ -1102,6 +1143,15 @@ class ItemBuilderModel extends WPL_Model {
 			if ( trim( @$dimensions['width']  ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageWidth( $dimensions['width'] );
 			if ( trim( @$dimensions['length'] ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageLength( $dimensions['length'] );
 			if ( trim( @$dimensions['height'] ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageDepth( $dimensions['height'] );
+
+			// update ShippingPackageDetails with weight and dimensions of first variations
+			$shippingPackageDetails = new ShipPackageDetailsType();
+			$shippingPackageDetails->setWeightMajor( floatval( $weight_major) );
+			$shippingPackageDetails->setWeightMinor( floatval( $weight_minor) );
+			if ( trim( @$dimensions['width']  ) != '' ) $shippingPackageDetails->setPackageWidth( $dimensions['width'] );
+			if ( trim( @$dimensions['length'] ) != '' ) $shippingPackageDetails->setPackageLength( $dimensions['length'] );
+			if ( trim( @$dimensions['height'] ) != '' ) $shippingPackageDetails->setPackageDepth( $dimensions['height'] );
+			$item->setShippingPackageDetails( $shippingPackageDetails );
 
 			// debug
 			$this->logger->info('first variations weight: '.print_r($weight,1));
@@ -1193,6 +1243,7 @@ class ItemBuilderModel extends WPL_Model {
 		// $p = $this->lm->getItem( $id );
         $variations      = ProductWrapper::getVariations( $post_id );
         $this->variationAttributes = array();
+        $total_stock = 0;
 
         // find default variation
         $default_variation = reset( $variations );
@@ -1206,7 +1257,13 @@ class ItemBuilderModel extends WPL_Model {
 	        	$this->variationAttributes[] = $name;
 	        }
 
+	        // count total stock
+	        $total_stock += $var['stock'];
         }
+
+        // list accumulated stock quantity if not set in profile
+        if ( ! $item->Quantity )
+        	$item->Quantity = $total_stock;
 
 		// fetch default variations start price
 		if ( intval($item->StartPrice->value) == 0 ) {
@@ -1272,7 +1329,7 @@ class ItemBuilderModel extends WPL_Model {
 
 
 
-	public function checkItem( $item ) {
+	public function checkItem( $item, $reviseItem = false ) {
 
 		$success = true;
 		$this->VariationsHaveStock = false;
@@ -1339,7 +1396,7 @@ class ItemBuilderModel extends WPL_Model {
 				// $success = false;
 			}
 
-			if ( ! $VariationsHaveStock ) {
+			if ( ! $VariationsHaveStock && ! $reviseItem ) {
 				$longMessage = __('None of these variations are in stock.','wplister');
 				$success = false;
 			}
@@ -1487,6 +1544,9 @@ class ItemBuilderModel extends WPL_Model {
 		// load template
 		$template = new TemplatesModel( $item['template'] );
 		$html = $template->processItem( $item );
+
+		// strip invalid XML characters
+		$html = $this->stripInvalidXml( $html );
 
 		// return html
 		return $html;
@@ -1662,6 +1722,37 @@ class ItemBuilderModel extends WPL_Model {
 		$url = str_replace('%3A', ':', $url );
 		return $url;
 	}
-	
 
-}
+	// Removes invalid XML characters
+	// Not all valid utf-8 characters are allowed in XML documents. For XML 1.0 the standard says:
+	// Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+	function stripInvalidXml( $value ) {
+	    $ret = "";
+	    $current;
+	    if (empty($value))
+	        return $ret;
+
+	    $length = strlen($value);
+	    for ($i=0; $i < $length; $i++) {
+
+	        $current = ord($value{$i});
+	        if (($current == 0x9) ||
+	            ($current == 0xA) ||
+	            ($current == 0xD) ||
+	            (($current >= 0x20) && ($current <= 0xD7FF)) ||
+	            (($current >= 0xE000) && ($current <= 0xFFFD)) ||
+	            (($current >= 0x10000) && ($current <= 0x10FFFF))) {
+
+	            $ret .= chr($current);
+
+	        } else {
+
+	            $ret .= " ";
+
+	        }
+	    }
+
+	    return $ret;	    
+	} // stripInvalidXml()
+
+} // class ItemBuilderModel

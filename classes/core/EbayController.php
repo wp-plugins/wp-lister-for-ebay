@@ -98,7 +98,7 @@ class EbayController {
         
     }
  
-    // do getTokenExpirationTime and save to DB
+    // do getTokenExpirationTime and save to DB (deprecated)
     public function getTokenExpirationTime( $site_id, $sandbox_enabled ){ 
 
         $token = get_option('wplister_ebay_token');

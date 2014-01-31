@@ -48,6 +48,9 @@ class WPL_EbatNs_Logger{
 			} elseif ( preg_match("/<ErrorCode>(.*)<\/ErrorCode>/", $msg, $matches) ) {
 				$this->success = 'Error '.$matches[1];
 				$data['success'] = $this->success;
+			} elseif ( preg_match("/<soapenv:Fault>/", $msg, $matches) ) {
+				$this->success = 'SOAP Error';
+				$data['success'] = $this->success;
 			}
 		}
 		// extract ItemID from request
@@ -70,6 +73,13 @@ class WPL_EbatNs_Logger{
 				$this->callname = $matches[1];
 				$data['callname'] = $this->callname;
 			}
+		}
+
+		// handle curl_error
+		if ( $subject == 'curl_error' ) {
+			$this->success = 'Failure';
+			$data['success']  = $this->success;
+			$data['response'] = 'cURL error: '.$msg;
 		}
 
 		// assign msg

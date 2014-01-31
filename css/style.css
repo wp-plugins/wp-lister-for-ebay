@@ -290,17 +290,17 @@ img.tips {
 
 
 /* MP6 */
-.version-3-8     div.update-nag,
+.branch-3-8      div.update-nag,
 .admin-color-mp6 div.update-nag {
 	border-left: 4px solid #ffba00;
 }
 
-.version-3-8     #wpl-sandbox-reminder-wrap a.show-settings,
+.branch-3-8      #wpl-sandbox-reminder-wrap a.show-settings,
 .admin-color-mp6 #wpl-sandbox-reminder-wrap a.show-settings {
 	padding: 0 0 0 10px;
 }
 
-.version-3-8     #wpl-sandbox-reminder-wrap,
+.branch-3-8      #wpl-sandbox-reminder-wrap,
 .admin-color-mp6 #wpl-sandbox-reminder-wrap {
 	height: 22px;
 	padding: 3px 6px;
@@ -309,7 +309,7 @@ img.tips {
     border-bottom-right-radius: 0;
 }
 
-.version-3-8     #wpl-sandbox-reminder-wrap a:after,
+.branch-3-8      #wpl-sandbox-reminder-wrap a:after,
 .admin-color-mp6 #wpl-sandbox-reminder-wrap a:after {
 	content: '';
 	margin-right: 5px;

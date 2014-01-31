@@ -23,7 +23,10 @@
 
 <div class="wrap">
 	<div class="icon32" style="background: url(<?php echo $wpl_plugin_url; ?>img/hammer-32x32.png) no-repeat;" id="wpl-icon"><br /></div>
-	<h2><?php echo __('Logs','wplister') ?></h2>
+	<h2>
+		<?php echo __('Logs','wplister') ?>
+		<a href="<?php echo $wpl_form_action; ?>" class="add-new-h2">Refresh</a>
+	</h2>
 	<?php echo $wpl_message ?>
 
 

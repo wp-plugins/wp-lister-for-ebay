@@ -3,17 +3,17 @@
 Plugin Name: WP-Lister for eBay
 Plugin URI: http://www.wplab.com/plugins/wp-lister/
 Description: List your products on eBay the easy way.
-Version: 1.3.3
+Version: 1.3.5
 Author: Matthias Krok
 Author URI: http://www.wplab.com/ 
-Max WP Version: 3.8
+Max WP Version: 3.8.1
 Text Domain: wp-lister
 License: GPL2+
 */
 
 
 // include base classes
-define('WPLISTER_VERSION', '1.3.3' );
+define('WPLISTER_VERSION', '1.3.5' );
 define('WPLISTER_PATH', realpath( dirname(__FILE__) ) );
 define('WPLISTER_URL', plugins_url() . '/' . basename(dirname(__FILE__)) . '/' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Autoloader.php' );
@@ -23,6 +23,7 @@ require_once( WPLISTER_PATH . '/classes/core/WPL_Logger.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_EbatNs_Logger.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Page.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Model.php' );
+require_once( WPLISTER_PATH . '/classes/core/WPL_CronActions.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_AjaxHandler.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Setup.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Install_Uninstall.php' );
@@ -31,6 +32,7 @@ require_once( WPLISTER_PATH . '/classes/core/WPL_Functions.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_API_Hooks.php' );
 require_once( WPLISTER_PATH . '/classes/core/EbayController.php' );
 require_once( WPLISTER_PATH . '/classes/integration/WooFrontendIntegration.php' );
+require_once( WPLISTER_PATH . '/classes/integration/WooOrderBuilder.php' );
 
 // set up autoloader
 spl_autoload_register('WPL_Autoloader::autoload');
@@ -58,7 +60,6 @@ class WPL_WPLister extends WPL_BasePlugin {
 			$oUninstall = new WPLister_Uninstall( __FILE__ );
 			$this->loadPages();
 		}
-
 
 	}
 		
@@ -94,7 +95,7 @@ class WPL_WPLister extends WPL_BasePlugin {
 		load_plugin_textdomain( 'wplister', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );	
 
 		// add cron handler
-		add_action('wplister_update_auctions', array( &$this, 'cron_update_auctions' ) );
+		// add_action('wplister_update_auctions', array( &$this, 'cron_update_auctions' ) );
 
 	}
 
@@ -171,30 +172,6 @@ class WPL_WPLister extends WPL_BasePlugin {
         wp_enqueue_script( 'jquery-tiptip' );
 
 	}
-	
-	// update auctions - called by wp_cron if activated
-	public function cron_update_auctions() {
-        $this->logger->info("WP-CRON: cron_update_auctions()");
-
-		$this->initEC();
-		
-		// decide if the old transactions update or the new orders update mode is to be used
-		$mode = get_option( 'wplister_ebay_update_mode', 'order' );
-		if ( $mode == 'order' ) {
-			$this->EC->updateEbayOrders(); // new
-		} else {
-			$this->EC->loadTransactions(); // old
-		}
-
-		// update ended items and process relist schedule
-		$this->EC->updateListings(); 
-
-		$this->EC->closeEbay();
-        $this->logger->info("WP-CRON: cron_update_auctions() finished");
-	}
-
-
-
 	
 } // class WPL_WPLister
 

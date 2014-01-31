@@ -425,6 +425,23 @@ class EbayOrdersModel extends WPL_Model {
 		$data['items'] = serialize( $items );
 
 
+		// maybe skip orders from foreign sites
+		if ( get_option( 'wplister_skip_foreign_site_orders' ) ) {
+
+			// get WP-Lister eBay site
+			$ebay_sites	   = EbayController::getEbaySites();
+			$wplister_site = $ebay_sites[ get_option( 'wplister_ebay_site_id' ) ];
+
+			// check if sites match - skip if they don't
+			if ( $Transaction->TransactionSiteID != $wplister_site ) {
+				$this->logger->info( "skipped order #".$Detail->OrderID." from foreign site #".$Detail->Item->Site." / ".$Transaction->TransactionSiteID );			
+				$this->addToReport( 'skipped', $data );
+				return false;						
+			}
+
+		}
+
+
         // save GetOrders reponse in details
 		$data['details'] = $this->encodeObject( $Detail );
 
@@ -487,7 +504,7 @@ class EbayOrdersModel extends WPL_Model {
 		if ( $this->count_failed ) $html .= __('Orders failed to create','wplister')  .': '. $this->count_failed  .' '. '<br>';
 		$html .= '<br>';
 
-		if ( $this->count_skipped ) $html .= __('Note: Foreign orders for which no matching item ID could be found in WP-Lister\'s listings table were skipping during update.','wplister') . '<br><br>';
+		if ( $this->count_skipped ) $html .= __('Note: Orders from foreign eBay sites were skipping during update.','wplister') . '<br><br>';
 
 		$html .= '<table style="width:99%">';
 		$html .= '<tr>';
@@ -609,8 +626,8 @@ class EbayOrdersModel extends WPL_Model {
 			$tm = new TransactionsModel();
 			$lastdate = $tm->getDateOfLastCreatedTransaction();
 			if ($lastdate) {
-				// add one minute to prevent importing the same transaction again
-				$lastdate = mysql2date('U', $lastdate) + 60;
+				// add two minutes to prevent importing the same transaction again
+				$lastdate = mysql2date('U', $lastdate) + 120;
 				$lastdate = date('Y-m-d H:i:s', $lastdate );
 			}
 		}

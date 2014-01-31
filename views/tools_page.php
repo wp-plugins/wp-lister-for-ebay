@@ -147,21 +147,12 @@
 			<div class="meta-box-sortables ui-sortable">
 				
 				<div class="postbox" id="UpdateToolsBox">
-					<h3 class="hndle"><span><?php echo __('Tools','wplister'); ?></span></h3>
+					<h3 class="hndle"><span><?php echo __('Updates','wplister'); ?></span></h3>
 					<div class="inside">
 
 						<!-- Update eBay data --> 
 						<a id="btn_update_ebay_data" class="button-secondary right"><?php echo __('Update eBay data','wplister'); ?></a>
 						<p><?php echo __('This will load available categories, shipping services, payment options and your custom store categories from eBay','wplister'); ?></p>
-						<br style="clear:both;"/>
-
-						<!-- Force update check --> 
-						<form method="post" action="<?php echo $wpl_form_action; ?>">
-								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
-								<input type="hidden" name="action" value="force_update_check" />
-								<input type="submit" value="<?php echo __('Force update check','wplister'); ?>" name="submit" class="button-secondary">
-								<p><?php echo __('Since WordPress only checks twice a day for plugin updates, it might be neccessary to force an immediate update check if you want to install an update which was released within the last hours.','wplister'); ?></p>
-						</form>
 						<br style="clear:both;"/>
 
 						<!-- Update user details --> 
@@ -174,7 +165,16 @@
 						</form>
 						<br style="clear:both;"/>
 
-						<?php if ( 'order' == get_option( 'wplister_ebay_update_mode', 'order' ) ) : ?>
+						<!-- Force update check --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="force_update_check" />
+								<input type="submit" value="<?php echo __('Force update check','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('Since WordPress only checks twice a day for plugin updates, it might be neccessary to force an immediate update check if you want to install an update which was released within the last hours.','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
+						<?php /* if ( 'order' == get_option( 'wplister_ebay_update_mode', 'order' ) ) : ?>
 
 						<!-- Update eBay orders --> 
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
@@ -196,7 +196,38 @@
 						</form>
 						<br style="clear:both;"/>
 
-						<?php endif; ?>
+						<?php endif; */ ?>
+
+					</div>
+				</div> <!-- postbox -->
+
+				<div class="postbox" id="InventoryToolBox" style="display:block;">
+					<h3 class="hndle"><span><?php echo __('Inventory Check','wplister'); ?></span></h3>
+					<div class="inside">
+
+						<!-- check for out of sync products --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="check_wc_out_of_sync" />
+								<input type="submit" value="<?php echo __('Check product inventory','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('Check all published listings and find products with different stock or price in WooCommerce.','wplister'); ?>
+									<br>
+									<small>Note: If you are using price modifiers in your profile, this check could find false positives which are actually in sync.</small>
+								</p>
+						</form>
+						<br style="clear:both;"/>
+
+						<!-- check for out of stock products --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="check_wc_out_of_stock" />
+								<input type="submit" value="<?php echo __('Check product stock','wplister'); ?>" name="submit" class="button-secondary">
+								<p><?php echo __('Check all published listings and find products which are out of stock in WooCommerce.','wplister'); ?>
+									<br>
+									<small>Note: This doesn't work for variable products at this time.<br>Please use the "Check product inventory" button above instead.</small>
+								</p>
+						</form>
+						<br style="clear:both;"/>
 
 					</div>
 				</div> <!-- postbox -->

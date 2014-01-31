@@ -17,9 +17,20 @@ class WPL_WooFrontendIntegration {
 
 
 	// show current ebay status - WooCommerce 2.0 only
-	function handle_add_to_cart_link( $html, $product, $link ) {
+	function handle_add_to_cart_link( $html, $product, $link = false ) {
 
-		if ( get_option( 'wplister_local_auction_display', 'off' ) != 'off' ) {
+		$auction_display_mode = get_option( 'wplister_local_auction_display', 'off' );
+
+		if ( $auction_display_mode == 'forced' ) {
+
+			if ( $listing = $this->is_on_ebay( $product->id ) ) {
+
+				// replace add to cart button with view details button
+				$html = sprintf('<a href="%s" class="add_to_cart_button button product_type_simple">%s</a>', get_permalink( $product->id ), __('View details','wplister') );
+
+			}
+
+		} elseif ( $auction_display_mode != 'off' ) {
 
 			if ( $listing = $this->is_on_auction( $product->id ) ) {
 
@@ -38,7 +49,23 @@ class WPL_WooFrontendIntegration {
 	function show_single_product_info() {
 		global $post;
 
-		if ( get_option( 'wplister_local_auction_display', 'off' ) != 'off' ) {
+		$auction_display_mode = get_option( 'wplister_local_auction_display', 'off' );
+
+		if ( $auction_display_mode == 'forced' ) {
+
+			if ( $listing = $this->is_on_ebay( $post->ID ) ) {
+
+				// view on ebay button
+				echo '<p>';
+				echo sprintf('<a href="%s" class="single_add_to_cart_button button alt" target="_blank">%s</a>', $listing->ViewItemURL, __('View on eBay','wplister') );
+				echo '</p>';
+
+				// hide woo elements
+				echo '<style> form.cart { display:none } </style>';
+
+			}
+
+		} elseif ( $auction_display_mode != 'off' ) {
 
 			if ( $listing = $this->is_on_auction( $post->ID ) ) {
 				// echo "<pre>";print_r($listing);echo"</pre>";die();
@@ -48,7 +75,7 @@ class WPL_WooFrontendIntegration {
 				if ( $details['BidCount'] == 0 ) {
 					
 					// do nothing if "only if bids" is enabled and there are more than 12 hours left
-					$auction_display_mode = get_option( 'wplister_local_auction_display', 'off' );
+					// $auction_display_mode = get_option( 'wplister_local_auction_display', 'off' );
 					$hours_left           = ( strtotime($listing->end_date) - gmdate('U') ) / 3600;
 					if ( ( $hours_left > 12 ) && ( $auction_display_mode == 'if_bid' ) ) return;
 
@@ -157,6 +184,28 @@ class WPL_WooFrontendIntegration {
 		return false;
 
 	} // is_on_auction()
+
+	// check if product is currently on ebay
+	function is_on_ebay( $post_id ) {
+
+		$lm = new ListingsModel();
+		$listings = $lm->getAllListingsFromPostID( $post_id );
+		foreach ($listings as $listing) {
+
+			// check status
+			if ( ! in_array( $listing->status, array('published','changed') ) )
+				 continue;
+
+			// check end date
+			if ( $listing->end_date )
+				if ( strtotime( $listing->end_date ) < time() ) continue;
+
+			return $listing;
+		}
+
+		return false;
+
+	} // is_on_ebay()
 
     public function add_custom_product_tabs( $tabs ) {
 		global $post;

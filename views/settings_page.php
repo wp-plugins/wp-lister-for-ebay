@@ -56,6 +56,11 @@
 												<?php if ( $wpl_ebay_user->StoreOwner ) : ?>
 												<tr><td><?php echo __('Store','wplister') . ':</td><td>' ?><a href="<?php echo $wpl_ebay_user->StoreURL ?>" target="_blank"><?php echo __('visit store','wplister') ?></a></td></tr>
 												<?php endif; ?>
+												<?php if ( $expdate = get_option( 'wplister_ebay_token_expirationtime' ) ) : ?>
+												<!--
+												<tr><td><?php echo __('eBay token valid for','wplister') . ':</td><td>' ?><?php echo human_time_diff( strtotime($expdate) ) ?></td></tr>
+												-->
+												<?php endif; ?>
 											</table>												
 										</p>
 									<?php elseif ( $wpl_text_ebay_token ): ?>

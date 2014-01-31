@@ -52,8 +52,9 @@ class WPL_BasePlugin extends WPL_Core {
 	        // fatal error has occured
 	        echo "<pre>FATAL ERROR:\n";print_r($error);echo"</pre>";
 	    } else {
-		    // general info about last error... 
-    	    echo "<pre>OK - last error was: \n";print_r($error);echo"</pre>";
+        	// third bit (4) will show non-fatal errors too
+        	if ( 2 & get_option( 'wplister_php_error_handling', 0 ) )
+    	    	echo "<pre>OK - last error was: \n";print_r($error);echo"</pre>";
 	    }
 
 		if ( $is_ajax ) echo " */";

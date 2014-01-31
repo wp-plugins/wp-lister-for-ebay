@@ -40,7 +40,7 @@ class ProfilesPage extends WPL_Page {
 			$this->duplicateProfile();
 		}
 		// handle delete action
-		if ( $this->requestAction() == 'delete' ) {
+		if ( isset( $_REQUEST['profile'] ) && ( $this->requestAction() == 'delete_profile' ) ) {
 			$this->initEC();
 			$this->EC->deleteProfiles( $_REQUEST['profile'] );
 			$this->EC->closeEbay();
@@ -143,6 +143,7 @@ class ProfilesPage extends WPL_Page {
 		$verified_listings  = $listingsModel->getAllVerifiedWithProfile( $item['profile_id'] );
 		$published_listings = $listingsModel->getAllPublishedWithProfile( $item['profile_id'] );
 		$ended_listings     = $listingsModel->getAllEndedWithProfile( $item['profile_id'] );
+		$locked_listings    = $listingsModel->getAllLockedWithProfile( $item['profile_id'] );
 
 
 		// do we have a primary category?
@@ -203,6 +204,7 @@ class ProfilesPage extends WPL_Page {
 			'verified_listings'         => $verified_listings,
 			'published_listings'        => $published_listings,
 			'ended_listings'            => $ended_listings,
+			'locked_listings'           => $locked_listings,
 			'available_dispatch_times'  => $available_dispatch_times,
 			'available_conditions'  	=> $available_conditions,
 			'available_shipping_packages' => $available_shipping_packages,

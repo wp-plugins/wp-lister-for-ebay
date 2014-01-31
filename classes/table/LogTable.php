@@ -95,6 +95,11 @@ class LogTable extends WP_List_Table {
                 $details .= ': <span style="color:#555">'.$LongMessage.'</span>';
             }
 
+            if ( preg_match("/cURL error:(.*)/", $item['response'], $matches) ) {
+                $LongMessage = $matches[1];
+                $details .= ': <span style="color:#555">'.$LongMessage.' (cURL)</span>';
+            }
+
             return '<span style="color:#B00">Failed</span>'.$details;
         }
         return $item['success'];

@@ -2,10 +2,10 @@
 
 	#side-sortables .postbox input.text_input,
 	#side-sortables .postbox select.select {
-	    width: 45%;
+	    width: 35%;
 	}
 	#side-sortables .postbox label.text_label {
-	    width: 50%;
+	    width: 60%;
 	}
 
 	#side-sortables .postbox .inside p.desc {
@@ -71,6 +71,10 @@
 
 										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_ended" value="yes" id="apply_changes_to_all_ended" <?php #if ($wpl_ended_listings) echo 'checked' ?>/>
 										<label for="apply_changes_to_all_ended"><?php printf( __('update %s ended items','wplister'), count($wpl_ended_listings) ) ?></label>
+										<br class="clear" />
+
+										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_locked" value="yes" id="apply_changes_to_all_locked" <?php #if ($wpl_locked_listings) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_locked"><?php printf( __('update %s locked items','wplister'), count($wpl_locked_listings) ) ?></label>
 
 									<?php else: ?>
 										<p>There are no prepared items using this profile.</p>
@@ -211,7 +215,7 @@
 								<p class="x-desc" style="display: block;">
 									<?php #echo __('Leave this empty to list all available items.','wplister'); ?>
 									<?php #echo __('"Fixed quantity" should be empty to use inventory sync, "Maximum quantity" is effective only with inventory sync.','wplister'); ?>
-									<?php echo __('Custom quantities to not apply to locked listings.','wplister'); ?>
+									<?php echo __('Custom quantities do not apply to locked listings.','wplister'); ?>
 									<?php echo __('Leave this empty to use inventory sync!','wplister'); ?>
 								</p>
 
@@ -274,6 +278,15 @@
 								<hr>
 							</p>
 
+							<label for="wpl-text-bold_title" class="text_label">
+								<?php echo __('Bold title','wplister'); ?>
+                                <?php wplister_tooltip('Select if you want the listing title to be in boldface type. Applicable listing fees apply. Not applicable to eBay Motors.') ?>
+							</label>
+							<select id="wpl-text-bold_title" name="wpl_e2e_bold_title" title="Use additional product description as subtitle" class=" required-entry select">
+								<option value="1" <?php if ( @$item_details['bold_title'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( @$item_details['bold_title'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<br class="clear" />
 
 							<label for="wpl-text-subtitle_enabled" class="text_label">
 								<?php echo __('Enable subtitle','wplister'); ?>
@@ -357,6 +370,17 @@
 							</select>
 							<br class="clear" />
 
+							<label for="wpl-text-gallery_type" class="text_label">
+								<?php echo __('Gallery type','wplister'); ?>
+                                <?php wplister_tooltip('Specifies the Gallery enhancement type for the listing. If you use Plus, you also get the features of Gallery and if you use Featured, you get all the features of Gallery and Plus.') ?>
+							</label>
+							<select id="wpl-text-gallery_type" name="wpl_e2e_gallery_type" title="Gallery image" class=" required-entry select">
+								<option value="Gallery"  <?php if ( @$item_details['gallery_type'] == 'Gallery'  ): ?>selected="selected"<?php endif; ?>>Gallery</option>
+								<option value="Plus"     <?php if ( @$item_details['gallery_type'] == 'Plus'     ): ?>selected="selected"<?php endif; ?>>Plus</option>
+								<option value="Featured" <?php if ( @$item_details['gallery_type'] == 'Featured' ): ?>selected="selected"<?php endif; ?>>Featured</option>
+							</select>
+							<br class="clear" />
+
 
 						</div>
 					</div>
@@ -375,7 +399,7 @@
                                 						If set to Yes, the Global Shipping Program is the default international shipping option for the listing, and eBay sets the international shipping service to International Priority Shipping. <br><br>
                                 						If set to "No", the seller is responsible for specifying an international shipping service for the listing if desired.') ?>
 							</label>
-							<select id="wpl-text-global_shipping" name="wpl_e2e_global_shipping" title="Enable Global Shipping" class=" required-entry select">
+							<select id="wpl-text-global_shipping" name="wpl_e2e_global_shipping" class=" required-entry select">
 								<option value="1" <?php if ( @$item_details['global_shipping'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( @$item_details['global_shipping'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 							</select>
@@ -386,7 +410,7 @@
                                 <?php wplister_tooltip('This option can be used to obscure item title, item ID, and item price from post-order Feedback comments left by buyers.<br><br>
                                 						Typically, it is not advisable that sellers use the Private Listing feature, but using this feature may be appropriate for sellers listing in Adults Only categories, or for high-priced and/or celebrity items.') ?>
 							</label>
-							<select id="wpl-text-private_listing" name="wpl_e2e_private_listing" title="List as private listing" class=" required-entry select">
+							<select id="wpl-text-private_listing" name="wpl_e2e_private_listing" class=" required-entry select">
 								<option value="1" <?php if ( @$item_details['private_listing'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( @$item_details['private_listing'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 							</select>
@@ -397,9 +421,20 @@
                                 <?php wplister_tooltip('This is a workaround for users who use actual UPCs as SKU in their shop. <br><br>
                                 						The recommended way of listing products by UPC in order to fetch product details from the eBay catalog is by setting the UPC on the edit product page.') ?>
 							</label>
-							<select id="wpl-text-use_sku_as_upc" name="wpl_e2e_use_sku_as_upc" title="Fetch the UPC value from the products SKU" class=" required-entry select">
+							<select id="wpl-text-use_sku_as_upc" name="wpl_e2e_use_sku_as_upc" class=" required-entry select">
 								<option value="1" <?php if ( @$item_details['use_sku_as_upc'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( @$item_details['use_sku_as_upc'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
+							<label for="wpl-text-include_prefilled_info" class="text_label">
+								<?php echo __('Prefilled info','wplister'); ?>
+                                <?php wplister_tooltip('This option only applies to products from the eBay catalog which are listed by UPC.<br>
+                                						Disable this if you do not want to include the prefilled product information in your listings.') ?>
+							</label>
+							<select id="wpl-text-include_prefilled_info" name="wpl_e2e_include_prefilled_info" class=" required-entry select">
+								<option value="1" <?php if ( @$item_details['include_prefilled_info'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( @$item_details['include_prefilled_info'] == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 							</select>
 							<br class="clear" />
 

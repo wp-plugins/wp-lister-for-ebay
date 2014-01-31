@@ -107,7 +107,7 @@ class ProfilesTable extends WP_List_Table {
         $actions = array(
             'edit'      => sprintf('<a href="?page=%s&action=%s&profile=%s">%s</a>',$_REQUEST['page'],'edit',$item['profile_id'],__('Edit','wplister')),
             'duplicate' => sprintf('<a href="?page=%s&action=%s&profile=%s">%s</a>',$_REQUEST['page'],'duplicate_auction_profile',$item['profile_id'],__('Duplicate','wplister')),
-            'delete'    => sprintf('<a href="?page=%s&action=%s&profile=%s">%s</a>',$_REQUEST['page'],'delete',$item['profile_id'],__('Delete','wplister')),
+            'delete'    => sprintf('<a href="?page=%s&action=%s&profile=%s">%s</a>',$_REQUEST['page'],'delete_profile',$item['profile_id'],__('Delete','wplister')),
         );
 
         // make title link to edit page
@@ -218,7 +218,7 @@ class ProfilesTable extends WP_List_Table {
      **************************************************************************/
     function get_bulk_actions() {
         $actions = array(
-            'delete'    => __('Delete','wplister')
+            'delete_profile'    => __('Delete','wplister')
         );
         return $actions;
     }

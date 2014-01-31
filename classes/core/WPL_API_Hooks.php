@@ -15,6 +15,7 @@ class WPL_API_Hooks extends WPL_Core {
 
 		// revise item on eBay
 		add_action( 'wplister_revise_item', array( &$this, 'wplister_revise_item' ), 10, 1 );
+		add_action( 'wplister_relist_item', array( &$this, 'wplister_relist_item' ), 10, 1 );
 
 		// re-apply profile and mark listing item as changed
 		add_action( 'wplister_product_has_changed', array( &$this, 'wplister_product_has_changed' ), 10, 1 );
@@ -23,8 +24,17 @@ class WPL_API_Hooks extends WPL_Core {
 		add_action( 'wpla_inventory_status_changed', array( &$this, 'wpla_inventory_status_changed' ), 10, 1 );
 
 		// handle ajax requests from third party CSV import plugins
-		add_action( 'wp_ajax_woo-product-importer-ajax',      array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );
-		add_action( 'wp_ajax_woocommerce_csv_import_request', array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );
+		add_action( 'wp_ajax_woo-product-importer-ajax',      	array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );	// Woo Product Importer 		https://github.com/dgrundel/woo-product-importer
+		add_action( 'wp_ajax_woocommerce_csv_import_request', 	array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );	// Product CSV Import Suite 	http://www.woothemes.com/products/product-csv-import-suite/
+		add_action( 'wp_ajax_runImport',      					array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );	// WooCommerce CSV importer 	http://wordpress.org/plugins/woocommerce-csvimport/
+		// add_action( 'load-all-import_page_pmxi-admin-import', array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );	// WP All Import				
+		add_action( 'pmxi_saved_post', 							array( &$this, 'wplister_product_has_changed' ), 20, 1 ); 		// WP All Import				http://www.wpallimport.com/documentation/advanced/action-reference/
+
+		// trigger 3rd party import mode if called from custom cron implementation
+		// example: /wp-content/plugins/wwc-amz-aff/do-cron.php for WooCommerce Amazon Affiliates plugin
+		// deactivated as it seems to cause problems with wwc-amz-aff
+		// if ( 'do-cron.php' == basename( $_SERVER['SCRIPT_NAME'] ) )
+		// 	$this->handle_third_party_ajax_csv_import();
 
 		// example of using wplister_custom_attributes filter to add SKU as a virtual attribute
 		add_filter( 'wplister_custom_attributes', array( &$this, 'wplister_custom_attributes' ), 10, 1 );
@@ -60,6 +70,26 @@ class WPL_API_Hooks extends WPL_Core {
 		$this->EC->closeEbay();
 
 		$this->logger->info('revised listing '.$listing_id );
+		return isset( $this->EC->lastResults ) ? $this->EC->lastResults : false;
+
+	}
+
+	// relist ebay item for given product_id 
+	function wplister_relist_item( $post_id ) {
+
+		// call markItemAsModified() to re-apply the listing profile
+		$lm = new ListingsModel();
+		$lm->markItemAsModified( $post_id );
+
+		$listing_id = $lm->getListingIDFromPostID( $post_id );
+		$this->logger->info('relisting item '.$listing_id );
+
+		// call EbayController
+		$this->initEC();
+		$results = $this->EC->relistItems( $listing_id );
+		$this->EC->closeEbay();
+
+		$this->logger->info('relisted item '.$listing_id );
 		return isset( $this->EC->lastResults ) ? $this->EC->lastResults : false;
 
 	}

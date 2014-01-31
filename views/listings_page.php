@@ -17,6 +17,9 @@
 		/*color: #21759B;*/
 		color: #D54E21;
 	}
+	td.column-auction_title a.missing_product_title_link {
+		color: #D54E21;
+	}
 
 	.tablenav .actions a.wpl_job_button {
 		display: inline-block;

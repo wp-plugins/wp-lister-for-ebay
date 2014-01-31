@@ -20,8 +20,9 @@ class ListingsPage extends WPL_Page {
 
 		// Add custom screen options
 		add_action( "load-toplevel_page_wplister", array( &$this, 'addScreenOptions' ) );
-		
-		$this->handleSubmitOnInit();
+
+		// $this->handleSubmitOnInit();
+		add_action( "wp_loaded", array( &$this, 'handleSubmitOnInit' ) );
 	}
 
 	// public function onWpNetworkAdminMenu() {
@@ -270,7 +271,7 @@ class ListingsPage extends WPL_Page {
 				$this->showMessage( __('Selected items were updated from eBay.','wplister') );
 			}
 			// handle delete action
-			if ( $this->requestAction() == 'delete' ) {
+			if ( isset( $_REQUEST['auction'] ) && ( $this->requestAction() == 'delete_listing' ) ) {
 
 		        $lm = new ListingsModel();
 		        $id = $_REQUEST['auction'];
@@ -380,7 +381,7 @@ class ListingsPage extends WPL_Page {
 				$msg .= sprintf( __('WP-Lister has found %s changed item(s) which need to be revised on eBay to apply their latest changes.','wplister'), $summary->changed );
 				// $msg .= '<br><br>';
 				$msg .= '&nbsp;&nbsp;';
-				$msg .= '<a id="btn_revise_all_changed_items_reminder" class="btn_revise_all_changed_items_reminder button-secondary wpl_job_button">' . __('Revise all changed items','wplister') . '</a>';
+				$msg .= '<a id="btn_revise_all_changed_items_reminder" class="btn_revise_all_changed_items_reminder button wpl_job_button">' . __('Revise all changed items','wplister') . '</a>';
 				$msg .= '</p>';
 				$this->showMessage( $msg );				
 
@@ -391,7 +392,7 @@ class ListingsPage extends WPL_Page {
 				$msg  = '<p>';
 				$msg .= sprintf( __('WP-Lister has found %s manually relisted item(s) which need to be updated from eBay to fetch their latest changes.','wplister'), $summary->relisted );
 				// $msg .= '&nbsp;&nbsp;';
-				// $msg .= '<a id="btn_revise_all_relisted_items_reminder" class="button-secondary wpl_job_button">' . __('Update all relisted items','wplister') . '</a>';
+				// $msg .= '<a id="btn_revise_all_relisted_items_reminder" class="button wpl_job_button">' . __('Update all relisted items','wplister') . '</a>';
 				$msg .= '</p>';
 				$this->showMessage( $msg );				
 
@@ -499,20 +500,22 @@ class ListingsPage extends WPL_Page {
 				$msg .= '<br>';
 				
 				foreach ($dupe->listings as $listing) {
+					$color = $listing->status == 'archived' ? 'silver' : '';
+					$msg .= '<span style="color:'.$color.'">';					
 					$msg .= '&nbsp;&bull;&nbsp;';					
 					$msg .= ''.$listing->auction_title.'';					
 					if ($listing->ebay_id) $msg .= ' (#'.$listing->ebay_id.')';
 					$msg .= ' &ndash; <i>'.$listing->status.'</i>';					
 					$msg .= '<br>';
-					if ( in_array( $listing->status, array( 'prepared', 'verified', 'ended' ) ) ) {
-						$delete_link = sprintf('<a class="delete" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete',$listing->id,__('Click to remove this listing','wplister'));
+					if ( in_array( $listing->status, array( 'prepared', 'verified', 'ended', 'sold' ) ) ) {
+						$delete_link = sprintf('<a class="delete" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete_listing',$listing->id,__('Click to remove this listing','wplister'));
 						$archive_link = sprintf('<a class="archive" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'archive',$listing->id,__('Click to move to archive','wplister'));
-						$msg .= '&nbsp;&nbsp;&nbsp;'.$archive_link;
+						$msg .= '&nbsp;&nbsp;&nbsp;&nbsp;'.$archive_link;
 						$msg .= '<br>';
 					}
 				}
 
-				$msg .= '<br>';
+				$msg .= '</span><br>';
 			}
 			$msg .= __('If you are not planning to use the inventory sync, you can hide this warning in settings.','wplister');
 			$msg .= '<br>';
@@ -528,8 +531,23 @@ class ListingsPage extends WPL_Page {
 	
 		// init model
 		$ibm = new ItemBuilderModel();
+
+		$this->initEC();
+		$item = $ibm->buildItem( $id, $this->EC->session );
+		
+		// if ( ! $ibm->checkItem($item) ) return $ibm->result;
+		$ibm->checkItem($item);
+
 		$preview_html = $ibm->getFinalHTML( $id );
-		echo $preview_html;
+		// echo $preview_html;
+
+		$aData = array(
+			'item'				=> $item,
+			'check_result'		=> $ibm->result,
+			'preview_html'		=> $preview_html
+		);
+		header('Content-Type: text/html; charset=utf-8');
+		$this->display( 'listings_preview', $aData );
 		exit();		
 
 	}

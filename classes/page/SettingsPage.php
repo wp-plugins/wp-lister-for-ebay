@@ -148,7 +148,6 @@ class SettingsPage extends WPL_Page {
 			'ebay_user'					=> self::getOption( 'ebay_user' ),
 
 			'option_cron_auctions'		=> self::getOption( 'cron_auctions' ),
-			'option_cron_transactions'	=> self::getOption( 'cron_transactions' ),
 			'option_enable_ebay_motors'	=> self::getOption( 'enable_ebay_motors' ),
 			'option_ebay_update_mode'	=> self::getOption( 'ebay_update_mode', 'order' ),
 	
@@ -270,7 +269,6 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'paypal_email',			$this->getValueFromPost( 'text_paypal_email' ) );
 			
 			self::updateOption( 'cron_auctions',		$this->getValueFromPost( 'option_cron_auctions' ) );
-			self::updateOption( 'cron_transactions',	$this->getAnswerFromPost( 'option_cron_transactions' ) );
 			self::updateOption( 'enable_ebay_motors', 	$this->getValueFromPost( 'option_enable_ebay_motors' ) );
 			self::updateOption( 'ebay_update_mode', 	$this->getValueFromPost( 'option_ebay_update_mode' ) );
 

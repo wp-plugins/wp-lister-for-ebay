@@ -349,7 +349,7 @@ class WPL_WooBackendIntegration {
 		// check listing status
 		$listingsModel = new ListingsModel();
 		$status = $listingsModel->getStatusFromPostID( $post->ID );
-		if ( ! in_array($status, array('published','changed') ) ) return;
+		if ( ! in_array($status, array('published','changed','ended','prepared','verified') ) ) return;
 
 		// get first item
 		$listings = $listingsModel->getAllListingsFromPostID( $post->ID );
@@ -379,52 +379,80 @@ class WPL_WooBackendIntegration {
 			<input type="hidden" name="wpl_ebay_listing_id" value="<?php echo $item->id ?>" />
 
 			<?php _e( 'eBay listing is', 'wplister' ); ?>
-				<b><?php echo $item->status; ?></b>
-				<?php if ( isset($locktip) ) echo $locktip ?>
+			<b><?php echo $item->status; ?></b>
+
+			<?php if ( isset($locktip) ) echo $locktip ?>
+
+			<?php if ( isset($item->ViewItemURL) && $item->ViewItemURL ) : ?>
 				<a href="<?php echo $item->ViewItemURL ?>" target="_blank" style="float:right;">
 					<?php echo __('View on eBay', 'wplister') ?>
 				</a>
+			<?php elseif ( $item->status == 'prepared' ) : ?>
+				<a href="admin.php?page=wplister&amp;action=verify&amp;auction=<?php echo $item->id ?>" style="float:right;">
+					<?php echo __('Verify', 'wplister') ?>
+				</a>
+			<?php elseif ( $item->status == 'verified' ) : ?>
+				<a href="admin.php?page=wplister&amp;action=publish2e&amp;auction=<?php echo $item->id ?>" style="float:right;">
+					<?php echo __('Publish', 'wplister') ?>
+				</a>
+			<?php endif; ?>
+
 			<br>
 
-			<?php
-
-				// prevent wp_kses_post() from removing the data-tip attribute
-				global $allowedposttags;
-				$allowedposttags['img']['data-tip'] = true;
-
-				if ( $item->locked ) {
-
-					$tip = 'This listing is locked. WP-Lister will update prices and stock levels automatically on eBay when updating the product.<br>'; 
-					$tip .= __('If the product is out of stock, the listing will be ended on eBay.', 'wplister');
-					$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
-
-					woocommerce_wp_checkbox( array( 
-						'id'    => 'wpl_ebay_revise_on_update', 
-						'label' => __('Revise inventory on update', 'wplister') . $tip,
-						// 'description' => __('Revise on eBay', 'wplister'),
-						'value' => 'yes'
-					) );
-
-				} else {
-
-					$tip = __('Revise eBay listing when updating the product', 'wplister') . '. '; 
-					$tip .= __('If the product is out of stock, the listing will be ended on eBay.', 'wplister');
-					$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
-
-					woocommerce_wp_checkbox( array( 
-						'id'    => 'wpl_ebay_revise_on_update', 
-						'label' => __('Revise listing on update', 'wplister') . $tip,
-						// 'description' => __('Revise on eBay', 'wplister'),
-						'value' => get_option( 'wplister_revise_on_update_default', false )
-					) );
-
-				}
-
+			<?php 
+				// show revise checkbox for published listings
+				if ( in_array($status, array('published','changed') ) )
+					$this->wplister_product_submitbox_revise_checkbox( $item );
 			?>
+
+			<?php if ( in_array($status, array('ended','sold') ) ) : ?>
+				<a href="admin.php?page=wplister&amp;action=relist&amp;auction=<?php echo $item->id ?>" 
+					onclick="return confirm('Are you sure you want to relist this product on eBay?');" style="float:right;">
+					<?php echo __('Relist', 'wplister') ?>
+				</a>
+			<?php endif; ?>
 
 		</div>
 		<?php
-	}
+	} // wplister_product_submitbox_misc_actions()
+
+	// draw checkbox to revise item
+	function wplister_product_submitbox_revise_checkbox( $item ) {
+		global $woocommerce;
+
+		// prevent wp_kses_post() from removing the data-tip attribute
+		global $allowedposttags;
+		$allowedposttags['img']['data-tip'] = true;
+
+		if ( $item->locked ) {
+
+			$tip = 'This listing is locked. WP-Lister will update prices and stock levels automatically on eBay when updating the product.<br>'; 
+			$tip .= __('If the product is out of stock, the listing will be ended on eBay.', 'wplister');
+			$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
+			woocommerce_wp_checkbox( array( 
+				'id'    => 'wpl_ebay_revise_on_update', 
+				'label' => __('Revise inventory on update', 'wplister') . $tip,
+				// 'description' => __('Revise on eBay', 'wplister'),
+				'value' => 'yes'
+			) );
+
+		} else {
+
+			$tip = __('Revise eBay listing when updating the product', 'wplister') . '. '; 
+			$tip .= __('If the product is out of stock, the listing will be ended on eBay.', 'wplister');
+			$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
+			woocommerce_wp_checkbox( array( 
+				'id'    => 'wpl_ebay_revise_on_update', 
+				'label' => __('Revise listing on update', 'wplister') . $tip,
+				// 'description' => __('Revise on eBay', 'wplister'),
+				'value' => get_option( 'wplister_revise_on_update_default', false )
+			) );
+
+		}
+
+	} // wplister_product_submitbox_revise_checkbox()
 
 	// if product has been imported from ebay...
 	function wplister_product_submitbox_imported_status() {
@@ -489,7 +517,6 @@ class WPL_WooBackendIntegration {
 	} // save_meta_box()
 
 
-
 	function wplister_product_updated_messages( $messages ) {
 		global $post, $post_ID;
 
@@ -499,6 +526,28 @@ class WPL_WooBackendIntegration {
 
 		// do nothing if no result for this product exists
 		if ( ! isset( $update_results[ $post_ID ] ) ) return $messages;
+
+		// show errors later
+		add_action( 'admin_notices', array( &$this, 'wplister_product_updated_notices' ), 20 );
+
+		$success = $update_results[ $post_ID ]->success;
+		// $errors  = $update_results[ $post_ID ]->errors;
+
+		// add message
+		if ( $success )
+			$messages['product'][1] = sprintf( __( 'Product and eBay listing were updated. <a href="%s">View Product</a>', 'wplister' ), esc_url( get_permalink($post_ID) ) );
+
+		return $messages;
+	}
+
+	function wplister_product_updated_notices() {
+		global $post, $post_ID;
+
+		// fetch last results
+		$update_results = get_option( 'wplister_last_product_update_results', array() );
+		if ( ! is_array($update_results) ) $update_results = array();
+		if ( ! isset( $update_results[ $post_ID ] ) ) return;
+
 
 		$success = $update_results[ $post_ID ]->success;
 		$errors  = $update_results[ $post_ID ]->errors;
@@ -512,16 +561,11 @@ class WPL_WooBackendIntegration {
 			
 		}
 
-		// add message
-		if ( $success )
-			$messages['product'][1] = sprintf( __( 'Product and eBay listing were updated. <a href="%s">View Product</a>', 'wplister' ), esc_url( get_permalink($post_ID) ) );
-
 		// unset last result
 		unset( $update_results[ $post_ID ] );
 		update_option( 'wplister_last_product_update_results', $update_results );
 
-		return $messages;
-	}
+	} // wplister_product_updated_notices()
 
 
 

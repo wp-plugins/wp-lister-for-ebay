@@ -1,0 +1,3652 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP-Lister for eBay v1.3.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2013-12-28 11:19:26+0000\n"
+"Last-Translator: admin <nikincce@abv.bg>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: CSL v1.x\n"
+"X-Poedit-Language: Bulgarian\n"
+"X-Poedit-Country: BULGARIA\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-Bookmarks: \n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Textdomain-Support: yes"
+
+#: classes/WPL_BasePlugin.php:32
+#: classes/WPL_Setup.php:27
+#: classes/core/WPL_BasePlugin.php:30
+#: classes/core/WPL_Setup.php:34
+#: classes/core/WPL_Toolbar.php:75
+#: classes/page/SettingsPage.php:29
+#: classes/table/NetworkSitesTable.php:112
+#@ wplister
+msgid "Settings"
+msgstr "Настройки"
+
+#: classes/WPL_Model.php:186
+#: classes/core/WPL_Model.php:259
+#@ wplister
+msgid "Additional details about this error"
+msgstr "Допълнителни детайли за тази грешка"
+
+#: classes/WPL_Page.php:75
+#: classes/core/WPL_Page.php:79
+#, php-format
+#@ wplister
+msgid "Thank you for listing with %s"
+msgstr "Благодарим Ви, че публикувате с %s"
+
+#: classes/WPL_Setup.php:25
+#: classes/core/WPL_Setup.php:32
+#@ wplister
+msgid "You have not linked WP-Lister to your eBay account yet."
+msgstr "Все още не сте свързали WP-Lister с Вашия eBay профил."
+
+#: classes/WPL_Setup.php:26
+#: classes/core/WPL_Setup.php:33
+#, php-format
+#@ wplister
+msgid "To complete the setup procedure go to %s and follow the instructions."
+msgstr "За да завършите процедурата по настройване, моля отидете на %s и следвайте инструкциите."
+
+#: classes/WPL_Setup.php:34
+#: classes/core/WPL_Setup.php:41
+#@ wplister
+msgid "WP-Lister Setup - Step 2"
+msgstr "WP-Lister Настройки - Стъпка 2"
+
+#: classes/WPL_Setup.php:35
+#: classes/core/WPL_Setup.php:42
+#@ wplister
+msgid "Before creating your first profile, we need to download certain information which are specific to the eBay site you selected."
+msgstr "Преди да създадете Вашия първи профил, трябва да свалим определена информация, която е специфична за сайта на eBay, който сте избрали."
+
+#: classes/WPL_Setup.php:36
+#: classes/core/WPL_Setup.php:43
+#@ wplister
+msgid "This includes shipping options, payment methods, your custom store categories as well as the whole eBay category tree, which might take a while."
+msgstr "Това включва опции за доставка, методи на плащане, вашите потребителски продуктови категории, както и цялоло категорийно дърво на eBay, което може да отнеме известно време."
+
+#: classes/WPL_Setup.php:39
+#: classes/core/WPL_Setup.php:46
+#@ wplister
+msgid "Update eBay details"
+msgstr "Обнови eBay детайли"
+
+#: classes/WPL_Setup.php:53
+#: classes/core/WPL_Setup.php:60
+#@ wplister
+msgid "WP-Lister Setup - Step 3"
+msgstr "WP-Lister Настройки - Стъпка 3"
+
+#: classes/WPL_Setup.php:54
+#: classes/core/WPL_Setup.php:61
+#@ wplister
+msgid "Create a default listing template."
+msgstr "Създай дизайн на обява по подразбиране."
+
+#: classes/WPL_Setup.php:55
+#: classes/core/WPL_Setup.php:62
+#, php-format
+#@ wplister
+msgid "To create your first listing template click on %s."
+msgstr "За да създадете Вашия първи дизайн на обява, моля натиснете на %s."
+
+#: classes/WPL_Setup.php:57
+#: classes/core/WPL_Setup.php:64
+#@ wplister
+msgid "Replace the default text according to your requirements and save your template to continue."
+msgstr "Заменете текста по подразбиране според Вашите изисквания и запазете дизайна, за да продължите."
+
+#: classes/WPL_Setup.php:58
+#: classes/core/WPL_Setup.php:65
+#: views/templates_edit_page.php:91
+#@ wplister
+msgid "New Template"
+msgstr "Нов Дизайн"
+
+#: classes/WPL_Setup.php:71
+#: classes/core/WPL_Setup.php:78
+#@ wplister
+msgid "WP-Lister Setup - Step 4"
+msgstr "WP-Lister Настройки - Стъпка 4"
+
+#: classes/WPL_Setup.php:72
+#: classes/core/WPL_Setup.php:79
+#@ wplister
+msgid "The final step: create your first listing profile."
+msgstr "Финална Стъпка: създайте Вашия първи профил за публикуване на обяви."
+
+#: classes/WPL_Setup.php:73
+#: classes/core/WPL_Setup.php:80
+#, php-format
+#@ wplister
+msgid "Click on %s and start defining your listing options.<br>After saving your profile, visit your Products page and select the products to list on eBay."
+msgstr "Натиснете на %s , за да може да започнете да определяте Вашите Обяви.<br>След като запазите Вашия Профил, посетете Вашата страница с продукти и изберете продуктите, които да се публикуват в eBay."
+
+#: classes/WPL_Setup.php:74
+#: classes/core/WPL_Setup.php:81
+#: views/profiles_edit_page.php:20
+#@ wplister
+msgid "New Profile"
+msgstr "Нов Профил"
+
+#: classes/WPL_Setup.php:82
+#: classes/core/WPL_Setup.php:89
+#@ wplister
+msgid "WP-Lister Setup is complete."
+msgstr "WP-Lister Настройките завършиха."
+
+#: classes/WPL_Setup.php:83
+#: classes/core/WPL_Setup.php:90
+#@ wplister
+msgid "You are ready now to list your first items."
+msgstr "Вие сте готови сега, да публикувате Вашите обяви."
+
+#: classes/WPL_Setup.php:84
+#: classes/core/WPL_Setup.php:91
+#@ wplister
+msgid "Visit your Products page, select a few items and select \"Prepare listings\" from the bulk actions menu."
+msgstr "Посетете Вашата страница с Продукти, изберете няколко продукта и натиснете \"Подготви Обяви\" от менюто с опции."
+
+#: classes/WPL_Setup.php:95
+#: classes/core/WPL_Setup.php:102
+#@ wplister
+msgid "Your eBay token seems to be invalid."
+msgstr "Вашият eBay token изглежда е невалиден."
+
+#: classes/WPL_Setup.php:96
+#: classes/core/WPL_Setup.php:103
+#@ wplister
+msgid "To re-authenticate WP-Lister visit the Settings page, click on \"Change Account\" and follow the instructions."
+msgstr "За повторно удостоверяване на WP-Lister посетете страницата с настройки, щракнете върху \\ \\\"Промени Акаунт \" и следвайте инструкциите."
+
+#: classes/WPL_Setup.php:282
+#: classes/WPL_Setup.php:369
+#: classes/WPL_Setup.php:388
+#: classes/WPL_Setup.php:400
+#: classes/WPL_Setup.php:415
+#: classes/WPL_Setup.php:426
+#: classes/WPL_Setup.php:440
+#: classes/WPL_Setup.php:455
+#: classes/WPL_Setup.php:497
+#: classes/WPL_Setup.php:512
+#: classes/WPL_Setup.php:526
+#: classes/WPL_Setup.php:540
+#: classes/WPL_Setup.php:554
+#: classes/WPL_Setup.php:569
+#: classes/WPL_Setup.php:592
+#@ wplister
+msgid "WP-Lister database was upgraded to version "
+msgstr "WP-Lister датабазата беше обновена до версия "
+
+#: classes/core/WPL_Setup.php:315
+#: classes/core/WPL_Setup.php:402
+#: classes/core/WPL_Setup.php:421
+#: classes/core/WPL_Setup.php:433
+#: classes/core/WPL_Setup.php:448
+#: classes/core/WPL_Setup.php:459
+#: classes/core/WPL_Setup.php:473
+#: classes/core/WPL_Setup.php:488
+#: classes/core/WPL_Setup.php:530
+#: classes/core/WPL_Setup.php:545
+#: classes/core/WPL_Setup.php:559
+#: classes/core/WPL_Setup.php:573
+#: classes/core/WPL_Setup.php:587
+#: classes/core/WPL_Setup.php:602
+#: classes/core/WPL_Setup.php:625
+#: classes/core/WPL_Setup.php:639
+#: classes/core/WPL_Setup.php:653
+#: classes/core/WPL_Setup.php:686
+#: classes/core/WPL_Setup.php:700
+#: classes/core/WPL_Setup.php:715
+#: classes/core/WPL_Setup.php:729
+#: classes/core/WPL_Setup.php:746
+#: classes/core/WPL_Setup.php:769
+#@ wplister
+msgid "WP-Lister database was upgraded to version"
+msgstr "WP-Lister датабазата беше обновена до версия"
+
+#: classes/core/WPL_Toolbar.php:19
+#@ wplister
+msgid "eBay"
+msgstr "eBay"
+
+#: classes/core/WPL_Toolbar.php:28
+#: classes/page/ListingsPage.php:535
+#: views/listings_page.php:32
+#@ wplister
+msgid "Listings"
+msgstr "Обяви"
+
+#: classes/core/WPL_Toolbar.php:38
+#: classes/page/ProfilesPage.php:31
+#: views/profiles_page.php:20
+#@ wplister
+msgid "Profiles"
+msgstr "Профили"
+
+#: classes/core/WPL_Toolbar.php:51
+#: classes/page/EbayOrdersPage.php:27
+#: views/orders_page.php:13
+#@ wplister
+msgid "Orders"
+msgstr "Поръчки"
+
+#: classes/core/WPL_Toolbar.php:63
+#: classes/page/TransactionsPage.php:28
+#: views/transactions_page.php:13
+#@ wplister
+msgid "Transactions"
+msgstr "Транзакции"
+
+#: classes/core/WPL_Toolbar.php:85
+#: views/settings_tabs.php:8
+#@ wplister
+msgid "General Settings"
+msgstr "Общи Настройки"
+
+#: classes/core/WPL_Toolbar.php:95
+#@ wplister
+msgid "Categories"
+msgstr "Категории"
+
+#: classes/core/WPL_Toolbar.php:105
+#: views/settings_tabs.php:12
+#@ wplister
+msgid "Advanced"
+msgstr "Разщирени"
+
+#: classes/core/WPL_Toolbar.php:115
+#: views/settings_tabs.php:14
+#@ wplister
+msgid "Developer"
+msgstr "Създател"
+
+#: classes/core/WPL_Toolbar.php:125
+#@ wplister
+msgid "Updates"
+msgstr "Обновления"
+
+#: classes/core/WPL_Toolbar.php:138
+#: classes/page/LogPage.php:25
+#: views/log_page.php:26
+#@ wplister
+msgid "Logs"
+msgstr "Дневник"
+
+#: classes/core/WPL_Toolbar.php:176
+#@ wplister
+msgid "View item on eBay"
+msgstr "Виж продукта в eBay"
+
+#: classes/core/WPL_Toolbar.php:219
+#@ wplister
+msgid "Prepare listing"
+msgstr "Подготви обява"
+
+#: classes/integration/ProductWrapper_jigo.php:386
+#: classes/integration/ProductWrapper_mp.php:212
+#: classes/integration/ProductWrapper_wpec.php:374
+#: classes/integration/WooBackendIntegration.php:84
+#: views/listings_edit_page.php:223
+#@ wplister
+msgid "Listing status"
+msgstr "Състояние на Обявата"
+
+#: classes/integration/WooBackendIntegration.php:296
+#@ wplister
+msgid "On eBay"
+msgstr "В eBay"
+
+#: classes/integration/WooBackendIntegration.php:302
+#@ wplister
+msgid "Not on eBay"
+msgstr "Не в eBay"
+
+#: classes/integration/WooBackendIntegration.php:362
+#@ wplister
+msgid "eBay listing is"
+msgstr "eBay обява е"
+
+#: classes/integration/WooBackendIntegration.php:366
+#: classes/integration/WooBackendIntegration.php:428
+#: classes/integration/WooFrontendIntegration.php:75
+#: classes/table/ListingsTable.php:129
+#: classes/table/ListingsTable.php:335
+#@ wplister
+msgid "View on eBay"
+msgstr "Виж в eBay"
+
+#: classes/integration/WooBackendIntegration.php:372
+#@ wplister
+msgid "Revise eBay listing when updating the product"
+msgstr "Преразгледай eBay обявата при актуализиране на продукта"
+
+#: classes/integration/WooBackendIntegration.php:373
+#@ wplister
+msgid "If the product is out of stock, the listing will be ended on eBay."
+msgstr "Ако продуктът е изчерпван, обявата ще бъде прекратена в eBay."
+
+#: classes/integration/WooBackendIntegration.php:384
+#@ wplister
+msgid "Revise inventory on update"
+msgstr "Преразгледай наличността при обновяване"
+
+#: classes/integration/WooBackendIntegration.php:393
+#@ wplister
+msgid "Revise listing on update"
+msgstr "Преразгледай обявата при обновяване"
+
+#: classes/integration/WooBackendIntegration.php:425
+#@ wplister
+msgid "This product was imported"
+msgstr "Този продукт беше импортиран"
+
+#: classes/integration/WooBackendIntegration.php:490
+#, php-format
+#@ wplister
+msgid "Product and eBay listing were updated. <a href=\"%s\">View Product</a>"
+msgstr "Продукта и  eBay обявата бяха обновени. <a href=\"%s\">Виж Продукт</a>"
+
+#: classes/integration/WooFrontendIntegration.php:27
+#@ wplister
+msgid "View details"
+msgstr "Виж детайли"
+
+#: classes/integration/WooFrontendIntegration.php:56
+#@ wplister
+msgid "Starting bid"
+msgstr "Стартова цена"
+
+#: classes/integration/WooFrontendIntegration.php:59
+#@ wplister
+msgid "Current bid"
+msgstr "Актуална цена"
+
+#: classes/integration/WooFrontendIntegration.php:60
+#@ wplister
+msgid "bids"
+msgstr "наддавания"
+
+#: classes/integration/WooFrontendIntegration.php:66
+#, php-format
+#@ wplister
+msgid "This item is currently on auction and will end in %s"
+msgstr "Този продукт в момента е на търг и ще приключи в %s"
+
+#: classes/integration/WooFrontendIntegration.php:69
+#@ wplister
+msgid "This item is currently on auction on eBay."
+msgstr "Този продукт в момента е на търг в eBay."
+
+#: classes/integration/WooFrontendIntegration.php:168
+#@ wplister
+msgid "Compatibility"
+msgstr "Съвместимост"
+
+#: classes/integration/WooFrontendIntegration.php:191
+#@ wplister
+msgid "Item Compatibility List"
+msgstr "Списък със Съвместимости"
+
+#: classes/integration/WooProductMetaBox.php:21
+#@ wplister
+msgid "eBay Options"
+msgstr "eBay Опции"
+
+#: classes/integration/WooProductMetaBox.php:24
+#@ wplister
+msgid "Advanced eBay Options"
+msgstr "Разширени eBay Опции"
+
+#: classes/integration/WooProductMetaBox.php:27
+#@ wplister
+msgid "eBay Shipping Options"
+msgstr "eBay Опции на Доставка"
+
+#: classes/integration/WooProductMetaBox.php:56
+#@ wplister
+msgid "Listing title"
+msgstr "Заглавие на Обявата"
+
+#: classes/integration/WooProductMetaBox.php:64
+#@ wplister
+msgid "Listing subtitle"
+msgstr "Под-Заглавие на Обявата"
+
+#: classes/integration/WooProductMetaBox.php:66
+#@ wplister
+msgid "Leave empty to use the product excerpt. Will be cut after 55 characters."
+msgstr "Оставете празно, за да използвате откъс на продукта. Ще бъде отрязано след 55 знака."
+
+#: classes/integration/WooProductMetaBox.php:72
+#@ wplister
+msgid "Price / Start Price"
+msgstr "Цена / Стартова Цена"
+
+#: classes/integration/WooProductMetaBox.php:79
+#@ wplister
+msgid "Listing Type"
+msgstr "Тип Обява"
+
+#: classes/integration/WooProductMetaBox.php:81
+#: classes/integration/WooProductMetaBox.php:92
+#: classes/integration/WooProductMetaBox.php:115
+#: classes/integration/WooProductMetaBox.php:606
+#@ wplister
+msgid "-- use profile setting --"
+msgstr "-- използвай опции от профила --"
+
+#: classes/integration/WooProductMetaBox.php:82
+#: views/listings_edit_page.php:237
+#: views/profiles_edit_page.php:75
+#@ wplister
+msgid "Auction"
+msgstr "Търг"
+
+#: classes/integration/WooProductMetaBox.php:83
+#: classes/table/ProfilesTable.php:75
+#: views/listings_edit_page.php:238
+#: views/profiles_edit_page.php:76
+#@ wplister
+msgid "Fixed Price"
+msgstr "Фиксирана Цена"
+
+#: classes/integration/WooProductMetaBox.php:90
+#@ wplister
+msgid "Listing Duration"
+msgstr "Времетраене на Обявата"
+
+#: classes/integration/WooProductMetaBox.php:93
+#: views/profiles_edit_page.php:109
+#@ wplister
+msgid "Day"
+msgstr "Ден"
+
+#: classes/integration/WooProductMetaBox.php:94
+#: classes/integration/WooProductMetaBox.php:95
+#: classes/integration/WooProductMetaBox.php:96
+#: classes/integration/WooProductMetaBox.php:97
+#: classes/integration/WooProductMetaBox.php:98
+#: classes/integration/WooProductMetaBox.php:99
+#: classes/integration/WooProductMetaBox.php:100
+#: views/listings_edit_page.php:191
+#: views/listings_edit_page.php:192
+#: views/listings_edit_page.php:193
+#: views/listings_edit_page.php:194
+#: views/listings_edit_page.php:195
+#: views/listings_edit_page.php:196
+#: views/listings_edit_page.php:197
+#: views/profiles_edit_page.php:110
+#: views/profiles_edit_page.php:111
+#: views/profiles_edit_page.php:112
+#: views/profiles_edit_page.php:113
+#: views/profiles_edit_page.php:114
+#: views/profiles_edit_page.php:115
+#: views/profiles_edit_page.php:116
+#@ wplister
+msgid "Days"
+msgstr "Дни"
+
+#: classes/integration/WooProductMetaBox.php:101
+#: views/listings_edit_page.php:198
+#: views/profiles_edit_page.php:117
+#@ wplister
+msgid "Good Till Canceled"
+msgstr "До отмяна"
+
+#: classes/integration/WooProductMetaBox.php:116
+#: views/profiles_edit_page.php:143
+#: views/profiles_edit_page.php:180
+#@ wplister
+msgid "New"
+msgstr "Ново"
+
+#: classes/integration/WooProductMetaBox.php:117
+#: views/profiles_edit_page.php:144
+#@ wplister
+msgid "Used"
+msgstr "Използвано"
+
+#: classes/integration/WooProductMetaBox.php:140
+#: views/profiles_edit_page.php:128
+#@ wplister
+msgid "Condition"
+msgstr "Състояние"
+
+#: classes/integration/WooProductMetaBox.php:148
+#: views/profiles_edit_page.php:155
+#@ wplister
+msgid "Condition description"
+msgstr "Описание на Състоянието"
+
+#: classes/integration/WooProductMetaBox.php:150
+#: views/profiles_edit_page.php:156
+#: views/profiles_edit_page.php:161
+#@ wplister
+msgid "This field should only be used to further clarify the condition of used items."
+msgstr "Това поле трябва да се използва само за по-нататъшно изясняване на състоянието на използваните продукти."
+
+#: classes/integration/WooProductMetaBox.php:213
+#: views/profiles_edit_page.php:92
+#@ wplister
+msgid "Buy Now Price"
+msgstr "Купи Сега Цена"
+
+#: classes/integration/WooProductMetaBox.php:215
+#@ wplister
+msgid "The optional Buy Now Price is only used for auction style listings. It has no effect on fixed price listings."
+msgstr "Опционалната Купи Сега Жена се използва само за търг стил обява. Това не оказва влияние върху обяви с фиксирани цени."
+
+#: classes/integration/WooProductMetaBox.php:221
+#@ wplister
+msgid "Reserve Price"
+msgstr "Резервирана Цена"
+
+#: classes/integration/WooProductMetaBox.php:223
+#@ wplister
+msgid "The lowest price at which you are willing to sell the item. Not all categories support a reserve price."
+msgstr "Най-ниската цена, на която сте готови да продавате стоката. Не всички категории поддържат резерв цена."
+
+#: classes/integration/WooProductMetaBox.php:229
+#@ wplister
+msgid "UPC"
+msgstr "UPC"
+
+#: classes/integration/WooProductMetaBox.php:236
+#@ wplister
+msgid "Gallery Image URL"
+msgstr "URL на Галерийно Изобр."
+
+#: classes/integration/WooProductMetaBox.php:243
+#: views/profile/edit_sidebar.php:372
+#@ wplister
+msgid "Global Shipping"
+msgstr "Глобална Доставка"
+
+#: classes/integration/WooProductMetaBox.php:249
+#@ wplister
+msgid "Hide from eBay"
+msgstr "Скрий от eBay"
+
+#: classes/integration/WooProductMetaBox.php:255
+#@ wplister
+msgid "Payment Instructions"
+msgstr "Инструкции на Плащане"
+
+#: classes/integration/WooProductMetaBox.php:274
+#: views/profile/edit_categories.php:46
+#@ wplister
+msgid "eBay categories"
+msgstr "eBay Категории"
+
+#: classes/integration/WooProductMetaBox.php:286
+#: views/profile/edit_categories.php:51
+#@ wplister
+msgid "Primary eBay category"
+msgstr "Основна eBay Категория"
+
+#: classes/integration/WooProductMetaBox.php:290
+#: classes/integration/WooProductMetaBox.php:300
+#: classes/table/CategoriesMapTable.php:95
+#: classes/table/CategoriesMapTable.php:122
+#: views/profile/edit_categories.php:59
+#: views/profile/edit_categories.php:73
+#: views/profile/edit_categories.php:101
+#: views/profile/edit_categories.php:115
+#@ wplister
+msgid "select"
+msgstr "избери"
+
+#: classes/integration/WooProductMetaBox.php:291
+#: classes/integration/WooProductMetaBox.php:301
+#: classes/table/CategoriesMapTable.php:96
+#: classes/table/CategoriesMapTable.php:123
+#: views/profile/edit_categories.php:60
+#: views/profile/edit_categories.php:74
+#: views/profile/edit_categories.php:102
+#: views/profile/edit_categories.php:116
+#: views/profile/edit_shipping_int.php:53
+#: views/profile/edit_shipping_int.php:99
+#: views/profile/edit_shipping_loc.php:43
+#: views/profile/edit_shipping_loc.php:76
+#: views/profiles_edit_page.php:218
+#@ wplister
+msgid "remove"
+msgstr "премахни"
+
+#: classes/integration/WooProductMetaBox.php:296
+#: views/profile/edit_categories.php:66
+#@ wplister
+msgid "Secondary eBay category"
+msgstr "Допълнителна eBay Категория"
+
+#: classes/integration/WooProductMetaBox.php:602
+#@ wplister
+msgid "Custom shipping options"
+msgstr "Опции за избор на доставка"
+
+#: classes/integration/WooProductMetaBox.php:607
+#: views/profile/edit_shipping.php:32
+#@ wplister
+msgid "Use Flat Shipping"
+msgstr "Използвайте Flat Доставка"
+
+#: classes/integration/WooProductMetaBox.php:608
+#: views/profile/edit_shipping.php:33
+#@ wplister
+msgid "Use Calculated Shipping"
+msgstr "Използвайте Изчислена Доставка"
+
+#: classes/integration/WooProductMetaBox.php:609
+#: views/profile/edit_shipping.php:34
+#@ wplister
+msgid "Use Flat Domestic and Calculated International Shipping"
+msgstr "Използвайте Flat Вътрешна и Изчислена Международна Доставка"
+
+#: classes/integration/WooProductMetaBox.php:610
+#: views/profile/edit_shipping.php:35
+#@ wplister
+msgid "Use Calculated Domestic and Flat International Shipping"
+msgstr "Използвайте Изчислена Вътрешна и Flat Международна Доставка"
+
+#: classes/integration/WooProductMetaBox.php:611
+#: views/profile/edit_shipping.php:36
+#@ wplister
+msgid "Use Freight Shipping"
+msgstr "Използвайте Товарна Доставка"
+
+#: classes/integration/WooProductMetaBox.php:616
+#@ wplister
+msgid "Domestic shipping"
+msgstr "Вътрешна Доставка"
+
+#: classes/integration/WooProductMetaBox.php:619
+#: views/profile/edit_shipping.php:59
+#@ wplister
+msgid "International shipping"
+msgstr "Международна Доставка"
+
+#: classes/model/EbayOrdersModel.php:475
+#: classes/model/TransactionsModel.php:462
+#, php-format
+#@ wplister
+msgid "the last %s days"
+msgstr "последните %s дни"
+
+#: classes/model/EbayOrdersModel.php:477
+#: classes/model/TransactionsModel.php:464
+#, php-format
+#@ wplister
+msgid "from %s to %s"
+msgstr "от %s до %s"
+
+#: classes/model/EbayOrdersModel.php:485
+#@ wplister
+msgid "New orders created"
+msgstr "Новите поръчки са създадени"
+
+#: classes/model/EbayOrdersModel.php:486
+#@ wplister
+msgid "Existing orders updated"
+msgstr "Съществуващите Поръчки бяха обновени"
+
+#: classes/model/EbayOrdersModel.php:487
+#@ wplister
+msgid "Foreign orders skipped"
+msgstr "Чуждите Поръчки бяха отхвърлени"
+
+#: classes/model/EbayOrdersModel.php:488
+#@ wplister
+msgid "Orders failed to create"
+msgstr "Има грешка при създаването на поръчките"
+
+#: classes/model/EbayOrdersModel.php:491
+#@ wplister
+msgid "Note: Foreign orders for which no matching item ID could be found in WP-Lister's listings table were skipping during update."
+msgstr "Забележка: Чуждестранни поръчки, за които няма съвпадение на ID на продукта в листа с обяви на WP-Lister, бяха пропуснати по време на актуализация."
+
+#: classes/model/EbayOrdersModel.php:495
+#: classes/model/TransactionsModel.php:482
+#: classes/table/TemplatesTable.php:170
+#@ wplister
+msgid "Last modified"
+msgstr "Последно променен"
+
+#: classes/model/EbayOrdersModel.php:496
+#: classes/table/EbayOrdersTable.php:238
+#@ wplister
+msgid "Order ID"
+msgstr "ID на Поръчка"
+
+#: classes/model/EbayOrdersModel.php:497
+#: classes/model/TransactionsModel.php:484
+#@ wplister
+msgid "Action"
+msgstr "Действие"
+
+#: classes/model/EbayOrdersModel.php:498
+#: classes/table/EbayOrdersTable.php:234
+#@ wplister
+msgid "Total"
+msgstr "Общо"
+
+#: classes/model/EbayOrdersModel.php:500
+#: classes/model/TransactionsModel.php:487
+#@ wplister
+msgid "Buyer ID"
+msgstr "ID на Купувач"
+
+#: classes/model/EbayOrdersModel.php:501
+#: classes/model/TransactionsModel.php:488
+#@ wplister
+msgid "Date created"
+msgstr "Дата на Създаване"
+
+#: classes/model/EbayShippingModel.php:356
+#@ wplister
+msgid "Economy services"
+msgstr "Икономична Услуга"
+
+#: classes/model/EbayShippingModel.php:360
+#@ wplister
+msgid "Standard services"
+msgstr "Стандартна Услуга"
+
+#: classes/model/EbayShippingModel.php:364
+#@ wplister
+msgid "Expedited services"
+msgstr "Бърза Услуга"
+
+#: classes/model/EbayShippingModel.php:368
+#@ wplister
+msgid "One-day services"
+msgstr "Еднодневна Услуга"
+
+#: classes/model/EbayShippingModel.php:372
+#@ wplister
+msgid "Pickup services"
+msgstr "Лично Предаване Услуга"
+
+#: classes/model/EbayShippingModel.php:376
+#@ wplister
+msgid "Other services"
+msgstr "Други Услуги"
+
+#: classes/model/EbayShippingModel.php:380
+#@ wplister
+msgid "International services"
+msgstr "Международна Услуга"
+
+#: classes/model/EbayShippingModel.php:384
+#@ wplister
+msgid "eBay shipping services"
+msgstr "eBays Спедиторски Услуги"
+
+#: classes/model/ItemBuilderModel.php:1225
+#@ wplister
+msgid "Some variations seem to have no price."
+msgstr "Някои вариации все още нямат цена."
+
+#: classes/model/ItemBuilderModel.php:1246
+#: classes/model/ItemBuilderModel.php:1305
+#@ wplister
+msgid "eBay does not allow attribute values longer than 50 characters."
+msgstr "eBay не позволява изрази, представени като атрибути, по - дълги от 50 символа."
+
+#: classes/model/ItemBuilderModel.php:1248
+#: classes/model/ItemBuilderModel.php:1307
+#@ wplister
+msgid "You need to shorten this value:"
+msgstr "Вие трябва да съкратите този израз:"
+
+#: classes/model/ItemBuilderModel.php:1259
+#@ wplister
+msgid "You are using the same SKU for more than one variations which is not allowed by eBay."
+msgstr "Вие използвате същото SKU за повече от една вариация, което не е позволено от eBay."
+
+#: classes/model/ItemBuilderModel.php:1261
+#@ wplister
+msgid "To circumvent this issue, your item will be listed without SKU."
+msgstr "За да се избегне тази нередност, продукта ще бъде публикуван без SKU."
+
+#: classes/model/ItemBuilderModel.php:1266
+#@ wplister
+msgid "Some variations are missing a SKU."
+msgstr "На някои вариации липсва SKU."
+
+#: classes/model/ItemBuilderModel.php:1268
+#@ wplister
+msgid "It is required to assign a unique SKU to each variation to prevent inventory sync issues."
+msgstr "Задължително е да посочите уникално SKU за всяка вариация, за  да избегнете грешки  при обновяване на инвентара."
+
+#: classes/model/ItemBuilderModel.php:1273
+#@ wplister
+msgid "None of these variations are in stock."
+msgstr "Нито една от тези вариации не е в наличност."
+
+#: classes/model/ItemBuilderModel.php:1285
+#@ wplister
+msgid "Price can not be zero."
+msgstr "Цената неможе да бъде нула."
+
+#: classes/model/ItemBuilderModel.php:1295
+#, php-format
+#@ wplister
+msgid "eBay requires a minimum price of %s for this listing type."
+msgstr "eBay изисква минимална цена от %s за този тип продукти."
+
+#: classes/model/ItemBuilderModel.php:1314
+#@ wplister
+msgid "There has been no primary category assigned."
+msgstr "Няма избрана основна категория."
+
+#: classes/model/ItemBuilderModel.php:1320
+#@ wplister
+msgid "You need to add at least one image to your product."
+msgstr "Трябва да добавите поне едно изображение за този продукт."
+
+#: classes/model/ProfilesModel.php:159
+#@ wplister
+msgid "duplicated"
+msgstr "копиран"
+
+#: classes/model/TemplatesModel.php:551
+#: classes/table/ListingsTable.php:257
+#: classes/table/ListingsTable.php:604
+#: classes/table/ProfilesTable.php:173
+#: classes/table/TransactionsTable.php:232
+#: views/invoice_template.php:124
+#: views/order_details.php:102
+#: views/transaction_details.php:110
+#@ wplister
+msgid "Price"
+msgstr "Цена"
+
+#: classes/model/TransactionsModel.php:472
+#@ wplister
+msgid "New transactions created"
+msgstr "Новите Транзакции бяха създадени"
+
+#: classes/model/TransactionsModel.php:473
+#@ wplister
+msgid "Existing transactions updated"
+msgstr "Съществуващите Транзакции бяха обновени"
+
+#: classes/model/TransactionsModel.php:474
+#@ wplister
+msgid "Foreign transactions skipped"
+msgstr "Чуждите Транзакции бяха отхвърлени"
+
+#: classes/model/TransactionsModel.php:475
+#@ wplister
+msgid "Transactions failed to create"
+msgstr "Възникна грешка при създаване на Транзакция"
+
+#: classes/model/TransactionsModel.php:478
+#@ wplister
+msgid "Note: Foreign transactions for which no matching item ID could be found in WP-Lister's listings table were skipping during update."
+msgstr "Забележка: Чуждестранни транзакции, за които няма съвпадение на ID на продукта в листа с обяви на WP-Lister, бяха пропуснати по време на актуализация."
+
+#: classes/model/TransactionsModel.php:483
+#@ wplister
+msgid "Transaction ID"
+msgstr "Транзакция ID"
+
+#: classes/model/TransactionsModel.php:485
+#: classes/table/LogTable.php:221
+#@ wplister
+msgid "Item ID"
+msgstr "Продукт ID"
+
+#: classes/model/TransactionsModel.php:486
+#: classes/table/ListingsTable.php:600
+#: classes/table/NetworkSitesTable.php:267
+#: views/listings_edit_page.php:172
+#@ wplister
+msgid "Title"
+msgstr "Заглавие"
+
+#: classes/page/EbayOrdersPage.php:72
+#@ wplister
+msgid "order(s) found on eBay."
+msgstr "поръчка(и) намерени в eBay."
+
+#: classes/page/EbayOrdersPage.php:73
+#: classes/page/ToolsPage.php:129
+#: classes/page/ToolsPage.php:145
+#: classes/page/TransactionsPage.php:74
+#@ wplister
+msgid "Timespan"
+msgstr "Обхващани Години"
+
+#: classes/page/EbayOrdersPage.php:74
+#: classes/page/EbayOrdersPage.php:90
+#: classes/page/ToolsPage.php:131
+#: classes/page/ToolsPage.php:147
+#: classes/page/TransactionsPage.php:76
+#@ wplister
+msgid "show details"
+msgstr "покажи детайли"
+
+#: classes/page/EbayOrdersPage.php:89
+#@ wplister
+msgid "orders were updated from eBay."
+msgstr "поръчки бяха актуализирани от eBay."
+
+#: classes/page/EbayOrdersPage.php:95
+#: classes/page/EbayOrdersPage.php:108
+#: classes/page/TransactionsPage.php:88
+#: classes/page/TransactionsPage.php:99
+#@ wplister
+msgid "You need to select at least one item from the list below in order to use bulk actions."
+msgstr "Трябва да посочите поне един продукт от листа по - долу, за да може да използвате общата редакция."
+
+#: classes/page/EbayOrdersPage.php:106
+#: classes/page/ListingsPage.php:281
+#: classes/page/LogPage.php:45
+#: classes/page/ProfilesPage.php:47
+#: classes/page/TransactionsPage.php:97
+#@ wplister
+msgid "Selected items were removed."
+msgstr "Избраните Продукти бяха премахнати."
+
+#: classes/page/HelpPage.php:14
+#: views/tutorial_page.php:11
+#@ wplister
+msgid "Tutorial"
+msgstr "Урок"
+
+#: classes/page/ListingsPage.php:215
+#@ wplister
+msgid "Selected items were verified with eBay."
+msgstr "Избраните Продукти бяха проверени от eBay."
+
+#: classes/page/ListingsPage.php:217
+#@ wplister
+msgid "There were some problems verifying your items."
+msgstr "Имаше проблеми при проверката на вашите Продукти."
+
+#: classes/page/ListingsPage.php:226
+#@ wplister
+msgid "Selected items were revised on eBay."
+msgstr "Избраните Продукти бяха преразгледани в eBay."
+
+#: classes/page/ListingsPage.php:228
+#@ wplister
+msgid "There were some problems revising your items."
+msgstr "Имаше проблеми при преразглеждането на вашите Продукти."
+
+#: classes/page/ListingsPage.php:237
+#@ wplister
+msgid "Selected items were published on eBay."
+msgstr "Избраните Продукти бяха публикувани в eBay."
+
+#: classes/page/ListingsPage.php:239
+#@ wplister
+msgid "Some items could not be published."
+msgstr "Някои от продуктите не бяха публикувани."
+
+#: classes/page/ListingsPage.php:248
+#@ wplister
+msgid "Selected items were re-listed on eBay."
+msgstr "Избраните Продукти бяха препубликувани в eBay."
+
+#: classes/page/ListingsPage.php:250
+#@ wplister
+msgid "There were some problems relisting your items."
+msgstr "Имаше проблеми при препубликуването на вашите Продукти."
+
+#: classes/page/ListingsPage.php:258
+#@ wplister
+msgid "Selected listings were ended."
+msgstr "Избраните Обяви свършиха."
+
+#: classes/page/ListingsPage.php:265
+#@ wplister
+msgid "Selected items were updated from eBay."
+msgstr "Избраните Продукти бяха актуализирани от eBay."
+
+#: classes/page/ListingsPage.php:299
+#@ wplister
+msgid "Selected items were archived."
+msgstr "Избраните Продукти бяха архивирани."
+
+#: classes/page/ListingsPage.php:317
+#@ wplister
+msgid "Selected items were locked."
+msgstr "Избраните Продукти бяха заключени."
+
+#: classes/page/ListingsPage.php:335
+#@ wplister
+msgid "Selected items were unlocked."
+msgstr "Избраните Продукти бяха отключени."
+
+#: classes/page/ListingsPage.php:354
+#@ wplister
+msgid "New listing was prepared from product."
+msgstr "Новата Обява беше съставена от Продукт."
+
+#: classes/page/ListingsPage.php:363
+#@ wplister
+msgid "Profiles were re-applied to selected items."
+msgstr "Профилите бяха нанесени повторно на посочените продукти."
+
+#: classes/page/ListingsPage.php:375
+#, php-format
+#@ wplister
+msgid "WP-Lister has found %s changed item(s) which need to be revised on eBay to apply their latest changes."
+msgstr "WP-Lister откри %s променен(и) продукт(а), които трябва да бъдат преразгледани в eBay, за да им се нанесат последните промени."
+
+#: classes/page/ListingsPage.php:378
+#: views/listings_page.php:63
+#: views/listings_page.php:98
+#@ wplister
+msgid "Revise all changed items"
+msgstr "Преразгледай всички променени продукти"
+
+#: classes/page/ListingsPage.php:387
+#, php-format
+#@ wplister
+msgid "WP-Lister has found %s manually relisted item(s) which need to be updated from eBay to fetch their latest changes."
+msgstr "WP-Lister откри %s ръчно препубликуван(и) продукт(а), които трябва да бъдат актуализирани от eBay, за да се въведат тяхните последни промени."
+
+#: classes/page/ListingsPage.php:456
+#@ wplister
+msgid "Listing updated."
+msgstr "Обявата беше обновена."
+
+#: classes/page/ListingsPage.php:464
+#@ wplister
+msgid "Your changes were updated on eBay."
+msgstr "Вашите Промени бяха обновени в eBay."
+
+#: classes/page/ListingsPage.php:484
+#@ wplister
+msgid "WP-Lister has found multiple listings for some of your products."
+msgstr "WP-Lister откри многократни обяви за някои от вашите продукти."
+
+#: classes/page/ListingsPage.php:485
+#@ wplister
+msgid "Show details"
+msgstr "Покажи детайли"
+
+#: classes/page/ListingsPage.php:488
+#@ wplister
+msgid "Creating multiple listings for one product is not recommended as it can cause issues syncing inventory and other unexpected behaviour."
+msgstr "Създаването на многократни обяви за един продукт не е препоръчително, защото може да окаже проблеми при синхронизирането на наличността и други неочаквани ситуации."
+
+#: classes/page/ListingsPage.php:493
+#@ wplister
+msgid "Listings for product"
+msgstr "Обяви за продукт"
+
+#: classes/page/ListingsPage.php:503
+#@ wplister
+msgid "Click to remove this listing"
+msgstr "Натиснете, за да премахнете тази обява"
+
+#: classes/page/ListingsPage.php:504
+#@ wplister
+msgid "Click to move to archive"
+msgstr "Натиснете, за да преместите в архива"
+
+#: classes/page/ListingsPage.php:512
+#@ wplister
+msgid "If you are not planning to use the inventory sync, you can hide this warning in settings."
+msgstr "Ако не планирате да използвате синхронизация на наличността, можете да скриете това предупреждение в настройките."
+
+#: classes/page/ListingsPage.php:514
+#@ wplister
+msgid "If you need to list single products multiple times for some reason, please contact support@wplab.com and we will find a solution."
+msgstr "Ако имате нужда да публикувате единични продукти няколко пъти по някаква причина, моля свържете се с support@wplab.com и ние ще намерим решение."
+
+#: classes/page/LogPage.php:51
+#@ wplister
+msgid "Database log has been cleared."
+msgstr "Датабаза дневника беше изчистен."
+
+#: classes/page/NetworkAdminPage.php:23
+#@ wplister
+msgid "WP-Lister"
+msgstr "WP-Lister"
+
+#: classes/page/NetworkAdminPage.php:61
+#@ wplister
+msgid "WP-Lister was activated on the selected sites."
+msgstr "WP-Lister беше активиран на посочените сайтове."
+
+#: classes/page/NetworkAdminPage.php:67
+#@ wplister
+msgid "WP-Lister was deactivated on the selected sites."
+msgstr "WP-Lister беше деактивиран на посочените сайтове."
+
+#: classes/page/NetworkAdminPage.php:72
+#@ wplister
+msgid "WP-Lister was installed from scratch on the selected sites."
+msgstr "WP-Lister беше инсталиран на посочените сайтове."
+
+#: classes/page/NetworkAdminPage.php:77
+#@ wplister
+msgid "WP-Lister was installed on the selected sites."
+msgstr "WP-Lister беше инсталиран на посочените сайтове."
+
+#: classes/page/NetworkAdminPage.php:82
+#@ wplister
+msgid "WP-Lister was uninstalled on the selected sites."
+msgstr "WP-Lister беше деинсталиран на посочените сайтове."
+
+#: classes/page/ProfilesPage.php:382
+#@ wplister
+msgid "Profile saved."
+msgstr "Профилът беше запазен."
+
+#: classes/page/ProfilesPage.php:398
+#, php-format
+#@ wplister
+msgid "%s prepared items updated."
+msgstr "%s подготвени продукта бяха обновени."
+
+#: classes/page/ProfilesPage.php:405
+#, php-format
+#@ wplister
+msgid "%s verified items updated."
+msgstr "%s проверени продукта бяха обновени."
+
+#: classes/page/ProfilesPage.php:412
+#, php-format
+#@ wplister
+msgid "%s published items changed."
+msgstr "%s публикувани продукта бяха обновени."
+
+#: classes/page/ProfilesPage.php:419
+#, php-format
+#@ wplister
+msgid "%s ended items updated."
+msgstr "%s свършили продукта бяха обновени."
+
+#: classes/page/ProfilesPage.php:515
+#: views/listings_edit_page.php:190
+#: views/listings_edit_page.php:236
+#: views/profile/edit_shipping_int.php:31
+#: views/profile/edit_shipping_int.php:89
+#: views/profile/edit_sidebar.php:120
+#: views/profile/edit_sidebar.php:158
+#: views/profiles_edit_page.php:74
+#: views/profiles_edit_page.php:108
+#: views/profiles_edit_page.php:208
+#: views/profiles_edit_page.php:282
+#: views/profiles_edit_page.php:305
+#: views/profiles_edit_page.php:320
+#: views/profiles_edit_page.php:331
+#: views/profiles_edit_page.php:345
+#: views/settings_page.php:154
+#: views/settings_page.php:207
+#@ wplister
+msgid "Please select"
+msgstr "Моля посочете"
+
+#: classes/page/SettingsPage.php:259
+#@ wplister
+msgid "You switched to a different eBay site."
+msgstr "Вие преминахте на различен eBay сайт."
+
+#: classes/page/SettingsPage.php:260
+#@ wplister
+msgid "Please update site specific eBay details like categories, shipping services and payment options."
+msgstr "Молим да актуализирате специфичните детайли на eBay като категории, спедиторски услуги и опции за плащане."
+
+#: classes/page/SettingsPage.php:262
+#: views/tools_page.php:70
+#@ wplister
+msgid "Update eBay data"
+msgstr "Обновете eBay информация"
+
+#: classes/page/SettingsPage.php:277
+#: classes/page/SettingsPage.php:341
+#@ wplister
+msgid "Settings saved."
+msgstr "Настройките бяха запазени."
+
+#: classes/page/SettingsPage.php:360
+#@ wplister
+msgid "Categories mapping updated."
+msgstr "Картографирането на Категориите беше актуализирано."
+
+#: classes/page/SettingsPage.php:394
+#: classes/page/SettingsPage.php:397
+#@ wplister
+msgid "Enabled sandbox mode."
+msgstr "Включете режим Sandbox."
+
+#: classes/page/SettingsPage.php:416
+#: classes/page/SettingsPage.php:419
+#@ wplister
+msgid "Switched to production mode."
+msgstr "Преминете на режим на производство."
+
+#: classes/page/SettingsPage.php:442
+#@ wplister
+msgid "Your token was changed."
+msgstr "Вашият token беше променен."
+
+#: classes/page/SettingsPage.php:443
+#: classes/page/ToolsPage.php:104
+#@ wplister
+msgid "Your UserID is"
+msgstr "Вашият UserID е"
+
+#: classes/page/SettingsPage.php:446
+#@ wplister
+msgid "Settings updated."
+msgstr "Настройките бяха обновени."
+
+#: classes/page/TemplatesPage.php:29
+#: views/templates_page.php:20
+#@ wplister
+msgid "Templates"
+msgstr "Шаблони"
+
+#: classes/page/TemplatesPage.php:284
+#@ wplister
+msgid "New template created in folder:"
+msgstr "Нов шаблон беше създаден в папка:"
+
+#: classes/page/TemplatesPage.php:305
+#, php-format
+#@ wplister
+msgid "%s published items marked as changed."
+msgstr "%s публикувани продукта бяха отбелязани като променени."
+
+#: classes/page/TemplatesPage.php:371
+#@ wplister
+msgid "Template saved."
+msgstr "Шаблонът беше запазен."
+
+#: classes/page/TemplatesPage.php:419
+#@ wplister
+msgid "There was a problem while extracting the archive:"
+msgstr "Имаше проблем при извличане от архива:"
+
+#: classes/page/TemplatesPage.php:421
+#@ wplister
+msgid "Your listing template was uploaded and installed."
+msgstr "Вашата обява шаблон беше качена и инсталирана."
+
+#: classes/page/TemplatesPage.php:427
+#@ wplister
+msgid "There was a problem while processing your upload."
+msgstr "Имаше проблем при обработката на качването на файловете."
+
+#: classes/page/ToolsPage.php:28
+#: views/tools_page.php:37
+#: views/tools_page.php:66
+#@ wplister
+msgid "Tools"
+msgstr "Инструменти"
+
+#: classes/page/ToolsPage.php:43
+#@ wplister
+msgid "Check for updates was initiated."
+msgstr "Проверката за актуализации бе започната."
+
+#: classes/page/ToolsPage.php:44
+#@ wplister
+msgid "You can visit your WordPress Updates now."
+msgstr "Можете да посетите WordPress Updates сега."
+
+#: classes/page/ToolsPage.php:45
+#@ wplister
+msgid "Since the updater runs in the background, it might take a little while before new updates appear."
+msgstr "Тъй като програмата за обновяване работи във фонов режим, тя може да отнеме малко повече време, преди да се появят нови актуализации."
+
+#: classes/page/ToolsPage.php:46
+#@ wplister
+msgid "view updates"
+msgstr "виж обновления"
+
+#: classes/page/ToolsPage.php:94
+#@ wplister
+msgid "Your token will expire on"
+msgstr "Вашият token ще изтече на"
+
+#: classes/page/ToolsPage.php:128
+#: classes/page/TransactionsPage.php:73
+#@ wplister
+msgid "Transactions were loaded from eBay."
+msgstr "Транзакциите бяха заредени от eBay."
+
+#: classes/page/ToolsPage.php:144
+#@ wplister
+msgid "Orders were loaded from eBay."
+msgstr "Поръчките бяха заредени от eBay."
+
+#: classes/page/ToolsPage.php:262
+#@ wplister
+msgid "fetching list of tasks"
+msgstr "извличане на списък от задачи"
+
+#: classes/page/ToolsPage.php:263
+#@ wplister
+msgid "estimating time left"
+msgstr "оставащо време"
+
+#: classes/page/ToolsPage.php:264
+#@ wplister
+msgid "finishing up"
+msgstr "завършване"
+
+#: classes/page/ToolsPage.php:265
+#@ wplister
+msgid "All {0} tasks have been completed."
+msgstr "Всички {0} задачи бяха завършени."
+
+#: classes/page/ToolsPage.php:266
+#@ wplister
+msgid "processing {0} of {1}"
+msgstr "обработване на {0} от {1}"
+
+#: classes/page/ToolsPage.php:267
+#@ wplister
+msgid "about {0} remaining"
+msgstr "около {0} оставащи"
+
+#: classes/page/ToolsPage.php:268
+#: views/common_header.php:36
+#@ wplister
+msgid "Please don't close this window until all tasks are completed."
+msgstr "Моля, не затваряйте този прозорец, докато всички задачи не са завършени."
+
+#: classes/page/TransactionsPage.php:86
+#@ wplister
+msgid "Selected transactions were updated from eBay."
+msgstr "Избраните транзакции бяха актуализирани от eBay."
+
+#: classes/table/CategoriesMapTable.php:84
+#: classes/table/CategoriesMapTable.php:111
+#@ wplister
+msgid "Unknown category ID"
+msgstr "Непозната Kатегория ID"
+
+#: classes/table/CategoriesMapTable.php:85
+#: classes/table/CategoriesMapTable.php:112
+#@ wplister
+msgid "This is not a leaf category"
+msgstr "Това не е категорийна листа"
+
+#: classes/table/CategoriesMapTable.php:147
+#: classes/table/ProfilesTable.php:174
+#@ wplister
+msgid "Category"
+msgstr "Категория"
+
+#: classes/table/CategoriesMapTable.php:148
+#@ wplister
+msgid "eBay category"
+msgstr "eBay Категория"
+
+#: classes/table/CategoriesMapTable.php:149
+#@ wplister
+msgid "eBay Store category"
+msgstr "eBay Магазинна Категория"
+
+#: classes/table/EbayOrdersTable.php:113
+#: classes/table/TransactionsTable.php:115
+#@ wplister
+msgid "Details"
+msgstr "Детайли"
+
+#: classes/table/EbayOrdersTable.php:120
+#: classes/table/TransactionsTable.php:122
+#@ wplister
+msgid "Create Order"
+msgstr "Създайте Поръчка"
+
+#: classes/table/EbayOrdersTable.php:122
+#: classes/table/TransactionsTable.php:124
+#@ wplister
+msgid "View Order"
+msgstr "Виж Поръчка"
+
+#: classes/table/EbayOrdersTable.php:176
+#: classes/table/EbayOrdersTable.php:340
+#@ wplister
+msgid "Active"
+msgstr "Активни"
+
+#: classes/table/EbayOrdersTable.php:180
+#: classes/table/EbayOrdersTable.php:334
+#@ wplister
+msgid "Completed"
+msgstr "Завършени"
+
+#: classes/table/EbayOrdersTable.php:230
+#: classes/table/ListingsTable.php:607
+#: classes/table/TransactionsTable.php:228
+#@ wplister
+msgid "Created at"
+msgstr "Създадена на"
+
+#: classes/table/EbayOrdersTable.php:233
+#: views/profiles_edit_page.php:321
+#@ wplister
+msgid "Buyer"
+msgstr "Купувач"
+
+#: classes/table/EbayOrdersTable.php:236
+#: classes/table/TransactionsTable.php:236
+#@ wplister
+msgid "Payment method"
+msgstr "Метод на Плащане"
+
+#: classes/table/EbayOrdersTable.php:237
+#: classes/table/ListingsTable.php:611
+#: classes/table/LogTable.php:223
+#: classes/table/NetworkSitesTable.php:268
+#: classes/table/TransactionsTable.php:239
+#: views/settings_page.php:53
+#@ wplister
+msgid "Status"
+msgstr "Статут"
+
+#: classes/table/EbayOrdersTable.php:240
+#: classes/table/TransactionsTable.php:241
+#@ wplister
+msgid "Last change"
+msgstr "Последна Промяна"
+
+#: classes/table/EbayOrdersTable.php:284
+#@ wplister
+msgid "Update selected orders from eBay"
+msgstr "Обновяване на избраните поръчки от eBay"
+
+#: classes/table/EbayOrdersTable.php:285
+#@ wplister
+msgid "Delete selected orders"
+msgstr "Изтриване на Избраните Поръчки"
+
+#: classes/table/EbayOrdersTable.php:328
+#: classes/table/ListingsTable.php:725
+#: classes/table/LogTable.php:279
+#@ wplister
+msgid "All"
+msgstr "Всички"
+
+#: classes/table/ListingsTable.php:123
+#: classes/table/TemplatesTable.php:113
+#@ wplister
+msgid "Preview"
+msgstr "Преглед"
+
+#: classes/table/ListingsTable.php:124
+#: classes/table/ListingsTable.php:532
+#: classes/table/ListingsTable.php:551
+#: classes/table/ProfilesTable.php:108
+#: classes/table/ProfilesTable.php:132
+#: classes/table/TemplatesTable.php:114
+#@ wplister
+msgid "Edit"
+msgstr "Редакция"
+
+#: classes/table/ListingsTable.php:125
+#@ wplister
+msgid "Lock"
+msgstr "Заключване"
+
+#: classes/table/ListingsTable.php:126
+#@ wplister
+msgid "Unlock"
+msgstr "Отключване"
+
+#: classes/table/ListingsTable.php:127
+#@ wplister
+msgid "Verify"
+msgstr "Проверка"
+
+#: classes/table/ListingsTable.php:128
+#@ wplister
+msgid "Publish"
+msgstr "Публикуване"
+
+#: classes/table/ListingsTable.php:130
+#@ wplister
+msgid "Revise"
+msgstr "Преразглеждане"
+
+#: classes/table/ListingsTable.php:131
+#@ wplister
+msgid "End Listing"
+msgstr "Край на Обява"
+
+#: classes/table/ListingsTable.php:133
+#@ wplister
+msgid "Relist"
+msgstr "Препубликуване"
+
+#: classes/table/ListingsTable.php:134
+#@ wplister
+msgid "Update from eBay"
+msgstr "Обнови от eBay"
+
+#: classes/table/ListingsTable.php:135
+#: classes/table/LogTable.php:245
+#: classes/table/ProfilesTable.php:110
+#: classes/table/ProfilesTable.php:221
+#: classes/table/TemplatesTable.php:116
+#: classes/table/TransactionsTable.php:286
+#@ wplister
+msgid "Delete"
+msgstr "Изтрий"
+
+#: classes/table/ListingsTable.php:136
+#@ wplister
+msgid "Archive"
+msgstr "Архив"
+
+#: classes/table/ListingsTable.php:240
+#@ wplister
+msgid "These variations will be listed as a single item."
+msgstr "Тези вариации ще бъдат публикувани като отделен продукт."
+
+#: classes/table/ListingsTable.php:255
+#: classes/table/ListingsTable.php:601
+#@ wplister
+msgid "SKU"
+msgstr "SKU"
+
+#: classes/table/ListingsTable.php:469
+#: views/listings_edit_page.php:225
+#@ wplister
+msgid "prepared"
+msgstr "подготвен"
+
+#: classes/table/ListingsTable.php:473
+#: views/listings_edit_page.php:226
+#@ wplister
+msgid "verified"
+msgstr "проверен"
+
+#: classes/table/ListingsTable.php:477
+#: views/listings_edit_page.php:227
+#@ wplister
+msgid "published"
+msgstr "публикуван"
+
+#: classes/table/ListingsTable.php:481
+#: views/listings_edit_page.php:228
+#@ wplister
+msgid "sold"
+msgstr "продаден"
+
+#: classes/table/ListingsTable.php:485
+#: views/listings_edit_page.php:229
+#@ wplister
+msgid "ended"
+msgstr "завършил"
+
+#: classes/table/ListingsTable.php:489
+#@ wplister
+msgid "archived"
+msgstr "архивиран"
+
+#: classes/table/ListingsTable.php:493
+#@ wplister
+msgid "imported"
+msgstr "вмъкнат"
+
+#: classes/table/ListingsTable.php:497
+#@ wplister
+msgid "selected"
+msgstr "избран"
+
+#: classes/table/ListingsTable.php:501
+#: views/listings_edit_page.php:230
+#@ wplister
+msgid "changed"
+msgstr "променен"
+
+#: classes/table/ListingsTable.php:505
+#@ wplister
+msgid "relisted"
+msgstr "препубликуван"
+
+#: classes/table/ListingsTable.php:524
+#@ wplister
+msgid "Profile missing"
+msgstr "Липсва Профил"
+
+#: classes/table/ListingsTable.php:543
+#@ wplister
+msgid "Template missing"
+msgstr "Липсва Шаблон"
+
+#: classes/table/ListingsTable.php:599
+#: classes/table/NetworkSitesTable.php:269
+#: classes/table/TransactionsTable.php:229
+#@ wplister
+msgid "eBay ID"
+msgstr "eBay ID"
+
+#: classes/table/ListingsTable.php:602
+#: classes/table/TransactionsTable.php:233
+#: views/invoice_template.php:120
+#: views/listings_edit_page.php:182
+#: views/order_details.php:98
+#: views/profile/edit_sidebar.php:185
+#: views/transaction_details.php:106
+#@ wplister
+msgid "Quantity"
+msgstr "Количество"
+
+#: classes/table/ListingsTable.php:603
+#: classes/table/ListingsTable.php:767
+#@ wplister
+msgid "Sold"
+msgstr "Продадено"
+
+#: classes/table/ListingsTable.php:605
+#@ wplister
+msgid "Fees"
+msgstr "Такси"
+
+#: classes/table/ListingsTable.php:608
+#@ wplister
+msgid "Ends at"
+msgstr "Свършва на"
+
+#: classes/table/ListingsTable.php:609
+#: classes/table/ProfilesTable.php:171
+#@ wplister
+msgid "Profile"
+msgstr "Профил"
+
+#: classes/table/ListingsTable.php:610
+#: classes/table/ProfilesTable.php:176
+#: classes/table/TemplatesTable.php:167
+#: views/listings_edit_page.php:127
+#: views/profile/edit_sidebar.php:225
+#@ wplister
+msgid "Template"
+msgstr "Шаблон"
+
+#: classes/table/ListingsTable.php:657
+#@ wplister
+msgid "Verify with eBay"
+msgstr "Провери с eBay"
+
+#: classes/table/ListingsTable.php:658
+#@ wplister
+msgid "Publish to eBay"
+msgstr "Публикувай в eBay"
+
+#: classes/table/ListingsTable.php:659
+#@ wplister
+msgid "Update details from eBay"
+msgstr "Обнови детайли от eBay"
+
+#: classes/table/ListingsTable.php:660
+#@ wplister
+msgid "Select another profile"
+msgstr "Избери друг профил"
+
+#: classes/table/ListingsTable.php:661
+#@ wplister
+msgid "Re-apply profile"
+msgstr "Нанеси отново профил"
+
+#: classes/table/ListingsTable.php:662
+#@ wplister
+msgid "Revise items"
+msgstr "Преразгледай продуктите"
+
+#: classes/table/ListingsTable.php:663
+#@ wplister
+msgid "End listings"
+msgstr "Завършили Обяви"
+
+#: classes/table/ListingsTable.php:664
+#@ wplister
+msgid "Re-list ended items"
+msgstr "Прелубликувай завършилите продукти"
+
+#: classes/table/ListingsTable.php:665
+#@ wplister
+msgid "Lock listings"
+msgstr "Заключи обявите"
+
+#: classes/table/ListingsTable.php:666
+#@ wplister
+msgid "Unlock listings"
+msgstr "Отключи обявите"
+
+#: classes/table/ListingsTable.php:667
+#@ wplister
+msgid "Move to archive"
+msgstr "Премести в архив"
+
+#: classes/table/ListingsTable.php:668
+#@ wplister
+msgid "Delete listings"
+msgstr "Изтрий обяви"
+
+#: classes/table/ListingsTable.php:731
+#@ wplister
+msgid "Prepared"
+msgstr "Подготвени"
+
+#: classes/table/ListingsTable.php:737
+#@ wplister
+msgid "Verified"
+msgstr "Проверени"
+
+#: classes/table/ListingsTable.php:743
+#@ wplister
+msgid "Published"
+msgstr "Публикувани"
+
+#: classes/table/ListingsTable.php:749
+#@ wplister
+msgid "Changed"
+msgstr "Променени"
+
+#: classes/table/ListingsTable.php:755
+#@ wplister
+msgid "Ended"
+msgstr "Завършили"
+
+#: classes/table/ListingsTable.php:761
+#@ wplister
+msgid "Archived"
+msgstr "Архивирани"
+
+#: classes/table/ListingsTable.php:779
+#: views/listings_page.php:52
+#: views/listings_page.php:81
+#@ wplister
+msgid "Verify all prepared items with eBay and get listing fees."
+msgstr "Проверете всички приготвени продукти с eBay и получете всички такси по обявите."
+
+#: classes/table/ListingsTable.php:780
+#: views/listings_page.php:53
+#: views/listings_page.php:80
+#@ wplister
+msgid "Verify all prepared items"
+msgstr "Провери всички подготвени продукти"
+
+#: classes/table/ListingsTable.php:785
+#: views/listings_page.php:58
+#: views/listings_page.php:90
+#@ wplister
+msgid "Publish all verified items on eBay."
+msgstr "Публикувай всички проверени продукти в eBay"
+
+#: classes/table/ListingsTable.php:786
+#: views/listings_page.php:59
+#: views/listings_page.php:89
+#@ wplister
+msgid "Publish all verified items"
+msgstr "Публикувай всички проверени продукти"
+
+#: classes/table/LogTable.php:219
+#: views/order_details.php:132
+#: views/order_details.php:166
+#: views/transaction_details.php:137
+#@ wplister
+msgid "Date"
+msgstr "Дата"
+
+#: classes/table/LogTable.php:220
+#@ wplister
+msgid "Request"
+msgstr "Поискване"
+
+#: classes/table/LogTable.php:222
+#: classes/table/TemplatesTable.php:71
+#@ wplister
+msgid "User"
+msgstr "Потребител"
+
+#: classes/table/LogTable.php:285
+#@ wplister
+msgid "Successful"
+msgstr "Успешно"
+
+#: classes/table/LogTable.php:291
+#@ wplister
+msgid "Failed"
+msgstr "Неуспешни"
+
+#: classes/table/LogTable.php:298
+#@ wplister
+msgid "Unknown"
+msgstr "Неизвестни"
+
+#: classes/table/NetworkSitesTable.php:111
+#@ wplister
+msgid "Dashboard"
+msgstr "Табло"
+
+#: classes/table/NetworkSitesTable.php:114
+#@ wplister
+msgid "Install"
+msgstr "Инсталиране"
+
+#: classes/table/NetworkSitesTable.php:115
+#: views/settings_advanced.php:65
+#@ wplister
+msgid "Uninstall"
+msgstr "Деинсталиране"
+
+#: classes/table/NetworkSitesTable.php:116
+#: classes/table/NetworkSitesTable.php:317
+#@ wplister
+msgid "Activate"
+msgstr "Активиране"
+
+#: classes/table/NetworkSitesTable.php:117
+#: classes/table/NetworkSitesTable.php:318
+#@ wplister
+msgid "Deactivate"
+msgstr "Деактивиране"
+
+#: classes/table/NetworkSitesTable.php:213
+#@ wplister
+msgid "enabled"
+msgstr "включено"
+
+#: classes/table/NetworkSitesTable.php:217
+#@ wplister
+msgid "disabled"
+msgstr "изключено"
+
+#: classes/table/NetworkSitesTable.php:221
+#@ wplister
+msgid "not installed"
+msgstr "не е инсталирано"
+
+#: classes/table/NetworkSitesTable.php:270
+#@ wplister
+msgid "DB Version"
+msgstr "DB Версия"
+
+#: classes/table/NetworkSitesTable.php:271
+#@ wplister
+msgid "Setup"
+msgstr "Настройки"
+
+#: classes/table/NetworkSitesTable.php:272
+#: classes/table/TemplatesTable.php:168
+#@ wplister
+msgid "Folder"
+msgstr "Папка"
+
+#: classes/table/NetworkSitesTable.php:319
+#@ wplister
+msgid "Update DB"
+msgstr "Обнови DB"
+
+#: classes/table/ProfilesTable.php:47
+#@ wplister
+msgid "No profiles found."
+msgstr "Няма намерени профили."
+
+#: classes/table/ProfilesTable.php:75
+#@ wplister
+msgid "Listing"
+msgstr "Обява"
+
+#: classes/table/ProfilesTable.php:77
+#: views/profiles_edit_page.php:306
+#: views/profiles_edit_page.php:307
+#: views/profiles_edit_page.php:308
+#: views/profiles_edit_page.php:309
+#@ wplister
+msgid "days"
+msgstr "дни"
+
+#: classes/table/ProfilesTable.php:109
+#: classes/table/TemplatesTable.php:115
+#@ wplister
+msgid "Duplicate"
+msgstr "Копирай"
+
+#: classes/table/ProfilesTable.php:172
+#: views/listings_edit_page.php:188
+#: views/profiles_edit_page.php:104
+#@ wplister
+msgid "Duration"
+msgstr "Времетраене"
+
+#: classes/table/ProfilesTable.php:175
+#: views/listings_edit_page.php:234
+#: views/profiles_edit_page.php:70
+#@ wplister
+msgid "Type"
+msgstr "Тип"
+
+#: classes/table/TemplatesTable.php:71
+#@ wplister
+msgid "Default"
+msgstr "По подразбиране"
+
+#: classes/table/TemplatesTable.php:117
+#@ wplister
+msgid "Download"
+msgstr "Сваляне"
+
+#: classes/table/TransactionsTable.php:137
+#@ wplister
+msgid "Edit Product"
+msgstr "Редактирай Продукт"
+
+#: classes/table/TransactionsTable.php:174
+#@ wplister
+msgid "InComplete"
+msgstr "Незавършен"
+
+#: classes/table/TransactionsTable.php:178
+#@ wplister
+msgid "Complete"
+msgstr "Завършен"
+
+#: classes/table/TransactionsTable.php:230
+#@ wplister
+msgid "Product"
+msgstr "Продукт"
+
+#: classes/table/TransactionsTable.php:235
+#: views/invoice_template.php:122
+#: views/order_details.php:100
+#: views/templates_copy_form.php:37
+#: views/templates_edit_page.php:341
+#: views/transaction_details.php:108
+#@ wplister
+msgid "Name"
+msgstr "Име"
+
+#: classes/table/TransactionsTable.php:285
+#@ wplister
+msgid "Update transaction from eBay"
+msgstr "Обнови транзакции от eBay"
+
+#: views/common_header.php:10
+#: views/settings_dev.php:79
+#@ wplister
+msgid "Sandbox enabled"
+msgstr "Sandbox е включен"
+
+#: views/common_header.php:39
+#@ wplister
+msgid "Close window"
+msgstr "Затвори прозореца"
+
+#: views/listings_edit_page.php:51
+#@ wplister
+msgid "Edit Listing"
+msgstr "Редактирай Обява"
+
+#: views/listings_edit_page.php:67
+#: views/listings_edit_page.php:115
+#: views/profile/edit_sidebar.php:49
+#: views/settings_advanced.php:36
+#: views/settings_categories.php:96
+#: views/settings_dev.php:36
+#: views/templates_edit_page.php:121
+#@ wplister
+msgid "Update"
+msgstr "Обнови"
+
+#: views/listings_edit_page.php:77
+#@ wplister
+msgid "Your changes to this item will only be updated on eBay when you revise this item."
+msgstr "Вашите промени в този продукт ще бъдат актуализирани в eBay, когато се преразгледа тoзи продукт."
+
+#: views/listings_edit_page.php:79
+#@ wplister
+msgid "revise this item when saving"
+msgstr "преразгледай този продукт при запазване"
+
+#: views/listings_edit_page.php:81
+#@ wplister
+msgid "This item has been ended."
+msgstr "Тази продукт е бил приключил."
+
+#: views/listings_edit_page.php:93
+#@ wplister
+msgid "Current item ID"
+msgstr "Текущ Продукт ID"
+
+#: views/listings_edit_page.php:97
+#@ wplister
+msgid "Previous item IDs"
+msgstr "Предишен Продукт ID"
+
+#: views/listings_edit_page.php:145
+#@ wplister
+msgid "Information"
+msgstr "Информация"
+
+#: views/listings_edit_page.php:167
+#@ wplister
+msgid "Item settings"
+msgstr "Настройки на Продукта"
+
+#: views/listings_edit_page.php:177
+#: views/profiles_edit_page.php:85
+#@ wplister
+msgid "Price / Start price"
+msgstr "Цена / Стартова Цена"
+
+#: views/listings_edit_page.php:179
+#: views/listings_edit_page.php:184
+#@ wplister
+msgid "This will have no effect on product variations."
+msgstr "Това няма да има ефект върху вариациите на продукта."
+
+#: views/listings_edit_page.php:209
+#@ wplister
+msgid "Developer options"
+msgstr "Опции на Програмиста"
+
+#: views/listings_edit_page.php:215
+#@ wplister
+msgid "Items sold"
+msgstr "Продадени продукта"
+
+#: views/listings_edit_page.php:219
+#@ wplister
+msgid "eBay Item ID"
+msgstr "eBay Продукт ID"
+
+#: views/listings_edit_page.php:241
+#: views/profiles_edit_page.php:80
+#@ wplister
+msgid "Note: eBay does not allow changing the listing type for already published items."
+msgstr "Забележка: eBay не позволява промяна на вида на обявата за вече публикувани продукти."
+
+#: views/listings_edit_page.php:244
+#@ wplister
+msgid "Product ID"
+msgstr "Продукт ID"
+
+#: views/listings_edit_page.php:248
+#@ wplister
+msgid "Update advanced settings"
+msgstr "Обнови разширените настройки"
+
+#: views/listings_edit_page.php:251
+#: views/settings_advanced.php:251
+#@ wplister
+msgid "Yes, I know what I am doing."
+msgstr "Да, знам какво правя."
+
+#: views/listings_edit_page.php:263
+#@ wplister
+msgid "Save listing"
+msgstr "Запази Обява"
+
+#: views/listings_page.php:42
+#: views/log_page.php:37
+#: views/orders_page.php:24
+#@ wplister
+msgid "Search"
+msgstr "Търсене"
+
+#: views/listings_page.php:62
+#: views/listings_page.php:99
+#@ wplister
+msgid "Revise all changed items on eBay."
+msgstr "Преразглеждане на всички променени продукти в eBay."
+
+#: views/listings_page.php:66
+#: views/listings_page.php:108
+#@ wplister
+msgid "Update all published items from eBay."
+msgstr "Обнови всички публикувани продукти от eBay."
+
+#: views/listings_page.php:67
+#: views/listings_page.php:107
+#@ wplister
+msgid "Update all published items"
+msgstr "Обнови всички публикувани продукти"
+
+#: views/listings_page.php:119
+#@ wplister
+msgid "Are you sure you want to end this listing?"
+msgstr "Наистина ли искате да сложите край на тази обява?"
+
+#: views/listings_page.php:124
+#@ wplister
+msgid "Are you sure you want to relist this ended listing?"
+msgstr "Наистина ли искате да препубликувате тази завършила обява?"
+
+#: views/listings_page.php:129
+#: views/listings_page.php:132
+#@ wplister
+msgid "Are you sure you want to remove this listing from WP-Lister?"
+msgstr "Сигурни ли сте, че искате да премахнете тази обява от WP-Lister?"
+
+#: views/listings_prepare_page.php:84
+#@ wplister
+msgid "Choose a listing profile"
+msgstr "Изберете Профил за Обяви"
+
+#: views/listings_prepare_page.php:93
+#@ wplister
+msgid "Please select a profile for the products shown below:"
+msgstr "Моля, изберете профил за продуктите, показани по-долу:"
+
+#: views/listings_prepare_page.php:112
+#@ wplister
+msgid "Apply Profile"
+msgstr "Нанесете Профил"
+
+#: views/listings_prepare_page.php:115
+#@ wplister
+msgid "Verify all selected items with eBay now."
+msgstr "Проверете всички избрани продукти с eBay сега."
+
+#: views/log_details.php:159
+#: views/log_details.php:173
+#: views/log_details.php:179
+#@ wplister
+msgid "Send to support"
+msgstr "Изпратете на поддръжка"
+
+#: views/log_details.php:163
+#@ wplister
+msgid "Your Name"
+msgstr "Вашето Име"
+
+#: views/log_details.php:166
+#@ wplister
+msgid "Your Email"
+msgstr "Вашият Email"
+
+#: views/log_details.php:169
+#@ wplister
+msgid "Your Message"
+msgstr "Вашето Съобщение"
+
+#: views/log_page.php:47
+#@ wplister
+msgid "Clear log"
+msgstr "Изчистете Историята"
+
+#: views/order_details.php:134
+#: views/order_details.php:168
+#: views/transaction_details.php:139
+#@ wplister
+msgid "Time"
+msgstr "Време"
+
+#: views/order_details.php:136
+#: views/order_details.php:170
+#: views/transaction_details.php:141
+#@ wplister
+msgid "Message"
+msgstr "Съобщение"
+
+#: views/orders_page.php:35
+#: views/settings_page.php:106
+#: views/transactions_page.php:33
+#@ wplister
+msgid "Next scheduled update"
+msgstr "Следващото планирано Обновление"
+
+#: views/orders_page.php:38
+#@ wplister
+msgid "Automatic background updates are currently disabled."
+msgstr "В момента Автоматични фонови актуализации са изключени."
+
+#: views/orders_page.php:46
+#@ wplister
+msgid "Update orders"
+msgstr "Обнови Поръчки"
+
+#: views/orders_page.php:47
+#@ wplister
+msgid "Update recent orders from eBay."
+msgstr "Обнове последните поръчки от eBay."
+
+#: views/orders_page.php:52
+#@ wplister
+msgid "View transactions"
+msgstr "Виж транзакции"
+
+#: views/profile/edit_categories.php:81
+#@ wplister
+msgid "Conditions and item specifics are based on the category"
+msgstr "Условия и особености на продуктите се основават на категорията"
+
+#: views/profile/edit_categories.php:89
+#@ wplister
+msgid "Store categories"
+msgstr "Магазинни Категории"
+
+#: views/profile/edit_categories.php:94
+#: views/profile/edit_categories.php:108
+#@ wplister
+msgid "Store category"
+msgstr "Магазинна Категория"
+
+#: views/profile/edit_shipping.php:27
+#@ wplister
+msgid "Shipping Options"
+msgstr "Опции за Доставка"
+
+#: views/profile/edit_shipping_int.php:8
+#: views/profile/edit_shipping_int.php:70
+#@ wplister
+msgid "Destination"
+msgstr "Дестинация"
+
+#: views/profile/edit_shipping_int.php:12
+#: views/profile/edit_shipping_int.php:66
+#: views/profile/edit_shipping_loc.php:14
+#: views/profile/edit_shipping_loc.php:61
+#@ wplister
+msgid "Shipping service"
+msgstr "Спедиторска Услуга"
+
+#: views/profile/edit_shipping_int.php:16
+#: views/profile/edit_shipping_loc.php:18
+#@ wplister
+msgid "First item cost"
+msgstr "Разходи по първият Продукт"
+
+#: views/profile/edit_shipping_int.php:20
+#: views/profile/edit_shipping_loc.php:22
+#@ wplister
+msgid "Additional items cost"
+msgstr "Допълнителни разходи по Продукта"
+
+#: views/profile/edit_shipping_int.php:73
+#@ wplister
+msgid "Package"
+msgstr "Опаковка"
+
+#: views/profile/edit_shipping_int.php:74
+#@ wplister
+msgid "Handling fee"
+msgstr "Tакса за Oбработка"
+
+#: views/profile/edit_shipping_int.php:107
+#@ wplister
+msgid "Add international shipping option"
+msgstr "Добави международна спедиторска услуга"
+
+#: views/profile/edit_shipping_int.php:116
+#: views/profile/edit_shipping_int.php:141
+#: views/profile/edit_shipping_loc.php:106
+#: views/profile/edit_shipping_loc.php:142
+#@ wplister
+msgid "Shipping discount profile"
+msgstr "Спедиторски профил за отстъпки"
+
+#: views/profile/edit_shipping_int.php:121
+#: views/profile/edit_shipping_int.php:146
+#: views/profile/edit_shipping_loc.php:111
+#: views/profile/edit_shipping_loc.php:147
+#@ wplister
+msgid "no discount profile"
+msgstr "няма профил за отстъпки"
+
+#: views/profile/edit_shipping_int.php:129
+#: views/profile/edit_shipping_loc.php:131
+#@ wplister
+msgid "Packaging and handling costs"
+msgstr "Опаковане и Обработване струват"
+
+#: views/profile/edit_shipping_int.php:158
+#@ wplister
+msgid "Ship to locations"
+msgstr "Изпрати до местоположения"
+
+#: views/profile/edit_shipping_int.php:169
+#@ wplister
+msgid "Exclude locations"
+msgstr "Изключи местоположения"
+
+#: views/profile/edit_shipping_loc.php:3
+#@ wplister
+msgid "Freight shipping may be used when flat or calculated shipping cannot be used due to the greater weight of the item."
+msgstr "Товарна доставка може да се използва, когато плоската или изчислена доставка, не може да бъде използвана поради по-голямото тегло на продукта."
+
+#: views/profile/edit_shipping_loc.php:4
+#@ wplister
+msgid "Currently, FreightFlat is available only for the US, UK, AU, CA and CAFR sites, and only for domestic shipping. On the US site, FreightFlat applies to shipping with carriers that are not affiliated with eBay."
+msgstr "В момента, FreightFlat е достъпна само за САЩ, Великобритания, AU, CA и CAFR сайтове, и то само за вътрешно доставяне. На сайта на САЩ, FreightFlat се отнася за доставка с превозвачи, които не са свързани с eBay."
+
+#: views/profile/edit_shipping_loc.php:5
+#@ wplister
+msgid "Due to limitations in the eBay API, you still need to select at least one valid domestic shipping service. This will have no effect on the listing on eBay."
+msgstr "Поради ограничения в API eBay, вие все още трябва да изберете поне едно валидно вътрешно транспортно обслужване. Това няма да има ефект във връзка с обявата в eBay."
+
+#: views/profile/edit_shipping_loc.php:54
+#@ wplister
+msgid "Warning: Calculated shipping is currently only available on eBay US, Canada and Australia."
+msgstr "Внимание: Изчисляване на Доставката в момента е достъпно само в eBay САЩ, Канада и Австралия."
+
+#: views/profile/edit_shipping_loc.php:84
+#@ wplister
+msgid "Add domestic shipping option"
+msgstr "Добави вътрешно транспортно доставяне"
+
+#: views/profile/edit_shipping_loc.php:93
+#@ wplister
+msgid "Package type"
+msgstr "Тип Опаковка"
+
+#: views/profile/edit_shipping_loc.php:119
+#: views/profile/edit_shipping_loc.php:155
+#@ wplister
+msgid "Enable free shipping"
+msgstr "Включи безплатна доставка"
+
+#: views/profile/edit_shipping_loc.php:124
+#: views/profile/edit_shipping_loc.php:160
+#: views/profile/edit_sidebar.php:283
+#: views/profile/edit_sidebar.php:327
+#: views/profile/edit_sidebar.php:337
+#: views/profile/edit_sidebar.php:355
+#: views/profile/edit_sidebar.php:379
+#: views/profile/edit_sidebar.php:390
+#: views/profile/edit_sidebar.php:401
+#: views/profile/edit_sidebar.php:411
+#: views/profiles_edit_page.php:284
+#: views/settings_advanced.php:67
+#: views/settings_advanced.php:226
+#: views/settings_advanced.php:238
+#: views/settings_advanced.php:250
+#: views/settings_advanced.php:284
+#: views/settings_advanced.php:297
+#: views/settings_dev.php:86
+#: views/settings_dev.php:102
+#: views/settings_dev.php:154
+#: views/settings_page.php:217
+#@ wplister
+msgid "No"
+msgstr "Не"
+
+#: views/profile/edit_shipping_loc.php:125
+#: views/profile/edit_shipping_loc.php:161
+#: views/profile/edit_sidebar.php:282
+#: views/profile/edit_sidebar.php:326
+#: views/profile/edit_sidebar.php:336
+#: views/profile/edit_sidebar.php:354
+#: views/profile/edit_sidebar.php:378
+#: views/profile/edit_sidebar.php:389
+#: views/profile/edit_sidebar.php:400
+#: views/profile/edit_sidebar.php:410
+#: views/profiles_edit_page.php:283
+#: views/settings_advanced.php:68
+#: views/settings_advanced.php:227
+#: views/settings_advanced.php:239
+#: views/settings_advanced.php:285
+#: views/settings_advanced.php:298
+#: views/settings_dev.php:85
+#: views/settings_dev.php:101
+#: views/settings_dev.php:155
+#: views/settings_page.php:216
+#@ wplister
+msgid "Yes"
+msgstr "Да"
+
+#: views/profile/edit_shipping_loc.php:170
+#@ wplister
+msgid "Shipping profile"
+msgstr "Профил за Доставка"
+
+#: views/profile/edit_shipping_loc.php:174
+#: views/profiles_edit_page.php:257
+#: views/profiles_edit_page.php:368
+#@ wplister
+msgid "no profile"
+msgstr "няма профил"
+
+#: views/profile/edit_sidebar.php:58
+#, php-format
+#@ wplister
+msgid "There are %s prepared, %s verified and %s published items using this profile."
+msgstr "Има %s подготвени, %s проверени и %s публикувани продукта, използващи този профил."
+
+#: views/profile/edit_sidebar.php:61
+#, php-format
+#@ wplister
+msgid "update %s prepared items"
+msgstr "обнови %s подготвени продукта"
+
+#: views/profile/edit_sidebar.php:65
+#, php-format
+#@ wplister
+msgid "update %s verified items"
+msgstr "обнови %s проверени продукта"
+
+#: views/profile/edit_sidebar.php:69
+#, php-format
+#@ wplister
+msgid "update %s published items"
+msgstr "обнови %s публикувани продукта"
+
+#: views/profile/edit_sidebar.php:73
+#, php-format
+#@ wplister
+msgid "update %s ended items"
+msgstr "обнови %s изтекли продукта"
+
+#: views/profile/edit_sidebar.php:86
+#: views/profiles_edit_page.php:387
+#@ wplister
+msgid "Save profile"
+msgstr "Запази Профил"
+
+#: views/profile/edit_sidebar.php:98
+#@ wplister
+msgid "Location and Taxes"
+msgstr "Местоположение и Такси"
+
+#: views/profile/edit_sidebar.php:102
+#: views/templates_edit_page.php:356
+#@ wplister
+msgid "Location"
+msgstr "Местоположение"
+
+#: views/profile/edit_sidebar.php:109
+#@ wplister
+msgid "Postal code"
+msgstr "Пощенски Код"
+
+#: views/profile/edit_sidebar.php:116
+#@ wplister
+msgid "Country"
+msgstr "Държава"
+
+#: views/profile/edit_sidebar.php:133
+#@ wplister
+msgid "Currency"
+msgstr "Валута"
+
+#: views/profile/edit_sidebar.php:154
+#@ wplister
+msgid "Taxes"
+msgstr "Такси"
+
+#: views/profile/edit_sidebar.php:159
+#@ wplister
+msgid "no taxes"
+msgstr "няма такси"
+
+#: views/profile/edit_sidebar.php:160
+#@ wplister
+msgid "fixed tax rate"
+msgstr "фиксирани такси"
+
+#: views/profile/edit_sidebar.php:161
+#@ wplister
+msgid "use Sales Tax Table"
+msgstr "използвай Таблица на Таксите за Продажби"
+
+#: views/profile/edit_sidebar.php:162
+#@ wplister
+msgid "apply product tax"
+msgstr "прилагат продуктова такса"
+
+#: views/profile/edit_sidebar.php:168
+#@ wplister
+msgid "Tax rate (VAT)"
+msgstr "Такса (VAT)"
+
+#: views/profile/edit_sidebar.php:180
+#@ wplister
+msgid "Quantity Override"
+msgstr "Презаписване на Количество"
+
+#: views/profile/edit_sidebar.php:189
+#@ wplister
+msgid "auto sync"
+msgstr "автосинхронизация"
+
+#: views/profile/edit_sidebar.php:190
+#@ wplister
+msgid "custom qty"
+msgstr "друго кол."
+
+#: views/profile/edit_sidebar.php:198
+#@ wplister
+msgid "Max. quantity"
+msgstr "Максимално количество"
+
+#: views/profile/edit_sidebar.php:205
+#@ wplister
+msgid "Fixed quantity"
+msgstr "Фиксирано Количество"
+
+#: views/profile/edit_sidebar.php:214
+#@ wplister
+msgid "Custom quantities to not apply to locked listings."
+msgstr "Персонализирани количества не се прилагат за заключени обяви."
+
+#: views/profile/edit_sidebar.php:215
+#@ wplister
+msgid "Leave this empty to use inventory sync!"
+msgstr "Оставете това поле празно, за да изпозлвате синхронизация на наличността!"
+
+#: views/profile/edit_sidebar.php:243
+#@ wplister
+msgid "Title and Subtitle"
+msgstr "Заглавие и Под-Заглавие"
+
+#: views/profile/edit_sidebar.php:247
+#@ wplister
+msgid "Title prefix"
+msgstr "Префикс на Заглавието"
+
+#: views/profile/edit_sidebar.php:254
+#@ wplister
+msgid "Title suffix"
+msgstr "Суфикс на Заглавието"
+
+#: views/profile/edit_sidebar.php:261
+#@ wplister
+msgid "Add keywords to your listing title."
+msgstr "Добавете ключови думи към заглавието на вашата обява."
+
+#: views/profile/edit_sidebar.php:263
+#@ wplister
+msgid "How?"
+msgstr "Как?"
+
+#: views/profile/edit_sidebar.php:267
+#@ wplister
+msgid "You can use a subset of the available listing shortcodes in title prefix and suffix."
+msgstr "Можете да използвате подмножество на наличните кратки кодове за вписване в заглавния префикс и суфикс."
+
+#: views/profile/edit_sidebar.php:269
+#@ wplister
+msgid "Example"
+msgstr "Пример"
+
+#: views/profile/edit_sidebar.php:278
+#@ wplister
+msgid "Enable subtitle"
+msgstr "Разрешаване на Под-Заглавие"
+
+#: views/profile/edit_sidebar.php:290
+#@ wplister
+msgid "Custom subtitle"
+msgstr "Друго Под-Заглавие"
+
+#: views/profile/edit_sidebar.php:297
+#@ wplister
+msgid "Leave this empty to use the short description as subtitle."
+msgstr "Оставете това поле празно, за да използвате кратко описание като Под-Заглавие."
+
+#: views/profile/edit_sidebar.php:298
+#@ wplister
+msgid "Will be truncated after 55 characters."
+msgstr "Ще бъде пресечено в 55 символа."
+
+#: views/profile/edit_sidebar.php:308
+#@ wplister
+msgid "Variations"
+msgstr "Вариации"
+
+#: views/profile/edit_sidebar.php:312
+#@ wplister
+msgid "Variation mode"
+msgstr "Режим на Вариации"
+
+#: views/profile/edit_sidebar.php:316
+#@ wplister
+msgid "list as variations"
+msgstr "публикувай като вариации"
+
+#: views/profile/edit_sidebar.php:317
+#@ wplister
+msgid "flatten variations"
+msgstr "изравнени вариации"
+
+#: views/profile/edit_sidebar.php:322
+#@ wplister
+msgid "Variation images"
+msgstr "Избражения за Вариация"
+
+#: views/profile/edit_sidebar.php:332
+#@ wplister
+msgid "Add var. table"
+msgstr "Добави таблица за вариации"
+
+#: views/profile/edit_sidebar.php:346
+#@ wplister
+msgid "Images"
+msgstr "Изображения"
+
+#: views/profile/edit_sidebar.php:350
+#@ wplister
+msgid "Gallery image"
+msgstr "Галерийно Изображение"
+
+#: views/profile/edit_sidebar.php:367
+#@ wplister
+msgid "Other options"
+msgstr "Други опции"
+
+#: views/profile/edit_sidebar.php:384
+#@ wplister
+msgid "Private listing"
+msgstr "Частна Обява"
+
+#: views/profile/edit_sidebar.php:395
+#@ wplister
+msgid "Use SKU as UPC"
+msgstr "Използвай SKU като UPC"
+
+#: views/profile/edit_sidebar.php:406
+#@ wplister
+msgid "Strikethrough price"
+msgstr "Зачеркната цена"
+
+#: views/profile/edit_sidebar.php:416
+#@ wplister
+msgid "Hit Counter"
+msgstr "Брояч за Посещения"
+
+#: views/profile/edit_sidebar.php:431
+#@ wplister
+msgid "Sort order"
+msgstr "Ред на Сортиране"
+
+#: views/profile/edit_sidebar.php:442
+#: views/templates_edit_page.php:239
+#@ wplister
+msgid "Help"
+msgstr "Помощ"
+
+#: views/profiles_edit_page.php:18
+#@ wplister
+msgid "Edit Profile"
+msgstr "Редактирай Профил"
+
+#: views/profiles_edit_page.php:52
+#@ wplister
+msgid "General eBay settings"
+msgstr "Главни eBay настройки"
+
+#: views/profiles_edit_page.php:57
+#@ wplister
+msgid "Profile name"
+msgstr "Профилно Име"
+
+#: views/profiles_edit_page.php:63
+#@ wplister
+msgid "Profile description"
+msgstr "Описание на Профила"
+
+#: views/profiles_edit_page.php:86
+#@ wplister
+msgid "Leave this empty to use the product price as it is."
+msgstr "Оставете това поле празно, за да се използва цената на продукта, както е."
+
+#: views/profiles_edit_page.php:98
+#@ wplister
+msgid "Fixed price (199), percent (+10% / -10%) or fixed change (+5 / -5)"
+msgstr "Фиксирана Цена (199), процент (+10% / -10%) или фиксирана промяна (+5 / -5)"
+
+#: views/profiles_edit_page.php:122
+#@ wplister
+msgid "GTC listings will be charged every 30 days."
+msgstr "GTC обяви ще бъдат таксувани на всеки 30 дни."
+
+#: views/profiles_edit_page.php:141
+#@ wplister
+msgid "none"
+msgstr "без"
+
+#: views/profiles_edit_page.php:149
+#@ wplister
+msgid "Available conditions may vary for different categories."
+msgstr "Наличните състояния може да варират за различните категории."
+
+#: views/profiles_edit_page.php:150
+#@ wplister
+msgid "You should set the category first."
+msgstr "Трябва първо да посочите категорията."
+
+#: views/profiles_edit_page.php:167
+#@ wplister
+msgid "Handling time"
+msgstr "Време за Обработка"
+
+#: views/profiles_edit_page.php:168
+#: views/profiles_edit_page.php:185
+#@ wplister
+msgid "The maximum number of business days a seller commits to for shipping an item to domestic buyers after receiving a cleared payment."
+msgstr "Максималният брой работни дни, за които Продавачът се задължава да изпрати продукта до купувача, след получаване на плащане."
+
+#: views/profiles_edit_page.php:197
+#: views/profiles_edit_page.php:200
+#@ wplister
+msgid "Payment methods"
+msgstr "Начин на Плащане"
+
+#: views/profiles_edit_page.php:226
+#@ wplister
+msgid "Add payment method"
+msgstr "Добави Начин на Плащане"
+
+#: views/profiles_edit_page.php:235
+#@ wplister
+msgid "Cash on delivery fee"
+msgstr "Такса Наложен Платеж"
+
+#: views/profiles_edit_page.php:243
+#@ wplister
+msgid "Payment instructions"
+msgstr "Инструкции на Плащане"
+
+#: views/profiles_edit_page.php:253
+#@ wplister
+msgid "Payment profile"
+msgstr "Профил за Плащане"
+
+#: views/profiles_edit_page.php:274
+#@ wplister
+msgid "Return Policy"
+msgstr "Политика на Връщане"
+
+#: views/profiles_edit_page.php:278
+#@ wplister
+msgid "Enable return policy"
+msgstr "Включи Политика на Връщане"
+
+#: views/profiles_edit_page.php:291
+#@ wplister
+msgid "Returns within"
+msgstr "Връщане в рамките на"
+
+#: views/profiles_edit_page.php:310
+#@ wplister
+msgid "month"
+msgstr "месец"
+
+#: views/profiles_edit_page.php:316
+#@ wplister
+msgid "Shipping cost paid by"
+msgstr "Цена за Доставка, платена от"
+
+#: views/profiles_edit_page.php:322
+#@ wplister
+msgid "Seller"
+msgstr "Продавач"
+
+#: views/profiles_edit_page.php:327
+#@ wplister
+msgid "Refund option"
+msgstr "Опция за Възстановяване на Плащане"
+
+#: views/profiles_edit_page.php:341
+#@ wplister
+msgid "Restocking fee"
+msgstr "Такса за Презаписване"
+
+#: views/profiles_edit_page.php:346
+#@ wplister
+msgid "No restocking fee"
+msgstr "Няма Такса за Презаписване"
+
+#: views/profiles_edit_page.php:347
+#: views/profiles_edit_page.php:348
+#: views/profiles_edit_page.php:349
+#@ wplister
+msgid "percent"
+msgstr "процент"
+
+#: views/profiles_edit_page.php:354
+#@ wplister
+msgid "Returns description"
+msgstr "Описание за Връщане на Продукти"
+
+#: views/profiles_edit_page.php:364
+#@ wplister
+msgid "Return policy profile"
+msgstr "Профил за Връщане на Продукти"
+
+#: views/profiles_page.php:20
+#: views/templates_page.php:20
+#@ wplister
+msgid "Add New"
+msgstr "Добави Нов"
+
+#: views/profiles_page.php:39
+#@ wplister
+msgid "Add New Profile"
+msgstr "Добави Нов Профил"
+
+#: views/profiles_page.php:59
+#: views/templates_page.php:126
+#@ wplister
+msgid "Are you sure you want to delete this item?."
+msgstr "Сигурен ли сте, че искате да изтриете този продукт?"
+
+#: views/settings_advanced.php:43
+#@ wplister
+msgid "This page contains some advanced options for special use cases."
+msgstr "Тази страница съдържа някои допълнителни опции за специални случаи на употреба."
+
+#: views/settings_advanced.php:50
+#: views/settings_dev.php:50
+#: views/settings_dev.php:195
+#: views/settings_page.php:89
+#@ wplister
+msgid "Save Settings"
+msgstr "Запази Настройки"
+
+#: views/settings_advanced.php:62
+#@ wplister
+msgid "Uninstall on deactivation"
+msgstr "Деинсталирай при деактивиране"
+
+#: views/settings_advanced.php:71
+#@ wplister
+msgid "Enable to completely remove listings, transactions and settings when deactivating the plugin."
+msgstr "Разрешаване за пълно премахване на обяви, операции и настройки при деактивиране на плъгинa."
+
+#: views/settings_advanced.php:72
+#@ wplister
+msgid "To remove your listing templates as well, please delete the folder <code>wp-content/uploads/wp-lister/templates/</code>."
+msgstr "За да премахнете вашия списък с дизайни на обяви, какъвто е, моля изтрийте папката <code>wp-content/uploads/wp-lister/templates/</code>."
+
+#: views/settings_advanced.php:90
+#@ wplister
+msgid "Roles and Capabilities"
+msgstr "Роли и Възможности"
+
+#: views/settings_advanced.php:153
+#@ wplister
+msgid "Listing Templates"
+msgstr "Дизайни на Обяви"
+
+#: views/settings_advanced.php:157
+#@ wplister
+msgid "Shortcode processing"
+msgstr "Shortcode обработка"
+
+#: views/settings_advanced.php:161
+#@ wplister
+msgid "off"
+msgstr "изкл"
+
+#: views/settings_advanced.php:162
+#@ wplister
+msgid "only in product description"
+msgstr "само в продуктовото описание"
+
+#: views/settings_advanced.php:163
+#@ wplister
+msgid "in description and listing template"
+msgstr "в описанието и дизайна на обявата"
+
+#: views/settings_advanced.php:166
+#@ wplister
+msgid "Enable this if you want to use WordPress shortcodes in your product description or your listing template."
+msgstr "Активирайте тази опция, ако искате да използвате WordPress Shortcodes в описанието на продукта или във вашия дизайн на обява."
+
+#: views/settings_advanced.php:170
+#@ wplister
+msgid "Link handling"
+msgstr "Обработка на връзка"
+
+#: views/settings_advanced.php:174
+#@ wplister
+msgid "remove all links from description"
+msgstr "премахни всички линкове от описанието"
+
+#: views/settings_advanced.php:175
+#@ wplister
+msgid "allow all links"
+msgstr "позволи всички линкове"
+
+#: views/settings_advanced.php:178
+#@ wplister
+msgid "WP-Lister does remove links from product descriptions by default to avoid violating the eBay Links policy."
+msgstr "WP-Lister премахва връзки от описанията на продуктите по подразбиране, за да се избегне нарушаване на eBay Links политика."
+
+#: views/settings_advanced.php:179
+#@ wplister
+msgid "Specifically you are not allowed to advertise products that you list on eBay by linking to their product pages on your site."
+msgstr "Конкретно не ви е позволено да рекламирате продуктите, които вие публикувате в eBay, като ги свържете с техните продуктовите страници на вашия сайт."
+
+#: views/settings_advanced.php:184
+#@ wplister
+msgid "Default image size"
+msgstr "Размер на Изображението по подразбиране"
+
+#: views/settings_advanced.php:188
+#@ wplister
+msgid "full"
+msgstr "пълно"
+
+#: views/settings_advanced.php:189
+#@ wplister
+msgid "large"
+msgstr "голяма"
+
+#: views/settings_advanced.php:193
+#@ wplister
+msgid "Product Gallery"
+msgstr "Продуктова Галерия"
+
+#: views/settings_advanced.php:198
+#@ wplister
+msgid "use attached images if no Gallery found"
+msgstr "използвай прикачените картинки, ако няма намерена Галерия"
+
+#: views/settings_advanced.php:199
+#@ wplister
+msgid "no fallback"
+msgstr "без връщане"
+
+#: views/settings_advanced.php:202
+#@ wplister
+msgid "If you find unwanted images in your listings try disabling this option."
+msgstr "Ако установите нежелани изображения във вашите обяви, опитайте с изключване на тази опция."
+
+#: views/settings_advanced.php:209
+#@ wplister
+msgid "User Interface"
+msgstr "Потребителски Интерфейс"
+
+#: views/settings_advanced.php:213
+#@ wplister
+msgid "Menu label"
+msgstr "Меню Етикет"
+
+#: views/settings_advanced.php:218
+#@ wplister
+msgid "Customize the main admin menu label of WP-Lister."
+msgstr "Персонализиране на главното администраторско меню от WP-Lister."
+
+#: views/settings_advanced.php:222
+#@ wplister
+msgid "Open preview in new tab"
+msgstr "Отвори изгледа в нов прозорец"
+
+#: views/settings_advanced.php:230
+#@ wplister
+msgid "Select if you want the listing preview open in a new tab by default."
+msgstr "Изберете, ако искате Визуализацията на обявата да се отваря в нов прозорец по подразбиране."
+
+#: views/settings_advanced.php:234
+#@ wplister
+msgid "Disable WYSIWYG editor"
+msgstr "Изключи WYSIWYG редактор"
+
+#: views/settings_advanced.php:242
+#@ wplister
+msgid "Select the editor you want to use to edit listing templates."
+msgstr "Изберете редактора, който искате да използвате, за да редактира списъка с шаблони."
+
+#: views/settings_advanced.php:246
+#@ wplister
+msgid "Hide duplicates warning"
+msgstr "Скрий предупреждението за дубликати"
+
+#: views/settings_advanced.php:254
+#@ wplister
+msgid "If you do not plan to use the inventory sync feature, you can safely list one product multiple times."
+msgstr "Ако не планирате да използвате функцията за синхронизиране на наличността, можете спокойно да публикувате един продукт няколко пъти."
+
+#: views/settings_advanced.php:262
+#@ wplister
+msgid "Misc options"
+msgstr "Други опции"
+
+#: views/settings_advanced.php:266
+#@ wplister
+msgid "Local timezone"
+msgstr "Локална Часова Зона"
+
+#: views/settings_advanced.php:270
+#@ wplister
+msgid "no timezone selected"
+msgstr "няма избрана часова зона"
+
+#: views/settings_advanced.php:276
+#@ wplister
+msgid "Select your local timezone."
+msgstr "Изберете Вашата Часова Зона."
+
+#: views/settings_advanced.php:280
+#@ wplister
+msgid "Enable Item Compatibility tab"
+msgstr "Активирайте раздела Съвместимост"
+
+#: views/settings_advanced.php:288
+#@ wplister
+msgid "Show eBay Item Compatibility List as new tab on single product page."
+msgstr "Покажи eBay списъка за съвместимост, като нов раздел на продуктoвата страница."
+
+#: views/settings_advanced.php:293
+#@ wplister
+msgid "Ignore backorders"
+msgstr "Игнорирай неизпълнени поръчки"
+
+#: views/settings_advanced.php:301
+#@ wplister
+msgid "Should WP-Lister mark a product as out of stock even when it has backorders enabled?"
+msgstr " WP-Lister да маркирва ли даден продукт като изчерпан от запасите, дори когато са включени неизпълнени поръчки?"
+
+#: views/settings_categories.php:61
+#@ wplister
+msgid "This is where you can assign eBay categories to your all your WooCommerce product categories."
+msgstr "Това е мястото, където можете да зададете eBay категории към всичките си продуктови категории в WooCommerce."
+
+#: views/settings_categories.php:63
+#@ wplister
+msgid "Once you selected a destination category for each local category, you can remove the category settings from your profile and WP-Lister will automatically select the category according to this list."
+msgstr "След като сте избрали целева категория за всяка местна категория, можете да премахнете настройките на категорията  от вашия профил и WP-Lister автоматично ще избере категория съгласно този списък."
+
+#: views/settings_categories.php:65
+#@ wplister
+msgid "In order to access item specifics and custom item conditions in a profile without a primary category it is recommended to select a default category at the bottom of this page."
+msgstr "За да получите достъп до спецификацията на продукта и състоянието на продукта в профила без основна категория е препоръчително, да изберете категория по подразбиране, в долната част на тази страница."
+
+#: views/settings_categories.php:87
+#@ wplister
+msgid "Default category"
+msgstr "Категория по подразбиране"
+
+#: views/settings_categories.php:89
+#@ wplister
+msgid "Use this to make additional item conditions available in your profile."
+msgstr "Използвайте това, за да направите допълнителни полета за наличните състояния на продукта в профила ви."
+
+#: views/settings_categories.php:94
+#@ wplister
+msgid "Select default category"
+msgstr "Изберете категория по подразбиране"
+
+#: views/settings_categories.php:95
+#@ wplister
+msgid "Import / Export"
+msgstr "Вмъкване/Изнасяне"
+
+#: views/settings_categories.php:106
+#@ wplister
+msgid "Backup and restore category mappings"
+msgstr "Архивиране и възстановяване на категориите"
+
+#: views/settings_categories.php:109
+#@ wplister
+msgid "Export category mappings"
+msgstr "Изнеси категориите"
+
+#: views/settings_categories.php:115
+#@ wplister
+msgid "Import category mappings"
+msgstr "Вмъкни категории"
+
+#: views/settings_dev.php:43
+#@ wplister
+msgid "This page contains some special options intended for developers and debugging."
+msgstr "Тази страница съдържа някои специални възможности, предназначени за разработчици и отстраняване на грешки."
+
+#: views/settings_dev.php:71
+#@ wplister
+msgid "eBay Sandbox"
+msgstr "eBay Sandbox"
+
+#: views/settings_dev.php:75
+#@ wplister
+msgid "The eBay sandbox allows you to list items to a testing area free of charge."
+msgstr "В eBay sandbox ви e позволeno да публикувате продукти за тестова зона без заплащане."
+
+#: views/settings_dev.php:76
+#@ wplister
+msgid "This is feature intended for developers only and not recommended for end users."
+msgstr "Това е функция, предназначена за разработчиците само и не се препоръчва за крайните потребители."
+
+#: views/settings_dev.php:80
+#@ wplister
+msgid "To use the sandbox, you need to create a dedicated sandbox account and connect WP-Lister with it."
+msgstr "За да използвате sandbox, вие трябва да създадете определен sandbox акаунт и свържете WP-Lister с него."
+
+#: views/settings_dev.php:81
+#@ wplister
+msgid "After enabling sandbox mode click \"Change Account\" and authenticate WP-Lister using your sandbox account."
+msgstr "След като включите sandbox режим, натиснете \"Смени Акаунт\" и ауторизирайте WP-Lister да използва този sandbox акаунт."
+
+#: views/settings_dev.php:93
+#@ wplister
+msgid "Logging"
+msgstr "Влизане"
+
+#: views/settings_dev.php:97
+#@ wplister
+msgid "Log to database"
+msgstr "Влез в датабазатa"
+
+#: views/settings_dev.php:105
+#@ wplister
+msgid "Enable to log all communication with eBay to the database."
+msgstr "Активирайте влизането на всички съобщения с eBay към базата данни."
+
+#: views/settings_dev.php:109
+#@ wplister
+msgid "Log entry size limit"
+msgstr "Размер на ограничението за влизане"
+
+#: views/settings_dev.php:119
+#@ wplister
+msgid "XML Beautifier"
+msgstr "XML Beautifier"
+
+#: views/settings_dev.php:131
+#: views/settings_dev.php:162
+#@ wplister
+msgid "Debug options"
+msgstr "Опции на дебъгване"
+
+#: views/settings_dev.php:139
+#@ wplister
+msgid "Handle 404 errors for admin-ajax.php"
+msgstr "Управлявай грешки от тип за admin-ajax.php"
+
+#: views/settings_dev.php:140
+#@ wplister
+msgid "404 errors for admin-ajax.php should actually never happen and are generally a sign of incorrect server configuration."
+msgstr "Грешки тип 404 за admin-ajax.php не трябва никога да се случват в действителност и обикновено са знак за неправилна конфигурация на сървъра."
+
+#: views/settings_dev.php:140
+#@ wplister
+msgid "This setting is just a workaround. You should consider moving to a proper hosting provider instead."
+msgstr "Тази настройка е само временно решение. Трябва да помислите за преместване в друг доставчик на хостинг услуги, вместо това."
+
+#: views/settings_dev.php:144
+#@ wplister
+msgid "Halt on error"
+msgstr "Спиране при грешка"
+
+#: views/settings_dev.php:145
+#@ wplister
+msgid "Continue with next item"
+msgstr "Продължи със следващия продукт"
+
+#: views/settings_dev.php:146
+#@ wplister
+msgid "Try again"
+msgstr "Опитай отново"
+
+#: views/settings_dev.php:150
+#@ wplister
+msgid "Disable variations"
+msgstr "Изключи вариации"
+
+#: views/settings_dev.php:165
+#@ wplister
+msgid "Log to logfile"
+msgstr "Влез в лог файла"
+
+#: views/settings_dev.php:167
+#@ wplister
+msgid "no logfile"
+msgstr "няма лог файл"
+
+#: views/settings_dev.php:177
+#@ wplister
+msgid "write debug information to logfile."
+msgstr "напиши дебъг информация в лог файла."
+
+#: views/settings_dev.php:183
+#@ wplister
+msgid "eBay token"
+msgstr "eBay token"
+
+#: views/settings_page.php:41
+#@ wplister
+msgid "Your Account"
+msgstr "Вашият Акаунт"
+
+#: views/settings_page.php:50
+#@ wplister
+msgid "Account Details"
+msgstr "Детайли по Акаунта"
+
+#: views/settings_page.php:52
+#@ wplister
+msgid "User ID"
+msgstr "Потребителско ID"
+
+#: views/settings_page.php:54
+#@ wplister
+msgid "Score"
+msgstr "Оценка"
+
+#: views/settings_page.php:55
+#@ wplister
+msgid "Site"
+msgstr "Сайт"
+
+#: views/settings_page.php:57
+#@ wplister
+msgid "Store"
+msgstr "Магазин"
+
+#: views/settings_page.php:57
+#@ wplister
+msgid "visit store"
+msgstr "Посети магазин"
+
+#: views/settings_page.php:62
+#@ wplister
+msgid "WP-Lister has been linked to your eBay account."
+msgstr "WP-Lister беше насочен към вашия eBay акаунт."
+
+#: views/settings_page.php:63
+#@ wplister
+msgid "Please visit the Tools page and click on \"Update user details\"."
+msgstr "Моля, посетете страницата с Инструменти и кликнете върху \"Обнови Потребителски Детайли\"."
+
+#: views/settings_page.php:65
+#@ wplister
+msgid "WP-Lister is not linked to your eBay account yet."
+msgstr "WP-Lister не е насочен към вашия eBay акаунт все още."
+
+#: views/settings_page.php:76
+#@ wplister
+msgid "Change Account"
+msgstr "Смени Акаунт"
+
+#: views/settings_page.php:84
+#@ wplister
+msgid "Reset Account"
+msgstr "Нулиране на Акаунт"
+
+#: views/settings_page.php:101
+#@ wplister
+msgid "Update Schedule"
+msgstr "Обновяване на Разписание"
+
+#: views/settings_page.php:121
+#@ wplister
+msgid "PayPal"
+msgstr "PayPal"
+
+#: views/settings_page.php:124
+#@ wplister
+msgid "PayPal account"
+msgstr "PayPal акаунт"
+
+#: views/settings_page.php:127
+#@ wplister
+msgid "To use PayPal you need to enter your PayPal address."
+msgstr "За да използвате PayPal трябва да въведете вашия PayPal адрес."
+
+#: views/settings_page.php:144
+#@ wplister
+msgid "eBay authorization"
+msgstr "eBay ауторизация"
+
+#: views/settings_page.php:146
+#@ wplister
+msgid "Follow these steps to link WP-Lister with your eBay account"
+msgstr "Следвайте стъпките, за да свържете WP-Lister с вашия eBay акаунт"
+
+#: views/settings_page.php:159
+#@ wplister
+msgid "Select the eBay site you want to list your items on:"
+msgstr "Изберете eBay сайта, в който искате да публикувате вашите обяви:"
+
+#: views/settings_page.php:168
+#@ wplister
+msgid "Click \"Connect with eBay\" to sign in to eBay and grant access for WP-Lister"
+msgstr "Натиснете \"Свързване с eBay\" за да влезете в eBay и да дадете достъп до WP-Lister"
+
+#: views/settings_page.php:176
+#@ wplister
+msgid "Fetch eBay Token"
+msgstr "Извлечи eBay Token"
+
+#: views/settings_page.php:177
+#@ wplister
+msgid "After linking WP-Lister with your eBay account, click here to fetch your token"
+msgstr "След като свържете WP-Lister с вашия eBay акаунт, натиснете тук за извлечете вашия token"
+
+#: views/settings_page.php:202
+#@ wplister
+msgid "eBay settings"
+msgstr "eBay настройки"
+
+#: views/settings_page.php:205
+#@ wplister
+msgid "eBay site"
+msgstr "eBay сайт"
+
+#: views/settings_page.php:214
+#@ wplister
+msgid "Include eBay Motors"
+msgstr "Включи eBay Превозни Средства"
+
+#: views/settings_page.php:228
+#@ wplister
+msgid "Automatic updates"
+msgstr "Автомачни обновления"
+
+#: views/settings_page.php:230
+#@ wplister
+msgid "Enable to update listings and transactions using WP-Cron."
+msgstr "Разрешаване за актуализиране на обяви и транзакции, чрез WP-Cron."
+
+#: views/settings_page.php:233
+#@ wplister
+msgid "Update interval"
+msgstr "Интервал на обновяване"
+
+#: views/settings_page.php:237
+#@ wplister
+msgid "manually"
+msgstr "ръчно"
+
+#: views/settings_page.php:238
+#@ wplister
+msgid "hourly"
+msgstr "почасово"
+
+#: views/settings_page.php:239
+#@ wplister
+msgid "daily"
+msgstr "дневно"
+
+#: views/settings_page.php:244
+#@ wplister
+msgid "Update mode"
+msgstr "Режим на Актуализация"
+
+#: views/settings_page.php:248
+#@ wplister
+msgid "Transaction"
+msgstr "Транзакция"
+
+#: views/settings_page.php:249
+#@ wplister
+msgid "Order"
+msgstr "Поръчка"
+
+#: views/sites_page.php:13
+#@ wplister
+msgid "WP-Lister Network Sites"
+msgstr "WP-Lister Сайтове"
+
+#: views/sites_page.php:37
+#@ wplister
+msgid "Update sites"
+msgstr "Обнови сайтове"
+
+#: views/sites_page.php:38
+#@ wplister
+msgid "Update recent sites from eBay."
+msgstr "Обнови скорошни сайтове от eBay."
+
+#: views/templates_copy_form.php:34
+#: views/templates_copy_form.php:46
+#@ wplister
+msgid "Duplicate Template"
+msgstr "Дублиране на Дизайн"
+
+#: views/templates_copy_form.php:40
+#: views/templates_edit_page.php:346
+#@ wplister
+msgid "Description"
+msgstr "Описание"
+
+#: views/templates_edit_page.php:89
+#@ wplister
+msgid "Edit Template"
+msgstr "Редактирай Дизайн"
+
+#: views/templates_edit_page.php:133
+#, php-format
+#@ wplister
+msgid "There are %s prepared, %s verified and %s published items using this template."
+msgstr "Има %s подготвени, %s проверени и %s публикувани обяви с този дизайн."
+
+#: views/templates_edit_page.php:144
+#@ wplister
+msgid "You can find the theme files in this folder:"
+msgstr "Можете да откриете файловете на дизайна в тази папка:"
+
+#: views/templates_edit_page.php:169
+#: views/templates_edit_page.php:459
+#@ wplister
+msgid "Save template"
+msgstr "Запази Дизайн"
+
+#: views/templates_edit_page.php:182
+#@ wplister
+msgid "Template Options"
+msgstr "Опции на Дизайна"
+
+#: views/templates_edit_page.php:336
+#@ wplister
+msgid "Template settings"
+msgstr "Настройки на Дизайна"
+
+#: views/templates_edit_page.php:350
+#@ wplister
+msgid "Version"
+msgstr "Версия"
+
+#: views/templates_edit_page.php:362
+#@ wplister
+msgid "Template description is only for internal use."
+msgstr "Описанието на Дизайна е само за вътрешни нужди."
+
+#: views/templates_edit_page.php:453
+#, php-format
+#@ wplister
+msgid "apply changes to all %s prepared listings using this template"
+msgstr "приложи промените към всички %s подготвени обяви, използващи този дизайн"
+
+#: views/templates_page.php:39
+#@ wplister
+msgid "Create new template"
+msgstr "Създай нов дизайн"
+
+#: views/templates_page.php:40
+#@ wplister
+msgid "Upload existing template"
+msgstr "Качи съществуваш дизайн"
+
+#: views/templates_page.php:51
+#@ wplister
+msgid "Upload"
+msgstr "Качване"
+
+#: views/tools_page.php:71
+#@ wplister
+msgid "This will load available categories, shipping services, payment options and your custom store categories from eBay"
+msgstr "Това ще зареди наличните категории, спедиторски услуги, опции за плащане и вашите потребителски категории от eBay"
+
+#: views/tools_page.php:78
+#@ wplister
+msgid "Force update check"
+msgstr "Принудителна проверка за актуализация"
+
+#: views/tools_page.php:79
+#@ wplister
+msgid "Since WordPress only checks twice a day for plugin updates, it might be neccessary to force an immediate update check if you want to install an update which was released within the last hours."
+msgstr "Тъй като WordPress проверява само два пъти на ден за плъгин актуализации, може да бъде необходимо принудително да се проверява за актуализации, ако искате да инсталирате актуализация, която бе представена в рамките на последните часове."
+
+#: views/tools_page.php:87
+#@ wplister
+msgid "Update user details"
+msgstr "Обнови потребителски детайли"
+
+#: views/tools_page.php:88
+#@ wplister
+msgid "Update account details from eBay"
+msgstr "Обнови детайли по акаунта от eBay"
+
+#: views/tools_page.php:89
+#@ wplister
+msgid "and update your seller profiles for shipping, payment and return policy."
+msgstr "и актуализирай твоите профили за Доставка, Плащане и Политика на връщане."
+
+#: views/tools_page.php:99
+#@ wplister
+msgid "Update eBay orders"
+msgstr "Обнови eBay поръчки"
+
+#: views/tools_page.php:100
+#@ wplister
+msgid "This will load all orders within 30 days from eBay."
+msgstr "Това ще зареди всички поръчки през последните 30 дена от eBay."
+
+#: views/tools_page.php:110
+#@ wplister
+msgid "Update eBay transactions"
+msgstr "Обнови eBay транзакции"
+
+#: views/tools_page.php:111
+#@ wplister
+msgid "This will load all transactions within 30 days from eBay."
+msgstr "Това ще зареди всички транзакции през последните 30 дни от eBay."
+
+#: views/tools_page.php:122
+#@ wplister
+msgid "Debugging"
+msgstr "Дебъгване"
+
+#: views/tools_page.php:130
+#@ wplister
+msgid "Test eBay connection"
+msgstr "Тествай свързване с eBay"
+
+#: views/tools_page.php:131
+#@ wplister
+msgid "Test connection to eBay API"
+msgstr "Тествай свързването с eBay API"
+
+#: views/tools_page.php:139
+#@ wplister
+msgid "Check eBay time offset"
+msgstr "Провери времето за компенсация на eBay"
+
+#: views/tools_page.php:140
+#@ wplister
+msgid "Check eBay time to server time offset"
+msgstr "Провери компенсираното време, за което eBay се свързва със сървъра"
+
+#: views/tools_page.php:148
+#@ wplister
+msgid "Show cURL debug info"
+msgstr "Покажи cURL debug информация"
+
+#: views/tools_page.php:149
+#@ wplister
+msgid "Check availability of CURL php extension and show phpinfo()"
+msgstr "Провери наличността на CURL php extension и покажи phpinfo()"
+
+#: views/tools_page.php:157
+#: views/tools_page.php:158
+#@ wplister
+msgid "Get token expiration date"
+msgstr "Вземи дата на изтичане на token-а"
+
+#: views/tools_page.php:169
+#: views/tools_page.php:189
+#@ wplister
+msgid "View debug log"
+msgstr "Виж дебъг лога"
+
+#: views/tools_page.php:170
+#@ wplister
+msgid "Open logfile viewer in new tab"
+msgstr "Отвори лог файла в нов прозорец"
+
+#: views/tools_page.php:177
+#@ wplister
+msgid "Clear debug log"
+msgstr "Изчисти дебъг лога"
+
+#: views/tools_page.php:178
+#@ wplister
+msgid "Current log file size"
+msgstr "Сегашен размер на лог файла"
+
+#: views/tools_page.php:190
+#@ wplister
+msgid "View Logfile"
+msgstr "Виж Лог Файла"
+
+#: views/transactions_page.php:42
+#@ wplister
+msgid "Update transactions"
+msgstr "Обнови транзакции"
+
+#: views/transactions_page.php:43
+#@ wplister
+msgid "Update recent transactions from eBay."
+msgstr "Обнови скорошните транзакции от eBay."
+
+#: views/tutorial_page.php:20
+#@ wplister
+msgid "Installation and Setup"
+msgstr "Инсталация и Настройки"
+
+#: views/tutorial_page.php:28
+#@ wplister
+msgid "Begin the setup"
+msgstr "Започва настройването"
+
+#: views/tutorial_page.php:33
+#@ wplister
+msgid "Listing items"
+msgstr "Продукти с Обяви"
+
+#: views/tutorial_page.php:42
+#@ wplister
+msgid "Ressources"
+msgstr "Източници"
+
+#: views/tutorial_page.php:45
+#@ wplister
+msgid "Helpful links"
+msgstr "Помощни Линкове"
+
+#: views/tutorial_page.php:47
+#@ wplister
+msgid "FAQ"
+msgstr "В&О"
+
+#: views/tutorial_page.php:48
+#@ wplister
+msgid "Documentation"
+msgstr "Документация"
+
+#: views/tutorial_page.php:49
+#@ wplister
+msgid "Installing WP-Lister"
+msgstr "Инсталиране на WP-Lister"
+
+#: views/tutorial_page.php:50
+#@ wplister
+msgid "Screencasts"
+msgstr "Скрийнкастове"
+
+#: wp-lister.php:133
+#: wp-lister.php:134
+#@ wplister
+msgid "Prepare Listings"
+msgstr "Подготви Обяви"
+

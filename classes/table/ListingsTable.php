@@ -137,7 +137,7 @@ class ListingsTable extends WP_List_Table {
             #'open'           => sprintf('<a href="%s" target="_blank">%s</a>',$item['ViewItemURL'],__('Open in new tab','wplister')),
             'relist'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'relist',$item['id'],__('Relist','wplister')),
             'update'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'update',$item['id'],__('Update from eBay','wplister')),
-            'delete'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete',$item['id'],__('Delete','wplister')),
+            'delete'          => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete_listing',$item['id'],__('Delete','wplister')),
             'archive'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'archive',$item['id'],__('Archive','wplister')),
         );
 
@@ -182,6 +182,14 @@ class ListingsTable extends WP_List_Table {
                 unset( $actions['open'] );
                 $needs_update = true;
             }
+        } 
+
+        // show warning if WooCommerce product has been deleted
+        if ( ! ProductWrapper::getProduct( $item['post_id'] ) && ($item['status'] != 'archived') ) {
+            $tip_msg = 'This product has been deleted!<br>Please do <i>not</i> delete products from WooCommerce, or archive the listing first.';
+            $img_url  = WPLISTER_URL . '/img/error.gif';
+            $listing_title .= '&nbsp;<img src="'.$img_url.'" style="height:12px; padding:0;" class="tips" data-tip="'.$tip_msg.'"/>&nbsp;';
+            $listing_title = str_replace('product_title_link', 'missing_product_title_link', $listing_title);
         } 
 
         // add variations link
@@ -357,6 +365,31 @@ class ListingsTable extends WP_List_Table {
 
     } // generateVariationsHtmlLink()
 
+    function column_ebay_id($item) {
+
+        // check for previous item IDs
+        $history = maybe_unserialize( $item['history'] );
+        if ( ! is_array($history)) $history = array();
+        $previous_ids = is_array(@$history['previous_ids']) ? $history['previous_ids'] : array();
+
+        // if no previous ids, return 
+        if ( empty( $previous_ids ) ) return $item['ebay_id'];
+
+        // build previous ids html
+        $html = '';
+        $html .= '<a href="#" onClick="jQuery(\'#previds_'.$item['id'].'\').toggle();return false;" style="color:#555" title="Click to show previous eBay IDs">'.$item['ebay_id'].'</a><br>';
+        $html .= '<div id="previds_'.$item['id'].'" class="variations_list" style="display:none;margin-bottom:10px;">';
+
+        foreach ($previous_ids as $key => $id) {
+            $color = 'silver';
+            if ( isset($_POST['s']) && $_POST['s'] == $id ) $color = '#555';
+            $html .= '<span style="color:'.$color.'">'.$id.'</span><br>';
+        }
+        $html .= '</div>';
+
+        return $html;
+    }
+      
     function column_ebay_id_DISABLED($item) {
 
         //Build row actions
@@ -399,7 +432,8 @@ class ListingsTable extends WP_List_Table {
                 $quantity = $item['quantity']; 
             }
 
-            return $quantity;
+            if ( $quantity )
+                return $quantity;
         }
 
 
@@ -468,7 +502,14 @@ class ListingsTable extends WP_List_Table {
             }
         }
 
-        return $this->number_format( $item['price'], 2 );
+        // use price from ebay_auctions by default
+        $start_price = $item['price'];
+
+        // handle StartPrice on product level
+        if ( $product_start_price = get_post_meta( $item['post_id'], '_ebay_start_price', true ) )
+            $start_price  = $product_start_price;
+
+        return $this->number_format( $start_price, 2 );
     }
     
     function column_end_date($item) {
@@ -707,7 +748,7 @@ class ListingsTable extends WP_List_Table {
             'lock'      => __('Lock listings','wplister'),
             'unlock'    => __('Unlock listings','wplister'),
             'archive'   => __('Move to archive','wplister'),
-            'delete'    => __('Delete listings','wplister'),
+            'delete_listing' => __('Delete listings','wplister'),
         );
 
         if ( ! current_user_can( 'publish_ebay_listings' ) ) {
@@ -715,13 +756,13 @@ class ListingsTable extends WP_List_Table {
             unset( $actions['revise'] );
             unset( $actions['end_item'] );
             unset( $actions['relist'] );
-            unset( $actions['delete'] );
+            unset( $actions['delete_listing'] );
         }
 
         if ( isset($_GET['listing_status']) && ( $_GET['listing_status'] == 'archived' ) ) {
             unset( $actions['archive'] );
         } else {
-            unset( $actions['delete'] );            
+            unset( $actions['delete_listing'] );            
         }
 
         return $actions;
@@ -739,7 +780,7 @@ class ListingsTable extends WP_List_Table {
         global $wbdb;
         
         //Detect when a bulk action is being triggered...
-        if( 'delete'===$this->current_action() ) {
+        if( 'delete_listing'===$this->current_action() ) {
             #wp_die('Items deleted (or they would be if we had items to delete)!');
             #$wpdb->query("DELETE FROM {$wpdb->prefix}ebay_auctions WHERE id = ''",)
         }
@@ -817,13 +858,13 @@ class ListingsTable extends WP_List_Table {
         ?>
         <div class="alignleft actions" style="">
 
-            <a class="btn_verify_all_prepared_items button-secondary wpl_job_button"
+            <a class="btn_verify_all_prepared_items button wpl_job_button"
                title="<?php echo __('Verify all prepared items with eBay and get listing fees.','wplister') ?>"
                 ><?php echo __('Verify all prepared items','wplister'); ?></a>
 
             <?php if ( current_user_can( 'publish_ebay_listings' ) ) : ?>
 
-            <a class="btn_publish_all_verified_items button-secondary wpl_job_button"
+            <a class="btn_publish_all_verified_items button wpl_job_button"
                title="<?php echo __('Publish all verified items on eBay.','wplister') ?>"
                 ><?php echo __('Publish all verified items','wplister'); ?></a>
 
