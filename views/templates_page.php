@@ -36,8 +36,8 @@
         <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
         <input type="hidden" name="action" value="add_new_template" />
 
-		<input type="submit" value="<?php echo __('Create new template','wplister') ?>" name="submit" class="button-secondary">
-		&nbsp; <a href="#" onclick="jQuery('#templates-upload').show();return false;" class="button-secondary"><?php echo __('Upload existing template','wplister') ?></a>
+		<input type="submit" value="<?php echo __('Create new template','wplister') ?>" name="submit" class="button">
+		&nbsp; <a href="#" onclick="jQuery('#templates-upload').show();return false;" class="button"><?php echo __('Upload existing template','wplister') ?></a>
     </form>
     <br style="clear:both;"/>
 
@@ -48,7 +48,7 @@
 		<?php wp_nonce_field( 'wpl_upload_template' ); ?>
 
 	    <input type="file" name="fupload" />
-		<input type="submit" value="<?php echo __('Upload','wplister') ?>" name="submit" class="button-secondary">
+		<input type="submit" value="<?php echo __('Upload','wplister') ?>" name="submit" class="button">
 		<p>
 			You can only upload a zipped folder containing the template files.
 		</p>

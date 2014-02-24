@@ -218,7 +218,7 @@
 											<?php endforeach; ?>
 										</select>
 									</td><td align="right">
-										<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary" 
+										<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button" 
 											onclick="jQuery(this).parent().parent().remove();" />
 									</td>
 								</tr>
@@ -228,7 +228,7 @@
 
 							<input type="button" value="<?php echo __('Add payment method','wplister'); ?>" name="btn_add_payment_option" 
 								onclick="jQuery('#payment_options_table').find('tr.row').first().clone().appendTo('#payment_options_table');"
-								class="button-secondary">
+								class="button">
 
 							<br class="clear" />
 
@@ -324,7 +324,7 @@
 							<?php if ( isset( $ShippingCostPaidByOptions ) && is_array( $ShippingCostPaidByOptions ) ): ?>
 								<?php foreach ($ShippingCostPaidByOptions as $option_id => $desc) : ?>
 									<option value="<?php echo $option_id ?>" 
-										<?php if ( $item_details['ShippingCostPaidBy'] == $option_id ) : ?>
+										<?php if ( @$item_details['ShippingCostPaidBy'] == $option_id ) : ?>
 											selected="selected"
 										<?php endif; ?>
 										><?php echo $desc ?></option>

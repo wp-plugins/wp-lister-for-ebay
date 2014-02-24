@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WP-Lister Pro v1.2.7.6\n"
+"Project-Id-Version: WP-Lister Pro v1.3.6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-09-21 17:39:03+0000\n"
+"PO-Revision-Date: 2014-02-22 10:44:59+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -20,10 +20,10 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Textdomain-Support: yes"
 
-#: classes/core/WPL_BasePlugin.php:30
-#: classes/core/WPL_Setup.php:31
-#: classes/core/WPL_Toolbar.php:75
-#: classes/page/SettingsPage.php:28
+#: classes/core/WPL_BasePlugin.php:67
+#: classes/core/WPL_Setup.php:46
+#: classes/core/WPL_Toolbar.php:90
+#: classes/page/SettingsPage.php:29
 #: classes/table/NetworkSitesTable.php:112
 #@ wplister
 msgid "Settings"
@@ -34,15 +34,15 @@ msgstr "Einstellungen"
 msgid "Edit Profile"
 msgstr "Profil bearbeiten"
 
-#: classes/core/WPL_Setup.php:78
+#: classes/core/WPL_Setup.php:93
 #: views/profiles_edit_page.php:20
 #@ wplister
 msgid "New Profile"
 msgstr "Neues Profil erstellen"
 
-#: classes/table/ListingsTable.php:124
-#: classes/table/ListingsTable.php:526
-#: classes/table/ListingsTable.php:545
+#: classes/table/ListingsTable.php:129
+#: classes/table/ListingsTable.php:654
+#: classes/table/ListingsTable.php:673
 #: classes/table/ProfilesTable.php:108
 #: classes/table/ProfilesTable.php:132
 #: classes/table/TemplatesTable.php:114
@@ -50,101 +50,105 @@ msgstr "Neues Profil erstellen"
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: classes/table/ListingsTable.php:133
-#: classes/table/LogTable.php:231
+#: classes/table/ListingsTable.php:140
+#: classes/table/LogTable.php:265
 #: classes/table/ProfilesTable.php:110
 #: classes/table/ProfilesTable.php:221
 #: classes/table/TemplatesTable.php:116
-#: classes/table/TransactionsTable.php:284
+#: classes/table/TransactionsTable.php:286
 #@ wplister
 msgid "Delete"
 msgstr "Löschen"
 
-#: classes/table/ListingsTable.php:125
+#: classes/integration/WooBackendIntegration.php:421
+#: classes/table/ListingsTable.php:132
 #@ wplister
 msgid "Verify"
 msgstr "Prüfen"
 
-#: classes/table/ListingsTable.php:123
+#: classes/table/ListingsTable.php:128
 #: classes/table/TemplatesTable.php:113
 #@ wplister
 msgid "Preview"
 msgstr "Vorschau"
 
-#: classes/table/ListingsTable.php:126
+#: classes/integration/WooBackendIntegration.php:425
+#: classes/table/ListingsTable.php:133
 #@ wplister
 msgid "Publish"
 msgstr "Veröffentlichen"
 
-#: classes/integration/WooBackendIntegration.php:309
-#: classes/integration/WooBackendIntegration.php:349
-#: classes/integration/WooFrontendIntegration.php:72
-#: classes/table/ListingsTable.php:127
-#: classes/table/ListingsTable.php:323
+#: classes/integration/WooBackendIntegration.php:417
+#: classes/integration/WooBackendIntegration.php:508
+#: classes/integration/WooFrontendIntegration.php:60
+#: classes/integration/WooFrontendIntegration.php:102
+#: classes/table/ListingsTable.php:134
+#: classes/table/ListingsTable.php:428
 #@ wplister
 msgid "View on eBay"
 msgstr "eBay öffnen"
 
-#: classes/table/ListingsTable.php:636
+#: classes/table/ListingsTable.php:779
 #@ wplister
 msgid "Verify with eBay"
 msgstr "Bei eBay überprüfen"
 
-#: classes/table/ListingsTable.php:637
+#: classes/table/ListingsTable.php:780
 #@ wplister
 msgid "Publish to eBay"
 msgstr "Auf eBay veröffentlichen"
 
-#: classes/table/ListingsTable.php:638
+#: classes/table/ListingsTable.php:781
 #@ wplister
 msgid "Update details from eBay"
 msgstr "Details von eBay abrufen"
 
-#: classes/page/SettingsPage.php:298
-#: classes/page/SettingsPage.php:319
+#: classes/page/SettingsPage.php:369
+#: classes/page/SettingsPage.php:444
 #@ wplister
 msgid "Settings saved."
 msgstr "Einstellungen wurden gespeichert."
 
-#: classes/core/WPL_Toolbar.php:38
-#: classes/page/ProfilesPage.php:30
+#: classes/core/WPL_Toolbar.php:41
+#: classes/page/ProfilesPage.php:31
 #: views/profiles_page.php:20
 #@ wplister
 msgid "Profiles"
 msgstr "Profile"
 
+#: classes/core/WPL_Toolbar.php:78
 #: classes/page/ToolsPage.php:28
 #: views/tools_page.php:37
-#: views/tools_page.php:66
 #@ wplister
 msgid "Tools"
 msgstr "Tools"
 
-#: classes/page/ListingsPage.php:215
+#: classes/page/ListingsPage.php:206
 #@ wplister
 msgid "Selected items were verified with eBay."
 msgstr "Die Artikel wurden bei eBay überprüft."
 
-#: classes/page/ListingsPage.php:237
+#: classes/page/ListingsPage.php:228
 #@ wplister
 msgid "Selected items were published on eBay."
 msgstr "Die ausgewählten Artikel wurden bei eBay eingestellt."
 
-#: classes/page/ListingsPage.php:265
+#: classes/page/ListingsPage.php:256
 #@ wplister
 msgid "Selected items were updated from eBay."
 msgstr "Die Details zu den ausgewählten Artikeln wurden von eBay abgerufen."
 
-#: classes/page/EbayOrdersPage.php:105
+#: classes/page/EbayMessagesPage.php:104
+#: classes/page/EbayOrdersPage.php:111
 #: classes/page/ListingsPage.php:272
-#: classes/page/LogPage.php:43
-#: classes/page/ProfilesPage.php:46
-#: classes/page/TransactionsPage.php:102
+#: classes/page/LogPage.php:45
+#: classes/page/ProfilesPage.php:47
+#: classes/page/TransactionsPage.php:103
 #@ wplister
 msgid "Selected items were removed."
 msgstr "Die ausgewählten Artikel wurden entfernt."
 
-#: classes/page/ProfilesPage.php:399
+#: classes/page/ProfilesPage.php:439
 #@ wplister
 msgid "Profile saved."
 msgstr "Profil wurde gespeichert."
@@ -160,58 +164,59 @@ msgstr "Hinzufügen"
 msgid "Add New Profile"
 msgstr "Neues Profil erstellen"
 
-#: views/settings_page.php:181
+#: views/settings_page.php:208
 #@ wplister
 msgid "eBay settings"
 msgstr "eBay Einstellungen"
 
-#: views/transactions_page.php:42
+#: views/transactions_page.php:44
 #@ wplister
 msgid "Update transactions"
 msgstr "Transaktionen aktualisieren"
 
 #: views/common_header.php:10
-#: views/settings_dev.php:37
+#: views/settings_dev.php:116
 #@ wplister
 msgid "Sandbox enabled"
 msgstr "Sandbox aktiviert"
 
-#: views/settings_advanced.php:57
-#: views/settings_dev.php:153
-#: views/settings_page.php:89
+#: views/settings_advanced.php:50
+#: views/settings_dev.php:50
+#: views/settings_dev.php:253
+#: views/settings_page.php:94
 #@ wplister
 msgid "Save Settings"
 msgstr "Einstellungen speichern"
 
-#: classes/table/ListingsTable.php:467
+#: classes/table/ListingsTable.php:591
 #: views/listings_edit_page.php:248
 #@ wplister
 msgid "prepared"
 msgstr "vorbereitet"
 
-#: classes/table/ListingsTable.php:471
+#: classes/table/ListingsTable.php:595
 #: views/listings_edit_page.php:249
 #@ wplister
 msgid "verified"
 msgstr "überprüft"
 
-#: classes/table/ListingsTable.php:475
+#: classes/table/ListingsTable.php:599
 #: views/listings_edit_page.php:250
 #@ wplister
 msgid "published"
 msgstr "veröffentlicht"
 
-#: classes/table/ListingsTable.php:487
+#: classes/table/ListingsTable.php:615
 #@ wplister
 msgid "imported"
 msgstr "importiert"
 
-#: classes/table/ListingsTable.php:491
+#: classes/table/ListingsTable.php:619
 #@ wplister
 msgid "selected"
 msgstr "ausgewählt"
 
-#: classes/table/ListingsTable.php:639
+#: classes/table/ListingsTable.php:782
 #@ wplister
 msgid "Select another profile"
 msgstr "Ein anderes Profil wählen"
@@ -227,21 +232,19 @@ msgstr "Anleitung"
 msgid "Please select a profile for the products shown below:"
 msgstr "Bitte wählen Sie ein Profil für die ausgewählten Produkte:"
 
-#: classes/page/ProfilesPage.php:532
+#: classes/page/ProfilesPage.php:581
 #: views/listings_edit_page.php:213
 #: views/listings_edit_page.php:259
-#: views/profile/edit_shipping_int.php:31
-#: views/profile/edit_shipping_int.php:89
-#: views/profile/edit_sidebar.php:120
-#: views/profile/edit_sidebar.php:158
+#: views/profile/edit_shipping_int.php:40
+#: views/profile/edit_shipping_int.php:110
+#: views/profile/edit_sidebar.php:124
+#: views/profile/edit_sidebar.php:162
 #: views/profiles_edit_page.php:74
-#: views/profiles_edit_page.php:121
-#: views/profiles_edit_page.php:224
-#: views/profiles_edit_page.php:284
-#: views/profiles_edit_page.php:307
-#: views/profiles_edit_page.php:322
-#: views/settings_page.php:133
-#: views/settings_page.php:186
+#: views/profiles_edit_page.php:111
+#: views/profiles_edit_page.php:214
+#: views/profiles_edit_page.php:301
+#: views/settings_page.php:160
+#: views/settings_page.php:213
 #@ wplister
 msgid "Please select"
 msgstr "Bitte wählen"
@@ -251,12 +254,12 @@ msgstr "Bitte wählen"
 msgid "Apply Profile"
 msgstr "Profil anwenden"
 
-#: classes/model/ProfilesModel.php:159
+#: classes/model/ProfilesModel.php:168
 #@ wplister
 msgid "duplicated"
 msgstr "Kopie"
 
-#: classes/integration/WooBackendIntegration.php:485
+#: classes/integration/WooProductMetaBox.php:89
 #: classes/table/ProfilesTable.php:75
 #: views/listings_edit_page.php:261
 #: views/profiles_edit_page.php:76
@@ -264,7 +267,7 @@ msgstr "Kopie"
 msgid "Fixed Price"
 msgstr "Festpreis"
 
-#: classes/integration/WooBackendIntegration.php:484
+#: classes/integration/WooProductMetaBox.php:88
 #: views/listings_edit_page.php:260
 #: views/profiles_edit_page.php:75
 #@ wplister
@@ -272,10 +275,17 @@ msgid "Auction"
 msgstr "Auktion"
 
 #: classes/table/ProfilesTable.php:77
-#: views/profiles_edit_page.php:308
-#: views/profiles_edit_page.php:309
-#: views/profiles_edit_page.php:310
-#: views/profiles_edit_page.php:311
+#: views/orders_page.php:63
+#: views/orders_page.php:64
+#: views/orders_page.php:65
+#: views/orders_page.php:66
+#: views/orders_page.php:67
+#: views/orders_page.php:68
+#: views/orders_page.php:69
+#: views/profiles_edit_page.php:325
+#: views/profiles_edit_page.php:326
+#: views/profiles_edit_page.php:327
+#: views/profiles_edit_page.php:328
 #@ wplister
 msgid "days"
 msgstr "Tage"
@@ -286,7 +296,7 @@ msgstr "Tage"
 msgid "Duplicate"
 msgstr "Duplizieren"
 
-#: classes/table/ListingsTable.php:597
+#: classes/table/ListingsTable.php:731
 #: classes/table/ProfilesTable.php:171
 #@ wplister
 msgid "Profile"
@@ -294,16 +304,16 @@ msgstr "Profil"
 
 #: classes/table/ProfilesTable.php:172
 #: views/listings_edit_page.php:211
-#: views/profiles_edit_page.php:117
+#: views/profiles_edit_page.php:107
 #@ wplister
 msgid "Duration"
 msgstr "Laufzeit"
 
-#: classes/model/TemplatesModel.php:547
-#: classes/table/ListingsTable.php:182
-#: classes/table/ListingsTable.php:593
+#: classes/model/TemplatesModel.php:584
+#: classes/table/ListingsTable.php:312
+#: classes/table/ListingsTable.php:726
 #: classes/table/ProfilesTable.php:173
-#: classes/table/TransactionsTable.php:230
+#: classes/table/TransactionsTable.php:232
 #: views/invoice_template.php:124
 #: views/order_details.php:102
 #: views/transaction_details.php:110
@@ -324,139 +334,142 @@ msgstr "Kategorie"
 msgid "Type"
 msgstr "Typ"
 
-#: classes/table/ListingsTable.php:598
+#: classes/table/ListingsTable.php:732
 #: classes/table/ProfilesTable.php:176
 #: classes/table/TemplatesTable.php:167
 #: views/listings_edit_page.php:127
-#: views/profile/edit_sidebar.php:180
+#: views/profile/edit_sidebar.php:243
 #@ wplister
 msgid "Template"
 msgstr "Vorlage"
 
-#: classes/table/ListingsTable.php:588
+#: classes/model/EbayMessagesModel.php:349
+#: classes/table/ListingsTable.php:721
 #: classes/table/NetworkSitesTable.php:269
-#: classes/table/TransactionsTable.php:227
+#: classes/table/TransactionsTable.php:229
 #@ wplister
 msgid "eBay ID"
 msgstr "eBay ID"
 
-#: classes/model/TransactionsModel.php:507
-#: classes/table/ListingsTable.php:589
+#: classes/model/EbayMessagesModel.php:350
+#: classes/model/TransactionsModel.php:655
+#: classes/table/ListingsTable.php:722
 #: classes/table/NetworkSitesTable.php:267
 #: views/listings_edit_page.php:195
 #@ wplister
 msgid "Title"
 msgstr "Titel"
 
-#: classes/table/ListingsTable.php:591
-#: classes/table/TransactionsTable.php:231
+#: classes/table/ListingsTable.php:724
+#: classes/table/TransactionsTable.php:233
 #: views/invoice_template.php:120
 #: views/listings_edit_page.php:205
 #: views/order_details.php:98
-#: views/profiles_edit_page.php:103
+#: views/profile/edit_sidebar.php:189
 #: views/transaction_details.php:106
 #@ wplister
 msgid "Quantity"
 msgstr "Anzahl"
 
-#: classes/table/ListingsTable.php:592
-#: classes/table/ListingsTable.php:722
+#: classes/table/ListingsTable.php:725
+#: classes/table/ListingsTable.php:889
 #@ wplister
 msgid "Sold"
 msgstr "Verkauft"
 
-#: classes/table/ListingsTable.php:594
+#: classes/table/ListingsTable.php:727
 #@ wplister
 msgid "Fees"
 msgstr "Gebühren"
 
-#: classes/table/EbayOrdersTable.php:227
-#: classes/table/ListingsTable.php:595
-#: classes/table/TransactionsTable.php:226
+#: classes/table/EbayOrdersTable.php:256
+#: classes/table/ListingsTable.php:729
+#: classes/table/TransactionsTable.php:228
 #@ wplister
 msgid "Created at"
 msgstr "Erstellt am"
 
-#: classes/table/ListingsTable.php:596
+#: classes/table/ListingsTable.php:730
 #@ wplister
 msgid "Ends at"
 msgstr "Endet am"
 
-#: classes/table/EbayOrdersTable.php:234
-#: classes/table/ListingsTable.php:599
-#: classes/table/LogTable.php:209
+#: classes/table/EbayOrdersTable.php:263
+#: classes/table/ListingsTable.php:733
+#: classes/table/LogTable.php:243
 #: classes/table/NetworkSitesTable.php:268
-#: classes/table/TransactionsTable.php:237
+#: classes/table/TransactionsTable.php:239
 #: views/settings_page.php:53
 #@ wplister
 msgid "Status"
 msgstr "Status"
 
+#: classes/table/EbayMessagesTable.php:110
 #: classes/table/EbayOrdersTable.php:113
 #: classes/table/TransactionsTable.php:115
 #@ wplister
 msgid "Details"
 msgstr "Details"
 
-#: classes/table/TransactionsTable.php:233
+#: classes/table/TransactionsTable.php:235
 #: views/invoice_template.php:122
 #: views/order_details.php:100
 #: views/templates_copy_form.php:37
-#: views/templates_edit_page.php:341
+#: views/templates_edit_page.php:351
 #: views/transaction_details.php:108
 #@ wplister
 msgid "Name"
 msgstr "Name"
 
-#: classes/table/EbayOrdersTable.php:233
-#: classes/table/TransactionsTable.php:234
+#: classes/table/EbayOrdersTable.php:262
+#: classes/table/TransactionsTable.php:236
 #@ wplister
 msgid "Payment method"
 msgstr "Zahlungsart"
 
-#: classes/table/EbayOrdersTable.php:237
-#: classes/table/TransactionsTable.php:239
+#: classes/table/EbayOrdersTable.php:266
+#: classes/table/TransactionsTable.php:241
 #@ wplister
 msgid "Last change"
 msgstr "Letzte Änderung"
 
-#: classes/core/WPL_Toolbar.php:63
-#: classes/page/TransactionsPage.php:27
+#: classes/core/WPL_Toolbar.php:66
+#: classes/page/TransactionsPage.php:28
 #: views/transactions_page.php:13
 #@ wplister
 msgid "Transactions"
 msgstr "Transaktionen"
 
-#: classes/table/ListingsTable.php:735
-#: views/listings_page.php:53
-#: views/listings_page.php:76
+#: classes/table/ListingsTable.php:908
+#: views/listings_page.php:68
+#: views/listings_page.php:95
 #@ wplister
 msgid "Verify all prepared items"
 msgstr "Überprüfe alle vorbereiteten Artikel"
 
-#: classes/table/ListingsTable.php:734
-#: views/listings_page.php:52
-#: views/listings_page.php:77
+#: classes/table/ListingsTable.php:907
+#: views/listings_page.php:67
+#: views/listings_page.php:96
 #@ wplister
 msgid "Verify all prepared items with eBay and get listing fees."
 msgstr "Überprüft alle vorbereiteten Artikel bei eBay und fragt die Einstellgebühren ab."
 
-#: classes/table/ListingsTable.php:739
-#: views/listings_page.php:57
-#: views/listings_page.php:85
+#: classes/table/ListingsTable.php:914
+#: views/listings_page.php:74
+#: views/listings_page.php:104
 #@ wplister
 msgid "Publish all verified items"
 msgstr "Veröffentliche alle überprüften Artikel"
 
-#: classes/table/ListingsTable.php:738
-#: views/listings_page.php:56
-#: views/listings_page.php:86
+#: classes/table/ListingsTable.php:913
+#: views/listings_page.php:73
+#: views/listings_page.php:105
 #@ wplister
 msgid "Publish all verified items on eBay."
 msgstr "Stellt alle geprüften Artikel bei eBay ein."
 
 #: views/templates_copy_form.php:40
-#: views/templates_edit_page.php:346
+#: views/templates_edit_page.php:356
 #@ wplister
 msgid "Description"
 msgstr "Beschreibung"
@@ -467,34 +480,34 @@ msgstr "Beschreibung"
 msgid "Price / Start price"
 msgstr "Preis / Startpreis"
 
-#: classes/integration/WooBackendIntegration.php:544
-#: views/profiles_edit_page.php:92
+#: classes/integration/WooProductMetaBox.php:222
+#: views/profiles_edit_page.php:93
 #@ wplister
 msgid "Buy Now Price"
 msgstr "Sofort-Kauf Preis"
 
-#: views/profiles_edit_page.php:98
+#: views/profiles_edit_page.php:101
 #@ wplister
 msgid "Fixed price (199), percent (+10% / -10%) or fixed change (+5 / -5)"
 msgstr "Festpreis (199), Prozent (+10% / -10%) oder absolute Änderung (+5 / -5)"
 
-#: views/profile/edit_sidebar.php:202
+#: views/profile/edit_sidebar.php:265
 #@ wplister
 msgid "Title prefix"
 msgstr "Titel-Präfix"
 
-#: views/profile/edit_sidebar.php:209
+#: views/profile/edit_sidebar.php:272
 #@ wplister
 msgid "Title suffix"
 msgstr "Titel-Suffix"
 
-#: classes/integration/WooBackendIntegration.php:496
-#: classes/integration/WooBackendIntegration.php:497
-#: classes/integration/WooBackendIntegration.php:498
-#: classes/integration/WooBackendIntegration.php:499
-#: classes/integration/WooBackendIntegration.php:500
-#: classes/integration/WooBackendIntegration.php:501
-#: classes/integration/WooBackendIntegration.php:502
+#: classes/integration/WooProductMetaBox.php:100
+#: classes/integration/WooProductMetaBox.php:101
+#: classes/integration/WooProductMetaBox.php:102
+#: classes/integration/WooProductMetaBox.php:103
+#: classes/integration/WooProductMetaBox.php:104
+#: classes/integration/WooProductMetaBox.php:105
+#: classes/integration/WooProductMetaBox.php:106
 #: views/listings_edit_page.php:214
 #: views/listings_edit_page.php:215
 #: views/listings_edit_page.php:216
@@ -502,47 +515,49 @@ msgstr "Titel-Suffix"
 #: views/listings_edit_page.php:218
 #: views/listings_edit_page.php:219
 #: views/listings_edit_page.php:220
-#: views/profile/edit_sidebar.php:462
-#: views/profiles_edit_page.php:123
-#: views/profiles_edit_page.php:124
-#: views/profiles_edit_page.php:125
-#: views/profiles_edit_page.php:126
-#: views/profiles_edit_page.php:127
-#: views/profiles_edit_page.php:128
-#: views/profiles_edit_page.php:129
+#: views/profile/edit_sidebar.php:608
+#: views/profiles_edit_page.php:113
+#: views/profiles_edit_page.php:114
+#: views/profiles_edit_page.php:115
+#: views/profiles_edit_page.php:116
+#: views/profiles_edit_page.php:117
+#: views/profiles_edit_page.php:118
+#: views/profiles_edit_page.php:119
 #@ wplister
 msgid "Days"
 msgstr "Tage"
 
-#: classes/integration/WooBackendIntegration.php:503
+#: classes/integration/WooProductMetaBox.php:107
 #: views/listings_edit_page.php:221
-#: views/profiles_edit_page.php:130
+#: views/profiles_edit_page.php:120
 #@ wplister
 msgid "Good Till Canceled"
 msgstr "unbegrenzt"
 
-#: views/profiles_edit_page.php:141
+#: classes/integration/WooProductMetaBox.php:146
+#: views/profiles_edit_page.php:131
 #@ wplister
 msgid "Condition"
 msgstr "Zustand"
 
-#: views/profiles_edit_page.php:156
-#: views/profiles_edit_page.php:193
+#: classes/integration/WooProductMetaBox.php:122
+#: views/profiles_edit_page.php:146
+#: views/profiles_edit_page.php:183
 #@ wplister
 msgid "New"
 msgstr "Neu"
 
-#: views/profiles_edit_page.php:162
+#: views/profiles_edit_page.php:152
 #@ wplister
 msgid "Available conditions may vary for different categories."
 msgstr "Die verfügbaren Artikelzustände sind von der gewählten Kategorie abhängig."
 
-#: views/profiles_edit_page.php:163
+#: views/profiles_edit_page.php:153
 #@ wplister
 msgid "You should set the category first."
 msgstr "Sie sollten zuerst eine Kategorie auswählen."
 
-#: classes/integration/WooBackendIntegration.php:634
+#: classes/integration/WooProductMetaBox.php:284
 #: views/profile/edit_categories.php:46
 #@ wplister
 msgid "eBay categories"
@@ -554,235 +569,264 @@ msgstr "eBay Kategorien"
 msgid "Store category"
 msgstr "Shop-Kategorie"
 
-#: views/profiles_edit_page.php:154
+#: views/profiles_edit_page.php:144
 #@ wplister
 msgid "none"
 msgstr "keine"
 
-#: views/profile/edit_sidebar.php:102
-#: views/templates_edit_page.php:356
+#: views/profile/edit_sidebar.php:106
+#: views/templates_edit_page.php:366
 #@ wplister
 msgid "Location"
 msgstr "Ort"
 
-#: views/profile/edit_sidebar.php:116
+#: views/profile/edit_sidebar.php:120
 #@ wplister
 msgid "Country"
 msgstr "Land"
 
-#: views/profile/edit_sidebar.php:133
+#: views/profile/edit_sidebar.php:137
 #@ wplister
 msgid "Currency"
 msgstr "Währung"
 
-#: views/profile/edit_sidebar.php:154
+#: views/profile/edit_sidebar.php:158
 #@ wplister
 msgid "Taxes"
 msgstr "Steuern"
 
-#: views/profile/edit_sidebar.php:159
+#: views/profile/edit_sidebar.php:163
 #@ wplister
 msgid "no taxes"
 msgstr "keine Steuern"
 
-#: views/profile/edit_sidebar.php:160
+#: views/profile/edit_sidebar.php:164
 #@ wplister
 msgid "fixed tax rate"
 msgstr "fester Steuersatz"
 
-#: views/profile/edit_sidebar.php:162
+#: views/profile/edit_sidebar.php:166
 #@ wplister
 msgid "apply product tax"
 msgstr "verwende Steuersatz des Artikels"
 
-#: classes/integration/WooBackendIntegration.php:651
-#: classes/integration/WooBackendIntegration.php:661
+#: classes/integration/WooProductMetaBox.php:301
+#: classes/integration/WooProductMetaBox.php:311
 #: classes/table/CategoriesMapTable.php:96
 #: classes/table/CategoriesMapTable.php:123
 #: views/profile/edit_categories.php:60
 #: views/profile/edit_categories.php:74
 #: views/profile/edit_categories.php:102
 #: views/profile/edit_categories.php:116
-#: views/profile/edit_shipping_int.php:53
-#: views/profile/edit_shipping_int.php:99
+#: views/profile/edit_shipping_int.php:63
+#: views/profile/edit_shipping_int.php:121
 #: views/profile/edit_shipping_loc.php:43
 #: views/profile/edit_shipping_loc.php:76
-#: views/profiles_edit_page.php:234
+#: views/profiles_edit_page.php:224
 #@ wplister
 msgid "remove"
 msgstr "entfernen"
 
-#: views/profiles_edit_page.php:213
-#: views/profiles_edit_page.php:216
+#: views/profiles_edit_page.php:203
+#: views/profiles_edit_page.php:206
 #@ wplister
 msgid "Payment methods"
 msgstr "Zahlungsweisen"
 
-#: views/profiles_edit_page.php:242
+#: views/profiles_edit_page.php:232
 #@ wplister
 msgid "Add payment method"
 msgstr "Neue Zahlungsweise hinzufügen"
 
 #: views/listings_edit_page.php:150
-#: views/profile/edit_sidebar.php:237
-#: views/profile/edit_sidebar.php:284
-#: views/profile/edit_sidebar.php:294
-#: views/profile/edit_sidebar.php:312
-#: views/profile/edit_sidebar.php:349
-#: views/profile/edit_sidebar.php:430
-#: views/profile/edit_sidebar.php:521
-#: views/profile/edit_sidebar.php:532
-#: views/profile/edit_sidebar.php:543
-#: views/profile/edit_sidebar.php:553
-#: views/profiles_edit_page.php:285
-#: views/settings_advanced.php:75
-#: views/settings_advanced.php:189
-#: views/settings_advanced.php:201
-#: views/settings_advanced.php:213
-#: views/settings_dev.php:39
-#: views/settings_dev.php:74
-#: views/settings_dev.php:102
-#: views/settings_page.php:195
-#: views/settings_page.php:232
-#: views/settings_page.php:241
+#: views/profile/edit_shipping_int.php:185
+#: views/profile/edit_shipping_loc.php:112
+#: views/profile/edit_shipping_loc.php:148
+#: views/profile/edit_shipping_loc.php:180
+#: views/profile/edit_sidebar.php:230
+#: views/profile/edit_sidebar.php:299
+#: views/profile/edit_sidebar.php:309
+#: views/profile/edit_sidebar.php:356
+#: views/profile/edit_sidebar.php:366
+#: views/profile/edit_sidebar.php:384
+#: views/profile/edit_sidebar.php:432
+#: views/profile/edit_sidebar.php:528
+#: views/profile/edit_sidebar.php:576
+#: views/profile/edit_sidebar.php:669
+#: views/profile/edit_sidebar.php:680
+#: views/profile/edit_sidebar.php:691
+#: views/profile/edit_sidebar.php:702
+#: views/profile/edit_sidebar.php:712
+#: views/profiles_edit_page.php:302
+#: views/settings_advanced.php:68
+#: views/settings_advanced.php:231
+#: views/settings_advanced.php:243
+#: views/settings_advanced.php:275
+#: views/settings_advanced.php:284
+#: views/settings_advanced.php:293
+#: views/settings_advanced.php:307
+#: views/settings_advanced.php:359
+#: views/settings_advanced.php:372
+#: views/settings_advanced.php:407
+#: views/settings_advanced.php:421
+#: views/settings_advanced.php:435
+#: views/settings_dev.php:122
+#: views/settings_dev.php:138
+#: views/settings_dev.php:204
+#: views/settings_page.php:222
+#: views/settings_page.php:259
+#: views/settings_page.php:268
+#: views/settings_page.php:298
 #@ wplister
 msgid "Yes"
 msgstr "Ja"
 
 #: views/listings_edit_page.php:151
-#: views/profile/edit_sidebar.php:238
-#: views/profile/edit_sidebar.php:285
-#: views/profile/edit_sidebar.php:295
-#: views/profile/edit_sidebar.php:313
-#: views/profile/edit_sidebar.php:323
-#: views/profile/edit_sidebar.php:350
-#: views/profile/edit_sidebar.php:431
-#: views/profile/edit_sidebar.php:522
-#: views/profile/edit_sidebar.php:533
-#: views/profile/edit_sidebar.php:544
-#: views/profile/edit_sidebar.php:554
-#: views/profiles_edit_page.php:256
-#: views/profiles_edit_page.php:286
-#: views/settings_advanced.php:74
-#: views/settings_advanced.php:164
-#: views/settings_advanced.php:188
-#: views/settings_advanced.php:200
-#: views/settings_advanced.php:212
-#: views/settings_dev.php:40
-#: views/settings_dev.php:75
-#: views/settings_dev.php:101
-#: views/settings_page.php:196
-#: views/settings_page.php:233
-#: views/settings_page.php:242
+#: views/profile/edit_shipping_int.php:184
+#: views/profile/edit_shipping_loc.php:111
+#: views/profile/edit_shipping_loc.php:147
+#: views/profile/edit_shipping_loc.php:179
+#: views/profile/edit_sidebar.php:229
+#: views/profile/edit_sidebar.php:300
+#: views/profile/edit_sidebar.php:310
+#: views/profile/edit_sidebar.php:357
+#: views/profile/edit_sidebar.php:367
+#: views/profile/edit_sidebar.php:385
+#: views/profile/edit_sidebar.php:406
+#: views/profile/edit_sidebar.php:433
+#: views/profile/edit_sidebar.php:529
+#: views/profile/edit_sidebar.php:577
+#: views/profile/edit_sidebar.php:670
+#: views/profile/edit_sidebar.php:681
+#: views/profile/edit_sidebar.php:692
+#: views/profile/edit_sidebar.php:703
+#: views/profile/edit_sidebar.php:713
+#: views/profiles_edit_page.php:246
+#: views/profiles_edit_page.php:303
+#: views/settings_advanced.php:67
+#: views/settings_advanced.php:230
+#: views/settings_advanced.php:242
+#: views/settings_advanced.php:254
+#: views/settings_advanced.php:274
+#: views/settings_advanced.php:283
+#: views/settings_advanced.php:292
+#: views/settings_advanced.php:306
+#: views/settings_advanced.php:358
+#: views/settings_advanced.php:371
+#: views/settings_advanced.php:406
+#: views/settings_advanced.php:420
+#: views/settings_advanced.php:434
+#: views/settings_dev.php:123
+#: views/settings_dev.php:139
+#: views/settings_dev.php:203
+#: views/settings_page.php:223
+#: views/settings_page.php:260
+#: views/settings_page.php:269
+#: views/settings_page.php:297
 #@ wplister
 msgid "No"
 msgstr "Nein"
 
-#: views/profiles_edit_page.php:293
+#: views/profiles_edit_page.php:310
 #@ wplister
 msgid "Returns within"
 msgstr "Rückgabe innerhalb von"
 
-#: views/profiles_edit_page.php:331
+#: views/profiles_edit_page.php:384
 #@ wplister
 msgid "Returns description"
 msgstr "Widerrufsbelehrung"
 
-#: views/profile/edit_sidebar.php:308
+#: views/profile/edit_sidebar.php:380
 #@ wplister
 msgid "Gallery image"
 msgstr "Galeriebild"
 
-#: views/profile/edit_sidebar.php:86
-#: views/profiles_edit_page.php:346
+#: views/profile/edit_sidebar.php:90
+#: views/profiles_edit_page.php:417
 #@ wplister
 msgid "Save profile"
 msgstr "Profil speichern"
 
-#: views/settings_dev.php:134
+#: views/settings_dev.php:241
 #@ wplister
 msgid "eBay token"
 msgstr "eBay Token"
 
-#: views/settings_page.php:207
+#: views/settings_page.php:234
 #@ wplister
 msgid "Automatic updates"
 msgstr "Automatische Aktualisierung"
 
-#: views/settings_page.php:221
+#: views/settings_page.php:248
 #@ wplister
 msgid "hourly"
 msgstr "stündlich"
 
-#: views/settings_page.php:222
+#: views/settings_page.php:249
 #@ wplister
 msgid "daily"
 msgstr "täglich"
 
-#: classes/core/WPL_Setup.php:43
+#: classes/core/WPL_Setup.php:58
 #@ wplister
 msgid "Update eBay details"
 msgstr "eBay Details aktualisieren"
 
-#: views/tools_page.php:96
-#@ wplister
-msgid "Update eBay transactions"
-msgstr "Transaktionen aktualisieren"
-
-#: views/tools_page.php:115
+#: views/tools_page.php:271
 #@ wplister
 msgid "Test connection to eBay API"
 msgstr "Teste Verbindung zur eBay-API"
 
-#: views/transactions_page.php:43
+#: views/transactions_page.php:45
 #@ wplister
 msgid "Update recent transactions from eBay."
 msgstr "Lade neue Transaktionen von eBay."
 
-#: classes/table/ListingsTable.php:479
+#: classes/table/ListingsTable.php:603
 #: views/listings_edit_page.php:251
 #@ wplister
 msgid "sold"
 msgstr "verkauft"
 
-#: classes/integration/WooBackendIntegration.php:941
+#: classes/integration/WooProductMetaBox.php:672
 #: views/profile/edit_shipping.php:59
 #@ wplister
 msgid "International shipping"
 msgstr "Internationaler Versand"
 
 #: views/profile/edit_shipping_int.php:8
-#: views/profile/edit_shipping_int.php:70
+#: views/profile/edit_shipping_int.php:80
 #@ wplister
 msgid "Destination"
 msgstr "Ziel"
 
-#: views/settings_page.php:237
+#: views/settings_page.php:264
 #@ wplister
 msgid "Create orders"
 msgstr "Bestellung erzeugen"
 
-#: classes/integration/WPL_CustomUpdater.php:81
-#: classes/integration/WPL_CustomUpdater.php:157
-#: classes/integration/WPL_CustomUpdater.php:198
+#: classes/integration/WPL_CustomUpdater.php:118
+#: classes/integration/WPL_CustomUpdater.php:194
+#: classes/integration/WPL_CustomUpdater.php:235
+#: classes/integration/WPL_CustomUpdater.php:281
 #@ wplister
 msgid "An unknown error occurred"
 msgstr "Ein unbekannter Fehler ist aufgetreten"
 
-#: classes/page/ListingsPage.php:37
 #: classes/page/NetworkAdminPage.php:23
 #@ wplister
 msgid "WP-Lister"
 msgstr "WP-Lister"
 
-#: classes/table/ListingsTable.php:483
+#: classes/table/ListingsTable.php:607
 #: views/listings_edit_page.php:252
 #@ wplister
 msgid "ended"
 msgstr "beendet"
 
-#: classes/integration/WooBackendIntegration.php:650
-#: classes/integration/WooBackendIntegration.php:660
+#: classes/integration/WooProductMetaBox.php:300
+#: classes/integration/WooProductMetaBox.php:310
 #: classes/table/CategoriesMapTable.php:95
 #: classes/table/CategoriesMapTable.php:122
 #: views/profile/edit_categories.php:59
@@ -793,28 +837,28 @@ msgstr "beendet"
 msgid "select"
 msgstr "auswählen"
 
-#: views/settings_page.php:123
+#: views/settings_page.php:150
 #@ wplister
 msgid "eBay authorization"
 msgstr "eBay Authorisierung"
 
-#: views/settings_page.php:147
+#: views/settings_page.php:174
 #@ wplister
 msgid "Click \"Connect with eBay\" to sign in to eBay and grant access for WP-Lister"
 msgstr "Klicke \"Connect with eBay\" um Dich bei eBay anzumelden und WP-Lister den Zugriff zu gewähren"
 
-#: views/settings_page.php:155
+#: views/settings_page.php:182
 #@ wplister
 msgid "Fetch eBay Token"
 msgstr "Hole eBay Token"
 
-#: views/settings_page.php:156
+#: views/settings_page.php:183
 #@ wplister
 msgid "After linking WP-Lister with your eBay account, click here to fetch your token"
 msgstr "Nachdem Du WP-Lister den Zugriff gewährt hast, klicke hier um das Token abzurufen"
 
-#: views/tools_page.php:153
-#: views/tools_page.php:154
+#: views/tools_page.php:311
+#: views/tools_page.php:312
 #@ wplister
 msgid "Get token expiration date"
 msgstr "Frage das Token-Ablaufdatum ab"
@@ -829,12 +873,13 @@ msgstr "Installation und Einrichtung"
 msgid "Listing items"
 msgstr "Artikel einstellen"
 
-#: views/tools_page.php:78
+#: views/settings_license.php:95
+#: views/tools_page.php:172
 #@ wplister
 msgid "Force update check"
 msgstr "Jetzt auf Updates prüfen"
 
-#: views/tools_page.php:79
+#: views/tools_page.php:173
 #@ wplister
 msgid "Since WordPress only checks twice a day for plugin updates, it might be neccessary to force an immediate update check if you want to install an update which was released within the last hours."
 msgstr "Da WordPress nur zweimal am Tag auf neue Updates prüft kann eine manuelle Prüfung notwendig sein, z.B. um eine neue Version zu installieren, die in den letzten Stunden veröffentlich wurde. "
@@ -844,59 +889,60 @@ msgstr "Da WordPress nur zweimal am Tag auf neue Updates prüft kann eine manuel
 msgid "Begin the setup"
 msgstr "Beginne die Einrichtung"
 
+#: classes/page/SettingsPage.php:110
 #: classes/page/ToolsPage.php:43
 #@ wplister
 msgid "Check for updates was initiated."
 msgstr "Die Prüfung auf Updates wurde gestartet."
 
-#: classes/core/WPL_Setup.php:29
+#: classes/core/WPL_Setup.php:44
 #@ wplister
 msgid "You have not linked WP-Lister to your eBay account yet."
 msgstr "Sie haben WP-Lister noch nicht mit Ihrem eBay-Konto verknüpft."
 
-#: classes/core/WPL_Setup.php:30
+#: classes/core/WPL_Setup.php:45
 #, php-format
 #@ wplister
 msgid "To complete the setup procedure go to %s and follow the instructions."
 msgstr "Um die Einrichtung abzuschließen, gehen Sie zu %s und folgen Sie den Anweisungen."
 
-#: classes/core/WPL_Setup.php:38
+#: classes/core/WPL_Setup.php:53
 #@ wplister
 msgid "WP-Lister Setup - Step 2"
 msgstr "WP-Lister Einrichtung - Schritt 2"
 
-#: classes/core/WPL_Setup.php:57
+#: classes/core/WPL_Setup.php:72
 #@ wplister
 msgid "WP-Lister Setup - Step 3"
 msgstr "WP-Lister Einrichtung - Schritt 3"
 
-#: classes/core/WPL_Setup.php:86
+#: classes/core/WPL_Setup.php:101
 #@ wplister
 msgid "WP-Lister Setup is complete."
 msgstr "WP-Lister ist vollständig eingerichtet."
 
-#: classes/table/ListingsTable.php:128
+#: classes/table/ListingsTable.php:135
 #@ wplister
 msgid "Revise"
 msgstr "Aktualisieren"
 
-#: classes/table/ListingsTable.php:495
+#: classes/table/ListingsTable.php:623
 #: views/listings_edit_page.php:253
 #@ wplister
 msgid "changed"
 msgstr "geändert"
 
-#: classes/table/ListingsTable.php:641
+#: classes/table/ListingsTable.php:784
 #@ wplister
 msgid "Revise items"
 msgstr "Aktualisieren"
 
-#: classes/page/ListingsPage.php:226
+#: classes/page/ListingsPage.php:217
 #@ wplister
 msgid "Selected items were revised on eBay."
 msgstr "Die ausgewählten Artikel wurden aktualisiert."
 
-#: classes/table/LogTable.php:208
+#: classes/table/LogTable.php:242
 #: classes/table/TemplatesTable.php:71
 #@ wplister
 msgid "User"
@@ -907,14 +953,14 @@ msgstr "Benutzer"
 msgid "Default"
 msgstr "Standard"
 
-#: classes/model/EbayOrdersModel.php:511
-#: classes/model/TransactionsModel.php:503
+#: classes/model/EbayOrdersModel.php:715
+#: classes/model/TransactionsModel.php:651
 #: classes/table/TemplatesTable.php:170
 #@ wplister
 msgid "Last modified"
 msgstr "Zuletzt geändert"
 
-#: classes/table/LogTable.php:205
+#: classes/table/LogTable.php:239
 #: views/order_details.php:132
 #: views/order_details.php:166
 #: views/transaction_details.php:137
@@ -922,20 +968,20 @@ msgstr "Zuletzt geändert"
 msgid "Date"
 msgstr "Datum"
 
-#: classes/table/LogTable.php:206
+#: classes/table/LogTable.php:240
 #@ wplister
 msgid "Request"
 msgstr "Request"
 
-#: classes/model/TransactionsModel.php:506
-#: classes/table/LogTable.php:207
+#: classes/model/TransactionsModel.php:654
+#: classes/table/LogTable.php:241
 #@ wplister
 msgid "Item ID"
 msgstr "Item ID"
 
-#: classes/core/WPL_Toolbar.php:138
-#: classes/page/LogPage.php:23
-#: views/log_page.php:26
+#: classes/core/WPL_Toolbar.php:154
+#: classes/page/LogPage.php:25
+#: views/log_page.php:27
 #@ wplister
 msgid "Logs"
 msgstr "Logs"
@@ -945,7 +991,7 @@ msgstr "Logs"
 msgid "Leave this empty to use the product price as it is."
 msgstr "Lassen Sie dieses Feld leer um den Produktpreis unverändert zu verwenden."
 
-#: views/settings_dev.php:72
+#: views/settings_dev.php:134
 #@ wplister
 msgid "Log to database"
 msgstr "Logge eBay-Kommunikation"
@@ -955,318 +1001,322 @@ msgstr "Logge eBay-Kommunikation"
 msgid "Edit Template"
 msgstr "Vorlage bearbeiten"
 
-#: classes/core/WPL_Setup.php:62
+#: classes/core/WPL_Setup.php:77
 #: views/templates_edit_page.php:91
 #@ wplister
 msgid "New Template"
 msgstr "Neue Vorlage"
 
-#: views/templates_edit_page.php:336
+#: views/templates_edit_page.php:346
 #@ wplister
 msgid "Template settings"
 msgstr "Vorlagen-Einstellungen"
 
-#: views/templates_edit_page.php:350
+#: views/templates_edit_page.php:360
 #@ wplister
 msgid "Version"
 msgstr "Version"
 
-#: views/templates_edit_page.php:362
+#: views/templates_edit_page.php:372
 #@ wplister
 msgid "Template description is only for internal use."
 msgstr "Die Vorlagenbeschreibung wird nicht veröffentlicht."
 
-#: views/templates_edit_page.php:453
+#: views/templates_edit_page.php:463
 #, php-format
 #@ wplister
 msgid "apply changes to all %s prepared listings using this template"
 msgstr "wende Änderungen auf alle %s vorbereiteten Auktionen an, die diese Vorlage verwenden"
 
 #: views/templates_edit_page.php:169
-#: views/templates_edit_page.php:459
+#: views/templates_edit_page.php:469
 #@ wplister
 msgid "Save template"
 msgstr "Vorlage speichern"
 
-#: classes/page/TemplatesPage.php:28
+#: classes/page/TemplatesPage.php:29
 #: views/templates_page.php:20
 #@ wplister
 msgid "Templates"
 msgstr "Vorlagen"
 
-#: views/tools_page.php:114
+#: views/tools_page.php:270
 #@ wplister
 msgid "Test eBay connection"
 msgstr "Teste eBay-Verbindung"
 
-#: views/tools_page.php:133
+#: views/tools_page.php:303
 #@ wplister
 msgid "Check availability of CURL php extension and show phpinfo()"
 msgstr "Prüfe ob cURL verfügbar ist"
 
-#: views/tools_page.php:143
-#: views/tools_page.php:162
+#: views/tools_page.php:323
+#: views/tools_page.php:343
 #@ wplister
 msgid "View debug log"
 msgstr "Debug Log"
 
-#: views/tools_page.php:163
+#: views/tools_page.php:344
 #@ wplister
 msgid "View Logfile"
 msgstr "Logfile"
 
-#: classes/page/SettingsPage.php:520
+#: classes/page/SettingsPage.php:676
 #@ wplister
 msgid "Your token was changed."
 msgstr "Ihr Token wurde geändert."
 
-#: classes/page/TemplatesPage.php:370
+#: classes/page/TemplatesPage.php:375
 #@ wplister
 msgid "Template saved."
 msgstr "Vorlage wurde gespeichert."
 
-#: classes/core/WPL_Setup.php:39
+#: classes/core/WPL_Setup.php:54
 #@ wplister
 msgid "Before creating your first profile, we need to download certain information which are specific to the eBay site you selected."
 msgstr "Bevor Sie das erste Auktions-Profil erstellen können, müssen einige Daten von der ausgewählten eBay Site heruntergeladen werden."
 
-#: classes/core/WPL_Page.php:76
+#: classes/core/WPL_Page.php:79
 #, php-format
 #@ wplister
 msgid "Thank you for listing with %s"
 msgstr "Vielen Dank, dass Sie %s verwenden."
 
-#: classes/core/WPL_Setup.php:40
+#: classes/core/WPL_Setup.php:55
 #@ wplister
 msgid "This includes shipping options, payment methods, your custom store categories as well as the whole eBay category tree, which might take a while."
 msgstr "Dies beinhaltet Versandmethoden, Zahlungsweisen, die Kategorien Ihres eBay-Shops sowie sämtliche eBay-Kategorien, was eine Weile dauern kann."
 
-#: classes/core/WPL_Setup.php:58
+#: classes/core/WPL_Setup.php:73
 #@ wplister
 msgid "Create a default listing template."
 msgstr "Neue Vorlage erstellen"
 
-#: classes/core/WPL_Setup.php:59
+#: classes/core/WPL_Setup.php:74
 #, php-format
 #@ wplister
 msgid "To create your first listing template click on %s."
 msgstr "Um Ihre erste Auktionsvorlage zu erstellen, klicken Sie bitte auf %s."
 
-#: classes/core/WPL_Setup.php:61
+#: classes/core/WPL_Setup.php:76
 #@ wplister
 msgid "Replace the default text according to your requirements and save your template to continue."
 msgstr "Nehmen Sie Ihre gewünschten Änderungen am Text vor und speichern Sie die Vorlage."
 
-#: classes/core/WPL_Setup.php:75
+#: classes/core/WPL_Setup.php:90
 #@ wplister
 msgid "WP-Lister Setup - Step 4"
 msgstr "WP-Lister Setup - Schritt 4"
 
-#: classes/core/WPL_Setup.php:76
+#: classes/core/WPL_Setup.php:91
 #@ wplister
 msgid "The final step: create your first listing profile."
 msgstr "Der letzte Schritt: Erstellen Sie Ihr erstes Profil."
 
-#: classes/core/WPL_Setup.php:77
+#: classes/core/WPL_Setup.php:92
 #, php-format
 #@ wplister
 msgid "Click on %s and start defining your listing options.<br>After saving your profile, visit your Products page and select the products to list on eBay."
 msgstr "Klicken Sie auf %s und nehmen Sie die gewünschten Einstellungen vor.<br>Nachdem Sie Ihr Profil gespeichert haben, besuchen Sie die Produktübersicht und wählen die Produkte aus, die Sie auf eBay einstellen möchten."
 
-#: classes/core/WPL_Setup.php:87
+#: classes/core/WPL_Setup.php:102
 #@ wplister
 msgid "You are ready now to list your first items."
 msgstr "Sie können jetzt die ersten Artikel bei eBay einstellen."
 
-#: classes/core/WPL_Setup.php:88
+#: classes/core/WPL_Setup.php:103
 #@ wplister
 msgid "Visit your Products page, select a few items and select \"Prepare listings\" from the bulk actions menu."
 msgstr "Besuchen Sie die Produktübersicht, markieren Sie einige Artikel und wählen Sie \"Auktionen vorbereiten\" aus dem Pulldown-Menu."
 
-#: classes/integration/OrderWrapper_woo.php:924
+#: classes/integration/OrderWrapper_woo.php:596
 #: classes/integration/ProductWrapper_jigo.php:410
 #: classes/integration/ProductWrapper_mp.php:234
 #: classes/integration/ProductWrapper_wpec.php:396
-#: classes/integration/WooBackendIntegration.php:35
+#: classes/integration/WooBackendIntegration.php:114
 #: views/listings_edit_page.php:246
 #@ wplister
 msgid "Listing status"
 msgstr "Status"
 
-#: classes/model/EbayShippingModel.php:354
+#: classes/model/EbayShippingModel.php:380
 #@ wplister
 msgid "Economy services"
 msgstr ""
 
-#: classes/model/EbayShippingModel.php:358
+#: classes/model/EbayShippingModel.php:384
 #@ wplister
 msgid "Standard services"
 msgstr ""
 
-#: classes/model/EbayShippingModel.php:362
+#: classes/model/EbayShippingModel.php:388
 #@ wplister
 msgid "Expedited services"
 msgstr ""
 
-#: classes/model/EbayShippingModel.php:366
+#: classes/model/EbayShippingModel.php:392
 #@ wplister
 msgid "One-day services"
 msgstr ""
 
-#: classes/model/EbayShippingModel.php:370
+#: classes/model/EbayShippingModel.php:396
 #@ wplister
 msgid "Pickup services"
 msgstr ""
 
-#: classes/model/EbayShippingModel.php:374
+#: classes/model/EbayShippingModel.php:400
 #@ wplister
 msgid "Other services"
 msgstr ""
 
-#: classes/model/EbayShippingModel.php:378
+#: classes/model/EbayShippingModel.php:404
 #@ wplister
 msgid "International services"
 msgstr ""
 
-#: classes/model/ItemBuilderModel.php:1168
+#: classes/model/ItemBuilderModel.php:1491
 #@ wplister
 msgid "Some variations seem to have no price."
 msgstr "Einige Produktvarianten haben keinen Preis."
 
-#: classes/model/ItemBuilderModel.php:1200
+#: classes/model/ItemBuilderModel.php:1525
 #@ wplister
 msgid "You are using the same SKU for more than one variations which is not allowed by eBay."
 msgstr "Sie verwenden dieselbe Artikelnummer für mehr als eine Produktvariante, was seitens eBay nicht erlaubt ist."
 
-#: classes/model/ItemBuilderModel.php:1202
+#: classes/model/ItemBuilderModel.php:1527
 #@ wplister
 msgid "To circumvent this issue, your item will be listed without SKU."
 msgstr "Um diesen Artikel dennoch einstellen zu können, wird die Artikelnummer nicht übermittelt."
 
-#: classes/model/ItemBuilderModel.php:1207
+#: classes/model/ItemBuilderModel.php:1539
 #@ wplister
 msgid "None of these variations are in stock."
 msgstr "Keine dieser Produktvarianten ist verfügbar."
 
-#: classes/model/ItemBuilderModel.php:1219
+#: classes/model/ItemBuilderModel.php:1551
 #@ wplister
 msgid "Price can not be zero."
 msgstr "Der Preis kann nicht null sein."
 
-#: classes/page/ListingsPage.php:217
+#: classes/page/ListingsPage.php:208
 #@ wplister
 msgid "There were some problems verifying your items."
 msgstr "Bei der Überprüfung wurden Probleme festgestellt."
 
-#: classes/page/ListingsPage.php:239
+#: classes/page/ListingsPage.php:230
 #@ wplister
 msgid "Some items could not be published."
 msgstr "Einige Artikel konnten nicht eingestellt werden."
 
-#: classes/page/ListingsPage.php:258
+#: classes/page/ListingsPage.php:249
 #@ wplister
 msgid "Selected listings were ended."
 msgstr "Die ausgewählten Auktionen wurden beendet."
 
-#: classes/page/ListingsPage.php:301
+#: classes/page/ListingsPage.php:362
 #@ wplister
 msgid "Selected variations were split into single items."
 msgstr "Die ausgewählten Produktvarianten wurden in einzelne Artikel aufgeteilt."
 
-#: classes/page/ListingsPage.php:309
+#: classes/page/ListingsPage.php:370
 #@ wplister
 msgid "Profiles were re-applied to selected items."
 msgstr "Die Profildaten der ausgewählten Artikel wurden aktualisiert."
 
-#: classes/page/ListingsPage.php:416
+#: classes/page/ListingsPage.php:477
 #@ wplister
 msgid "Listing updated."
 msgstr "Auktionen wurden aktualisiert."
 
-#: classes/page/ListingsPage.php:424
+#: classes/page/ListingsPage.php:485
 #@ wplister
 msgid "Your changes were updated on eBay."
 msgstr "Ihre Änderungen wurden an eBay übertragen."
 
-#: classes/core/WPL_Toolbar.php:28
-#: classes/page/ListingsPage.php:494
-#: views/listings_page.php:32
+#: classes/core/WPL_Toolbar.php:31
+#: classes/page/ListingsPage.php:576
+#: views/listings_page.php:47
 #@ wplister
 msgid "Listings"
 msgstr "Auktionen"
 
-#: classes/page/SettingsPage.php:338
+#: classes/page/SettingsPage.php:463
 #@ wplister
 msgid "Categories mapping updated."
 msgstr "Kategorienzuweisung aktualisiert."
 
-#: classes/page/SettingsPage.php:375
+#: classes/page/SettingsPage.php:500
 #@ wplister
 msgid "Your license was activated."
 msgstr "Ihre Lizenz wurde aktiviert."
 
-#: classes/page/SettingsPage.php:379
-#: classes/page/SettingsPage.php:382
-#: classes/page/SettingsPage.php:385
+#: classes/page/SettingsPage.php:504
+#: classes/page/SettingsPage.php:507
+#: classes/page/SettingsPage.php:510
 #@ wplister
 msgid "There was a problem activating your license."
 msgstr "Es gab ein Problem bei der Aktivierung Ihrer Lizenz."
 
-#: classes/page/SettingsPage.php:402
+#: classes/page/SettingsPage.php:527
 #@ wplister
 msgid "Your license was deactivated."
 msgstr "Ihre Lizenz wurde deaktiviert."
 
-#: classes/page/SettingsPage.php:417
-#: classes/page/SettingsPage.php:420
-#: classes/page/SettingsPage.php:423
+#: classes/page/SettingsPage.php:542
+#: classes/page/SettingsPage.php:545
+#: classes/page/SettingsPage.php:548
 #@ wplister
 msgid "There was a problem deactivating your license."
 msgstr "Es gab ein Problem bei der Deaktivierung Ihrer Lizenz."
 
-#: classes/page/SettingsPage.php:524
+#: classes/page/SettingsPage.php:680
 #@ wplister
 msgid "Settings updated."
 msgstr "Einstellungen wurden aktualisiert."
 
-#: classes/page/TemplatesPage.php:418
+#: classes/page/TemplatesPage.php:423
 #@ wplister
 msgid "There was a problem while extracting the archive:"
 msgstr "Es gab ein Problem beim Entpacken des Archivs:"
 
-#: classes/page/TemplatesPage.php:420
+#: classes/page/TemplatesPage.php:425
 #@ wplister
 msgid "Your listing template was uploaded and installed."
 msgstr "Ihre Auktionsvorlage wurde installiert."
 
-#: classes/page/TemplatesPage.php:426
+#: classes/page/TemplatesPage.php:431
 #@ wplister
 msgid "There was a problem while processing your upload."
 msgstr "Es gab ein Problem bei der Verarbeitung Ihres Uploads."
 
+#: classes/page/SettingsPage.php:111
 #: classes/page/ToolsPage.php:44
 #@ wplister
 msgid "You can visit your WordPress Updates now."
 msgstr "Bitte besuchen Sie WordPress Aktualisierungen."
 
-#: classes/page/SettingsPage.php:508
+#: classes/page/SettingsPage.php:112
+#: classes/page/SettingsPage.php:700
 #: classes/page/ToolsPage.php:45
 #@ wplister
 msgid "Since the updater runs in the background, it might take a little while before new updates appear."
 msgstr "Da der Updateprozess im Hintergrund läuft kann es eine Weile dauern bis neue Updates erscheinen."
 
-#: classes/page/SettingsPage.php:509
+#: classes/page/SettingsPage.php:104
+#: classes/page/SettingsPage.php:113
+#: classes/page/SettingsPage.php:701
 #: classes/page/ToolsPage.php:46
 #@ wplister
 msgid "view updates"
 msgstr "WordPress Aktualisierungen"
 
-#: classes/page/TransactionsPage.php:91
+#: classes/page/TransactionsPage.php:92
 #@ wplister
 msgid "Selected transactions were updated from eBay."
 msgstr "Die ausgewählten Transaktionen wurden aktualisiert."
 
-#: classes/page/TransactionsPage.php:116
+#: classes/page/TransactionsPage.php:127
 #@ wplister
 msgid "Order created from transaction."
 msgstr "Neue Bestellung wurde erstellt."
@@ -1281,32 +1331,32 @@ msgstr "eBay Kategorie"
 msgid "eBay Store category"
 msgstr "eBay Shop Kategorie"
 
-#: classes/table/ListingsTable.php:129
+#: classes/table/ListingsTable.php:136
 #@ wplister
 msgid "End Listing"
 msgstr "Beende Auktion"
 
-#: classes/table/ListingsTable.php:220
+#: classes/table/ListingsTable.php:356
 #@ wplister
 msgid "Notice: eBay does not support individual weight and dimensions for variations when using calculated shipping services."
 msgstr "Hinweis: eBay unterstützt keine unterschiedlichen Maße und Gewichte für einzelne Produktvarianten bei Verwendung von Berechneten Versandmethoden."
 
-#: classes/table/ListingsTable.php:225
+#: classes/table/ListingsTable.php:362
 #@ wplister
 msgid "Split variations into single items"
 msgstr "Varianten in einzelne Artikel aufteilen"
 
-#: classes/table/ListingsTable.php:640
+#: classes/table/ListingsTable.php:783
 #@ wplister
 msgid "Re-apply profile"
 msgstr "Profil erneut anwenden"
 
-#: classes/table/ListingsTable.php:642
+#: classes/table/ListingsTable.php:785
 #@ wplister
 msgid "End listings"
 msgstr "Beende Auktionen"
 
-#: classes/table/ListingsTable.php:644
+#: classes/table/ListingsTable.php:790
 #@ wplister
 msgid "Delete listings"
 msgstr "Lösche Auktionen"
@@ -1332,28 +1382,28 @@ msgstr "Download"
 msgid "Folder"
 msgstr "Ordner"
 
-#: classes/table/EbayOrdersTable.php:119
+#: classes/table/EbayOrdersTable.php:127
 #: classes/table/TransactionsTable.php:122
 #@ wplister
 msgid "Create Order"
 msgstr "Bestellung erstellen"
 
-#: classes/table/TransactionsTable.php:172
+#: classes/table/TransactionsTable.php:174
 #@ wplister
 msgid "InComplete"
 msgstr "unvollständig"
 
-#: classes/table/TransactionsTable.php:176
+#: classes/table/TransactionsTable.php:178
 #@ wplister
 msgid "Complete"
 msgstr "abgeschlossen"
 
-#: classes/table/TransactionsTable.php:283
+#: classes/table/TransactionsTable.php:285
 #@ wplister
 msgid "Update transaction from eBay"
 msgstr "Transaktionen von eBay aktualisieren"
 
-#: classes/page/ToolsPage.php:239
+#: classes/page/ToolsPage.php:293
 #: views/common_header.php:36
 #@ wplister
 msgid "Please don't close this window until all tasks are completed."
@@ -1372,8 +1422,9 @@ msgstr "Auktion bearbeiten"
 #: views/listings_edit_page.php:67
 #: views/listings_edit_page.php:115
 #: views/profile/edit_sidebar.php:49
-#: views/settings_advanced.php:43
-#: views/settings_categories.php:96
+#: views/settings_advanced.php:36
+#: views/settings_categories.php:97
+#: views/settings_dev.php:36
 #: views/templates_edit_page.php:121
 #@ wplister
 msgid "Update"
@@ -1406,6 +1457,7 @@ msgid "This will have no effect on product variations."
 msgstr "Gilt nicht für Produktvarianten"
 
 #: views/listings_edit_page.php:232
+#: views/settings_dev.php:211
 #@ wplister
 msgid "Developer options"
 msgstr "Entwickler"
@@ -1426,7 +1478,7 @@ msgid "Product ID"
 msgstr "Produkt ID"
 
 #: views/listings_edit_page.php:274
-#: views/settings_advanced.php:165
+#: views/settings_advanced.php:255
 #@ wplister
 msgid "Yes, I know what I am doing."
 msgstr "Ja, ich weiss genau was ich tue."
@@ -1436,27 +1488,28 @@ msgstr "Ja, ich weiss genau was ich tue."
 msgid "Save listing"
 msgstr "Artikel speichern"
 
-#: views/listings_page.php:60
-#: views/listings_page.php:95
+#: views/listings_page.php:77
+#: views/listings_page.php:114
 #@ wplister
 msgid "Revise all changed items on eBay."
 msgstr "Übertrage alle Änderungen zu eBay"
 
-#: classes/page/ListingsPage.php:324
-#: views/listings_page.php:61
-#: views/listings_page.php:94
+#: classes/page/ListingsPage.php:385
+#: classes/page/ToolsPage.php:861
+#: views/listings_page.php:78
+#: views/listings_page.php:113
 #@ wplister
 msgid "Revise all changed items"
 msgstr "Übertrage alle Änderungen zu eBay"
 
-#: views/listings_page.php:64
-#: views/listings_page.php:104
+#: views/listings_page.php:81
+#: views/listings_page.php:123
 #@ wplister
 msgid "Update all published items from eBay."
 msgstr "Lade Änderungen von eBay"
 
-#: views/listings_page.php:65
-#: views/listings_page.php:103
+#: views/listings_page.php:82
+#: views/listings_page.php:122
 #@ wplister
 msgid "Update all published items"
 msgstr "Lade Änderungen von eBay"
@@ -1476,7 +1529,8 @@ msgstr "Überprüfe alle ausgewählten Artikel im nächsten Schritt."
 msgid "Store categories"
 msgstr "zeige Kategorien"
 
-#: views/profile/edit_item_specifics.php:212
+#: classes/integration/WooProductMetaBox.php:534
+#: views/profile/edit_item_specifics.php:222
 #@ wplister
 msgid "Item Specifics"
 msgstr "Artikelattribute"
@@ -1486,21 +1540,21 @@ msgstr "Artikelattribute"
 msgid "Shipping Options"
 msgstr "Versandmethoden"
 
-#: classes/integration/WooBackendIntegration.php:929
+#: classes/integration/WooProductMetaBox.php:660
 #: views/profile/edit_shipping.php:32
 #@ wplister
 msgid "Use Flat Shipping"
 msgstr "Einfache Versandkosten"
 
-#: classes/integration/WooBackendIntegration.php:930
+#: classes/integration/WooProductMetaBox.php:661
 #: views/profile/edit_shipping.php:33
 #@ wplister
 msgid "Use Calculated Shipping"
 msgstr "Berechnete Versandkosten"
 
-#: classes/integration/WooBackendIntegration.php:1135
+#: classes/integration/WooOrderMetaBox.php:96
 #: views/profile/edit_shipping_int.php:12
-#: views/profile/edit_shipping_int.php:66
+#: views/profile/edit_shipping_int.php:76
 #: views/profile/edit_shipping_loc.php:14
 #: views/profile/edit_shipping_loc.php:61
 #@ wplister
@@ -1524,43 +1578,38 @@ msgstr "weitere Artikel"
 msgid "Add domestic shipping option"
 msgstr "Versandmethode hinzufügen"
 
-#: views/profile/edit_shipping_loc.php:93
+#: views/profile/edit_shipping_loc.php:158
 #@ wplister
 msgid "Package type"
 msgstr "Pakettyp"
 
-#: views/profile/edit_shipping_int.php:129
-#: views/profile/edit_shipping_loc.php:120
+#: views/profile/edit_shipping_int.php:151
+#: views/profile/edit_shipping_loc.php:118
 #@ wplister
 msgid "Packaging and handling costs"
 msgstr "Verpackung und Versand"
 
-#: views/profile/edit_shipping_int.php:73
+#: views/profile/edit_shipping_int.php:83
 #@ wplister
 msgid "Package"
 msgstr "Paket"
 
-#: views/profile/edit_shipping_int.php:74
+#: views/profile/edit_shipping_int.php:84
 #@ wplister
 msgid "Handling fee"
 msgstr "Bearbeitungsgebühr"
 
-#: views/profile/edit_shipping_int.php:107
+#: views/profile/edit_shipping_int.php:129
 #@ wplister
 msgid "Add international shipping option"
 msgstr "Internationale Versandmethode hinzufügen"
 
-#: views/profile/edit_sidebar.php:109
+#: views/profile/edit_sidebar.php:113
 #@ wplister
 msgid "Postal code"
 msgstr "PLZ"
 
-#: views/profile/edit_sidebar.php:280
-#@ wplister
-msgid "Variation images"
-msgstr "Bilder von Varianten"
-
-#: views/profile/edit_sidebar.php:585
+#: views/profile/edit_sidebar.php:744
 #: views/templates_edit_page.php:239
 #@ wplister
 msgid "Help"
@@ -1581,33 +1630,28 @@ msgstr "Profilname"
 msgid "Profile description"
 msgstr "Profilbeschreibung"
 
-#: views/profiles_edit_page.php:111
-#@ wplister
-msgid "Should be empty to use inventory sync."
-msgstr "Für den automatischen Bestandsabgleich ist es erforderlich, dass Sie die Stückzahl leer lassen."
-
-#: views/profiles_edit_page.php:135
+#: views/profiles_edit_page.php:125
 #@ wplister
 msgid "GTC listings will be charged every 30 days."
 msgstr "GTC = Good Till Cancelled"
 
-#: views/profiles_edit_page.php:180
+#: views/profiles_edit_page.php:170
 #@ wplister
 msgid "Handling time"
 msgstr "Bearbeitungszeit"
 
-#: views/profiles_edit_page.php:181
-#: views/profiles_edit_page.php:198
+#: views/profiles_edit_page.php:171
+#: views/profiles_edit_page.php:188
 #@ wplister
 msgid "The maximum number of business days a seller commits to for shipping an item to domestic buyers after receiving a cleared payment."
 msgstr "Die maximale Anzahl von Werktagen die Sie nach dem Eingang der Zahlung für den Versand der Ware benötigen."
 
-#: views/profiles_edit_page.php:251
+#: views/profiles_edit_page.php:241
 #@ wplister
 msgid "Immediate payment"
 msgstr "sofortige Zahlung"
 
-#: views/profiles_edit_page.php:257
+#: views/profiles_edit_page.php:247
 #@ wplister
 msgid "Yes, require immediate payment through PayPal"
 msgstr "nur sofortige Zahlung via Paypal erlauben"
@@ -1618,146 +1662,148 @@ msgstr "nur sofortige Zahlung via Paypal erlauben"
 msgid "Are you sure you want to delete this item?."
 msgstr "Sind Sie sicher, dass Sie diesen Artikel löschen wollen?"
 
-#: views/settings_dev.php:29
+#: views/settings_dev.php:108
 #@ wplister
 msgid "eBay Sandbox"
 msgstr "eBay Sandbox"
 
-#: views/settings_dev.php:49
+#: views/settings_dev.php:63
+#: views/settings_license.php:75
 #@ wplister
 msgid "Beta testers"
 msgstr "Beta-Tester"
 
-#: views/settings_dev.php:53
+#: views/settings_dev.php:67
+#: views/settings_license.php:79
 #@ wplister
 msgid "If you want to test new features before they are released, select the \"beta\" channel."
 msgstr "Wenn Sie neue Features testen wollen bevor diese veröffentlich werden, dann wählen Sie den \"beta\" Update-Kanal."
 
-#: views/settings_dev.php:55
+#: views/settings_dev.php:69
+#: views/settings_license.php:82
 #@ wplister
 msgid "Update channel"
 msgstr "Update-Kanal"
 
-#: views/settings_dev.php:57
+#: views/settings_dev.php:71
+#: views/settings_license.php:86
 #@ wplister
 msgid "stable"
 msgstr "stable"
 
-#: views/settings_dev.php:58
+#: views/settings_dev.php:72
+#: views/settings_license.php:87
 #@ wplister
 msgid "beta"
 msgstr "beta"
 
-#: views/settings_dev.php:69
+#: views/settings_dev.php:130
 #@ wplister
 msgid "Logging"
 msgstr "Logging"
 
-#: views/settings_dev.php:85
-#: views/settings_dev.php:113
+#: views/settings_dev.php:168
 #@ wplister
 msgid "Debug options"
 msgstr "Debugging Optionen"
 
-#: views/settings_dev.php:116
+#: views/settings_dev.php:223
 #@ wplister
 msgid "Log to logfile"
 msgstr "Schreibe Logfile"
 
-#: views/settings_dev.php:118
+#: views/settings_dev.php:225
 #@ wplister
 msgid "no logfile"
 msgstr "kein Logfile"
 
-#: views/settings_dev.php:128
+#: views/settings_dev.php:235
 #@ wplister
 msgid "write debug information to logfile."
 msgstr "schreibe Debug-Informationen in Logfile"
 
-#: classes/core/WPL_Toolbar.php:115
 #: views/settings_license.php:26
-#: views/settings_tabs.php:23
 #@ wplister
 msgid "License"
 msgstr "Lizenz"
 
-#: views/settings_license.php:29
+#: views/settings_license.php:30
 #@ wplister
 msgid "License email"
 msgstr "E-Mail"
 
-#: views/settings_license.php:32
+#: views/settings_license.php:36
 #@ wplister
 msgid "License key"
 msgstr "Lizenzschlüssel"
 
-#: views/settings_license.php:36
+#: views/settings_license.php:42
 #@ wplister
 msgid "Your license has been activated for"
 msgstr "Ihre Lizenz wurde aktiviert für"
 
-#: views/settings_license.php:39
+#: views/settings_license.php:45
 #@ wplister
 msgid "Your license has not been activated."
 msgstr "Ihre Lizenz wurde nicht aktiviert."
 
-#: views/settings_license.php:40
+#: views/settings_license.php:46
 #@ wplister
 msgid "Please check if your license key matches your email address."
 msgstr "Bitte überprüfen Sie ob die Emailadresse zu Ihrem Lizenzschlüssel passt."
 
-#: views/settings_license.php:46
+#: views/settings_license.php:53
 #@ wplister
 msgid "Deactivate license"
 msgstr "Deaktiviere Lizenz"
 
-#: views/settings_license.php:49
+#: views/settings_license.php:58
 #@ wplister
 msgid "Yes, I want to deactivate this license for"
 msgstr "Ja, ich möchte diese Lizenz deaktivieren für"
 
-#: views/settings_license.php:59
+#: views/settings_license.php:101
 #@ wplister
 msgid "Update license"
 msgstr "Aktualisiere Lizenz"
 
-#: views/settings_page.php:125
+#: views/settings_page.php:152
 #@ wplister
 msgid "Follow these steps to link WP-Lister with your eBay account"
 msgstr "Folgen Sie diesen Schritten um WP-Lister mit Ihrem eBay-Konto zu verknüpfen"
 
-#: views/settings_page.php:138
+#: views/settings_page.php:165
 #@ wplister
 msgid "Select the eBay site you want to list your items on:"
 msgstr "Wählen Sie die eBay Webseite auf der Sie Ihre Produkte einstellen möchten:"
 
-#: views/settings_page.php:184
+#: views/settings_page.php:211
 #@ wplister
 msgid "eBay site"
 msgstr "eBay Site"
 
-#: views/settings_page.php:209
+#: views/settings_page.php:236
 #@ wplister
 msgid "Enable to update listings and transactions using WP-Cron."
 msgstr "Aktualisiere Auktionen und Transaktionen mit WP-Cron."
 
 #: classes/table/NetworkSitesTable.php:115
-#: views/settings_advanced.php:72
+#: views/settings_advanced.php:65
 #@ wplister
 msgid "Uninstall"
 msgstr "Deinstallieren"
 
-#: views/settings_advanced.php:69
+#: views/settings_advanced.php:62
 #@ wplister
 msgid "Uninstall on deactivation"
 msgstr "Deinstalliere WP-Lister bei Deaktivierung"
 
-#: views/settings_advanced.php:78
+#: views/settings_advanced.php:71
 #@ wplister
 msgid "Enable to completely remove listings, transactions and settings when deactivating the plugin."
 msgstr "Setzen Sie dieses Häkchen um Daten und Einstellungen zu entfernen wenn Sie das Plugin deaktivieren."
 
-#: views/settings_advanced.php:82
+#: views/settings_advanced.php:75
 #@ wplister
 msgid "Please deactivate your license first."
 msgstr "Bitte deaktivieren Sie Ihre Lizenz zuerst."
@@ -1782,199 +1828,192 @@ msgstr "Vorlage hochladen"
 msgid "Upload"
 msgstr "Upload"
 
-#: views/tools_page.php:70
+#: classes/page/SettingsPage.php:347
+#: views/tools_page.php:154
 #@ wplister
 msgid "Update eBay data"
 msgstr "Aktualisiere eBay-Daten"
 
-#: views/tools_page.php:71
+#: views/tools_page.php:155
 #@ wplister
 msgid "This will load available categories, shipping services, payment options and your custom store categories from eBay"
 msgstr "Aktualisiert alle Kategorien, Versandarten und Zahlungsweisen von eBay."
 
-#: wp-lister.php:146
 #: wp-lister.php:147
+#: wp-lister.php:148
 #@ wplister
 msgid "Prepare Listings"
 msgstr "Auktionen vorbereiten"
 
-#: views/settings_page.php:228
+#: views/settings_page.php:255
 #@ wplister
 msgid "Sync inventory"
 msgstr "Bestände abgleichen"
 
-#: classes/core/WPL_Toolbar.php:19
-#: classes/integration/WooBackendIntegration.php:1118
+#: classes/core/WPL_Toolbar.php:22
+#: classes/integration/WooOrderMetaBox.php:71
+#: classes/integration/WooOrderMetaBox.php:76
 #@ wplister
 msgid "eBay"
 msgstr "eBay"
 
-#: classes/integration/WooBackendIntegration.php:1137
+#: classes/integration/WooOrderMetaBox.php:98
 #@ wplister
 msgid "Select shipping service"
 msgstr "Versandart wählen"
 
-#: classes/integration/WooBackendIntegration.php:1146
+#: classes/integration/WooOrderMetaBox.php:107
 #@ wplister
 msgid "Tracking ID:"
 msgstr "Tracking-Nr.:"
 
-#: classes/integration/WooBackendIntegration.php:1154
+#: classes/integration/WooOrderMetaBox.php:115
 #@ wplister
 msgid "Shipping date:"
 msgstr "Versanddatum:"
 
-#: classes/integration/WooBackendIntegration.php:1163
+#: classes/integration/WooOrderMetaBox.php:124
 #@ wplister
 msgid "Your feedback:"
 msgstr "Ihr Feedback:"
 
 #: views/listings_edit_page.php:145
-#: views/profile/edit_sidebar.php:341
+#: views/profile/edit_sidebar.php:424
 #@ wplister
 msgid "Best Offer"
 msgstr "Best Offer"
 
 #: views/listings_edit_page.php:148
-#: views/profile/edit_sidebar.php:345
 #@ wplister
 msgid "Enable Best Offer"
 msgstr "Best Offer aktivieren"
 
 #: views/listings_edit_page.php:155
-#: views/profile/edit_sidebar.php:357
+#: views/profile/edit_sidebar.php:440
 #@ wplister
 msgid "Auto accept price"
 msgstr "Auto-Akzeptieren Preis"
 
 #: views/listings_edit_page.php:159
-#: views/profile/edit_sidebar.php:364
+#: views/profile/edit_sidebar.php:447
 #@ wplister
 msgid "Minimum price"
 msgstr "Mindestpreis"
 
-#: views/settings_dev.php:78
+#: views/settings_dev.php:142
 #@ wplister
 msgid "Enable to log all communication with eBay to the database."
 msgstr "Aktivieren Sie diese Option um sämtliche Kommunikation mit eBay zu protokollieren."
 
-#: views/tools_page.php:97
-#@ wplister
-msgid "This will load all transactions within 30 days from eBay."
-msgstr "Alle Transaktionen der letzten 30 Tage einlesen"
-
-#: classes/core/WPL_Model.php:210
+#: classes/core/WPL_Model.php:292
 #@ wplister
 msgid "Additional details about this error"
 msgstr "Weitere Details zu diesem Fehler"
 
-#: classes/model/ItemBuilderModel.php:1248
+#: classes/model/ItemBuilderModel.php:1580
 #@ wplister
 msgid "There has been no primary category assigned."
 msgstr "Es wurde keine Hauptkategorie zugewiesen."
 
-#: classes/model/EbayOrdersModel.php:491
-#: classes/model/TransactionsModel.php:483
+#: classes/model/EbayMessagesModel.php:330
+#: classes/model/EbayOrdersModel.php:695
+#: classes/model/TransactionsModel.php:631
 #, php-format
 #@ wplister
 msgid "the last %s days"
 msgstr "the letzten %s Tage"
 
-#: classes/model/EbayOrdersModel.php:493
-#: classes/model/TransactionsModel.php:485
+#: classes/model/EbayMessagesModel.php:332
+#: classes/model/EbayOrdersModel.php:697
+#: classes/model/TransactionsModel.php:633
 #, php-format
 #@ wplister
 msgid "from %s to %s"
 msgstr "von %s bis %s"
 
-#: classes/model/TransactionsModel.php:493
+#: classes/model/TransactionsModel.php:641
 #@ wplister
 msgid "New transactions created"
 msgstr "Neue Transaktionen erzeugt"
 
-#: classes/model/TransactionsModel.php:494
+#: classes/model/TransactionsModel.php:642
 #@ wplister
 msgid "Existing transactions updated"
 msgstr "Vorhandene Transaktionen aktualisiert"
 
-#: classes/model/TransactionsModel.php:495
+#: classes/model/TransactionsModel.php:643
 #@ wplister
 msgid "Foreign transactions skipped"
 msgstr "Unbekannte Transaktionen übersprungen"
 
-#: classes/model/TransactionsModel.php:504
+#: classes/model/TransactionsModel.php:652
 #@ wplister
 msgid "Transaction ID"
 msgstr "Transaktions Nr."
 
-#: classes/model/EbayOrdersModel.php:513
-#: classes/model/TransactionsModel.php:505
+#: classes/model/EbayOrdersModel.php:717
+#: classes/model/TransactionsModel.php:653
 #@ wplister
 msgid "Action"
 msgstr "Aktion"
 
-#: classes/model/EbayOrdersModel.php:516
-#: classes/model/TransactionsModel.php:508
+#: classes/model/EbayOrdersModel.php:720
+#: classes/model/TransactionsModel.php:656
 #@ wplister
 msgid "Buyer ID"
 msgstr "Käufer ID"
 
-#: classes/model/EbayOrdersModel.php:517
-#: classes/model/TransactionsModel.php:509
+#: classes/model/EbayOrdersModel.php:721
+#: classes/model/TransactionsModel.php:657
 #@ wplister
 msgid "Date created"
 msgstr "Erstellt"
 
-#: classes/page/ListingsPage.php:248
+#: classes/page/ListingsPage.php:239
 #@ wplister
 msgid "Selected items were re-listed on eBay."
 msgstr "Die ausgewählten Artikel wurden erneut auf eBay eingestellt."
 
-#: classes/page/ListingsPage.php:250
+#: classes/page/ListingsPage.php:241
 #@ wplister
 msgid "There were some problems relisting your items."
 msgstr "Es gab Probleme beim Wiedereinstellen Ihrer Artikel."
 
-#: classes/page/ListingsPage.php:321
+#: classes/page/ListingsPage.php:382
 #, php-format
 #@ wplister
 msgid "WP-Lister has found %s changed item(s) which need to be revised on eBay to apply their latest changes."
 msgstr "WP-Lister hat %s geänderte Artikel gefunden deren Änderungen noch zu eBay hochgeladen werden müssen."
 
-#: classes/page/ListingsPage.php:444
+#: classes/page/ListingsPage.php:505
 #@ wplister
 msgid "WP-Lister has found multiple listings for some of your products."
 msgstr "WP-Lister hat mehrere Auktionen für einzelne Produkte gefunden."
 
-#: classes/page/ListingsPage.php:445
+#: classes/page/ListingsPage.php:506
 #@ wplister
 msgid "Show details"
 msgstr "Details anzeigen"
 
-#: classes/page/ListingsPage.php:448
+#: classes/page/ListingsPage.php:509
 #@ wplister
 msgid "Creating multiple listings for one product is not recommended as it can cause issues syncing inventory and other unexpected behaviour."
 msgstr "Es wird nicht empfohlen, ein Produkt mehrfach bei eBay einzustellen da dies zu Fehlern bei der automatischen Bestandsaktualisierung führen kann."
 
-#: classes/page/ListingsPage.php:453
+#: classes/page/ListingsPage.php:516
 #@ wplister
 msgid "Listings for product"
 msgstr "Auktionen für Produkt"
 
-#: classes/page/ListingsPage.php:463
+#: classes/page/ListingsPage.php:528
 #@ wplister
 msgid "Click to remove this listing"
 msgstr "Diese Auktion entfernen"
 
-#: classes/page/ListingsPage.php:471
+#: classes/page/ListingsPage.php:538
 #@ wplister
 msgid "If you are not planning to use the inventory sync, you can hide this warning in settings."
 msgstr "Wenn Sie nicht vorhanden, die automatische Bestandsaktualisierung zu verwenden, dann können Sie diese Warnung in den Einstellungen deaktivieren."
-
-#: classes/page/ListingsPage.php:473
-#@ wplister
-msgid "If you need to list single products multiple times for some reason, please contact support@wplab.com and we will find a solution."
-msgstr "Wenn Sie dennoch einzelne Produkte mehrfach auf eBay einstellen wollen, dann wenden Sie sich bitte an support@wplab.com und wir werden gemeinsam eine Lösung erarbeiten."
 
 #: classes/page/NetworkAdminPage.php:61
 #@ wplister
@@ -2001,98 +2040,108 @@ msgstr "WP-Lister wurde auf den ausgewählten Sites installiert."
 msgid "WP-Lister was uninstalled on the selected sites."
 msgstr "WP-Lister wurde auf den ausgewählten Sites deinstalliert."
 
-#: classes/page/ProfilesPage.php:415
+#: classes/page/ProfilesPage.php:455
 #, php-format
 #@ wplister
 msgid "%s prepared items updated."
 msgstr "%s vorbereitete Artikel wurden aktualisiert."
 
-#: classes/page/ProfilesPage.php:422
+#: classes/page/ProfilesPage.php:462
 #, php-format
 #@ wplister
 msgid "%s verified items updated."
 msgstr "%s überprüfte Artikel wurden aktualisiert."
 
-#: classes/page/ProfilesPage.php:429
+#: classes/page/ProfilesPage.php:469
 #, php-format
 #@ wplister
 msgid "%s published items changed."
 msgstr "%s veröffentlichte Artikel wurden aktualisiert."
 
-#: classes/page/TemplatesPage.php:304
+#: classes/page/TemplatesPage.php:309
 #, php-format
 #@ wplister
 msgid "%s published items marked as changed."
 msgstr "%s veröffentlichte Artikel wurden als geändert markiert."
 
-#: classes/page/ToolsPage.php:122
-#: classes/page/TransactionsPage.php:78
+#: classes/page/ToolsPage.php:149
+#: classes/page/TransactionsPage.php:79
 #@ wplister
 msgid "Transactions were loaded from eBay."
 msgstr "Transaktionen wurden von eBay geladen."
 
-#: classes/page/EbayOrdersPage.php:72
-#: classes/page/ToolsPage.php:123
-#: classes/page/TransactionsPage.php:79
+#: classes/page/EbayMessagesPage.php:72
+#: classes/page/EbayOrdersPage.php:77
+#: classes/page/ToolsPage.php:150
+#: classes/page/ToolsPage.php:166
+#: classes/page/TransactionsPage.php:80
 #@ wplister
 msgid "Timespan"
 msgstr "Zeitspanne"
 
-#: classes/page/EbayOrdersPage.php:73
-#: classes/page/EbayOrdersPage.php:89
-#: classes/page/ToolsPage.php:125
-#: classes/page/TransactionsPage.php:81
+#: classes/page/EbayMessagesPage.php:73
+#: classes/page/EbayMessagesPage.php:88
+#: classes/page/EbayOrdersPage.php:78
+#: classes/page/EbayOrdersPage.php:94
+#: classes/page/ToolsPage.php:152
+#: classes/page/ToolsPage.php:168
+#: classes/page/TransactionsPage.php:82
 #@ wplister
 msgid "show details"
 msgstr "Zeige Details"
 
-#: classes/page/TransactionsPage.php:123
+#: classes/page/TransactionsPage.php:134
 #@ wplister
 msgid "There was a problem creating an order from this transaction."
 msgstr "Es gab ein Problem beim Erstellen der Bestellung aus dieser Transaktion."
 
-#: classes/table/ListingsTable.php:131
+#: classes/integration/WooBackendIntegration.php:440
+#: classes/table/ListingsTable.php:138
+#: classes/table/ListingsTable.php:895
 #@ wplister
 msgid "Relist"
 msgstr "Wiedereinstellen"
 
-#: classes/table/ListingsTable.php:167
+#: classes/table/ListingsTable.php:294
 #@ wplister
 msgid "These variations will be listed as a single item."
 msgstr "Diese Variationen werden als ein einzelner Artikel eingestellt."
 
-#: classes/table/ListingsTable.php:643
+#: classes/table/ListingsTable.php:786
 #@ wplister
 msgid "Re-list ended items"
 msgstr "Beendete Artikel wieder einstellen"
 
-#: classes/table/ListingsTable.php:686
-#: classes/table/LogTable.php:265
+#: classes/table/EbayMessagesTable.php:309
+#: classes/table/EbayOrdersTable.php:359
+#: classes/table/ListingsTable.php:847
+#: classes/table/LogTable.php:299
+#: classes/table/TransactionsTable.php:333
 #@ wplister
 msgid "All"
 msgstr "Alle"
 
-#: classes/table/ListingsTable.php:692
+#: classes/table/ListingsTable.php:853
 #@ wplister
 msgid "Prepared"
 msgstr "Vorbereitet"
 
-#: classes/table/ListingsTable.php:698
+#: classes/table/ListingsTable.php:859
 #@ wplister
 msgid "Verified"
 msgstr "Überprüft"
 
-#: classes/table/ListingsTable.php:704
+#: classes/table/ListingsTable.php:865
 #@ wplister
 msgid "Published"
 msgstr "Veröffentlicht"
 
-#: classes/table/ListingsTable.php:710
+#: classes/table/ListingsTable.php:871
 #@ wplister
 msgid "Changed"
 msgstr "Geändert"
 
-#: classes/table/ListingsTable.php:716
+#: classes/table/ListingsTable.php:877
 #@ wplister
 msgid "Ended"
 msgstr "Beendet"
@@ -2149,7 +2198,7 @@ msgstr "Setup"
 msgid "Update DB"
 msgstr "Update DB"
 
-#: classes/table/EbayOrdersTable.php:121
+#: classes/table/EbayOrdersTable.php:129
 #: classes/table/TransactionsTable.php:124
 #@ wplister
 msgid "View Order"
@@ -2161,8 +2210,11 @@ msgstr "Bestellung ansehen"
 msgid "Note: eBay does not allow changing the listing type for already published items."
 msgstr "Hinweis: eBay erlaubt keine Änderung des Auktionstyps bei bereits veröffentlichten Artikeln."
 
-#: views/listings_page.php:42
-#: views/log_page.php:37
+#: views/listings_page.php:57
+#: views/log_page.php:40
+#: views/messages_page.php:32
+#: views/orders_page.php:24
+#: views/transactions_page.php:24
 #@ wplister
 msgid "Search"
 msgstr "Suchen"
@@ -2196,110 +2248,111 @@ msgstr "aktualisiere %s überprüfte Artikel"
 msgid "update %s published items"
 msgstr "aktualisiere %s veröffentlichte Artikel"
 
-#: views/profile/edit_sidebar.php:98
+#: views/profile/edit_sidebar.php:102
 #@ wplister
 msgid "Location and Taxes"
 msgstr "Ort und Steuern"
 
-#: views/profile/edit_sidebar.php:161
+#: views/profile/edit_sidebar.php:165
 #@ wplister
 msgid "use Sales Tax Table"
 msgstr "verwende Sales Tax Table"
 
-#: views/profile/edit_sidebar.php:198
+#: views/profile/edit_sidebar.php:261
 #@ wplister
 msgid "Title and Subtitle"
 msgstr "Titel und Untertitel"
 
-#: views/profile/edit_sidebar.php:222
+#: views/profile/edit_sidebar.php:285
 #@ wplister
 msgid "You can use a subset of the available listing shortcodes in title prefix and suffix."
 msgstr "Sie können eine Auswahl der verfügbaren Platzhalter im Präfix und Suffix verwenden."
 
-#: views/profile/edit_sidebar.php:224
+#: views/profile/edit_sidebar.php:287
 #@ wplister
 msgid "Example"
 msgstr "Beispiel"
 
-#: views/profile/edit_sidebar.php:245
+#: views/profile/edit_sidebar.php:317
 #@ wplister
 msgid "Custom subtitle"
 msgstr "Eigener Untertitel"
 
-#: views/profile/edit_sidebar.php:252
+#: views/profile/edit_sidebar.php:324
 #@ wplister
 msgid "Leave this empty to use the short description as subtitle."
 msgstr "Leer lassen um die Kurzbeschreibung als Untertitel zu verwenden."
 
-#: views/profile/edit_sidebar.php:253
+#: views/profile/edit_sidebar.php:325
 #@ wplister
 msgid "Will be truncated after 55 characters."
 msgstr "Wird nach 55 Zeichen abgeschnitten."
 
-#: views/profile/edit_sidebar.php:263
+#: views/profile/edit_sidebar.php:335
 #@ wplister
 msgid "Variations"
 msgstr "Variationen"
 
-#: views/profile/edit_sidebar.php:271
+#: views/profile/edit_sidebar.php:343
 #@ wplister
 msgid "list as variations"
 msgstr "Variationen"
 
-#: views/profile/edit_sidebar.php:272
+#: views/profile/edit_sidebar.php:344
 #@ wplister
 msgid "flatten variations"
 msgstr "einfacher Artikel"
 
-#: views/profile/edit_sidebar.php:274
+#: views/profile/edit_sidebar.php:346
 #@ wplister
 msgid "split variations"
 msgstr "Variationen aufsplitten"
 
-#: views/profile/edit_sidebar.php:304
+#: views/profile/edit_sidebar.php:376
 #@ wplister
 msgid "Images"
 msgstr "Fotos"
 
-#: views/profile/edit_sidebar.php:496
+#: views/profile/edit_sidebar.php:644
 #@ wplister
 msgid "Other options"
 msgstr "Sonstige Optionen"
 
-#: views/profile/edit_sidebar.php:501
+#: views/profile/edit_sidebar.php:649
 #@ wplister
 msgid "Cross Border Trade"
 msgstr "Cross Border Trade"
 
-#: views/profile/edit_sidebar.php:384
-#: views/profile/edit_sidebar.php:442
-#: views/profile/edit_sidebar.php:454
-#: views/profile/edit_sidebar.php:507
+#: views/profile/edit_sidebar.php:467
+#: views/profile/edit_sidebar.php:540
+#: views/profile/edit_sidebar.php:588
+#: views/profile/edit_sidebar.php:600
+#: views/profile/edit_sidebar.php:655
 #@ wplister
 msgid "None"
 msgstr "Nein"
 
-#: views/profile/edit_sidebar.php:527
+#: views/profile/edit_sidebar.php:675
 #@ wplister
 msgid "Private listing"
 msgstr "Private Auktion"
 
-#: views/settings_categories.php:87
+#: views/settings_categories.php:88
 #@ wplister
 msgid "Default category"
 msgstr "Standardkategorie"
 
-#: views/settings_categories.php:89
+#: views/settings_categories.php:90
 #@ wplister
 msgid "Use this to make additional item conditions available in your profile."
 msgstr "Wählen Sie eine Standardkategorie um die verfügbaren Artikelzustände im Profil zu ergänzen."
 
-#: views/settings_categories.php:94
+#: views/settings_categories.php:95
 #@ wplister
 msgid "Select default category"
 msgstr "Standardkategorie auswählen"
 
-#: views/settings_dev.php:33
+#: views/settings_dev.php:112
 #@ wplister
 msgid "The eBay sandbox allows you to list items to a testing area free of charge."
 msgstr "Die eBay Sandbox ist eine Testumgebung für Entwickler. "
@@ -2339,98 +2392,94 @@ msgstr "eBay Shop"
 msgid "visit store"
 msgstr "Shop ansehen"
 
-#: views/settings_page.php:76
+#: views/settings_page.php:81
 #@ wplister
 msgid "Change Account"
 msgstr "Konto wechseln"
 
-#: views/settings_advanced.php:79
+#: views/settings_advanced.php:72
 #@ wplister
 msgid "To remove your listing templates as well, please delete the folder <code>wp-content/uploads/wp-lister/templates/</code>."
 msgstr "Um die Vorlagen ebenfalls zu entfernen, löschen Sie einfach den Ordner <code>wp-content/uploads/wp-lister/templates/</code>."
 
-#: views/settings_page.php:216
+#: views/settings_page.php:243
 #@ wplister
 msgid "manually"
 msgstr "manuell"
 
-#: views/settings_page.php:247
-#@ wplister
-msgid "Order status"
-msgstr "Bestellstatus"
-
-#: views/settings_page.php:251
+#: views/settings_page.php:278
+#: views/settings_page.php:287
 #@ wplister
 msgid "completed"
 msgstr "abgeschlossen"
 
-#: views/settings_page.php:252
+#: views/settings_page.php:279
 #@ wplister
 msgid "processing"
 msgstr "in Bearbeitung"
 
-#: views/settings_advanced.php:100
+#: views/settings_advanced.php:157
 #@ wplister
 msgid "Listing Templates"
 msgstr "Vorlagen"
 
-#: views/settings_advanced.php:104
+#: views/settings_advanced.php:161
 #@ wplister
 msgid "Shortcode processing"
 msgstr "Verarbeitung von Shortcodes"
 
-#: views/settings_advanced.php:108
+#: views/settings_advanced.php:165
 #@ wplister
 msgid "off"
 msgstr "aus"
 
-#: views/settings_advanced.php:109
+#: views/settings_advanced.php:166
 #@ wplister
 msgid "only in product description"
 msgstr "nur in Produktbeschreibung"
 
-#: views/settings_advanced.php:110
+#: views/settings_advanced.php:167
 #@ wplister
 msgid "in description and listing template"
 msgstr "in Beschreibung und Vorlage"
 
-#: views/settings_advanced.php:113
+#: views/settings_advanced.php:170
 #@ wplister
 msgid "Enable this if you want to use WordPress shortcodes in your product description or your listing template."
 msgstr "Aktivieren Sie diese Option um WordPress Shortcodes in Produktbeschreibung oder Ihrer Auktionsvorlage zu verwenden."
 
-#: views/settings_advanced.php:117
+#: views/settings_advanced.php:174
 #@ wplister
 msgid "Link handling"
 msgstr "Verarbeitung von Links"
 
-#: views/settings_advanced.php:121
+#: views/settings_advanced.php:178
 #@ wplister
 msgid "remove all links from description"
 msgstr "Entfernte alle Links aus der Produktbeschreibung"
 
-#: views/settings_advanced.php:122
+#: views/settings_advanced.php:179
 #@ wplister
 msgid "allow all links"
 msgstr "Erlaube alle Links"
 
-#: views/settings_advanced.php:126
+#: views/settings_advanced.php:183
 #@ wplister
 msgid "Specifically you are not allowed to advertise products that you list on eBay by linking to their product pages on your site."
 msgstr "Insbesondere Links auf Produkte auf der eigenen Webseite die ebenfalls bei eBay eingestellt wurden sind demnach verboten."
 
-#: views/settings_advanced.php:156
-#: views/settings_page.php:276
+#: views/settings_advanced.php:384
+#: views/settings_page.php:333
 #@ wplister
 msgid "Misc options"
 msgstr "Verschiedenes"
 
-#: views/settings_advanced.php:160
+#: views/settings_advanced.php:250
 #@ wplister
 msgid "Hide duplicates warning"
 msgstr "Warning über Duplikate ausblenden"
 
-#: views/settings_advanced.php:168
+#: views/settings_advanced.php:258
 #@ wplister
 msgid "If you do not plan to use the inventory sync feature, you can safely list one product multiple times."
 msgstr "Wenn Sie nicht vorhaben, die automatische Bestandsaktualisierung zu verwenden, dann können Sie ein Produkt auch mehrfach einstellen."
@@ -2456,17 +2505,17 @@ msgstr ""
 msgid "There are %s prepared, %s verified and %s published items using this template."
 msgstr "Diese Vorlage wird von %s vorbereiteten, %s überprüften und %s veröffentlichten Artikeln verwendet."
 
-#: views/tools_page.php:144
+#: views/tools_page.php:324
 #@ wplister
 msgid "Open logfile viewer in new tab"
 msgstr "Logfile in neuem Tab öffnen"
 
-#: views/tools_page.php:87
+#: views/tools_page.php:162
 #@ wplister
 msgid "Update user details"
 msgstr "Benutzerdetails aktualisieren"
 
-#: views/tools_page.php:88
+#: views/tools_page.php:163
 #@ wplister
 msgid "Update account details from eBay"
 msgstr "Kontodetails aktualisieren"
@@ -2501,498 +2550,475 @@ msgstr "WP-Lister installieren"
 msgid "Screencasts"
 msgstr "Screencasts"
 
-#: classes/core/WPL_AjaxHandler.php:427
+#: classes/core/WPL_AjaxHandler.php:544
 #@ wplister
 msgid "image"
 msgstr "Bild"
 
-#: classes/core/WPL_Setup.php:99
+#: classes/core/WPL_Setup.php:114
 #@ wplister
 msgid "Your eBay token seems to be invalid."
 msgstr "Ihr eBay-Token scheint ungültig zu sein."
 
-#: classes/core/WPL_Setup.php:100
+#: classes/core/WPL_Setup.php:115
 #@ wplister
 msgid "To re-authenticate WP-Lister visit the Settings page, click on \"Change Account\" and follow the instructions."
 msgstr "Um WP-Lister erneut mit Ihrem eBay-Konto zu verknüpfen, klicken Sie in den Einstellungen auf \"Konto wechseln\"."
 
-#: classes/core/WPL_Toolbar.php:85
+#: classes/core/WPL_Toolbar.php:100
 #: views/settings_tabs.php:8
 #@ wplister
 msgid "General Settings"
 msgstr "Allgemeine Einstellungen"
 
-#: classes/core/WPL_Toolbar.php:95
+#: classes/core/WPL_Toolbar.php:110
 #: views/settings_tabs.php:13
 #@ wplister
 msgid "Categories"
 msgstr "Kategorien"
 
-#: classes/core/WPL_Toolbar.php:125
+#: classes/core/WPL_Toolbar.php:130
 #: views/settings_tabs.php:19
 #@ wplister
 msgid "Developer"
 msgstr "Entwickler"
 
-#: classes/core/WPL_Toolbar.php:176
+#: classes/core/WPL_Toolbar.php:189
 #@ wplister
 msgid "View item on eBay"
 msgstr "Auf eBay ansehen"
 
-#: classes/core/WPL_Toolbar.php:218
+#: classes/core/WPL_Toolbar.php:232
 #@ wplister
 msgid "Prepare listing"
 msgstr "Auktion vorbereiten"
 
-#: classes/integration/OrderWrapper_woo.php:861
-#, php-format
-#@ wplister
-msgid "%s item(s) were revised on eBay."
-msgstr "%s Artikel wurden auf eBay aktualisiert."
-
-#: classes/integration/WooBackendIntegration.php:450
+#: classes/integration/WooProductMetaBox.php:60
 #@ wplister
 msgid "Listing title"
 msgstr "Titel"
 
-#: classes/integration/WooBackendIntegration.php:458
+#: classes/integration/WooProductMetaBox.php:69
 #@ wplister
 msgid "Listing subtitle"
 msgstr "Untertitel"
 
-#: classes/integration/WooBackendIntegration.php:460
-#@ wplister
-msgid "Leave empty to use the product excerpt. Will be cut after 55 characters."
-msgstr "Leer lassen um die Kurzbeschreibung zu verwenden. Wird nach 55 Zeichen abgeschnitten."
-
-#: classes/integration/WooBackendIntegration.php:466
-#: views/profiles_edit_page.php:168
+#: classes/integration/WooProductMetaBox.php:154
+#: views/profiles_edit_page.php:158
 #@ wplister
 msgid "Condition description"
 msgstr "Zustandsbeschreibung"
 
-#: classes/integration/WooBackendIntegration.php:468
-#: views/profiles_edit_page.php:169
-#: views/profiles_edit_page.php:174
+#: classes/integration/WooProductMetaBox.php:156
+#: views/profiles_edit_page.php:159
+#: views/profiles_edit_page.php:164
 #@ wplister
 msgid "This field should only be used to further clarify the condition of used items."
 msgstr ""
 
-#: classes/integration/WooBackendIntegration.php:481
+#: classes/integration/WooProductMetaBox.php:85
 #@ wplister
 msgid "Listing Type"
 msgstr "Typ"
 
-#: classes/integration/WooBackendIntegration.php:483
-#: classes/integration/WooBackendIntegration.php:494
-#: classes/integration/WooBackendIntegration.php:928
+#: classes/integration/WooProductMetaBox.php:87
+#: classes/integration/WooProductMetaBox.php:98
+#: classes/integration/WooProductMetaBox.php:121
+#: classes/integration/WooProductMetaBox.php:659
 #@ wplister
 msgid "-- use profile setting --"
 msgstr "-- aus Profil --"
 
-#: classes/integration/WooBackendIntegration.php:474
+#: classes/integration/WooProductMetaBox.php:78
 #@ wplister
 msgid "Price / Start Price"
 msgstr "Preis / Startpreis"
 
-#: classes/integration/WooBackendIntegration.php:551
+#: classes/integration/WooProductMetaBox.php:230
 #@ wplister
 msgid "Reserve Price"
 msgstr "Mindestpreis"
 
-#: classes/integration/WooBackendIntegration.php:553
+#: classes/integration/WooProductMetaBox.php:232
 #@ wplister
 msgid "The lowest price at which you are willing to sell the item. Not all categories support a reserve price."
 msgstr "Der niedrigste Preis zu dem Sie gewillt sind, diesen Artikel zu verkaufen. Wird nicht in allen Kategorien unterstützt."
 
-#: classes/integration/WooBackendIntegration.php:573
-#: views/profile/edit_sidebar.php:515
+#: classes/integration/WooProductMetaBox.php:252
+#: views/profile/edit_sidebar.php:663
 #@ wplister
 msgid "Global Shipping"
 msgstr "Globaler Versand"
 
-#: classes/integration/WooBackendIntegration.php:585
+#: classes/integration/WooProductMetaBox.php:265
 #@ wplister
 msgid "Payment Instructions"
 msgstr "Zahlungsanweisungen"
 
-#: classes/integration/WooBackendIntegration.php:253
+#: classes/integration/WooBackendIntegration.php:350
 #@ wplister
 msgid "Not on eBay"
 msgstr "Nicht auf eBay"
 
-#: classes/model/ItemBuilderModel.php:1254
+#: classes/model/ItemBuilderModel.php:1586
 #@ wplister
 msgid "You need to add at least one image to your product."
 msgstr "Sie müssen mindestens ein Bild zu Ihrem Produkt hinzufügen."
 
-#: classes/model/TransactionsModel.php:496
+#: classes/model/TransactionsModel.php:644
 #@ wplister
 msgid "Transactions failed to create"
 msgstr "Transaktionen konnten nicht erstellt werden"
 
-#: classes/model/TransactionsModel.php:499
+#: classes/model/TransactionsModel.php:647
 #@ wplister
 msgid "Note: Foreign transactions for which no matching item ID could be found in WP-Lister's listings table were skipping during update."
 msgstr ""
 
-#: classes/page/ListingsPage.php:291
+#: classes/page/ListingsPage.php:343
 #@ wplister
 msgid "New listing was prepared from product."
 msgstr "Eine neue Auktion wurde erstellt."
 
-#: classes/page/ListingsPage.php:333
+#: classes/page/ListingsPage.php:394
 #, php-format
 #@ wplister
 msgid "WP-Lister has found %s manually relisted item(s) which need to be updated from eBay to fetch their latest changes."
 msgstr "WP-Lister hat %s Auktionen gefunden, die auf eBay manuell erneut eingestellt wurden. Bitte aktualisieren Sie die Auktionen erneut um den aktuellen Stand abzurufen."
 
-#: classes/page/SettingsPage.php:279
-#@ wplister
-msgid "You switched to a different eBay site. Please make sure that you update eBay details on the Tools page."
-msgstr ""
-
-#: classes/page/SettingsPage.php:462
-#: classes/page/SettingsPage.php:465
+#: classes/page/SettingsPage.php:626
+#: classes/page/SettingsPage.php:629
 #@ wplister
 msgid "Enabled sandbox mode."
 msgstr ""
 
-#: classes/page/SettingsPage.php:483
-#: classes/page/SettingsPage.php:486
+#: classes/page/SettingsPage.php:648
+#: classes/page/SettingsPage.php:651
 #@ wplister
 msgid "Switched to production mode."
 msgstr ""
 
-#: classes/page/SettingsPage.php:506
+#: classes/page/SettingsPage.php:698
 #@ wplister
 msgid "Update channel was changed."
 msgstr ""
 
-#: classes/page/SettingsPage.php:507
+#: classes/page/SettingsPage.php:699
 #@ wplister
 msgid "To install the latest version of WP-Lister, please visit your WordPress Updates now."
 msgstr ""
 
-#: classes/page/SettingsPage.php:521
-#: classes/page/ToolsPage.php:98
+#: classes/page/SettingsPage.php:677
+#: classes/page/ToolsPage.php:125
 #@ wplister
 msgid "Your UserID is"
 msgstr "Ihre eBay Benutzer ID lautet"
 
-#: classes/page/ToolsPage.php:89
+#: classes/core/WPL_Setup.php:1263
+#: classes/page/ToolsPage.php:115
 #@ wplister
 msgid "Your token will expire on"
 msgstr "Das Ablaufdatum Ihres eBay-Token lautet:"
 
-#: classes/table/ListingsTable.php:499
+#: classes/table/ListingsTable.php:627
 #@ wplister
 msgid "relisted"
 msgstr "wiedereingestellt"
 
-#: classes/table/ListingsTable.php:518
+#: classes/table/ListingsTable.php:646
 #@ wplister
 msgid "Profile missing"
 msgstr "Profil fehlt"
 
-#: classes/table/ListingsTable.php:537
+#: classes/table/ListingsTable.php:665
 #@ wplister
 msgid "Template missing"
 msgstr "Vorlage fehlt"
 
-#: classes/table/ListingsTable.php:590
+#: classes/table/ListingsTable.php:310
+#: classes/table/ListingsTable.php:723
 #@ wplister
 msgid "SKU"
 msgstr "SKU"
 
-#: classes/table/LogTable.php:271
+#: classes/table/LogTable.php:305
 #@ wplister
 msgid "Successful"
 msgstr "Erfolgreich"
 
-#: classes/table/LogTable.php:277
+#: classes/table/LogTable.php:317
 #@ wplister
 msgid "Failed"
 msgstr "Fehlgeschlagen"
 
-#: classes/table/LogTable.php:284
+#: classes/table/LogTable.php:332
 #@ wplister
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: views/log_details.php:136
-#: views/log_details.php:150
-#: views/log_details.php:156
+#: views/log_details.php:159
+#: views/log_details.php:173
+#: views/log_details.php:179
 #@ wplister
 msgid "Send to support"
 msgstr "An Support senden"
 
-#: views/log_details.php:140
+#: views/log_details.php:163
 #@ wplister
 msgid "Your Name"
 msgstr "Dein Name"
 
-#: views/log_details.php:143
+#: views/log_details.php:166
 #@ wplister
 msgid "Your Email"
 msgstr "Email-Adresse"
 
-#: views/log_details.php:146
+#: views/log_details.php:169
 #@ wplister
 msgid "Your Message"
 msgstr "Nachricht"
 
-#: classes/integration/WooBackendIntegration.php:931
+#: classes/integration/WooProductMetaBox.php:662
 #: views/profile/edit_shipping.php:34
 #@ wplister
 msgid "Use Flat Domestic and Calculated International Shipping"
 msgstr ""
 
-#: classes/integration/WooBackendIntegration.php:932
+#: classes/integration/WooProductMetaBox.php:663
 #: views/profile/edit_shipping.php:35
 #@ wplister
 msgid "Use Calculated Domestic and Flat International Shipping"
 msgstr ""
 
-#: views/profile/edit_sidebar.php:319
+#: views/profile/edit_sidebar.php:402
 #@ wplister
 msgid "Upload to EPS"
 msgstr "EPS-Upload"
 
-#: views/profile/edit_sidebar.php:324
+#: views/profile/edit_sidebar.php:407
 #@ wplister
 msgid "Upload all images"
 msgstr "Alle Bilder hochladen"
 
-#: views/profile/edit_sidebar.php:325
+#: views/profile/edit_sidebar.php:408
 #@ wplister
 msgid "Upload first 12 images"
 msgstr "Die ersten 12 Bilder hochladen"
 
-#: views/profile/edit_sidebar.php:326
+#: views/profile/edit_sidebar.php:409
 #@ wplister
 msgid "Upload only main image"
 msgstr "Nur das erste Bild hochladen"
 
-#: views/profile/edit_sidebar.php:330
+#: views/profile/edit_sidebar.php:413
 #@ wplister
 msgid "Note: Uploading images to eBay Picture Service (EPS) will slow down the listing process."
 msgstr "Das Hochladen von Produktfotos zu EPS (eBay Picture Service) verlangsamt das Einstellen neuer Artikeln erheblich."
 
-#: views/profile/edit_sidebar.php:376
+#: views/profile/edit_sidebar.php:459
 #@ wplister
 msgid "Schedule Listing"
 msgstr "Auktion planen"
 
-#: views/profile/edit_sidebar.php:380
-#@ wplister
-msgid "Schedule time"
-msgstr "Einstellzeit"
-
-#: views/profile/edit_sidebar.php:414
+#: views/profile/edit_sidebar.php:511
 #@ wplister
 msgid "The current time is"
 msgstr "Die aktuelle Zeit ist"
 
-#: views/profile/edit_sidebar.php:422
+#: views/profile/edit_sidebar.php:568
 #@ wplister
 msgid "Selling Manager Pro"
 msgstr "Verkaufsmanager Pro"
 
-#: views/profile/edit_sidebar.php:426
-#@ wplister
-msgid "Enable Auto Relist"
-msgstr "Auto. Wiedereinstellen"
-
-#: views/profile/edit_sidebar.php:438
+#: views/profile/edit_sidebar.php:584
 #@ wplister
 msgid "Auto Relist Type"
 msgstr "Art"
 
-#: views/profile/edit_sidebar.php:443
+#: views/profile/edit_sidebar.php:589
 #@ wplister
 msgid "Relist continuously"
 msgstr "kontinuierlich wiedereinstellen"
 
-#: views/profile/edit_sidebar.php:444
+#: views/profile/edit_sidebar.php:590
 #@ wplister
 msgid "Relist continuously until sold"
 msgstr "wiedereinstellen bis verkauft"
 
-#: views/profile/edit_sidebar.php:445
+#: views/profile/edit_sidebar.php:591
 #@ wplister
 msgid "Relist once if not sold"
 msgstr "einmal wiedereinstellen falls nicht verkauft"
 
-#: views/profile/edit_sidebar.php:450
+#: views/profile/edit_sidebar.php:536
+#: views/profile/edit_sidebar.php:596
 #@ wplister
 msgid "Relist Condition"
 msgstr "Bedingung"
 
-#: views/profile/edit_sidebar.php:455
+#: views/profile/edit_sidebar.php:541
+#: views/profile/edit_sidebar.php:601
 #@ wplister
 msgid "Relist immediately"
 msgstr "Sofort wieder einstellen"
 
-#: views/profile/edit_sidebar.php:456
+#: views/profile/edit_sidebar.php:602
 #@ wplister
 msgid "Relist after days / hours"
 msgstr "Nach x Tagen / Stunden einstellen"
 
-#: views/profile/edit_sidebar.php:457
+#: views/profile/edit_sidebar.php:543
+#: views/profile/edit_sidebar.php:603
 #@ wplister
 msgid "Relist at specific time of day"
 msgstr "Zu einer bestimmten Uhrzeit einstellen"
 
-#: views/profile/edit_sidebar.php:469
+#: views/profile/edit_sidebar.php:548
+#: views/profile/edit_sidebar.php:615
 #@ wplister
 msgid "Hours"
 msgstr "Stunden"
 
-#: views/profile/edit_sidebar.php:476
+#: views/profile/edit_sidebar.php:555
+#: views/profile/edit_sidebar.php:622
 #@ wplister
 msgid "Time of day"
 msgstr "Uhrzeit"
 
-#: views/profile/edit_sidebar.php:483
+#: views/profile/edit_sidebar.php:629
 #@ wplister
 msgid "Hold inventory level"
 msgstr "Bestand halten"
 
-#: views/profile/edit_sidebar.php:538
+#: views/profile/edit_sidebar.php:686
 #@ wplister
 msgid "Use SKU as UPC"
 msgstr "Verwende SKU als UPC"
 
-#: views/profile/edit_sidebar.php:549
+#: views/profile/edit_sidebar.php:708
 #@ wplister
 msgid "Strikethrough price"
 msgstr "Listenpreis"
 
-#: classes/integration/WooBackendIntegration.php:495
-#: views/profiles_edit_page.php:122
+#: classes/integration/WooProductMetaBox.php:99
+#: views/profiles_edit_page.php:112
 #@ wplister
 msgid "Day"
 msgstr "Tag"
 
-#: views/profiles_edit_page.php:263
+#: views/profiles_edit_page.php:262
 #@ wplister
 msgid "Payment instructions"
 msgstr "Zahlungsanweisungen"
 
-#: views/profiles_edit_page.php:318
+#: views/profiles_edit_page.php:371
 #@ wplister
 msgid "Restocking fee"
 msgstr "Lagerauffüllungsgebühr"
 
-#: views/profiles_edit_page.php:323
+#: views/profiles_edit_page.php:376
 #@ wplister
 msgid "No restocking fee"
 msgstr "Keine Lagerauffüllungsgebühr"
 
-#: views/profiles_edit_page.php:324
-#: views/profiles_edit_page.php:325
-#: views/profiles_edit_page.php:326
+#: views/profiles_edit_page.php:377
+#: views/profiles_edit_page.php:378
+#: views/profiles_edit_page.php:379
 #@ wplister
 msgid "percent"
 msgstr "Prozent"
 
-#: views/settings_dev.php:34
+#: views/settings_dev.php:117
 #@ wplister
 msgid "To use the sandbox, you need to create a dedicated sandbox account and connect WP-Lister with it."
 msgstr ""
 
-#: views/settings_dev.php:35
+#: views/settings_dev.php:118
 #@ wplister
 msgid "After enabling sandbox mode click \"Change Account\" and authenticate WP-Lister using your sandbox account."
 msgstr ""
 
-#: views/settings_dev.php:88
-#@ wplister
-msgid "Handle 404 errors for admin-ajax.php"
-msgstr "Was tun falls admin-ajax.php mit Fehler 404 antwortet?"
-
-#: views/settings_dev.php:90
+#: views/settings_dev.php:193
 #@ wplister
 msgid "Halt on error"
 msgstr "Abbrechen"
 
-#: views/settings_dev.php:91
+#: views/settings_dev.php:194
 #@ wplister
 msgid "Continue with next item"
 msgstr "Überspringen"
 
-#: views/settings_dev.php:92
+#: views/settings_dev.php:195
 #@ wplister
 msgid "Try again"
 msgstr "Erneut versuchen"
 
-#: views/settings_dev.php:95
+#: views/settings_dev.php:189
 #@ wplister
 msgid "404 errors for admin-ajax.php should actually never happen and are generally a sign of incorrect server configuration."
 msgstr ""
 
-#: views/settings_dev.php:96
+#: views/settings_dev.php:189
 #@ wplister
 msgid "This setting is just a workaround. You should consider moving to a proper hosting provider instead."
 msgstr ""
 
-#: views/settings_dev.php:141
+#: views/settings_dev.php:146
 #@ wplister
 msgid "Log entry size limit"
 msgstr ""
 
-#: views/settings_page.php:62
+#: views/settings_page.php:67
 #@ wplister
 msgid "WP-Lister has been linked to your eBay account."
 msgstr "WP-Lister wurde mit Ihrem eBay-Konto verbunden."
 
-#: views/settings_page.php:63
+#: views/settings_page.php:68
 #@ wplister
 msgid "Please visit the Tools page and click on \"Update user details\"."
 msgstr ""
 
-#: views/settings_page.php:65
+#: views/settings_page.php:70
 #@ wplister
 msgid "WP-Lister is not linked to your eBay account yet."
 msgstr "WP-Lister wurde noch nicht mit Ihrem eBay-Konto verbunden."
 
-#: views/settings_page.php:84
+#: views/settings_page.php:89
 #@ wplister
 msgid "Reset Account"
 msgstr "Konto zurücksetzen"
 
-#: views/settings_page.php:193
+#: views/settings_page.php:220
 #@ wplister
 msgid "Include eBay Motors"
 msgstr "Include eBay Motors"
 
-#: views/settings_page.php:218
+#: views/settings_page.php:245
 #@ wplister
 msgid "15 min."
 msgstr "15 Min."
 
-#: views/settings_page.php:219
+#: views/settings_page.php:246
 #@ wplister
 msgid "30 min."
 msgstr "30 Min."
 
-#: views/settings_advanced.php:172
+#: views/settings_advanced.php:340
 #@ wplister
 msgid "Handle foreign transactions"
 msgstr "Unbekannte Transaktionen"
 
-#: views/settings_advanced.php:176
+#: views/settings_advanced.php:344
 #@ wplister
 msgid "Skip"
 msgstr "Ignorieren"
 
-#: views/settings_advanced.php:177
+#: views/settings_advanced.php:345
 #@ wplister
 msgid "Import"
 msgstr "Einlesen"
 
-#: views/settings_advanced.php:180
+#: views/settings_advanced.php:348
 #@ wplister
 msgid "Transactions for items which were not listed with WP-Lister are skipped by default."
 msgstr "Transaktionen für Artikel, welche nicht mit WP-Lister eingestellt wurden, werden standardmässig ignoriert."
@@ -3008,329 +3034,331 @@ msgstr "Vorlage duplizieren"
 msgid "Template Options"
 msgstr "Vorlagenoptionen"
 
-#: views/orders_page.php:33
-#: views/transactions_page.php:33
+#: views/messages_page.php:44
+#: views/orders_page.php:35
+#: views/settings_page.php:111
+#: views/transactions_page.php:35
 #@ wplister
 msgid "Next scheduled update"
 msgstr "Nächste Aktualisierung"
 
-#: classes/core/WPL_Setup.php:286
-#: classes/core/WPL_Setup.php:373
-#: classes/core/WPL_Setup.php:392
-#: classes/core/WPL_Setup.php:404
-#: classes/core/WPL_Setup.php:419
-#: classes/core/WPL_Setup.php:430
-#: classes/core/WPL_Setup.php:444
-#: classes/core/WPL_Setup.php:459
-#: classes/core/WPL_Setup.php:501
-#: classes/core/WPL_Setup.php:516
-#: classes/core/WPL_Setup.php:530
-#: classes/core/WPL_Setup.php:544
-#: classes/core/WPL_Setup.php:558
-#: classes/core/WPL_Setup.php:573
-#: classes/core/WPL_Setup.php:596
-#: classes/core/WPL_Setup.php:610
-#: classes/core/WPL_Setup.php:624
-#: classes/core/WPL_Setup.php:657
-#: classes/core/WPL_Setup.php:671
-#: classes/core/WPL_Setup.php:686
+#: classes/core/WPL_Setup.php:340
+#: classes/core/WPL_Setup.php:427
+#: classes/core/WPL_Setup.php:446
+#: classes/core/WPL_Setup.php:458
+#: classes/core/WPL_Setup.php:473
+#: classes/core/WPL_Setup.php:484
+#: classes/core/WPL_Setup.php:498
+#: classes/core/WPL_Setup.php:513
+#: classes/core/WPL_Setup.php:555
+#: classes/core/WPL_Setup.php:570
+#: classes/core/WPL_Setup.php:584
+#: classes/core/WPL_Setup.php:598
+#: classes/core/WPL_Setup.php:612
+#: classes/core/WPL_Setup.php:627
+#: classes/core/WPL_Setup.php:650
+#: classes/core/WPL_Setup.php:664
+#: classes/core/WPL_Setup.php:678
+#: classes/core/WPL_Setup.php:711
+#: classes/core/WPL_Setup.php:725
+#: classes/core/WPL_Setup.php:740
+#: classes/core/WPL_Setup.php:754
+#: classes/core/WPL_Setup.php:800
+#: classes/core/WPL_Setup.php:816
+#: classes/core/WPL_Setup.php:841
+#: classes/core/WPL_Setup.php:863
+#: classes/core/WPL_Setup.php:894
+#: classes/core/WPL_Setup.php:908
+#: classes/core/WPL_Setup.php:933
+#: classes/core/WPL_Setup.php:959
+#: classes/core/WPL_Setup.php:976
+#: classes/core/WPL_Setup.php:993
 #@ wplister
 msgid "WP-Lister database was upgraded to version"
 msgstr "Datenbank wurde aktualisiert auf Version"
 
-#: classes/page/TemplatesPage.php:283
+#: classes/page/TemplatesPage.php:284
 #@ wplister
 msgid "New template created in folder:"
 msgstr "Neue Vorlage erstellt in Verzeichnis:"
 
-#: classes/core/WPL_Toolbar.php:51
-#: classes/page/EbayOrdersPage.php:26
+#: classes/core/WPL_Toolbar.php:54
+#: classes/page/EbayOrdersPage.php:27
 #: views/orders_page.php:13
 #@ wplister
 msgid "Orders"
 msgstr "Bestellungen"
 
-#: classes/core/WPL_Toolbar.php:105
+#: classes/core/WPL_Toolbar.php:120
 #: views/settings_tabs.php:17
 #@ wplister
 msgid "Advanced"
 msgstr "Fortgeschritten"
 
-#: classes/integration/OrderWrapper_woo.php:855
-#, php-format
-#@ wplister
-msgid "Preparing to revise %s item(s) on eBay..."
-msgstr "Bereite die Aktualisierung von %s Artikeln vor..."
-
-#: classes/integration/WooBackendIntegration.php:247
+#: classes/integration/WooBackendIntegration.php:344
 #@ wplister
 msgid "On eBay"
 msgstr "Auf eBay"
 
-#: classes/integration/WooBackendIntegration.php:306
+#: classes/integration/WooBackendIntegration.php:410
 #@ wplister
 msgid "eBay listing is"
 msgstr "eBay Auktion ist"
 
-#: classes/integration/WooBackendIntegration.php:315
-#@ wplister
-msgid "Revise eBay listing when updating product"
-msgstr "Aktualisiere Auktion beim Speichern"
-
-#: classes/integration/WooBackendIntegration.php:316
+#: classes/integration/WooBackendIntegration.php:459
+#: classes/integration/WooBackendIntegration.php:472
 #@ wplister
 msgid "If the product is out of stock, the listing will be ended on eBay."
 msgstr "Falls das Produkt ausverkauft ist wird die Auktion auf eBay beendet."
 
-#: classes/integration/WooBackendIntegration.php:321
+#: classes/integration/WooBackendIntegration.php:477
 #@ wplister
 msgid "Revise listing on update"
 msgstr "Aktualisiere Auktion beim Speichern"
 
-#: classes/integration/WooBackendIntegration.php:346
+#: classes/integration/WooBackendIntegration.php:505
 #@ wplister
 msgid "This product was imported"
 msgstr "Dieses Produkt wurde importiert"
 
-#: classes/integration/WooBackendIntegration.php:415
+#: classes/integration/WooProductMetaBox.php:21
 #@ wplister
 msgid "eBay Options"
 msgstr "eBay Optionen"
 
-#: classes/integration/WooBackendIntegration.php:418
+#: classes/integration/WooProductMetaBox.php:24
 #@ wplister
 msgid "Advanced eBay Options"
 msgstr "Weitere eBay Optionen"
 
-#: classes/integration/WooBackendIntegration.php:421
+#: classes/integration/WooProductMetaBox.php:27
 #@ wplister
 msgid "eBay Shipping Options"
 msgstr "eBay Versandeinstellungen"
 
-#: classes/integration/WooBackendIntegration.php:492
+#: classes/integration/WooProductMetaBox.php:96
 #@ wplister
 msgid "Listing Duration"
 msgstr ""
 
-#: classes/integration/WooBackendIntegration.php:559
+#: classes/integration/WooProductMetaBox.php:238
 #@ wplister
 msgid "UPC"
 msgstr "UPC"
 
-#: classes/integration/WooBackendIntegration.php:566
+#: classes/integration/WooProductMetaBox.php:245
 #@ wplister
 msgid "Gallery Image URL"
 msgstr "Galeriefoto URL"
 
-#: classes/integration/WooBackendIntegration.php:579
+#: classes/integration/WooProductMetaBox.php:258
 #@ wplister
 msgid "Hide from eBay"
 msgstr "Nicht auf eBay einstellen"
 
-#: classes/integration/WooBackendIntegration.php:646
+#: classes/integration/WooProductMetaBox.php:296
 #: views/profile/edit_categories.php:51
 #@ wplister
 msgid "Primary eBay category"
 msgstr "Primäre eBay-Kategorie"
 
-#: classes/integration/WooBackendIntegration.php:656
+#: classes/integration/WooProductMetaBox.php:306
 #: views/profile/edit_categories.php:66
 #@ wplister
 msgid "Secondary eBay category"
 msgstr "Sekundäre eBay-Kategorie"
 
-#: classes/integration/WooBackendIntegration.php:924
+#: classes/integration/WooProductMetaBox.php:655
 #@ wplister
 msgid "Custom shipping options"
 msgstr "Eigene Versandoptionen"
 
-#: classes/integration/WooBackendIntegration.php:933
+#: classes/integration/WooProductMetaBox.php:664
 #: views/profile/edit_shipping.php:36
 #@ wplister
 msgid "Use Freight Shipping"
 msgstr "Versand per Spedition"
 
-#: classes/integration/WooBackendIntegration.php:938
+#: classes/integration/WooProductMetaBox.php:669
 #@ wplister
 msgid "Domestic shipping"
 msgstr "Inlandsversand"
 
-#: classes/integration/WooFrontendIntegration.php:24
+#: classes/integration/WooFrontendIntegration.php:29
+#: classes/integration/WooFrontendIntegration.php:38
 #@ wplister
 msgid "View details"
 msgstr "Zeige Details"
 
-#: classes/integration/WooFrontendIntegration.php:53
+#: classes/integration/WooFrontendIntegration.php:83
 #@ wplister
 msgid "Starting bid"
 msgstr "Startgebot"
 
-#: classes/integration/WooFrontendIntegration.php:56
+#: classes/integration/WooFrontendIntegration.php:86
 #@ wplister
 msgid "Current bid"
 msgstr "Aktuelles Gebot"
 
-#: classes/integration/WooFrontendIntegration.php:57
+#: classes/integration/WooFrontendIntegration.php:87
 #@ wplister
 msgid "bids"
 msgstr "Gebote"
 
-#: classes/integration/WooFrontendIntegration.php:63
+#: classes/integration/WooFrontendIntegration.php:93
 #, php-format
 #@ wplister
 msgid "This item is currently on auction and will end in %s"
 msgstr "Dieser Artikel ist zur Zeit als Auktion auf eBay eingestellt und wird in %s enden"
 
-#: classes/integration/WooFrontendIntegration.php:66
+#: classes/integration/WooFrontendIntegration.php:96
 #@ wplister
 msgid "This item is currently on auction on eBay."
 msgstr "Dieser Artikel ist zur Zeit als Auktion auf eBay eingestellt"
 
-#: classes/model/EbayOrdersModel.php:501
+#: classes/model/EbayOrdersModel.php:705
 #@ wplister
 msgid "New orders created"
 msgstr "Neue Bestellungen erzeugt"
 
-#: classes/model/EbayOrdersModel.php:502
+#: classes/model/EbayOrdersModel.php:706
 #@ wplister
 msgid "Existing orders updated"
 msgstr "Vorhandene Bestellungen aktualisiert"
 
-#: classes/model/EbayOrdersModel.php:503
+#: classes/model/EbayOrdersModel.php:707
 #@ wplister
 msgid "Foreign orders skipped"
 msgstr "Unbekannte Bestellungen ignoriert"
 
-#: classes/model/EbayOrdersModel.php:504
+#: classes/model/EbayOrdersModel.php:708
 #@ wplister
 msgid "Orders failed to create"
 msgstr "Bestellungen konnten nicht erstellt werden"
 
-#: classes/model/EbayOrdersModel.php:507
-#@ wplister
-msgid "Note: Foreign orders for which no matching item ID could be found in WP-Lister's listings table were skipping during update."
-msgstr ""
-
-#: classes/model/EbayOrdersModel.php:512
-#: classes/table/EbayOrdersTable.php:235
+#: classes/model/EbayOrdersModel.php:716
+#: classes/table/EbayOrdersTable.php:264
 #@ wplister
 msgid "Order ID"
 msgstr "Bestellnr."
 
-#: classes/model/EbayOrdersModel.php:514
-#: classes/table/EbayOrdersTable.php:231
+#: classes/model/EbayOrdersModel.php:718
+#: classes/table/EbayOrdersTable.php:260
 #@ wplister
 msgid "Total"
 msgstr "Summe"
 
-#: classes/model/EbayShippingModel.php:382
+#: classes/model/EbayShippingModel.php:408
 #@ wplister
 msgid "eBay shipping services"
 msgstr "eBay Versandoptionen"
 
-#: classes/model/ItemBuilderModel.php:1187
-#: classes/model/ItemBuilderModel.php:1239
+#: classes/model/ItemBuilderModel.php:1512
+#: classes/model/ItemBuilderModel.php:1571
 #@ wplister
 msgid "eBay does not allow attribute values longer than 50 characters."
 msgstr "eBay erlaubt keine Werte länger als 50 Zeichen."
 
-#: classes/model/ItemBuilderModel.php:1189
-#: classes/model/ItemBuilderModel.php:1241
+#: classes/model/ItemBuilderModel.php:1514
+#: classes/model/ItemBuilderModel.php:1573
 #@ wplister
 msgid "You need to shorten this value:"
 msgstr "Sie müssen diesen Wert kürzen:"
 
-#: classes/model/ItemBuilderModel.php:1229
+#: classes/model/ItemBuilderModel.php:1561
 #, php-format
 #@ wplister
 msgid "eBay requires a minimum price of %s for this listing type."
 msgstr "eBay erfordert einen Mindestpreis von %s für diesen Angebotstyp."
 
-#: classes/page/EbayOrdersPage.php:71
+#: classes/page/EbayOrdersPage.php:76
 #@ wplister
 msgid "order(s) found on eBay."
 msgstr "Bestellung(en) auf eBay gefunden."
 
-#: classes/page/EbayOrdersPage.php:88
+#: classes/page/EbayOrdersPage.php:93
 #@ wplister
 msgid "orders were updated from eBay."
 msgstr "Bestellungen wurden von eBay aktualisiert."
 
-#: classes/page/EbayOrdersPage.php:94
-#: classes/page/EbayOrdersPage.php:107
-#: classes/page/TransactionsPage.php:93
-#: classes/page/TransactionsPage.php:104
+#: classes/page/EbayOrdersPage.php:99
+#: classes/page/EbayOrdersPage.php:113
+#: classes/page/TransactionsPage.php:94
+#: classes/page/TransactionsPage.php:105
+#: classes/page/TransactionsPage.php:115
 #@ wplister
 msgid "You need to select at least one item from the list below in order to use bulk actions."
 msgstr "Sie müssen mindestens einen Eintrag aus der Liste auswählen."
 
-#: classes/page/EbayOrdersPage.php:120
+#: classes/page/EbayOrdersPage.php:128
 #@ wplister
 msgid "WooCommerce order was created from eBay order."
 msgstr "WooCommerce-Bestellung wurde aus eBay-Bestellung erzeugt."
 
-#: classes/page/EbayOrdersPage.php:127
+#: classes/page/EbayOrdersPage.php:135
 #@ wplister
 msgid "There was a problem creating an order in WooCommerce from this eBay order."
 msgstr "Es gab ein Problem beim Erstellen einer Bestellung in WooCommerce aus dieser eBay-Bestellung."
 
-#: classes/page/ListingsPage.php:228
+#: classes/page/ListingsPage.php:219
 #@ wplister
 msgid "There were some problems revising your items."
 msgstr "Es gab ein Problem beim Aktualisieren der Artikel."
 
-#: classes/page/ProfilesPage.php:436
+#: classes/page/ProfilesPage.php:476
 #, php-format
 #@ wplister
 msgid "%s ended items updated."
 msgstr "%s beendete Auktionen wurden aktualisiert."
 
-#: classes/page/SettingsPage.php:351
+#: classes/page/SettingsPage.php:476
 #@ wplister
 msgid "Please enter your license key."
 msgstr "Bitte geben Sie Ihren Lizenzschlüssel ein."
 
-#: classes/page/SettingsPage.php:355
+#: classes/page/SettingsPage.php:480
 #@ wplister
 msgid "Please enter your license email address."
 msgstr "Bitte geben Sie Ihre Lizenz-Emailadresse ein."
 
-#: classes/page/SettingsPage.php:408
+#: classes/page/SettingsPage.php:533
+#: classes/page/SettingsPage.php:575
 #@ wplister
 msgid "This license has not been activated on this site."
 msgstr "Die Lizenz wurde nicht für diese Website aktiviert."
 
-#: classes/page/SettingsPage.php:409
+#: classes/page/SettingsPage.php:534
+#: classes/page/SettingsPage.php:576
 #@ wplister
 msgid "The update server responded:"
 msgstr "Der Update-Server antwortete:"
 
-#: classes/page/ToolsPage.php:233
+#: classes/page/ToolsPage.php:287
 #@ wplister
 msgid "fetching list of tasks"
 msgstr "Lade zu erledigende Aufgaben..."
 
-#: classes/page/ToolsPage.php:234
+#: classes/page/ToolsPage.php:288
 #@ wplister
 msgid "estimating time left"
 msgstr "Berechne verbleibende Zeit"
 
-#: classes/page/ToolsPage.php:235
+#: classes/page/ToolsPage.php:289
 #@ wplister
 msgid "finishing up"
 msgstr "Beende Verarbeitung"
 
-#: classes/page/ToolsPage.php:236
+#: classes/page/ToolsPage.php:290
 #@ wplister
 msgid "All {0} tasks have been completed."
 msgstr "Alle {0} Aufgaben wurden ausgeführt."
 
-#: classes/page/ToolsPage.php:237
+#: classes/page/ToolsPage.php:291
 #@ wplister
 msgid "processing {0} of {1}"
 msgstr "verarbeite {0} von {1}"
 
-#: classes/page/ToolsPage.php:238
+#: classes/page/ToolsPage.php:292
 #@ wplister
 msgid "about {0} remaining"
 msgstr "etwa {0} verbleibend"
@@ -3347,42 +3375,48 @@ msgstr "Unbekannte Kategorie-ID"
 msgid "This is not a leaf category"
 msgstr ""
 
-#: classes/table/EbayOrdersTable.php:173
+#: classes/table/EbayOrdersTable.php:201
+#: classes/table/EbayOrdersTable.php:371
+#: classes/table/TransactionsTable.php:345
 #@ wplister
 msgid "Active"
 msgstr "Aktiv"
 
-#: classes/table/EbayOrdersTable.php:177
+#: classes/table/EbayOrdersTable.php:205
+#: classes/table/EbayOrdersTable.php:365
+#: classes/table/TransactionsTable.php:339
 #@ wplister
 msgid "Completed"
 msgstr "Vollständig"
 
-#: classes/table/EbayOrdersTable.php:230
+#: classes/table/EbayOrdersTable.php:259
+#: views/profiles_edit_page.php:350
 #@ wplister
 msgid "Buyer"
 msgstr "Käufer"
 
-#: classes/table/EbayOrdersTable.php:281
+#: classes/table/EbayOrdersTable.php:310
 #@ wplister
 msgid "Update selected orders from eBay"
 msgstr "Aktualisiere ausgewählte Bestellungen von eBay"
 
-#: classes/table/EbayOrdersTable.php:282
+#: classes/table/EbayOrdersTable.php:311
 #@ wplister
 msgid "Delete selected orders"
 msgstr "Lösche ausgewählte Bestellungen"
 
-#: classes/table/ListingsTable.php:132
+#: classes/table/ListingsTable.php:139
 #@ wplister
 msgid "Update from eBay"
 msgstr "Von eBay aktualisieren"
 
-#: classes/table/TransactionsTable.php:135
+#: classes/table/TransactionsTable.php:137
 #@ wplister
 msgid "Edit Product"
 msgstr "Produkt bearbeiten"
 
-#: classes/table/TransactionsTable.php:228
+#: classes/table/EbayMessagesTable.php:212
+#: classes/table/TransactionsTable.php:230
 #@ wplister
 msgid "Product"
 msgstr "Produkt"
@@ -3421,22 +3455,23 @@ msgstr "Zeit"
 msgid "Message"
 msgstr "Nachricht"
 
-#: views/orders_page.php:36
+#: views/messages_page.php:48
+#: views/orders_page.php:39
 #@ wplister
 msgid "Automatic background updates are currently disabled."
-msgstr ""
+msgstr "Der automatische Abgleich ist zur Zeit deaktiviert."
 
-#: views/orders_page.php:44
+#: views/orders_page.php:51
 #@ wplister
 msgid "Update orders"
 msgstr "Bestellungen aktualisieren"
 
-#: views/orders_page.php:45
+#: views/orders_page.php:52
 #@ wplister
 msgid "Update recent orders from eBay."
 msgstr "Lade neue Bestellungen von eBay"
 
-#: views/orders_page.php:50
+#: views/orders_page.php:44
 #@ wplister
 msgid "View transactions"
 msgstr "Zeige Transaktionen"
@@ -3446,18 +3481,18 @@ msgstr "Zeige Transaktionen"
 msgid "Conditions and item specifics are based on the category"
 msgstr "Artikelzustand und -attribute basieren auf der Kategorie"
 
-#: views/profile/edit_shipping_int.php:116
-#: views/profile/edit_shipping_int.php:141
-#: views/profile/edit_shipping_loc.php:106
-#: views/profile/edit_shipping_loc.php:131
+#: views/profile/edit_shipping_int.php:138
+#: views/profile/edit_shipping_int.php:163
+#: views/profile/edit_shipping_loc.php:93
+#: views/profile/edit_shipping_loc.php:129
 #@ wplister
 msgid "Shipping discount profile"
 msgstr "Versandrabatt-Profil"
 
-#: views/profile/edit_shipping_int.php:121
-#: views/profile/edit_shipping_int.php:146
-#: views/profile/edit_shipping_loc.php:111
-#: views/profile/edit_shipping_loc.php:136
+#: views/profile/edit_shipping_int.php:143
+#: views/profile/edit_shipping_int.php:168
+#: views/profile/edit_shipping_loc.php:98
+#: views/profile/edit_shipping_loc.php:134
 #@ wplister
 msgid "no discount profile"
 msgstr "kein Versandrabatt"
@@ -3483,289 +3518,1212 @@ msgstr ""
 msgid "update %s ended items"
 msgstr "aktualisiere %s beendete Artikel"
 
-#: views/profile/edit_sidebar.php:168
+#: views/profile/edit_sidebar.php:172
 #@ wplister
 msgid "Tax rate (VAT)"
 msgstr "Steuersatz (MwSt.)"
 
-#: views/profile/edit_sidebar.php:216
+#: views/profile/edit_sidebar.php:279
 #@ wplister
 msgid "Add keywords to your listing title."
 msgstr "Suchbegriffe zum Titel der Auktion hinzufügen"
 
-#: views/profile/edit_sidebar.php:218
+#: views/profile/edit_sidebar.php:281
 #@ wplister
 msgid "How?"
 msgstr "Wie?"
 
-#: views/profile/edit_sidebar.php:233
+#: views/profile/edit_sidebar.php:305
 #@ wplister
 msgid "Enable subtitle"
 msgstr "Untertitel aktivieren"
 
-#: views/profile/edit_sidebar.php:267
+#: views/profile/edit_sidebar.php:339
 #@ wplister
 msgid "Variation mode"
 msgstr "Variations-Modus"
 
-#: views/profile/edit_sidebar.php:290
+#: views/profile/edit_sidebar.php:362
 #@ wplister
 msgid "Add var. table"
 msgstr "Tabelle hinzufügen"
 
-#: views/profile/edit_sidebar.php:559
+#: views/profile/edit_sidebar.php:718
 #@ wplister
 msgid "Hit Counter"
 msgstr "Besucherzähler"
 
-#: views/profile/edit_sidebar.php:574
+#: views/profile/edit_sidebar.php:733
 #@ wplister
 msgid "Sort order"
 msgstr "Sortierung"
 
-#: views/profiles_edit_page.php:157
+#: classes/integration/WooProductMetaBox.php:123
+#: views/profiles_edit_page.php:147
 #@ wplister
 msgid "Used"
 msgstr "Gebraucht"
 
-#: views/profiles_edit_page.php:276
+#: views/profiles_edit_page.php:293
 #@ wplister
 msgid "Return Policy"
 msgstr "Rückgabebedingungen"
 
-#: views/profiles_edit_page.php:280
+#: views/profiles_edit_page.php:297
 #@ wplister
 msgid "Enable return policy"
 msgstr "Aktiviere Rückgabe"
 
-#: views/profiles_edit_page.php:312
+#: views/profiles_edit_page.php:329
 #@ wplister
 msgid "month"
 msgstr "Monat"
 
-#: views/settings_advanced.php:50
+#: views/settings_advanced.php:43
 #@ wplister
 msgid "This page contains some advanced options for special use cases."
 msgstr ""
 
-#: views/settings_advanced.php:125
+#: views/settings_advanced.php:182
 #@ wplister
 msgid "WP-Lister does remove links from product descriptions by default to avoid violating the eBay Links policy."
 msgstr ""
 
-#: views/settings_advanced.php:131
+#: views/settings_advanced.php:188
 #@ wplister
 msgid "Default image size"
 msgstr ""
 
-#: views/settings_advanced.php:135
+#: views/settings_advanced.php:192
 #@ wplister
 msgid "full"
 msgstr ""
 
-#: views/settings_advanced.php:136
+#: views/settings_advanced.php:193
 #@ wplister
 msgid "large"
 msgstr ""
 
-#: views/settings_advanced.php:140
+#: views/settings_advanced.php:197
 #@ wplister
 msgid "Product Gallery"
 msgstr ""
 
-#: views/settings_advanced.php:145
+#: views/settings_advanced.php:202
 #@ wplister
 msgid "use attached images if no Gallery found"
 msgstr ""
 
-#: views/settings_advanced.php:146
+#: views/settings_advanced.php:203
 #@ wplister
 msgid "no fallback"
 msgstr ""
 
-#: views/settings_advanced.php:149
+#: views/settings_advanced.php:206
 #@ wplister
 msgid "If you find unwanted images in your listings try disabling this option."
 msgstr ""
 
-#: views/settings_advanced.php:184
+#: views/settings_advanced.php:430
 #@ wplister
 msgid "Ignore backorders"
 msgstr ""
 
-#: views/settings_advanced.php:192
+#: views/settings_advanced.php:438
 #@ wplister
 msgid "Should WP-Lister mark a product as out of stock even when it has backorders enabled?"
 msgstr ""
 
-#: views/settings_advanced.php:196
+#: views/settings_advanced.php:226
 #@ wplister
 msgid "Open preview in new tab"
 msgstr ""
 
-#: views/settings_advanced.php:204
+#: views/settings_advanced.php:234
 #@ wplister
 msgid "Select if you want the listing preview open in a new tab by default."
 msgstr ""
 
-#: views/settings_advanced.php:208
+#: views/settings_advanced.php:238
 #@ wplister
 msgid "Disable WYSIWYG editor"
 msgstr ""
 
-#: views/settings_advanced.php:216
+#: views/settings_advanced.php:246
 #@ wplister
 msgid "Select the editor you want to use to edit listing templates."
 msgstr ""
 
-#: views/settings_advanced.php:220
+#: views/settings_advanced.php:388
 #@ wplister
 msgid "Local timezone"
 msgstr "Lokale Zeitzone"
 
-#: views/settings_advanced.php:224
+#: views/settings_advanced.php:392
 #@ wplister
 msgid "no timezone selected"
 msgstr ""
 
-#: views/settings_advanced.php:230
+#: views/settings_advanced.php:398
 #@ wplister
 msgid "Select your local timezone."
 msgstr ""
 
-#: views/settings_categories.php:61
+#: views/settings_categories.php:62
 #@ wplister
 msgid "This is where you can assign eBay categories to your all your WooCommerce product categories."
 msgstr "Weisen Sie Ihren Produktkategorien jeweils eine eBay-Kategorie und ggf. eine Kategorie aus Ihrem eBay-Shop zu."
 
-#: views/settings_categories.php:63
+#: views/settings_categories.php:64
 #@ wplister
 msgid "Once you selected a destination category for each local category, you can remove the category settings from your profile and WP-Lister will automatically select the category according to this list."
 msgstr ""
 
-#: views/settings_categories.php:65
+#: views/settings_categories.php:66
 #@ wplister
 msgid "In order to access item specifics and custom item conditions in a profile without a primary category it is recommended to select a default category at the bottom of this page."
 msgstr ""
 
-#: views/settings_categories.php:95
+#: views/settings_categories.php:96
 #@ wplister
 msgid "Import / Export"
 msgstr "Import / Export"
 
-#: views/settings_categories.php:106
+#: views/settings_categories.php:107
 #@ wplister
 msgid "Backup and restore category mappings"
 msgstr "Sichern und Wiederherstellen von Kategorie-Zuordnungen"
 
-#: views/settings_categories.php:109
+#: views/settings_categories.php:110
 #@ wplister
 msgid "Export category mappings"
 msgstr "Exportiere Kategorie-Zuweisungen"
 
-#: views/settings_categories.php:115
+#: views/settings_categories.php:116
 #@ wplister
 msgid "Import category mappings"
 msgstr "Importiere Kategorie-Zuweisungen"
 
-#: views/settings_dev.php:99
+#: views/settings_dev.php:199
 #@ wplister
 msgid "Disable variations"
 msgstr ""
 
-#: views/settings_page.php:100
+#: views/settings_page.php:127
 #@ wplister
 msgid "PayPal"
 msgstr "PayPal"
 
-#: views/settings_page.php:103
+#: views/settings_page.php:130
 #@ wplister
 msgid "PayPal account"
 msgstr "PayPal-Konto"
 
-#: views/settings_page.php:106
+#: views/settings_page.php:133
 #@ wplister
 msgid "To use PayPal you need to enter your PayPal address."
 msgstr ""
 
-#: views/settings_page.php:212
+#: views/settings_page.php:239
 #@ wplister
 msgid "Update interval"
 msgstr "Aktualisierungsinterval"
 
-#: views/settings_page.php:259
+#: views/settings_page.php:306
 #@ wplister
 msgid "Update mode"
 msgstr "Modus für Aktualisierung"
 
-#: views/settings_page.php:263
+#: views/settings_page.php:310
 #@ wplister
 msgid "Transaction"
 msgstr "Transaktion"
 
-#: views/settings_page.php:264
+#: views/settings_page.php:311
 #@ wplister
 msgid "Order"
 msgstr "Bestellung"
 
-#: views/settings_page.php:281
+#: views/settings_page.php:338
 #@ wplister
 msgid "Link auctions to eBay"
 msgstr "Verlinke Auktionen zu eBay"
 
-#: views/settings_page.php:285
+#: views/settings_page.php:342
 #@ wplister
 msgid "Off"
 msgstr "Aus"
 
-#: views/settings_page.php:286
+#: views/settings_page.php:344
 #@ wplister
 msgid "Always show link to eBay for products on auction"
 msgstr "Zeige Link zu eBay für alle Auktionen"
 
-#: views/settings_page.php:287
+#: views/settings_page.php:343
 #@ wplister
 msgid "Only if there are bids on eBay or the auction ends within 12 hours"
 msgstr "Zeige Link zu eBay nur wenn Gebote abgegeben wurden oder die Auktion innerhalb von 12 Stunden endet"
 
-#: views/settings_page.php:290
+#: views/settings_page.php:348
 #@ wplister
 msgid "Enable this to modify the product details page for items currently on auction."
 msgstr ""
 
-#: views/tools_page.php:106
+#: views/tools_page.php:262
 #@ wplister
 msgid "Debugging"
 msgstr "Debugging"
 
-#: views/tools_page.php:123
+#: views/tools_page.php:293
 #@ wplister
 msgid "Check eBay time offset"
 msgstr ""
 
-#: views/tools_page.php:124
+#: views/tools_page.php:294
 #@ wplister
 msgid "Check eBay time to server time offset"
 msgstr ""
 
-#: views/tools_page.php:132
+#: views/tools_page.php:302
 #@ wplister
 msgid "Show cURL debug info"
 msgstr ""
 
-#: views/listings_page.php:115
+#: views/listings_page.php:134
 #@ wplister
 msgid "Are you sure you want to end this listing?"
 msgstr "Wollen Sie diese Auktion wirklich beenden?"
 
-#: views/listings_page.php:120
+#: views/listings_page.php:139
 #@ wplister
 msgid "Are you sure you want to relist this ended listing?"
 msgstr "Wollen Sie diese beendete Auktion erneut einstellen?"
 
-#: views/listings_page.php:125
-#: views/listings_page.php:128
+#: views/listings_page.php:144
+#: views/listings_page.php:147
 #@ wplister
 msgid "Are you sure you want to remove this listing from WP-Lister?"
 msgstr "Wollen Sie diese Auktion wirklich aus WP-Lister entfernen?"
+
+#: classes/core/WPL_Setup.php:790
+#@ wplister
+msgid "WP-Lister database upgrade is in progress"
+msgstr ""
+
+#: classes/core/WPL_Setup.php:971
+#@ wplister
+msgid "WP-Lister database upgrade in progress"
+msgstr ""
+
+#: classes/core/WPL_Setup.php:1174
+#, php-format
+#@ wplister
+msgid "An update to %s is available."
+msgstr "Ein Update auf %s ist verfügbar."
+
+#: classes/core/WPL_Setup.php:1177
+#@ wplister
+msgid "Show Details"
+msgstr "Details anzeigen"
+
+#: classes/core/WPL_Setup.php:1179
+#@ wplister
+msgid "Install Update"
+msgstr "Update installieren"
+
+#: classes/core/WPL_Toolbar.php:140
+#: views/settings_tabs.php:23
+#: views/tools_page.php:150
+#@ wplister
+msgid "Updates"
+msgstr "Updates"
+
+#: classes/integration/OrderWrapper_woo.php:520
+#, php-format
+#@ wplister
+msgid "Preparing to update inventory for %s item(s) on eBay..."
+msgstr ""
+
+#: classes/integration/OrderWrapper_woo.php:528
+#@ wplister
+msgid "eBay inventory was updated successfully."
+msgstr ""
+
+#: classes/integration/OrderWrapper_woo.php:530
+#@ wplister
+msgid "There was a problem revising the inventory on eBay! Please check the database log and contact support."
+msgstr ""
+
+#: classes/integration/WooBackendIntegration.php:59
+#@ wplister
+msgid "Prepare this product to be listed on eBay."
+msgstr ""
+
+#: classes/integration/WooBackendIntegration.php:59
+#@ wplister
+msgid "List on eBay"
+msgstr ""
+
+#: classes/integration/WooBackendIntegration.php:464
+#@ wplister
+msgid "Revise inventory on update"
+msgstr ""
+
+#: classes/integration/WooBackendIntegration.php:471
+#@ wplister
+msgid "Revise eBay listing when updating the product"
+msgstr ""
+
+#: classes/integration/WooBackendIntegration.php:567
+#, php-format
+#@ wplister
+msgid "Product and eBay listing were updated. <a href=\"%s\">View Product</a>"
+msgstr ""
+
+#: classes/integration/WooFrontendIntegration.php:221
+#@ wplister
+msgid "Compatibility"
+msgstr ""
+
+#: classes/integration/WooFrontendIntegration.php:244
+#@ wplister
+msgid "Item Compatibility List"
+msgstr ""
+
+#: classes/integration/WooOrderBuilder.php:340
+#@ wplister
+msgid "VAT"
+msgstr "MwSt."
+
+#: classes/integration/WooProductMetaBox.php:62
+#@ wplister
+msgid "Leave empty to generate title from product name. Maximum length: 80 characters"
+msgstr ""
+
+#: classes/integration/WooProductMetaBox.php:71
+#@ wplister
+msgid "Leave empty to use the product excerpt. Maximum length: 55 characters"
+msgstr ""
+
+#: classes/integration/WooProductMetaBox.php:224
+#@ wplister
+msgid "The optional Buy Now Price is only used for auction style listings. It has no effect on fixed price listings."
+msgstr ""
+
+#: classes/integration/WooProductMetaBox.php:259
+#@ wplister
+msgid "Hide this product from the list of products currently not listed on eBay."
+msgstr ""
+
+#: classes/model/EbayMessagesModel.php:340
+#@ wplister
+msgid "New messages created"
+msgstr ""
+
+#: classes/model/EbayMessagesModel.php:341
+#@ wplister
+msgid "Existing messages updated"
+msgstr ""
+
+#: classes/model/EbayMessagesModel.php:346
+#: classes/table/EbayMessagesTable.php:207
+#@ wplister
+msgid "Received at"
+msgstr ""
+
+#: classes/model/EbayMessagesModel.php:347
+#: classes/table/EbayMessagesTable.php:214
+#@ wplister
+msgid "Message ID"
+msgstr ""
+
+#: classes/model/EbayMessagesModel.php:348
+#: classes/table/EbayMessagesTable.php:209
+#@ wplister
+msgid "Subject"
+msgstr ""
+
+#: classes/model/EbayMessagesModel.php:351
+#@ wplister
+msgid "Sender"
+msgstr ""
+
+#: classes/model/EbayOrdersModel.php:711
+#@ wplister
+msgid "Note: Orders from foreign eBay sites were skipping during update."
+msgstr ""
+
+#: classes/model/ItemBuilderModel.php:1532
+#@ wplister
+msgid "Some variations are missing a SKU."
+msgstr ""
+
+#: classes/model/ItemBuilderModel.php:1534
+#@ wplister
+msgid "It is required to assign a unique SKU to each variation to prevent inventory sync issues."
+msgstr ""
+
+#: classes/model/ListingsModel.php:2553
+#@ wplister
+msgid "Skipped product draft"
+msgstr ""
+
+#: classes/page/EbayMessagesPage.php:27
+#: views/messages_page.php:21
+#@ wplister
+msgid "Messages"
+msgstr ""
+
+#: classes/page/EbayMessagesPage.php:71
+#@ wplister
+msgid "message(s) found on eBay."
+msgstr ""
+
+#: classes/page/EbayMessagesPage.php:87
+#@ wplister
+msgid "messages were updated from eBay."
+msgstr ""
+
+#: classes/page/EbayMessagesPage.php:93
+#: classes/page/EbayMessagesPage.php:106
+#@ wplister
+msgid "You need to select at least one item from the list below in message to use bulk actions."
+msgstr ""
+
+#: classes/page/EbayOrdersPage.php:176
+#@ wplister
+msgid "There are duplicate orders for"
+msgstr ""
+
+#: classes/page/ListingsPage.php:290
+#@ wplister
+msgid "Selected items were archived."
+msgstr ""
+
+#: classes/page/ListingsPage.php:308
+#@ wplister
+msgid "Selected items were locked."
+msgstr ""
+
+#: classes/page/ListingsPage.php:326
+#@ wplister
+msgid "Selected items were unlocked."
+msgstr ""
+
+#: classes/page/ListingsPage.php:396
+#@ wplister
+msgid "Update all relisted items"
+msgstr ""
+
+#: classes/page/ListingsPage.php:511
+#@ wplister
+msgid "Please keep only one listing and move unwanted duplciates to the archive."
+msgstr ""
+
+#: classes/page/ListingsPage.php:529
+#@ wplister
+msgid "Click to move to archive"
+msgstr ""
+
+#: classes/page/LogPage.php:51
+#@ wplister
+msgid "Database log has been cleared."
+msgstr ""
+
+#: classes/page/SettingsPage.php:101
+#@ wplister
+msgid "Update available"
+msgstr "Update verfügbar"
+
+#: classes/page/SettingsPage.php:103
+#@ wplister
+msgid "Please visit your WordPress Updates to install the new version."
+msgstr "Sie können die neue Version im Dashboard unter Updates installieren."
+
+#: classes/page/SettingsPage.php:344
+#@ wplister
+msgid "You switched to a different eBay site."
+msgstr ""
+
+#: classes/page/SettingsPage.php:345
+#@ wplister
+msgid "Please update site specific eBay details like categories, shipping services and payment options."
+msgstr ""
+
+#: classes/page/SettingsPage.php:571
+#@ wplister
+msgid "Your license is currently active on this site."
+msgstr ""
+
+#: classes/page/SettingsPage.php:582
+#: classes/page/SettingsPage.php:585
+#: classes/page/SettingsPage.php:588
+#@ wplister
+msgid "There was a problem checking your license."
+msgstr ""
+
+#: classes/page/ToolsPage.php:165
+#@ wplister
+msgid "Orders were loaded from eBay."
+msgstr ""
+
+#: classes/page/ToolsPage.php:533
+#@ wplister
+msgid "Resize all"
+msgstr ""
+
+#: classes/page/ToolsPage.php:631
+#: classes/page/ToolsPage.php:858
+#@ wplister
+msgid "Mark all as changed"
+msgstr ""
+
+#: classes/page/ToolsPage.php:853
+#@ wplister
+msgid "Check again"
+msgstr ""
+
+#: classes/page/TransactionsPage.php:113
+#@ wplister
+msgid "Selected transaction was reverted."
+msgstr ""
+
+#: classes/page/TransactionsPage.php:175
+#@ wplister
+msgid "WP-Lister found the following duplicate transactions which should be removed."
+msgstr ""
+
+#: classes/table/EbayMessagesTable.php:111
+#@ wplister
+msgid "Reply on eBay"
+msgstr ""
+
+#: classes/table/EbayMessagesTable.php:153
+#: classes/table/EbayMessagesTable.php:321
+#@ wplister
+msgid "Unread"
+msgstr ""
+
+#: classes/table/EbayMessagesTable.php:157
+#: classes/table/EbayMessagesTable.php:315
+#@ wplister
+msgid "Read"
+msgstr ""
+
+#: classes/table/EbayMessagesTable.php:216
+#@ wplister
+msgid "Expires at"
+msgstr ""
+
+#: classes/table/EbayMessagesTable.php:260
+#@ wplister
+msgid "Update selected messages from eBay"
+msgstr ""
+
+#: classes/table/EbayMessagesTable.php:261
+#@ wplister
+msgid "Delete selected messages"
+msgstr ""
+
+#: classes/table/EbayOrdersTable.php:173
+#@ wplister
+msgid "Payment complete"
+msgstr ""
+
+#: classes/table/EbayOrdersTable.php:177
+#@ wplister
+msgid "Payment in Progress"
+msgstr ""
+
+#: classes/table/EbayOrdersTable.php:181
+#@ wplister
+msgid "The buyer's eCheck bounced"
+msgstr ""
+
+#: classes/table/ListingsTable.php:130
+#@ wplister
+msgid "Lock"
+msgstr "Sperren"
+
+#: classes/table/ListingsTable.php:131
+#@ wplister
+msgid "Unlock"
+msgstr "Entsperren"
+
+#: classes/table/ListingsTable.php:141
+#@ wplister
+msgid "Archive"
+msgstr "Archivieren"
+
+#: classes/table/ListingsTable.php:611
+#@ wplister
+msgid "archived"
+msgstr "archiviert"
+
+#: classes/table/ListingsTable.php:787
+#@ wplister
+msgid "Lock listings"
+msgstr "Produkte sperren"
+
+#: classes/table/ListingsTable.php:788
+#@ wplister
+msgid "Unlock listings"
+msgstr "Produkte entsperren"
+
+#: classes/table/ListingsTable.php:789
+#@ wplister
+msgid "Move to archive"
+msgstr "Archivieren"
+
+#: classes/table/ListingsTable.php:883
+#@ wplister
+msgid "Archived"
+msgstr "Archiviert"
+
+#: classes/table/LogTable.php:311
+#@ wplister
+msgid "Warnings"
+msgstr "Warnungen"
+
+#: classes/table/LogTable.php:324
+#@ wplister
+msgid "Partial Failure"
+msgstr ""
+
+#: views/log_page.php:58
+#: views/tools_page.php:136
+#@ wplister
+msgid "Clear log"
+msgstr ""
+
+#: views/messages_page.php:56
+#@ wplister
+msgid "Update messages"
+msgstr ""
+
+#: views/messages_page.php:57
+#@ wplister
+msgid "Update recent messages from eBay."
+msgstr ""
+
+#: views/orders_page.php:53
+#@ wplister
+msgid "Options"
+msgstr "Optionen"
+
+#: views/orders_page.php:57
+#@ wplister
+msgid "Update timespan"
+msgstr "Zeitspanne"
+
+#: views/orders_page.php:61
+#@ wplister
+msgid "-- since last updated order --"
+msgstr ""
+
+#: views/orders_page.php:62
+#@ wplister
+msgid "day"
+msgstr ""
+
+#: views/profile/edit_shipping_int.php:179
+#: views/profile/edit_shipping_loc.php:174
+#@ wplister
+msgid "Promotional shipping discount"
+msgstr ""
+
+#: views/profile/edit_shipping_int.php:194
+#@ wplister
+msgid "Ship to locations"
+msgstr "Versand nach"
+
+#: views/profile/edit_shipping_int.php:206
+#@ wplister
+msgid "Exclude locations"
+msgstr "Kein Versand nach"
+
+#: views/profile/edit_shipping_loc.php:106
+#: views/profile/edit_shipping_loc.php:142
+#@ wplister
+msgid "Enable free shipping"
+msgstr "Kostenloser Versand"
+
+#: views/profile/edit_shipping_loc.php:187
+#@ wplister
+msgid "Shipping profile"
+msgstr "Versandkostenprofil"
+
+#: views/profile/edit_shipping_loc.php:191
+#: views/profiles_edit_page.php:276
+#: views/profiles_edit_page.php:398
+#@ wplister
+msgid "no profile"
+msgstr "kein Profil"
+
+#: views/profile/edit_sidebar.php:77
+#, php-format
+#@ wplister
+msgid "update %s locked items"
+msgstr "aktualisiere %s gesperrte Artikel"
+
+#: views/profile/edit_sidebar.php:184
+#@ wplister
+msgid "Quantity Override"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:193
+#@ wplister
+msgid "auto sync"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:194
+#@ wplister
+msgid "custom qty"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:202
+#@ wplister
+msgid "Max. quantity"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:209
+#@ wplister
+msgid "Fixed quantity"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:218
+#@ wplister
+msgid "Custom quantities do not apply to locked listings."
+msgstr ""
+
+#: views/profile/edit_sidebar.php:219
+#@ wplister
+msgid "Leave this empty to use inventory sync!"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:225
+#@ wplister
+msgid "Auto replenish"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:295
+#@ wplister
+msgid "Bold title"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:352
+#@ wplister
+msgid "Var. images"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:390
+#@ wplister
+msgid "Gallery type"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:428
+#: views/profile/edit_sidebar.php:572
+#@ wplister
+msgid "Enable"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:463
+#@ wplister
+msgid "Schedule hour"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:498
+#@ wplister
+msgid "Schedule minute"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:520
+#: views/profile/edit_sidebar.php:524
+#@ wplister
+msgid "Auto Relist"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:542
+#@ wplister
+msgid "Relist after X hours"
+msgstr ""
+
+#: views/profile/edit_sidebar.php:697
+#@ wplister
+msgid "Prefilled info"
+msgstr ""
+
+#: views/profiles_edit_page.php:254
+#@ wplister
+msgid "Cash on delivery fee"
+msgstr "Nachnahmegebühr"
+
+#: views/profiles_edit_page.php:272
+#@ wplister
+msgid "Payment profile"
+msgstr "Zahlungsprofil"
+
+#: views/profiles_edit_page.php:324
+#: views/profiles_edit_page.php:349
+#: views/profiles_edit_page.php:361
+#: views/profiles_edit_page.php:375
+#@ wplister
+msgid "not specified"
+msgstr "nicht angegeben"
+
+#: views/profiles_edit_page.php:335
+#@ wplister
+msgid "Shipping cost paid by"
+msgstr "Versandkosten zahlt"
+
+#: views/profiles_edit_page.php:351
+#@ wplister
+msgid "Seller"
+msgstr "Verkäufer"
+
+#: views/profiles_edit_page.php:357
+#@ wplister
+msgid "Refund option"
+msgstr "Rückgabe"
+
+#: views/profiles_edit_page.php:394
+#@ wplister
+msgid "Return policy profile"
+msgstr "Rückgabeprofil"
+
+#: views/settings_advanced.php:94
+#@ wplister
+msgid "Roles and Capabilities"
+msgstr ""
+
+#: views/settings_advanced.php:213
+#@ wplister
+msgid "User Interface"
+msgstr ""
+
+#: views/settings_advanced.php:217
+#@ wplister
+msgid "Menu label"
+msgstr ""
+
+#: views/settings_advanced.php:222
+#@ wplister
+msgid "Customize the main admin menu label of WP-Lister."
+msgstr ""
+
+#: views/settings_advanced.php:266
+#@ wplister
+msgid "Order Processing"
+msgstr ""
+
+#: views/settings_advanced.php:270
+#@ wplister
+msgid "Disable New Order emails"
+msgstr ""
+
+#: views/settings_advanced.php:279
+#@ wplister
+msgid "Disable Processing Order emails"
+msgstr ""
+
+#: views/settings_advanced.php:288
+#@ wplister
+msgid "Disable Completed Order emails"
+msgstr ""
+
+#: views/settings_advanced.php:297
+#@ wplister
+msgid "WooCommerce sends out various notifications when an order status is changed."
+msgstr ""
+
+#: views/settings_advanced.php:298
+#@ wplister
+msgid "WP-Lister can disable these notifications when creating eBay orders in WooCommerce."
+msgstr ""
+
+#: views/settings_advanced.php:302
+#@ wplister
+msgid "Complete sale on eBay automatically"
+msgstr ""
+
+#: views/settings_advanced.php:311
+#@ wplister
+msgid "Automatically complete the sale on eBay when an order is completed in WooCommerce."
+msgstr ""
+
+#: views/settings_advanced.php:315
+#@ wplister
+msgid "Default feedback text"
+msgstr ""
+
+#: views/settings_advanced.php:320
+#@ wplister
+msgid "This is what will be sent as your seller feedback when sales are completed automatically."
+msgstr ""
+
+#: views/settings_advanced.php:326
+#@ wplister
+msgid "Create orders when"
+msgstr ""
+
+#: views/settings_advanced.php:330
+#@ wplister
+msgid "When purchase has been completed"
+msgstr ""
+
+#: views/settings_advanced.php:331
+#@ wplister
+msgid "Immediately"
+msgstr ""
+
+#: views/settings_advanced.php:334
+#@ wplister
+msgid "Orders can be created when they are downloaded or when they have been completed."
+msgstr ""
+
+#: views/settings_advanced.php:354
+#@ wplister
+msgid "Skip orders from foreign sites"
+msgstr ""
+
+#: views/settings_advanced.php:362
+#@ wplister
+msgid "Enable this option to process orders only from the selected eBay site."
+msgstr ""
+
+#: views/settings_advanced.php:367
+#@ wplister
+msgid "Apply WooCommerce taxes"
+msgstr ""
+
+#: views/settings_advanced.php:375
+#@ wplister
+msgid "Enable this to apply WooCommerce taxes for orders created on eBay."
+msgstr ""
+
+#: views/settings_advanced.php:402
+#@ wplister
+msgid "Enable Item Compatibility tab"
+msgstr ""
+
+#: views/settings_advanced.php:410
+#@ wplister
+msgid "Show eBay Item Compatibility List as new tab on single product page."
+msgstr ""
+
+#: views/settings_advanced.php:416
+#@ wplister
+msgid "External products inventory"
+msgstr ""
+
+#: views/settings_advanced.php:424
+#@ wplister
+msgid "Enable inventory management on external products."
+msgstr ""
+
+#: views/settings_dev.php:43
+#@ wplister
+msgid "This page contains some special options intended for developers and debugging."
+msgstr ""
+
+#: views/settings_dev.php:83
+#@ wplister
+msgid "eBay Token"
+msgstr "eBay-Token"
+
+#: views/settings_dev.php:87
+#, php-format
+#@ wplister
+msgid "Your token will expire in %s."
+msgstr "Ihr Token wird in %s ablaufen."
+
+#: views/settings_dev.php:91
+#@ wplister
+msgid "When it expires, you will need to re-authenticate WP-Lister with your eBay account."
+msgstr "Bevor es abläuft sollten Sie WP-Lister erneut mit Ihrem eBay-Konto verbinden."
+
+#: views/settings_dev.php:113
+#@ wplister
+msgid "This is feature intended for developers only and not recommended for end users."
+msgstr ""
+
+#: views/settings_dev.php:156
+#@ wplister
+msgid "XML Beautifier"
+msgstr ""
+
+#: views/settings_dev.php:176
+#@ wplister
+msgid "PHP error handling"
+msgstr ""
+
+#: views/settings_dev.php:180
+#@ wplister
+msgid "Production Mode"
+msgstr ""
+
+#: views/settings_dev.php:181
+#@ wplister
+msgid "Show all errors inline"
+msgstr ""
+
+#: views/settings_dev.php:182
+#@ wplister
+msgid "Show fatal errors on shutdown"
+msgstr ""
+
+#: views/settings_dev.php:183
+#@ wplister
+msgid "Show errors inline and on shutdown"
+msgstr ""
+
+#: views/settings_dev.php:184
+#@ wplister
+msgid "Show fatal and non-fatal errors on shutdown"
+msgstr ""
+
+#: views/settings_dev.php:188
+#@ wplister
+msgid "AJAX error handling"
+msgstr ""
+
+#: views/settings_dev.php:215
+#@ wplister
+msgid "eBay Messages"
+msgstr ""
+
+#: views/settings_dev.php:219
+#@ wplister
+msgid "Disabled"
+msgstr ""
+
+#: views/settings_dev.php:220
+#@ wplister
+msgid "Enabled"
+msgstr ""
+
+#: views/settings_license.php:65
+#@ wplister
+msgid "Your license is currently deactivated on this site."
+msgstr "Ihre Lizenz ist zur Zeit deaktiviert für diese Domain."
+
+#: views/settings_license.php:99
+#@ wplister
+msgid "Check license activation"
+msgstr "Lizenz überprüfen"
+
+#: views/settings_page.php:61
+#@ wplister
+msgid "eBay token valid for"
+msgstr "eBay-Token läuft ab in"
+
+#: views/settings_page.php:106
+#@ wplister
+msgid "Update Schedule"
+msgstr "Nächster Abgleich"
+
+#: views/settings_page.php:274
+#@ wplister
+msgid "Status for completed orders"
+msgstr ""
+
+#: views/settings_page.php:283
+#@ wplister
+msgid "Status for unpaid orders"
+msgstr ""
+
+#: views/settings_page.php:288
+#@ wplister
+msgid "on-hold"
+msgstr ""
+
+#: views/settings_page.php:289
+#@ wplister
+msgid "pending"
+msgstr ""
+
+#: views/settings_page.php:293
+#@ wplister
+msgid "Create customers"
+msgstr ""
+
+#: views/settings_page.php:345
+#@ wplister
+msgid "Always show link to eBay for auctions and fixed price items"
+msgstr ""
+
+#: views/tools_page.php:164
+#@ wplister
+msgid "and update your seller profiles for shipping, payment and return policy."
+msgstr ""
+
+#: views/tools_page.php:205
+#@ wplister
+msgid "Inventory Check"
+msgstr ""
+
+#: views/tools_page.php:212
+#@ wplister
+msgid "Check product inventory"
+msgstr ""
+
+#: views/tools_page.php:213
+#@ wplister
+msgid "Check all published listings and find products with different stock or price in WooCommerce."
+msgstr ""
+
+#: views/tools_page.php:224
+#@ wplister
+msgid "Check product stock"
+msgstr ""
+
+#: views/tools_page.php:225
+#@ wplister
+msgid "Check all published listings and find products which are out of stock in WooCommerce."
+msgstr ""
+
+#: views/tools_page.php:236
+#@ wplister
+msgid "Other"
+msgstr "Sonstiges"
+
+#: views/tools_page.php:243
+#@ wplister
+msgid "Check product images"
+msgstr ""
+
+#: views/tools_page.php:244
+#@ wplister
+msgid "Check all listings for product images smaller than 500px."
+msgstr ""
+
+#: views/tools_page.php:252
+#@ wplister
+msgid "Check transactions"
+msgstr ""
+
+#: views/tools_page.php:253
+#@ wplister
+msgid "Fix missing transactions and check for duplicates."
+msgstr ""
+
+#: views/tools_page.php:279
+#@ wplister
+msgid "Test PHP time limit"
+msgstr ""
+
+#: views/tools_page.php:281
+#@ wplister
+msgid "Test if your server regards the PHP max_execution_time setting"
+msgstr ""
+
+#: views/tools_page.php:331
+#@ wplister
+msgid "Clear debug log"
+msgstr ""
+
+#: views/tools_page.php:332
+#@ wplister
+msgid "Current log file size"
+msgstr ""
 

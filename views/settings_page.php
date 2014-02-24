@@ -78,7 +78,7 @@
 										<form method="post" id="removeTokenForm" action="<?php echo $wpl_form_action; ?>">
 											<?php wp_nonce_field( 'remove_token' ); ?>
 											<input type="hidden" name="action" value="remove_token" >
-											<input type="submit" value="<?php echo __('Change Account','wplister'); ?>" id="remove_token" class="button-secondary" name="remove_token">
+											<input type="submit" value="<?php echo __('Change Account','wplister'); ?>" id="remove_token" class="button" name="remove_token">
 										</form>
 										</div>
 									<?php elseif ( $wpl_text_ebay_token ): ?>
@@ -86,7 +86,7 @@
 										<form method="post" id="removeTokenForm" action="<?php echo $wpl_form_action; ?>">
 											<?php wp_nonce_field( 'remove_token' ); ?>
 											<input type="hidden" name="action" value="remove_token" >
-											<input type="submit" value="<?php echo __('Reset Account','wplister'); ?>" id="remove_token" class="button-secondary" name="remove_token">
+											<input type="submit" value="<?php echo __('Reset Account','wplister'); ?>" id="remove_token" class="button" name="remove_token">
 										</form>
 										</div>
 									<?php endif; ?>
@@ -108,8 +108,9 @@
 
 							<p>
 							<?php if ( wp_next_scheduled( 'wplister_update_auctions' ) ) : ?>
-								<?php echo __('Next scheduled update','wplister'); ?>: 
+								<?php echo __('Next scheduled update','wplister'); ?> 
 								<?php echo human_time_diff( wp_next_scheduled( 'wplister_update_auctions' ), current_time('timestamp',1) ) ?>
+								<?php echo wp_next_scheduled( 'wplister_update_auctions' ) < current_time('timestamp',1) ? 'ago' : '' ?>
 							<?php else: ?>
 								<span style="color:darkred; font-weight:bold">
 									Warning: Update schedule is disabled.
@@ -126,7 +127,7 @@
 						<h3 class="hndle"><span><?php echo __('PayPal','wplister') ?></span></h3>
 						<div class="inside">
 
-							<label for="wpl-text_paypal_email-field" class="text_label"><?php echo __('PayPal account','wplister'); ?>:</label>
+							<label for="wpl-text_paypal_email-field" class="text_label"><?php echo __('PayPal account','wplister'); ?></label>
 							<input type="text" name="wpl_e2e_text_paypal_email" id="wpl-text_paypal_email-field" value="<?php echo $wpl_text_paypal_email; ?>" class="text_input" />
 							<p class="desc" style="display: block;">
 								<?php echo __('To use PayPal you need to enter your PayPal address.','wplister'); ?>
@@ -161,7 +162,7 @@
 													<option value="<?php echo $site_id ?>" <?php if ( $wpl_text_ebay_site_id == $site_id ): ?>selected="selected"<?php endif; ?>><?php echo $site_name ?></option>					
 												<?php endforeach; ?>
 											</select>
-											<?php echo __('Select the eBay site you want to list your items on:','wplister') ?>:
+											<?php echo __('Select the eBay site you want to list your items on:','wplister') ?>
 											<br>
 											<small>
 											If you want to change the site later, you will need to go through setup again. <br>
@@ -170,7 +171,7 @@
 								</li>
 									<li>
 										<a style="float:right;" href="<?php echo $wpl_auth_url; ?>" class="button-primary" target="_blank">Connect with eBay</a>
-										<?php echo __('Click "Connect with eBay" to sign in to eBay and grant access for WP-Lister','wplister') ?>:
+										<?php echo __('Click "Connect with eBay" to sign in to eBay and grant access for WP-Lister','wplister') ?>
 										<br>
 										<small>This will open the eBay Sign In page in a new window.</small><br>
 										<small>Please sign in, grant access for WP-Lister and close the new window to come back here.</small>
@@ -178,8 +179,8 @@
 									<li>
 										<form id="frmFetchToken" method="post" action="<?php echo $wpl_form_action; ?>">
 											<input type="hidden" name="action" value="FetchToken" >
-											<input  style="float:right;" type="submit" value="<?php echo __('Fetch eBay Token','wplister') ?>" name="submit" class="button-secondary">
-											<?php echo __('After linking WP-Lister with your eBay account, click here to fetch your token','wplister') ?>:
+											<input  style="float:right;" type="submit" value="<?php echo __('Fetch eBay Token','wplister') ?>" name="submit" class="button">
+											<?php echo __('After linking WP-Lister with your eBay account, click here to fetch your token','wplister') ?>
 											<br>
 											<small>
 											After retrieving your token, we will proceed with the first time set up. 
@@ -207,7 +208,7 @@
 						<h3 class="hndle"><span><?php echo __('eBay settings','wplister') ?></span></h3>
 						<div class="inside">
 
-							<label for="wpl-text-ebay_site_id" class="text_label"><?php echo __('eBay site','wplister'); ?>:</label>
+							<label for="wpl-text-ebay_site_id" class="text_label"><?php echo __('eBay site','wplister'); ?></label>
 							<select id="wpl-text-ebay_site_id" name="wpl_e2e_text_ebay_site_id" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 								<?php foreach ($wpl_ebay_sites as $site_id => $site_name) : ?>

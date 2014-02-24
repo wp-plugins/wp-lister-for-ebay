@@ -40,7 +40,7 @@
 										<input type="text" name="wpl_e2e_loc_shipping_options_flat[][add_price]" 
 											value="<?php echo @$service['add_price']; ?>" class="price_input field_add_price" />
 									</td><td>
-										<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary" 
+										<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button" 
 											onclick="jQuery(this).parent().parent().remove();" />
 									</td>
 								</tr>
@@ -73,7 +73,7 @@
 										<?php ProfilesPage::wpl_generate_shipping_option_tags( $wpl_loc_calc_shipping_options, $service ) ?>											
 										</select>
  									</td><td>
-										<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary" 
+										<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button" 
 											onclick="jQuery(this).parent().parent().remove();" />
 									</td>
 								</tr>
@@ -85,22 +85,9 @@
 								id="btn_add_loc_shipping_option" 
 								name="btn_add_loc_shipping_option" 
 								onclick="handleAddShippingServiceRow('local');"
-								class="button-secondary button-add-shipping-option">
+								class="button button-add-shipping-option">
 
 							<div class="service_table_calc loc_service_table_calc" style="border-top:1px solid #ccc; margin-top:10px; padding-top:10px;">
-
-								<label class="text_label">
-									<?php echo __('Package type','wplister'); ?>
-		                            <?php wplister_tooltip('<b>Shipping Package</b><br>The nature of the package used to ship the item(s). This is required to calculate the shipping costs.') ?>
-								</label>
-								<select name="wpl_e2e_shipping_package" id="wpl-shipping_package" 
-										title="Type" class="required-entry select select_shipping_package" style="width:auto">
-									<?php foreach ($wpl_available_shipping_packages as $shipping_package) : ?>
-										<option value="<?php echo $shipping_package->ShippingPackage ?>" <?php if ( @$item_details['shipping_package'] == $shipping_package->ShippingPackage ): ?>selected="selected"<?php endif; ?>><?php echo $shipping_package->Description ?></option>
-									<?php endforeach; ?>
-								</select>
-								<br class="clear" />
-
 
 								<label class="text_label">
 									<?php echo __('Shipping discount profile','wplister'); ?>
@@ -162,6 +149,23 @@
 								</select>
 								<br class="clear" />
 								
+							</div>
+
+							<!-- package type is required if either local or international are set to calc -->
+							<div class="service_table_calc loc_service_table_calc int_service_table_calc">
+
+								<label class="text_label">
+									<?php echo __('Package type','wplister'); ?>
+		                            <?php wplister_tooltip('<b>Shipping Package</b><br>The nature of the package used to ship the item(s). This is required to calculate the shipping costs.') ?>
+								</label>
+								<select name="wpl_e2e_shipping_package" id="wpl-shipping_package" 
+										title="Type" class="required-entry select select_shipping_package" style="width:auto">
+									<?php foreach ($wpl_available_shipping_packages as $shipping_package) : ?>
+										<option value="<?php echo $shipping_package->ShippingPackage ?>" <?php if ( @$item_details['shipping_package'] == $shipping_package->ShippingPackage ): ?>selected="selected"<?php endif; ?>><?php echo $shipping_package->Description ?></option>
+									<?php endforeach; ?>
+								</select>
+								<br class="clear" />
+
 							</div>
 
 							<div class="service_table_flat service_table_calc" >

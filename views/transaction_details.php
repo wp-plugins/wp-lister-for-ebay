@@ -34,7 +34,7 @@
             <td>            
                 <b>eBay Buyer:</b>
             </td><td>
-                <?php echo $d->Buyer->UserID ?>
+                <?php echo $d->Buyer->UserID ? $d->Buyer->UserID : $wpl_transaction['buyer_userid'] ?>
             </td>
         </tr>
         <tr>
@@ -62,17 +62,17 @@
         <tr><td width="50%">
             
             <b>Shipping address:</b><br>
-            <?php echo $d->Buyer->BuyerInfo->ShippingAddress->Name ?> <br>
-            <?php echo $d->Buyer->BuyerInfo->ShippingAddress->Street1 ?> <br>
-            <?php if ($d->Buyer->BuyerInfo->ShippingAddress->Street2): ?>
+            <?php echo @$d->Buyer->BuyerInfo->ShippingAddress->Name ? $d->Buyer->BuyerInfo->ShippingAddress->Name : $wpl_transaction['buyer_name']?> <br>
+            <?php echo @$d->Buyer->BuyerInfo->ShippingAddress->Street1 ?> <br>
+            <?php if (@$d->Buyer->BuyerInfo->ShippingAddress->Street2): ?>
             <?php echo $d->Buyer->BuyerInfo->ShippingAddress->Street2 ?> <br>
             <?php endif; ?>
-            <?php echo $d->Buyer->BuyerInfo->ShippingAddress->PostalCode ?> 
-            <?php echo $d->Buyer->BuyerInfo->ShippingAddress->CityName ?> <br>
-            <?php echo $d->Buyer->BuyerInfo->ShippingAddress->CountryName ?> <br>
+            <?php echo @$d->Buyer->BuyerInfo->ShippingAddress->PostalCode ?> 
+            <?php echo @$d->Buyer->BuyerInfo->ShippingAddress->CityName ?> <br>
+            <?php echo @$d->Buyer->BuyerInfo->ShippingAddress->CountryName ?> <br>
             <br>
             <b>Shipping service:</b><br>
-            <?php echo $d->ShippingServiceSelected->ShippingService ?> <br>
+            <?php echo @$d->ShippingServiceSelected->ShippingService ?> <br>
             <br>
 
         </td><td width="50%">
@@ -158,6 +158,11 @@
             <?php endforeach; ?>
 
         </table>
+
+        <?php if ( get_option('wplister_log_level') ) : ?>
+            <h2>Debug data</h2>
+            <pre><?php print_r($wpl_transaction['history']) ?></pre>
+        <?php endif; ?>
 
     <?php endif; ?>
     

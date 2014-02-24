@@ -35,6 +35,8 @@ class ListingsModel extends WPL_Model {
 		$listing_status = ( isset($_REQUEST['listing_status']) ? $_REQUEST['listing_status'] : 'all');
 		if ( $listing_status == 'all' ) {
 			$where_sql = "WHERE NOT status = 'archived' ";
+		} elseif ( $listing_status == 'relist' ) {
+			$where_sql = "WHERE ( status = 'ended' OR status = 'sold' ) AND quantity > 0 ";
 		} else {
 			$where_sql = "WHERE status = '".$listing_status."' ";
 		} 
@@ -279,6 +281,14 @@ class ListingsModel extends WPL_Model {
 			$status = $row->status;
 			$summary->$status = $row->total;
 		}
+
+		// count relist candidates
+		$relist = $wpdb->get_var("
+			SELECT COUNT( id ) AS relist
+			FROM $this->tablename
+			WHERE ( status = 'ended' OR status = 'sold' ) AND quantity > 0
+		");
+		$summary->relist = $relist;
 
 		// count total items as well
 		$total_items = $wpdb->get_var("
@@ -1459,12 +1469,15 @@ class ListingsModel extends WPL_Model {
 		}
 
 		// set status to ended if end_date is in the past
-		if ( time() > mysql2date('U', $data['end_date']) ) {
+		// if ( time() > mysql2date('U', $data['end_date']) ) {
+
+		// set status to ended if ListingStatus is Ended or Completed
+		if ( $Detail->SellingStatus->ListingStatus != 'Active' ) {
 			$data['status'] 		= 'ended';
 
 			// but mark as sold if no stock remaining
-			$lm = new ListingsModel();
-			$item = $lm->getItemByEbayID( $data['ebay_id'] );
+			// $lm = new ListingsModel();
+			$item = $this->getItemByEbayID( $data['ebay_id'] );
 			if ( $item && ! $this->checkStockLevel( $item ) ) $data['status'] = 'sold';
 
 		} else {
@@ -1494,7 +1507,7 @@ class ListingsModel extends WPL_Model {
 		// update
 		$wpdb->update( $this->tablename, $data, array( 'id' => $id ) );
 
-		$this->logger->info('sql: '.$wpdb->last_query );
+		$this->logger->debug('sql: '.$wpdb->last_query );
 		$this->logger->info( mysql_error() );
 	}
 
@@ -1506,7 +1519,24 @@ class ListingsModel extends WPL_Model {
 		$items = $this->getAllPastEndDate();
 
 		foreach ($items as $item) {
-			$wpdb->update( $this->tablename, array( 'status' => 'ended' ), array( 'id' => $item['id'] ) );
+			// if quantity sold is greater than quantity, mark as sold instead of ended
+			// $status = intval( $item['quantity_sold'] ) < intval( $item['quantity'] ) ? 'ended' : 'sold';
+			
+			// default status is ended
+			$status = 'ended';
+			
+			// check eBay available quantity first - if all were sold 
+			if ( intval( $item['quantity_sold'] ) >= intval( $item['quantity'] ) ) {
+
+				// if eBay indicates item was sold, check WooCommerce stock - updateDetails does the same
+				$item = $this->getItemByEbayID( $data['ebay_id'] );
+				if ( $item && ! $this->checkStockLevel( $item ) ) 
+					$status = 'sold';
+
+			}
+
+			$wpdb->update( $this->tablename, array( 'status' => $status ), array( 'id' => $item['id'] ) );
+			$this->logger->info('updateEndedListings() changed item '.$item['ebay_id'].' to status '.$status);
 		}
 
 
@@ -1654,6 +1684,17 @@ class ListingsModel extends WPL_Model {
 			SELECT * 
 			FROM $this->tablename
 			WHERE status = 'ended'
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
+	function getAllRelisted() {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE status = 'relisted'
 			ORDER BY id DESC
 		", ARRAY_A);		
 
@@ -1951,7 +1992,12 @@ class ListingsModel extends WPL_Model {
 		$post_content = $post_content ? $post_content : $post->post_content;
 
 		// skip pending products and drafts
-		if ( $post->post_status != 'publish' ) return false;
+		if ( $post->post_status != 'publish' ) { 
+			if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'wpl_prepare_single_listing' )
+				$this->showMessage( __('Skipped product draft','wplister') . ': ' . $post_title, 2, 1 );
+			return false; 
+		}
+
 
 		// support for qTranslate
 		if ( function_exists('qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage') ) {

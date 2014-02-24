@@ -317,6 +317,7 @@ class EbayController {
         $sm->downloadDispatchTimes( $this->session );      
         $sm->downloadShippingPackages( $this->session );      
         $sm->downloadShippingDiscountProfiles( $this->session );      
+        $sm->downloadExcludeShippingLocations( $this->session );
     }
 
     // load shipping services and insert to db
@@ -781,6 +782,10 @@ class EbayController {
         // send request
         $res = $this->sp->GetUserPreferences($req);
         // echo "<pre>";print_r($res);echo"</pre>";#die();
+
+        // handle response error
+        if ( 'EbatNs_ResponseError' == get_class( $res ) )
+            return false;
 
         $SellerProfileOptedIn = $res->SellerProfilePreferences->SellerProfileOptedIn;
         update_option('wplister_ebay_seller_profiles_enabled', $SellerProfileOptedIn ? 'yes' : 'no' );

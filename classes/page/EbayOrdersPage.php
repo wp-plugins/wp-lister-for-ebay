@@ -100,11 +100,12 @@ class EbayOrdersPage extends WPL_Page {
 			}
 		}
 
-		// handle delete action
-		if ( $this->requestAction() == 'delete' ) {
+		// handle wpl_delete_order action
+		if ( $this->requestAction() == 'wpl_delete_order' ) {
 			if ( isset( $_REQUEST['ebay_order'] ) ) {
 				$tm = new EbayOrdersModel();
-				foreach ( $_REQUEST['ebay_order'] as $id ) {
+				$ebay_orders = is_array( $_REQUEST['ebay_order'] ) ? $_REQUEST['ebay_order'] : array( $_REQUEST['ebay_order'] );
+				foreach ( $ebay_orders as $id ) {
 					$tm->deleteItem( $id );
 				}
 				$this->showMessage( __('Selected items were removed.','wplister') );
@@ -143,8 +144,9 @@ class EbayOrdersPage extends WPL_Page {
 		$om = new EbayOrdersModel();
 		$duplicateOrders = $om->getAllDuplicateOrders();
 		if ( ! empty($duplicateOrders) ) {
+
 			// built message
-			$msg  = '<p><b>Warning: '.__('There are duplicate orders for','wplister').' '.join(',',$duplicateOrders).'</b>';
+			$msg  = '<p><b>Warning: '.__('There are duplicate orders for','wplister').' '.join(', ',$duplicateOrders).'</b>';
 			$msg .= '<br>';
 			$msg .= 'This can happen when the scheduled order update is triggered twice at the same time - which is a rare <a href="http://wordpress.stackexchange.com/a/122805" target="_blank">race condition issue</a> in the WordPress scheduling system WP-Cron.';
 			$msg .= '<br><br>';
@@ -153,6 +155,103 @@ class EbayOrdersPage extends WPL_Page {
 			$msg .= 'plugin to set up a dedicated cron job on your server and ';
 			$msg .= '<a href="http://bloglow.com/tutorials/how-to-and-why-you-should-disable-wordpress-cron/" target="_blank">disable WP-Cron entirely</a>.';
 			$msg .= '</p>';
+
+
+			// built message
+			// $msg  = '<p><b>Warning: '.__('WP-Lister found the following duplicate transactions which should be removed.','wplister').'</b>';
+			$msg .= '<p>';
+
+			// table header
+			$msg .= '<table style="width:100%">';
+			$msg .= "<tr>";
+			$msg .= "<th style='text-align:left'>Date</th>";
+			$msg .= "<th style='text-align:left'>Order ID</th>";
+			$msg .= "<th style='text-align:left'>Total</th>";
+			$msg .= "<th style='text-align:left'>Items</th>";
+			$msg .= "<th style='text-align:left'>Last modified</th>";
+			// $msg .= "<th style='text-align:left'>eBay ID</th>";
+			// $msg .= "<th style='text-align:left'>Stock red.</th>";
+			// $msg .= "<th style='text-align:left'>New Stock</th>";
+			$msg .= "<th style='text-align:left'>Status</th>";
+			$msg .= "<th style='text-align:left'>&nbsp;</th>";
+			$msg .= "</tr>";
+
+			// table rows
+			foreach ($duplicateOrders as $order_id) {
+
+				// $transactions = $tm->getAllTransactionsByTransactionID( $order_id );
+				$last_order_id = false;
+
+				$orders = $om->getAllOrderByOrderID( $order_id );
+				foreach ($orders as $order) {
+
+					// get column data
+					// $qty     = $order['quantity'];
+					// $stock   = $order['stock'] . ' x ';
+					// $title   = $order['auction_title'];
+					// $post_id = $order['post_id'];
+					// $ebay_id = $order['ebay_id'];
+
+					// build links
+					// $ebay_url = $order['ViewItemURL'] ? $order['ViewItemURL'] : $ebay_url = 'http://www.ebay.com/itm/'.$ebay_id;
+					// $ebay_link = '<a href="'.$ebay_url.'" target="_blank">'.$ebay_id.'</a>';
+					// $edit_link = '<a href="post.php?action=edit&post='.$post_id.'" target="_blank">'.$title.'</a>';
+
+					// check if stock was reduced
+					// list( $reduced_product_id, $new_stock_value ) = $tm->checkIfStockWasReducedForItemID( $order, $order['item_id'] );
+
+					// color results
+					$color_id = 'silver';
+					if ( $order_id != $last_order_id ) {
+						$color_id = 'black';
+						$last_order_id = $order_id;						
+					}
+
+					$color_status = 'auto';
+					if ( $order['CompleteStatus'] == 'Completed' ) {
+						$color_status = 'darkgreen';
+					}
+					if ( $order['CompleteStatus'] == 'Cancelled' ) {
+						$color_status = 'silver';
+					}
+
+					// built buttons
+					$actions = '';
+					// if ( $order['status'] != 'reverted' && $order['CompleteStatus'] != 'Completed' ) {
+						$button_label = 'Remove';
+						$url = 'admin.php?page=wplister-orders&action=wpl_delete_order&ebay_order='.$order['id'];
+						$actions = '<a href="'.$url.'" class="button button-small">'.$button_label.'</a>';
+					// }
+
+					// build table row
+					$msg .= "<tr>";
+					$msg .= "<td>".$order['date_created']."</td>";
+					$msg .= "<td style='color:$color_id'>".$order['order_id']."</td>";
+					$msg .= "<td>".woocommerce_price($order['total'])."</td>";
+					$msg .= "<td>".count($order['items'])."</td>";
+					$msg .= "<td>".$order['LastTimeModified']."</td>";
+					// $msg .= "<td>".$order['item_id']."</td>";
+					// $msg .= "<td>".$reduced_product_id."</td>";
+					// $msg .= "<td>".$new_stock_value."</td>";
+					$msg .= "<td style='color:$color_status'>".$order['CompleteStatus']."</td>";
+					$msg .= "<td>".$actions."</td>";
+					// $msg .= "<td>$edit_link (ID $post_id)</td>";
+					// $msg .= "<td>$qty x </td>";
+					// $msg .= "<td>$ebay_link</td>";
+					$msg .= "</tr>";
+
+				}
+			}
+			$msg .= '</table>';
+
+			$msg .= '<br>';
+			// $msg .= $table;
+			// $msg .= '<br>';
+			// $msg .= 'This is caused by...';
+			// $msg .= '<br><br>';
+			// $msg .= 'To fix this... ';
+			$msg .= '</p>';
+
 			$this->showMessage( $msg, 1 );				
 		}
 	}

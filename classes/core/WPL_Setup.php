@@ -917,6 +917,83 @@ class WPL_Setup extends WPL_Core {
 		}
 
 
+		// upgrade to version 31  (1.3.5.4)
+		if ( 31 > $db_version ) {
+			$new_db_version = 31;
+
+			// add indices to ebay_log table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_log` ADD INDEX `timestamp` (`timestamp`) ";
+			$wpdb->query($sql);	echo mysql_error();
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_log` ADD INDEX `callname` (`callname`) ";
+			$wpdb->query($sql);	echo mysql_error();
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_log` ADD INDEX `success` (`success`) ";
+			$wpdb->query($sql);	echo mysql_error();
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+		// upgrade to version 32  (1.3.5.5)
+		if ( 32 > $db_version ) {
+			$new_db_version = 32;
+
+			// add column to ebay_transactions table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
+			        ADD COLUMN `order_id` varchar(64) DEFAULT NULL AFTER `transaction_id`
+			";
+			$wpdb->query($sql);	echo mysql_error();
+
+			// add indices to ebay_transactions table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions` ADD INDEX `item_id` (`item_id`) ";
+			$wpdb->query($sql);	echo mysql_error();
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions` ADD INDEX `transaction_id` (`transaction_id`) ";
+			$wpdb->query($sql);	echo mysql_error();
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions` ADD INDEX `order_id` (`order_id`) ";
+			$wpdb->query($sql);	echo mysql_error();
+	
+			// add index to ebay_orders table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_orders` ADD INDEX `order_id` (`order_id`) ";
+			$wpdb->query($sql);	echo mysql_error();
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+		// upgrade to version 33  (1.3.5.6)
+		if ( 33 > $db_version ) {
+			$new_db_version = 33;
+
+			global $oWPL_WPLister;
+			$more_orders_to_process = $oWPL_WPLister->pages['tools']->checkTransactions();
+
+			// check if database upgrade is finished yet
+			if ( $more_orders_to_process ) {
+				$msg  = __('WP-Lister database upgrade in progress', 'wplister') .'...';
+				if ( ($msg) && (!$hide_message) ) self::showMessage($msg);	
+				return;
+			} else {
+				update_option('wplister_db_version', $new_db_version);
+				$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			}
+		}
+
+		// upgrade to version 34  (1.3.5.7)
+		if ( 34 > $db_version ) {
+			$new_db_version = 34;
+
+			// fetch exclude shipping locations
+			if ( get_option('wplister_ebay_token') != '' ) {
+				$this->initEC();
+	    	    $sm = new EbayShippingModel();
+    	    	$result = $sm->downloadExcludeShippingLocations( $this->EC->session );      
+				$this->EC->closeEbay();		
+			}
+			
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+
 		// show update message
 		if ( ($msg) && (!$hide_message) ) self::showMessage($msg);		
 
@@ -1092,7 +1169,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query("UPDATE ".$wpdb->prefix."ebay_auctions SET end_date       = NULL WHERE end_date       = '0000-00-00 00:00:00' ");
 			$wpdb->query("UPDATE ".$wpdb->prefix."ebay_auctions SET relist_date    = NULL WHERE relist_date    = '0000-00-00 00:00:00' ");
 			$wpdb->query("UPDATE ".$wpdb->prefix."ebay_auctions SET date_finished  = NULL WHERE date_finished  = '0000-00-00 00:00:00' ");
-			$this->showMessage( __('Repaired DB rows: ','wplister') . $rows_null_count );
+			$this->showMessage( 'Repaired DB rows: ' . $rows_null_count );
 			echo mysql_error();
 		}
 

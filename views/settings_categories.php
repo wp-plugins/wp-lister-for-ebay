@@ -39,14 +39,15 @@
 	.row-actions {
 		display: block;
 		position: absolute;
-		top: 0;
+		top: -3px;
 		right: 0;
 		padding: 0;
 	}
-	.row-actions input.button-secondary {
+	table.categories .row-actions input.button {
 		margin: 0;
-		/*line-height: 10px;*/
-		padding: 2px 8px;
+		height: 25px;
+		line-height: 24px;
+		/*padding: 2px 8px;*/
 	}
 
 </style>
@@ -91,8 +92,8 @@
         </div>
 
 		<div class="submit" style="padding-top: 0; float: right;">
-            <input type="button" value="<?php echo __('Select default category','wplister') ?>" class="button-secondary btn_select_default_category">
-	        <a href="#" onclick="jQuery('#import_export_container').slideToggle();return false;" class="button-secondary"><?php echo __('Import / Export','wplister'); ?></a> 
+            <input type="button" value="<?php echo __('Select default category','wplister') ?>" class="button btn_select_default_category">
+	        <a href="#" onclick="jQuery('#import_export_container').slideToggle();return false;" class="button"><?php echo __('Import / Export','wplister'); ?></a> 
 			<input type="submit" value="<?php echo __('Update','wplister') ?>" name="submit" class="button-primary">
 		</div>
 	
@@ -106,13 +107,13 @@
         <h3><?php echo __('Backup and restore category mappings','wplister'); ?></h3>
 
             <p>
-                <a href="<?php echo $wpl_form_action ?>&action=wplister_export_categories_map" class="button-secondary"><?php echo __('Export category mappings','wplister'); ?></a> 
+                <a href="<?php echo $wpl_form_action ?>&action=wplister_export_categories_map" class="button"><?php echo __('Export category mappings','wplister'); ?></a> 
             </p>
 
             <p>
                 <form id="upload_json" method="post" action="<?php echo $wpl_form_action; ?>" enctype="multipart/form-data" >
 
-                    <a href="#" onclick="alert('Please select a file using the button right next to this button.');return false;" class="button-secondary"><?php echo __('Import category mappings','wplister'); ?></a> 
+                    <a href="#" onclick="alert('Please select a file using the button right next to this button.');return false;" class="button"><?php echo __('Import category mappings','wplister'); ?></a> 
 
                     <input type="hidden" name="action" value="wplister_import_categories_map" />
                     <input type="file" name="wpl_file_upload" onchange="this.form.submit();" />

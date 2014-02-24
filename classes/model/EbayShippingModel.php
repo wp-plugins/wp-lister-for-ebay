@@ -112,6 +112,24 @@ class EbayShippingModel extends WPL_Model {
 		
 	}
 
+	function downloadExcludeShippingLocations($session, $siteid = 77)
+	{
+		$this->initServiceProxy($session);
+		
+		// download the list of exludeable shipping locations 
+		$req = new GeteBayDetailsRequestType();
+        $req->setDetailName( 'ExcludeShippingLocationDetails' );
+		
+		$res = $this->_cs->GeteBayDetails($req);
+
+		// save $locations as serialized array
+		foreach ($res->ExcludeShippingLocationDetails as $Location) {
+			$locations[$Location->Location] = $Location->Description;
+		}
+		update_option( 'wplister_ExcludeShippingLocationDetails', serialize($locations) );
+		
+	}
+
 	function downloadCountryDetails($session, $siteid = 77)
 	{
 		$this->initServiceProxy($session);
@@ -337,6 +355,12 @@ class EbayShippingModel extends WPL_Model {
 	function getShippingLocations() {
 		$locations = maybe_unserialize( get_option( 'wplister_ShippingLocationDetails' ) );
 		// $this->logger->info('wplister_ShippingLocationDetails'.print_r($locations,1));
+		if ( ! is_array($locations) ) return array();
+		return $locations;
+	}
+	function getExcludeShippingLocations() {
+		$locations = maybe_unserialize( get_option( 'wplister_ExcludeShippingLocationDetails' ) );
+		// $this->logger->info('wplister_ExcludeShippingLocationDetails'.print_r($locations,1));
 		if ( ! is_array($locations) ) return array();
 		return $locations;
 	}

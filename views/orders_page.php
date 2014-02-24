@@ -34,24 +34,25 @@
 		<?php if ( wp_next_scheduled( 'wplister_update_auctions' ) ) : ?>
 			<?php echo __('Next scheduled update','wplister'); ?>: 
 			<?php echo human_time_diff( wp_next_scheduled( 'wplister_update_auctions' ), current_time('timestamp',1) ) ?>
+			<?php echo wp_next_scheduled( 'wplister_update_auctions' ) < current_time('timestamp',1) ? 'ago' : '' ?>
 		<?php else: ?>
 			<?php echo __('Automatic background updates are currently disabled.','wplister'); ?>
 		<?php endif; ?>
 		</p>
 
 		<div class="submit" style="padding-top: 0; float: right;">
-			<a href="admin.php?page=wplister-transactions" class="button-secondary" title="View transactions from before switching to orders"><?php echo __('View transactions','wplister') ?></a>
+			<a href="admin.php?page=wplister-transactions" class="button" title="View transactions from before switching to orders"><?php echo __('View transactions','wplister') ?></a>
 		</div>
 
 		<form method="post" action="<?php echo $wpl_form_action; ?>">
-			<div class="submit" style="padding-top: 0; float: left;">
+			<p>
 				<?php #wp_nonce_field( 'e2e_tools_page' ); ?>
 				<input type="hidden" name="action" value="update_orders" />
-				<input type="submit" value="<?php echo __('Update orders','wplister') ?>" name="submit" class="button-secondary"
+				<input type="submit" value="<?php echo __('Update orders','wplister') ?>" name="submit" class="button"
 					   title="<?php echo __('Update recent orders from eBay.','wplister') ?>">
-				&nbsp; <a href="#" onclick="jQuery('#wpl_advanced_order_options').toggle();return false;" class="button-secondary"><?php echo __('Options','wplister') ?></a>
-			</div>
-			<!br style="clear:both;"/>
+				&nbsp; <a href="#" onclick="jQuery('#wpl_advanced_order_options').toggle();return false;" class="button"><?php echo __('Options','wplister') ?></a>
+			</p>
+
 			<div id="wpl_advanced_order_options" class="submit" style="display:none; padding-top: 0; float:left; clear:both">
 				<label for="wpl_number_of_days" class="text_label"><?php echo __('Update timespan','wplister'); ?></label>
 				<select name="wpl_number_of_days" id="wpl_number_of_days" 

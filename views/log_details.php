@@ -132,8 +132,8 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
         	margin-top: 15px;
         	padding: 20px;
         	padding-top: 0;
-        	background-color:#ffc;
-        	border: 1px solid #cca;
+        	background-color:#eee;
+        	border: 1px solid #ccc;
         	display: none;
         }
         #support_request_wrap label {
@@ -176,8 +176,8 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
 
 		<div style="float:right;margin-top:10px;">
 			<!-- <a href="<?php echo $_SERVER['REQUEST_URI']; ?>&send_to_support=yes" target="_blank">send to support</a> &middot; -->
-			<a href="#" onclick="jQuery('#support_request_wrap').slideToggle();return false;" class="button-secondary"><?php echo __('Send to support','wplister') ?></a>&nbsp;
-			<a href="<?php echo $_SERVER['REQUEST_URI']; ?>&new_tab=yes" target="_blank" class="button-secondary">Open in new tab</a>
+			<a href="#" onclick="jQuery('#support_request_wrap').slideToggle();return false;" class="button"><?php echo __('Send to support','wplister') ?></a>&nbsp;
+			<a href="<?php echo $_SERVER['REQUEST_URI']; ?>&new_tab=yes" target="_blank" class="button">Open in new tab</a>
 		</div>
 	<?php endif; ?>
 

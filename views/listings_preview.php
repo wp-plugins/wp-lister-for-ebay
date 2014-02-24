@@ -109,7 +109,7 @@
 				<td class="images" style="width:310px;" valign="top">
 
 					<div class="main_image_wrapper">					
-						<span class="helper"></span><img src="<?php echo @$wpl_item->PictureDetails->GalleryURL ?>" /> <!-- this has to be a single line -->
+						<span class="helper"></span><img id="main_image_tag" src="<?php echo @$wpl_item->PictureDetails->GalleryURL ?>" title=""/> <!-- this has to be a single line -->
 					</div>
 
 					<center class="zoomlink">
@@ -430,7 +430,7 @@
 
 							<tr>
 								<th class="vi-is1-lbl">
-									Category:
+									eBay Category:
 								</th>
 								<td colspan="3" class="vi-is1-clr">
 									<?php 
@@ -447,6 +447,28 @@
 							<tr>
 								<td colspan="4" height="10"></td>
 							</tr>
+
+							<?php if ( $wpl_item->Storefront->StoreCategoryID ) : ?>
+							<tr>
+								<th class="vi-is1-lbl">
+									Store Category:
+								</th>
+								<td colspan="3" class="vi-is1-clr">
+									<?php 
+
+										if ( $wpl_item->Storefront->StoreCategoryID )
+											echo EbayCategoriesModel::getFullStoreCategoryName( $wpl_item->Storefront->StoreCategoryID );
+
+										if ( $wpl_item->Storefront->StoreCategory2ID )
+											echo '<br>'.EbayCategoriesModel::getFullStoreCategoryName( $wpl_item->Storefront->StoreCategory2ID );
+
+									?>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="4" height="10"></td>
+							</tr>
+							<?php endif; ?>
 
 						</tbody>
 					</table>
@@ -471,3 +493,35 @@
 <hr>
 
 <?php echo $wpl_preview_html ?>
+
+
+<!-- show image size as tooltip -->
+<script>
+
+function loadImageSize(imgSrc, callback){
+	var image = new Image();
+	image.src = imgSrc;
+	if (image.complete) {
+		callback(image);
+		image.onload=function(){};
+	} else {
+		image.onload = function() {
+			callback(image);
+			// clear onLoad, IE behaves erratically with animated gifs otherwise
+			image.onload=function(){};
+		}
+		image.onerror = function() {
+	    	alert("Could not load image.");
+		}
+	}
+}
+
+function updateImageSize(image) {
+	var img = document.getElementById('main_image_tag');
+	img.title = "Image size: " + image.width + "x" + image.height;
+}
+var imgSrc = "<?php echo @$wpl_item->PictureDetails->GalleryURL ?>";
+if ( imgSrc != '' ) loadImageSize( imgSrc, updateImageSize);
+
+</script>
+

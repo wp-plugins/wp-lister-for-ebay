@@ -110,7 +110,7 @@ class WPL_Autoloader {
 	// load integration wrapper for active shop plugin
 	private static function selectProductWrapper() {
 
-		if ( self::is_plugin_active('woocommerce/woocommerce.php') ) {
+		if ( defined('WC_VERSION') || defined('WOOCOMMERCE_VERSION') || self::is_plugin_active('woocommerce/woocommerce.php') ) {
 			$path = WPLISTER_PATH . '/classes/integration/ProductWrapper_woo.php'; 
 		} elseif ( self::is_plugin_active('wp-e-commerce/wp-shopping-cart.php') ) {
 			$path = WPLISTER_PATH . '/classes/integration/ProductWrapper_wpec.php';
@@ -135,7 +135,7 @@ class WPL_Autoloader {
 	// load integration wrapper for active shop plugin
 	private static function selectOrderWrapper() {
 
-		if ( self::is_plugin_active('woocommerce/woocommerce.php') ) {
+		if ( defined('WC_VERSION') || defined('WOOCOMMERCE_VERSION') || self::is_plugin_active('woocommerce/woocommerce.php') ) {
 			$path = WPLISTER_PATH . '/classes/integration/OrderWrapper_woo.php'; 
 		} elseif ( self::is_plugin_active('wp-e-commerce/wp-shopping-cart.php') ) {
 			$path = WPLISTER_PATH . '/classes/integration/OrderWrapper_wpec.php';

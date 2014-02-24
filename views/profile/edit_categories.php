@@ -56,8 +56,8 @@
 								<input type="hidden" name="wpl_e2e_ebay_category_1_id" id="ebay_category_id_1" value="<?php echo $item_details['ebay_category_1_id']; ?>" class="" />
 								<span  id="ebay_category_name_1" class="text_input" style="width:45%;float:left;line-height:2em;"><?php echo $item_details['ebay_category_1_name']; ?></span>
 								<div class="category_row_actions">
-									<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_ebay_category" onclick="">
-									<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_ebay_category" onclick="">
+									<input type="button" value="<?php echo __('select','wplister'); ?>" class="button btn_select_ebay_category" onclick="">
+									<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button btn_remove_ebay_category" onclick="">
 								</div>
 							</div>
 							
@@ -70,8 +70,8 @@
 								<input type="hidden" name="wpl_e2e_ebay_category_2_id" id="ebay_category_id_2" value="<?php echo $item_details['ebay_category_2_id']; ?>" class="" />
 								<span  id="ebay_category_name_2" class="text_input" style="width:45%;float:left;line-height:2em;"><?php echo $item_details['ebay_category_2_name']; ?></span>
 								<div class="category_row_actions">
-									<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_ebay_category" onclick="">
-									<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_ebay_category" onclick="">
+									<input type="button" value="<?php echo __('select','wplister'); ?>" class="button btn_select_ebay_category" onclick="">
+									<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button btn_remove_ebay_category" onclick="">
 								</div>
 							</div>
 							<div class="clear"></div>
@@ -98,8 +98,8 @@
 								<input type="hidden" name="wpl_e2e_store_category_1_id" id="store_category_id_1" value="<?php echo $item_details['store_category_1_id']; ?>" class="" />
 								<span  id="store_category_name_1" class="text_input" style="width:45%;float:left;line-height:2em;"><?php echo $item_details['store_category_1_name']; ?></span>
 								<div class="category_row_actions">
-									<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_store_category" onclick="">
-									<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_store_category" onclick="">
+									<input type="button" value="<?php echo __('select','wplister'); ?>" class="button btn_select_store_category" onclick="">
+									<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button btn_remove_store_category" onclick="">
 								</div>
 							</div>
 							
@@ -112,8 +112,8 @@
 								<input type="hidden" name="wpl_e2e_store_category_2_id" id="store_category_id_2" value="<?php echo $item_details['store_category_2_id']; ?>" class="" />
 								<span  id="store_category_name_2" class="text_input" style="width:45%;float:left;line-height:2em;"><?php echo $item_details['store_category_2_name']; ?></span>
 								<div class="category_row_actions">
-									<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_store_category" onclick="">
-									<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_store_category" onclick="">
+									<input type="button" value="<?php echo __('select','wplister'); ?>" class="button btn_select_store_category" onclick="">
+									<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button btn_remove_store_category" onclick="">
 								</div>
 							</div>
 							<div class="clear"></div>

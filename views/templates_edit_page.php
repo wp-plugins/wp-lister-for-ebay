@@ -243,7 +243,7 @@
 								WordPress shortcodes won't work - and these will only work here.
 							</p>
 							<p>
-								<b>Available Shortcodes:</b><br>
+								<b>Available Shortcodes</b><br>
 							</p>
 							<p>
 								<code>[[product_title]]</code><br>
@@ -313,6 +313,16 @@
 							</p>
 							<p>
 								Note: The <i>related listings widget</i> will only show up-sells or cross-sells - which you need to set up for each product in WooCommerce.
+							</p>
+							<p>
+								<b>Shortcodes for advanced developers</b><br>
+							</p>
+							<p>
+								<!-- For advanced developers:<br> -->
+								<!-- <code>[[ebay_item_id]]</code><br> -->
+								<code>[[ebay_store_url]]</code><br>
+								<code>[[ebay_store_category_id]]</code><br>
+								<code>[[ebay_store_category_name]]</code><br>
 							</p>
 							<p>
 								For more information visit the 

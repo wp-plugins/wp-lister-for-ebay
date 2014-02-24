@@ -3,6 +3,14 @@
  * WPL_API_Hooks
  *
  * implements public action hooks for 3rd party developers
+ *
+ * TODO: document other filter hooks intended for 3rd party developers, mainly:
+ *  - wplister_get_product_main_image
+ *  - wplister_product_images
+ *  - wplister_ebay_price
+ *  - wplister_before_process_template_html
+ *  - wplister_process_template_html
+ *  - wplister_listing_columns
  */
 
 class WPL_API_Hooks extends WPL_Core {

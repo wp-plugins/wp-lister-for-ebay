@@ -14,14 +14,18 @@
 				jQuery('#loc_shipping_options_table_calc').hide();
 				jQuery('#int_shipping_options_table_flat').hide();
 				jQuery('.loc_service_table_calc').hide();
+				jQuery('.int_service_table_flat').hide();
+				jQuery('.loc_service_table_flat').show();
 				jQuery('.int_service_table_calc').show();
 			} else if ( serviceType == 'CalculatedDomesticFlatInternational') {
 				jQuery('#loc_shipping_options_table_flat').hide();
 				jQuery('#int_shipping_options_table_calc').hide();
 				jQuery('#loc_shipping_options_table_calc').show();
 				jQuery('#int_shipping_options_table_flat').show();
+				jQuery('.loc_service_table_flat').hide();
 				jQuery('.int_service_table_calc').hide();
 				jQuery('.loc_service_table_calc').show();
+				jQuery('.int_service_table_flat').show();
 			} else if ( serviceType == 'disabled' ) {
 				jQuery('#loc_shipping_options_table_flat').hide();
 				jQuery('#int_shipping_options_table_calc').hide();
@@ -111,7 +115,8 @@
 				// location / destinaton
 				fields = jQuery(item).find('.select_location');
 				for (var i = fields.length - 1; i >= 0; i--) {
-					jQuery(fields[i]).attr('name','wpl_e2e_'+thisDest+'_shipping_options_'+thisType+'['+i+'][location][]');
+					jQuery(fields[i]).attr('name','wpl_e2e_'+thisDest+'_shipping_options_'+thisType+'['+i+'][location][]')
+									 .attr('id','wpl_e2e_'+thisDest+'_shipping_options_'+thisType+'_location_choser_'+i+''); // select tags should have a unique id for chosen.js ()
 				};
 
 				// price field

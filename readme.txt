@@ -90,6 +90,67 @@ Already working on it. Expect it soon.
 2. Profile Editor
 
 == Changelog ==
+= 1.3.6 =
+* fixed disabling immediate payment option
+* various improvements and fixes - read the full changelog below
+
+= 1.3.5.8 =
+* fixed issue with ShippingPackage not being set
+* fixed rare issue selecting locations for new added shipping services
+* added listing template shortcodes ebay_store_category_id, ebay_store_category_name, ebay_store_url, ebay_item_id
+
+= 1.3.5.7 =
+* allow relisting of sold items from product page
+* fetch exclude shipping locations (database version 34)
+* hide Selling Manager Pro profile options unless active
+* added button to update all relisted items to warning message (if listing were manually relisted on ebay)
+* fixed missing package type option for flat domestic and calculated international shipping mode
+* fixed issue with ended items being marked as sold
+
+= 1.3.5.6 =
+* added new listing filter to show ended listings which can be relisted
+* added support for all available exclude ship to locations - requires updating eBay details
+* mark ended listing as sold if all units are sold when updating ended listings
+* update transactions cache for past orders automatically (db upgrade)
+* improved duplicate orders warning message with delete option
+* improved check if WooCommerce is installed
+* fixed issue with split variations creating duplicates
+* only allow prepared items to be split
+
+= 1.3.5.5 =
+* show main image dimensions in listing preview
+* added status filter and search box on transactions page
+* added check for duplicate transactions and option to restore stock
+* added transaction check on tools page to update transactions cache from orders
+* prevent processing duplicate transactions in orders with different OrderIDs
+* fix soap error when using CODCost with decimal comma
+* improved display of warnings on edit product page
+* clear EPS cache after upscaling images
+
+= 1.3.5.4 =
+* added images check and option to upscale images to 500px
+* improved ebay log performance
+* decode html entities in item specifics values
+* fixed php 5.4 warning on edit product page
+* define global constants WPL_EBAY_LISTING and WPL_EBAY_PREVIEW for 3rd party devs
+
+= 1.3.5.3 =
+* show warning when trying to prepare a single listing from a product draft
+* fixed shipping date issue when completing orders automatically on eBay
+* use BestEffort error handling option for CompleteSale
+
+= 1.3.5.2 =
+* added prepare listing action links on products page
+* skip orders that are older than the oldest order in WP-Lister
+* don't update order status if order is marked as completed, refunded, cancelled or failed
+* compare rounded prices in inventory check
+
+= 1.3.5.1 =
+* added option to select order status for unpaid orders
+* minor layout adjustments for WordPress 3.8 and WooCommerce 2.1
+* show store category in listing preview
+* fixed a rare XML decoding issue
+
 = 1.3.5 =
 * various improvements and fixes - read the full changelog below
 

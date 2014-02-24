@@ -300,6 +300,134 @@ class TransactionsModel extends WPL_Model {
 
 	} // insertOrUpdate()
 
+    // revert a duplicate transaction and restore stock if required
+	public function revertTransaction( $id ) {
+		global $wpdb;
+
+		// get transaction record
+		$transaction = $this->getItem( $id );
+		if ( ! $transaction ) return false;
+
+
+		// restore listing's quantity_sold
+		// get current values from db
+		$quantity_purchased = $transaction['quantity'];
+		$quantity_sold = $wpdb->get_var( 'SELECT quantity_sold FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$transaction['item_id'] );
+
+		// decrease the listing's quantity_sold
+		$quantity_sold = $quantity_sold - $quantity_purchased;
+		$wpdb->update( $wpdb->prefix.'ebay_auctions', 
+			array( 'quantity_sold' => $quantity_sold ), 
+			array( 'ebay_id' => $transaction['item_id'] ) 
+		);
+
+
+		// check if we need to restore product stock
+		list( $reduced_product_id, $new_stock_value ) = $this->checkIfStockWasReducedForItemID( $transaction );
+		if ( $reduced_product_id ) {
+			// echo "<pre>stock was reduced to ";print_r($new_stock_value);echo"</pre>";#die();
+
+			// restore product stock 
+			$newstock = ProductWrapper::increaseStockBy( $reduced_product_id, $transaction['quantity'] );
+			$this->addHistory( $transaction['transaction_id'], 'restored_stock', 'Product stock was restored', array( 'product_id' => $reduced_product_id, 'newstock' => $newstock ) );
+		}
+
+		// update status
+		$this->updateById( $id, array( 'status' => 'reverted' ) );
+		$this->addHistory( $transaction['transaction_id'], 'revert_transaction', 'Transaction was reverted' );
+
+		return true;
+	} // revertTransaction()
+
+    // revert a duplicate transaction and restore stock if required
+	public function checkIfStockWasReducedForItemID( $txn, $item_id = false ) {
+		$product_id      = false;
+		$variation_id    = false;
+		$new_stock_value = false;
+		$ebay_id_matches = false;
+		if ( ! $item_id ) $item_id = $txn['item_id'];
+
+		// check if stock was reduced
+		$history = maybe_unserialize( $txn['history'] );
+		// echo "<pre>";print_r($history);echo"</pre>";die();
+
+		if ( is_array( $history ) )
+		foreach ($history as $record) {
+
+			// only process reduce_stock actions
+			if ( 'reduce_stock' == $record->action ) {
+
+				// check for matching eBay ID - transaction history might contain multiple transactions for combined orders
+				if ( isset( $record->details['ebay_id'] ) )
+					$ebay_id_matches = $item_id == $record->details['ebay_id'] ? true : false;
+
+				// only process history records if ebay ID matches transaction's item ID
+				if ( $ebay_id_matches ) {
+
+					// get product ID if it exists
+					if ( isset( $record->details['product_id'] ) )
+						$product_id = $record->details['product_id'];
+
+					// get variation ID if it exists
+					if ( isset( $record->details['variation_id'] ) )
+						$variation_id = $record->details['variation_id'];
+
+					// get new stock if it exists
+					if ( isset( $record->details['newstock'] ) )
+						$new_stock_value = $record->details['newstock'];
+
+				}
+
+			} // if reduce stock
+
+		} // each $record
+
+		// return variation id if found
+		$product_id = $variation_id ? $variation_id : $product_id;
+
+		return array( $product_id, $new_stock_value );
+	} // checkIfStockWasReducedForItemID()
+
+	function createTransactionFromEbayOrder( $order, $Detail ) {
+		global $wpdb;
+		$this->logger->debug( 'createTransactionFromEbayOrder()'.print_r( $Detail, 1 ) );
+
+		// map TransactionType to DB columns
+		$data = $this->mapItemDetailToDB( $Detail, true );
+		if (!$data) return true;
+
+		// todo: check for variations?
+		// $this->insertOrUpdate( $data );
+
+		// add some data from order array which is missing in Transactions object
+		$data['order_id']             = $order['order_id'];				// add order_id for transactions that were created from eBay orders
+		$data['wp_order_id']          = $order['post_id'];
+		$data['eBayPaymentStatus']    = $order['eBayPaymentStatus'];
+		$data['CheckoutStatus']       = $order['CheckoutStatus'];
+		$data['ShippingService']      = $order['ShippingService'];
+		$data['ShippingAddress_City'] = $order['ShippingAddress_City'];
+		$data['PaymentMethod']        = $order['PaymentMethod'];
+		$data['CompleteStatus']       = $order['CompleteStatus'];
+		$data['LastTimeModified']     = $order['LastTimeModified'];
+		$data['buyer_userid']         = $order['buyer_userid'];
+		$data['buyer_name']           = $order['buyer_name'];
+		$data['details']              = maybe_serialize( $Detail );
+		$data['history']              = $order['history'];
+
+		// create new transaction
+		$this->logger->info( 'insert transaction #'.$data['transaction_id'].' for item #'.$data['item_id'].' from order #'.$data['order_id'] );
+		$result = $wpdb->insert( $this->tablename, $data );
+		if ( ! $result ) {
+			$this->logger->error( 'insert transaction failed - MySQL said: '.$wpdb->last_error );
+			$this->addToReport( 'error', $data, false, false, $wpdb->last_error );
+			return false;
+		}
+		$id = $wpdb->insert_id;
+		// $this->logger->info( 'insert_id: '.$id );
+
+		return $id;
+	} // createTransactionFromEbayOrder
+
 
 	// add transaction history entry
 	function addHistory( $transaction_id, $action, $msg, $details = array(), $success = true ) {
@@ -353,24 +481,25 @@ class TransactionsModel extends WPL_Model {
 
 	}
 
-	function mapItemDetailToDB( $Detail ) {
+	function mapItemDetailToDB( $Detail, $always_process_foreign_transactions = false ) {
 		//#type $Detail TransactionType
+		// echo "<pre>";print_r($Detail);echo"</pre>";#die();
 
 		$data['item_id']                   = $Detail->Item->ItemID;
 		$data['transaction_id']            = $Detail->TransactionID;
 		$data['date_created']              = $this->convertEbayDateToSql( $Detail->CreatedDate );
 		$data['price']                     = $Detail->TransactionPrice->value;
 		$data['quantity']                  = $Detail->QuantityPurchased;
-		$data['buyer_userid']              = $Detail->Buyer->UserID;
-		$data['buyer_name']                = $Detail->Buyer->RegistrationAddress->Name;
-		$data['buyer_email']               = $Detail->Buyer->Email;
+		$data['buyer_userid']              = @$Detail->Buyer->UserID;
+		$data['buyer_name']                = @$Detail->Buyer->RegistrationAddress->Name;
+		$data['buyer_email']               = @$Detail->Buyer->Email;
 		
 		$data['eBayPaymentStatus']         = $Detail->Status->eBayPaymentStatus;
 		$data['CheckoutStatus']            = $Detail->Status->CheckoutStatus;
-		$data['ShippingService']           = $Detail->ShippingServiceSelected->ShippingService;
+		$data['ShippingService']           = @$Detail->ShippingServiceSelected->ShippingService;
 		//$data['ShippingAddress_Country'] = $Detail->Buyer->BuyerInfo->ShippingAddress->Country;
 		//$data['ShippingAddress_Zip']     = $Detail->Buyer->BuyerInfo->ShippingAddress->PostalCode;
-		$data['ShippingAddress_City']      = $Detail->Buyer->BuyerInfo->ShippingAddress->CityName;
+		$data['ShippingAddress_City']      = @$Detail->Buyer->BuyerInfo->ShippingAddress->CityName;
 		$data['PaymentMethod']             = $Detail->Status->PaymentMethodUsed;
 		$data['CompleteStatus']            = $Detail->Status->CompleteStatus;
 		$data['LastTimeModified']          = $this->convertEbayDateToSql( $Detail->Status->LastTimeModified );
@@ -393,7 +522,7 @@ class TransactionsModel extends WPL_Model {
 			$data['item_title'] = $Detail->Item->Title;
 
 			// only skip if foreign_transactions option is disabled
-			if ( get_option( 'wplister_foreign_transactions' ) != 1 ) {
+			if ( ( get_option( 'wplister_foreign_transactions' ) != 1 ) && ! $always_process_foreign_transactions ) {
 				$this->logger->info( "skipped transaction #".$Detail->TransactionID." for foreign item #".$Detail->Item->ItemID );			
 				$this->addToReport( 'skipped', $data );
 				return false;			
@@ -411,7 +540,7 @@ class TransactionsModel extends WPL_Model {
 
 		// use buyer name from shipping address if registration address is empty
 		if ( $data['buyer_name'] == '' ) {
-			$data['buyer_name'] = $Detail->Buyer->BuyerInfo->ShippingAddress->Name;
+			$data['buyer_name'] = @$Detail->Buyer->BuyerInfo->ShippingAddress->Name;
 		}
 
 
@@ -419,7 +548,7 @@ class TransactionsModel extends WPL_Model {
 		$data['details'] = $this->encodeObject( $Detail );
 
 		return $data;
-	}
+	} // mapItemDetailToDB
 
 
 	function addToReport( $status, $data, $newstock = false, $wp_order_id = false, $error = false ) {
@@ -550,6 +679,18 @@ class TransactionsModel extends WPL_Model {
 
 		return $transaction;
 	}
+	function getAllTransactionsByTransactionID( $transaction_id ) {
+		global $wpdb;
+
+		$transaction = $wpdb->get_results( "
+			SELECT *
+			FROM $this->tablename
+			WHERE transaction_id = '$transaction_id'
+			ORDER BY LastTimeModified DESC
+		", ARRAY_A );
+
+		return $transaction;
+	}
 	function getTransactionByOrderID( $wp_order_id ) {
 		global $wpdb;
 
@@ -561,6 +702,41 @@ class TransactionsModel extends WPL_Model {
 
 		return $transaction;
 	}
+
+	function getTransactionByEbayOrderID( $order_id ) {
+		global $wpdb;
+
+		$transaction = $wpdb->get_row( "
+			SELECT *
+			FROM $this->tablename
+			WHERE order_id = '$order_id'
+		", ARRAY_A );
+
+		return $transaction;
+	}
+
+
+	function getAllDuplicateTransactions() {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT transaction_id, COUNT(*) c
+			FROM $this->tablename
+			WHERE status IS NULL OR NOT status = 'reverted'
+			GROUP BY transaction_id 
+			HAVING c > 1
+		", OBJECT_K);		
+
+		if ( ! empty($items) ) {
+			$transactions = array();
+			foreach ($items as &$item) {
+				$transactions[] = $item->transaction_id;
+			}
+			$items = $transactions;
+		}
+
+		return $items;		
+	}
+
 
 	function getDateOfLastTransaction() {
 		global $wpdb;
@@ -598,6 +774,30 @@ class TransactionsModel extends WPL_Model {
 	}
 
 
+	function getStatusSummary() {
+		global $wpdb;
+		$result = $wpdb->get_results("
+			SELECT CompleteStatus, count(*) as total
+			FROM $this->tablename
+			GROUP BY CompleteStatus
+		");
+
+		$summary = new stdClass();
+		foreach ($result as $row) {
+			$CompleteStatus = $row->CompleteStatus;
+			$summary->$CompleteStatus = $row->total;
+		}
+
+		// count total items as well
+		$total_items = $wpdb->get_var("
+			SELECT COUNT( id ) AS total_items
+			FROM $this->tablename
+		");
+		$summary->total_items = $total_items;
+
+		return $summary;
+	}
+
 	function getPageItems( $current_page, $per_page ) {
 		global $wpdb;
 
@@ -605,10 +805,36 @@ class TransactionsModel extends WPL_Model {
         $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'desc'; //If no order, default to asc
         $offset = ( $current_page - 1 ) * $per_page;
 
+        $join_sql  = '';
+        $where_sql = '';
+
+        // filter transaction_status
+		$transaction_status = ( isset($_REQUEST['transaction_status']) ? $_REQUEST['transaction_status'] : 'all');
+		if ( $transaction_status != 'all' ) {
+			$where_sql = "WHERE CompleteStatus = '".$transaction_status."' ";
+		} 
+
+        // filter search_query
+		$search_query = ( isset($_REQUEST['s']) ? $_REQUEST['s'] : false);
+		if ( $search_query ) {
+			$where_sql = "
+				WHERE  t.buyer_name   LIKE '%".$search_query."%'
+					OR t.item_title   LIKE '%".$search_query."%'
+					OR t.transaction_id   = '".$search_query."'
+					OR t.order_id         = '".$search_query."'
+					OR t.item_id          = '".$search_query."'
+					OR t.buyer_userid     = '".$search_query."'
+					OR t.buyer_email      = '".$search_query."'
+			";
+		} 
+
+
         // get items
 		$items = $wpdb->get_results("
 			SELECT *
-			FROM $this->tablename
+			FROM $this->tablename t
+            $join_sql 
+            $where_sql
 			ORDER BY $orderby $order
             LIMIT $offset, $per_page
 		", ARRAY_A);
@@ -619,10 +845,13 @@ class TransactionsModel extends WPL_Model {
 		} else {
 			$this->total_items = $wpdb->get_var("
 				SELECT COUNT(*)
-				FROM $this->tablename
+				FROM $this->tablename t
+	            $join_sql 
+    	        $where_sql
 				ORDER BY $orderby $order
 			");			
 		}
+
 
 		// foreach( $items as &$profile ) {
 		// 	$profile['details'] = $this->decodeObject( $profile['details'] );
@@ -632,6 +861,26 @@ class TransactionsModel extends WPL_Model {
 	}
 
 
+
+	public function updateById( $id, $data ) {
+		global $wpdb;
+
+		// handle NULL values
+		foreach ($data as $key => $value) {
+			if ( NULL === $value ) {
+				$wpdb->query( "UPDATE {$this->tablename} SET $key = NULL WHERE id = $id" );
+				$this->logger->info('SQL to set NULL value: '.$wpdb->last_query );
+				$this->logger->info( mysql_error() );
+				unset( $data[$key] );
+			}
+		}
+
+		// update
+		$wpdb->update( $this->tablename, $data, array( 'id' => $id ) );
+
+		$this->logger->debug('sql: '.$wpdb->last_query );
+		$this->logger->info( mysql_error() );
+	}
 
 
 }

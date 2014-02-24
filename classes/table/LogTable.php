@@ -81,12 +81,15 @@ class LogTable extends WP_List_Table {
     }
 
     function column_success($item){
+
         if ( $item['success'] == 'Success' ) {
             return '<span style="color:green">Success</span>';
         }
+
         if ( $item['success'] == 'Warning' ) {
             return '<span style="color:darkorange">Warning</span>';
         }
+
         if ( $item['success'] == 'Failure' ) {
 
             $details = '';
@@ -102,6 +105,18 @@ class LogTable extends WP_List_Table {
 
             return '<span style="color:#B00">Failed</span>'.$details;
         }
+
+        if ( $item['success'] == 'PartialFailure' ) {
+
+            $details = '';
+            if ( preg_match("/<LongMessage>(.*)<\/LongMessage>/", $item['response'], $matches) ) {
+                $LongMessage = $matches[1];
+                $details .= ': <span style="color:#555">'.$LongMessage.'</span>';
+            }
+
+            return '<span style="color:#B00">Partial Failure</span>'.$details;
+        }
+
         return $item['success'];
     }    
 
@@ -301,6 +316,14 @@ class LogTable extends WP_List_Table {
        $class = ($current == 'Failure' ? ' class="current"' :'');
        $views['Failure'] = "<a href='{$Failure_url}' {$class} >".__('Failed','wplister')."</a>";
        if ( isset($summary->Failure) ) $views['Failure'] .= '<span class="count">('.$summary->Failure.')</span>';
+
+       // PartialFailure link
+       if ( isset($summary->PartialFailure) ) {
+           $PartialFailure_url = add_query_arg('log_status','PartialFailure');
+           $class = ($current == 'PartialFailure' ? ' class="current"' :'');
+           $views['PartialFailure'] = "<a href='{$PartialFailure_url}' {$class} >".__('Partial Failure','wplister')."</a>";
+           $views['PartialFailure'] .= '<span class="count">('.$summary->PartialFailure.')</span>';       
+       }
 
        // unknown link
        if ( isset($summary->unknown) ) {

@@ -189,8 +189,17 @@
 					</div>
 
 					<div class="postbox" id="DeveloperToolBox" style="display:none;">
-						<h3 class="hndle"><span><?php echo __('Debug options','wplister') ?></span></h3>
+						<h3 class="hndle"><span><?php echo __('Developer options','wplister') ?></span></h3>
 						<div class="inside">
+
+							<label for="wpl-option-enable_messages_page" class="text_label">
+								<?php echo __('eBay Messages','wplister'); ?>
+                                <?php wplister_tooltip('Enable handling of eBay messages within WP-Lister. This feature is still in beta.') ?>
+							</label>
+							<select id="wpl-option-enable_messages_page" name="wpl_e2e_enable_messages_page" class=" required-entry select">
+								<option value="0" <?php if ( $wpl_enable_messages_page == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('Disabled','wplister'); ?> (default)</option>
+								<option value="1" <?php if ( $wpl_enable_messages_page == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Enabled','wplister'); ?></option>
+							</select>
 
 							<label for="wpl-text-log_level" class="text_label"><?php echo __('Log to logfile','wplister'); ?></label>
 							<select id="wpl-text-log_level" name="wpl_e2e_text_log_level" title="Logging" class=" required-entry select">

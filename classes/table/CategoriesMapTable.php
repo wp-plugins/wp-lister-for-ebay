@@ -92,8 +92,8 @@ class CategoriesMapTable extends WP_List_Table {
                 <span id="ebay_category_name_'.$id.'" class="text_input" >' . $name . '</span>
             </p>
             <span class="row-actions" id="sel_ebay_cat_id_'.$id.'" >
-                <input type="button" class="button-secondary btn_select_category" value="' . __('select','wplister') . '" >
-                <input type="button" class="button-secondary btn_remove_category" value="' . __('remove','wplister') . '" >
+                <input type="button" class="button btn_select_category" value="' . __('select','wplister') . '" >
+                <input type="button" class="button btn_remove_category" value="' . __('remove','wplister') . '" >
             </span>
         </div>
         ';
@@ -119,8 +119,8 @@ class CategoriesMapTable extends WP_List_Table {
                 <span id="store_category_name_'.$id.'" class="text_input" >' . $name . '</span>
             </p>
             <span class="row-actions" id="sel_store_cat_id_'.$id.'" >
-                <input type="button" class="button-secondary btn_select_category" value="' . __('select','wplister') . '" >
-                <input type="button" class="button-secondary btn_remove_category" value="' . __('remove','wplister') . '" >
+                <input type="button" class="button btn_select_category" value="' . __('select','wplister') . '" >
+                <input type="button" class="button btn_remove_category" value="' . __('remove','wplister') . '" >
             </span>
         </div>
         ';

@@ -443,6 +443,17 @@ class WPL_AjaxHandler extends WPL_Core {
 				$this->returnJSON( $response );
 				exit();
 			
+			case 'updateAllRelistedItems':
+				
+				// get published items
+		        $lm = new ListingsModel();
+		        $items = $lm->getAllRelisted();
+		        
+		        // create job from items and send response
+		        $response = $this->_create_bulk_listing_job( 'updateItem', $items, $jobname );
+				$this->returnJSON( $response );
+				exit();
+			
 			default:
 				// echo "unknown job";
 				// break;

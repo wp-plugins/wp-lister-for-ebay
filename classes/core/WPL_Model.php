@@ -107,7 +107,8 @@ class WPL_Model {
 
 	/* Generic message display */
 	public function showMessage($message, $errormsg = false, $echo = false) {		
-		$class = ($errormsg) ? 'error' : 'updated fade';
+		$class = ($errormsg) ? 'error' : 'updated fade';			// error or success
+		$class = ($errormsg == 2) ? 'updated update-nag' : $class; 	// warning
 		$message = '<div id="message" class="'.$class.'" style="display:block !important"><p>'.$message.'</p></div>';
 		if ($echo) {
 			echo $message;
@@ -388,6 +389,12 @@ class WPL_Model {
 		$replace = array( ' ', '' );
 		$sql_date = str_replace( $search, $replace, $ebay_date );
 		return $sql_date;
+	}
+
+	// convert 2013-02-14 08:00:58 to 2013-02-14T08:00:58.000Z
+	public function convertSqlDateToEbay( $sql_date ) {
+		$iso_date = date('Y-m-d\TH:i:s', strtotime( $sql_date ) ) . '.000Z';
+		return $iso_date;
 	}
 
 

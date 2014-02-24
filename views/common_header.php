@@ -35,8 +35,8 @@
 		<div id="job_bottom_notice" style="">
 			<?php echo __("Please don't close this window until all tasks are completed.",'wplister') ?>
 		</div>
-		<div class="submit" style="float:right; padding: 10px 0 0 0;">
-			<a class="btn_close button-secondary"><?php echo __('Close window','wplister') ?></a>
+		<div class="submit" style="float:right; padding: 10px 0 0 0; margin: 0;">
+			<a class="btn_close button"><?php echo __('Close window','wplister') ?></a>
 		</div>
 
 	</div>
@@ -76,6 +76,11 @@
 			});
 			jQuery('.btn_revise_all_changed_items_reminder').click( function(event) {
 				WpLister.JobRunner.runJob( 'reviseAllChangedItems', 'Revising items...' );
+			});
+
+			// btn_update_all_relisted_items
+			jQuery('.btn_update_all_relisted_items_reminder').click( function(event) {
+				WpLister.JobRunner.runJob( 'updateAllRelistedItems', 'Updating relisted items...' );
 			});
 
 			// btn_update_all_published_items

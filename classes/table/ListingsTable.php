@@ -850,6 +850,12 @@ class ListingsTable extends WP_List_Table {
        $views['sold'] = "<a href='{$sold_url}' {$class} >".__('Sold','wplister')."</a>";
        if ( isset($summary->sold) ) $views['sold'] .= '<span class="count">('.$summary->sold.')</span>';
 
+       // relist link
+       $sold_url = add_query_arg( 'listing_status', 'relist', $base_url );
+       $class = ($current == 'relist' ? ' class="current"' :'');
+       $views['relist'] = "<a href='{$sold_url}' {$class} title='Show ended listings which are in stock and can be relisted.'>".__('Relist','wplister')."</a>";
+       if ( isset($summary->relist) ) $views['relist'] .= '<span class="count">('.$summary->relist.')</span>';
+
        return $views;
     }    
 

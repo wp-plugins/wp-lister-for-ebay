@@ -60,7 +60,7 @@
 										<input type="text" name="wpl_e2e_int_shipping_options_flat[][add_price]" 
 											value="<?php echo @$service['add_price']; ?>" class="price_input field_add_price" />
 									</td><td>
-										<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary" 
+										<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button" 
 											onclick="jQuery(this).parent().parent().remove();" />
 									</td>
 								</tr>
@@ -94,6 +94,9 @@
 										<?php ProfilesPage::wpl_generate_shipping_option_tags( $wpl_int_calc_shipping_options, $service ) ?>											
 										</select>
 									</td><td>
+										<?php // make sure $service is structured correctly ?>
+										<?php $service = is_array( $service ) ? $service : array(); ?>
+										<?php $service = isset( $service['location'] ) ? $service : array( 'location' => array() ); ?>
 										<?php $service['location'] = is_array( $service['location'] ) ? $service['location'] : array( $service['location'] ); ?>
 										<select multiple="multiple" class="chosen_select select_location" id="" name="wpl_e2e_int_shipping_options_calc[][location][]" data-placeholder="Select locations" style="">
 											<?php
@@ -115,7 +118,7 @@
 										</select>
 										-->
 									</td><td>
-										<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary" 
+										<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button" 
 											onclick="jQuery(this).parent().parent().remove();" />
 									</td>
 								</tr>
@@ -127,7 +130,7 @@
 								id="btn_add_int_shipping_option" 
 								name="btn_add_int_shipping_option" 
 								onclick="handleAddShippingServiceRow('international');"
-								class="button-secondary button-add-shipping-option">
+								class="button button-add-shipping-option">
 
 							<div class="service_table_calc int_service_table_calc" style="border-top:1px solid #ccc; margin-top:10px; padding-top:10px;">
 
@@ -154,7 +157,7 @@
 							</div>
 
 
-							<div class="service_table_flat loc_service_table_flat" style="border-top:1px solid #ccc; margin-top:10px; padding-top:10px;">
+							<div class="service_table_flat int_service_table_flat" style="border-top:1px solid #ccc; margin-top:10px; padding-top:10px;">
 
 								<label class="text_label">
 									<?php echo __('Shipping discount profile','wplister'); ?>
@@ -205,7 +208,7 @@
 								</label>
 								<select multiple="multiple" class="chosen_select" id="wpl_e2e_ExcludeShipToLocations" name="wpl_e2e_ExcludeShipToLocations[]" data-placeholder="Select locations" style="width: 65%;">
 									<?php
-										foreach ( $wpl_shipping_locations as $location => $desc )
+										foreach ( $wpl_exclude_locations as $location => $desc )
 											echo '<option value="' . $location . '" ' . selected( ! empty( $item_details['ExcludeShipToLocations'] ) && in_array( $location, $item_details['ExcludeShipToLocations'] ), true ) . '>' . $desc . '</option>';
 									?>
 								</select>

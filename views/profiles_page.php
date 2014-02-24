@@ -36,7 +36,7 @@
         <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
         <input type="hidden" name="action" value="add_new_profile" />
 
-		<input type="submit" value="<?php echo __('Add New Profile','wplister') ?>" name="submit" class="button-secondary">
+		<input type="submit" value="<?php echo __('Add New Profile','wplister') ?>" name="submit" class="button">
     </form>
 	<br style="clear:both;"/>
 

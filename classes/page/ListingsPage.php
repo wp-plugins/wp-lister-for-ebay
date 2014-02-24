@@ -22,7 +22,7 @@ class ListingsPage extends WPL_Page {
 		add_action( "load-toplevel_page_wplister", array( &$this, 'addScreenOptions' ) );
 
 		// $this->handleSubmitOnInit();
-		add_action( "wp_loaded", array( &$this, 'handleSubmitOnInit' ) );
+		add_action( "wp_loaded", array( &$this, 'handleSubmitOnInit' ), 1 );
 	}
 
 	// public function onWpNetworkAdminMenu() {
@@ -80,21 +80,6 @@ class ListingsPage extends WPL_Page {
 
 			$listingsModel = new ListingsModel();
 	        $items = $listingsModel->applyProfileToNewListings( $profile );
-
-			// verify new listings if asked to
-			// if ( @$_REQUEST['wpl_e2e_verify_after_profile']=='1') {
-
-			//	$this->logger->info( 'verifying new items NOW' );
-	
-			// 	// get session
-			// 	$this->initEC();
-				
-			// 	// verify prepared items
-			// 	foreach( $items as $item ) {
-			// 		$listingsModel->verifyAddItem( $item['id'], $this->EC->session );
-			// 	}		
-			// 	$this->EC->closeEbay();
-			// }
 
 			// remember selected profile
 			self::updateOption('last_selected_profile', intval( $_REQUEST['wpl_e2e_profile_to_apply'] ) );
@@ -346,7 +331,7 @@ class ListingsPage extends WPL_Page {
 
 		        // get profile
 				$profilesModel = new ProfilesModel();
-		        $profile = $profilesModel->getItem( $_REQUEST['profile_id'] );
+		        $profile = isset( $_REQUEST['profile_id'] ) ? $profilesModel->getItem( $_REQUEST['profile_id'] ) : false;
 
 		        if ( $profile ) {
 			
@@ -355,9 +340,16 @@ class ListingsPage extends WPL_Page {
 			        $listingsModel->prepareProductForListing( $_REQUEST['product_id'] );
 
 			        $listingsModel->applyProfileToNewListings( $profile );		      
+					$this->showMessage( __('New listing was prepared from product.','wplister') );
+
+		        } elseif ( isset( $_REQUEST['product_id'] ) ) {
+	
+					// prepare product
+					$listingsModel = new ListingsModel();
+			        $listingsModel->prepareProductForListing( $_REQUEST['product_id'] );
+
 		        }
 
-				$this->showMessage( __('New listing was prepared from product.','wplister') );
 			}
 
 
@@ -391,8 +383,8 @@ class ListingsPage extends WPL_Page {
 	        if ( isset($summary->relisted) ) {
 				$msg  = '<p>';
 				$msg .= sprintf( __('WP-Lister has found %s manually relisted item(s) which need to be updated from eBay to fetch their latest changes.','wplister'), $summary->relisted );
-				// $msg .= '&nbsp;&nbsp;';
-				// $msg .= '<a id="btn_revise_all_relisted_items_reminder" class="button wpl_job_button">' . __('Update all relisted items','wplister') . '</a>';
+				$msg .= '&nbsp;&nbsp;';
+				$msg .= '<a id="btn_update_all_relisted_items_reminder" class="btn_update_all_relisted_items_reminder button wpl_job_button">' . __('Update all relisted items','wplister') . '</a>';
 				$msg .= '</p>';
 				$this->showMessage( $msg );				
 
@@ -488,10 +480,12 @@ class ListingsPage extends WPL_Page {
 	        if ( isset( $_REQUEST['paged'] )) $page .= '&paged='.$_REQUEST['paged'];
 
 			$msg  = '<p><b>'.__('WP-Lister has found multiple listings for some of your products.','wplister').'</b>';
-			$msg .= ' <a href="#" onclick="jQuery(\'#wpl_dupe_details\').toggle()">'.__('Show details','wplister').'</a></p>';
+			$msg .= '&nbsp; <a href="#" onclick="jQuery(\'#wpl_dupe_details\').toggle()">'.__('Show details','wplister').'</a></p>';
 			// $msg .= '<br>';
 			$msg .= '<div id="wpl_dupe_details" style="display:none"><p>';
 			$msg .= __('Creating multiple listings for one product is not recommended as it can cause issues syncing inventory and other unexpected behaviour.','wplister');
+			$msg .= '<br>';
+			$msg .= __('Please keep only one listing and move unwanted duplicates to the archive.','wplister');
 			$msg .= '<br><br>';
 			foreach ($duplicateProducts as $dupe) {
 
@@ -513,13 +507,14 @@ class ListingsPage extends WPL_Page {
 						$msg .= '&nbsp;&nbsp;&nbsp;&nbsp;'.$archive_link;
 						$msg .= '<br>';
 					}
+					$msg .= '</span>';
 				}
+				$msg .= '<br>';
 
-				$msg .= '</span><br>';
 			}
 			$msg .= __('If you are not planning to use the inventory sync, you can hide this warning in settings.','wplister');
-			$msg .= '<br>';
-			$msg .= __('If you need to list single products multiple times for some reason, please contact support@wplab.com and we will find a solution.','wplister');
+			// $msg .= '<br>';
+			// $msg .= 'If you need to list single products multiple times for some reason, please contact support@wplab.com and we will find a solution.';
 			$msg .= '</p></div>';
 			$this->showMessage( $msg );				
 		}
@@ -538,7 +533,7 @@ class ListingsPage extends WPL_Page {
 		// if ( ! $ibm->checkItem($item) ) return $ibm->result;
 		$ibm->checkItem($item);
 
-		$preview_html = $ibm->getFinalHTML( $id );
+		$preview_html = $ibm->getFinalHTML( $id, $item );
 		// echo $preview_html;
 
 		$aData = array(

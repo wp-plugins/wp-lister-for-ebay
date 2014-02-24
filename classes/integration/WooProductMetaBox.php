@@ -48,6 +48,10 @@ class WpLister_Product_MetaBox {
             	clear: both;
             	margin-left: 25%;
             }
+
+			.branch-3-8 div.update-nag {
+				border-left: 4px solid #ffba00;
+			}
         </style>
         <?php
 
@@ -293,8 +297,8 @@ class WpLister_Product_MetaBox {
 			<input type="hidden" name="wpl_ebay_category_1_id" id="ebay_category_id_1" value="<?php echo $ebay_category_1_id ?>" class="" />
 			<span  id="ebay_category_name_1" class="text_input" style="width:45%;float:left;line-height:2em;"><?php echo $ebay_category_1_name ?></span>
 			<div class="category_row_actions">
-				<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_ebay_category" onclick="">
-				<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_ebay_category" onclick="">
+				<input type="button" value="<?php echo __('select','wplister'); ?>" class="button btn_select_ebay_category" onclick="">
+				<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button btn_remove_ebay_category" onclick="">
 			</div>
 		</div>
 		<br style="clear:both" />
@@ -303,8 +307,8 @@ class WpLister_Product_MetaBox {
 			<input type="hidden" name="wpl_ebay_category_2_id" id="ebay_category_id_2" value="<?php echo $ebay_category_2_id ?>" class="" />
 			<span  id="ebay_category_name_2" class="text_input" style="width:45%;float:left;line-height:2em;"><?php echo $ebay_category_2_name ?></span>
 			<div class="category_row_actions">
-				<input type="button" value="<?php echo __('select','wplister'); ?>" class="button-secondary btn_select_ebay_category" onclick="">
-				<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button-secondary btn_remove_ebay_category" onclick="">
+				<input type="button" value="<?php echo __('select','wplister'); ?>" class="button btn_select_ebay_category" onclick="">
+				<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button btn_remove_ebay_category" onclick="">
 			</div>
 		</div>
 		<br style="clear:both" />
@@ -566,6 +570,7 @@ class WpLister_Product_MetaBox {
 		$wpl_loc_flat_shipping_options = EbayShippingModel::getAllLocal('flat');
 		$wpl_int_flat_shipping_options = EbayShippingModel::getAllInternational('flat');
 		$wpl_shipping_locations        = EbayShippingModel::getShippingLocations();
+		$wpl_exclude_locations         = EbayShippingModel::getExcludeShippingLocations();
 		$wpl_countries                 = EbayShippingModel::getEbayCountries();
 
 		$wpl_loc_calc_shipping_options   = EbayShippingModel::getAllLocal('calculated');

@@ -63,21 +63,21 @@
 
 	<div class="submit" style="">
 
-		<a id="btn_verify_all_prepared_items" class="btn_verify_all_prepared_items button-secondary wpl_job_button"
+		<a id="btn_verify_all_prepared_items" class="btn_verify_all_prepared_items button wpl_job_button"
 		   title="<?php echo __('Verify all prepared items with eBay and get listing fees.','wplister') ?>"
 			><?php echo __('Verify all prepared items','wplister'); ?></a>
 
 		<?php if ( current_user_can( 'publish_ebay_listings' ) ) : ?>
 
-		<a id="btn_publish_all_verified_items" class="btn_publish_all_verified_items button-secondary wpl_job_button"
+		<a id="btn_publish_all_verified_items" class="btn_publish_all_verified_items button wpl_job_button"
 		   title="<?php echo __('Publish all verified items on eBay.','wplister') ?>"
 			><?php echo __('Publish all verified items','wplister'); ?></a>
 
-		<a id="btn_revise_all_changed_items" class="btn_revise_all_changed_items button-secondary wpl_job_button"
+		<a id="btn_revise_all_changed_items" class="btn_revise_all_changed_items button wpl_job_button"
 		   title="<?php echo __('Revise all changed items on eBay.','wplister') ?>"
 			><?php echo __('Revise all changed items','wplister'); ?></a>
 
-		<a id="btn_update_all_published_items" class="btn_update_all_published_items button-secondary wpl_job_button"
+		<a id="btn_update_all_published_items" class="btn_update_all_published_items button wpl_job_button"
 		   title="<?php echo __('Update all published items from eBay.','wplister') .' '. 'Note: This will only update the listing items in WP-Lister. Products in WooCommerce will not be affected.' ?>"
 			><?php echo __('Update all published items','wplister'); ?></a>
 
@@ -92,7 +92,7 @@
 		<div class="submit" style="padding-top: 0; float: left;">
 			<?php #wp_nonce_field( 'e2e_tools_page' ); ?>
 			<input type="hidden" name="action" value="verify_all_prepared_items" />
-			<input type="submit" value="<?php echo __('Verify all prepared items','wplister') ?>" name="submit" class="button-secondary"
+			<input type="submit" value="<?php echo __('Verify all prepared items','wplister') ?>" name="submit" class="button"
 				   title="<?php echo __('Verify all prepared items with eBay and get listing fees.','wplister') ?>">
 		</div>
 	</form>
@@ -101,7 +101,7 @@
 		<div class="submit" style="padding-top: 0; float: left; padding-left:15px;">
 			<?php #wp_nonce_field( 'e2e_tools_page' ); ?>
 			<input type="hidden" name="action" value="publish_all_verified_items" />
-			<input type="submit" value="<?php echo __('Publish all verified items','wplister') ?>" name="submit" class="button-secondary" 
+			<input type="submit" value="<?php echo __('Publish all verified items','wplister') ?>" name="submit" class="button" 
 				   title="<?php echo __('Publish all verified items on eBay.','wplister') ?>">
 		</div>
 	</form>
@@ -110,7 +110,7 @@
 		<div class="submit" style="padding-top: 0; float: left; padding-left:15px;">
 			<?php #wp_nonce_field( 'e2e_tools_page' ); ?>
 			<input type="hidden" name="action" value="revise_all_changed_items" />
-			<input type="submit" value="<?php echo __('Revise all changed items','wplister') ?>" name="submit" class="button-secondary" 
+			<input type="submit" value="<?php echo __('Revise all changed items','wplister') ?>" name="submit" class="button" 
 				   title="<?php echo __('Revise all changed items on eBay.','wplister') ?>">
 		</div>
 	</form>
@@ -119,7 +119,7 @@
 		<div class="submit" style="padding-top: 0; float: left; padding-left:15px;">
 			<?php #wp_nonce_field( 'e2e_tools_page' ); ?>
 			<input type="hidden" name="action" value="update_all_published_items" />
-			<input type="submit" value="<?php echo __('Update all published items','wplister') ?>" name="submit" class="button-secondary" 
+			<input type="submit" value="<?php echo __('Update all published items','wplister') ?>" name="submit" class="button" 
 				   title="<?php echo __('Update all published items from eBay.','wplister') ?>">
 		</div>
 	</form>

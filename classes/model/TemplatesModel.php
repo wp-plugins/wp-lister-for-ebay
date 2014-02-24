@@ -173,11 +173,19 @@ class TemplatesModel extends WPL_Model {
 	}
 
 
-	public function processItem( $item ) {
+	public function processItem( $item, $ItemObj = false, $preview = false ) {
 		
 		$listing = new ListingsModel();
 		$ibm = new ItemBuilderModel();
 
+		// let other plugin know we are doing an eBay listing
+   		if ( ! defined( 'WPL_EBAY_LISTING' ) )
+   			define( 'WPL_EBAY_LISTING', true );
+  
+		// let other plugin know we are doing an eBay listing
+   		if ( $preview && ! defined( 'WPL_EBAY_PREVIEW' ) )
+   			define( 'WPL_EBAY_PREVIEW', true );
+  
 		// load template content
 		$this->initTemplate();
 		$tpl_html = $this->getContent();
@@ -266,6 +274,9 @@ class TemplatesModel extends WPL_Model {
 		// process ajax galleries
 		$tpl_html = $this->processGalleryShortcodes( $item['id'], $tpl_html );
 
+		// process item shortcodes
+		$tpl_html = $this->processEbayItemShortcodes( $ItemObj, $tpl_html );
+
 
 		// handle images...
 		$main_image = $ibm->getProductMainImageURL( $item['post_id'] );
@@ -344,6 +355,27 @@ class TemplatesModel extends WPL_Model {
 		// 	}
 
 		return $html;
+	}
+
+
+	public function processEbayItemShortcodes( $ItemObj, $tpl_html ) {
+		if ( ! $ItemObj ) return $tpl_html;
+
+		// ebay_item_id
+		$tpl_html = str_replace( '[[ebay_item_id]]', @$ItemObj->ItemID, $tpl_html );
+
+		// ebay_store_category_id
+		$tpl_html = str_replace( '[[ebay_store_category_id]]', $ItemObj->Storefront->StoreCategoryID, $tpl_html );
+
+		// ebay_store_category_name
+		$tpl_html = str_replace( '[[ebay_store_category_name]]', EbayCategoriesModel::getStoreCategoryName( $ItemObj->Storefront->StoreCategoryID ), $tpl_html );
+
+		// ebay_store_url
+		$user_details = get_option( 'wplister_ebay_user' );
+		if ( isset( $user_details->StoreURL ) )
+			$tpl_html = str_replace( '[[ebay_store_url]]', $user_details->StoreURL, $tpl_html );
+
+		return $tpl_html;
 	}
 
 

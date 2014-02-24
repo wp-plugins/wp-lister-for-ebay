@@ -229,6 +229,7 @@ class SettingsPage extends WPL_Page {
 			'ajax_error_handling'		=> self::getOption( 'ajax_error_handling', 'halt' ),
 			'php_error_handling'		=> self::getOption( 'php_error_handling', 0 ),
 			'disable_variations'		=> self::getOption( 'disable_variations', 0 ),
+			'enable_messages_page'		=> self::getOption( 'enable_messages_page', 0 ),
 			'log_record_limit'			=> self::getOption( 'log_record_limit', 4096 ),
 			'xml_formatter'				=> self::getOption( 'xml_formatter', 'default' ),
 
@@ -259,7 +260,7 @@ class SettingsPage extends WPL_Page {
 				$msg .= __('You switched to a different eBay site.','wplister') . ' ';
 				$msg .= __('Please update site specific eBay details like categories, shipping services and payment options.','wplister');
 				$msg .= '&nbsp;&nbsp;';
-				$msg .= '<a id="btn_update_ebay_data" class="button-secondary wpl_job_button">' . __('Update eBay data','wplister') . '</a>';
+				$msg .= '<a id="btn_update_ebay_data" class="button wpl_job_button">' . __('Update eBay data','wplister') . '</a>';
 				$msg .= '</p>';
 				$this->showMessage( $msg );
 				$changed_site_id = true;
@@ -383,7 +384,7 @@ class SettingsPage extends WPL_Page {
 					self::updateOption( 'ebay_tokens', $tokens );
 					
 					// restore sandbox token
-					if ( isset($tokens['sandbox']) ) {
+					if ( isset($tokens['sandbox']) && $tokens['sandbox']['token'] ) {
 						self::updateOption( 'ebay_token', $tokens['sandbox']['token'] );
 						self::updateOption( 'sandbox_enabled',	$this->getValueFromPost( 'option_sandbox_enabled' ) );
 						$this->initEC();
@@ -405,7 +406,7 @@ class SettingsPage extends WPL_Page {
 					self::updateOption( 'ebay_tokens', $tokens );
 					
 					// restore production token
-					if ( isset($tokens['production']) ) {
+					if ( isset($tokens['production']) && $tokens['production']['token'] ) {
 						self::updateOption( 'ebay_token', $tokens['production']['token'] );
 						self::updateOption( 'sandbox_enabled',	$this->getValueFromPost( 'option_sandbox_enabled' ) );
 						$this->initEC();
@@ -427,6 +428,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'ajax_error_handling',	$this->getValueFromPost( 'ajax_error_handling' ) );
 			self::updateOption( 'php_error_handling',	$this->getValueFromPost( 'php_error_handling' ) );
 			self::updateOption( 'disable_variations',	$this->getValueFromPost( 'disable_variations' ) );
+			self::updateOption( 'enable_messages_page',	$this->getValueFromPost( 'enable_messages_page' ) );
 			self::updateOption( 'log_record_limit',		$this->getValueFromPost( 'log_record_limit' ) );
 			self::updateOption( 'xml_formatter',		$this->getValueFromPost( 'xml_formatter' ) );
 

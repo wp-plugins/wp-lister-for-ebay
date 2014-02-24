@@ -30,9 +30,38 @@ class WPL_WooBackendIntegration {
 		// add_action( 'woocommerce_order_get_items', array( &$this, 'wpl_woocommerce_order_get_items' ), 10, 2 );
 		add_filter( 'woocommerce_get_product_from_item', array( &$this, 'wpl_woocommerce_get_product_from_item' ), 10, 3 );
 
+		// add Prepare Listing action link on products table
+		add_filter( 'post_row_actions', array( &$this, 'wpl_post_row_actions' ), 10, 2 );
+
 	}
 
 
+
+	/**
+	 * add Prepare Listing action link on products table
+	 **/
+	// add_filter( 'post_row_actions', array( &$this, 'wpl_post_row_actions' ), 10, 2 );
+
+	function wpl_post_row_actions( $actions, $post ){
+
+		// skip if this is not a WC product
+		if ( $post->post_type == 'product' ) {
+
+			// get listing status
+			$listingsModel = new ListingsModel();
+			$status = $listingsModel->getStatusFromPostID( $post->ID );
+			
+			// skip if listing exists
+			if ( $status ) return $actions;
+
+			// TODO: check if product is in stock and not currently published on eBay!
+			// if ( ! get_post_meta( $post->ID, '_ebay_item_id', true ) )
+			$actions['prepare_auction'] = "<a title='" . esc_attr( __('Prepare this product to be listed on eBay.','wplister') ) . "' href='" . wp_nonce_url( admin_url( 'admin.php?page=wplister' . '&amp;action=wpl_prepare_single_listing&amp;product_id=' . $post->ID ), 'prepare_listing_' . $post->ID ) . "'>" . __( 'List on eBay', 'wplister' ) . "</a>";
+
+		}
+
+		return $actions;
+	}
 
 	/**
 	 * fix order line items
@@ -106,7 +135,7 @@ class WPL_WooBackendIntegration {
 					case 'published':
 					case 'changed':
 						$ebayUrl = $listingsModel->getViewItemURLFromPostID( $post->ID );
-						echo '<a href="'.$ebayUrl.'" title="View on eBay" target="_blank"><img src="'.WPLISTER_URL.'/img/ebay-16x16.png" alt="yes" /></a>';
+						echo '<a href="'.$ebayUrl.'" title="View on eBay" target="_blank"><img src="'.WPLISTER_URL.'img/ebay-16x16.png" alt="yes" /></a>';
 						break;
 					
 					case 'prepared':
@@ -349,7 +378,7 @@ class WPL_WooBackendIntegration {
 		// check listing status
 		$listingsModel = new ListingsModel();
 		$status = $listingsModel->getStatusFromPostID( $post->ID );
-		if ( ! in_array($status, array('published','changed','ended','prepared','verified') ) ) return;
+		if ( ! in_array($status, array('published','changed','ended','sold','prepared','verified') ) ) return;
 
 		// get first item
 		$listings = $listingsModel->getAllListingsFromPostID( $post->ID );

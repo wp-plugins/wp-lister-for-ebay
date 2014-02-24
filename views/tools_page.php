@@ -7,7 +7,7 @@
 	}
 
 	a.right,
-	input.button-secondary {
+	input.button {
 		float: right;
 	}
 
@@ -133,7 +133,7 @@
 				<form method="post" action="<?php echo $wpl_form_action; ?>">
 					<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 					<input type="hidden" name="action" value="wpl_clear_shutdown_log" />
-					<input type="submit" value="<?php echo __('Clear log','wplister'); ?>" name="submit" class="button-secondary">
+					<input type="submit" value="<?php echo __('Clear log','wplister'); ?>" name="submit" class="button">
 				</form>
 				<br style="clear:both;"/>
 			</p>
@@ -151,7 +151,7 @@
 					<div class="inside">
 
 						<!-- Update eBay data --> 
-						<a id="btn_update_ebay_data" class="button-secondary right"><?php echo __('Update eBay data','wplister'); ?></a>
+						<a id="btn_update_ebay_data" class="button right"><?php echo __('Update eBay data','wplister'); ?></a>
 						<p><?php echo __('This will load available categories, shipping services, payment options and your custom store categories from eBay','wplister'); ?></p>
 						<br style="clear:both;"/>
 
@@ -159,7 +159,7 @@
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="GetUser" />
-								<input type="submit" value="<?php echo __('Update user details','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('Update user details','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Update account details from eBay','wplister'); ?> 
 									<?php echo __('and update your seller profiles for shipping, payment and return policy.','wplister'); ?></p>
 						</form>
@@ -169,7 +169,7 @@
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="force_update_check" />
-								<input type="submit" value="<?php echo __('Force update check','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('Force update check','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Since WordPress only checks twice a day for plugin updates, it might be neccessary to force an immediate update check if you want to install an update which was released within the last hours.','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
@@ -180,7 +180,7 @@
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="update_ebay_orders_30" />
-								<input type="submit" value="<?php echo __('Update eBay orders','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('Update eBay orders','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('This will load all orders within 30 days from eBay.','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
@@ -191,7 +191,7 @@
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="update_ebay_transactions_30" />
-								<input type="submit" value="<?php echo __('Update eBay transactions','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('Update eBay transactions','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('This will load all transactions within 30 days from eBay.','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
@@ -209,7 +209,7 @@
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="check_wc_out_of_sync" />
-								<input type="submit" value="<?php echo __('Check product inventory','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('Check product inventory','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Check all published listings and find products with different stock or price in WooCommerce.','wplister'); ?>
 									<br>
 									<small>Note: If you are using price modifiers in your profile, this check could find false positives which are actually in sync.</small>
@@ -221,11 +221,36 @@
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="check_wc_out_of_stock" />
-								<input type="submit" value="<?php echo __('Check product stock','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('Check product stock','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Check all published listings and find products which are out of stock in WooCommerce.','wplister'); ?>
 									<br>
 									<small>Note: This doesn't work for variable products at this time.<br>Please use the "Check product inventory" button above instead.</small>
 								</p>
+						</form>
+						<br style="clear:both;"/>
+
+					</div>
+				</div> <!-- postbox -->
+
+				<div class="postbox" id="OtherToolBox" style="display:block;">
+					<h3 class="hndle"><span><?php echo __('Other','wplister'); ?></span></h3>
+					<div class="inside">
+
+						<!-- check for out of sync products --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="check_ebay_image_requirements" />
+								<input type="submit" value="<?php echo __('Check product images','wplister'); ?>" name="submit" class="button">
+								<p><?php echo __('Check all listings for product images smaller than 500px.','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
+						<!-- check for missing transactions --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="check_missing_ebay_transactions" />
+								<input type="submit" value="<?php echo __('Check transactions','wplister'); ?>" name="submit" class="button">
+								<p><?php echo __('Fix missing transactions and check for duplicates.','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
 
@@ -242,7 +267,7 @@
 								<?php #wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="page" value="<?php echo @$_REQUEST['page'] ?>" />
 								<input type="hidden" name="action" value="check_ebay_connection" />
-								<input type="submit" value="<?php echo __('Test eBay connection','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('Test eBay connection','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Test connection to eBay API','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
@@ -251,7 +276,7 @@
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="check_max_execution_time" />
-								<input type="submit" value="<?php echo __('Test PHP time limit','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('Test PHP time limit','wplister'); ?>" name="submit" class="button">
 								<p>
 									<?php echo __('Test if your server regards the PHP max_execution_time setting','wplister'); ?><br>
 									<small>
@@ -265,7 +290,7 @@
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="check_ebay_time_offset" />
-								<input type="submit" value="<?php echo __('Check eBay time offset','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('Check eBay time offset','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Check eBay time to server time offset','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
@@ -274,7 +299,7 @@
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="curl_debug" />
-								<input type="submit" value="<?php echo __('Show cURL debug info','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('Show cURL debug info','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Check availability of CURL php extension and show phpinfo()','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
@@ -283,7 +308,7 @@
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="GetTokenStatus" />
-								<input type="submit" value="<?php echo __('Get token expiration date','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('Get token expiration date','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Get token expiration date','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
@@ -295,7 +320,7 @@
 						<form method="post" action="admin-ajax.php" target="_blank">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="wplister_tail_log" />
-								<input type="submit" value="<?php echo __('View debug log','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('View debug log','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Open logfile viewer in new tab','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
@@ -303,7 +328,7 @@
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="wplister_clear_log" />
-								<input type="submit" value="<?php echo __('Clear debug log','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('Clear debug log','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Current log file size','wplister'); ?>: <?php echo round($wpl_log_size/1024/1024,1) ?> mb</p>
 						</form>
 						<br style="clear:both;"/>
@@ -315,7 +340,7 @@
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="view_logfile" />
-								<input type="submit" value="<?php echo __('View debug log','wplister'); ?>" name="submit" class="button-secondary">
+								<input type="submit" value="<?php echo __('View debug log','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('View Logfile','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
@@ -328,7 +353,7 @@
 							<div class="submit" style="padding-top: 0; float: left;">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="GetNotificationPreferences" />
-								<input type="submit" value="GetNotificationPreferences" name="submit" class="button-secondary">
+								<input type="submit" value="GetNotificationPreferences" name="submit" class="button">
 							</div>
 						</form>
 						<br style="clear:both;"/>
@@ -338,7 +363,7 @@
 							<div class="submit" style="padding-top: 0; float: left;">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="SetNotificationPreferences" />
-								<input type="submit" value="SetNotificationPreferences" name="submit" class="button-secondary">
+								<input type="submit" value="SetNotificationPreferences" name="submit" class="button">
 							</div>
 						</form>
 						<br style="clear:both;"/>

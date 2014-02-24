@@ -22,7 +22,7 @@ class EbayMessagesPage extends WPL_Page {
 	public function onWpAdminMenu() {
 		parent::onWpAdminMenu();
 
-		if ( 'beta' != get_option( 'wplister_update_channel', 'stable' ) ) return;
+		if ( ! get_option( 'wplister_enable_messages_page' ) ) return;
 
 		add_submenu_page( self::ParentMenuId, $this->getSubmenuPageTitle( 'Messages' ), __('Messages','wplister'), 
 						  self::ParentPermissions, $this->getSubmenuId( 'messages' ), array( &$this, 'onDisplayEbayMessagesPage' ) );

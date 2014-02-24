@@ -316,6 +316,38 @@ class TransactionsTable extends WP_List_Table {
         
     }
     
+    // status filter links
+    // http://wordpress.stackexchange.com/questions/56883/how-do-i-create-links-at-the-top-of-wp-list-table
+    function get_views(){
+       $views    = array();
+       $current  = ( !empty($_REQUEST['transaction_status']) ? $_REQUEST['transaction_status'] : 'all');
+       $base_url = remove_query_arg( array( 'action', 'order', 'transaction_status' ) );
+
+       // get transaction status summary
+       $om = new TransactionsModel();
+       $summary = $om->getStatusSummary();
+
+       // All link
+       $class = ($current == 'all' ? ' class="current"' :'');
+       $all_url = remove_query_arg( 'transaction_status', $base_url );
+       $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
+       $views['all'] .= '<span class="count">('.$summary->total_items.')</span>';
+
+       // Completed link
+       $Completed_url = add_query_arg( 'transaction_status', 'Completed', $base_url );
+       $class = ($current == 'Completed' ? ' class="current"' :'');
+       $views['Completed'] = "<a href='{$Completed_url}' {$class} >".__('Completed','wplister')."</a>";
+       if ( isset($summary->Completed) ) $views['Completed'] .= '<span class="count">('.$summary->Completed.')</span>';
+
+       // Active link
+       $Active_url = add_query_arg( 'transaction_status', 'Active', $base_url );
+       $class = ($current == 'Active' ? ' class="current"' :'');
+       $views['Active'] = "<a href='{$Active_url}' {$class} >".__('Active','wplister')."</a>";
+       if ( isset($summary->Active) ) $views['Active'] .= '<span class="count">('.$summary->Active.')</span>';
+
+       return $views;
+    }    
+    
     
     /** ************************************************************************
      * REQUIRED! This is where you prepare your data for display. This method will

@@ -110,6 +110,7 @@ class ProfilesPage extends WPL_Page {
 		$loc_flat_shipping_options = EbayShippingModel::getAllLocal('flat');
 		$int_flat_shipping_options = EbayShippingModel::getAllInternational('flat');
 		$shipping_locations        = EbayShippingModel::getShippingLocations();
+		$exclude_locations         = EbayShippingModel::getExcludeShippingLocations();
 		$countries                 = EbayShippingModel::getEbayCountries();
 		$template_files            = $this->getTemplatesList();
 		$store_categories          = $this->getStoreCategories();
@@ -197,6 +198,7 @@ class ProfilesPage extends WPL_Page {
 			'calc_shipping_enabled'	 	=> in_array( self::getOption('ebay_site_id'), array(0,2,15,100) ),
 			'default_ebay_category_id'	=> self::getOption('default_ebay_category_id'),
 			'shipping_locations'        => $shipping_locations,
+			'exclude_locations'         => $exclude_locations,
 			'countries'                 => $countries,
 			'template_files'            => $template_files,
 			'store_categories'          => $store_categories,

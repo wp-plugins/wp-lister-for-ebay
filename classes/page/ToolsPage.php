@@ -92,6 +92,16 @@ class ToolsPage extends WPL_Page {
 					$this->checkProductStock();
 				}
 
+				// check_ebay_image_requirements
+				if ( $_REQUEST['action'] == 'check_ebay_image_requirements') {				
+					$this->checkProductImages();
+				}
+
+				// check_missing_ebay_transactions
+				if ( $_REQUEST['action'] == 'check_missing_ebay_transactions') {				
+					$this->checkTransactions( true );
+				}
+
 				// check_wc_out_of_sync
 				if ( $_REQUEST['action'] == 'check_wc_out_of_sync') {				
 					$this->checkProductInventory();
@@ -265,8 +275,12 @@ class ToolsPage extends WPL_Page {
         wp_enqueue_script('jquery-ui-core');
         wp_enqueue_script('jquery-ui-progressbar');
 
+        // only enqueue JobRunner.js on WP-Lister's pages
+        if ( ! isset( $_REQUEST['page'] ) ) return;
+       	if ( substr( $_REQUEST['page'], 0, 8 ) != 'wplister' ) return;
+
 		// JobRunner
-		wp_register_script( 'wpl_JobRunner', self::$PLUGIN_URL.'/js/classes/JobRunner.js', array( 'jquery', 'jquery-ui-core', 'jquery-ui-progressbar' ), WPLISTER_VERSION );
+		wp_register_script( 'wpl_JobRunner', self::$PLUGIN_URL.'js/classes/JobRunner.js', array( 'jquery', 'jquery-ui-core', 'jquery-ui-progressbar' ), WPLISTER_VERSION );
 		wp_enqueue_script( 'wpl_JobRunner' );
 
 		wp_localize_script('wpl_JobRunner', 'wpl_JobRunner_i18n', array(
@@ -284,7 +298,246 @@ class ToolsPage extends WPL_Page {
     	// wp_enqueue_style( 'wp-jquery-ui-dialog' );
 	    // wp_enqueue_script ( 'jquery-ui-dialog' ); 
 
+	} // onWpEnqueueScripts
+
+
+	// create missing transactions from eBay orders
+	public function checkTransactions( $show_message = false ) {
+
+		$om = new EbayOrdersModel();
+		$tm = new TransactionsModel();
+		$orders = $om->getAll();
+		// echo "<pre>";print_r($orders);echo"</pre>";#die();
+		$created_transactions = 0;
+		$pending_orders = 0;
+
+		// loop orders
+		foreach ($orders as $order) {
+			
+			$order_details = $om->decodeObject( $order['details'], false, true );
+			// echo "<pre>";print_r($order_details);echo"</pre>";#die();
+
+			// skip if this order has been processed already
+			if ( $tm->getTransactionByEbayOrderID( $order['order_id'] ) )
+				continue;
+
+			// limit processing to 500 orders at a time
+			if ( $created_transactions >= 500 ) {
+				$pending_orders++;				
+				continue;
+			}
+
+			// loop transactions
+			$transactions = $order_details->TransactionArray;
+			foreach ($transactions as $Transaction) {
+
+				// echo "<pre>";print_r($Transaction->TransactionID);echo"</pre>";#die();
+				// $transaction_id = $Transaction->TransactionID;
+
+				// create transaction
+				$txn_id = $tm->createTransactionFromEbayOrder( $order, $Transaction );
+				// echo "<pre>created transaction ";print_r($Transaction->TransactionID);echo"</pre>";#die();
+				$created_transactions++;
+			}
+
+		}
+
+		$msg = $created_transactions . ' transactions were created.<br><br>';
+		if ( $pending_orders ) {
+			$msg .= 'There are ' . $pending_orders . ' more orders to process. Please run this check again until all orders have been processed.';
+		} else {
+			$msg .= 'Please visit the <a href="admin.php?page=wplister-transactions">Transactions</a> page to check for duplicates.';
+		}
+		if ( $show_message ) $this->showMessage( $msg );
+
+		// return number of orders which still need to be processed
+		return $pending_orders;
+	} // checkTransactions
+
+
+
+	public function upscaleImage( $image_file ) {
+
+		$upload_dir = wp_upload_dir();
+		$image_path = $upload_dir['basedir'] .'/'. $image_file;
+
+		$image = wp_get_image_editor( $image_path ); // Return an implementation that extends <tt>WP_Image_Editor</tt>
+
+		if ( ! is_wp_error( $image ) ) {
+
+			$size = $image->get_size();
+			// echo "<pre>";print_r($size);echo"</pre>";#die();
+
+			// resize() was tweaked to allow upscaling
+		    $image->resize( 500, 500, false );
+		    $result = $image->save( $image_path );
+			// echo "<pre>";print_r($result);echo"</pre>";#die();
+
+			$size = $image->get_size();
+			// echo "<pre>";print_r($size);echo"</pre>";#die();
+
+			return $size;
+
+		} else {
+			echo "<pre>";print_r($image);echo"</pre>";#die();
+			return false;
+		}
+
 	}
+
+	// allow resize() to upscale images
+	public function filter_image_resize_dimensions($default, $orig_w, $orig_h, $dest_w, $dest_h, $crop) {
+	    if ( $crop ) return null; // let the wordpress default function handle this
+
+        // don't crop, just resize using $dest_w x $dest_h as a maximum bounding box
+        $crop_w = $orig_w;
+        $crop_h = $orig_h;
+
+        $s_x = 0;
+        $s_y = 0;
+
+        // note the use of wp_expand_dimensions() instead of wp_constrain_dimensions()
+        list( $new_w, $new_h ) = wp_expand_dimensions( $orig_w, $orig_h, $dest_w, $dest_h );
+
+        // the return array matches the parameters to imagecopyresampled()
+	    return array( 0, 0, (int) $s_x, (int) $s_y, (int) $new_w, (int) $new_h, (int) $crop_w, (int) $crop_h );
+
+	} // filter image_resize_dimensions 
+
+	public function checkProductImages() {
+
+		// get all listings
+		$lm = new ListingsModel();
+		$listings = $lm->getAll();
+		$found_images = array();
+		$found_products = array();
+
+		// allow WP to upscale images
+		if ( isset( $_REQUEST['resize_images'] ) ) {
+			add_filter('image_resize_dimensions', array( $this, 'filter_image_resize_dimensions' ), 10, 6);
+		}
+
+
+		// process published listings
+		foreach ( $listings as $item ) {
+
+			// get featured image id
+			$post_id = $item['post_id'];
+			$attachment_id = get_post_thumbnail_id( $post_id );
+			if ( ! $attachment_id ) continue;
+
+			// $image_attributes = wp_get_attachment_image_src( $attachment_id, 'full' ); 
+			// $img_width  = $image_attributes[1];
+			// $img_height = $image_attributes[2];
+
+			// get attachment meta data
+			$meta = wp_get_attachment_metadata( $attachment_id ); 
+			if ( empty ( $meta ) ) continue;
+			// echo "<pre>";print_r($meta);echo"</pre>";#die();
+
+			// check if at least one side is 500px or longer
+			if ( ( $meta['width'] >= 500 ) || ( $meta['height'] >= 500 ) )
+				continue;
+
+			// echo "<pre>";print_r($attachment_id);echo"</pre>";#die();
+
+			// resize image
+			if ( isset( $_REQUEST['resize_images'] ) ) {
+				$size = $this->upscaleImage( $meta['file'] );
+				if ( $size ) {
+
+					// update attachment meta sizes
+					// echo "<pre>new size: ";print_r($size);echo"</pre>";#die();
+					$meta['width']  = $size['width'];
+					$meta['height'] = $size['height'];
+					// echo wp_update_attachment_metadata( $post_id, $meta );
+					update_post_meta( $attachment_id, '_wp_attachment_metadata', $meta );
+
+					// clear EPS cache for listing item
+					$lm->updateListing( $item['id'], array( 'eps' => NULL ) );
+
+					$this->showMessage( sprintf('Resized image <code>%s</code> to %s x %s.', $meta['file'], $meta['width'], $meta['height'] ) );
+					continue;					
+				}
+			}
+
+			// get image url
+			$image_attributes    = wp_get_attachment_image_src( $attachment_id, 'full' ); 
+			$meta['url']         = $image_attributes[0];
+
+			$meta['post_id']     = $post_id;
+			$meta['ebay_id']     = $item['ebay_id'];
+			$meta['ViewItemURL'] = $item['ViewItemURL'];
+
+			// add to list of found images
+			$found_images[ $attachment_id ] = $meta;
+
+		}
+		// echo "<pre>";print_r($found_images);echo"</pre>";
+
+		// return if empty
+		if ( empty( $found_images ) ) {
+			$this->showMessage('All images are okay.');
+			return;			
+		}
+
+
+		$msg = '<p>';
+		$msg .= 'Warning: Some product images do not meet the requirements.';
+		$msg .= '</p>';
+
+		// table header
+		$msg .= '<table style="width:100%">';
+		$msg .= "<tr>";
+		$msg .= "<th style='text-align:left'>Width</th>";
+		$msg .= "<th style='text-align:left'>Height</th>";
+		$msg .= "<th style='text-align:left'>File</th>";
+		$msg .= "<th style='text-align:left'>Product</th>";
+		$msg .= "<th style='text-align:left'>eBay ID</th>";
+		$msg .= "<th style='text-align:left'>ID</th>";
+		$msg .= "</tr>";
+
+		// table rows
+		foreach ( $found_images as $attachment_id => $item ) {
+
+			// get column data
+			$post_id = $item['post_id'];
+			$ebay_id = $item['ebay_id'];
+			$width   = $item['width'];
+			$height  = $item['height'];
+			$file    = $item['file'];
+			$url     = $item['url'];
+			$title   = get_the_title( $item['post_id'] );
+
+			// build links
+			$ebay_url = $item['ViewItemURL'] ? $item['ViewItemURL'] : $ebay_url = 'http://www.ebay.com/itm/'.$ebay_id;
+			$ebay_link = '<a href="'.$ebay_url.'" target="_blank">'.$ebay_id.'</a>';
+			$edit_link = '<a href="post.php?action=edit&post='.$post_id.'" target="_blank">'.$title.'</a>';
+			$file_link = '<a href="'.$url.'" target="_blank">'.$file.'</a>';
+
+			// build table row
+			$msg .= "<tr>";
+			$msg .= "<td>$width</td>";
+			$msg .= "<td>$height</td>";
+			$msg .= "<td>$file_link</td>";
+			$msg .= "<td>$edit_link (ID $post_id)</td>";
+			$msg .= "<td>$ebay_link</td>";
+			$msg .= "<td>$attachment_id</td>";
+			$msg .= "</tr>";
+		}
+		$msg .= '</table>';
+
+
+		$msg .= '<p>';
+		$url = 'admin.php?page=wplister-tools&action=check_ebay_image_requirements&resize_images=yes&_wpnonce='.wp_create_nonce('e2e_tools_page');
+		$msg .= '<a href="'.$url.'" class="button">'.__('Resize all','wplister').'</a> &nbsp; ';
+		$msg .= 'Click this button to upscale all found images to 500px.';
+		$msg .= '</p>';
+
+		$this->showMessage( $msg, 1 );
+
+
+	} // checkProductImages()
 
 	public function checkProductStock() {
 
@@ -478,11 +731,11 @@ class ToolsPage extends WPL_Page {
 				$in_sync = false;
 
 			// check price
-			if ( $price != $item['price'] )
+			if ( round( $price, 2 ) != round( $item['price'], 2 ) )
 				$in_sync = false;
 
 			// check max price
-			if ( isset( $price_max ) && isset( $item['price_max'] ) && ( $price_max != $item['price_max'] ) )
+			if ( isset( $price_max ) && isset( $item['price_max'] ) && ( round( $price_max, 2 ) != round ( $item['price_max'], 2 ) ) )
 				$in_sync = false;
 
 			// if in sync, continue with next item

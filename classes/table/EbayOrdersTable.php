@@ -308,12 +308,12 @@ class EbayOrdersTable extends WP_List_Table {
     function get_bulk_actions() {
         $actions = array(
             'update' 	=> __('Update selected orders from eBay','wplister'),
-            'delete'    => __('Delete selected orders','wplister')
+            'wpl_delete_order'    => __('Delete selected orders','wplister')
         );
 
-        // delete orders is only for developers
+        // wpl_delete_order orders is only for developers
         if ( ! get_option('wplister_log_level') )
-            unset( $actions['delete'] );
+            unset( $actions['wpl_delete_order'] );
 
         return $actions;
     }

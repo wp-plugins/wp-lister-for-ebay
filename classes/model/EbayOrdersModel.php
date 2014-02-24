@@ -243,7 +243,23 @@ class EbayOrdersModel extends WPL_Model {
 			// $this->logger->info( 'insert_id: '.$insert_id );
 
 			// process order line items
+			$tm = new TransactionsModel();
 			foreach ( $Details->TransactionArray as $Transaction ) {
+
+				// check if we already processed this TransactionID
+				if ( $existing_transaction = $tm->getTransactionByTransactionID( $Transaction->TransactionID ) ) {
+
+					// add history record
+					$history_message = "Skipped already processed transaction {$Transaction->TransactionID}";
+					$history_details = array( 'ebay_id' => $ebay_id );
+					$this->addHistory( $data['order_id'], 'skipped_transaction', $history_message, $history_details );
+
+					// TODO: optionally update transaction to reflect correct CompleteStatus etc. - like so:
+					// $tm->updateTransactionFromEbayOrder( $data, $Transaction );
+
+					// skip processing listing items
+					continue;
+				}
 
 				// check if item has variation 
 				$hasVariations = false;
@@ -258,6 +274,8 @@ class EbayOrdersModel extends WPL_Model {
 				// update listing sold quantity and status
 				$this->processListingItem( $data['order_id'], $Transaction->Item->ItemID, $Transaction->QuantityPurchased, $data, $VariationSpecifics );
 
+				// create transaction record for future reference
+				$tm->createTransactionFromEbayOrder( $data, $Transaction );
 			}
 
 
@@ -441,6 +459,22 @@ class EbayOrdersModel extends WPL_Model {
 
 		}
 
+		// skip orders that are older than the oldest order in WP-Lister
+		if ( $first_order_date_created = $this->getDateOfFirstOrder() ) {
+
+			// convert to timestamps
+			$this_order_date_created  = strtotime( $data['date_created'] );
+			$first_order_date_created = strtotime( $first_order_date_created );
+
+			// skip if order date is older
+			if ( $this_order_date_created < $first_order_date_created ) {
+				$this->logger->info( "skipped old order #".$Detail->OrderID." created at ".$data['date_created'] );			
+				$this->addToReport( 'skipped', $data );
+				return false;						
+			}
+
+		}
+
 
         // save GetOrders reponse in details
 		$data['details'] = $this->encodeObject( $Detail );
@@ -580,6 +614,17 @@ class EbayOrdersModel extends WPL_Model {
 
 		return $order;
 	}
+	function getAllOrderByOrderID( $order_id ) {
+		global $wpdb;
+
+		$order = $wpdb->get_results( "
+			SELECT *
+			FROM $this->tablename
+			WHERE order_id = '$order_id'
+		", ARRAY_A );
+
+		return $order;
+	}
 
 	function getOrderByPostID( $post_id ) {
 		global $wpdb;
@@ -613,6 +658,7 @@ class EbayOrdersModel extends WPL_Model {
 		return $items;		
 	}
 
+	// get the newest modification date of all orders in WP-Lister
 	function getDateOfLastOrder() {
 		global $wpdb;
 		$lastdate = $wpdb->get_var( "
@@ -632,6 +678,18 @@ class EbayOrdersModel extends WPL_Model {
 			}
 		}
 		return $lastdate;
+	}
+
+	// get the creation date of the oldest order in WP-Lister
+	function getDateOfFirstOrder() {
+		global $wpdb;
+		$date = $wpdb->get_var( "
+			SELECT date_created
+			FROM $this->tablename
+			ORDER BY date_created ASC LIMIT 1
+		" );
+
+		return $date;
 	}
 
 	function deleteItem( $id ) {

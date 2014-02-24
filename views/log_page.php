@@ -51,12 +51,14 @@
 	<br style="clear:both;"/>
 
 	<form method="post" action="<?php echo $wpl_form_action; ?>">
-		<div class="submit" style="padding-top: 0; float: left;">
+		<!-- <div class="submit" style="padding-top: 0; float: left;"> -->
+		<p>
 			<?php #wp_nonce_field( 'e2e_log_page' ); ?>
 			<input type="hidden" name="action" value="wpl_clear_ebay_log" />
-			<input type="submit" value="<?php echo __('Clear log','wplister') ?>" name="submit" class="button-secondary">
+			<input type="submit" value="<?php echo __('Clear log','wplister') ?>" name="submit" class="button">
 			&nbsp; current size: <?php echo $wpl_tableSize ?> mb
-		</div>
+		</p>
+		<!-- </div> -->
 	</form>
 
 

@@ -34,7 +34,7 @@
 		<div class="submit" style="padding-top: 0; float: left;">
 			<?php #wp_nonce_field( 'e2e_tools_page' ); ?>
 			<input type="hidden" name="action" value="update_sites" />
-			<input type="submit" value="<?php echo __('Update sites','wplister') ?>" name="submit" class="button-secondary"
+			<input type="submit" value="<?php echo __('Update sites','wplister') ?>" name="submit" class="button"
 				   title="<?php echo __('Update recent sites from eBay.','wplister') ?>">
 		</div>
 	</form>

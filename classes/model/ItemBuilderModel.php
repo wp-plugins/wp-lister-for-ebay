@@ -49,7 +49,7 @@ class ItemBuilderModel extends WPL_Model {
 		$item->Title = $this->prepareTitle( $listing['auction_title'] );
 
 		// set listing description
-		$item->Description = $this->getFinalHTML( $id );
+		$item->Description = $this->getFinalHTML( $id, $item );
 
 		// set listing duration
 		$product_listing_duration = get_post_meta( $post_id, '_ebay_listing_duration', true );
@@ -609,6 +609,8 @@ class ItemBuilderModel extends WPL_Model {
         // handle require immediate payment option
         if ( @$profile_details['autopay'] == '1' ) {
 			$item->setAutoPay( true );
+        } else {
+			$item->setAutoPay( 0 );        	
         }
 
 		// ReturnPolicy
@@ -763,10 +765,9 @@ class ItemBuilderModel extends WPL_Model {
 			$calculatedShippingRate = new CalculatedShippingRateType();
 			$calculatedShippingRate->setOriginatingPostalCode( $profile_details['postcode'] );
 			
-			// if ( $isCalcInt ) $calculatedShippingRate->setShippingPackage( 'PackageThickEnvelope' );
-			// TODO: separate ShippingPackage field in profile from local / int shipping
-			if ( $isCalcInt ) $calculatedShippingRate->setShippingPackage( $localShippingOptions[0]['ShippingPackage'] );
-			if ( $isCalcLoc ) $calculatedShippingRate->setShippingPackage( $localShippingOptions[0]['ShippingPackage'] );
+			// set ShippingPackage if calculated shipping is used
+			if ( $isCalcInt ) $calculatedShippingRate->setShippingPackage( $profile_details['shipping_package'] );
+			if ( $isCalcLoc ) $calculatedShippingRate->setShippingPackage( $profile_details['shipping_package'] );
 
 			if ( $isCalcLoc ) {
 				$calculatedShippingRate->setPackagingHandlingCosts( floatval( @$profile_details['PackagingHandlingCosts'] ) );	
@@ -797,6 +798,10 @@ class ItemBuilderModel extends WPL_Model {
 		// set ShippingPackageDetails
 		if ( $hasWeight ) {
 			$shippingPackageDetails = new ShipPackageDetailsType();
+
+			// set ShippingPackage if calculated shipping is used
+			if ( $isCalcInt ) $shippingPackageDetails->setShippingPackage( $profile_details['shipping_package'] );
+			if ( $isCalcLoc ) $shippingPackageDetails->setShippingPackage( $profile_details['shipping_package'] );
 			
 			list( $weight_major, $weight_minor ) = ProductWrapper::getEbayWeight( $post_id );
 			$shippingPackageDetails->setWeightMajor( floatval( $weight_major) );
@@ -883,7 +888,7 @@ class ItemBuilderModel extends WPL_Model {
 
 		// COD cost
 		if ( isset( $profile_details['cod_cost'] ) && trim( $profile_details['cod_cost'] ) ) {
-			$shippingDetails->setCODCost( $profile_details['cod_cost'] );
+			$shippingDetails->setCODCost( str_replace( ',', '.', $profile_details['cod_cost'] ) );
 		}
 		
 		// check if we have local pickup only
@@ -934,6 +939,7 @@ class ItemBuilderModel extends WPL_Model {
 
         		// fixed value
         		$value = $spec['value'];
+        		$value = html_entity_decode( $value, ENT_QUOTES );
         		if ( $this->mb_strlen( $value ) > 50 ) continue;
 
 	            $NameValueList = new NameValueListType();
@@ -949,6 +955,7 @@ class ItemBuilderModel extends WPL_Model {
 
         		// pull value from product attribute
         		$value = isset( $attributes[ $spec['attribute'] ] ) ? $attributes[ $spec['attribute'] ] : '';
+        		$value = html_entity_decode( $value, ENT_QUOTES );
 
         		// process custom attributes
         		$custom_attributes = apply_filters( 'wplister_custom_attributes', array() );
@@ -980,6 +987,7 @@ class ItemBuilderModel extends WPL_Model {
     	// TODO: make this an option (globally?)
         foreach ($attributes as $name => $value) {
 
+    		$value = html_entity_decode( $value, ENT_QUOTES );
     		if ( $this->mb_strlen( $value ) > 50 ) continue;
 
             $NameValueList = new NameValueListType();
@@ -1532,7 +1540,7 @@ class ItemBuilderModel extends WPL_Model {
 	}
 	
 
-	public function getFinalHTML( $id ) {
+	public function getFinalHTML( $id, $ItemObj ) {
 		
 		// get item data
 		$item = $this->lm->getItem( $id );
@@ -1543,7 +1551,7 @@ class ItemBuilderModel extends WPL_Model {
 
 		// load template
 		$template = new TemplatesModel( $item['template'] );
-		$html = $template->processItem( $item );
+		$html = $template->processItem( $item, $ItemObj );
 
 		// strip invalid XML characters
 		$html = $this->stripInvalidXml( $html );
@@ -1567,7 +1575,7 @@ class ItemBuilderModel extends WPL_Model {
 		// load template
 		if ( ! $template_id ) $template_id = $item['template'];
 		$template = new TemplatesModel( $template_id );
-		$html = $template->processItem( $item );
+		$html = $template->processItem( $item, false, true );
 
 		// return html
 		return $html;

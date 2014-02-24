@@ -43,18 +43,19 @@
 		<?php if ( false ) : ?>
 			<?php echo __('Next scheduled update','wplister'); ?>: 
 			<?php echo human_time_diff( wp_next_scheduled( 'wplister_update_auctions' ), current_time('timestamp',1) ) ?>
+			<?php echo wp_next_scheduled( 'wplister_update_auctions' ) < current_time('timestamp',1) ? 'ago' : '' ?>
 		<?php else: ?>
 			<?php echo __('Automatic background updates are currently disabled.','wplister'); ?>
 		<?php endif; ?>
 		</p>
 
 		<form method="post" action="<?php echo $wpl_form_action; ?>">
-			<div class="submit" style="padding-top: 0; float: left;">
+			<p>
 				<?php #wp_nonce_field( 'e2e_tools_page' ); ?>
 				<input type="hidden" name="action" value="update_messages" />
-				<input type="submit" value="<?php echo __('Update messages','wplister') ?>" name="submit" class="button-secondary"
+				<input type="submit" value="<?php echo __('Update messages','wplister') ?>" name="submit" class="button"
 					   title="<?php echo __('Update recent messages from eBay.','wplister') ?>">
-			</div>
+			</p>
 		</form>
 
 	<?php #endif; ?>
