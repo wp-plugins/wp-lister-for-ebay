@@ -33,6 +33,29 @@ class WPL_WooBackendIntegration {
 		// add Prepare Listing action link on products table
 		add_filter( 'post_row_actions', array( &$this, 'wpl_post_row_actions' ), 10, 2 );
 
+		// prevent WooCommerce from sending out notification emails when updating order status manually
+		if ( get_option( 'wplister_disable_changed_order_emails' ) ) {
+			add_filter( 'woocommerce_email_enabled_new_order', array( $this, 'check_order_email_enabled' ), 10, 2 );
+			add_filter( 'woocommerce_email_enabled_customer_completed_order', array( $this, 'check_order_email_enabled' ), 10, 2 );
+			add_filter( 'woocommerce_email_enabled_customer_processing_order', array( $this, 'check_order_email_enabled' ), 10, 2 );		
+		}
+
+	}
+
+
+
+	/**
+	 * prevent WooCommerce from sending out notification emails when updating order status for eBay orders manually
+	 **/
+	function check_order_email_enabled( $enabled, $order ){
+		if ( ! is_object($order) ) return $enabled;
+
+		// check if this order was imported from eBay
+		if ( get_post_meta( $order->id, '_ebay_order_id', true ) ) {
+			return false;
+		}
+
+		return $enabled;
 	}
 
 
@@ -178,6 +201,7 @@ class WPL_WooBackendIntegration {
 
 		// don't mark as changed when listing has been revised earlier in this request
 		if ( isset( $_POST['wpl_ebay_revise_on_update'] ) ) return;
+		if ( isset( $_POST['wpl_ebay_relist_on_update'] ) ) return;
 
 		$lm = new ListingsModel();
 		$lm->markItemAsModified( $post_id );
@@ -395,12 +419,14 @@ class WPL_WooBackendIntegration {
 		?>
 		
 		<style type="text/css">
-			#wpl_ebay_revise_on_update {
+			#wpl_ebay_revise_on_update,
+			#wpl_ebay_relist_on_update {
 				width: auto;
 				/*margin-left: 1em;*/
 				float: right;
 			}
 			.wpl_ebay_revise_on_update_field { margin:0; }
+			.wpl_ebay_relist_on_update_field { margin:0; }
 		</style>
 
 		<div class="misc-pub-section" id="wplister-submit-options">
@@ -434,12 +460,18 @@ class WPL_WooBackendIntegration {
 					$this->wplister_product_submitbox_revise_checkbox( $item );
 			?>
 
-			<?php if ( in_array($status, array('ended','sold') ) ) : ?>
+			<?php 
+				// show relist checkbox for ended listings
+				if ( in_array($status, array('ended','sold') ) )
+					$this->wplister_product_submitbox_relist_checkbox( $item );
+			?>
+
+			<?php /* if ( in_array($status, array('ended','sold') ) ) : ?>
 				<a href="admin.php?page=wplister&amp;action=relist&amp;auction=<?php echo $item->id ?>" 
 					onclick="return confirm('Are you sure you want to relist this product on eBay?');" style="float:right;">
 					<?php echo __('Relist', 'wplister') ?>
 				</a>
-			<?php endif; ?>
+			<?php endif; */ ?>
 
 		</div>
 		<?php
@@ -482,6 +514,31 @@ class WPL_WooBackendIntegration {
 		}
 
 	} // wplister_product_submitbox_revise_checkbox()
+
+
+	// draw checkbox to relist item
+	function wplister_product_submitbox_relist_checkbox( $item ) {
+		global $woocommerce;
+
+		// prevent wp_kses_post() from removing the data-tip attribute
+		global $allowedposttags;
+		$allowedposttags['img']['data-tip'] = true;
+
+
+		$tip = __('Relist eBay listing when updating the product', 'wplister') . '. '; 
+		$tip .= __('If the product is out of stock, it can not be relisted on eBay.', 'wplister');
+		$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
+		woocommerce_wp_checkbox( array( 
+			'id'    => 'wpl_ebay_relist_on_update', 
+			'label' => __('Relist item', 'wplister') . $tip,
+			// 'description' => __('Relist on eBay', 'wplister'),
+			// 'value' => get_option( 'wplister_relist_on_update_default', false )
+			'value' => false
+		) );
+
+
+	} // wplister_product_submitbox_relist_checkbox()
 
 	// if product has been imported from ebay...
 	function wplister_product_submitbox_imported_status() {
@@ -540,6 +597,27 @@ class WPL_WooBackendIntegration {
 			// $class = (false) ? 'error' : 'updated fade';
 			// echo '<div id="message" class="'.$class.'" style="display:block !important"><p>'.$message.'</p></div>';
 
+		}
+
+		if ( isset( $_POST['wpl_ebay_relist_on_update'] ) ) {
+
+			// call markItemAsModified() to re-apply the listing profile
+			$lm = new ListingsModel();
+			$lm->markItemAsModified( $post_id );
+
+			$wpl_logger->info('relisting listing '.$_POST['wpl_ebay_listing_id'] );
+
+			// call EbayController
+			$oWPL_WPLister->initEC();
+			$results = $oWPL_WPLister->EC->relistItems( $_POST['wpl_ebay_listing_id'] );
+			$oWPL_WPLister->EC->closeEbay();
+
+			$wpl_logger->info('relisted listing '.$_POST['wpl_ebay_listing_id'] );
+
+			// $message = __('Selected items were revised on eBay.', 'wplister');
+			// $message .= ' ID: '.$_POST['wpl_ebay_listing_id'];
+			// $class = (false) ? 'error' : 'updated fade';
+			// echo '<div id="message" class="'.$class.'" style="display:block !important"><p>'.$message.'</p></div>';
 
 		}
 

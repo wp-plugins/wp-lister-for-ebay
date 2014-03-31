@@ -140,15 +140,77 @@ class TemplatesModel extends WPL_Model {
 	}
 
 
+	// check syntax for php file (lint)
+	public function checkSyntax( $file ) {
+
+		// disable syntax check by default
+		if ( get_option( 'wplister_enable_php_syntax_check', 0 ) != 1 )
+			return true;
+
+		// check if exec() is enabled
+	    // $exec_enabled =
+	    //     function_exists('exec')                                            					&&
+	    //     ! in_array('exec', array_map('trim',explode(',', ini_get('disable_functions'))))   &&
+	    //     ! (strtolower( ini_get( 'safe_mode' ) ) != 'off')
+	    // ;
+
+		// if ( ! $exec_enabled ) {
+	    	// echo "exec is disabled<br>";
+	    	// echo "<pre>disabled functions: ";print_r( explode(',',ini_get('disable_functions')) );echo"</pre>";#die();
+	    	// echo "<pre>exec() exists: ";print_r( function_exists('exec') );echo"</pre>";#die();
+	    	// echo "<pre>safe mode: ";print_r( ini_get( 'safe_mode' ) );echo"</pre>";#die();
+	    	// phpinfo();
+	    	// return true;
+		// }
+
+		// attempt to call php -l
+		try {
+
+			// call php lint
+	        $cmd = 'php -l ' . $file;
+    	    exec( $cmd, $output, $retval );
+    	    // echo "<pre>out: ";print_r($output);echo"</pre>";#die();
+    	    // echo "<pre>ret: ";print_r($retval);echo"</pre>";#die();
+
+		} catch (Exception $e) {
+		    // if exec() fails to execute, pass syntax check
+		    echo 'Exception caught while checking syntax of php code: ',  $e->getMessage(), "<br>";
+		    echo "<pre>";print_r($e);echo"</pre>";#die();
+		    return true;
+		}
+
+		// process result
+        if ( is_array($output) ) {
+        	if ( $output[0] == '' ) unset( $output[0] ); // remove empty first line
+        	$output = join('<br>',$output);	
+        } 
+        // echo "<pre>";print_r($output);echo"</pre>";die();
+
+        // check for syntax errors
+        if ( $output && ( substr($output, 0, 16 ) != 'No syntax errors') ) {
+        	$this->showMessage( 'There is a problem with some PHP code in your template. Please fix the following error:<br><br><code>'.$output.'</code>', 1, 1 );
+        	return false;
+        }
+
+        // all good
+        return true;
+	}
+
+
 	// initialize listing template
-	public function initTemplate() {
+	public function initTemplate( $check_syntax = false ) {
 		global $wpl_tpl_fields;
 
 		// load functions.php if present
 		$file = $this->folderpath . '/functions.php';
 		if ( file_exists($file) ) {
-			include_once( $file );
-			do_action( 'wplister_template_init' );
+
+			if ( ( ! $check_syntax ) || $this->checkSyntax( $file ) ) {
+				// echo "<pre>";print_r( debug_backtrace() );echo"</pre>";die();
+				include_once( $file );
+				do_action( 'wplister_template_init' );
+			}
+
 		}
 
 		// load config.json
@@ -187,7 +249,7 @@ class TemplatesModel extends WPL_Model {
    			define( 'WPL_EBAY_PREVIEW', true );
   
 		// load template content
-		$this->initTemplate();
+		$this->initTemplate( $preview );
 		$tpl_html = $this->getContent();
 
 		// handle errors

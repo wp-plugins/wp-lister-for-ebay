@@ -162,9 +162,11 @@ class WPL_Setup extends WPL_Core {
 		global $wpdb;
 
 		if ( isset( $_GET['page'] ) && ( $_GET['page'] == 'wplister-settings' ) && ( self::getOption('log_to_db') == '1' ) ) {
-			$delete_count = $wpdb->get_var('SELECT count(id) FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 MONTH )');
+			$days_to_keep = self::getOption( 'log_days_limit', 30 );		
+			// $delete_count = $wpdb->get_var('SELECT count(id) FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 MONTH )');
+			$delete_count = $wpdb->get_var('SELECT count(id) FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.$days_to_keep.' DAY )');
 			if ( $delete_count ) {
-				$wpdb->query('DELETE FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 MONTH )');
+				$wpdb->query('DELETE FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.$days_to_keep.' DAY )');
 				// $this->showMessage( __('Log entries cleaned: ','wplister') . $delete_count );
 			}
 		}
@@ -746,7 +748,7 @@ class WPL_Setup extends WPL_Core {
 
 			// add column to ebay_profiles table
 			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
-			        ADD COLUMN `locked` int(11) NOT NULL AFTER `status`
+			        ADD COLUMN `locked` int(11) NOT NULL DEFAULT 0 AFTER `status`
 			";
 			$wpdb->query($sql);	echo mysql_error();
 	

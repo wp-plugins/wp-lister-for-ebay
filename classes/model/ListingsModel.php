@@ -158,15 +158,24 @@ class ListingsModel extends WPL_Model {
 		return $item;
 	}
 
-	// find listing by current or previous item ID
+	// find listing by current item ID - fall back to previous item ID
 	function findItemByEbayID( $id, $decode_details = true ) {
 		global $wpdb;
 		$item = $wpdb->get_row("
 			SELECT *
 			FROM $this->tablename
 			WHERE ebay_id = '$id'
-			   OR history LIKE '%$id%'
 		");
+
+		// if no listing was found, check previous item IDs 
+		if ( ! $item ) {
+			$item = $wpdb->get_row("
+				SELECT *
+				FROM $this->tablename
+				WHERE history LIKE '%$id%'
+			");
+		}
+
 		if (!$item) return false;
 		if (!$decode_details) return $item;
 
@@ -299,6 +308,16 @@ class ListingsModel extends WPL_Model {
 		$summary->total_items = $total_items;
 
 		return $summary;
+	}
+
+	// set locked status of all items at once
+	public function lockAll( $locked = false ) {
+		global $wpdb;
+		$locked = $locked ? 1 : 0;
+
+		$result = $wpdb->query( "UPDATE {$this->tablename} SET locked = $locked WHERE NOT status = 'archived' " );
+		echo $wpdb->last_error;
+		return $result;
 	}
 
 	function getHistory( $ebay_id ) {
@@ -1410,8 +1429,14 @@ class ListingsModel extends WPL_Model {
 		// if item was relisted through WP-Lister
 		if ( $Detail->RelistParentID ) {
 		
-			// keep item id in history
-			$this->addItemIdToHistory( $Detail->ItemID, $Detail->RelistParentID );
+			// if listing is still active, it was not relisted!
+			// RelistParentID can also be set when "Sell similar item" is used - even with the api docs saying otherwise
+			if ( $Detail->SellingStatus->ListingStatus != 'Active' ) {
+
+				// keep item id in history
+				$this->addItemIdToHistory( $Detail->ItemID, $Detail->RelistParentID );
+
+			}
 
 		}
 
@@ -1512,31 +1537,55 @@ class ListingsModel extends WPL_Model {
 	}
 
 
-	public function updateEndedListings( $sm = false ) {
+	public function updateEndedListings( $session ) {
 		global $wpdb;
 
 		// set listing status to ended for all listings with an end_date in the past
 		$items = $this->getAllPastEndDate();
+		$this->logger->info('getAllPastEndDate() found '.sizeof($items).' items');
+
+		$auto_update_ended_items = get_option( 'wplister_auto_update_ended_items' );
 
 		foreach ($items as $item) {
 			// if quantity sold is greater than quantity, mark as sold instead of ended
 			// $status = intval( $item['quantity_sold'] ) < intval( $item['quantity'] ) ? 'ended' : 'sold';
 			
+            // check if details for ended items should be fetched from ebay automatically
+			// diabled by default for performance reasons - it is not recommended to relist items on eBay anyway
+            if ( $auto_update_ended_items ) {
+
+				// suggested by Kim - to check if an ended item has been relisted
+				$oldItemID = $item['ebay_id'];
+				$this->updateItemDetails( $item['id'], $session );
+
+			}
+
 			// default status is ended
 			$status = 'ended';
+
+			// load item details
+			$item = $this->getItem( $item['id'] );			
 			
 			// check eBay available quantity first - if all were sold 
 			if ( intval( $item['quantity_sold'] ) >= intval( $item['quantity'] ) ) {
 
 				// if eBay indicates item was sold, check WooCommerce stock - updateDetails does the same
-				$item = $this->getItemByEbayID( $data['ebay_id'] );
-				if ( $item && ! $this->checkStockLevel( $item ) ) 
+				if ( $this->checkStockLevel( $item ) ) 
 					$status = 'sold';
 
 			}
 
+			// check if ebay ID has changed - ie. item has been relisted
+            if ( $auto_update_ended_items ) {
+
+				if ( $oldItemID != $item['ebay_id'] )
+					$status = 'published';
+
+			}
+			
+
 			$wpdb->update( $this->tablename, array( 'status' => $status ), array( 'id' => $item['id'] ) );
-			$this->logger->info('updateEndedListings() changed item '.$item['ebay_id'].' to status '.$status);
+			$this->logger->info('updateEndedListings() changed item '.$item['ebay_id'].' ('.$item['id'].') to status '.$status);
 		}
 
 
@@ -1695,6 +1744,17 @@ class ListingsModel extends WPL_Model {
 			SELECT * 
 			FROM $this->tablename
 			WHERE status = 'relisted'
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
+	function getAllWithStatus( $status ) {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT * 
+			FROM $this->tablename
+			WHERE status = '$status'
 			ORDER BY id DESC
 		", ARRAY_A);		
 
@@ -1992,9 +2052,10 @@ class ListingsModel extends WPL_Model {
 		$post_content = $post_content ? $post_content : $post->post_content;
 
 		// skip pending products and drafts
-		if ( $post->post_status != 'publish' ) { 
+		// if ( $post->post_status != 'publish' ) { 
+		if ( ! in_array( $post->post_status, array('publish','private') ) ) { 
 			if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'wpl_prepare_single_listing' )
-				$this->showMessage( __('Skipped product draft','wplister') . ': ' . $post_title, 2, 1 );
+				$this->showMessage( __('Skipped product with status','wplister') . ' <em>' . $post->post_status . '</em>: ' . $post_title, 2, 1 );
 			return false; 
 		}
 
@@ -2007,10 +2068,11 @@ class ListingsModel extends WPL_Model {
 
 		// gather product data
 		$data['post_id']       = $post_id;
-		$data['parent_id']     = $parent_id;
+		$data['parent_id']     = $parent_id ? $parent_id : 0;
 		$data['auction_title'] = $post_title;
 		$data['post_content']  = $post_content;
 		$data['price']         = ProductWrapper::getPrice( $post_id );
+		$data['locked']        = 0;
 		$data['status']        = 'selected';
 		
 		$this->logger->info('insert new auction '.$post_id.' - title: '.$data['auction_title']);
@@ -2266,4 +2328,14 @@ class ListingsModel extends WPL_Model {
 	}
 
 
-}
+	public function cleanArchive() {
+		global $wpdb;
+
+		$wpdb->query("DELETE FROM $this->tablename WHERE status = 'archived' AND ( ebay_id = '' OR ebay_id IS NULL ) ");
+		echo mysql_error();
+
+		return mysql_affected_rows();
+	} // cleanArchive()
+
+
+} // class ListingsModel

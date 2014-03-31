@@ -230,6 +230,18 @@
 								<?php echo __('Select if you want the listing preview open in a new tab by default.','wplister'); ?><br>
 							</p>
 
+							<label for="wpl-enable_categories_page" class="text_label">
+								<?php echo __('Categories in main menu','wplister') ?>
+                                <?php wplister_tooltip('This will add a <em>Categories</em> submenu entry visible to users who can manage listings.') ?>
+							</label>
+							<select id="wpl-enable_categories_page" name="wpl_e2e_enable_categories_page" class="required-entry select">
+								<option value="0" <?php if ( $wpl_enable_categories_page != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
+								<option value="1" <?php if ( $wpl_enable_categories_page == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Enable this to make category settings available to users without access to other eBay settings.','wplister'); ?><br>
+							</p>
+
 							<label for="wpl-option-disable_wysiwyg_editor" class="text_label">
 								<?php echo __('Disable WYSIWYG editor','wplister') ?>
                                 <?php wplister_tooltip('Depending in your listing template content, you might want to disable the built in WP editor to edit your template content.') ?>
@@ -299,6 +311,31 @@
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('Should WP-Lister mark a product as out of stock even when it has backorders enabled?','wplister'); ?><br>
+							</p>
+
+							<label for="wpl-api_enable_auto_relist" class="text_label">
+								<?php echo __('Enable API auto relist','wplister') ?>
+                                <?php wplister_tooltip('When a locked product is marked out of stock via the API or CSV import, WP-Lister automatically ends the listing on eBay. Enable this option to allow WP-Lister to automatically relist the item when it is back in stock.') ?>
+							</label>
+							<select id="wpl-api_enable_auto_relist" name="wpl_e2e_api_enable_auto_relist" class="required-entry select">
+								<option value="0" <?php if ( $wpl_api_enable_auto_relist != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
+								<option value="1" <?php if ( $wpl_api_enable_auto_relist == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Enable this if you update your inventory are via the API or CSV import.','wplister'); ?>
+								<?php echo __('This only effects locked items.','wplister'); ?><br>
+							</p>
+
+							<label for="wpl-auto_update_ended_items" class="text_label">
+								<?php echo __('Auto update ended items','wplister') ?>
+                                <?php wplister_tooltip('This can be helpful if you manually relisted items on eBay - which is not recommended.<br>Use it with care as it might cause performance issues and unexpected results.') ?>
+							</label>
+							<select id="wpl-auto_update_ended_items" name="wpl_e2e_auto_update_ended_items" class="required-entry select">
+								<option value="0" <?php if ( $wpl_auto_update_ended_items != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
+								<option value="1" <?php if ( $wpl_auto_update_ended_items == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Automatically update item details from eBay when a listing has ended.','wplister'); ?> (beta)
 							</p>
 
 						</div>

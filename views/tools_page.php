@@ -205,14 +205,26 @@
 					<h3 class="hndle"><span><?php echo __('Inventory Check','wplister'); ?></span></h3>
 					<div class="inside">
 
-						<!-- check for out of sync products --> 
+						<!-- check for out of sync products (published) --> 
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="check_wc_out_of_sync" />
+								<input type="hidden" name="mode" value="published" />
 								<input type="submit" value="<?php echo __('Check product inventory','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Check all published listings and find products with different stock or price in WooCommerce.','wplister'); ?>
 									<br>
 									<small>Note: If you are using price modifiers in your profile, this check could find false positives which are actually in sync.</small>
+								</p>
+						</form>
+						<br style="clear:both;"/>
+
+						<!-- check for out of sync products (ended) --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="check_wc_out_of_sync" />
+								<input type="hidden" name="mode" value="ended" />
+								<input type="submit" value="<?php echo __('Check ended listings','wplister'); ?>" name="submit" class="button">
+								<p><?php echo __('Check all ended listings and find products with different stock or price in WooCommerce.','wplister'); ?>
 								</p>
 						</form>
 						<br style="clear:both;"/>
@@ -223,8 +235,16 @@
 								<input type="hidden" name="action" value="check_wc_out_of_stock" />
 								<input type="submit" value="<?php echo __('Check product stock','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Check all published listings and find products which are out of stock in WooCommerce.','wplister'); ?>
-									<br>
-									<small>Note: This doesn't work for variable products at this time.<br>Please use the "Check product inventory" button above instead.</small>
+								</p>
+						</form>
+						<br style="clear:both;"/>
+
+						<!-- check for sold products that are still in stock --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="check_wc_sold_stock" />
+								<input type="submit" value="<?php echo __('Check sold stock','wplister'); ?>" name="submit" class="button">
+								<p><?php echo __('Check all sold listings and find products which are still in stock in WooCommerce.','wplister'); ?>
 								</p>
 						</form>
 						<br style="clear:both;"/>
@@ -251,6 +271,24 @@
 								<input type="hidden" name="action" value="check_missing_ebay_transactions" />
 								<input type="submit" value="<?php echo __('Check transactions','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Fix missing transactions and check for duplicates.','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
+						<!-- lock all listings --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="lock_all_listings" />
+								<input type="submit" value="<?php echo __('Lock all items','wplister'); ?>" name="submit" class="button">
+								<p><?php echo __('Lock all items.','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
+						<!-- unlock all listings --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="unlock_all_listings" />
+								<input type="submit" value="<?php echo __('Unlock all items','wplister'); ?>" name="submit" class="button">
+								<p><?php echo __('Unlock all items.','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
 

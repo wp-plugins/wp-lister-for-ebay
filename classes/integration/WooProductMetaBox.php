@@ -136,7 +136,8 @@ class WpLister_Product_MetaBox {
 
 		// check if conditions are available for this category - or fall back to default
 		if ( isset( $item_conditions[ $primary_category_id ] ) ) {
-			$available_conditions = $item_conditions[ $primary_category_id ];
+			// get available conditions and add default value "use profile setting" to the beginning
+		    $available_conditions = array('' => __('-- use profile setting --','wplister')) + $item_conditions[ $primary_category_id ]; 
 		} else {
 			$available_conditions = $default_conditions;
 		}
@@ -259,6 +260,52 @@ class WpLister_Product_MetaBox {
 			'description' 	=> __('Hide this product from the list of products currently not listed on eBay.','wplister'),
 			'value' 		=> get_post_meta( $post->ID, '_ebay_hide_from_unlisted', true )
 		) );
+
+
+		$wpl_seller_profiles_enabled	= get_option('wplister_ebay_seller_profiles_enabled');
+		if ( $wpl_seller_profiles_enabled ) {
+
+			// $wpl_seller_shipping_profiles	= get_option('wplister_ebay_seller_shipping_profiles');
+			$wpl_seller_payment_profiles	= get_option('wplister_ebay_seller_payment_profiles');
+			$wpl_seller_return_profiles		= get_option('wplister_ebay_seller_return_profiles');
+			// echo "<pre>";print_r($wpl_seller_payment_profiles);echo"</pre>";#die();
+
+			if ( is_array( $wpl_seller_payment_profiles ) ) {
+
+				$seller_payment_profiles = array( '' => __('-- use profile setting --','wplister') );
+				foreach ( $wpl_seller_payment_profiles as $seller_profile ) {
+					$seller_payment_profiles[ $seller_profile->ProfileID ] = $seller_profile->ProfileName . ' - ' . $seller_profile->ShortSummary;
+				}
+
+				woocommerce_wp_select( array(
+					'id' 			=> 'wpl_ebay_seller_payment_profile_id',
+					'label' 		=> __('Payment profile', 'wplister'),
+					'options' 		=> $seller_payment_profiles,
+					// 'description' 	=> __('Available conditions may vary for different categories.','wplister'),
+					'value'			=> get_post_meta( $post->ID, '_ebay_seller_payment_profile_id', true )
+				) );
+
+			}
+
+			if ( is_array( $wpl_seller_return_profiles ) ) {
+
+				$seller_return_profiles = array( '' => __('-- use profile setting --','wplister') );
+				foreach ( $wpl_seller_return_profiles as $seller_profile ) {
+					$seller_return_profiles[ $seller_profile->ProfileID ] = $seller_profile->ProfileName . ' - ' . $seller_profile->ShortSummary;
+				}
+
+				woocommerce_wp_select( array(
+					'id' 			=> 'wpl_ebay_seller_return_profile_id',
+					'label' 		=> __('Return profile', 'wplister'),
+					'options' 		=> $seller_return_profiles,
+					// 'description' 	=> __('Available conditions may vary for different categories.','wplister'),
+					'value'			=> get_post_meta( $post->ID, '_ebay_seller_return_profile_id', true )
+				) );
+
+			}
+
+		}
+
 
 		woocommerce_wp_textarea_input( array( 
 			'id'    => 'wpl_ebay_payment_instructions', 
@@ -702,6 +749,9 @@ class WpLister_Product_MetaBox {
 			update_post_meta( $post_id, '_ebay_category_2_id', $wpl_ebay_category_2_id );
 			update_post_meta( $post_id, '_ebay_gallery_image_url', $wpl_ebay_gallery_image_url );
 
+			update_post_meta( $post_id, '_ebay_seller_payment_profile_id', esc_attr( @$_POST['wpl_ebay_seller_payment_profile_id'] ) );
+			update_post_meta( $post_id, '_ebay_seller_return_profile_id', esc_attr( @$_POST['wpl_ebay_seller_return_profile_id'] ) );
+
 			// shipping options
 			$ebay_shipping_service_type = esc_attr( @$_POST['wpl_e2e_shipping_service_type'] );
 
@@ -741,6 +791,11 @@ class WpLister_Product_MetaBox {
 				delete_post_meta( $post_id, '_ebay_shipping_int_flat_profile' );
 				delete_post_meta( $post_id, '_ebay_shipping_loc_calc_profile' );
 				delete_post_meta( $post_id, '_ebay_shipping_int_calc_profile' );
+
+				delete_post_meta( $post_id, '_ebay_seller_shipping_profile_id' );
+				delete_post_meta( $post_id, '_ebay_shipping_loc_enable_free_shipping' );
+				delete_post_meta( $post_id, '_ebay_shipping_ShipToLocations' );
+				delete_post_meta( $post_id, '_ebay_shipping_ExcludeShipToLocations' );
 
 			}
 

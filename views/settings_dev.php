@@ -85,6 +85,56 @@
 				<div class="meta-box-sortables ui-sortable">
 
 
+					<div class="postbox" id="DbLoggingBox">
+						<h3 class="hndle"><span><?php echo __('Logging','wplister') ?></span></h3>
+						<div class="inside">
+
+							<label for="wpl-option-log_to_db" class="text_label">
+								<?php echo __('Log to database','wplister'); ?>
+                                <?php wplister_tooltip('If you have any issues or want support to look into a specific error message from eBay then please enable logging, repeat the steps and send the resulting log record to support.') ?>
+							</label>
+							<select id="wpl-option-log_to_db" name="wpl_e2e_option_log_to_db" title="Logging" class=" required-entry select">
+								<option value="1" <?php if ( $wpl_option_log_to_db == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( $wpl_option_log_to_db != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Enable to log all communication with eBay to the database.','wplister'); ?>
+							</p>
+
+							<label for="wpl-option-log_days_limit" class="text_label">
+								<?php echo __('Keep log records for','wplister'); ?>
+                                <?php wplister_tooltip('Select how long log records should be kept. Older records are removed automatically. The default is 30 days.') ?>
+							</label>
+							<select id="wpl-option-log_days_limit" name="wpl_e2e_log_days_limit" class=" required-entry select">
+								<option value="7"  <?php if ( $wpl_log_days_limit == '7' ):  ?>selected="selected"<?php endif; ?>>7 days</option>
+								<option value="14"  <?php if ( $wpl_log_days_limit == '14' ):  ?>selected="selected"<?php endif; ?>>14 days</option>
+								<option value="30"  <?php if ( $wpl_log_days_limit == '30' ):  ?>selected="selected"<?php endif; ?>>30 days</option>
+								<option value="60"  <?php if ( $wpl_log_days_limit == '60' ):  ?>selected="selected"<?php endif; ?>>60 days</option>
+								<option value="90"  <?php if ( $wpl_log_days_limit == '90' ):  ?>selected="selected"<?php endif; ?>>90 days</option>
+							</select>
+
+							<label for="wpl-option-log_record_limit" class="text_label">
+								<?php echo __('Log entry size limit','wplister'); ?>
+                                <?php wplister_tooltip('Limit the maximum size of a single log record. The default value is 4k.') ?>
+							</label>
+							<select id="wpl-option-log_record_limit" name="wpl_e2e_log_record_limit" class=" required-entry select">
+								<option value="4096"  <?php if ( $wpl_log_record_limit == '4096' ):  ?>selected="selected"<?php endif; ?>>4 kb</option>
+								<option value="8192"  <?php if ( $wpl_log_record_limit == '8192' ):  ?>selected="selected"<?php endif; ?>>8 kb</option>
+								<option value="64000" <?php if ( $wpl_log_record_limit == '64000' ): ?>selected="selected"<?php endif; ?>>64 kb</option>
+							</select>
+
+							<label for="wpl-option-xml_formatter" class="text_label">
+								<?php echo __('XML Beautifier','wplister'); ?>
+                                <?php wplister_tooltip('Select which XML formatter should be used to display log records. If the default settings does not work, switch to the built in formatter.') ?>
+							</label>
+							<select id="wpl-option-xml_formatter" name="wpl_e2e_xml_formatter" class=" required-entry select">
+								<option value="default" <?php if ( $wpl_xml_formatter == 'default' ): ?>selected="selected"<?php endif; ?>>auto detect</option>
+								<option value="custom"  <?php if ( $wpl_xml_formatter == 'custom' ):  ?>selected="selected"<?php endif; ?>>force built in XML formatter</option>
+							</select>
+
+						</div>
+					</div>
+
 					<div class="postbox" id="SandboxSettingsBox">
 						<h3 class="hndle"><span><?php echo __('eBay Sandbox','wplister') ?></span></h3>
 						<div class="inside">
@@ -102,44 +152,6 @@
 							<select id="wpl-option-sandbox_enabled" name="wpl_e2e_option_sandbox_enabled" title="Sandbox" class=" required-entry select">
 								<option value="1" <?php if ( $wpl_option_sandbox_enabled == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( $wpl_option_sandbox_enabled != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
-							</select>
-
-						</div>
-					</div>
-
-					<div class="postbox" id="DbLoggingBox">
-						<h3 class="hndle"><span><?php echo __('Logging','wplister') ?></span></h3>
-						<div class="inside">
-
-							<label for="wpl-option-log_to_db" class="text_label">
-								<?php echo __('Log to database','wplister'); ?>
-                                <?php wplister_tooltip('If you have any issues or want support to look into a specific error message from eBay then please enable logging, repeat the steps and send the resulting log record to support.') ?>
-							</label>
-							<select id="wpl-option-log_to_db" name="wpl_e2e_option_log_to_db" title="Logging" class=" required-entry select">
-								<option value="1" <?php if ( $wpl_option_log_to_db == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
-								<option value="0" <?php if ( $wpl_option_log_to_db != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
-							</select>
-							<p class="desc" style="display: block;">
-								<?php echo __('Enable to log all communication with eBay to the database.','wplister'); ?>
-							</p>
-
-							<label for="wpl-option-log_record_limit" class="text_label">
-								<?php echo __('Log entry size limit','wplister'); ?>
-                                <?php wplister_tooltip('Limit the maximum size of a single log record. The default value is 4k.') ?>
-							</label>
-							<select id="wpl-option-log_record_limit" name="wpl_e2e_log_record_limit" class=" required-entry select">
-								<option value="4096"  <?php if ( $wpl_log_record_limit == '4096' ):  ?>selected="selected"<?php endif; ?>>4 kb</option>
-								<option value="8192"  <?php if ( $wpl_log_record_limit == '8192' ):  ?>selected="selected"<?php endif; ?>>8 kb</option>
-								<option value="64000" <?php if ( $wpl_log_record_limit == '64000' ): ?>selected="selected"<?php endif; ?>>64 kb</option>
-							</select>
-
-							<label for="wpl-option-xml_formatter" class="text_label">
-								<?php echo __('XML Beautifier','wplister'); ?>
-                                <?php wplister_tooltip('Select which XML formatter should be used to display log records.') ?>
-							</label>
-							<select id="wpl-option-xml_formatter" name="wpl_e2e_xml_formatter" class=" required-entry select">
-								<option value="default" <?php if ( $wpl_xml_formatter == 'default' ): ?>selected="selected"<?php endif; ?>>default</option>
-								<option value="custom"  <?php if ( $wpl_xml_formatter == 'custom' ):  ?>selected="selected"<?php endif; ?>>use built in XML formatter</option>
 							</select>
 
 						</div>

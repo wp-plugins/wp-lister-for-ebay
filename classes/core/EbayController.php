@@ -471,6 +471,7 @@ class EbayController {
     }
 
     // call ReviseInventoryStatus on selected products
+    // (called from 'wplister_revise_inventory_status' api hook)
     public function reviseInventoryForProducts( $product_ids ){ 
 
         if ( ! is_array( $product_ids ) && ! is_numeric( $product_ids ) ) return; 
@@ -479,8 +480,32 @@ class EbayController {
         $lm = new ListingsModel();
         foreach( $product_ids as $post_id ) {
             $listing_id = $lm->getListingIDFromPostID( $post_id );
+
+            // check if API is allowed to relist ended items
+            if ( get_option( 'wplister_api_enable_auto_relist' ) ) {
+
+                // check listing status - only ended and sold items can be relisted
+                $allowed_statuses = array( 'ended', 'sold' );
+                if ( $lm->itemHasAllowedStatus( $listing_id, $allowed_statuses ) ) {
+
+                    // ok, we have an ended item - check if it's in stock
+                    $listing_item = $lm->getItem( $listing_id );
+                    if ( $lm->checkStockLevel( $listing_item ) ) {
+
+                        // let's relist
+                        $this->lastResults[] = $lm->relistItem( $listing_id, $this->session );  
+                        continue;
+
+                    } // is in stock
+
+                } // is ended
+
+            } // if API relist enabled
+
+            // revise inventory status (default)
             $this->lastResults[] = $lm->reviseInventoryStatus( $listing_id, $this->session, false );  
-        }
+
+        } // 
         
         $this->processLastResults();
     }

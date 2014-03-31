@@ -33,6 +33,7 @@ We worked hard to make WP-Lister easy to use but flexible. The workflow of listi
 * german
 * french
 * italian
+* dutch
 * korean
 * latvian
 * bulgarian
@@ -68,13 +69,15 @@ WP-Lister requires a recent version of WordPress (3.6+) with WooCommerce 2.x ins
 
 To learn more about variations and allowed categories you should visit this page: http://pages.ebay.com/help/sell/listing-variations.html. There you will find a link to eBay’s look up table for categories allowing variations. If you can only list to categories where no variations are allowed, consider purchasing WP-Lister Pro which can split variations into single listings.
 
-= I already have listed my products on eBay. Can WP-Lister import them to WordPress? =
+= I already have listed my products on eBay. Can WP-Lister import them to WooCommerce? =
 
-WP-Lister is specifically designed to let you manage your products in WordPress - and list them from there on eBay. If you would like to use WP-Lister but you need to import all your items from eBay to WooCommerce first, you might want to use this plugin which we developed to get you started: http://www.wplab.com/plugins/import-from-ebay-to-woocommerce/
+No, WP-Lister itself was created to let you manage your products in WordPress - and list them *from* WordPress *to* eBay. 
+
+But if you need to import all your items from eBay to WooCommerce first to be able to use WP-Lister, you can use an importer add-on plugin we developed to get you started: http://www.wplab.com/plugins/import-from-ebay-to-woocommerce/. Since importing from eBay is rather complex and support intensive this add-on plugin does have a price tag attached. 
 
 = Does WP-Lister support windows servers? =
 
-The current version does run on windows servers, but this feature is still experimental.
+Nope.
 
 = Are there any more FAQ? =
 
@@ -90,6 +93,77 @@ Already working on it. Expect it soon.
 2. Profile Editor
 
 == Changelog ==
+= 1.3.8 =
+* various improvements and fixes - read the full changelog below
+
+= 1.3.7.6 =
+* fixed item condition on product level missing "use profile setting" option when a default category was set 
+
+= 1.3.7.5 =
+* automatically strip CDATA tags when template is saved 
+* added option to lock and unlock all items on tools page 
+* improved quantity display for changed items on listings page 
+* fixed issue with wrong quantity after updating listing template 
+
+= 1.3.7.4 =
+* added option to update item details for ended listings automatically 
+* fixed rare MySQL errors on Mac servers 
+* fixed bug in new auto relist api option 
+
+= 1.3.7.3 =
+* added option to enable relisting ended items automatically when they updated to back in stock via the API 
+* improved send to support feature 
+
+= 1.3.7.2 =
+* added option to disable notification emails when updating the order status for eBay orders manually 
+* improved developer settings page 
+
+= 1.3.7.1 =
+* disable template syntax check by default 
+* added translation for Dutch/Netherlands (nl_NL) 
+
+= 1.3.7 =
+* added optimize log button 
+* improved detection of relisted items 
+* fixed possible issue with wrong products in created orders 
+
+= 1.3.6.9 =
+* enable listing of private products 
+* added option to show category settings page in main menu 
+* make category settings available in the free version 
+
+= 1.3.6.8 =
+* added clean archive feature 
+* check PHP syntax of listing template 
+* make replace add to cart button option available in free version 
+
+= 1.3.6.7 =
+* improved relist option on edit product page 
+* added option to select how long to keep log records 
+* only display update notice if current user can update plugins 
+* fixed issue when free shipping was enabled in profile but disabled on product level 
+
+= 1.3.6.6 =
+* added option to disable VAT processing when creating orders 
+
+= 1.3.6.5 =
+* fixed check for existing transactions when processing orders for auction items 
+* improved manual inventory checks 
+* improved order details view 
+
+= 1.3.6.4 =
+* fixed issue with ended listing not being marked as ended
+* explain error 21919028 
+
+= 1.3.6.2 =
+* added support for payment and return profiles on product level
+* fixed sticky shipping profile and locations after disabling product level shipping options 
+* disable GetItFast if dispatch time does not allow it - fix possible issue revising imported items
+
+= 1.3.6.1 =
+* fixed soap error (invalid value for Item.AutoPay)
+* updated translation 
+
 = 1.3.6 =
 * fixed disabling immediate payment option
 * various improvements and fixes - read the full changelog below

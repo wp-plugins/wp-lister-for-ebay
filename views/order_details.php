@@ -8,6 +8,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <style type="text/css">
         body,td,p { color:#2f2f2f; font:12px/16px Verdana, Arial, Helvetica, sans-serif; }
+        a { text-decoration: none; }
+        a:hover { color: #000; }
     </style>
 </head>
 
@@ -107,7 +109,9 @@
             <tr><td width="20%">                      
                 <?php echo $item['quantity'] ?> 
             </td><td>
-                <?php echo $item['title'] ?>
+                <a href="admin.php?page=wplister&amp;s=<?php echo $item['item_id'] ?>" target="_blank">
+                    <?php echo $item['title'] ?>
+                </a>
                 <?php if ( is_object( @$d->Variation ) ) : ?>
                     <?php foreach ($d->Variation->VariationSpecifics as $spec) : ?>
                         <br> -
@@ -140,12 +144,28 @@
 
             <?php foreach ( $wpl_ebay_order['history'] as $record ) : ?>
 
+<?php #echo "<pre>";print_r($record);echo"</pre>"; ?>
+
                 <tr><td width="16%">                      
-                    <?php echo date( get_option( 'date_format' ), $record->time ) ?> 
+                    <?php // echo date( get_option( 'date_format' ), $record->time ) ?> 
+                    <?php echo date( 'Y-m-d', $record->time ) ?> 
                 </td><td width="12%">                      
                     <?php echo date( 'H:i:s', $record->time ) ?> 
                 </td><td>
-                    <?php echo $record->msg ?> 
+                    <?php echo $record->msg ?> <br>
+                    
+                    <?php if ( isset( $record->details['ebay_id'] ) ) : ?>
+                        <a href="admin.php?page=wplister&amp;s=<?php echo $record->details['ebay_id'] ?>" target="_blank">
+                            &raquo; find item <?php echo $record->details['ebay_id'] ?>
+                        </a>
+                    <?php endif; ?>
+
+                    <?php if ( isset( $record->details['product_id'] ) ) : ?>
+                        <a href="post.php?action=edit&amp;post=<?php echo $record->details['product_id'] ?>" target="_blank">
+                            &raquo; edit product <?php echo $record->details['product_id'] ?>
+                        </a>
+                    <?php endif; ?>
+
                 </td><td>
                     <?php echo $record->success ? '<span style="color:darkgreen;">OK</span>' : '<span style="color:darkred;">FAILED</span>' ?> 
                 </td></tr>

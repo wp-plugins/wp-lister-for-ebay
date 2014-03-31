@@ -25,7 +25,7 @@ class ItemBuilderModel extends WPL_Model {
 
 
 
-	function buildItem( $id, $session, $reviseItem = false )
+	function buildItem( $id, $session, $reviseItem = false, $preview = false )
 	{
 
 		// fetch record from db
@@ -49,7 +49,7 @@ class ItemBuilderModel extends WPL_Model {
 		$item->Title = $this->prepareTitle( $listing['auction_title'] );
 
 		// set listing description
-		$item->Description = $this->getFinalHTML( $id, $item );
+		$item->Description = $this->getFinalHTML( $id, $item, $preview );
 
 		// set listing duration
 		$product_listing_duration = get_post_meta( $post_id, '_ebay_listing_duration', true );
@@ -321,27 +321,34 @@ class ItemBuilderModel extends WPL_Model {
 			$profile_details['condition_description']	= get_post_meta( $post_id, '_ebay_condition_description', true );
 
 		// check for custom product level seller profiles
-		if ( get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true ) )
-			$profile_details['seller_shipping_profile_id']			= get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true );
+		// if ( get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true ) )
+		// 	$profile_details['seller_shipping_profile_id']			= get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true );
 		if ( get_post_meta( $post_id, '_ebay_seller_payment_profile_id', true ) )
 			$profile_details['seller_payment_profile_id']			= get_post_meta( $post_id, '_ebay_seller_payment_profile_id', true );
 		if ( get_post_meta( $post_id, '_ebay_seller_return_profile_id', true ) )
 			$profile_details['seller_return_profile_id']			= get_post_meta( $post_id, '_ebay_seller_return_profile_id', true );
 
-		// check for custom product level ship to locations
-		if ( get_post_meta( $post_id, '_ebay_shipping_ShipToLocations', true ) )
-			$profile_details['ShipToLocations']						= get_post_meta( $post_id, '_ebay_shipping_ShipToLocations', true );
-		if ( get_post_meta( $post_id, '_ebay_shipping_ExcludeShipToLocations', true ) )
-			$profile_details['ExcludeShipToLocations']				= get_post_meta( $post_id, '_ebay_shipping_ExcludeShipToLocations', true );
-
-		// check for custom product level shipping options
+		// check for custom product level shipping options - if enabled
 		$product_shipping_service_type = get_post_meta( $post_id, '_ebay_shipping_service_type', true );
 		if ( ( $product_shipping_service_type != '' ) && ( $product_shipping_service_type != 'disabled' ) ) {
+
 			$profile_details['shipping_service_type']               = $product_shipping_service_type;
 			$profile_details['loc_shipping_options']                = get_post_meta( $post_id, '_ebay_loc_shipping_options', true );
 			$profile_details['int_shipping_options']                = get_post_meta( $post_id, '_ebay_int_shipping_options', true );
 			$profile_details['PackagingHandlingCosts']              = get_post_meta( $post_id, '_ebay_PackagingHandlingCosts', true );
 			$profile_details['InternationalPackagingHandlingCosts'] = get_post_meta( $post_id, '_ebay_InternationalPackagingHandlingCosts', true );
+			$profile_details['shipping_loc_enable_free_shipping']   = get_post_meta( $post_id, '_ebay_shipping_loc_enable_free_shipping', true );
+
+			// check for custom product level seller profiles
+			if ( get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true ) )
+				$profile_details['seller_shipping_profile_id']			= get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true );
+
+			// check for custom product level ship to locations
+			if ( get_post_meta( $post_id, '_ebay_shipping_ShipToLocations', true ) )
+				$profile_details['ShipToLocations']						= get_post_meta( $post_id, '_ebay_shipping_ShipToLocations', true );
+			if ( get_post_meta( $post_id, '_ebay_shipping_ExcludeShipToLocations', true ) )
+				$profile_details['ExcludeShipToLocations']				= get_post_meta( $post_id, '_ebay_shipping_ExcludeShipToLocations', true );
+
 		}
 
 		return $profile_details;
@@ -541,6 +548,11 @@ class ItemBuilderModel extends WPL_Model {
 		$item->Location = $profile_details['location'];
 		$item->DispatchTimeMax = $profile_details['dispatch_time'];
 
+		// disable GetItFast if dispatch time does not allow it - fixes revising imported items
+		if ( intval($profile_details['dispatch_time']) > 1 ) {
+			$item->setGetItFast( 0 );
+		}
+
 		// item condition
 		if ( $profile_details['condition_id'] != 'none' ) {
 			$item->ConditionID = $profile_details['condition_id'];
@@ -691,9 +703,9 @@ class ItemBuilderModel extends WPL_Model {
 					$ShippingServiceOptions->setShippingServiceAdditionalCost( $add_price );
 				}				
 			} else {
-				// enable FreeShipping option for calculated shipping services if specified in profile or product meta
+				// enable FreeShipping option for calculated shipping services if specified in profile (or product meta)
 				$free_shipping_enabled = isset( $profile_details['shipping_loc_enable_free_shipping'] ) ? $profile_details['shipping_loc_enable_free_shipping'] : false;			
-				$free_shipping_enabled = $free_shipping_enabled || get_post_meta( $post_id, '_ebay_shipping_loc_enable_free_shipping', true );
+				// $free_shipping_enabled = $free_shipping_enabled || get_post_meta( $post_id, '_ebay_shipping_loc_enable_free_shipping', true );
 				if ( ( $free_shipping_enabled ) && ( $pr == 1 ) ) $ShippingServiceOptions->setFreeShipping( true );
 			}
 
@@ -1540,7 +1552,7 @@ class ItemBuilderModel extends WPL_Model {
 	}
 	
 
-	public function getFinalHTML( $id, $ItemObj ) {
+	public function getFinalHTML( $id, $ItemObj, $preview = false ) {
 		
 		// get item data
 		$item = $this->lm->getItem( $id );
@@ -1551,7 +1563,7 @@ class ItemBuilderModel extends WPL_Model {
 
 		// load template
 		$template = new TemplatesModel( $item['template'] );
-		$html = $template->processItem( $item, $ItemObj );
+		$html = $template->processItem( $item, $ItemObj, $preview );
 
 		// strip invalid XML characters
 		$html = $this->stripInvalidXml( $html );

@@ -246,11 +246,18 @@ class EbayOrdersModel extends WPL_Model {
 			$tm = new TransactionsModel();
 			foreach ( $Details->TransactionArray as $Transaction ) {
 
+				// avoid empty transaction id (auctions)
+				$transaction_id = $Transaction->TransactionID;
+				if ( intval( $transaction_id ) == 0 ) {
+					// use negative OrderLineItemID to separate from real TransactionIDs
+					$transaction_id = 0 - str_replace('-', '', $Transaction->OrderLineItemID);
+				}
+
 				// check if we already processed this TransactionID
-				if ( $existing_transaction = $tm->getTransactionByTransactionID( $Transaction->TransactionID ) ) {
+				if ( $existing_transaction = $tm->getTransactionByTransactionID( $transaction_id ) ) {
 
 					// add history record
-					$history_message = "Skipped already processed transaction {$Transaction->TransactionID}";
+					$history_message = "Skipped already processed transaction {$transaction_id}";
 					$history_details = array( 'ebay_id' => $ebay_id );
 					$this->addHistory( $data['order_id'], 'skipped_transaction', $history_message, $history_details );
 

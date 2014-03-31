@@ -326,6 +326,13 @@ class ListingsPage extends WPL_Page {
 				$this->showMessage( __('Selected items were unlocked.','wplister') );
 			}
 
+			// clean listing archive
+			if ( $this->requestAction() == 'wpl_clean_listing_archive' ) {
+		        $lm = new ListingsModel();
+				$lm->cleanArchive();				
+				$this->showMessage( __('Archive was cleared.','wplister') );
+			}
+
 			// handle toolbar action - prepare listing from product
 			if ( $this->requestAction() == 'wpl_prepare_single_listing' ) {
 
@@ -528,12 +535,12 @@ class ListingsPage extends WPL_Page {
 		$ibm = new ItemBuilderModel();
 
 		$this->initEC();
-		$item = $ibm->buildItem( $id, $this->EC->session );
+		$item = $ibm->buildItem( $id, $this->EC->session, false, true );
 		
 		// if ( ! $ibm->checkItem($item) ) return $ibm->result;
 		$ibm->checkItem($item);
 
-		$preview_html = $ibm->getFinalHTML( $id, $item );
+		$preview_html = $ibm->getFinalHTML( $id, $item, true );
 		// echo $preview_html;
 
 		$aData = array(

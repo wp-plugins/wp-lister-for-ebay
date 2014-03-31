@@ -33,13 +33,6 @@ class TemplatesPage extends WPL_Page {
 	public function handleSubmit() {
         $this->logger->debug("handleSubmit()");
 
-		// handle save template
-		if ( $this->requestAction() == 'save_template' ) {
-			$this->saveTemplate();
-			if ( @$_POST['return_to'] == 'listings' ) {
-				wp_redirect( get_admin_url().'admin.php?page=wplister' );
-			}
-		}
 		// handle download template
 		if ( $this->requestAction() == 'download_listing_template' ) {
 			$this->downloadTemplate();
@@ -55,6 +48,13 @@ class TemplatesPage extends WPL_Page {
 
 	public function handleSubmitOnInit() {
 
+		// handle save template
+		if ( $this->requestAction() == 'save_template' ) {
+			$this->saveTemplate();
+			if ( @$_POST['return_to'] == 'listings' ) {
+				wp_redirect( get_admin_url().'admin.php?page=wplister' );
+			}
+		}
 		// handle preview action
 		if ( $this->requestAction() == 'preview_template' ) {
 			$this->previewTemplate( $_REQUEST['template'] );
@@ -177,8 +177,8 @@ class TemplatesPage extends WPL_Page {
 			$functions				= $templatesModel->getFunctions();				
 		}
 
-		// init template
-		$templatesModel->initTemplate();
+		// init template - and run syntax check
+		$templatesModel->initTemplate( true );
 
 		// remove template header from stylesheet
 		if ( preg_match('/^\/\*.*^\*\//uUsm', $css, $matches ) ) {
@@ -294,6 +294,7 @@ class TemplatesPage extends WPL_Page {
 			
 			$dirname = $this->getValueFromPost( 'template_id' );
 			$tpl_dir = $templates_dir . $dirname;
+			$changed = 0;
 
 			// re-apply profile to all published
 			$listingsModel = new ListingsModel();
@@ -302,11 +303,14 @@ class TemplatesPage extends WPL_Page {
 		        foreach ($items as $item) {
 
 		        	// don't mark locked items as changed
-		        	if ( ! $item['locked'] )
-			        	$listingsModel->updateListing( $item['id'], array('status' => 'changed') );
+		        	if ( ! $item['locked'] ) {
+			        	// $listingsModel->updateListing( $item['id'], array('status' => 'changed') ); // for some reason, this was messing up quantities
+			        	$listingsModel->reapplyProfileToItem( $item['id'] );
+			        	$changed++;
+		        	}
 			        
 		        }
-				$this->showMessage( sprintf( __('%s published items marked as changed.','wplister'), count($items) ) );			
+				$this->showMessage( sprintf( __('%s published items marked as changed.','wplister'), $changed ) );			
 			}
 
 			// init template to handle setting
@@ -332,6 +336,11 @@ class TemplatesPage extends WPL_Page {
 		$template_name 				= stripslashes( $this->getValueFromPost( 'template_name'  ) );
 		$template_description 		= stripslashes( $this->getValueFromPost( 'template_description'  ) );
 		$template_version 			= stripslashes( $this->getValueFromPost( 'template_version'  ) );
+
+		// strip CDATA tags
+		$tpl_html   = $this->stripCDATA( $tpl_html );
+		$tpl_header = $this->stripCDATA( $tpl_header );
+		$tpl_footer = $this->stripCDATA( $tpl_footer );
 
 		// handle custom fields settings
 		$settings = array();
@@ -379,6 +388,17 @@ class TemplatesPage extends WPL_Page {
 
 		}
 
+	}
+
+
+	public function stripCDATA( $content ) {
+        $content = str_replace('// <![CDATA[', 	'', $content );
+        $content = str_replace('// ]]>', 		'', $content );
+        $content = str_replace('//<![CDATA[', 	'', $content );
+        $content = str_replace('//]]>', 		'', $content );
+        // $content = str_replace('<![CDATA[', 	'', $content );
+        // $content = str_replace(']]>', 		'', $content );
+		return $content;
 	}
 
 

@@ -272,6 +272,25 @@
 					</div>
 
 
+					<div class="postbox" id="OtherSettingsBox">
+						<h3 class="hndle"><span><?php echo __('Misc options','wplister') ?></span></h3>
+						<div class="inside">
+
+							<label for="wpl-local_auction_display" class="text_label">
+								<?php echo __('Link auctions to eBay','wplister'); ?>
+                                <?php wplister_tooltip('In order to prevent selling an item in WooCommerce which is currently on auction, WP-Lister can replace the "Add to cart" button with a "View on eBay" button.') ?>
+							</label>
+							<select id="wpl-local_auction_display" name="wpl_e2e_local_auction_display" class=" required-entry select">
+								<option value="off" 	<?php if ( $wpl_local_auction_display == 'off'    ): ?>selected="selected"<?php endif; ?>><?php echo __('Off','wplister'); ?></option>
+								<option value="always"  <?php if ( $wpl_local_auction_display == 'always' ): ?>selected="selected"<?php endif; ?>><?php echo __('Always show link to eBay for products on auction','wplister'); ?></option>
+								<option value="forced"  <?php if ( $wpl_local_auction_display == 'forced' ): ?>selected="selected"<?php endif; ?>><?php echo __('Always show link to eBay for auctions and fixed price items','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Enable this to modify the product details page for items currently on auction.','wplister'); ?>
+							</p>
+
+						</div>
+					</div>
 
 
 				</form>

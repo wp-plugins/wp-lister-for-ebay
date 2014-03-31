@@ -219,6 +219,13 @@ class WPL_Model {
 				$longMessage .= 'You should wait a few hours and see if this issue disappears, but if it persists you should consider moving to a better hosting provider.';
 			}
 			
+			// #21919028 - Error: Portions of this listing cannot be revised if the item has bid or active Best Offers or is ending in 12 hours.
+			if ( $error->getErrorCode() == 21919028 ) { 
+				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
+				$longMessage .= 'You probably tried to disable Best Offer for this item.<br>';
+				$longMessage .= 'Turning off the Best Offer feature is not an allowed after an item has had sales.';
+			}
+			
 			// #488 - Error: Duplicate UUID used.
 			if ( $error->getErrorCode() == 488 ) { 
 				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';

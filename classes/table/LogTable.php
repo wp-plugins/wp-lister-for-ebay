@@ -339,6 +339,10 @@ class LogTable extends WP_List_Table {
     function getStatusSummary() {
         global $wpdb;
 
+        // check if MySQL server has gone away and reconnect if required
+        if ( ! mysql_ping() )
+            $wpdb->db_connect();
+
         // process search query
         $where_sql = " WHERE NOT callname = '' ";
         $where_sql = $this->add_searchquery_to_where_sql( $where_sql );

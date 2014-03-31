@@ -218,6 +218,8 @@ class ListingsTable extends WP_List_Table {
         if (   $item['locked'] )                unset( $actions['edit'] );
         if ( ! $item['locked'] )                unset( $actions['unlock'] );
 
+        // make edit listing link only available to developers
+        if ( ! get_option('wplister_log_level') ) unset( $actions['edit'] );
 
         if ( ! current_user_can( 'publish_ebay_listings' ) ) {
             unset( $actions['publish2e'] );
@@ -319,7 +321,7 @@ class ListingsTable extends WP_List_Table {
 
                 // last column: price
                 $variations_html .= '<td align="right">';
-                $price = $listingsModel->applyProfilePrice( $var['price'], $profile_data['details']['start_price'] );
+                $price = $listingsModel->applyProfilePrice( $var['price'], @$profile_data['details']['start_price'] );
                 $variations_html .= $this->number_format( $price, 2 );
 
                 $variations_html .= '</td></tr>';
@@ -425,7 +427,7 @@ class ListingsTable extends WP_List_Table {
         // use profile quantity for flattened variations
         if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
 
-            if ( $item['quantity_sold'] > 0 ) {
+            if ( ( $item['quantity_sold'] > 0 ) && ( $item['status'] != 'changed' ) ) {
                 $qty_available = $item['quantity'] - $item['quantity_sold'];
                 $quantity = $qty_available . ' / ' . $item['quantity'];
             } else {
@@ -458,8 +460,8 @@ class ListingsTable extends WP_List_Table {
         //     }
         // }        
 
-        // show sold items if there are any
-        if ( $item['quantity_sold'] > 0 ) {
+        // show sold items if there are any - except for changed items, which would possibly show negative values
+        if ( ( $item['quantity_sold'] > 0 ) && ( $item['status'] != 'changed' ) ) {
             $qty_available = $item['quantity'] - $item['quantity_sold'];
             return $qty_available . ' / ' . $item['quantity'];
         }
@@ -486,8 +488,8 @@ class ListingsTable extends WP_List_Table {
             // apply price modifiers
             $listingsModel = new ListingsModel();
             $profile_data = $this->getProfileData( $item );
-            $price_min = $listingsModel->applyProfilePrice( $price_min, $profile_data['details']['start_price'] );
-            $price_max = $listingsModel->applyProfilePrice( $price_max, $profile_data['details']['start_price'] );
+            $price_min = $listingsModel->applyProfilePrice( $price_min, @$profile_data['details']['start_price'] );
+            $price_max = $listingsModel->applyProfilePrice( $price_max, @$profile_data['details']['start_price'] );
 
             // use lowest price for flattened variations
             if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
@@ -520,7 +522,7 @@ class ListingsTable extends WP_List_Table {
             $date = $item['date_finished'];
             $value = mysql2date( get_option('date_format'), $date );
             $html = '<span style="color:darkgreen">'.$value.'</span>';
-        } elseif ( ( is_array($profile_data['details']) ) && ( 'GTC' == $profile_data['details']['listing_duration'] ) ) {
+        } elseif ( ( is_array($profile_data['details']) ) && ( 'GTC' == @$profile_data['details']['listing_duration'] ) ) {
             $value = 'GTC';
             $html = '<span style="color:silver">'.$value.'</span>';
     	} else {

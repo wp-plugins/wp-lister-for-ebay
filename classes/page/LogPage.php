@@ -50,6 +50,10 @@ class LogPage extends WPL_Page {
 			$this->clearLog();
 			$this->showMessage( __('Database log has been cleared.','wplister') );
 		}
+		if ( $this->requestAction() == 'wpl_optimize_ebay_log' ) {
+			$count = $this->optimizeLog();
+			$this->showMessage( $count . ' ' . __('expired records have been removed and the database table has been optimized.','wplister') );
+		}
 
 	}
 
@@ -108,21 +112,23 @@ class LogPage extends WPL_Page {
 			$content = $this->display( 'log_details', array( 'row' => $row, 'version' => $this->get_plugin_version() ), false );
 
 			// build email
-			$to = 'info@wplab.com';
+			$to = 'support@wplab.com';
 			$subject = 'WP-Lister log record #'.$id.' - '. str_replace( 'http://','', get_bloginfo('wpurl') );
 			$attachments = array();
 			$headers = '';
-			$message = $content;
+			$message = '';
 
 			$user_name  = $_REQUEST['user_name'] ? $_REQUEST['user_name'] : 'WP-Lister';
 			$user_email = sanitize_email( $_REQUEST['user_email'] );
 			$user_msg   = stripslashes( $_REQUEST['user_msg'] );
 		    $headers = 'From: '.$user_name.' <'.$user_email.'>' . "\r\n";
 
-			$message .= '<hr>';
-			$message .= 'Name: '.$user_name.'<br>';
+			$message .= 'Name:  '.$user_name.'<br>';
 			$message .= 'Email: '.$user_email.'<br>';
 			$message .= 'Message: <br><br>'.nl2br($user_msg).'<br>';
+			$message .= '<hr>';
+			$message .= $content;
+			$message .= '<hr>';
 
 			// send email as html
 			add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
@@ -147,6 +153,10 @@ class LogPage extends WPL_Page {
 		$dbname = $wpdb->dbname;
 		$table  = $wpdb->prefix.'ebay_log';
 
+		// check if MySQL server has gone away and reconnect if required
+		if ( ! mysql_ping() )
+			$wpdb->db_connect();
+
 		$sql = "
 			SELECT round(((data_length + index_length) / 1024 / 1024), 1) AS 'size' 
 			FROM information_schema.TABLES 
@@ -155,7 +165,7 @@ class LogPage extends WPL_Page {
 		// echo "<pre>";print_r($sql);echo"</pre>";#die();
 
 		$size = $wpdb->get_var($sql);
-		if ( mysql_error() ) echo 'Error in deleteLogEntry(): '.mysql_error();
+		if ( mysql_error() ) echo 'Error in getTableSize(): '.mysql_error();
 
 		return $size;
 	}
@@ -175,6 +185,24 @@ class LogPage extends WPL_Page {
 
 		$wpdb->query("OPTIMIZE TABLE $table");
 		if ( mysql_error() ) echo 'Error in clearLog(): '.mysql_error();
+	}
+
+	public function optimizeLog() {
+		global $wpdb;
+		$table = $wpdb->prefix.'ebay_log';
+
+		$days_to_keep = self::getOption( 'log_days_limit', 30 );		
+		$delete_count = $wpdb->get_var('SELECT count(id) FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.$days_to_keep.' DAY )');
+		if ( $delete_count ) {
+			$wpdb->query('DELETE FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.$days_to_keep.' DAY )');
+			// $this->showMessage( 'Log entries removed: ' . $delete_count );
+		}
+		if ( mysql_error() ) echo 'Error in optimizeLog(): '.mysql_error();
+
+		$wpdb->query("OPTIMIZE TABLE $table");
+		if ( mysql_error() ) echo 'Error in optimizeLog(): '.mysql_error();
+
+		return $delete_count;
 	}
 
 

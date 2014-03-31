@@ -152,7 +152,7 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
 
 	<?php if ( ( ! isset($_REQUEST['send_to_support']) ) && ( ! isset($_REQUEST['new_tab']) ) ) : ?>
 		<div id="support_request_wrap" style="">
-			<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>" target="_blank" >
+			<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>" onsubmit="jQuery('#support_request_wrap').slideUp();" target="_blank" >
 				<input type="hidden" name="log_id" value="<?php echo $wpl_row->id ?>" />
 				<input type="hidden" name="send_to_support" value="yes" />
 

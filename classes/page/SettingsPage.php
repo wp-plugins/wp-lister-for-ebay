@@ -18,6 +18,10 @@ class SettingsPage extends WPL_Page {
 		$load_action = "load-".$this->main_admin_menu_slug."_page_wplister-".self::slug;
 		add_action( $load_action, array( &$this, 'addScreenOptions' ) );
 
+		// add screen option on categories page if enabled
+		if ( get_option( 'wplister_enable_categories_page' ) )
+			add_action( $load_action.'-categories', array( &$this, 'addScreenOptions' ) );
+
 		// network admin page
 		add_action( 'network_admin_menu', array( &$this, 'onWpAdminMenu' ) ); 
 
@@ -28,6 +32,14 @@ class SettingsPage extends WPL_Page {
 
 		add_submenu_page( self::ParentMenuId, $this->getSubmenuPageTitle( 'Settings' ), __('Settings','wplister'), 
 						  'manage_ebay_options', $this->getSubmenuId( 'settings' ), array( &$this, 'onDisplaySettingsPage' ) );
+
+		if ( get_option( 'wplister_enable_categories_page' ) ) {
+
+			add_submenu_page( self::ParentMenuId, $this->getSubmenuPageTitle( 'Categories' ), __('Categories','wplister'), 
+						  'manage_ebay_listings', $this->getSubmenuId( 'settings-categories' ), array( &$this, 'displayCategoriesPage' ) );
+
+		}
+
 	}
 
 	function addScreenOptions() {
@@ -150,6 +162,7 @@ class SettingsPage extends WPL_Page {
 			'option_cron_auctions'		=> self::getOption( 'cron_auctions' ),
 			'option_enable_ebay_motors'	=> self::getOption( 'enable_ebay_motors' ),
 			'option_ebay_update_mode'	=> self::getOption( 'ebay_update_mode', 'order' ),
+			'local_auction_display'     => self::getOption( 'local_auction_display', 'off' ),
 	
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'auth_url'					=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab='.$active_tab.'&action=wplRedirectToAuthURL',
@@ -171,6 +184,10 @@ class SettingsPage extends WPL_Page {
 	    $default_category_name = EbayCategoriesModel::getFullEbayCategoryName( $default_category_id );
 	    if ( ! $default_category_name ) $default_category_name = 'None';
 
+	    $form_action = 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab=categories';
+	    if ( @$_REQUEST['page'] == 'wplister-settings-categories' )
+		    $form_action = 'admin.php?page=wplister-settings-categories';
+
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,
 			'message'					=> $this->message,
@@ -181,7 +198,7 @@ class SettingsPage extends WPL_Page {
 			'default_category_name'		=> $default_category_name,
 
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
-			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab=categories'
+			'form_action'				=> $form_action
 		);
 		$this->display( 'settings_categories', $aData );
 	}
@@ -193,25 +210,28 @@ class SettingsPage extends WPL_Page {
         // echo "<pre>";print_r($wp_roles);echo"</pre>";#die();
 
 		$aData = array(
-			'plugin_url'				=> self::$PLUGIN_URL,
-			'message'					=> $this->message,
+			'plugin_url'                    => self::$PLUGIN_URL,
+			'message'                       => $this->message,
 
-			'process_shortcodes'		=> self::getOption( 'process_shortcodes', 'content' ),
-			'remove_links'				=> self::getOption( 'remove_links', 'default' ),
-			'default_image_size'		=> self::getOption( 'default_image_size', 'full' ),
-			'wc2_gallery_fallback'		=> self::getOption( 'wc2_gallery_fallback', 'attached' ),
-			'hide_dupe_msg'				=> self::getOption( 'hide_dupe_msg' ),
-			'option_uninstall'			=> self::getOption( 'uninstall' ),
-			'option_foreign_transactions' => self::getOption( 'foreign_transactions' ),
-			'option_allow_backorders'   => self::getOption( 'allow_backorders', 0 ),
-			'option_preview_in_new_tab' => self::getOption( 'preview_in_new_tab', 0 ),
+			'process_shortcodes'            => self::getOption( 'process_shortcodes', 'content' ),
+			'remove_links'                  => self::getOption( 'remove_links', 'default' ),
+			'default_image_size'            => self::getOption( 'default_image_size', 'full' ),
+			'wc2_gallery_fallback'          => self::getOption( 'wc2_gallery_fallback', 'attached' ),
+			'hide_dupe_msg'                 => self::getOption( 'hide_dupe_msg' ),
+			'option_uninstall'              => self::getOption( 'uninstall' ),
+			'option_foreign_transactions'   => self::getOption( 'foreign_transactions' ),
+			'option_allow_backorders'       => self::getOption( 'allow_backorders', 0 ),
+			'api_enable_auto_relist'        => self::getOption( 'api_enable_auto_relist', 0 ),
+			'auto_update_ended_items'       => self::getOption( 'auto_update_ended_items', 0 ),
+			'option_preview_in_new_tab'     => self::getOption( 'preview_in_new_tab', 0 ),
+			'enable_categories_page'        => self::getOption( 'enable_categories_page', 0 ),
 			'option_disable_wysiwyg_editor' => self::getOption( 'disable_wysiwyg_editor', 0 ),
-			'enable_item_compat_tab' 	=> self::getOption( 'enable_item_compat_tab', 1 ),
-			'option_local_timezone' 	=> self::getOption( 'local_timezone', '' ),
-			'text_admin_menu_label' 	=> self::getOption( 'admin_menu_label', 'WP-Lister' ),
-			'timezones' 				=> self::get_timezones(),
-            'available_roles'           => $wp_roles->role_names,
-            'wp_roles'         			=> $wp_roles->roles,
+			'enable_item_compat_tab'        => self::getOption( 'enable_item_compat_tab', 1 ),
+			'option_local_timezone'         => self::getOption( 'local_timezone', '' ),
+			'text_admin_menu_label'         => self::getOption( 'admin_menu_label', 'WP-Lister' ),
+			'timezones'                     => self::get_timezones(),
+			'available_roles'               => $wp_roles->role_names,
+			'wp_roles'                      => $wp_roles->roles,
 
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab=advanced'
@@ -231,6 +251,7 @@ class SettingsPage extends WPL_Page {
 			'disable_variations'		=> self::getOption( 'disable_variations', 0 ),
 			'enable_messages_page'		=> self::getOption( 'enable_messages_page', 0 ),
 			'log_record_limit'			=> self::getOption( 'log_record_limit', 4096 ),
+			'log_days_limit'			=> self::getOption( 'log_days_limit', 30 ),
 			'xml_formatter'				=> self::getOption( 'xml_formatter', 'default' ),
 
 			'text_ebay_token'			=> self::getOption( 'ebay_token' ),
@@ -272,6 +293,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'cron_auctions',		$this->getValueFromPost( 'option_cron_auctions' ) );
 			self::updateOption( 'enable_ebay_motors', 	$this->getValueFromPost( 'option_enable_ebay_motors' ) );
 			self::updateOption( 'ebay_update_mode', 	$this->getValueFromPost( 'option_ebay_update_mode' ) );
+			self::updateOption( 'local_auction_display',$this->getValueFromPost( 'local_auction_display' ) );
 
 			$this->handleCronSettings( $this->getValueFromPost( 'option_cron_auctions' ) );
 			if ( ! $changed_site_id ) $this->showMessage( __('Settings saved.','wplister') );
@@ -324,19 +346,22 @@ class SettingsPage extends WPL_Page {
 
 			}
 
-			self::updateOption( 'process_shortcodes', 	$this->getValueFromPost( 'process_shortcodes' ) );
-			self::updateOption( 'remove_links',     	$this->getValueFromPost( 'remove_links' ) );
-			self::updateOption( 'default_image_size',   $this->getValueFromPost( 'default_image_size' ) );
-			self::updateOption( 'wc2_gallery_fallback', $this->getValueFromPost( 'wc2_gallery_fallback' ) );
-			self::updateOption( 'hide_dupe_msg',    	$this->getValueFromPost( 'hide_dupe_msg' ) );
-			self::updateOption( 'uninstall',			$this->getValueFromPost( 'option_uninstall' ) );
-			self::updateOption( 'foreign_transactions',	$this->getValueFromPost( 'option_foreign_transactions' ) );
-			self::updateOption( 'preview_in_new_tab',	$this->getValueFromPost( 'option_preview_in_new_tab' ) );
+			self::updateOption( 'process_shortcodes', 		$this->getValueFromPost( 'process_shortcodes' ) );
+			self::updateOption( 'remove_links',     		$this->getValueFromPost( 'remove_links' ) );
+			self::updateOption( 'default_image_size',   	$this->getValueFromPost( 'default_image_size' ) );
+			self::updateOption( 'wc2_gallery_fallback', 	$this->getValueFromPost( 'wc2_gallery_fallback' ) );
+			self::updateOption( 'hide_dupe_msg',    		$this->getValueFromPost( 'hide_dupe_msg' ) );
+			self::updateOption( 'uninstall',				$this->getValueFromPost( 'option_uninstall' ) );
+			self::updateOption( 'foreign_transactions',		$this->getValueFromPost( 'option_foreign_transactions' ) );
+			self::updateOption( 'preview_in_new_tab',		$this->getValueFromPost( 'option_preview_in_new_tab' ) );
+			self::updateOption( 'enable_categories_page',	$this->getValueFromPost( 'enable_categories_page' ) );
 			self::updateOption( 'disable_wysiwyg_editor',	$this->getValueFromPost( 'option_disable_wysiwyg_editor' ) );
 			self::updateOption( 'enable_item_compat_tab', 	$this->getValueFromPost( 'enable_item_compat_tab' ) );
-			self::updateOption( 'local_timezone',		$this->getValueFromPost( 'option_local_timezone' ) );
-			self::updateOption( 'allow_backorders',		$this->getValueFromPost( 'option_allow_backorders' ) );
-			self::updateOption( 'admin_menu_label',		$this->getValueFromPost( 'text_admin_menu_label' ) );
+			self::updateOption( 'local_timezone',			$this->getValueFromPost( 'option_local_timezone' ) );
+			self::updateOption( 'allow_backorders',			$this->getValueFromPost( 'option_allow_backorders' ) );
+			self::updateOption( 'admin_menu_label',			$this->getValueFromPost( 'text_admin_menu_label' ) );
+			self::updateOption( 'api_enable_auto_relist',	$this->getValueFromPost( 'api_enable_auto_relist' ) );
+			self::updateOption( 'auto_update_ended_items',	$this->getValueFromPost( 'auto_update_ended_items' ) );
 
 			$this->showMessage( __('Settings saved.','wplister') );
 		}
@@ -430,6 +455,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'disable_variations',	$this->getValueFromPost( 'disable_variations' ) );
 			self::updateOption( 'enable_messages_page',	$this->getValueFromPost( 'enable_messages_page' ) );
 			self::updateOption( 'log_record_limit',		$this->getValueFromPost( 'log_record_limit' ) );
+			self::updateOption( 'log_days_limit',		$this->getValueFromPost( 'log_days_limit' ) );
 			self::updateOption( 'xml_formatter',		$this->getValueFromPost( 'xml_formatter' ) );
 
 			$this->handleChangedUpdateChannel();
