@@ -22,6 +22,10 @@ class WPL_WooBackendIntegration {
 		add_filter( 'parse_query', array( &$this, 'wplister_woocommerce_admin_product_filter_query' ) );
 		add_filter( 'views_edit-product', array( &$this, 'wplister_add_woocommerce_product_views' ) );
 
+		// custom views for orders table
+		add_filter( 'parse_query', array( &$this, 'wplister_woocommerce_admin_order_filter_query' ) );
+		add_filter( 'views_edit-shop_order', array( &$this, 'wplister_add_woocommerce_order_views' ) );
+
 		// submitbox actions
 		add_action( 'post_submitbox_misc_actions', array( &$this, 'wplister_product_submitbox_misc_actions' ), 100 );
 		add_action( 'woocommerce_process_product_meta', array( &$this, 'wplister_product_handle_submitbox_actions' ), 100, 2 );
@@ -206,6 +210,10 @@ class WPL_WooBackendIntegration {
 		$lm = new ListingsModel();
 		$lm->markItemAsModified( $post_id );
 
+		// if this a quickedit request, continue and revise inventory status of locked items
+		if ( !isset($_POST['woocommerce_quick_edit_nonce']) || (isset($_POST['woocommerce_quick_edit_nonce']) && !wp_verify_nonce( $_POST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ))) return $post_id;
+		do_action( 'wplister_product_has_changed', $post_id );
+
 		// Clear transient
 		// $woocommerce->clear_product_transients( $post_id );
 	}
@@ -344,6 +352,45 @@ class WPL_WooBackendIntegration {
 		}
 
 	}
+	// filter the orders in admin based on ebay status
+	// add_filter( 'parse_query', 'wplister_woocommerce_admin_order_filter_query' );
+	function wplister_woocommerce_admin_order_filter_query( $query ) {
+		global $typenow, $wp_query, $wpdb;
+
+	    if ( $typenow == 'shop_order' ) {
+
+	    	// filter by ebay status
+	    	if ( ! empty( $_GET['is_from_ebay'] ) ) {
+
+	        	// find all orders that are imported from ebay
+	        	$sql = "
+	        			SELECT DISTINCT post_id 
+	        			FROM {$wpdb->prefix}postmeta 
+					    WHERE meta_key = '_ebay_order_id'
+	        	";
+	        	$post_ids = $wpdb->get_col( $sql );
+	        	// echo "<pre>";print_r($post_ids);echo"</pre>";#die();
+
+
+		    	if ( $_GET['is_from_ebay'] == 'yes' ) {
+
+		        	if ( is_array($post_ids) && ( sizeof($post_ids) > 0 ) ) {
+			        	$query->query_vars['post__in'] = $post_ids;
+		        	}
+
+		        } elseif ( $_GET['is_from_ebay'] == 'no' ) {
+
+		        	if ( is_array($post_ids) && ( sizeof($post_ids) > 0 ) ) {
+			        	$query->query_vars['post__not_in'] = $post_ids;
+		        	}
+
+
+		        }
+	        }
+
+		}
+
+	}
 
 	// # debug final query
 	// add_filter( 'posts_results', 'wplister_woocommerce_admin_product_filter_posts_results' );
@@ -372,6 +419,32 @@ class WPL_WooBackendIntegration {
 		$query_string = remove_query_arg(array( 'is_on_ebay' ));
 		$query_string = add_query_arg( 'is_on_ebay', urlencode('no'), $query_string );
 		$views['unlisted'] = '<a href="'. $query_string . '" class="' . $class . '">' . __('Not on eBay', 'wplister') . '</a>';
+
+		// debug query
+		// $views['unlisted'] .= "<br>".$wp_query->request."<br>";
+
+		return $views;
+	}
+
+	// add custom view to woocommerce orders table
+	// add_filter( 'views_edit-order', 'wplister_add_woocommerce_order_views' );
+	function wplister_add_woocommerce_order_views( $views ) {
+		global $wp_query;
+
+		if ( ! current_user_can('edit_others_pages') ) return $views;
+
+		// On eBay
+		// $class = ( isset( $wp_query->query['is_from_ebay'] ) && $wp_query->query['is_from_ebay'] == 'no' ) ? 'current' : '';
+		$class = ( isset( $_REQUEST['is_from_ebay'] ) && $_REQUEST['is_from_ebay'] == 'yes' ) ? 'current' : '';
+		$query_string = remove_query_arg(array( 'is_from_ebay' ));
+		$query_string = add_query_arg( 'is_from_ebay', urlencode('yes'), $query_string );
+		$views['listed'] = '<a href="'. $query_string . '" class="' . $class . '">' . __('Placed on eBay', 'wplister') . '</a>';
+
+		// Not on eBay
+		$class = ( isset( $_REQUEST['is_from_ebay'] ) && $_REQUEST['is_from_ebay'] == 'no' ) ? 'current' : '';
+		$query_string = remove_query_arg(array( 'is_from_ebay' ));
+		$query_string = add_query_arg( 'is_from_ebay', urlencode('no'), $query_string );
+		$views['unlisted'] = '<a href="'. $query_string . '" class="' . $class . '">' . __('Not placed on eBay', 'wplister') . '</a>';
 
 		// debug query
 		// $views['unlisted'] .= "<br>".$wp_query->request."<br>";
@@ -594,7 +667,7 @@ class WPL_WooBackendIntegration {
 
 			// $message = __('Selected items were revised on eBay.', 'wplister');
 			// $message .= ' ID: '.$_POST['wpl_ebay_listing_id'];
-			// $class = (false) ? 'error' : 'updated fade';
+			// $class = (false) ? 'error' : 'updated';
 			// echo '<div id="message" class="'.$class.'" style="display:block !important"><p>'.$message.'</p></div>';
 
 		}
@@ -616,7 +689,7 @@ class WPL_WooBackendIntegration {
 
 			// $message = __('Selected items were revised on eBay.', 'wplister');
 			// $message .= ' ID: '.$_POST['wpl_ebay_listing_id'];
-			// $class = (false) ? 'error' : 'updated fade';
+			// $class = (false) ? 'error' : 'updated';
 			// echo '<div id="message" class="'.$class.'" style="display:block !important"><p>'.$message.'</p></div>';
 
 		}

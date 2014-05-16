@@ -12,7 +12,6 @@
 // require_once 'GetCategoriesRequestType.php';
 // require_once 'GetStoreRequestType.php';
 // require_once 'CategoryType.php';	
-// require_once 'EbatNs_DatabaseProvider.php';	
 // require_once 'EbatNs_Logger.php';
 // require_once 'GetCategoryFeaturesRequestType.php';
 
@@ -62,7 +61,7 @@ class EbayCategoriesModel extends WPL_Model {
 		$data['version'] = $this->_categoryVersion;
 		$data['site_id'] = $this->_siteid;
 		$wpdb->update( $this->tablename, $data, array( 'parent_cat_id' => '0') );
-        echo mysql_error();
+        echo $wpdb->last_error;
 
 		// include other update tasks
 		$tasks = array();
@@ -104,7 +103,7 @@ class EbayCategoriesModel extends WPL_Model {
 
 		// fetch the data back from the db and add a task for each top-level id
 		$rows = $wpdb->get_results( "select cat_id, cat_name from $this->tablename where parent_cat_id=0", ARRAY_A );
-        echo mysql_error();
+        echo $wpdb->last_error;
 		foreach ($rows as $row)
 		{
 			$this->logger->info('adding task for category #'.$row['cat_id'] . ' - '.$row['cat_name']);
@@ -214,10 +213,9 @@ class EbayCategoriesModel extends WPL_Model {
 		// $data['cat_name'] = trim(str_replace('?','', $data['cat_name'] ));
 
 		$wpdb->insert( $this->tablename, $data );
-		$mysql_error = mysql_error();
-		if ( $mysql_error ) {
+		if ( $wpdb->last_error ) {
 			$this->logger->error('failed to insert category '.$data['cat_id'] . ' - ' . $data['cat_name'] );
-			$this->logger->error('mysql said: '.$mysql_error );
+			$this->logger->error('mysql said: '.$wpdb->last_error );
 			$this->logger->error('data: '. print_r( $data, 1 ) );
 		} else {
 			$this->logger->info('category inserted() '.$data['cat_id'] . ' - ' . $data['cat_name'] );

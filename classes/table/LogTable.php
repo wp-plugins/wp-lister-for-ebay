@@ -93,11 +93,6 @@ class LogTable extends WP_List_Table {
         if ( $item['success'] == 'Failure' ) {
 
             $details = '';
-            if ( preg_match("/<LongMessage>(.*)<\/LongMessage>/", $item['response'], $matches) ) {
-                $LongMessage = $matches[1];
-                $details .= ': <span style="color:#555">'.$LongMessage.'</span>';
-            }
-
             if ( preg_match("/cURL error:(.*)/", $item['response'], $matches) ) {
                 $LongMessage = $matches[1];
                 $details .= ': <span style="color:#555">'.$LongMessage.' (cURL)</span>';
@@ -186,17 +181,37 @@ class LogTable extends WP_List_Table {
             }
         }
 
-        if ( preg_match("/<ShortMessage>(.*)<\/ShortMessage>/", $item['response'], $matches) ) {
-            $ShortMessage = $matches[1];
-            if ( $item['success'] == 'Warning' ) {
-                $link .= '<br><span style="color:darkorange">Warning: '.$ShortMessage.'</span>';
-            } else {
-                $link .= '<br><span style="color:#B00">Error: '.$ShortMessage.'</span>';               
-            }
-        }
+        // if ( preg_match("/<ShortMessage>(.*)<\/ShortMessage>/", $item['response'], $matches) ) {
+        //     $ShortMessage = $matches[1];
+        //     if ( $item['success'] == 'Warning' ) {
+        //         $link .= '<br><span style="color:darkorange">Warning: '.$ShortMessage.'</span>';
+        //     } else {
+        //         $link .= '<br><span style="color:#B00">Error: '.$ShortMessage.'</span>';               
+        //     }
+        // }
+
+        $link .= $this->displayErrors( $item['errors'] );
 
         return $link;
     }
+
+    function displayErrors( $errors ) {
+        $html = '';
+        foreach ( $errors as $err ) {
+
+            $color_code = 'darkorange';
+            if ( $err->SeverityCode == 'Error' ) $color_code = '#B00'; // errors are red
+
+            $html .= '<div class="error_details" style="margin-top:.5em">';
+            $html .= '<b style="color:'.$color_code.'">'.$err->SeverityCode.':</b> ';
+            $html .= $err->ShortMessage . ' <br>';
+            $html .= '<small>'.$err->LongMessage.' ('.$err->ErrorCode.')</small>';
+            $html .= '</div>';
+            
+        }
+        return $html;
+    }    
+
 
     function column_ebay_id($item) {
 
@@ -339,9 +354,8 @@ class LogTable extends WP_List_Table {
     function getStatusSummary() {
         global $wpdb;
 
-        // check if MySQL server has gone away and reconnect if required
-        if ( ! mysql_ping() )
-            $wpdb->db_connect();
+        // check if MySQL server has gone away and reconnect if required - WP 3.9+
+        if ( method_exists( $wpdb, 'check_connection') ) $wpdb->check_connection();
 
         // process search query
         $where_sql = " WHERE NOT callname = '' ";

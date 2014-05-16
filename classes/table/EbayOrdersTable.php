@@ -396,7 +396,11 @@ class EbayOrdersTable extends WP_List_Table {
         // get pagination state
         $current_page = $this->get_pagenum();
         $per_page = $this->get_items_per_page('orders_per_page', 20);
-        
+
+        // regard max table rows limit
+        if ( $max_per_page = get_option( 'wplister_force_table_items_limit' ) )
+            $per_page = min( $per_page, $max_per_page );
+                
         // define columns
         $this->_column_headers = $this->get_column_info();
         

@@ -147,8 +147,8 @@ class WPLister_Install {
 		#dbDelta($sql);
 		$result = $wpdb->query($sql);
 
-		$wpl_logger->info($sql);		
-		$wpl_logger->info(mysql_error());		
+		$wpl_logger->info( $sql );		
+		$wpl_logger->info( $wpdb->last_error );		
 		
 		
 		// create table: ebay_categories
@@ -266,16 +266,19 @@ class WPLister_Install {
 	// mysql update helper method
 	// from http://www.edmondscommerce.co.uk/mysql/mysql-add-column-if-not-exists-php-function/
 	function add_column_if_not_exist( $table, $column, $column_attr = "VARCHAR( 255 ) NULL" ){
+		global $wpdb;
 	    $exists = false;
-	    $columns = mysql_query("show columns from $table");
-	    while($col = mysql_fetch_assoc($columns)){
-	        if($col['Field'] == $column){
+
+	    $columns = $wpdb->get_results("show columns from $table");
+	    foreach ($columns as $col) {
+	        if ( $col->Field == $column ) {
 	            $exists = true;
 	            break;
 	        }
 	    }      
-	    if(!$exists){
-	        mysql_query("ALTER TABLE `$table` ADD `$column` $column_attr ");
+
+	    if ( ! $exists ) {
+	        $wpdb->query("ALTER TABLE `$table` ADD `$column` $column_attr ");
 	    }
 	}
 

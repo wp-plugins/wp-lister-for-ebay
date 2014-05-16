@@ -201,6 +201,17 @@ class TemplatesModel extends WPL_Model {
 	public function initTemplate( $check_syntax = false ) {
 		global $wpl_tpl_fields;
 
+		if ( ! $this->folderpath ) {
+			$this->showMessage("No template was assigned to this listing. Please check your listing profile and either re-apply the current profile or select a different listing profile.",1,1);
+			// echo "<pre>";debug_print_backtrace();
+			return false;
+		}
+
+		if ( ! file_exists( $this->folderpath . '/template.html' ) ) {
+			$this->showMessage("Template file is missing: ".$this->folderpath . '/template.html',1,1);
+			return false;
+		}
+
 		// load functions.php if present
 		$file = $this->folderpath . '/functions.php';
 		if ( file_exists($file) ) {
@@ -237,7 +248,6 @@ class TemplatesModel extends WPL_Model {
 
 	public function processItem( $item, $ItemObj = false, $preview = false ) {
 		
-		$listing = new ListingsModel();
 		$ibm = new ItemBuilderModel();
 
 		// let other plugin know we are doing an eBay listing
@@ -256,8 +266,10 @@ class TemplatesModel extends WPL_Model {
 		if ( ! $tpl_html ) {
 			$this->logger->error( 'template not found ' . $item['template'] );
 			$this->logger->error( 'should be here: ' . WP_CONTENT_DIR . '/uploads/wp-lister/templates/' . $item['template']  );
-			echo 'Template not found: '.$item['template'];
-			die();
+			$this->showMessage( 'There was a problem processing your listing template',1,1);
+			return '';
+			// echo 'Template not found: '.$item['template'];
+			// die();
 		}
 		// $this->logger->debug( 'template loaded from ' . $tpl_path );
 		// $this->logger->info( $tpl_html );
@@ -266,62 +278,9 @@ class TemplatesModel extends WPL_Model {
 		// custom template hook
 		$tpl_html = apply_filters( 'wplister_before_process_template_html', $tpl_html, $item );
 
-		// handle variations
-		$variations_html = '';
-        if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
-
-        	// generate variations table
-        	$variations_html = $this->getVariationsHTML( $item );
-
-        	// add variations table to item description
-        	if ( isset($item['profile_data']['details']['add_variations_table']) && $item['profile_data']['details']['add_variations_table'] ) {
-        		$item['post_content'] .= $variations_html;
-        	}
-
-        }
-		
-		// handle addons
-    	// generate addons table
-    	$addons_html = $this->getAddonsHTML( $item );
-
-    	// add addons table to item description
-    	if ( isset($item['profile_data']['details']['add_variations_table']) && $item['profile_data']['details']['add_variations_table'] ) {
-    		$item['post_content'] .= $addons_html;
-    	}
-
-		
-		// remove ALL links from post content by default
- 		if ( 'default' == get_option( 'wplister_remove_links', 'default' ) ) {
-			/* $item['post_content'] = preg_replace('#<a.*?>([^<]*)</a>#i', '$1', $item['post_content'] ); */
-			// regex improved to work in cases like <a ...><b>text</b></a>
-			/* $item['post_content'] = preg_replace('#<a.*?>(.*)</a>#iU', '$1', $item['post_content'] ); */
-			// improved for multiple links per line case
-			$item['post_content'] = preg_replace('#<a.*?>(.*?)</a>#i', ' $1 ', $item['post_content'] );
- 		}
-
- 		// fixed whitespace pasted from ms word
- 		// details: http://stackoverflow.com/questions/1431034/can-anyone-tell-me-what-this-ascii-character-is
-		$whitespace = chr(194).chr(160);
-		$item['post_content'] = str_replace( $whitespace, ' ', $item['post_content'] );
-
 
 		// replace shortcodes
 		$tpl_html = str_replace( '[[product_title]]', $ibm->prepareTitleAsHTML( $item['auction_title'] ), $tpl_html );
- 		if ( 'off' == get_option( 'wplister_process_shortcodes', 'content' ) ) {
-	 		$tpl_html = str_replace( '[[product_content]]', wpautop( $item['post_content'] ), $tpl_html );
- 		} else {
-	 		$tpl_html = str_replace( '[[product_content]]', apply_filters('the_content', $item['post_content'] ), $tpl_html );
- 		}
-		$tpl_html = str_replace( '[[product_variations]]', $variations_html, $tpl_html );
-		$tpl_html = str_replace( '[[product_addons]]', $addons_html, $tpl_html );
-
-		$tpl_html = str_replace( '[[product_excerpt]]', $listing->getRawPostExcerpt( $item['post_id'] ), $tpl_html );
-		$tpl_html = str_replace( '[[product_excerpt_nl2br]]', nl2br( $listing->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
-		$tpl_html = str_replace( '[[product_additional_content]]', wpautop( $listing->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
-		$tpl_html = str_replace( '[[product_additional_content_nl2br]]', nl2br( $listing->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
-		
-		$tpl_html = str_replace( '[[product_price]]', number_format_i18n( floatval($item['price']), 2 ), $tpl_html );
-		$tpl_html = str_replace( '[[product_price_raw]]', $item['price'], $tpl_html );
 
 
 		// process simple text shortcodes (used for title as well)
@@ -441,7 +400,87 @@ class TemplatesModel extends WPL_Model {
 	}
 
 
+	public function processMainContentShortcode( $post_id, $tpl_html, $item ) {
+
+		// use latest post_content from product
+		$post = get_post( $item['post_id'] );
+		if ( ! empty($post->post_content) ) $item['post_content'] = $post->post_content;
+
+
+		// handle variations
+		$variations_html = '';
+        if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
+
+        	// generate variations table
+        	$variations_html = $this->getVariationsHTML( $item );
+
+        	// add variations table to item description
+        	if ( isset($item['profile_data']['details']['add_variations_table']) && $item['profile_data']['details']['add_variations_table'] ) {
+        		$item['post_content'] .= $variations_html;
+        	}
+
+        }
+		// replace shortcodes
+		$tpl_html = str_replace( '[[product_variations]]', $variations_html, $tpl_html );
+
+		
+		// handle addons
+    	// generate addons table
+    	$addons_html = $this->getAddonsHTML( $item );
+    	// add addons table to item description
+    	if ( isset($item['profile_data']['details']['add_variations_table']) && $item['profile_data']['details']['add_variations_table'] ) {
+    		$item['post_content'] .= $addons_html;
+    	}
+		// replace shortcodes
+		$tpl_html = str_replace( '[[product_addons]]', $addons_html, $tpl_html );
+
+		
+		// remove ALL links from post content by default
+ 		if ( 'default' == get_option( 'wplister_remove_links', 'default' ) ) {
+			/* $item['post_content'] = preg_replace('#<a.*?>([^<]*)</a>#i', '$1', $item['post_content'] ); */
+			// regex improved to work in cases like <a ...><b>text</b></a>
+			/* $item['post_content'] = preg_replace('#<a.*?>(.*)</a>#iU', '$1', $item['post_content'] ); */
+			// improved for multiple links per line case
+			$item['post_content'] = preg_replace('#<a.*?>(.*?)</a>#i', ' $1 ', $item['post_content'] );
+ 		}
+
+ 		// fixed whitespace pasted from ms word
+ 		// details: http://stackoverflow.com/questions/1431034/can-anyone-tell-me-what-this-ascii-character-is
+		$whitespace = chr(194).chr(160);
+		$item['post_content'] = str_replace( $whitespace, ' ', $item['post_content'] );
+
+
+		// main content
+ 		if ( 'off' == get_option( 'wplister_process_shortcodes', 'content' ) ) {
+	 		$tpl_html = str_replace( '[[product_content]]', wpautop( $item['post_content'] ), $tpl_html );
+ 		} else {
+	 		$tpl_html = str_replace( '[[product_content]]', apply_filters('the_content', $item['post_content'] ), $tpl_html );
+ 		}
+
+		return $tpl_html;
+	}
+
+
 	public function processAllTextShortcodes( $post_id, $tpl_html, $max_length = false ) {
+
+		// get item object
+		$listingsModel = new ListingsModel();
+		$listing_id    = $listingsModel->getListingIDFromPostID( $post_id );
+		$item          = $listingsModel->getItem( $listing_id );
+
+		// main content - [[product_content]]
+	 	$tpl_html = $this->processMainContentShortcode( $post_id, $tpl_html, $item );
+
+		// product excerpt
+		$tpl_html = str_replace( '[[product_excerpt]]', $listingsModel->getRawPostExcerpt( $item['post_id'] ), $tpl_html );
+		$tpl_html = str_replace( '[[product_excerpt_nl2br]]', nl2br( $listingsModel->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
+		$tpl_html = str_replace( '[[product_additional_content]]', wpautop( $listingsModel->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
+		$tpl_html = str_replace( '[[product_additional_content_nl2br]]', nl2br( $listingsModel->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
+		
+		// product price
+		$tpl_html = str_replace( '[[product_price]]', number_format_i18n( floatval($item['price']), 2 ), $tpl_html );
+		$tpl_html = str_replace( '[[product_price_raw]]', $item['price'], $tpl_html );
+
 
 		// product_category
 		$tpl_html = str_replace( '[[product_category]]', ProductWrapper::getProductCategoryName( $post_id ), $tpl_html );
@@ -684,6 +723,7 @@ class TemplatesModel extends WPL_Model {
 
 
 	function getContent() {
+		if ( ! $this->folderpath ) return;
 
 		// load template.html
 		$tpl_html = $this->getHTML();

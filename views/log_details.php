@@ -40,7 +40,7 @@ function wpl_formatXmlString( $xml ) {
 	endwhile;
 
 	return $result;
-}
+} // wpl_formatXmlString()
 
 $url = $wpl_row->request_url;
 $req = $wpl_row->request;

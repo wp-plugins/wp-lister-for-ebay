@@ -640,8 +640,8 @@ class WPL_AjaxHandler extends WPL_Core {
 
 		require_once( WPLISTER_PATH . '/includes/php-tail/PHPTail.php' );
 		
-		// Initilize a new instance of PHPTail
-		$tail = new PHPTail( $this->logger->file, 3000 );
+		// Initilize a new instance of PHPTail - 3 sec reload, 512k max
+		$tail = new PHPTail( $this->logger->file, 3000, 524288 );
 
 		// handle ajax call
 		if(isset($_GET['ajax']))  {

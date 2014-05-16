@@ -129,7 +129,7 @@
 
 							<label for="wpl-text-condition_id" class="text_label">
 								<?php echo __('Condition','wplister'); ?> *
-                                <?php wplister_tooltip('The available item conditions depend on the primary eBay category.<br>Please select a primary category in order to load the available item conditions - or set a default primary category in the settings (WP-Lister Pro only).') ?>
+                                <?php wplister_tooltip('The available item conditions depend on the primary eBay category.<br>Please select a primary category in order to load the available item conditions - or set a default primary category in WP-Lister &raquo; Settings.') ?>
 							</label>
 							<select id="wpl-text-condition_id" name="wpl_e2e_condition_id" title="Condition" class=" required-entry select">
 							<?php if ( isset( $wpl_available_conditions ) && is_array( $wpl_available_conditions ) ): ?>

@@ -9,7 +9,6 @@
 // list of used EbatNs classes:
 
 // require_once 'EbatNs_ServiceProxy.php';
-// require_once 'EbatNs_DatabaseProvider.php';
 // require_once 'EbatNs_Logger.php';
 
 // require_once 'GetSellerTransactionsRequestType.php';
@@ -870,7 +869,7 @@ class TransactionsModel extends WPL_Model {
 			if ( NULL === $value ) {
 				$wpdb->query( "UPDATE {$this->tablename} SET $key = NULL WHERE id = $id" );
 				$this->logger->info('SQL to set NULL value: '.$wpdb->last_query );
-				$this->logger->info( mysql_error() );
+				$this->logger->info( $wpdb->last_error );
 				unset( $data[$key] );
 			}
 		}
@@ -879,7 +878,7 @@ class TransactionsModel extends WPL_Model {
 		$wpdb->update( $this->tablename, $data, array( 'id' => $id ) );
 
 		$this->logger->debug('sql: '.$wpdb->last_query );
-		$this->logger->info( mysql_error() );
+		$this->logger->info( $wpdb->last_error );
 	}
 
 

@@ -197,6 +197,19 @@
 								<option value="1" <?php if ( $wpl_disable_variations == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 
+							<label for="wpl-option-force_table_items_limit" class="text_label">
+								<?php echo __('Limit displayed items','wplister'); ?>
+                                <?php wplister_tooltip('If you can not open the listings or orders page or receive a timeout error when doing so, you can use this option to temporarily limit the maxmimum number of displayed listings or orders.') ?>
+							</label>
+							<select id="wpl-option-force_table_items_limit" name="wpl_e2e_force_table_items_limit" class=" required-entry select">
+								<option value=""><?php echo __('No limit','wplister'); ?> (default) </option>
+								<option value="1" <?php if ( $wpl_force_table_items_limit == '1' ): ?>selected="selected"<?php endif; ?>>1 item</option>
+								<option value="2" <?php if ( $wpl_force_table_items_limit == '2' ): ?>selected="selected"<?php endif; ?>>2 items</option>
+								<option value="3" <?php if ( $wpl_force_table_items_limit == '3' ): ?>selected="selected"<?php endif; ?>>3 items</option>
+								<option value="5" <?php if ( $wpl_force_table_items_limit == '5' ): ?>selected="selected"<?php endif; ?>>5 items</option>
+								<option value="10" <?php if ( $wpl_force_table_items_limit == '10' ): ?>selected="selected"<?php endif; ?>>10 items</option>
+							</select>
+
 						</div>
 					</div>
 

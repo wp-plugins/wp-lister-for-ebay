@@ -715,7 +715,7 @@ class EbayOrdersModel extends WPL_Model {
 			SET post_id = '$wp_order_id'
 			WHERE id = '$id'
 		" );
-		echo mysql_error();
+		echo $wpdb->last_error;
 	}
 
 	function getStatusSummary() {

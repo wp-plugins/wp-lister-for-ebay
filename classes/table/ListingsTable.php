@@ -27,6 +27,9 @@ if(!class_exists('WP_List_Table')){
  */
 class ListingsTable extends WP_List_Table {
 
+    var $last_product_id = 0;
+    var $last_product_variations = array();
+
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
      * use the parent reference to set some default configs.
@@ -41,9 +44,14 @@ class ListingsTable extends WP_List_Table {
             'ajax'      => false        //does this table support ajax?
         ) );
         
-        // get array of profile names
-        $profilesModel = new ProfilesModel();
-        $this->profiles = $profilesModel->getAllNames();
+        // get array of profile names - if installation has been completed
+        $db_version = get_option('wplister_db_version', 0);
+        if ( $db_version ) {
+            $profilesModel = new ProfilesModel();
+            $this->profiles = $profilesModel->getAllNames();
+        } else {
+            $this->profiles = array();
+        }
     }
 
     function getProfileData( $item ) {
@@ -195,6 +203,9 @@ class ListingsTable extends WP_List_Table {
         // add variations link
         $listing_title .= $this->generateVariationsHtmlLink( $item, $profile_data );
 
+        // check if item is scheduled for auto relist
+        $listing_title .= $this->generateAutoRelistInfo( $item, $profile_data );
+
 
         // disable some actions depending on status
         if ( $item['status'] != 'published' )   unset( $actions['lock'] );
@@ -245,7 +256,7 @@ class ListingsTable extends WP_List_Table {
         if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
 
             $listingsModel = new ListingsModel();
-            $variations    = ProductWrapper::getVariations( $item['post_id'] );
+            $variations    = $this->getProductVariations( $item['post_id'] );
 
             // check variations cache
             $result = $listingsModel->matchCachedVariations( $item );
@@ -316,7 +327,7 @@ class ListingsTable extends WP_List_Table {
                 // column: SKU
                 $variations_html .= '<td>';
                 $variations_html .= $var['sku'] ? $var['sku'] : '<span style="color:darkred">SKU is missing!</span';
-                $variations_html .= $var['is_default'] ? ' *' : '';
+                $variations_html .= @$var['is_default'] ? ' *' : '';
                 $variations_html .= '</td>';
 
                 // last column: price
@@ -366,6 +377,33 @@ class ListingsTable extends WP_List_Table {
         return $variations_html;
 
     } // generateVariationsHtmlLink()
+
+    function generateAutoRelistInfo( $item, $profile_data ){
+        $html = '';
+
+        if ( @$item['relist_date'] ) {
+            $relist_date = $item['relist_date'];
+            $relist_ts   = strtotime( $item['relist_date'] );
+            $relist_time = mysql2date( get_option('time_format'), $relist_date );
+
+            $time_diff = human_time_diff( $relist_ts, current_time('timestamp',1) ); 
+            // $time_diff .= $relist_ts < current_time('timestamp',1) ? 'ago' : ''; 
+
+            // if ( $relist_ts < time() ) {
+            if ( $relist_ts < current_time('timestamp',1) ) {
+                $html .= '<br><span style="color:darkred"><i>Scheduled to be relisted '.$time_diff.' ago ('.$relist_time.')</i></span>';
+            } else {
+                $html .= '<br><span style="color:inherit"><i>Scheduled to be relisted in '.$time_diff.' ('.$relist_time.')</i></span>';
+            }
+
+            $html .= '<br><a href="admin.php?page=wplister&action=relist&auction='.$item['id'].'" class="button button-small">'.'Relist Now'.'</a>';
+            $html .= '&nbsp;<a href="admin.php?page=wplister&action=cancel_schedule&auction='.$item['id'].'" class="button button-small">'.'Cancel Schedule'.'</a>';
+
+        }
+
+        return $html;
+    } // generateAutoRelistInfo()
+
 
     function column_ebay_id($item) {
 
@@ -442,7 +480,7 @@ class ListingsTable extends WP_List_Table {
         // if item has variations count them...
         if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
 
-            $variations = ProductWrapper::getVariations( $item['post_id'] );
+            $variations = $this->getProductVariations( $item['post_id'] );
 
             $quantity = 0;
             foreach ($variations as $var) {
@@ -474,7 +512,12 @@ class ListingsTable extends WP_List_Table {
         // if item has variations check each price...
         if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
 
-            $variations = ProductWrapper::getVariations( $item['post_id'] );
+            // handle StartPrice on product level
+            if ( $product_start_price = get_post_meta( $item['post_id'], '_ebay_start_price', true ) ) {
+                return $this->number_format( $product_start_price, 2 );
+            }
+
+            $variations = $this->getProductVariations( $item['post_id'] );
             if ( ! is_array($variations) || ! sizeof($variations) ) return '';
 
             $price_min = 1000000; // one million should be a high enough ceiling
@@ -531,16 +574,23 @@ class ListingsTable extends WP_List_Table {
 			$html = '<span>'.$value.'</span>';
     	}
 
-        if ( @$item['relist_date'] ) {
-            $relist_date = $item['relist_date'];
-            $relist_ts   = strtotime( $item['relist_date'] );
-            $relist_time = mysql2date( get_option('time_format'), $relist_date );
-            if ( $relist_ts < time() ) {
-                $html .= '<br><span style="color:darkred">Relist at: '.$relist_time.'</span>';
-            } else {
-                $html .= '<br><span style="color:silver">Relist at: '.$relist_time.'</span>';                
-            }
-        }
+        // if ( @$item['relist_date'] ) {
+        //     $relist_date = $item['relist_date'];
+        //     $relist_ts   = strtotime( $item['relist_date'] );
+        //     $relist_time = mysql2date( get_option('time_format'), $relist_date );
+
+        //     $time_diff = human_time_diff( $relist_ts, current_time('timestamp',1) ); 
+        //     // $time_diff .= $relist_ts < current_time('timestamp',1) ? 'ago' : ''; 
+
+        //     // if ( $relist_ts < time() ) {
+        //     if ( $relist_ts < current_time('timestamp',1) ) {
+        //         $html .= '<br><span style="color:darkred">Relist at: '.$relist_time.'</span>';
+        //         $html .= '<br><span style="color:darkred">('.$time_diff.' ago)</span>';
+        //     } else {
+        //         $html .= '<br><span style="color:silver">Relist at: '.$relist_time.'</span>';                
+        //         $html .= '<br><span style="color:silver">(in '.$time_diff.')</span>';
+        //     }
+        // }
 
         return $html;
 	}
@@ -646,6 +696,19 @@ class ListingsTable extends WP_List_Table {
     function column_weight($item){
         return ProductWrapper::getWeight( $item['post_id'] );
     }
+
+   
+    // get product variations - if possible from cache
+    function getProductVariations( $post_id ) {
+
+        // update cache if required
+        if ( $this->last_product_id != $post_id ) {
+            $this->last_product_variations = ProductWrapper::getVariations( $post_id );
+            $this->last_product_id         = $post_id;
+        }
+
+        return $this->last_product_variations;
+    }
     
     /** ************************************************************************
      * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
@@ -750,7 +813,8 @@ class ListingsTable extends WP_List_Table {
             'lock'      => __('Lock listings','wplister'),
             'unlock'    => __('Unlock listings','wplister'),
             'archive'   => __('Move to archive','wplister'),
-            'delete_listing' => __('Delete listings','wplister'),
+            'delete_listing'  => __('Delete listings','wplister'),
+            'cancel_schedule' => __('Cancel relist schedule','wplister'),
         );
 
         if ( ! current_user_can( 'publish_ebay_listings' ) ) {
@@ -765,6 +829,10 @@ class ListingsTable extends WP_List_Table {
             unset( $actions['archive'] );
         } else {
             unset( $actions['delete_listing'] );            
+        }
+
+        if ( ! isset($_GET['listing_status']) || ( $_GET['listing_status'] != 'autorelist' ) ) {
+            unset( $actions['cancel_schedule'] );            
         }
 
         return $actions;
@@ -858,6 +926,14 @@ class ListingsTable extends WP_List_Table {
        $views['relist'] = "<a href='{$sold_url}' {$class} title='Show ended listings which are in stock and can be relisted.'>".__('Relist','wplister')."</a>";
        if ( isset($summary->relist) ) $views['relist'] .= '<span class="count">('.$summary->relist.')</span>';
 
+       // autorelist link
+       if ( $summary->autorelist ) {
+           $sold_url = add_query_arg( 'listing_status', 'autorelist', $base_url );
+           $class = ($current == 'autorelist' ? ' class="current"' :'');
+           $views['autorelist'] = "<a href='{$sold_url}' {$class} title='Show ended listings which are scheduled to be relisted.'>".__('Scheduled','wplister')."</a>";
+           if ( isset($summary->autorelist) ) $views['autorelist'] .= '<span class="count">('.$summary->autorelist.')</span>';        
+       }
+
        return $views;
     }    
 
@@ -904,6 +980,10 @@ class ListingsTable extends WP_List_Table {
         // get pagination state
         $current_page = $this->get_pagenum();
         $per_page = $this->get_items_per_page('listings_per_page', 20);
+
+        // regard max table rows limit
+        if ( $max_per_page = get_option( 'wplister_force_table_items_limit' ) )
+            $per_page = min( $per_page, $max_per_page );
         
         // define columns
         $this->_column_headers = $this->get_column_info();

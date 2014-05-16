@@ -135,7 +135,7 @@ class WpLister_Product_MetaBox {
 		$item_conditions = $this->fetchItemConditions( $primary_category_id );
 
 		// check if conditions are available for this category - or fall back to default
-		if ( isset( $item_conditions[ $primary_category_id ] ) ) {
+		if ( isset( $item_conditions[ $primary_category_id ] ) && is_array( $item_conditions[ $primary_category_id ] ) ) {
 			// get available conditions and add default value "use profile setting" to the beginning
 		    $available_conditions = array('' => __('-- use profile setting --','wplister')) + $item_conditions[ $primary_category_id ]; 
 		} else {
@@ -755,7 +755,7 @@ class WpLister_Product_MetaBox {
 			// shipping options
 			$ebay_shipping_service_type = esc_attr( @$_POST['wpl_e2e_shipping_service_type'] );
 
-			if ( $ebay_shipping_service_type != 'disabled' ) {
+			if ( $ebay_shipping_service_type && $ebay_shipping_service_type != 'disabled' ) {
 	
 				update_post_meta( $post_id, '_ebay_shipping_service_type', $ebay_shipping_service_type );
 

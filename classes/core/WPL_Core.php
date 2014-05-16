@@ -50,7 +50,7 @@ class WPL_Core {
 
 	/* Generic message display */
 	public function showMessage($message, $errormsg = false, $echo = false) {		
-		$class = ($errormsg) ? 'error' : 'updated fade';			// error or success
+		$class = ($errormsg) ? 'error' : 'updated';			// error or success
 		$class = ($errormsg == 2) ? 'updated update-nag' : $class; 	// warning
 		$this->message .= '<div id="message" class="'.$class.'" style="display:block !important"><p>'.$message.'</p></div>';
 		if ($echo) echo $this->message;

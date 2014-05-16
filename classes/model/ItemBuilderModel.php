@@ -237,7 +237,11 @@ class ItemBuilderModel extends WPL_Model {
 			$item->SecondaryCategory->CategoryID = $profile_details['ebay_category_2_id'];
 		}
 
-
+		// if no secondary category, set to zero
+		if ( ! $item->SecondaryCategory->CategoryID ) {
+			$item->SecondaryCategory = new CategoryType();
+			$item->SecondaryCategory->CategoryID = 0;			
+		}		
 
 		// handle optional store category
 		if ( intval($profile_details['store_category_1_id']) > 0 ) {
@@ -340,8 +344,18 @@ class ItemBuilderModel extends WPL_Model {
 			$profile_details['shipping_loc_enable_free_shipping']   = get_post_meta( $post_id, '_ebay_shipping_loc_enable_free_shipping', true );
 
 			// check for custom product level seller profiles
-			if ( get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true ) )
-				$profile_details['seller_shipping_profile_id']			= get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true );
+			if ( get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true ) ) {
+
+				$product_level_profile_id = get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true );
+
+				// check if shipping profile id exists
+				$seller_shipping_profiles	= get_option('wplister_ebay_seller_shipping_profiles');
+				foreach ( $seller_shipping_profiles as $profile ) {
+					if ( $profile->ProfileID == $product_level_profile_id )
+						$profile_details['seller_shipping_profile_id'] = $product_level_profile_id;
+				}
+
+			}
 
 			// check for custom product level ship to locations
 			if ( get_post_meta( $post_id, '_ebay_shipping_ShipToLocations', true ) )
@@ -361,8 +375,20 @@ class ItemBuilderModel extends WPL_Model {
 		$SellerProfiles = new SellerProfilesType();
 
 		if ( @$profile_details['seller_shipping_profile_id'] ) {
-			$SellerProfiles->SellerShippingProfile = new SellerShippingProfileType();
-			$SellerProfiles->SellerShippingProfile->setShippingProfileID( $profile_details['seller_shipping_profile_id'] );
+
+			// check if shipping profile id exists
+			$seller_shipping_profiles	= get_option('wplister_ebay_seller_shipping_profiles');
+			$profile_exists = false;
+			foreach ( $seller_shipping_profiles as $profile ) {
+				if ( $profile->ProfileID == $profile_details['seller_shipping_profile_id'] )
+					$profile_exists = true; 
+			}
+
+			if ( $profile_exists ) {
+				$SellerProfiles->SellerShippingProfile = new SellerShippingProfileType();
+				$SellerProfiles->SellerShippingProfile->setShippingProfileID( $profile_details['seller_shipping_profile_id'] );
+			}
+
 		}
 
 		if ( @$profile_details['seller_payment_profile_id'] ) {
@@ -890,6 +916,12 @@ class ItemBuilderModel extends WPL_Model {
 			$shippingDetails->setGlobalShipping( true );
 		}
 
+		// store pickup
+		if ( @$profile_details['store_pickup'] == 1 ) {
+			$item->PickupInStoreDetails = new PickupInStoreDetailsType();
+			$item->PickupInStoreDetails->setEligibleForPickupInStore( true ); 
+		}
+
 		// Payment Instructions
 		if ( trim( @$profile_details['payment_instructions'] ) != '' ) {
 			$shippingDetails->setPaymentInstructions( nl2br( $profile_details['payment_instructions'] ) );
@@ -1004,7 +1036,13 @@ class ItemBuilderModel extends WPL_Model {
 
             $NameValueList = new NameValueListType();
 	    	$NameValueList->setName ( $name  );
-    		$NameValueList->setValue( $value );
+    		
+    		// support for multi value attributes
+    		// $value = 'blue|red|green';
+    		$values = explode('|', $value);
+    		foreach ($values as $value) {
+	    		$NameValueList->addValue( $value );
+    		}
         	
         	// only add attribute to ItemSpecifics if not already present in variations or processed attributes
         	if ( ( ! in_array( $name, $this->variationAttributes ) ) && ( ! in_array( $name, $processed_attributes ) ) ) {
@@ -1040,6 +1078,11 @@ class ItemBuilderModel extends WPL_Model {
 
         	// handle price
 			$newvar->StartPrice = $this->lm->applyProfilePrice( $var['price'], $profile_details['start_price'] );
+
+			// handle StartPrice on product level
+			if ( $product_start_price = get_post_meta( $listing['post_id'], '_ebay_start_price', true ) ) {
+				$newvar->StartPrice = $product_start_price;
+			}
 
         	// handle variation quantity - if no quantity set in profile
         	// if ( intval( $item->Quantity ) == 0 ) {
@@ -1109,6 +1152,14 @@ class ItemBuilderModel extends WPL_Model {
         // currently the first one is selected automatically, but there will be preferences for this later
         $VariationValuesForPictures =  reset($tmpVariationSpecificsSet);
         $VariationNameForPictures   =    key($tmpVariationSpecificsSet);
+
+        // apply variation image attribute from profile - if set
+        $variation_image_attribute = isset( $profile_details['variation_image_attribute'] ) ? $profile_details['variation_image_attribute'] : false;
+        if ( $variation_image_attribute && isset( $tmpVariationSpecificsSet[ $variation_image_attribute ] ) ) {
+	        $VariationValuesForPictures = $tmpVariationSpecificsSet[ $variation_image_attribute ];
+	        $VariationNameForPictures   = $variation_image_attribute;
+        }
+
 
         // build Pictures
     	$Pictures = new PicturesType();
@@ -1557,9 +1608,9 @@ class ItemBuilderModel extends WPL_Model {
 		// get item data
 		$item = $this->lm->getItem( $id );
 
-		// use latest post_content from product
-		$post = get_post( $item['post_id'] );
-		if ( ! empty($post->post_content) ) $item['post_content'] = $post->post_content;
+		// use latest post_content from product - moved to TemplatesModel
+		// $post = get_post( $item['post_id'] );
+		// if ( ! empty($post->post_content) ) $item['post_content'] = $post->post_content;
 
 		// load template
 		$template = new TemplatesModel( $item['template'] );
@@ -1580,9 +1631,9 @@ class ItemBuilderModel extends WPL_Model {
 			return '<div style="text-align:center; margin-top:5em;">You need to prepare at least one listing in order to preview a listing template.</div>';
 		}
 
-		// use latest post_content from product
-		$post = get_post( $item['post_id'] );
-		if ( ! empty($post->post_content) ) $item['post_content'] = $post->post_content;
+		// use latest post_content from product - moved to TemplatesModel
+		// $post = get_post( $item['post_id'] );
+		// if ( ! empty($post->post_content) ) $item['post_content'] = $post->post_content;
 
 		// load template
 		if ( ! $template_id ) $template_id = $item['template'];

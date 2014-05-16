@@ -128,245 +128,227 @@ class ListingsPage extends WPL_Page {
 	
 
 
+	public function handleActions() {
+
+		// handle save listing
+		if ( $this->requestAction() == 'save_listing' ) {
+			$this->saveListing();
+		}
+
+		// handle verify action
+		if ( $this->requestAction() == 'verify' ) {
+			$this->initEC();
+			$this->EC->verifyItems( $_REQUEST['auction'] );
+			$this->EC->closeEbay();
+			if ( $this->EC->isSuccess ) {
+				$this->showMessage( __('Selected items were verified with eBay.','wplister') );
+			} else {
+				$this->showMessage( __('There were some problems verifying your items.','wplister'), 1 );					
+			}
+		}
+		// handle revise action
+		if ( $this->requestAction() == 'revise' ) {
+			$this->initEC();
+			$this->EC->reviseItems( $_REQUEST['auction'] );
+			$this->EC->closeEbay();
+			if ( $this->EC->isSuccess ) {
+				$this->showMessage( __('Selected items were revised on eBay.','wplister') );
+			} else {
+				$this->showMessage( __('There were some problems revising your items.','wplister'), 1 );					
+			}
+		}
+		// handle publish to eBay action
+		if ( $this->requestAction() == 'publish2e' ) {
+			$this->initEC();
+			$this->EC->sendItemsToEbay( $_REQUEST['auction'] );
+			$this->EC->closeEbay();
+			if ( $this->EC->isSuccess ) {
+				$this->showMessage( __('Selected items were published on eBay.','wplister') );
+			} else {
+				$this->showMessage( __('Some items could not be published.','wplister'), 1 );					
+			}
+		}
+		// handle relist action
+		if ( $this->requestAction() == 'relist' ) {
+			$this->initEC();
+			$this->EC->relistItems( $_REQUEST['auction'] );
+			$this->EC->closeEbay();
+			if ( $this->EC->isSuccess ) {
+				$this->showMessage( __('Selected items were re-listed on eBay.','wplister') );
+			} else {
+				$this->showMessage( __('There were some problems relisting your items.','wplister'), 1 );					
+			}
+		}
+		// handle end_item action
+		if ( $this->requestAction() == 'end_item' ) {
+			$this->initEC();
+			$this->EC->endItemsOnEbay( $_REQUEST['auction'] );
+			$this->EC->closeEbay();
+			$this->showMessage( __('Selected listings were ended.','wplister') );
+		}
+		// handle update from eBay action
+		if ( $this->requestAction() == 'update' ) {
+			$this->initEC();
+			$this->EC->updateItemsFromEbay( $_REQUEST['auction'] );
+			$this->EC->closeEbay();
+			$this->showMessage( __('Selected items were updated from eBay.','wplister') );
+		}
+		// handle delete action
+		if ( isset( $_REQUEST['auction'] ) && ( $this->requestAction() == 'delete_listing' ) ) {
+
+	        $lm = new ListingsModel();
+	        $id = $_REQUEST['auction'];
+
+	        if ( is_array( $id )) {
+	            foreach( $id as $single_id ) {
+	                $lm->deleteItem( $single_id );  
+	            }
+	        } else {
+	            $lm->deleteItem( $id );         
+	        }
+
+			$this->showMessage( __('Selected items were removed.','wplister') );
+		}
+
+		// handle archive action
+		if ( $this->requestAction() == 'archive' ) {
+
+	        $lm = new ListingsModel();
+	        $id = $_REQUEST['auction'];
+	        $data = array( 'status' => 'archived' );
+
+	        if ( is_array( $id )) {
+	            foreach( $id as $single_id ) {
+	                $lm->updateListing( $single_id, $data );
+	            }
+	        } else {
+	            $lm->updateListing( $id, $data );
+	        }
+
+			$this->showMessage( __('Selected items were archived.','wplister') );
+		}
+
+		// handle lock action
+		if ( $this->requestAction() == 'lock' ) {
+
+	        $lm = new ListingsModel();
+	        $id = $_REQUEST['auction'];
+	        $data = array( 'locked' => true );
+
+	        if ( is_array( $id )) {
+	            foreach( $id as $single_id ) {
+	                $lm->updateListing( $single_id, $data );
+	            }
+	        } else {
+	            $lm->updateListing( $id, $data );
+	        }
+
+			$this->showMessage( __('Selected items were locked.','wplister') );
+		}
+
+		// handle unlock action
+		if ( $this->requestAction() == 'unlock' ) {
+
+	        $lm = new ListingsModel();
+	        $id = $_REQUEST['auction'];
+	        $data = array( 'locked' => false );
+
+	        if ( is_array( $id )) {
+	            foreach( $id as $single_id ) {
+	                $lm->updateListing( $single_id, $data );
+	            }
+	        } else {
+	            $lm->updateListing( $id, $data );
+	        }
+
+			$this->showMessage( __('Selected items were unlocked.','wplister') );
+		}
+
+		// handle cancel_schedule action
+		if ( $this->requestAction() == 'cancel_schedule' ) {
+
+	        $lm = new ListingsModel();
+	        $id = $_REQUEST['auction'];
+	        $data = array( 'relist_date' => null );
+
+	        if ( is_array( $id )) {
+	            foreach( $id as $single_id ) {
+	                $lm->updateListing( $single_id, $data );
+	            }
+	        } else {
+	            $lm->updateListing( $id, $data );
+	        }
+
+			$this->showMessage( __('Selected items were unscheduled from auto relist.','wplister') );
+		}
+
+		// clean listing archive
+		if ( $this->requestAction() == 'wpl_clean_listing_archive' ) {
+	        $lm = new ListingsModel();
+			$lm->cleanArchive();				
+			$this->showMessage( __('Archive was cleared.','wplister') );
+		}
+
+		// handle toolbar action - prepare listing from product
+		if ( $this->requestAction() == 'wpl_prepare_single_listing' ) {
+
+	        // get profile
+			$profilesModel = new ProfilesModel();
+	        $profile = isset( $_REQUEST['profile_id'] ) ? $profilesModel->getItem( $_REQUEST['profile_id'] ) : false;
+
+	        if ( $profile ) {
+		
+				// prepare product
+				$listingsModel = new ListingsModel();
+		        $listingsModel->prepareProductForListing( $_REQUEST['product_id'] );
+
+		        $listingsModel->applyProfileToNewListings( $profile );		      
+				$this->showMessage( __('New listing was prepared from product.','wplister') );
+
+	        } elseif ( isset( $_REQUEST['product_id'] ) ) {
+
+				// prepare product
+				$listingsModel = new ListingsModel();
+		        $listingsModel->prepareProductForListing( $_REQUEST['product_id'] );
+
+	        }
+
+		}
+
+
+		// handle reapply profile action
+		if ( $this->requestAction() == 'reapply' ) {
+			$listingsModel = new ListingsModel();
+	        $listingsModel->reapplyProfileToItems( $_REQUEST['auction'] );
+			$this->showMessage( __('Profiles were re-applied to selected items.','wplister') );
+		}
+
+	} // handleActions()
+
+
+
 	public function onDisplayListingsPage() {
 		WPL_Setup::checkSetup();
 	
+		// handle actions
+		$this->handleActions();
+
 		// init model
 		$listingsModel = new ListingsModel();
 		$selectedProducts = $listingsModel->selectedProducts();
 		
 		// do we have new products with no profile yet?
 		if ( $selectedProducts ) {
-		
-		    //Create an instance of our package class...
-		    $listingsTable = new ListingsTable();
-	    	//Fetch, prepare, sort, and filter our data...
-		    $listingsTable->prepare_items( $selectedProducts );
 	
-			// get profiles
-			$profilesModel = new ProfilesModel();
-			$profiles = $profilesModel->getAll();
-	
-			$aData = array(
-				'plugin_url'				=> self::$PLUGIN_URL,
-				'message'					=> $this->message,
-	
-				'last_selected_profile'		=> self::getOption('last_selected_profile'),
-				'profiles'					=> $profiles,
-				'listingsTable'				=> $listingsTable,
-			
-				'form_action'				=> 'admin.php?page='.self::ParentMenuId
-			);
-			$this->display( 'listings_prepare_page', $aData );
+			$this->displayPrepareListingsPage( $selectedProducts );
 
 		// edit listing
 		} elseif ( $this->requestAction() == 'edit' ) {
 
-			// get item
-			$listingsModel = new ListingsModel();
-			$item = $listingsModel->getItem( $_REQUEST['auction'] );
+			$this->displayEditPage();
 
-			// unserialize details
-			$this->initEC();
-			// $item['details'] = maybe_unserialize( $item['details'] );
-			// echo "<pre>";print_r($item);echo"</pre>";die();
-			
-			// get ebay data
-			$countries			 	= EbayShippingModel::getEbayCountries();
-			// $template_files 		= $this->getTemplatesList();
-			$templatesModel = new TemplatesModel();
-			$templates = $templatesModel->getAll();
-
-			$aData = array(
-				'plugin_url'				=> self::$PLUGIN_URL,
-				'message'					=> $this->message,
-	
-				'item'						=> $item,
-				'countries'					=> $countries,
-				'template_files'			=> $templates,
-				
-				'form_action'				=> 'admin.php?page='.self::ParentMenuId . ( isset($_REQUEST['paged']) ? '&paged='.$_REQUEST['paged'] : '' )
-			);
-			$this->display( 'listings_edit_page', array_merge( $aData, $item ) );
-		
 		// show list
 		} else {
-
-			// handle save listing
-			if ( $this->requestAction() == 'save_listing' ) {
-				$this->saveListing();
-			}
-
-			// handle verify action
-			if ( $this->requestAction() == 'verify' ) {
-				$this->initEC();
-				$this->EC->verifyItems( $_REQUEST['auction'] );
-				$this->EC->closeEbay();
-				if ( $this->EC->isSuccess ) {
-					$this->showMessage( __('Selected items were verified with eBay.','wplister') );
-				} else {
-					$this->showMessage( __('There were some problems verifying your items.','wplister'), 1 );					
-				}
-			}
-			// handle revise action
-			if ( $this->requestAction() == 'revise' ) {
-				$this->initEC();
-				$this->EC->reviseItems( $_REQUEST['auction'] );
-				$this->EC->closeEbay();
-				if ( $this->EC->isSuccess ) {
-					$this->showMessage( __('Selected items were revised on eBay.','wplister') );
-				} else {
-					$this->showMessage( __('There were some problems revising your items.','wplister'), 1 );					
-				}
-			}
-			// handle publish to eBay action
-			if ( $this->requestAction() == 'publish2e' ) {
-				$this->initEC();
-				$this->EC->sendItemsToEbay( $_REQUEST['auction'] );
-				$this->EC->closeEbay();
-				if ( $this->EC->isSuccess ) {
-					$this->showMessage( __('Selected items were published on eBay.','wplister') );
-				} else {
-					$this->showMessage( __('Some items could not be published.','wplister'), 1 );					
-				}
-			}
-			// handle relist action
-			if ( $this->requestAction() == 'relist' ) {
-				$this->initEC();
-				$this->EC->relistItems( $_REQUEST['auction'] );
-				$this->EC->closeEbay();
-				if ( $this->EC->isSuccess ) {
-					$this->showMessage( __('Selected items were re-listed on eBay.','wplister') );
-				} else {
-					$this->showMessage( __('There were some problems relisting your items.','wplister'), 1 );					
-				}
-			}
-			// handle end_item action
-			if ( $this->requestAction() == 'end_item' ) {
-				$this->initEC();
-				$this->EC->endItemsOnEbay( $_REQUEST['auction'] );
-				$this->EC->closeEbay();
-				$this->showMessage( __('Selected listings were ended.','wplister') );
-			}
-			// handle update from eBay action
-			if ( $this->requestAction() == 'update' ) {
-				$this->initEC();
-				$this->EC->updateItemsFromEbay( $_REQUEST['auction'] );
-				$this->EC->closeEbay();
-				$this->showMessage( __('Selected items were updated from eBay.','wplister') );
-			}
-			// handle delete action
-			if ( isset( $_REQUEST['auction'] ) && ( $this->requestAction() == 'delete_listing' ) ) {
-
-		        $lm = new ListingsModel();
-		        $id = $_REQUEST['auction'];
-
-		        if ( is_array( $id )) {
-		            foreach( $id as $single_id ) {
-		                $lm->deleteItem( $single_id );  
-		            }
-		        } else {
-		            $lm->deleteItem( $id );         
-		        }
-
-				$this->showMessage( __('Selected items were removed.','wplister') );
-			}
-
-			// handle archive action
-			if ( $this->requestAction() == 'archive' ) {
-
-		        $lm = new ListingsModel();
-		        $id = $_REQUEST['auction'];
-		        $data = array( 'status' => 'archived' );
-
-		        if ( is_array( $id )) {
-		            foreach( $id as $single_id ) {
-		                $lm->updateListing( $single_id, $data );
-		            }
-		        } else {
-		            $lm->updateListing( $id, $data );
-		        }
-
-				$this->showMessage( __('Selected items were archived.','wplister') );
-			}
-
-			// handle lock action
-			if ( $this->requestAction() == 'lock' ) {
-
-		        $lm = new ListingsModel();
-		        $id = $_REQUEST['auction'];
-		        $data = array( 'locked' => true );
-
-		        if ( is_array( $id )) {
-		            foreach( $id as $single_id ) {
-		                $lm->updateListing( $single_id, $data );
-		            }
-		        } else {
-		            $lm->updateListing( $id, $data );
-		        }
-
-				$this->showMessage( __('Selected items were locked.','wplister') );
-			}
-
-			// handle unlock action
-			if ( $this->requestAction() == 'unlock' ) {
-
-		        $lm = new ListingsModel();
-		        $id = $_REQUEST['auction'];
-		        $data = array( 'locked' => false );
-
-		        if ( is_array( $id )) {
-		            foreach( $id as $single_id ) {
-		                $lm->updateListing( $single_id, $data );
-		            }
-		        } else {
-		            $lm->updateListing( $id, $data );
-		        }
-
-				$this->showMessage( __('Selected items were unlocked.','wplister') );
-			}
-
-			// clean listing archive
-			if ( $this->requestAction() == 'wpl_clean_listing_archive' ) {
-		        $lm = new ListingsModel();
-				$lm->cleanArchive();				
-				$this->showMessage( __('Archive was cleared.','wplister') );
-			}
-
-			// handle toolbar action - prepare listing from product
-			if ( $this->requestAction() == 'wpl_prepare_single_listing' ) {
-
-		        // get profile
-				$profilesModel = new ProfilesModel();
-		        $profile = isset( $_REQUEST['profile_id'] ) ? $profilesModel->getItem( $_REQUEST['profile_id'] ) : false;
-
-		        if ( $profile ) {
-			
-					// prepare product
-					$listingsModel = new ListingsModel();
-			        $listingsModel->prepareProductForListing( $_REQUEST['product_id'] );
-
-			        $listingsModel->applyProfileToNewListings( $profile );		      
-					$this->showMessage( __('New listing was prepared from product.','wplister') );
-
-		        } elseif ( isset( $_REQUEST['product_id'] ) ) {
-	
-					// prepare product
-					$listingsModel = new ListingsModel();
-			        $listingsModel->prepareProductForListing( $_REQUEST['product_id'] );
-
-		        }
-
-			}
-
-
-
-			// handle reapply profile action
-			if ( $this->requestAction() == 'reapply' ) {
-				$listingsModel = new ListingsModel();
-		        $listingsModel->reapplyProfileToItems( $_REQUEST['auction'] );
-				$this->showMessage( __('Profiles were re-applied to selected items.','wplister') );
-			}
 
 			// show warning if duplicate products found
 			$this->checkForDuplicates();
@@ -417,6 +399,66 @@ class ListingsPage extends WPL_Page {
 			$this->display( 'listings_page', $aData );
 		
 		}
+
+	}
+
+
+	public function displayPrepareListingsPage( $selectedProducts ) {
+
+		// show warning if duplicate products found
+		$this->checkForDuplicates();
+
+	    //Create an instance of our package class...
+	    $listingsTable = new ListingsTable();
+    	//Fetch, prepare, sort, and filter our data...
+	    $listingsTable->prepare_items( $selectedProducts );
+
+		// get profiles
+		$profilesModel = new ProfilesModel();
+		$profiles = $profilesModel->getAll();
+
+		$aData = array(
+			'plugin_url'				=> self::$PLUGIN_URL,
+			'message'					=> $this->message,
+
+			'last_selected_profile'		=> self::getOption('last_selected_profile'),
+			'profiles'					=> $profiles,
+			'listingsTable'				=> $listingsTable,
+		
+			'form_action'				=> 'admin.php?page='.self::ParentMenuId
+		);
+		$this->display( 'listings_prepare_page', $aData );
+	}
+	
+
+	public function displayEditPage() {
+
+		// get item
+		$listingsModel = new ListingsModel();
+		$item = $listingsModel->getItem( $_REQUEST['auction'] );
+
+		// unserialize details
+		$this->initEC();
+		// $item['details'] = maybe_unserialize( $item['details'] );
+		// echo "<pre>";print_r($item);echo"</pre>";die();
+		
+		// get ebay data
+		$countries			 	= EbayShippingModel::getEbayCountries();
+		// $template_files 		= $this->getTemplatesList();
+		$templatesModel = new TemplatesModel();
+		$templates = $templatesModel->getAll();
+
+		$aData = array(
+			'plugin_url'				=> self::$PLUGIN_URL,
+			'message'					=> $this->message,
+
+			'item'						=> $item,
+			'countries'					=> $countries,
+			'template_files'			=> $templates,
+			
+			'form_action'				=> 'admin.php?page='.self::ParentMenuId . ( isset($_REQUEST['paged']) ? '&paged='.$_REQUEST['paged'] : '' )
+		);
+		$this->display( 'listings_edit_page', array_merge( $aData, $item ) );
 
 	}
 
@@ -509,9 +551,13 @@ class ListingsPage extends WPL_Page {
 					$msg .= ' &ndash; <i>'.$listing->status.'</i>';					
 					$msg .= '<br>';
 					if ( in_array( $listing->status, array( 'prepared', 'verified', 'ended', 'sold' ) ) ) {
-						$delete_link = sprintf('<a class="delete" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete_listing',$listing->id,__('Click to remove this listing','wplister'));
-						$archive_link = sprintf('<a class="archive" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'archive',$listing->id,__('Click to move to archive','wplister'));
+						$archive_link = sprintf('<a class="archive button button-small" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'archive',$listing->id,__('Click to move to archive','wplister'));
 						$msg .= '&nbsp;&nbsp;&nbsp;&nbsp;'.$archive_link;
+						$msg .= '<br>';
+					}
+					if ( in_array( $listing->status, array( 'selected' ) ) ) {
+						$delete_link = sprintf('<a class="delete button button-small button-primary" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete_listing',$listing->id,__('Click to remove this listing','wplister'));
+						$msg .= '&nbsp;&nbsp;&nbsp;&nbsp;'.$delete_link;
 						$msg .= '<br>';
 					}
 					$msg .= '</span>';
@@ -523,7 +569,7 @@ class ListingsPage extends WPL_Page {
 			// $msg .= '<br>';
 			// $msg .= 'If you need to list single products multiple times for some reason, please contact support@wplab.com and we will find a solution.';
 			$msg .= '</p></div>';
-			$this->showMessage( $msg );				
+			$this->showMessage( $msg, 2 );				
 		}
 	}
 
@@ -540,7 +586,8 @@ class ListingsPage extends WPL_Page {
 		// if ( ! $ibm->checkItem($item) ) return $ibm->result;
 		$ibm->checkItem($item);
 
-		$preview_html = $ibm->getFinalHTML( $id, $item, true );
+		// $preview_html = $ibm->getFinalHTML( $id, $item, true );
+		$preview_html = $item->Description;
 		// echo $preview_html;
 
 		$aData = array(

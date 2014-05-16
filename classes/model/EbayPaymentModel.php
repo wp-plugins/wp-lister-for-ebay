@@ -12,8 +12,6 @@
 
 // require_once 'GeteBayDetailsRequestType.php';
 // require_once 'PaymentOptionDetailsType.php';	
-
-// require_once 'EbatNs_DatabaseProvider.php';	
 // require_once 'EbatNs_Logger.php';
 
 class EbayPaymentModel extends WPL_Model {

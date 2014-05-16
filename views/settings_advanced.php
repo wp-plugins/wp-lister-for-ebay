@@ -288,6 +288,19 @@
 								<?php echo __('Select your local timezone.','wplister'); ?><br>
 							</p>
 
+							<label for="wpl-convert_dimensions" class="text_label">
+								<?php echo __('Dimension Unit Conversion','wplister'); ?>
+                                <?php wplister_tooltip('WP-Lister assumes that you use the same dimension unit in WooCommerce as on eBay. Enable this to convert length, width and height from one unit to another.') ?>
+							</label>
+							<select id="wpl-convert_dimensions" name="wpl_e2e_convert_dimensions" class="required-entry select">
+								<option value=""  <?php if ( $wpl_convert_dimensions == ''  ): ?>selected="selected"<?php endif; ?>><?php echo __('No conversion','wplister'); ?> (default)</option>
+								<option value="in-cm" <?php if ( $wpl_convert_dimensions == 'in-cm' ): ?>selected="selected"<?php endif; ?>><?php echo __('Convert inches to centimeters','wplister'); ?> ( in &raquo; cm )</option>
+								<option value="mm-cm" <?php if ( $wpl_convert_dimensions == 'mm-cm' ): ?>selected="selected"<?php endif; ?>><?php echo __('Convert milimeters to centimeters','wplister'); ?> ( mm &raquo; cm )</option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Convert length, width and height to the unit required by eBay.','wplister'); ?>
+							</p>
+
 							<label for="wpl-enable_item_compat_tab" class="text_label">
 								<?php echo __('Enable Item Compatibility tab','wplister'); ?>
                                 <?php wplister_tooltip('Item compatibility lists are currently only created for imported products. Future versions of WP-Lister Pro will allow to define compatibility lists in WooCommerce.') ?>
@@ -322,7 +335,7 @@
 								<option value="1" <?php if ( $wpl_api_enable_auto_relist == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
-								<?php echo __('Enable this if you update your inventory are via the API or CSV import.','wplister'); ?>
+								<?php echo __('Enable this if you update your inventory via the API or CSV import.','wplister'); ?>
 								<?php echo __('This only effects locked items.','wplister'); ?><br>
 							</p>
 

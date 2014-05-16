@@ -392,7 +392,7 @@ class ProfilesPage extends WPL_Page {
 
 		// proper error handling
 		if ($result===false) {
-			$this->showMessage( "There was a problem saving your profile.<br>SQL:<pre>".$wpdb->last_query.'</pre>'.mysql_error(), true );	
+			$this->showMessage( "There was a problem saving your profile.<br>SQL:<pre>".$wpdb->last_query.'</pre>'.$wpdb->last_error, true );	
 		} else {
 			$this->showMessage( __('Profile saved.','wplister') );
 
@@ -432,6 +432,12 @@ class ProfilesPage extends WPL_Page {
 			$items = $listingsModel->getAllEndedWithProfile( $item['profile_id'] );
 	        $listingsModel->applyProfileToNewListings( $profile, $items );
 			$this->showMessage( sprintf( __('%s ended items updated.','wplister'), count($items) ) );			
+
+			// update ended listings - required for autorelist to be applied
+			// $listingsModel->updateEndedListings();
+			$this->initEC();
+			$this->EC->updateListings();
+			$this->EC->closeEbay();			
 		}
 		
 	}

@@ -39,7 +39,7 @@
 
 
 	<?php if ( @$_REQUEST['action'] == 'check_ebay_connection' ): ?>
-		<div id="message" class="updated fade below-h2 test_results" style="display:block !important">
+		<div id="message" class="updated below-h2 test_results" style="display:block !important">
 			<h3>Test Results</h3>
 			<p>
 				<?php echo $wpl_resultsHtml ?>

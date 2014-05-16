@@ -26,7 +26,7 @@ class WPL_EbatNs_Logger{
 		$data['timestamp'] = date( 'Y-m-d H:i:s' );
 		$data['user_id'] = $this->currentUserID;
 		$wpdb->insert($wpdb->prefix.'ebay_log', $data);
-		if ( mysql_error() ) echo 'Error in WPL_EbatNs_Logger::__construct: '.mysql_error().'<br>'.$wpdb->last_query;
+		if ( $wpdb->last_error ) echo 'Error in WPL_EbatNs_Logger::__construct: '.$wpdb->last_error.'<br>'.$wpdb->last_query;
 		$this->id = $wpdb->insert_id;
 
 	}
@@ -36,9 +36,8 @@ class WPL_EbatNs_Logger{
 		global $wpdb;
 		$data = array();
 
-		// check if MySQL server has gone away and reconnect if required
-		if ( ! mysql_ping() )
-			$wpdb->db_connect();
+		// check if MySQL server has gone away and reconnect if required - WP 3.9+
+		if ( method_exists( $wpdb, 'check_connection') ) $wpdb->check_connection();
 
 		// extract Ack status from response
 		if ( $subject == 'Response' ) {
@@ -104,7 +103,7 @@ class WPL_EbatNs_Logger{
 				// insert into db
 				if ( isset($data['ebay_id']) ) $data['ebay_id'] = floatval( $data['ebay_id'] );
 				$wpdb->update($wpdb->prefix.'ebay_log', $data, array( 'id' => $this->id ));
-				if ( mysql_error() ) echo 'Error in WPL_EbatNs_Logger::log() - subject '.$subject.' - '.mysql_error().'<br>'.$wpdb->last_query;
+				if ( $wpdb->last_error ) echo 'Error in WPL_EbatNs_Logger::log() - subject '.$subject.' - '.$wpdb->last_error.'<br>'.$wpdb->last_query;
 
 			}
 		}

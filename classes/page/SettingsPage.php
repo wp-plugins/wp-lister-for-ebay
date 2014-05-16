@@ -227,6 +227,7 @@ class SettingsPage extends WPL_Page {
 			'enable_categories_page'        => self::getOption( 'enable_categories_page', 0 ),
 			'option_disable_wysiwyg_editor' => self::getOption( 'disable_wysiwyg_editor', 0 ),
 			'enable_item_compat_tab'        => self::getOption( 'enable_item_compat_tab', 1 ),
+			'convert_dimensions'        	=> self::getOption( 'convert_dimensions' ),
 			'option_local_timezone'         => self::getOption( 'local_timezone', '' ),
 			'text_admin_menu_label'         => self::getOption( 'admin_menu_label', 'WP-Lister' ),
 			'timezones'                     => self::get_timezones(),
@@ -253,6 +254,7 @@ class SettingsPage extends WPL_Page {
 			'log_record_limit'			=> self::getOption( 'log_record_limit', 4096 ),
 			'log_days_limit'			=> self::getOption( 'log_days_limit', 30 ),
 			'xml_formatter'				=> self::getOption( 'xml_formatter', 'default' ),
+			'force_table_items_limit'	=> self::getOption( 'force_table_items_limit' ),
 
 			'text_ebay_token'			=> self::getOption( 'ebay_token' ),
 			'text_log_level'			=> self::getOption( 'log_level' ),
@@ -357,6 +359,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'enable_categories_page',	$this->getValueFromPost( 'enable_categories_page' ) );
 			self::updateOption( 'disable_wysiwyg_editor',	$this->getValueFromPost( 'option_disable_wysiwyg_editor' ) );
 			self::updateOption( 'enable_item_compat_tab', 	$this->getValueFromPost( 'enable_item_compat_tab' ) );
+			self::updateOption( 'convert_dimensions', 		$this->getValueFromPost( 'convert_dimensions' ) );
 			self::updateOption( 'local_timezone',			$this->getValueFromPost( 'option_local_timezone' ) );
 			self::updateOption( 'allow_backorders',			$this->getValueFromPost( 'option_allow_backorders' ) );
 			self::updateOption( 'admin_menu_label',			$this->getValueFromPost( 'text_admin_menu_label' ) );
@@ -447,17 +450,18 @@ class SettingsPage extends WPL_Page {
 				}
 			}
 
-			self::updateOption( 'log_level',			$this->getValueFromPost( 'text_log_level' ) );
-			self::updateOption( 'log_to_db',			$this->getValueFromPost( 'option_log_to_db' ) );
-			self::updateOption( 'sandbox_enabled',		$this->getValueFromPost( 'option_sandbox_enabled' ) );
-			self::updateOption( 'ajax_error_handling',	$this->getValueFromPost( 'ajax_error_handling' ) );
-			self::updateOption( 'php_error_handling',	$this->getValueFromPost( 'php_error_handling' ) );
-			self::updateOption( 'disable_variations',	$this->getValueFromPost( 'disable_variations' ) );
-			self::updateOption( 'enable_messages_page',	$this->getValueFromPost( 'enable_messages_page' ) );
-			self::updateOption( 'log_record_limit',		$this->getValueFromPost( 'log_record_limit' ) );
-			self::updateOption( 'log_days_limit',		$this->getValueFromPost( 'log_days_limit' ) );
-			self::updateOption( 'xml_formatter',		$this->getValueFromPost( 'xml_formatter' ) );
-
+			self::updateOption( 'log_level',				$this->getValueFromPost( 'text_log_level' ) );
+			self::updateOption( 'log_to_db',				$this->getValueFromPost( 'option_log_to_db' ) );
+			self::updateOption( 'sandbox_enabled',			$this->getValueFromPost( 'option_sandbox_enabled' ) );
+			self::updateOption( 'ajax_error_handling',		$this->getValueFromPost( 'ajax_error_handling' ) );
+			self::updateOption( 'php_error_handling',		$this->getValueFromPost( 'php_error_handling' ) );
+			self::updateOption( 'disable_variations',		$this->getValueFromPost( 'disable_variations' ) );
+			self::updateOption( 'enable_messages_page',		$this->getValueFromPost( 'enable_messages_page' ) );
+			self::updateOption( 'log_record_limit',			$this->getValueFromPost( 'log_record_limit' ) );
+			self::updateOption( 'log_days_limit',			$this->getValueFromPost( 'log_days_limit' ) );
+			self::updateOption( 'xml_formatter',			$this->getValueFromPost( 'xml_formatter' ) );
+			self::updateOption( 'force_table_items_limit',	$this->getValueFromPost( 'force_table_items_limit' ) );
+			
 			$this->handleChangedUpdateChannel();
 
 			// new manual token ?

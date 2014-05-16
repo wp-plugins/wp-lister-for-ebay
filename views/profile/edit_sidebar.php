@@ -342,6 +342,25 @@
 							</select>
 							<br class="clear" />
 
+							<label for="wpl-text-variation_image_attribute" class="text_label">
+								<?php echo __('Image attribute','wplister'); ?>
+                                <?php wplister_tooltip('Select which attribute is used for variation images.') ?>
+							</label>
+							<select id="wpl-text-variation_image_attribute" name="wpl_e2e_variation_image_attribute" class=" required-entry select">
+								<option value="" <?php if ( @$item_details['variation_image_attribute'] == '' ): ?>selected="selected"<?php endif; ?>><?php echo __('Default','wplister'); ?></option>
+								<?php if ( isset( $wpl_available_attributes ) && is_array( $wpl_available_attributes ) ): ?>
+									<?php echo "<pre>";print_r($wpl_available_attributes);echo"</pre>";#die(); ?>
+									<?php foreach ($wpl_available_attributes as $attribute) : ?>
+										<option value="<?php echo $attribute->name ?>" 
+											<?php if ( @$item_details['variation_image_attribute'] == $attribute->name ) : ?>
+												selected="selected"
+											<?php endif; ?>
+											><?php echo $attribute->label ?></option>
+									<?php endforeach; ?>
+								<?php endif; ?>
+							</select>
+							<br class="clear" />
+
 							<label for="wpl-text-add_variations_table" class="text_label">
 								<?php echo __('Add var. table','wplister'); ?>
                                 <?php wplister_tooltip('<b>Add variations table</b><br>This will append a list (HTML table) of all available variations to the product description which can be customized via CSS.') ?>
@@ -402,6 +421,18 @@
 							<select id="wpl-text-global_shipping" name="wpl_e2e_global_shipping" class=" required-entry select">
 								<option value="1" <?php if ( @$item_details['global_shipping'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 								<option value="0" <?php if ( @$item_details['global_shipping'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<br class="clear" />
+
+							<label for="wpl-text-store_pickup" class="text_label">
+								<?php echo __('Store Pickup','wplister'); ?>
+                                <?php wplister_tooltip('Enable the listing for In-Store Pickup.<br><br>
+                                						To enable In-Store Pickup, set this option to <i>yes</i>. A seller must be eligible for the In-Store Pickup feature to use this option. <br><br>
+                                						At this time, the In-Store Pickup feature is generally only available to large retail merchants, and can only be applied to multi-quantity, fixed-price listings.') ?>
+							</label>
+							<select id="wpl-text-store_pickup" name="wpl_e2e_store_pickup" class=" required-entry select">
+								<option value="1" <?php if ( @$item_details['store_pickup'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( @$item_details['store_pickup'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 							</select>
 							<br class="clear" />
 

@@ -14,8 +14,6 @@
 // require_once 'ShippingServiceDetailsType.php';	
 // require_once 'ShippingLocationDetailsType.php';	
 // require_once 'CountryDetailsType.php';	
-
-// require_once 'EbatNs_DatabaseProvider.php';	
 // require_once 'EbatNs_Logger.php';
 
 class EbayShippingModel extends WPL_Model {

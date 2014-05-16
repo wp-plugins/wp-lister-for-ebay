@@ -7,13 +7,13 @@
 		text-align: right;
 	}
 	th.column-callname {
-		width: 25%;
+		width: 42%;
 	}
 	th.column-user {
 		width: 10%;
 	}
 	th.column-success {
-		width: 30%;
+		width: 15%;
 	}
 
 	.widefat tbody th.check-column {

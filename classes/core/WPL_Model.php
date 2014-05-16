@@ -107,7 +107,7 @@ class WPL_Model {
 
 	/* Generic message display */
 	public function showMessage($message, $errormsg = false, $echo = false) {		
-		$class = ($errormsg) ? 'error' : 'updated fade';			// error or success
+		$class = ($errormsg) ? 'error' : 'updated';			// error or success
 		$class = ($errormsg == 2) ? 'updated update-nag' : $class; 	// warning
 		$message = '<div id="message" class="'.$class.'" style="display:block !important"><p>'.$message.'</p></div>';
 		if ($echo) {
@@ -124,10 +124,17 @@ class WPL_Model {
 	//  - display any warning - except #21917103
 	//  - returns true on success (even with warnings) and false on failure
 	function handleResponse( $res )	{
-		$errors = array();
 
-		// if ( ! is_object($res) ) return false;
+		$errors = array();
 		$this->handle_error_code = null;
+
+		// prevent fatal error when response is not an object
+		if ( ! is_object($res) ) {
+			echo 'Unexpected error: eBay response is invalid.<br>';
+			echo "<pre>";print_r($res);echo"</pre>";
+			$this->logger->error('eBay response is not an object: '.print_r($res,1));
+			return false;
+		}
 
 		// echo errors and warnings - call can be successful but with warnings
 		if ( $res->getErrors() )
@@ -224,6 +231,14 @@ class WPL_Model {
 				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
 				$longMessage .= 'You probably tried to disable Best Offer for this item.<br>';
 				$longMessage .= 'Turning off the Best Offer feature is not an allowed after an item has had sales.';
+			}
+			
+			// #21917327 - Error: You've provided an invalid postage policy.
+			if ( $error->getErrorCode() == 21917327 ) { 
+				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
+				$longMessage .= 'Your shipping profiles on eBay have changed.<br>';
+				$longMessage .= 'Please visit WP-Lister &raquo; Tools and click on <i>Update user details</i> to fetch the current list of profiles from eBay.';
+				$longMessage .= 'You should check your profiles and products after doing so - you might have to update them.';
 			}
 			
 			// #488 - Error: Duplicate UUID used.

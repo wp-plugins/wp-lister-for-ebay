@@ -37,6 +37,8 @@ class ListingsModel extends WPL_Model {
 			$where_sql = "WHERE NOT status = 'archived' ";
 		} elseif ( $listing_status == 'relist' ) {
 			$where_sql = "WHERE ( status = 'ended' OR status = 'sold' ) AND quantity > 0 ";
+		} elseif ( $listing_status == 'autorelist' ) {
+			$where_sql = "WHERE relist_date IS NOT NULL ";
 		} else {
 			$where_sql = "WHERE status = '".$listing_status."' ";
 		} 
@@ -298,6 +300,14 @@ class ListingsModel extends WPL_Model {
 			WHERE ( status = 'ended' OR status = 'sold' ) AND quantity > 0
 		");
 		$summary->relist = $relist;
+
+		// count items scheduled for autorelist
+		$autorelist = $wpdb->get_var("
+			SELECT COUNT( id ) AS relist
+			FROM $this->tablename
+			WHERE relist_date IS NOT NULL
+		");
+		$summary->autorelist = $autorelist;
 
 		// count total items as well
 		$total_items = $wpdb->get_var("
@@ -771,15 +781,19 @@ class ListingsModel extends WPL_Model {
 		$item = new ItemType();
 		$item = $ibm->setEbaySite( $item, $session );			
 
+		// add old ItemID for relisting
+		$listing_item = $this->getItem( $id );
+		$item->setItemID( $listing_item['ebay_id'] );
+
+		// use Item.Site from listing details - this way we don't need to check primary category for eBayMotors
+		$listing_details = maybe_unserialize( $listing_item['details'] );
+		$item->Site = $listing_details->Site;
+
 		// eBay Motors (beta)
 		if ( $item->Site == 'eBayMotors' ) $session->setSiteId( 100 );
 
 		// preparation - set up new ServiceProxy with given session
 		$this->initServiceProxy($session);
-
-		// add old ItemID for relisting
-		$listing_item = $this->getItem( $id );
-		$item->setItemID( $listing_item['ebay_id'] );
 
 		// switch to FixedPriceItem if product has variations
 		$this->logger->info( "Auto-Relisting #$id (ItemID ".$listing_item['ebay_id'].") - ".$item->Title );
@@ -1406,7 +1420,7 @@ class ListingsModel extends WPL_Model {
 		$result = $wpdb->update( $this->tablename, $data, array( 'ebay_id' => $Detail->ItemID ) );
 		if ( $result === false ) {
 			$this->logger->error('sql: '.$wpdb->last_query );
-			$this->logger->error( mysql_error() );		
+			$this->logger->error( $wpdb->last_error );		
 		}
 
 
@@ -1441,7 +1455,7 @@ class ListingsModel extends WPL_Model {
 		}
 
 		#$this->logger->info('sql: '.$wpdb->last_query );
-		#$this->logger->info( mysql_error() );
+		#$this->logger->info( $wpdb->last_error );
 
 		return true;
 	} // handleItemDetail()
@@ -1524,8 +1538,9 @@ class ListingsModel extends WPL_Model {
 			if ( NULL === $value ) {
 				$wpdb->query( "UPDATE {$this->tablename} SET $key = NULL WHERE id = $id" );
 				$this->logger->info('SQL to set NULL value: '.$wpdb->last_query );
-				$this->logger->info( mysql_error() );
+				$this->logger->info( $wpdb->last_error );
 				unset( $data[$key] );
+				if ( empty($data) ) return;
 			}
 		}
 
@@ -1533,7 +1548,7 @@ class ListingsModel extends WPL_Model {
 		$wpdb->update( $this->tablename, $data, array( 'id' => $id ) );
 
 		$this->logger->debug('sql: '.$wpdb->last_query );
-		$this->logger->info( mysql_error() );
+		$this->logger->info( $wpdb->last_error );
 	}
 
 
@@ -1590,7 +1605,7 @@ class ListingsModel extends WPL_Model {
 
 
 		#$this->logger->info('sql: '.$wpdb->last_query );
-		#$this->logger->info( mysql_error() );
+		#$this->logger->info( $wpdb->last_error );
 	}
 
 
@@ -1764,8 +1779,9 @@ class ListingsModel extends WPL_Model {
 		global $wpdb;	
 
 		// by default only return pending listings - relist dates in the past
-		$condition = $pending_only ? 'AND relist_date < NOW()' : ''; 
+		$condition = $pending_only ? 'AND relist_date <= NOW()' : ''; 
 
+		$wpdb->query("SET time_zone='+0:00'"); // tell SQL to use GMT
 		$items = $wpdb->get_results("
 			SELECT * 
 			FROM $this->tablename
@@ -1774,6 +1790,7 @@ class ListingsModel extends WPL_Model {
 			  $condition
 			ORDER BY relist_date ASC
 		", ARRAY_A);		
+		$wpdb->query("SET time_zone='SYSTEM'"); // revert back to original
 
 		return $items;		
 	}
@@ -1913,7 +1930,7 @@ class ListingsModel extends WPL_Model {
 			WHERE $where
 			ORDER BY id DESC
 		", ARRAY_A);		
-		echo mysql_error();
+		echo $wpdb->last_error;
 
 		return $items;		
 	}
@@ -2082,7 +2099,7 @@ class ListingsModel extends WPL_Model {
 		$wpdb->insert( $this->tablename, $data );
 
 		$this->logger->debug('sql: '.$wpdb->last_query );
-		$this->logger->debug( mysql_error() );
+		$this->logger->debug( $wpdb->last_error );
 		
 		return $wpdb->insert_id;
 		
@@ -2279,7 +2296,7 @@ class ListingsModel extends WPL_Model {
 		// $this->logger->info('updating listing ID '.$id);
 		// $this->logger->info('data: '.print_r($data,1));
 		// $this->logger->info('sql: '.$wpdb->last_query);
-		// $this->logger->info('error: '.mysql_error());
+		// $this->logger->info('error: '.$wpdb->last_error);
 
 
 	} // applyProfileToItem()
@@ -2332,9 +2349,9 @@ class ListingsModel extends WPL_Model {
 		global $wpdb;
 
 		$wpdb->query("DELETE FROM $this->tablename WHERE status = 'archived' AND ( ebay_id = '' OR ebay_id IS NULL ) ");
-		echo mysql_error();
+		echo $wpdb->last_error;
 
-		return mysql_affected_rows();
+		return $wpdb->rows_affected;
 	} // cleanArchive()
 
 

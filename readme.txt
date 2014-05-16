@@ -2,7 +2,7 @@
 Contributors: wp-lab
 Tags: ebay, woocommerce, products, export
 Requires at least: 3.6
-Tested up to: 3.8.1
+Tested up to: 3.9.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -33,6 +33,7 @@ We worked hard to make WP-Lister easy to use but flexible. The workflow of listi
 * german
 * french
 * italian
+* spanish
 * dutch
 * korean
 * latvian
@@ -85,7 +86,7 @@ Yes, there are more questions and answers on http://www.wplab.com/plugins/wp-lis
 
 = Any plans for WP-Lister for Amazon? =
 
-Already working on it. Expect it soon.
+Working on it. Contact us if you want to become a beta tester.
 
 == Screenshots ==
 
@@ -93,6 +94,58 @@ Already working on it. Expect it soon.
 2. Profile Editor
 
 == Changelog ==
+= 1.4.0 =
+* improved auto relist option - filter scheduled items and option to cancel schedule 
+* fixed undefined method wpdb::check_connection error in pre 3.9 
+* tested with WordPress 3.9.1 and WooCommerce 2.1.9 
+
+= 1.3.9.2 =
+* added option to perform unit conversion on dimensions 
+* fixed db error message during first time install 
+* fixed item specifics box when creating new profile 
+* fixed issue with product description not being updated (introduced in 1.3.9.1) 
+* auto sync quantity is default for new profiles 
+* compatible with mysqli extension 
+
+= 1.3.9.1 =
+* fixed quick edit for locked products 
+* enabled product_content and other shortcodes in title prefix and suffix 
+* added debug data to order creation process 
+
+= 1.3.9 =
+* fully tested with WordPress 3.9 and WooCommerce 2.1.7 
+
+= 1.3.8.5 =
+* improved error handling for CompleteSale requests 
+* check for duplicate listing when selecting a profile 
+* hide eBay Motors from eBay site selection during setup 
+* fixed possible fatal error on edit product page 
+* updated css for WordPress 3.9 
+
+= 1.3.8.4 =
+* improved performance of listings page (if many variations are displayed) 
+* added option to limit the maximum number of displayed items 
+* fixed issues with auto relist feature 
+* added spanish translation 
+
+= 1.3.8.3 =
+* added profile option to select product attribute for variation images 
+* added option to filter orders which were placed on eBay in WooCommerce 
+* improved error handling if no template assigned or found 
+* fixed issue with variable products imported from Products CSV Suite 
+* fixed issue with Captcha Bank plugin 
+
+= 1.3.8.2 =
+* implemented support for multi value attributes / item specifics 
+* fixed issues when seller shipping profiles were changed on eBay 
+* improved error display on log records page 
+
+= 1.3.8.1 =
+* added store pickup profile option 
+* fixed removal of secondary eBay category 
+* fixed product level eBay price for variable products 
+* updated to eBay API version 841 
+
 = 1.3.8 =
 * various improvements and fixes - read the full changelog below
 

@@ -35,15 +35,18 @@ class WPL_Logger{
 			
 			$action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : '';
 			if ( $action == 'heartbeat' ) return;
+			if ( $action == 'wpla_tail_log' ) return;
 			if ( $action == 'wplister_tail_log' ) return;
 
 			// $this->debug('Start Session:'.print_r($_SERVER,1));
-			$this->info( 
-				$_SERVER['REQUEST_METHOD'] . ': ' . 
-				$_SERVER['QUERY_STRING'] . ' - ' . 
-				( isset( $_POST['action'] ) ? $_POST['action'] : '' ) .' - '. 
-				( isset( $_POST['do'] ) ? $_POST['do'] : '' )  
-			);
+			if ( $_SERVER['REQUEST_METHOD'] == 'POST' || is_admin() ) {
+				$this->info( 
+					$_SERVER['REQUEST_METHOD'] . ': ' . 
+					$_SERVER['QUERY_STRING'] . ' - ' . 
+					( isset( $_POST['action'] ) ? $_POST['action'] : '' ) .' - '. 
+					( isset( $_POST['do'] ) ? $_POST['do'] : '' )  
+				);
+			}
 
 		}
 

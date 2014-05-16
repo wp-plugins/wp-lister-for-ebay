@@ -122,6 +122,37 @@ class ProductWrapper {
 		$dimensions['height_unit'] = $unit;
 		$dimensions['width_unit']  = $unit;
 
+		// unit conversion
+		if ( $conversion_mode = get_option( 'wplister_convert_dimensions' ) ) {
+
+			switch ($conversion_mode) {
+				case 'mm-cm':
+					# convert mm to cm
+					$dimensions['length'] = $dimensions['length'] / 10;
+					$dimensions['height'] = $dimensions['height'] / 10;
+					$dimensions['width']  = $dimensions['width']  / 10;
+					$dimensions['length_unit'] = 'cm';
+					$dimensions['height_unit'] = 'cm';
+					$dimensions['width_unit']  = 'cm';
+					break;
+				
+				case 'in-cm':
+					# convert in to cm
+					$dimensions['length'] = $dimensions['length'] * 2.54;
+					$dimensions['height'] = $dimensions['height'] * 2.54;
+					$dimensions['width']  = $dimensions['width']  * 2.54;
+					$dimensions['length_unit'] = 'cm';
+					$dimensions['height_unit'] = 'cm';
+					$dimensions['width_unit']  = 'cm';
+					break;
+				
+				default:
+					# code...
+					break;
+			}
+
+		} // if convert dimensions
+
 		// check parent if variation has no dimensions
 		if ( ($dimensions['length'] == '') && ($dimensions['width'] == '') ) {
 			$parent_id = self::getVariationParent( $post_id );
@@ -174,7 +205,14 @@ class ProductWrapper {
 				if ( count( $terms ) > 0 ) {
 					$attribute_name = $woocommerce->attribute_label( $attribute['name'] );
 					$attribute_name = html_entity_decode( $attribute_name, ENT_QUOTES, 'UTF-8' ); // US Shoe Size (Men&#039;s) => US Shoe Size (Men's)
-					$attributes[ $attribute_name ] = $terms[0]->name;
+					// $attributes[ $attribute_name ] = $terms[0]->name;
+
+					// support for multi value attributes
+					$values = array();
+					foreach ($terms as $term) {
+						$values[] = $term->name;
+					}
+					$attributes[ $attribute_name ] = join( '|', $values );
 				}
 	
 			} else {
@@ -358,7 +396,7 @@ class ProductWrapper {
 					// handle fake custom product attributes
 					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $value;
 					// echo "no term found for $value<br>";
-				} else {
+				} elseif ( isset( $attribute_labels[ $key ] ) && ( $attribute_labels[ $key ] != '' ) ) {
 					// handle product attributes without value ("all Colors")
 					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = '_ALL_';
 					$attributes_without_values[] = $key;

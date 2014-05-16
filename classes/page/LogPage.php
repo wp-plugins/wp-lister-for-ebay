@@ -82,6 +82,11 @@ class LogPage extends WPL_Page {
 	    $logTable = new LogTable();
 	    $logTable->prepare_items();
 
+	    // parse errors
+	    foreach ( $logTable->items as & $item ) {
+    		$item['errors'] = $this->parseErrors( $item );
+	    }
+
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,
 			'message'					=> $this->message,
@@ -96,55 +101,101 @@ class LogPage extends WPL_Page {
 	}
 
 
+	public function parseErrors( $item ) {
+
+		// successful requests have no errors
+    	if ( $item['success'] == 'Success' ) return array();
+
+		// check for errors and warnings
+		$response = $item['response'];
+		$errors   = array();
+
+		if ( preg_match_all("/<ShortMessage>(.*)<\/ShortMessage>/", $response, $matches_sm) ) {
+		 	
+		 	preg_match_all("/<SeverityCode>(.*)<\/SeverityCode>/",  $response, $matches_sc );
+		 	preg_match_all("/<ErrorCode>(.*)<\/ErrorCode>/",        $response, $matches_ec );
+			preg_match_all("/<LongMessage>(.*)<\/LongMessage>/",    $response, $matches_lm );
+
+			foreach ($matches_sm[1] as $key => $sm ) {
+
+				$ec = $matches_ec[1][$key];
+				$sc = $matches_sc[1][$key];
+				$lm = $matches_lm[1][$key];
+
+				$err = new stdClass();
+				$err->SeverityCode = $sc;
+				$err->ErrorCode    = $ec;
+				$err->ShortMessage = $sm;
+				$err->LongMessage  = $lm;
+
+				$errors[] = $err;
+
+				// $errors .= '<b>'.$sc.':</b> ';
+				// $errors .= $sm . ' ('.$ec.')<br>';
+				// $errors .= '<small>'.$lm.'</small><br>';
+
+			}
+
+		}
+
+		return $errors;
+	}
+
+
 	public function displayLogEntry( $id ) {
 	global $wpdb;
 
 		$row = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}ebay_log WHERE id = '$id' ");
-		if ( mysql_error() ) echo 'Error in displayLogEntry(): '.mysql_error();
+		if ( $wpdb->last_error ) echo 'Error in displayLogEntry(): '.$wpdb->last_error;
 
 		// send log entry to support
 		if ( @$_REQUEST['send_to_support']=='yes' ) {
 
-			// trigger full details
-			$_GET['desc'] = 'show';
-
-			// get html content
-			$content = $this->display( 'log_details', array( 'row' => $row, 'version' => $this->get_plugin_version() ), false );
-
-			// build email
-			$to = 'support@wplab.com';
-			$subject = 'WP-Lister log record #'.$id.' - '. str_replace( 'http://','', get_bloginfo('wpurl') );
-			$attachments = array();
-			$headers = '';
-			$message = '';
-
-			$user_name  = $_REQUEST['user_name'] ? $_REQUEST['user_name'] : 'WP-Lister';
-			$user_email = sanitize_email( $_REQUEST['user_email'] );
-			$user_msg   = stripslashes( $_REQUEST['user_msg'] );
-		    $headers = 'From: '.$user_name.' <'.$user_email.'>' . "\r\n";
-
-			$message .= 'Name:  '.$user_name.'<br>';
-			$message .= 'Email: '.$user_email.'<br>';
-			$message .= 'Message: <br><br>'.nl2br($user_msg).'<br>';
-			$message .= '<hr>';
-			$message .= $content;
-			$message .= '<hr>';
-
-			// send email as html
-			add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
-			wp_mail($to, $subject, $message, $headers, $attachments);
-			
-			echo '<br><div style="text-align:center;font-family:sans-serif;">';
-			echo 'Your log entry was sent to WP Lab.';
-			echo '<br><br>';
-			echo 'Thank you for helping us improve WP-Lister.</div>';
+			$this->sendRecordToSupport( $id, $row );
 
 		} else {
 			// display detail page
 			$this->display( 'log_details', array( 'row' => $row, 'version' => $this->get_plugin_version() ) );
 		}
 
-		exit();		
+		exit();
+	}
+
+	public function sendRecordToSupport( $id, $row ) {
+
+		// trigger full details
+		$_GET['desc'] = 'show';
+
+		// get html content
+		$content = $this->display( 'log_details', array( 'row' => $row, 'version' => $this->get_plugin_version() ), false );
+
+		// build email
+		$to          = 'support@wplab.com';
+		$subject     = 'WP-Lister log record #'.$id.' - '. str_replace( 'http://','', get_bloginfo('wpurl') );
+		$attachments = array();
+		$headers     = '';
+		$message     = '';
+
+		$user_name  = $_REQUEST['user_name'] ? $_REQUEST['user_name'] : 'WP-Lister';
+		$user_email = sanitize_email( $_REQUEST['user_email'] );
+		$user_msg   = stripslashes( $_REQUEST['user_msg'] );
+		$headers    = 'From: '.$user_name.' <'.$user_email.'>' . "\r\n";
+
+		$message .= 'Name:  '.$user_name.'<br>';
+		$message .= 'Email: '.$user_email.'<br>';
+		$message .= 'Message: <br><br>'.nl2br($user_msg).'<br>';
+		$message .= '<hr>';
+		$message .= $content;
+		$message .= '<hr>';
+
+		// send email as html
+		add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
+		wp_mail($to, $subject, $message, $headers, $attachments);
+		
+		echo '<br><div style="text-align:center;font-family:sans-serif;">';
+		echo 'Your log entry was sent to WP Lab support.';
+		echo '<br><br>';
+		echo 'Thank you for helping us improve WP-Lister.</div>';
 
 	}
 
@@ -153,9 +204,8 @@ class LogPage extends WPL_Page {
 		$dbname = $wpdb->dbname;
 		$table  = $wpdb->prefix.'ebay_log';
 
-		// check if MySQL server has gone away and reconnect if required
-		if ( ! mysql_ping() )
-			$wpdb->db_connect();
+		// check if MySQL server has gone away and reconnect if required - WP 3.9+
+		if ( method_exists( $wpdb, 'check_connection') ) $wpdb->check_connection();
 
 		$sql = "
 			SELECT round(((data_length + index_length) / 1024 / 1024), 1) AS 'size' 
@@ -165,7 +215,7 @@ class LogPage extends WPL_Page {
 		// echo "<pre>";print_r($sql);echo"</pre>";#die();
 
 		$size = $wpdb->get_var($sql);
-		if ( mysql_error() ) echo 'Error in getTableSize(): '.mysql_error();
+		if ( $wpdb->last_error ) echo 'Error in getTableSize(): '.$wpdb->last_error;
 
 		return $size;
 	}
@@ -173,7 +223,7 @@ class LogPage extends WPL_Page {
 	public function deleteLogEntry( $id ) {
 		global $wpdb;
 		$wpdb->delete( $wpdb->prefix.'ebay_log',  array( 'id' => $id ) );
-		if ( mysql_error() ) echo 'Error in deleteLogEntry(): '.mysql_error();
+		if ( $wpdb->last_error ) echo 'Error in deleteLogEntry(): '.$wpdb->last_error;
 	}
 
 	public function clearLog() {
@@ -181,10 +231,10 @@ class LogPage extends WPL_Page {
 		$table = $wpdb->prefix.'ebay_log';
 
 		$wpdb->query("DELETE FROM $table");
-		if ( mysql_error() ) echo 'Error in clearLog(): '.mysql_error();
+		if ( $wpdb->last_error ) echo 'Error in clearLog(): '.$wpdb->last_error;
 
 		$wpdb->query("OPTIMIZE TABLE $table");
-		if ( mysql_error() ) echo 'Error in clearLog(): '.mysql_error();
+		if ( $wpdb->last_error ) echo 'Error in clearLog(): '.$wpdb->last_error;
 	}
 
 	public function optimizeLog() {
@@ -197,10 +247,10 @@ class LogPage extends WPL_Page {
 			$wpdb->query('DELETE FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.$days_to_keep.' DAY )');
 			// $this->showMessage( 'Log entries removed: ' . $delete_count );
 		}
-		if ( mysql_error() ) echo 'Error in optimizeLog(): '.mysql_error();
+		if ( $wpdb->last_error ) echo 'Error in optimizeLog(): '.$wpdb->last_error;
 
 		$wpdb->query("OPTIMIZE TABLE $table");
-		if ( mysql_error() ) echo 'Error in optimizeLog(): '.mysql_error();
+		if ( $wpdb->last_error ) echo 'Error in optimizeLog(): '.$wpdb->last_error;
 
 		return $delete_count;
 	}

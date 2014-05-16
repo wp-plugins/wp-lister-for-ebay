@@ -83,8 +83,8 @@
 		font-family: sans-serif;
 		font-size: small;
 		padding: 0 1em;
-		background-color: #ffeeee;
-		border: 1px solid red;
+		background-color: #ffdddd;
+		border: 1px solid #ffdddd;
 	}
 
 	div#message.updated {

@@ -52,50 +52,49 @@ class ProfilesModel extends WPL_Model {
 	}
 
 	function newItem() {
+
 		$item = array(
-			"profile_id" => false,
-			"profile_name" => "New profile",
+			"profile_id"          => false,
+			"profile_name"        => "New profile",
 			"profile_description" => "",
-			"listing_duration" => "Days_7",
+			"listing_duration"    => "Days_7",
 		);
 
-		$item['details'] = array(
-		
-			"auction_type" => "FixedPriceItem",
-			"condition_id" => "1000",
-			"counter_style" => "BasicStyle",
-			"country" => "US",
-			"currency" => "USD",
-			"dispatch_time" => "2",
-			"ebay_category_1_id" => "",
-			"ebay_category_1_name" => null,
-			"ebay_category_2_id" => "",
-			"ebay_category_2_name" => null,
-			"fixed_price" => "",
-			"int_shipping_options" => array(),
-			"listing_duration" => "Days_7",
-			"loc_shipping_options" => array(),
-			"location" => "",
-			"payment_options" => array(),
-			"profile_description" => "",
-			// "profile_id" => "0",
-			"profile_name" => "New profile",
-			"quantity" => "1",
-			"returns_accepted" => "1",
-			"returns_description" => "",
-			"returns_within" => "Days_14",
-			"start_price" => "",
-			"store_category_1_id" => "",
-			"store_category_2_id" => "",
-			"tax_mode" => "none",
-			"template" => "",
-			"title_prefix" => "",
-			"title_suffix" => "",
-			"vat_percent" => "",
-			"with_gallery_image" => "1"
-
+		$item['details'] = array(	
+			"auction_type"            => "FixedPriceItem",
+			"condition_id"            => "1000",
+			"counter_style"           => "BasicStyle",
+			"country"                 => "US",
+			"currency"                => "USD",
+			"dispatch_time"           => "2",
+			"ebay_category_1_id"      => "",
+			"ebay_category_1_name"    => null,
+			"ebay_category_2_id"      => "",
+			"ebay_category_2_name"    => null,
+			"fixed_price"             => "",
+			"int_shipping_options"    => array(),
+			"listing_duration"        => "Days_7",
+			"loc_shipping_options"    => array(),
+			"location"                => "",
+			"payment_options"         => array(),
+			"profile_description"     => "",
+			"profile_name"            => "New profile",
+			"custom_quantity_enabled" => "",
+			"max_quantity"            => "",
+			"quantity"                => "",
+			"returns_accepted"        => "1",
+			"returns_description"     => "",
+			"returns_within"          => "Days_14",
+			"start_price"             => "",
+			"store_category_1_id"     => "",
+			"store_category_2_id"     => "",
+			"tax_mode"                => "none",
+			"template"                => "",
+			"title_prefix"            => "",
+			"title_suffix"            => "",
+			"vat_percent"             => "",
+			"with_gallery_image"      => "1"
 		);
-
 
 		$item['conditions'] = array();
 		

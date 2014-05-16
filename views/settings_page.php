@@ -158,8 +158,9 @@
 											<input type="hidden" name="action" value="save_ebay_site" >
 											<select id="wpl-text-ebay_site_id" name="wpl_e2e_text_ebay_site_id" class="required-entry select" style="width:auto;float: right">
 												<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+												<?php unset( $wpl_ebay_sites[100] ); // remove eBay Motors - signin url doesn't exist ?>
 												<?php foreach ($wpl_ebay_sites as $site_id => $site_name) : ?>
-													<option value="<?php echo $site_id ?>" <?php if ( $wpl_text_ebay_site_id == $site_id ): ?>selected="selected"<?php endif; ?>><?php echo $site_name ?></option>					
+													<option value="<?php echo $site_id ?>" <?php if ( $wpl_text_ebay_site_id == $site_id ): ?>selected="selected"<?php endif; ?>><?php echo str_replace('_',' ',$site_name) ?></option>					
 												<?php endforeach; ?>
 											</select>
 											<?php echo __('Select the eBay site you want to list your items on:','wplister') ?>
@@ -212,7 +213,7 @@
 							<select id="wpl-text-ebay_site_id" name="wpl_e2e_text_ebay_site_id" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
 								<?php foreach ($wpl_ebay_sites as $site_id => $site_name) : ?>
-									<option value="<?php echo $site_id ?>" <?php if ( $wpl_text_ebay_site_id == $site_id ): ?>selected="selected"<?php endif; ?>><?php echo $site_name ?></option>					
+									<option value="<?php echo $site_id ?>" <?php if ( $wpl_text_ebay_site_id == $site_id ): ?>selected="selected"<?php endif; ?>><?php echo str_replace('_',' ',$site_name) ?></option>					
 								<?php endforeach; ?>
 							</select>
 
