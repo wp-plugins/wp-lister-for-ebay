@@ -132,10 +132,10 @@
 										<?php if ( count($wpl_prepared_listings) > -1 ): ?>
 											<p><?php printf( __('There are %s prepared, %s verified and %s published items using this template.','wplister'), count($wpl_prepared_listings), count($wpl_verified_listings), count($wpl_published_listings) ) ?></p>
 										<?php else: ?>
-											<p>There are no prepared items using this template.</p>
+											<p><?php echo __('There are no prepared items using this template.','wplister'); ?></p>
 										<?php endif; ?>
 
-											<p>To update already published items you need to revise them after saving the template.</p>
+											<p><?php echo __('To update already published items you need to revise them after saving the template.','wplister'); ?></p>
 										</div>
 
 										<!--
@@ -150,7 +150,7 @@
 									<?php else: ?>
 
 										<div class="misc-pub-section">
-											<p>To update already published items you need to revise them after saving the template.</p>
+											<p><?php echo __('To update already published items you need to revise them after saving the template.','wplister'); ?></p>
 										</div>
 
 									<?php endif; ?>
@@ -239,83 +239,83 @@
 						<h3><span><?php echo __('Help','wplister'); ?></span></h3>
 						<div class="inside">
 							<p>
-								You can use the following shortcodes in your listing template. 
-								WordPress shortcodes won't work - and these will only work here.
+								<?php echo __('You can use the following shortcodes in your listing template.','wplister'); ?>
+								<?php echo __('WordPress shortcodes will not work here.','wplister'); ?>
 							</p>
 							<p>
-								<b>Available Shortcodes</b><br>
+								<b><?php echo __('Available Shortcodes','wplister'); ?></b><br>
 							</p>
 							<p>
 								<code>[[product_title]]</code><br>
-								listing title<br>
+								<?php echo __('product title','wplister'); ?><br>
 							</p>
 							<p>
 								<code>[[product_content]]</code><br>
-								product main content<br>
+								<?php echo __('product main description','wplister'); ?><br>
 							</p>
 							<p>
 								<code>[[product_excerpt]]</code> or<br>
 								<code>[[product_excerpt_nl2br]]</code> or<br>
 								<code>[[product_additional_content]]</code><br>
-								additional product content<br>
+								<?php echo __('additional product description','wplister'); ?><br>
 							</p>
 							<p>
 								<code>[[product_price]]</code><br>
-								product price - formatted according to language settings<br>
+								<?php echo __('product price','wplister'); ?><br>
 							</p>
 							<p>
 								<code>[[product_main_image]]</code><br>
-								main product image as HTML tag<br>
+								<?php echo __('main product image as HTML tag','wplister'); ?><br>
 							</p>
 							<p>
 								<code>[[product_main_image_url]]</code><br>
-								main product image as raw URL<br>
+								<?php echo __('main product image as raw URL','wplister'); ?><br>
 							</p>
 							<p>
 								<code>[[additional_product_images]]</code><br>
-								lists additional images - can be styled via css<br>
+								<?php echo __('additional images as HTML list','wplister'); ?><br>
 							</p>
 							<p>
 								<code>[[img_1]]</code> ... <code>[[img_9]]</code><br>
 								<code>[[img_url_1]]</code> ... <code>[[img_url_9]]</code><br>
-								lists single images resp. their urls
+								<?php echo __('single images or their urls','wplister'); ?>
 							</p>
 							<p>
 								<code>[[product_weight]]</code><br>
 								<code>[[product_height]]</code><br>
 								<code>[[product_width]]</code><br>
 								<code>[[product_length]]</code><br>
-								product dimensions
+								<?php echo __('product dimensions','wplister'); ?>
 							</p>
 							<p>
 								<code>[[attribute_Size]]</code><br>
 								<code>[[attribute_Brand]]</code><br>
-								example for custom product attributes<br>
+								<?php echo __('example for custom product attributes','wplister'); ?><br>
 							</p>
 							<p>
 								<code>[[product_variations]]</code><br>
-								adds a html table listing all product variations<br>
+								<?php echo __('product variations as HTML table','wplister'); ?><br>
 							</p>
 							<p>
 								<code>[[product_category]]</code><br>
-								main product category name<br>
+								<?php echo __('main product category name','wplister'); ?><br>
 							</p>
 							<p>
 								<code>[[meta_<em>custom-meta-field-name</em>]]</code><br>
-								adds custom meta values<br>
+								<?php echo __('custom meta values','wplister'); ?><br>
 							</p>
 							<p>
 								<code>[[widget_new_listings]]</code><br>
 								<code>[[widget_ending_listings]]</code><br>
 								<code>[[widget_related_listings]]</code><br>
 								<code>[[widget_featured_listings]]</code><br>
-								embed the new crosssell widget (beta)
+								<?php echo __('Use these dynamic widgets to add a gallery showing your other listings.','wplister'); ?>
 							</p>
 							<p>
-								Note: The <i>related listings widget</i> will only show up-sells or cross-sells - which you need to set up for each product in WooCommerce.
+								<small><?php echo __('Note: The related listings widget will only show up-sells or cross-sells, which need to be defined for each product in WooCommerce.','wplister'); ?></small>
 							</p>
 							<p>
-								<b>Shortcodes for advanced developers</b><br>
+								<b><?php echo __('Shortcodes for advanced developers','wplister'); ?></b><br>
 							</p>
 							<p>
 								<!-- For advanced developers:<br> -->
@@ -325,11 +325,11 @@
 								<code>[[ebay_store_category_name]]</code><br>
 							</p>
 							<p>
-								For more information visit the 
-								<a href="http://www.wplab.com/plugins/wp-lister/faq/" target="_blank">FAQ</a>.
+								<!-- For more information visit the  -->
+								<!-- <a href="http://www.wplab.com/plugins/wp-lister/faq/" target="_blank">FAQ</a>. -->
 							</p>
 							<p>
-								If you need help setting up your template, please contact support at wplab.com.
+								<!-- If you need help setting up your template, please contact support at wplab.com. -->
 							</p>
 						</div>
 					</div>
@@ -407,23 +407,23 @@
 					        <input type="hidden" name="wpl_e2e_filename" value="<?php echo $wpl_item['template_path'] ?>" />
 					        <?php wp_editor( $wpl_html, 'tpl_html', $settings ); ?> 
 					    </div>
-					    <p><i>Note: You can disable the WYSIWYG editor at WP-Lister &raquo; Settings &raquo; Advanced.</i></p>
+					    <p><i><?php echo __('Note: You can disable the WYSIWYG editor on the advanced settings page.','wplister'); ?></i></p>
 					    <p>&nbsp;</p>
 					
 					<?php else: ?>
 
-					    <h2>Template Content</h2>
+					    <h2><?php echo __('Template Content','wplister'); ?></h2>
 
 					    <div id="html-editor-wrapper">
 					    	<textarea name="wpl_e2e_tpl_html"><?php echo $wpl_html ?></textarea>
 					    	<div id="html_editor"></div>
 					    </div>
-					    <p><i>You have disabled the WYSIWYG editor.</i></p>
+					    <p><i><?php echo __('You have disabled the WYSIWYG editor.','wplister'); ?></i></p>
 					    <p>&nbsp;</p>
 				    
 					<?php endif; ?>
 				    
-				    <h2>Stylesheet</h2>
+				    <h2><?php echo __('Stylesheet','wplister'); ?></h2>
 
 				    <div id="css-editor-wrapper">
 				    	<textarea name="wpl_e2e_tpl_css"><?php echo $wpl_css ?></textarea>

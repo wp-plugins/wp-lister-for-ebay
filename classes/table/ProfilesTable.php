@@ -72,7 +72,9 @@ class ProfilesTable extends WP_List_Table {
     function column_default($item, $column_name){
         switch($column_name){
             case 'type':
-                return $item[$column_name] == 'FixedPriceItem' ? __('Fixed Price','wplister') : __('Listing','wplister');
+                $type = $item[$column_name] == 'FixedPriceItem' ? __('Fixed Price','wplister') : __('Listing','wplister');
+                if ( $item[$column_name] == 'ClassifiedAd' ) $type = __('Classified Ad','wplister');
+                return $type;
             case 'listing_duration':
                 return str_replace('Days_','',$item[$column_name]) .' '. __('days','wplister');
             case 'price':

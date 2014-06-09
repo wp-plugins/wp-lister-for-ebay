@@ -6,6 +6,10 @@
 	    cursor: default;
 	}
 
+	#tiptip_holder #tiptip_content {
+		max-width: 250px;
+	}
+
 </style>
 
 <?php
@@ -88,7 +92,7 @@
 							<input type="text" name="wpl_e2e_start_price" id="wpl-text-start_price" value="<?php echo $item_details['start_price']; ?>" class="text_input" />
 							<br class="clear" />
 
-							<div id="wpl-text-fixed_price_container">
+							<div id="wpl-text-fixed_price_container" style="display:none">
 							<label for="wpl-text-fixed_price" class="text_label">
 								<?php echo __('Buy Now Price','wplister'); ?>
                                 <?php wplister_tooltip('Set a Buy Now Price to enable the Buy Now option for your listing.<br>You can set a custom Buy Now Price on the edit product page as well.' ) ?>
@@ -435,6 +439,11 @@
   					} else {
   						jQuery('#wpl-text-fixed_price_container').hide();
   					}
+  					if ( jQuery('#wpl-text-auction_type').val() == 'ClassifiedAd' ) {
+  						// jQuery('#wpl-option-PayPerLeadEnabled_container').show();
+  					} else {
+  						// jQuery('#wpl-option-PayPerLeadEnabled_container').hide();
+  					}
 				});
 				jQuery('#wpl-text-auction_type').change();
 
@@ -508,6 +517,13 @@
   					}
 				});
 				jQuery('#wpl-text-autorelist_enabled').change();
+
+				// update ended items automatically when deactivating autorelist option - after calling .change()
+				jQuery('#wpl-text-autorelist_enabled').change(function() {
+  					if ( jQuery('#wpl-text-autorelist_enabled').val() == 0 ) {
+  						jQuery('#wpl_e2e_apply_changes_to_all_ended').attr('checked','checked');
+  					}
+				});
 
 				// set Selling Manager Pro options visibility
 				jQuery('#wpl-text-sellingmanager_enabled').change(function() {

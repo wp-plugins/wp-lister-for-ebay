@@ -14,8 +14,8 @@ class WPL_Core {
 	static public $PLUGIN_DIR;
 	static public $PLUGIN_VERSION;
 
-	const ParentTitle		= 'WP-Lister';
-	const ParentName		= 'eBay';
+	// const ParentName		= 'eBay';
+	// const ParentTitle	= 'WP-Lister';
 	const ParentPermissions	= 'manage_ebay_listings';
 	const ParentMenuId		= 'wplister';
 	
@@ -29,10 +29,12 @@ class WPL_Core {
 	var $message;
 	var $messages = array();
 	var $EC;
+	var $app_name;
 	
 	public function __construct() {
 		global $wpl_logger;
-		$this->logger = &$wpl_logger;
+		$this->logger   = &$wpl_logger;
+		$this->app_name = apply_filters( 'wplister_app_name', 'WP-Lister' );
 
 		add_action( 'init', 				array( &$this, 'onWpInit' ), 1 );
 		add_action( 'admin_init', 			array( &$this, 'onWpAdminInit' ) );
@@ -50,6 +52,7 @@ class WPL_Core {
 
 	/* Generic message display */
 	public function showMessage($message, $errormsg = false, $echo = false) {		
+		if ( defined('WPLISTER_RESELLER_VERSION') ) $message = apply_filters( 'wplister_tooltip_text', $message );
 		$class = ($errormsg) ? 'error' : 'updated';			// error or success
 		$class = ($errormsg == 2) ? 'updated update-nag' : $class; 	// warning
 		$this->message .= '<div id="message" class="'.$class.'" style="display:block !important"><p>'.$message.'</p></div>';
@@ -111,7 +114,7 @@ class WPL_Core {
 	}
 	
 	protected function getSubmenuPageTitle( $insTitle ) {
-		return $insTitle.' - '.self::ParentTitle;
+		return $insTitle.' - '.$this->app_name;
 	}
 	
 	protected function getSubmenuId( $insId ) {

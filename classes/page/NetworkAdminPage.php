@@ -20,7 +20,7 @@ class NetworkAdminPage extends WPL_Page {
 	public function onWpNetworkAdminMenu() {
 		global $oWPL_WPLister;
 
-		$page_id = add_menu_page( self::ParentTitle, __('WP-Lister','wplister'), self::ParentPermissions, 
+		$page_id = add_menu_page( __('WP-Lister','wplister'), __('WP-Lister','wplister'), self::ParentPermissions, 
 					   self::ParentMenuId, array( $this, 'onDisplayNetworkAdminPage' ), $this->getImageUrl( 'hammer-16x16.png' ), ProductWrapper::menu_page_position );
 
 	}
@@ -52,7 +52,7 @@ class NetworkAdminPage extends WPL_Page {
 
 
 	public function onDisplayNetworkAdminPage() {
-		// WPL_Setup::checkSetup();
+		// $this->check_wplister_setup();
 
 		// handle activate action
 		if ( $this->requestAction() == 'activate' ) {

@@ -249,13 +249,13 @@ class TemplatesTable extends WP_List_Table {
      * @uses $this->get_pagenum()
      * @uses $this->set_pagination_args()
      **************************************************************************/
-    function prepare_items( $data ) {
+    function prepare_items() {
         
         /**
          * First, lets decide how many records per page to show
          */
         $per_page = $this->get_items_per_page('templates_per_page', 20);
-        
+        $data     = $this->db_items;
         
         /**
          * REQUIRED. Finally, we build an array to be used by the class for column 

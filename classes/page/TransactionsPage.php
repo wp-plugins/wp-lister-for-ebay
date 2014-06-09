@@ -60,7 +60,7 @@ class TransactionsPage extends WPL_Page {
 
 
 	public function onDisplayTransactionsPage() {
-		WPL_Setup::checkSetup();
+		$this->check_wplister_setup();
 
 		// handle update ALL from eBay action
 		if ( $this->requestAction() == 'update_transactions' ) {
@@ -141,7 +141,7 @@ class TransactionsPage extends WPL_Page {
 
 			// built message
 			// $msg  = '<p><b>Warning: '.__('There are duplicate transactions for','wplister').' '.join(', ',$duplicateTransactions).'</b>';
-			$msg  = '<p><b>Warning: '.__('WP-Lister found the following duplicate transactions which should be removed.','wplister').'</b>';
+			$msg  = '<p><b>Warning: '.__('There are duplicate transactions which should be removed.','wplister').'</b>';
 			$msg .= '<br>';
 
 			// table header

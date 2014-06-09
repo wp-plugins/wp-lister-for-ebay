@@ -52,14 +52,30 @@ class WPL_API_Hooks extends WPL_Core {
 	
 	// revise inventory status for given product_id or array of product_ids 
 	function wplister_revise_inventory_status( $products ) {
+		global $wpl_logger;
+        $this->dblogger = new WPL_EbatNs_Logger();
 
+        // log to db - before request
+        $this->dblogger->updateLog( array(
+            'callname'    => 'wplister_revise_inventory_status',
+            'request_url' => 'internal action hook',
+            'request'     => maybe_serialize( $products ),
+            'success'     => 'pending'
+        ));
+		
 		// call EbayController
 		$this->initEC();
 		$results = $this->EC->reviseInventoryForProducts( $products );
 		$this->EC->closeEbay();
+		$wpl_logger->info('revised inventory status for products: ' . print_r($products,1) . '');
+
+        // log to db 
+        $this->dblogger->updateLog( array(
+            'response'  => json_encode( $results ),
+            'success'   => 'Success'
+        ));
 
 		return isset( $this->EC->lastResults ) ? $this->EC->lastResults : false;
-
 	}
 
 	// revise ebay item for given product_id 

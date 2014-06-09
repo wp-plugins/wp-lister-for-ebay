@@ -64,10 +64,10 @@
 											</table>												
 										</p>
 									<?php elseif ( $wpl_text_ebay_token ): ?>
-										<p><?php echo __('WP-Lister has been linked to your eBay account.','wplister') ?></p>
+										<p><?php echo sprintf( __('%s has been linked to your eBay account.','wplister'), $this->app_name ) ?></p>
 										<p><?php echo __('Please visit the Tools page and click on "Update user details".','wplister') ?></p>
 									<?php else: ?>
-										<p><?php echo __('WP-Lister is not linked to your eBay account yet.','wplister') ?></p>
+										<p><?php echo sprintf( __('%s is not linked to your eBay account yet.','wplister'), $this->app_name ) ?></p>
 									<?php endif; ?>
 									</div>
 								</div>
@@ -247,6 +247,7 @@
 							</select>
 
 
+							<?php if ( $wpl_option_ebay_update_mode != 'order' ): ?>
 							<label for="wpl-option-ebay_update_mode" class="text_label">
 								<?php echo __('Update mode','wplister') ?>
                                 <?php wplister_tooltip('Set this to "Order" if you want to create a single WooCommerce order from a combined order on eBay. This is a transitory option which will be removed in future versions.') ?>
@@ -268,6 +269,9 @@
 								<?php endif; ?>
 								
 							</p>
+							<?php else: ?>
+								<input type="hidden" id="wpl-option-ebay_update_mode" name="wpl_e2e_option_ebay_update_mode" value="order" />
+							<?php endif; ?>
 
 						</div>
 					</div>

@@ -94,6 +94,33 @@ Working on it. Contact us if you want to become a beta tester.
 2. Profile Editor
 
 == Changelog ==
+= 1.4.4 =
+* added option to show product thumbnails on listings page 
+* improved warning before deleting listings from archive 
+* removed deprecated order update mode setting 
+* fixed layout issues in edit product page 
+* fixed various non-translatable strings 
+* fixed php 5.4 strict messages 
+* fixed issue with non-existing products with pdf invoice plugin 
+* fixed site url for eBay Malaysia
+
+= 1.4.3 =
+* added option to limit number of items displayed by gallery widgets 
+* added option to select tax rate to be used when creating orders with VAT enabled 
+* added support for editing imported compatibility tables (beta)
+* show warning when scheduled wp-cron jobs are not executed 
+* improved "(not) on ebay" product filters 
+
+= 1.4.2 =
+* fixed issue with VAT being added to item price in orders when prices are entered with tax 
+* fixed rare issue regarding line endings 
+* updated italian translation (thanks Valerio) 
+
+= 1.4.1 =
+* added support for classified ads (beta) (Pro) 
+* update ended items automatically when deactivating auto-relist profile option 
+* show when auto-relist is enabled in applied profile on listings page 
+
 = 1.4.0 =
 * improved auto relist option - filter scheduled items and option to cancel schedule 
 * fixed undefined method wpdb::check_connection error in pre 3.9 

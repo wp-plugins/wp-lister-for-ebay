@@ -75,6 +75,9 @@ if ( ( ! isset( $_GET['desc'] ) ) || ( $_GET['desc'] != 'show' ) ) {
 }
 
 
+// force WP default error reporting level - hide php strict notices for PEAR XML formatter
+error_reporting( E_ALL & ~E_DEPRECATED & ~E_STRICT );
+
 // try to include PEAR and hide php warnings on fail
 @include_once ('PEAR.php');
 if ( class_exists('PEAR') && ( 'custom' != get_option( 'wplister_xml_formatter', 'default' ) ) ) {

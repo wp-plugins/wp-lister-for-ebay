@@ -105,7 +105,7 @@ class SettingsPage extends WPL_Page {
 	
 
 	public function onDisplaySettingsPage() {
-		WPL_Setup::checkSetup('settings');
+		$this->check_wplister_setup('settings');
 
         $default_tab = is_network_admin() ? 'license' : 'settings';
         $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : $default_tab;
@@ -128,7 +128,7 @@ class SettingsPage extends WPL_Page {
 				$this->showMessage( "Please link WP-Lister to your eBay account." );
 			}
 
-			WPL_Setup::checkSetup('settings');
+			$this->check_wplister_setup('settings');
 		}
 
 		// action FetchToken
@@ -144,7 +144,7 @@ class SettingsPage extends WPL_Page {
 				$this->showMessage( "There was a problem fetching your token. Make sure you follow the instructions.", 1 );
 			}
 
-			WPL_Setup::checkSetup('settings');
+			$this->check_wplister_setup('settings');
 		}
 
 
@@ -178,7 +178,8 @@ class SettingsPage extends WPL_Page {
 	    //Create an instance of our package class...
 	    $categoriesMapTable = new CategoriesMapTable();
     	//Fetch, prepare, sort, and filter our data...
-	    $categoriesMapTable->prepare_items( $shop_categories );
+	    $categoriesMapTable->items = $shop_categories;
+	    $categoriesMapTable->prepare_items();
 
 	    $default_category_id = self::getOption('default_ebay_category_id');
 	    $default_category_name = EbayCategoriesModel::getFullEbayCategoryName( $default_category_id );
@@ -217,6 +218,7 @@ class SettingsPage extends WPL_Page {
 			'remove_links'                  => self::getOption( 'remove_links', 'default' ),
 			'default_image_size'            => self::getOption( 'default_image_size', 'full' ),
 			'wc2_gallery_fallback'          => self::getOption( 'wc2_gallery_fallback', 'attached' ),
+			'gallery_items_limit'        	=> self::getOption( 'gallery_items_limit', 12 ),
 			'hide_dupe_msg'                 => self::getOption( 'hide_dupe_msg' ),
 			'option_uninstall'              => self::getOption( 'uninstall' ),
 			'option_foreign_transactions'   => self::getOption( 'foreign_transactions' ),
@@ -225,11 +227,12 @@ class SettingsPage extends WPL_Page {
 			'auto_update_ended_items'       => self::getOption( 'auto_update_ended_items', 0 ),
 			'option_preview_in_new_tab'     => self::getOption( 'preview_in_new_tab', 0 ),
 			'enable_categories_page'        => self::getOption( 'enable_categories_page', 0 ),
+			'enable_thumbs_column'          => self::getOption( 'enable_thumbs_column', 0 ),
 			'option_disable_wysiwyg_editor' => self::getOption( 'disable_wysiwyg_editor', 0 ),
 			'enable_item_compat_tab'        => self::getOption( 'enable_item_compat_tab', 1 ),
 			'convert_dimensions'        	=> self::getOption( 'convert_dimensions' ),
 			'option_local_timezone'         => self::getOption( 'local_timezone', '' ),
-			'text_admin_menu_label'         => self::getOption( 'admin_menu_label', 'WP-Lister' ),
+			'text_admin_menu_label'         => self::getOption( 'admin_menu_label', $this->app_name ),
 			'timezones'                     => self::get_timezones(),
 			'available_roles'               => $wp_roles->role_names,
 			'wp_roles'                      => $wp_roles->roles,
@@ -353,18 +356,23 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'default_image_size',   	$this->getValueFromPost( 'default_image_size' ) );
 			self::updateOption( 'wc2_gallery_fallback', 	$this->getValueFromPost( 'wc2_gallery_fallback' ) );
 			self::updateOption( 'hide_dupe_msg',    		$this->getValueFromPost( 'hide_dupe_msg' ) );
+			self::updateOption( 'gallery_items_limit',  	$this->getValueFromPost( 'gallery_items_limit' ) );
 			self::updateOption( 'uninstall',				$this->getValueFromPost( 'option_uninstall' ) );
 			self::updateOption( 'foreign_transactions',		$this->getValueFromPost( 'option_foreign_transactions' ) );
 			self::updateOption( 'preview_in_new_tab',		$this->getValueFromPost( 'option_preview_in_new_tab' ) );
 			self::updateOption( 'enable_categories_page',	$this->getValueFromPost( 'enable_categories_page' ) );
+			self::updateOption( 'enable_thumbs_column',		$this->getValueFromPost( 'enable_thumbs_column' ) );
 			self::updateOption( 'disable_wysiwyg_editor',	$this->getValueFromPost( 'option_disable_wysiwyg_editor' ) );
 			self::updateOption( 'enable_item_compat_tab', 	$this->getValueFromPost( 'enable_item_compat_tab' ) );
 			self::updateOption( 'convert_dimensions', 		$this->getValueFromPost( 'convert_dimensions' ) );
 			self::updateOption( 'local_timezone',			$this->getValueFromPost( 'option_local_timezone' ) );
 			self::updateOption( 'allow_backorders',			$this->getValueFromPost( 'option_allow_backorders' ) );
-			self::updateOption( 'admin_menu_label',			$this->getValueFromPost( 'text_admin_menu_label' ) );
 			self::updateOption( 'api_enable_auto_relist',	$this->getValueFromPost( 'api_enable_auto_relist' ) );
 			self::updateOption( 'auto_update_ended_items',	$this->getValueFromPost( 'auto_update_ended_items' ) );
+
+			if ( ! defined('WPLISTER_RESELLER_VERSION') ) 
+				self::updateOption( 'admin_menu_label',		$this->getValueFromPost( 'text_admin_menu_label' ) );
+
 
 			$this->showMessage( __('Settings saved.','wplister') );
 		}
@@ -636,6 +644,15 @@ class SettingsPage extends WPL_Page {
         }
         echo "no file_upload set";
         return false;
+    }
+
+
+    function get_tax_rates() {
+    	global $wpdb;
+
+		$rates = $wpdb->get_results( "SELECT tax_rate_id, tax_rate_country, tax_rate_state, tax_rate_name, tax_rate_priority FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name" );
+
+		return $rates;
     }
 
 

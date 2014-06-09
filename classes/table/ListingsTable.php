@@ -29,6 +29,7 @@ class ListingsTable extends WP_List_Table {
 
     var $last_product_id = 0;
     var $last_product_variations = array();
+    var $selectedItems = false;
 
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
@@ -381,6 +382,7 @@ class ListingsTable extends WP_List_Table {
     function generateAutoRelistInfo( $item, $profile_data ){
         $html = '';
 
+        // check if item is currently scheduled to be auto-relisted
         if ( @$item['relist_date'] ) {
             $relist_date = $item['relist_date'];
             $relist_ts   = strtotime( $item['relist_date'] );
@@ -401,10 +403,44 @@ class ListingsTable extends WP_List_Table {
 
         }
 
+        // check if autorelist is enabled in the applied profile
+        $profile_details = $profile_data['details'];
+        if ( @$profile_details['autorelist_enabled'] ) {
+
+            // check relist condition
+            if ( 'RelistAfterHours' == $profile_details['autorelist_condition'] ) {
+
+                if ( ! @$profile_details['autorelist_after_hours'] ) return;
+                $html .= '<br><span style="color:inherit; font-size:11px;"><i>AutoRelist enabled: relist after '.$profile_details['autorelist_after_hours'].' hours</i></span>';
+
+            } elseif ( 'RelistAtTimeOfDay' == $profile_details['autorelist_condition'] ) {
+
+                if ( ! @$profile_details['autorelist_at_timeofday'] ) return;
+                $html .= '<br><span style="color:inherit; font-size:11px;"><i>AutoRelist enabled: relist at '.$profile_details['autorelist_at_timeofday'].'</i></span>';
+                
+            } else { // RelistImmediately
+
+                $html .= '<br><span style="color:inherit; font-size:11px;"><i>AutoRelist enabled: relist immediately</i></span>';
+
+            }
+
+        } // if $profile_details['autorelist_enabled']
+
         return $html;
     } // generateAutoRelistInfo()
 
 
+    function column_img($item) {
+        $post_id = $item['post_id'];
+        if ( ! $post_id ) return '';
+
+        $thumb = get_the_post_thumbnail( $post_id, 'thumbnail' );
+        $link  = 'admin.php?page=wplister&action=preview_auction&auction='.$item['id'].'&width=820&height=550&TB_iframe=true';
+        $thumb_link = '<a href="'.$link.'" class="thickbox">'.$thumb.'</a>';
+
+        return $thumb_link;
+    }
+      
     function column_ebay_id($item) {
 
         // check for previous item IDs
@@ -744,7 +780,8 @@ class ListingsTable extends WP_List_Table {
     function get_columns(){
         $columns = array(
             'cb'        		=> '<input type="checkbox" />', //Render a checkbox instead of text
-            'ebay_id'  			=> __('eBay ID','wplister'),
+            'ebay_id'           => __('eBay ID','wplister'),
+            'img'               => __('Image','wplister'),
             'auction_title' 	=> __('Title','wplister'),
             'sku'               => __('SKU','wplister'),
             'quantity'			=> __('Quantity','wplister'),
@@ -758,6 +795,9 @@ class ListingsTable extends WP_List_Table {
             'template'          => __('Template','wplister'),
             'status'		 	=> __('Status','wplister')
         );
+
+        if ( ! get_option( 'wplister_enable_thumbs_column' ) )
+            unset( $columns['img'] );
 
         // usage:
         // add_filter( 'wplister_listing_columns', 'my_custom_wplister_columns' );
@@ -972,7 +1012,7 @@ class ListingsTable extends WP_List_Table {
      * @uses $this->get_pagenum()
      * @uses $this->set_pagination_args()
      **************************************************************************/
-    function prepare_items( $items = false ) {
+    function prepare_items() {
         
         // process bulk actions
         $this->process_bulk_action();
@@ -988,8 +1028,8 @@ class ListingsTable extends WP_List_Table {
         // define columns
         $this->_column_headers = $this->get_column_info();
         
-        // fetch listings from model - if no parameter passed
-        if ( ! $items ) {
+        // fetch listings from model - if no selected products were found
+        if ( ! $this->selectedItems ) {
 
             $listingsModel = new ListingsModel();
             $this->items = $listingsModel->getPageItems( $current_page, $per_page );
@@ -997,8 +1037,8 @@ class ListingsTable extends WP_List_Table {
 
         } else {
 
-            $this->items = $items;
-            $this->total_items = count($items);
+            $this->items = $this->selectedItems;
+            $this->total_items = count($this->selectedItems);
 
         }
 

@@ -210,7 +210,7 @@ class ToolsPage extends WPL_Page {
 
 	public function onDisplayToolsPage() {
 		global $wpl_logger;
-		WPL_Setup::checkSetup();
+		$this->check_wplister_setup();
 
 		$this->handleActions();
 
@@ -576,9 +576,9 @@ class ToolsPage extends WPL_Page {
 		// Setup cURL Session
 		$cURLhandle = curl_init() ;
 		curl_setopt($cURLhandle, CURLOPT_URL, $url ) ;
-		curl_setopt($cURLhandle, CURLOPT_FOLLOWLOCATION, TRUE) ;
+		// curl_setopt($cURLhandle, CURLOPT_FOLLOWLOCATION, TRUE) ;
 		curl_setopt($cURLhandle, CURLOPT_MAXREDIRS, 5 ) ;
-		//    curl_setopt($cURLhandle, CURLOPT_USERAGENT, $c_cURLopt_UserAgent) ;
+		// curl_setopt($cURLhandle, CURLOPT_USERAGENT, $c_cURLopt_UserAgent) ;
 		curl_setopt($cURLhandle, CURLOPT_NOBODY, FALSE) ;
 		curl_setopt($cURLhandle, CURLOPT_POST, $usePost) ;
 		curl_setopt($cURLhandle, CURLOPT_SSL_VERIFYPEER, FALSE) ;
@@ -597,7 +597,12 @@ class ToolsPage extends WPL_Page {
 		curl_setopt($cURLhandle, CURLOPT_VERBOSE, FALSE) ;
 		curl_setopt($cURLhandle, CURLOPT_RETURNTRANSFER, TRUE) ;
 
+		// only enable CURLOPT_FOLLOWLOCATION if safe_mode and open_base_dir are not in use
+        if ( ini_get('open_basedir') == '' && ! ini_get('safe_mode') )
+			curl_setopt($cURLhandle, CURLOPT_FOLLOWLOCATION, TRUE);
 
+		// force SSLv3 - prevent SSL23_GET_SERVER_HELLO:unknown protocol error (?)
+		// curl_setopt($cURLhandle, CURLOPT_SSLVERSION, 3);
 
 		// Make cURL Call
 		$cURLresponse_data        = curl_exec($cURLhandle) ;

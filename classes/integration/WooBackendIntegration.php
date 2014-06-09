@@ -106,7 +106,8 @@ class WPL_WooBackendIntegration {
 		if ( ! $_product ) {
 
 			// check if this order was created by WP-Lister
-			if ( isset( $order->order_custom_fields['_ebay_order_id'] ) ) {
+			// if ( isset( $order->order_custom_fields['_ebay_order_id'] ) ) {
+			if ( get_post_meta( $order->id, '_ebay_order_id', true ) ) {
 
 				// create a new ebay product object to allow email templates or other plugins to do $_product->get_sku() and more...
 				$_product = new WC_Product_Ebay( $item['product_id'] );
@@ -175,6 +176,10 @@ class WPL_WooBackendIntegration {
 					
 					case 'ended':
 						echo '<img src="'.WPLISTER_URL.'/img/hammer-16x16.png" title="ended" />';
+						break;
+					
+					case 'archived':
+						echo '<img src="'.WPLISTER_URL.'/img/hammer-16x16.png" title="This product has been listed on eBay in the past but it is currently archived." />';
 						break;
 					
 					default:
@@ -294,8 +299,9 @@ class WPL_WooBackendIntegration {
 	        			FROM {$wpdb->prefix}posts 
 					    LEFT JOIN {$wpdb->prefix}ebay_auctions
 					         ON ( {$wpdb->prefix}posts.ID = {$wpdb->prefix}ebay_auctions.post_id )
-					    WHERE {$wpdb->prefix}ebay_auctions.ebay_id != ''
+					    WHERE {$wpdb->prefix}ebay_auctions.status != 'archived'
 	        	";
+					    // WHERE {$wpdb->prefix}ebay_auctions.ebay_id != ''
 	        	$post_ids_on_ebay = $wpdb->get_col( $sql );
 	        	// echo "<pre>";print_r($post_ids_on_ebay);echo"</pre>";#die();
 

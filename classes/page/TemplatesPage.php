@@ -94,7 +94,7 @@ class TemplatesPage extends WPL_Page {
 
 
 	public function onDisplayTemplatesPage() {
-		WPL_Setup::checkSetup();
+		$this->check_wplister_setup();
 	
 		// edit template
 		if ( ( $this->requestAction() == 'edit' ) || ( $this->requestAction() == 'add_new_template' ) ) {
@@ -127,7 +127,8 @@ class TemplatesPage extends WPL_Page {
 	    //Create an instance of our package class...
 	    $templatesTable = new TemplatesTable();
     	//Fetch, prepare, sort, and filter our data...
-	    $templatesTable->prepare_items( $templates );
+	    $templatesTable->db_items = $templates;
+	    $templatesTable->prepare_items();
 
 	    // refresh cache of template names and descriptions
 	    $this->refreshTemplatesCache( $templates );

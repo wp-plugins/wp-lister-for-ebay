@@ -1,6 +1,12 @@
 <?php
-// $Id: EbatNs_Client.php,v 1.14 2008-10-08 10:31:19 carsten Exp $
+// $Id: EbatNs_Client.php,v 1.16 2013-04-08 10:27:42 thomasbiniasch Exp $
 // $Log: EbatNs_Client.php,v $
+// Revision 1.16  2013-04-08 10:27:42  thomasbiniasch
+// small improvments for php 5.4
+//
+// Revision 1.15  2013-04-02 13:33:12  carstenharnisch
+// fixed problem with > PHP 5.4, regarding call-time pass-by-reference
+//
 // Revision 1.14  2008-10-08 10:31:19  carsten
 // changed the way the meta data is stored for schema objects. Now the information is helt in a static array (in EbatNs_ComplexType) for ALL schema classes.
 // Beside changes in the Core and the ComplexType class this will also need a different way how the schema-information is stored within the constructors of all generated schema-classes.
@@ -36,14 +42,11 @@
 //
 //
 require_once 'UserIdPasswordType.php';
-
 require_once 'EbatNs_RequesterCredentialType.php';
 require_once 'EbatNs_RequestHeaderType.php';
 require_once 'EbatNs_ResponseError.php';
 require_once 'EbatNs_ResponseParser.php';
-
 require_once 'EbatNs_DataConverter.php';
-
 class EbatNs_Client
 { 
 	// endpoint for call
@@ -66,7 +69,6 @@ class EbatNs_Client
 	protected $_transportOptions = array();
 	protected $_loggingOptions   = array();
 	protected $_callUsage = array();
-
 	//
 	// timepoint-tracing
 	//
@@ -124,7 +126,6 @@ class EbatNs_Client
 	        return null;
         
 	    $this->_startTp('executeBatchOperation');
-
 	    // lets execute the batch-operation
 	    $running = null;
 	    do {
@@ -147,7 +148,7 @@ class EbatNs_Client
     			if ( preg_match( "/^(.*?)\r?\n\r?\n(.*)/s", $responseRaw, $match ) )
     			{
     				$responseBody = $match[2];
-    				$headerLines = split( "\r?\n", $match[1] );
+    				$headerLines = preg_split( "/\r?\n/", $match[1] );
     				foreach ( $headerLines as $line )
     				{
     					if ( strpos( $line, ':' ) === false )
@@ -155,7 +156,7 @@ class EbatNs_Client
     						$responseHeaders[0] = $line;
     						continue;
     					} 
-    					list( $key, $value ) = split( ':', $line );
+    					list( $key, $value ) = explode( ':', $line );
     					$responseHeaders[strtolower( $key )] = trim( $value );
     				} 
     			} 
@@ -171,7 +172,6 @@ class EbatNs_Client
     		} 
     		curl_multi_remove_handle($this->mh, $ch);
         }
-
         curl_multi_close($this->mh);
         $this->chMultiHandles = array();
         $this->resultMethods = array();
@@ -378,14 +378,10 @@ class EbatNs_Client
 			{
 				if ( is_object( $callback['object'] ) )
 				{
-					// fix fatal error on PHP 5.4 - Call-time pass-by-reference has been removed
-					// return call_user_method( $callback['method'], $callback['object'], $typeName, & $value, $mapName, & $this );
 					return call_user_method( $callback['method'], $callback['object'], $typeName, $value, $mapName, $this );
 				} 
 				else
 				{
-					// fix fatal error on PHP 5.4 - Call-time pass-by-reference has been removed
-					// return call_user_func( $callback['method'], $typeName, & $value, $mapName, & $this );
 					return call_user_func( $callback['method'], $typeName, $value, $mapName, $this );
 				} 
 			} 
@@ -502,7 +498,7 @@ class EbatNs_Client
 	// should transform the response (body) to a PHP object structure
 	function decodeMessage( $method, $msg, $parseMode )
 	{
-		$this->_parser = &new EbatNs_ResponseParser( $this, 'urn:ebay:apis:eBLBaseComponents', $this->_parserOptions );
+		$this->_parser = new EbatNs_ResponseParser( $this, 'urn:ebay:apis:eBLBaseComponents', $this->_parserOptions );
 		return $this->_parser->decode( $method . 'Response', $msg, $parseMode );
 	} 
 	// should generate a complete SOAP-envelope for the request
@@ -635,6 +631,7 @@ class EbatNs_Client
 		{
 			$this->_currentResult = new EbatNs_ResponseError();
 			$this->_currentResult->raise( 'curl_error ' . curl_errno( $ch ) . ' ' . curl_error( $ch ), 80000 + 1, EBAT_SEVERITY_ERROR );
+            $this->log( curl_error( $ch ), 'curl_error' );
 			curl_close( $ch );
 			
 			return null;
@@ -647,7 +644,7 @@ class EbatNs_Client
 			if ( preg_match( "/^(.*?)\r?\n\r?\n(.*)/s", $responseRaw, $match ) )
 			{
 				$responseBody = $match[2];
-				$headerLines = split( "\r?\n", $match[1] );
+				$headerLines = preg_split( "/\r?\n/", $match[1] );
 				foreach ( $headerLines as $line )
 				{
 					if ( strpos( $line, ':' ) === false )
@@ -655,7 +652,7 @@ class EbatNs_Client
 						$responseHeaders[0] = $line;
 						continue;
 					} 
-					list( $key, $value ) = split( ':', $line );
+					list( $key, $value ) = explode( ':', $line );
 					$responseHeaders[strtolower( $key )] = trim( $value );
 				} 
 			} 
@@ -677,7 +674,6 @@ class EbatNs_Client
 			$ep = 'http://open.api.ebay.com/shopping';
 		
 		$this->_incrementApiUsage($method);
-
 		// place all data into theirs header
 		$reqHeaders[] = 'X-EBAY-API-VERSION: ' . $this->getVersion();
 		$reqHeaders[] = 'X-EBAY-API-APP-ID: ' . $this->_session->getAppId();
@@ -744,7 +740,6 @@ class EbatNs_Client
 			return $responseBody;
 		}
 	}
-
 	function sendMessageShoppingApiStyle( $message, $extraXmlHeaders )
 	{
 		$this->_currentResult = null;
@@ -821,7 +816,7 @@ class EbatNs_Client
 			if ( preg_match( "/^(.*?)\r?\n\r?\n(.*)/s", $responseRaw, $match ) )
 			{
 				$responseBody = $match[2];
-				$headerLines = split( "\r?\n", $match[1] );
+				$headerLines = preg_split( "/\r?\n/", $match[1] );
 				foreach ( $headerLines as $line )
 				{
 					if ( strpos( $line, ':' ) === false )
@@ -829,7 +824,7 @@ class EbatNs_Client
 						$responseHeaders[0] = $line;
 						continue;
 					} 
-					list( $key, $value ) = split( ':', $line );
+					list( $key, $value ) = explode( ':', $line );
 					$responseHeaders[strtolower( $key )] = trim( $value );
 				} 
 			} 
@@ -842,7 +837,6 @@ class EbatNs_Client
 		
 		return $responseBody;
 	} 
-
 	function callXmlStyle( $method, $request, $parseMode = EBATNS_PARSEMODE_CALL )
 	{
 		// Inject the Credentials into the request here !
@@ -1004,6 +998,7 @@ class EbatNs_Client
 		{
 			$this->_currentResult = new EbatNs_ResponseError();
 			$this->_currentResult->raise( 'curl_error ' . curl_errno( $ch ) . ' ' . curl_error( $ch ), 80000 + 1, EBAT_SEVERITY_ERROR );
+            $this->log( curl_error( $ch ), 'curl_error' );
 			curl_close( $ch );
 			
 			return null;
@@ -1026,12 +1021,11 @@ class EbatNs_Client
 				),
 				$responseRaw
 			);
-
 			$responseBody = null;
 			if ( preg_match( "/^(.*?)\r?\n\r?\n(.*)/s", $responseRaw, $match ) )
 			{
 				$responseBody = $match[2];
-				$headerLines = split( "\r?\n", $match[1] );
+				$headerLines = preg_split( "/\r?\n/", $match[1] );
 				foreach ( $headerLines as $line )
 				{
 					if ( strpos( $line, ':' ) === false )
@@ -1039,7 +1033,7 @@ class EbatNs_Client
 						$responseHeaders[0] = $line;
 						continue;
 					} 
-					list( $key, $value ) = split( ':', $line );
+					list( $key, $value ) = explode( ':', $line );
 					$responseHeaders[strtolower( $key )] = trim( $value );
 				} 
 			} 
@@ -1088,7 +1082,6 @@ class EbatNs_Client
 		if (count($response->getErrors()))
 			foreach ($response->getErrors() as $errorEle)
 				$errmsg .= '#' . $errorEle->getErrorCode() . ' : ' . ($asHtml ? htmlentities($errorEle->getLongMessage()) :  $errorEle->getLongMessage()) . ($asHtml ? "<br>" : "\r\n");
-
 		if ($addSlashes)
 			return addslashes($errmsg);
 		else   
@@ -1098,7 +1091,6 @@ class EbatNs_Client
 	public function addSelectorModel($callName, $selectorModel, $active)
 	{
 		$this->_selectorModels[$selectorModel->getName()][$callName] = $selectorModel;
-
 		if ($active)
 		{
 			$this->setActiveSelectorModel($selectorModel->getName());
@@ -1108,7 +1100,6 @@ class EbatNs_Client
 	public function setActiveSelectorModel($selectorName)
 	{
 		$this->_activeSelectorModel = $selectorName;
-
 		foreach($this->_selectorModels as $selectorModel)
 		{
 			foreach($selectorModel as $selectorModelCall)
@@ -1120,7 +1111,6 @@ class EbatNs_Client
 			}
 		}
 	}
-
 	public function getSession()
 	{
 		return $this->_session;

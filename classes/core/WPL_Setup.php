@@ -7,35 +7,35 @@ class WPL_Setup extends WPL_Core {
 		global $pagenow;
 
 		// check if safe mode is enabled
-		self::isPhpSafeMode();
+		$this->isPhpSafeMode();
 
 		// check if incomatible plugins are active
-		self::checkPlugins();
+		$this->checkPlugins();
 
 		// check if a recent version of WooCommerce is installed
-		self::checkWooCommerce();
+		$this->checkWooCommerce();
 
 		// check if cURL is loaded
-		if ( ! self::isCurlLoaded() ) return false;
+		if ( ! $this->isCurlLoaded() ) return false;
 
 		// check for windows server
-		// if ( self::isWindowsServer() ) return false;
-		self::isWindowsServer( $page );
+		// if ( $this->isWindowsServer() ) return false;
+		$this->isWindowsServer( $page );
 
 		// create folders if neccessary
-		if ( self::checkFolders() ) return false;
+		if ( $this->checkFolders() ) return false;
 
 		// check for updates
-		self::checkForUpdates();
+		$this->checkForUpdates();
 
 		// check if cron is working properly
-		self::checkCron();
+		$this->checkCron();
 
 		// check database after migration
-		// self::checkDatabase();
+		// $this->checkDatabase();
 
 		// check for multisite installation
-		// if ( self::checkMultisite() ) return false;
+		// if ( $this->checkMultisite() ) return false;
 
 		// setup wizard
 		// if ( self::getOption('ebay_token') == '' ) {
@@ -50,7 +50,7 @@ class WPL_Setup extends WPL_Core {
 		
 		} elseif ( '2' == self::getOption('setup_next_step') ) {
 		
-			$title = __('WP-Lister Setup - Step 2','wplister');
+			$title = $this->app_name .' '. __('Setup - Step 2','wplister');
 			$msg1  = __('Before creating your first profile, we need to download certain information which are specific to the eBay site you selected.','wplister');
 			$msg2  = __('This includes shipping options, payment methods, your custom store categories as well as the whole eBay category tree, which might take a while.','wplister');
 			$url   = $pagenow . '?page=' . $_GET['page'];
@@ -69,7 +69,7 @@ class WPL_Setup extends WPL_Core {
 			if ( sizeof($templates) > 0 ) {
 				self::updateOption('setup_next_step', '4');
 			} else {
-				$title = __('WP-Lister Setup - Step 3','wplister');
+				$title = $this->app_name .' '. __('Setup - Step 3','wplister');
 				$msg1 = __('Create a default listing template.','wplister');
 				$msg2 = __('To create your first listing template click on %s.','wplister').'<br>';
 				if ( @$_GET['action'] == 'add_new_template' )
@@ -87,7 +87,7 @@ class WPL_Setup extends WPL_Core {
 			if ( sizeof($profiles) > 0 ) {
 				self::updateOption('setup_next_step', '0');
 			} else {
-				$title = __('WP-Lister Setup - Step 4','wplister');
+				$title = $this->app_name .' '. __('Setup - Step 4','wplister');
 				$msg1  = __('The final step: create your first listing profile.', 'wplister');
 				$msg2  = __('Click on %s and start defining your listing options.<br>After saving your profile, visit your Products page and select the products to list on eBay.','wplister');
 				$link  = '<a href="admin.php?page=wplister-profiles&action=add_new_profile">'.__('New Profile', 'wplister').'</a>';
@@ -98,7 +98,7 @@ class WPL_Setup extends WPL_Core {
 		
 		} elseif ( '5' == self::getOption('setup_next_step') ) {
 		
-			$title = __('WP-Lister Setup is complete.','wplister');
+			$title = $this->app_name .' '. __('Setup is complete.','wplister');
 			$msg1  = __('You are ready now to list your first items.', 'wplister');
 			$msg2  = __('Visit your Products page, select a few items and select "Prepare listings" from the bulk actions menu.','wplister');
 			$msg   = "<p><b>$msg1</b></p><p>$msg2</p>";
@@ -339,7 +339,7 @@ class WPL_Setup extends WPL_Core {
 
 			// $db_version = $new_db_version;
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 
 		}
 		
@@ -364,7 +364,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 		
 		// upgrade to version 3
@@ -382,7 +382,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 			
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 		
 		// upgrade to version 4
@@ -400,7 +400,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 			
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 		*/
 	
@@ -426,7 +426,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 		
 
@@ -445,7 +445,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 			
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 		
 
@@ -457,7 +457,7 @@ class WPL_Setup extends WPL_Core {
 			update_option('wplister_license_email', get_bloginfo('admin_email') );
 
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 		
 
@@ -472,7 +472,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 			
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 		
 		// upgrade to version 9  (1.0)
@@ -483,7 +483,7 @@ class WPL_Setup extends WPL_Core {
 			update_option('wplister_update_channel', 'stable');
 			
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 		
 		// upgrade to version 10  (1.0.7)
@@ -497,7 +497,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 11  (1.0.8.8)
@@ -512,7 +512,7 @@ class WPL_Setup extends WPL_Core {
 			}
 			
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 		
 
@@ -554,7 +554,7 @@ class WPL_Setup extends WPL_Core {
 			}
 			
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 
@@ -569,7 +569,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 14  (1.1.0.4)
@@ -583,7 +583,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 15  (1.1.5.4)
@@ -597,7 +597,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 16  (1.1.6.3)
@@ -611,7 +611,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 17  (1.2.0.12)
@@ -626,7 +626,7 @@ class WPL_Setup extends WPL_Core {
 			}
 			
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 18 (1.2.0.18)
@@ -649,7 +649,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 			
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 19  (1.2.1.5)
@@ -663,7 +663,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 20  (1.2.2.16)
@@ -677,7 +677,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 21  (1.2.2.16)
@@ -710,7 +710,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 22  (1.2.4.7)
@@ -724,7 +724,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 23  (1.2.7.3)
@@ -739,7 +739,7 @@ class WPL_Setup extends WPL_Core {
 			}
 			
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 24  (1.3.0.12)
@@ -753,7 +753,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 25  (1.3.0.12)
@@ -789,7 +789,7 @@ class WPL_Setup extends WPL_Core {
 				if ( $total_number_of_products > $db_upgrade_offset + $batch_size ) {
 
 					$count_processed = min( $db_upgrade_offset + $batch_size, $total_number_of_products );
-					$msg  = __('WP-Lister database upgrade is in progress', 'wplister');
+					$msg  = __('Database upgrade is in progress', 'wplister');
 					$msg .= ' - ' . $count_processed . ' of ' . $total_number_of_products . ' items processed.';								
 					self::showMessage($msg);
 					return;
@@ -799,7 +799,7 @@ class WPL_Setup extends WPL_Core {
 					// last batch finished
 					delete_option( 'wplister_db_upgrade_offset' );
 					update_option('wplister_db_version', $new_db_version);
-					$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';				
+					$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';				
 
 				}
 
@@ -815,7 +815,7 @@ class WPL_Setup extends WPL_Core {
 				$wpdb->query( $sql );	echo $wpdb->last_error;
 
 				update_option('wplister_db_version', $new_db_version);
-				$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';				
+				$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';				
 			}
 
 		}
@@ -840,7 +840,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 			
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 27  (1.3.2.5)
@@ -862,7 +862,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 28  (1.3.2.10)
@@ -893,7 +893,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 29  (1.3.2.12)
@@ -907,7 +907,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 30  (1.3.4.5)
@@ -932,7 +932,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 32  (1.3.5.5)
@@ -958,7 +958,7 @@ class WPL_Setup extends WPL_Core {
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 		// upgrade to version 33  (1.3.5.6)
@@ -970,12 +970,12 @@ class WPL_Setup extends WPL_Core {
 
 			// check if database upgrade is finished yet
 			if ( $more_orders_to_process ) {
-				$msg  = __('WP-Lister database upgrade in progress', 'wplister') .'...';
+				$msg  = __('Database upgrade is in progress', 'wplister') .'...';
 				if ( ($msg) && (!$hide_message) ) self::showMessage($msg);	
 				return;
 			} else {
 				update_option('wplister_db_version', $new_db_version);
-				$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+				$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 			}
 		}
 
@@ -992,7 +992,7 @@ class WPL_Setup extends WPL_Core {
 			}
 			
 			update_option('wplister_db_version', $new_db_version);
-			$msg  = __('WP-Lister database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
 
@@ -1157,6 +1157,56 @@ class WPL_Setup extends WPL_Core {
 
 	// check if WP_Cron is working properly
 	public function checkCron() {
+
+		$cron_interval  = get_option( 'wplister_cron_auctions' );
+		$next_scheduled = wp_next_scheduled( 'wplister_update_auctions' ) ;
+		if ( ! $cron_interval ) return;
+
+		// check if schedule is active
+		if ( $cron_interval && ! $next_scheduled ) {
+
+			$this->showMessage( 
+				'<p>'
+				. '<b>Warning: WordPress Cron Job has been disabled - scheduled WP-Lister tasks are not executed!</b>'
+				. '<br><br>'
+				. 'The task schedule has been reset just now in order to automatically fix this.'
+				. '<br><br>'
+				. 'If this message does not disappear, please visit the <a href="admin.php?page=wplister-settings">Settings</a> page and click <i>Save Settings</i> or contact support.'
+				. '</p>'
+			,1);
+
+			// this should fix it:
+			wp_schedule_event( time(), $cron_interval, 'wplister_update_auctions' );
+			return;
+		} 
+
+		// check if schedule is delayed (by 1d)
+		// $next_scheduled = $next_scheduled - 3600*48; // debug only
+		if ( $next_scheduled < current_time('timestamp',1) - 3600*25 ) {
+
+			$this->showMessage( 
+				'<p>'
+				. '<b>Attention: WordPress cron jobs seem to be broken on your site!</b>'
+				. '<br><br>'
+				. 'There are active background jobs which were scheduled to run '
+				. human_time_diff( $next_scheduled, current_time('timestamp',1) ) . ' ago, '
+				. 'but never have been executed.'
+				. '<br><br>'
+				. 'You should contact your hoster or site administrator to get this fixed as soon as possible. Until then, WP-Lister will not be able to sync the inventory correctly nor process new orders from eBay.'
+				. '<br><br>'
+				. 'Keep in mind that this issue is not related to WP-Lister but to WordPress itself. All plugins and features which rely on scheduled tasks are affected by this issue - which includes scheduled posts, internal cleanup routines in WooCommerce and more.'
+				. '<br><br>'
+				. 'To see all your scheduled tasks and when they were last executed, we recommend installing '
+				. '<a href="https://wordpress.org/plugins/debug-bar/" target="_blank">Debug Bar</a> and the '
+				. '<a href="https://wordpress.org/plugins/debug-bar-cron/" target="_blank">Debug Bar Cron</a> extension. '
+				. 'A possible workaround for sites with broken WP-Cron is the '
+				. '<a href="https://wordpress.org/plugins/wp-cron-control/" target="_blank">WP Cron Control</a> plugin, '
+				. 'but we recommend to find out what is causing this and fixing it instead.'
+				. '</p>'
+			,1);
+
+		}
+
 	}
 
 
@@ -1194,7 +1244,7 @@ class WPL_Setup extends WPL_Core {
 				. '<b>Warning: '. __('Your token will expire on','wplister') . ' ' . $expdate
 				. ' (in ' . human_time_diff( strtotime($expdate) ) . ') '.'</b>'
 				. '<br><br>'
-				. 'You need to re-authenticate WP-Lister with eBay. To do so, please click the "Change account" button on Settings page and follow the instructions.'
+				. 'You need to reconnect your eBay account. To do so, please click the "Change account" button on Settings page and follow the instructions.'
 				. '</p>'
 			,1);
 

@@ -428,7 +428,7 @@ WpLister.JobRunner = function () {
         .error( function(e,xhr,error) { 
             jQuery('#jobs_log').append( "problem completing job - server responded: " + e.responseText + "<br>" );
             jQuery('#jobs_window .btn_close').show();
-            alert( "There was a problem completing this job.\n\nThe server responded:\n" + e.responseText + '\n\nPlease contact support@wplab.com.' ); 
+            alert( "There was a problem completing this job.\n\nThe server responded:\n" + e.responseText + '\n\nPlease report this to support.' ); 
             console.log( "error", xhr, error ); 
             console.log( e.responseText ); 
         });

@@ -144,8 +144,6 @@
 
             <?php foreach ( $wpl_ebay_order['history'] as $record ) : ?>
 
-<?php #echo "<pre>";print_r($record);echo"</pre>"; ?>
-
                 <tr><td width="16%">                      
                     <?php // echo date( get_option( 'date_format' ), $record->time ) ?> 
                     <?php echo date( 'Y-m-d', $record->time ) ?> 
@@ -206,9 +204,11 @@
 
     <?php endif; ?>
     
+    <h2>Debug Data</h2>
+    <a href="#" onclick="jQuery(this).hide();jQuery('#wplister_order_details_debug').slideDown();return false;" class="button">Show Debug Info</a>
+    <pre id="wplister_order_details_debug" style="display:none"><?php print_r( $wpl_ebay_order ) ?></pre>
            
     <pre><?php #print_r( $d ); ?></pre>
-    <pre><?php #print_r( $wpl_auction_item ); ?></pre>
     <pre><?php #print_r( $wpl_ebay_order ); ?></pre>
 
 

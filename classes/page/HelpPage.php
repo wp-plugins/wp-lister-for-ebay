@@ -10,6 +10,7 @@ class HelpPage extends WPL_Page {
 
 	public function onWpAdminMenu() {
 		parent::onWpAdminMenu();
+		if ( apply_filters( 'wplister_reseller_disable_tutorial_page', false ) ) return;
 
 		add_submenu_page( self::ParentMenuId, $this->getSubmenuPageTitle( 'Tutorial' ), __('Tutorial','wplister'), 
 						  self::ParentPermissions, $this->getSubmenuId( 'tutorial' ), array( &$this, 'onDisplayHelpPage' ) );
@@ -17,7 +18,7 @@ class HelpPage extends WPL_Page {
 
 
 	public function onDisplayHelpPage() {
-		WPL_Setup::checkSetup('tutorial');
+		$this->check_wplister_setup('tutorial');
 
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,

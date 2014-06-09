@@ -109,6 +109,20 @@ class WPL_EbatNs_Logger{
 		}
 
 	}
+
+    function updateLog( $data )
+    {
+        global $wpdb;
+
+        if ($this->debugLogDestination == 'db') {
+            
+            // insert into db
+            $wpdb->update($wpdb->prefix.'ebay_log', $data, array( 'id' => $this->id ));
+            if ( $wpdb->last_error ) echo 'Error in WPL_EbatNs_Logger::updateLog() - '.$wpdb->last_error.'<br>'.$wpdb->last_query;
+
+        }
+
+    } // updateLog()
 	
 	function logXml($xmlMsg, $subject = null)
 	{

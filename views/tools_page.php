@@ -471,7 +471,7 @@
 	<?php endif; ?>
 
 	<?php
-		// just in case - I've seen sites where WPL_Setup::checkSetup() wasn't properly called...
+		// just in case - I've seen sites where $this->check_wplister_setup() wasn't properly called...
         if ( ini_get('safe_mode') ) {
 			echo "
 				<b>Warning: PHP safe mode is enabled.</b><br>

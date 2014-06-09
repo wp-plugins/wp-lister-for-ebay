@@ -165,12 +165,12 @@ class CategoriesMapTable extends WP_List_Table {
      * @uses $this->items
      * @uses $this->set_pagination_args()
      **************************************************************************/
-    function prepare_items( $data ) {
+    function prepare_items() {
         
         $per_page = 1000;
 
         $this->_column_headers = $this->get_column_info();        
-        $this->items = $data;        
+        // $this->items = $data;        
         // echo "<pre>";print_r($data);echo "</pre>";
 
         $total_items = count( $this->items );

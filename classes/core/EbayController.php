@@ -971,7 +971,7 @@ class EbayController {
     }
 
     // TODO: fetch ebaySites from eBay
-    public function getEbaySites() {
+    static public function getEbaySites() {
 
         $sites = array (        
             '0'   => 'US', 
@@ -1039,7 +1039,7 @@ class EbayController {
             case 203:
                 return 'ebay.in';
             case 207:
-                return 'ebay.my';
+                return 'ebay.com.my';
             case 211:
                 return 'ebay.ph';
             case 212:

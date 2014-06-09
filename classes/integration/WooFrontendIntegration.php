@@ -231,7 +231,7 @@ class WPL_WooFrontendIntegration {
 	function showCompatibilityList() {
 		global $post;
 
-		// primary ebay category
+		// get compatibility list and names
 		$compatibility_list   = get_post_meta( $post->ID, '_ebay_item_compatibility_list', true );
 		$compatibility_names  = get_post_meta( $post->ID, '_ebay_item_compatibility_names', true );
 		#echo "<pre>";print_r($compatibility_names);echo"</pre>";#die();

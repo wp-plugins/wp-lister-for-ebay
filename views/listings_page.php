@@ -9,6 +9,15 @@
 	th.column-auction_title {
 		width: 25%;
 	}
+	th.column-img {
+		width: 100px;
+	}
+	td.column-img img {
+		max-width: 100px;
+		max-height: 90px;
+		width: auto !important;
+		height: auto !important;
+	}
 	
 	td.column-auction_title a.product_title_link {
 		color: #555;
@@ -157,10 +166,10 @@
 	
 				// ask again before deleting items
 				jQuery('.row-actions .delete a').on('click', function() {
-					return confirm("<?php echo __('Are you sure you want to remove this listing from WP-Lister?','wplister') ?>");
+					return confirm("<?php echo __('Are you sure you want to remove this listing?','wplister') .' '.  __('You should not delete listings which have been recently published on eBay!','wplister') ?>");
 				})
 				jQuery('#wpl_dupe_details a.delete').on('click', function() {
-					return confirm("<?php echo __('Are you sure you want to remove this listing from WP-Lister?','wplister') ?>");
+					return confirm("<?php echo __('Are you sure you want to remove this listing?','wplister') .' '.  __('You should not delete listings which have been recently published on eBay!','wplister') ?>");
 				})
 
 				// handle bulk actions click
@@ -171,6 +180,11 @@
 
 					// console.log( this.id );
 					// console.log('action',selected_action);
+
+					if ( selected_action == 'delete_listing' ) {
+						var confirmed = confirm("<?php echo __('Are you sure you want to do this?','wplister') .' '.  __('You should not delete listings which have been recently published on eBay!','wplister') ?>");
+						if ( ! confirmed ) return false;
+					}
 
 					// create array of selected listing IDs
 					var item_ids = [];

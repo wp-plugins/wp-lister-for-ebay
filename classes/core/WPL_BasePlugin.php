@@ -84,7 +84,8 @@ class WPL_BasePlugin extends WPL_Core {
 		// check if admin has manage_ebay_options capability
 		if ( ! isset( $role->capabilities['manage_ebay_options'] ) ) {
 
-	  		WPL_Setup::updatePermissions();
+			$Setup = new WPL_Setup();
+			$Setup->updatePermissions();
 
 		}
 

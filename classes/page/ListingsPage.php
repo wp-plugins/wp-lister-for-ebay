@@ -29,12 +29,12 @@ class ListingsPage extends WPL_Page {
 	// 	global $oWPL_WPLister;
 	// 	$settingsPage = $oWPL_WPLister->pages['settings'];
 
-	// 	$page_id = add_menu_page( self::ParentTitle, __('WP-Lister','wplister'), self::ParentPermissions, 
+	// 	$page_id = add_menu_page( $this->app_name, $this->main_admin_menu_label, self::ParentPermissions, 
 	// 				   self::ParentMenuId, array( $settingsPage, 'onDisplaySettingsPage' ), $this->getImageUrl( 'hammer-16x16.png' ), ProductWrapper::menu_page_position );
 	// }
 
 	public function onWpTopAdminMenu() {
-		$page_id = add_menu_page( self::ParentTitle, $this->main_admin_menu_label, self::ParentPermissions, 
+		$page_id = add_menu_page( $this->app_name, $this->main_admin_menu_label, self::ParentPermissions, 
 					   self::ParentMenuId, array( $this, 'onDisplayListingsPage' ), $this->getImageUrl( 'hammer-16x16.png' ), ProductWrapper::menu_page_position );
 		// $page_id: toplevel_page_wplister
 	}
@@ -328,7 +328,7 @@ class ListingsPage extends WPL_Page {
 
 
 	public function onDisplayListingsPage() {
-		WPL_Setup::checkSetup();
+		$this->check_wplister_setup();
 	
 		// handle actions
 		$this->handleActions();
@@ -359,7 +359,7 @@ class ListingsPage extends WPL_Page {
 	        // check for changed items and display reminder
 	        if ( isset($summary->changed) && current_user_can( 'publish_ebay_listings' ) ) {
 				$msg  = '<p>';
-				$msg .= sprintf( __('WP-Lister has found %s changed item(s) which need to be revised on eBay to apply their latest changes.','wplister'), $summary->changed );
+				$msg .= sprintf( __('There are %s changed item(s) which need to be revised on eBay to apply their latest changes.','wplister'), $summary->changed );
 				// $msg .= '<br><br>';
 				$msg .= '&nbsp;&nbsp;';
 				$msg .= '<a id="btn_revise_all_changed_items_reminder" class="btn_revise_all_changed_items_reminder button wpl_job_button">' . __('Revise all changed items','wplister') . '</a>';
@@ -371,7 +371,7 @@ class ListingsPage extends WPL_Page {
 	        // check for relisted items and display reminder
 	        if ( isset($summary->relisted) ) {
 				$msg  = '<p>';
-				$msg .= sprintf( __('WP-Lister has found %s manually relisted item(s) which need to be updated from eBay to fetch their latest changes.','wplister'), $summary->relisted );
+				$msg .= sprintf( __('There are %s manually relisted item(s) which need to be updated from eBay to fetch their latest changes.','wplister'), $summary->relisted );
 				$msg .= '&nbsp;&nbsp;';
 				$msg .= '<a id="btn_update_all_relisted_items_reminder" class="btn_update_all_relisted_items_reminder button wpl_job_button">' . __('Update all relisted items','wplister') . '</a>';
 				$msg .= '</p>';
@@ -411,7 +411,8 @@ class ListingsPage extends WPL_Page {
 	    //Create an instance of our package class...
 	    $listingsTable = new ListingsTable();
     	//Fetch, prepare, sort, and filter our data...
-	    $listingsTable->prepare_items( $selectedProducts );
+	    $listingsTable->selectedItems = $selectedProducts;
+	    $listingsTable->prepare_items();
 
 		// get profiles
 		$profilesModel = new ProfilesModel();
@@ -528,7 +529,7 @@ class ListingsPage extends WPL_Page {
 	        $page = $_REQUEST['page'];
 	        if ( isset( $_REQUEST['paged'] )) $page .= '&paged='.$_REQUEST['paged'];
 
-			$msg  = '<p><b>'.__('WP-Lister has found multiple listings for some of your products.','wplister').'</b>';
+			$msg  = '<p><b>'.__('There are multiple listings for some of your products.','wplister').'</b>';
 			$msg .= '&nbsp; <a href="#" onclick="jQuery(\'#wpl_dupe_details\').toggle()">'.__('Show details','wplister').'</a></p>';
 			// $msg .= '<br>';
 			$msg .= '<div id="wpl_dupe_details" style="display:none"><p>';

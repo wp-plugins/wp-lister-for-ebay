@@ -607,9 +607,10 @@ class WPL_AjaxHandler extends WPL_Core {
 	// show dynamic listing gallery
 	public function ajax_wpl_gallery() {
 	
-		$type    = isset( $_REQUEST['type'] )  ? $_REQUEST['type']  : 'new';	
-		$limit   = isset( $_REQUEST['limit'] ) ? $_REQUEST['limit'] : 12;	
-		$id      = isset( $_REQUEST['id'] )    ? $_REQUEST['id']    : false;	
+		$default_limit = get_option( 'wplister_gallery_items_limit', 12 );
+		$type          = isset( $_REQUEST['type'] )  ? $_REQUEST['type']  : 'new';	
+		$limit         = isset( $_REQUEST['limit'] ) ? $_REQUEST['limit'] : $default_limit;	
+		$id            = isset( $_REQUEST['id'] )    ? $_REQUEST['id']    : false;	
 
 		$lm = new ListingsModel();
 		$items = $lm->getItemsForGallery( $type, $id, $limit );

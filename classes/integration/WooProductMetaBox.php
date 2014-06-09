@@ -24,6 +24,9 @@ class WpLister_Product_MetaBox {
 		$title = __('Advanced eBay Options', 'wplister');
 		add_meta_box( 'wplister-ebay-advanced', $title, array( &$this, 'meta_box_advanced' ), 'product', 'normal', 'default');
 
+		$title = __('eBay Part Compatibility', 'wplister');
+		add_meta_box( 'wplister-ebay-compat', $title, array( &$this, 'meta_box_compat' ), 'product', 'normal', 'default');
+
 		$title = __('eBay Shipping Options', 'wplister');
 		add_meta_box( 'wplister-ebay-shipping', $title, array( &$this, 'meta_box_shipping' ), 'product', 'normal', 'default');
 
@@ -38,15 +41,19 @@ class WpLister_Product_MetaBox {
         <style type="text/css">
             #wplister-ebay-details label { 
             	float: left;
-            	width:25%;
+            	width: 33%;
             	line-height: 2em;
             }
             #wplister-ebay-details input { 
-            	width:74%; 
+            	width: 62%; 
             }
             #wplister-ebay-details .description { 
             	clear: both;
-            	margin-left: 25%;
+            	margin-left: 33%;
+            #wplister-ebay-details .de.input_specs,
+            #wplister-ebay-details .de.select_specs { 
+            	clear:100%h;
+            	margin-left: 33%;
             }
 
 			.branch-3-8 div.update-nag {
@@ -58,7 +65,7 @@ class WpLister_Product_MetaBox {
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_title',
 			'label' 		=> __('Listing title', 'wplister'),
-			'placeholder' 	=> 'Custom listing title',
+			'placeholder' 	=> __('Custom listing title'),
 			'description' 	=> __('Leave empty to generate title from product name. Maximum length: 80 characters','wplister'),
 			'custom_attributes' => array( 'maxlength' => 80 ),
 			'value'			=> get_post_meta( $post->ID, '_ebay_title', true )
@@ -67,7 +74,7 @@ class WpLister_Product_MetaBox {
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_subtitle',
 			'label' 		=> __('Listing subtitle', 'wplister'),
-			'placeholder' 	=> 'Custom listing subtitle',
+			'placeholder' 	=> __('Custom listing subtitle', 'wplister'),
 			'description' 	=> __('Leave empty to use the product excerpt. Maximum length: 55 characters','wplister'),
 			'custom_attributes' => array( 'maxlength' => 55 ),
 			'value'			=> get_post_meta( $post->ID, '_ebay_subtitle', true )
@@ -76,7 +83,7 @@ class WpLister_Product_MetaBox {
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_start_price',
 			'label' 		=> __('Price / Start Price', 'wplister'),
-			'placeholder' 	=> 'Start Price',
+			'placeholder' 	=> __('Start Price', 'wplister'),
 			'value'			=> get_post_meta( $post->ID, '_ebay_start_price', true )
 		) );
 
@@ -153,7 +160,7 @@ class WpLister_Product_MetaBox {
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_condition_description',
 			'label' 		=> __('Condition description', 'wplister'),
-			'placeholder' 	=> 'Condition description',
+			'placeholder' 	=> __('Condition description', 'wplister'),
 			'description' 	=> __('This field should only be used to further clarify the condition of used items.','wplister'),
 			'value'			=> get_post_meta( $post->ID, '_ebay_condition_description', true )
 		) );
@@ -190,18 +197,31 @@ class WpLister_Product_MetaBox {
         <style type="text/css">
             #wplister-ebay-advanced label { 
             	float: left;
-            	width:25%;
+            	width: 33%;
             	line-height: 2em;
             }
-            #wplister-ebay-advanced input { 
-            	width:74%; 
+            #wplister-ebay-advanced input, 
+            #wplister-ebay-advanced select.select { 
+            	width: 62%; 
             }
             #wplister-ebay-advanced input.checkbox { 
             	width:auto; 
             }
+            #wplister-ebay-advanced #ItemSpecifics_container input,
+            #wplister-ebay-advanced input.input_specs,
+            #wplister-ebay-advanced input.select_specs { 
+            	width:100%; 
+            }
+            #wplister-ebay-advanced #ItemSpecifics_container th { 
+            	text-align: center;
+            }
+            #wplister-ebay-advanced #EbayItemSpecificsBox .inside { 
+            	margin:0;
+            	padding:0;
+            }
             #wplister-ebay-advanced .description { 
             	clear: both;
-            	margin-left: 25%;
+            	margin-left: 33%;
             }
             #wplister-ebay-advanced .wpl_ebay_hide_from_unlisted_field .description { 
             	margin-left: 0;
@@ -221,30 +241,32 @@ class WpLister_Product_MetaBox {
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_buynow_price',
 			'label' 		=> __('Buy Now Price', 'wplister'),
-			'placeholder' 	=> 'Buy Now Price',
+			'placeholder' 	=> __('Buy Now Price', 'wplister'),
 			'description' 	=> __('The optional Buy Now Price is only used for auction style listings. It has no effect on fixed price listings.','wplister'),
+			'desc_tip'		=>  true,
 			'value'			=> get_post_meta( $post->ID, '_ebay_buynow_price', true )
 		) );
 
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_reserve_price',
 			'label' 		=> __('Reserve Price', 'wplister'),
-			'placeholder' 	=> 'Reserve Price',
+			'placeholder' 	=> __('Reserve Price', 'wplister'),
 			'description' 	=> __('The lowest price at which you are willing to sell the item. Not all categories support a reserve price.','wplister'),
+			'desc_tip'		=>  true,
 			'value'			=> get_post_meta( $post->ID, '_ebay_reserve_price', true )
 		) );
 
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_upc',
 			'label' 		=> __('UPC', 'wplister'),
-			'placeholder' 	=> 'Enter a Universal Product Code (UPC) to use product details from the eBay catalog.',
+			'placeholder' 	=> __('Enter a Universal Product Code (UPC) to use product details from the eBay catalog.', 'wplister'),
 			'value'			=> get_post_meta( $post->ID, '_ebay_upc', true )
 		) );
 
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_gallery_image_url',
 			'label' 		=> __('Gallery Image URL', 'wplister'),
-			'placeholder' 	=> 'Enter an URL if you want to use a custom gallery image on eBay.',
+			'placeholder' 	=> __('Enter an URL if you want to use a custom gallery image on eBay.', 'wplister'),
 			'value'			=> get_post_meta( $post->ID, '_ebay_gallery_image_url', true )
 		) );
 
@@ -315,7 +337,8 @@ class WpLister_Product_MetaBox {
 
 		$this->showCategoryOptions();
 		$this->showItemSpecifics();
-		WPL_WooFrontEndIntegration::showCompatibilityList();
+		// $this->showCompatibilityTable();
+		// WPL_WooFrontEndIntegration::showCompatibilityList();
 
 		if ( get_option( 'wplister_external_products_inventory' ) == 1 ) {
 			$this->enabledInventoryOnExternalProducts();
@@ -323,6 +346,10 @@ class WpLister_Product_MetaBox {
 
 		// woocommerce_wp_checkbox( array( 'id' => 'wpl_update_ebay_on_save', 'wrapper_class' => 'update_ebay', 'label' => __('Update on save?', 'wplister') ) );
 	
+	}
+
+	function meta_box_compat() {
+		$this->showCompatibilityTable();
 	}
 
 	function showCategoryOptions() {
@@ -543,10 +570,153 @@ class WpLister_Product_MetaBox {
 
 		<?php
 
-	}
+	} // showCategoryOptions()
+
+	// show editable parts compatibility table
+	function showCompatibilityTable() {
+		global $post;
+
+		// get compatibility list and names
+		$compatibility_list   = get_post_meta( $post->ID, '_ebay_item_compatibility_list', true );
+		$compatibility_names  = get_post_meta( $post->ID, '_ebay_item_compatibility_names', true );
+		// echo "<pre>";print_r($compatibility_list);echo"</pre>";#die();
+
+		// return if there is no compatibility list
+		if ( ( ! is_array($compatibility_list) ) || ( sizeof($compatibility_list) == 0 ) ) return;
+
+		// echo '<h2>'.  __('Item Compatibility List','wplister') . '</h2>';
+
+		?>
+			<table class="ebay_item_compatibility_table">
+
+				<tr>
+					<?php foreach ($compatibility_names as $name) : ?>
+						<th><?php echo $name ?></th>
+					<?php endforeach; ?>
+					<th><?php echo 'Notes' ?></th>
+				</tr>
+
+				<?php foreach ($compatibility_list as $comp) : ?>
+
+					<tr>
+						<?php foreach ($compatibility_names as $name) : ?>
+
+							<td><?php echo $comp->applications[ $name ]->value ?></td>
+
+						<?php endforeach; ?>
+
+						<td><?php echo $comp->notes ?></td>
+
+					</tr>
+					
+				<?php endforeach; ?>
+
+			</table>
+
+			<input type="hidden" name="wpl_e2e_compatibility_list"  id="wpl_e2e_compatibility_list"  value='<?php #echo json_encode($compatibility_list)  ?>' />
+			<input type="hidden" name="wpl_e2e_compatibility_names" id="wpl_e2e_compatibility_names" value='<?php #echo json_encode($compatibility_names) ?>' />
+
+			<div style="float:right; margin-top:1em;">
+				<a href="#" id="wpl_btn_add_compatibility_row" class="button"><?php echo __('Add row','wplister') ?></a>
+			</div>
+			<p>
+				To remove a row empty the first column and update.
+			</p>
+
+			<style type="text/css">
+
+				.ebay_item_compatibility_table {
+					width: 100%;
+				}
+				.ebay_item_compatibility_table tr th {
+					text-align: left;
+					border-bottom: 3px double #bbb;
+				}
+				.ebay_item_compatibility_table tr td {
+					border-bottom: 1px solid #ccc;
+				}
+				#wpl_btn_add_compatibility_row {
+					/*float: right;*/
+				}
+				
+			</style>
+
+			<script type="text/javascript">
+
+				jQuery( document ).ready( function () {
+
+					// make table editable
+					jQuery('table.ebay_item_compatibility_table').editableTableWidget();
+
+					// listen to submit
+					// jQuery('form#post').on('submit', function(evt, value) {
+					// 	console.log(evt);
+					// 	console.log(value);
+					// 	alert( evt + value );
+					// 	return false;
+					// });
+
+					// listen to changes
+					jQuery('table.ebay_item_compatibility_table td').on('change', function(evt, newValue) {
+						// update hidden data fields
+						wpl_updateTableData();
+						// return false; // reject change
+					});
+
+					// handle add row button
+					jQuery('#wpl_btn_add_compatibility_row').on('click', function(evt) {
+
+						// clone the last row and append to table
+						jQuery('table.ebay_item_compatibility_table tr:last').last().clone().insertAfter('table.ebay_item_compatibility_table tr:last');
+
+						return false; // reject change
+					});
+
+				});	
+
+
+		        function wpl_updateTableData() {
+		            var row = 0, data = [], cols = [];
+
+		            jQuery('table.ebay_item_compatibility_table').find('tbody tr').each(function () {
+
+		                row += 1;
+		                data[row] = [];
+
+		                jQuery(this).find('td').each(function () {
+		                    data[row].push(jQuery(this).html());
+		                });
+
+		                jQuery(this).find('th').each(function () {
+		                    cols.push(jQuery(this).html());
+		                });
+		            });
+
+		            // Remove undefined
+		            data.splice(0, 2);
+
+		            console.log('data',data);
+		            console.log('string', JSON.stringify(data) );
+		            // alert(data);
+
+		            // update hidden field
+		            jQuery('#wpl_e2e_compatibility_list').attr('value', JSON.stringify(data) );
+		            jQuery('#wpl_e2e_compatibility_names').attr('value', JSON.stringify(cols) );
+
+		            // return data;
+		        }
+
+			
+			</script>
+
+		<?php
+
+		wp_enqueue_script( 'jquery-editable-table' );
+
+	} // showCompatibilityTable()
 
 	function showItemSpecifics() {
-	}
+	} // showItemSpecifics()
 
 	function enabledInventoryOnExternalProducts() {
 		global $post;
@@ -585,15 +755,22 @@ class WpLister_Product_MetaBox {
         <style type="text/css">
             #wplister-ebay-shipping label { 
             	float: left;
-            	width:25%;
+            	width: 33%;
             	line-height: 2em;
             }
+            #wplister-ebay-shipping label img.help_tip { 
+				vertical-align: bottom;
+            	float: right;
+				margin: 0;
+				margin-top: 0.5em;
+				margin-right: 0.5em;
+            }
             #wplister-ebay-shipping input { 
-            	/*width:74%; */
+            	/*width: 64%; */
             }
             #wplister-ebay-shipping .description { 
             	/*clear: both;*/
-            	/*margin-left: 25%;*/
+            	/*margin-left: 33%;*/
             }
             #wplister-ebay-shipping .ebay_shipping_options_wrapper h2 {
             	padding-top: 0.5em;
@@ -707,6 +884,8 @@ class WpLister_Product_MetaBox {
 		wp_enqueue_script( 'jquery-ui-button' );
 		wp_enqueue_script( 'jquery-ui-autocomplete' );
 
+		// mustache template engine
+		wp_register_script( 'jquery-editable-table', WPLISTER_URL.'/js/editable-table/mindmup-editabletable.js', array( 'jquery' ) );
 	}
 
 	function save_meta_box( $post_id, $post ) {

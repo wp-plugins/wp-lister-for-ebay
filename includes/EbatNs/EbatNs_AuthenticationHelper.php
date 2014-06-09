@@ -1,6 +1,10 @@
 <?php
-// $Id: EbatNs_AuthenticationHelper.php,v 1.3 2008-06-13 08:51:25 michael Exp $
+// $Id: EbatNs_AuthenticationHelper.php,v 1.4 2013-04-02 13:31:07 carstenharnisch Exp $
 // $Log: EbatNs_AuthenticationHelper.php,v $
+// Revision 1.4  2013-04-02 13:31:07  carstenharnisch
+// - removed deprecated file (RuName)
+// - correct domain name for Australia
+//
 // Revision 1.3  2008-06-13 08:51:25  michael
 // use getSession() on proxy
 //
@@ -9,6 +13,7 @@
 //
 //
 require_once 'EbatNs_ServiceProxy.php';
+// deprecated
 // require_once 'GetRuNameRequestType.php';
 
 class EbatNs_AuthenticationHelper
@@ -62,6 +67,7 @@ class EbatNs_AuthenticationHelper
 			case 3:
 				return 'ebay.co.uk';
 			case 15:
+				// changed to correct domain name
 				return 'ebay.com.au';
 			case 16:
 				return 'ebay.at';
@@ -90,13 +96,13 @@ class EbatNs_AuthenticationHelper
 			case 203:
 				return 'ebay.in';
 			case 207:
-				return 'ebay.my';
+                return 'ebay.com.my';
 			case 211:
 				return 'ebay.ph';
 			case 212:
 				return 'ebay.pl';
 			case 216:
-				return 'ebay.sg';
+				return 'ebay.com.sg';
 			case 218:
 				return 'ebay.se';
 			case 223:

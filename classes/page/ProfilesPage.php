@@ -67,7 +67,7 @@ class ProfilesPage extends WPL_Page {
 
 
 	public function onDisplayProfilesPage() {
-		WPL_Setup::checkSetup();
+		$this->check_wplister_setup();
 	
 		// edit profile
 		if ( ( $this->requestAction() == 'edit' ) || ( $this->requestAction() == 'add_new_profile' ) ) {
@@ -264,7 +264,7 @@ class ProfilesPage extends WPL_Page {
 		return $details;
 	}
 
-	public function getPreprocessedPostDetails() {
+	static public function getPreprocessedPostDetails() {
 
 		// item details
 		$details = array();

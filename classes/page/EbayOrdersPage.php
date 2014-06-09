@@ -58,7 +58,7 @@ class EbayOrdersPage extends WPL_Page {
 
 
 	public function onDisplayEbayOrdersPage() {
-		WPL_Setup::checkSetup();
+		$this->check_wplister_setup();
 
 		// handle update ALL from eBay action
 		if ( $this->requestAction() == 'update_orders' ) {
@@ -158,7 +158,6 @@ class EbayOrdersPage extends WPL_Page {
 
 
 			// built message
-			// $msg  = '<p><b>Warning: '.__('WP-Lister found the following duplicate transactions which should be removed.','wplister').'</b>';
 			$msg .= '<p>';
 
 			// table header

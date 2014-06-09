@@ -92,10 +92,10 @@
 
 							<?php
 								$wpl_caps = array(
-									'manage_ebay_listings'  => 'Manage Listings',
-									'manage_ebay_options'   => 'Manage Settings',
-									'prepare_ebay_listings' => 'Prepare Listings',
-									'publish_ebay_listings' => 'Publish Listings',
+									'manage_ebay_listings'  => __('Manage Listings','wplister'),
+									'manage_ebay_options'   => __('Manage Settings','wplister'),
+									'prepare_ebay_listings' => __('Prepare Listings','wplister'),
+									'publish_ebay_listings' => __('Publish Listings','wplister'),
 								);
 							?>
 
@@ -175,9 +175,11 @@
 								<option value="allow_all" <?php if ( $wpl_remove_links == 'allow_all' ): ?>selected="selected"<?php endif; ?>><?php echo __('allow all links','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
-								<?php echo __('WP-Lister does remove links from product descriptions by default to avoid violating the eBay Links policy.','wplister'); ?>
+								<?php echo __('Links are removed from product descriptions by default to avoid violating the eBay Links policy.','wplister'); ?>
 								<?php echo __('Specifically you are not allowed to advertise products that you list on eBay by linking to their product pages on your site.','wplister'); ?>
-								Read more about eBay's Link policy <a href="http://pages.ebay.com/help/policies/listing-links.html" target="_blank">here</a>
+								
+								<?php echo __('Read more about eBay\'s Link policy','wplister'); ?>
+								<a href="<?php echo __('http://pages.ebay.com/help/policies/listing-links.html','wplister'); ?>" target="_blank"><?php echo __('here','wplister'); ?></a>
 							</p>
 
 							<label for="wpl-default_image_size" class="text_label">
@@ -202,6 +204,22 @@
 								<?php echo __('If you find unwanted images in your listings try disabling this option.','wplister'); ?>
 							</p>
 
+							<label for="wpl-gallery_items_limit" class="text_label">
+								<?php echo __('Gallery Widget limit','wplister'); ?>
+                                <?php wplister_tooltip('Limit the number of items displayed by the gallery widgets in your listing template - like <i>recent additions</i> or <i>ending soon</i>. The default is 12 items.') ?>
+							</label>
+							<select id="wpl-gallery_items_limit" name="wpl_e2e_gallery_items_limit" class="required-entry select">
+								<option value="3" <?php if ( $wpl_gallery_items_limit == '3' ): ?>selected="selected"<?php endif; ?>>3 <?php echo __('items','wplister'); ?></option>
+								<option value="6" <?php if ( $wpl_gallery_items_limit == '6' ): ?>selected="selected"<?php endif; ?>>6 <?php echo __('items','wplister'); ?></option>
+								<option value="9" <?php if ( $wpl_gallery_items_limit == '9' ): ?>selected="selected"<?php endif; ?>>9 <?php echo __('items','wplister'); ?></option>
+								<option value="12" <?php if ( $wpl_gallery_items_limit == '12' ): ?>selected="selected"<?php endif; ?>>12 <?php echo __('items','wplister'); ?></option>
+								<option value="15" <?php if ( $wpl_gallery_items_limit == '15' ): ?>selected="selected"<?php endif; ?>>15 <?php echo __('items','wplister'); ?></option>
+								<option value="24" <?php if ( $wpl_gallery_items_limit == '24' ): ?>selected="selected"<?php endif; ?>>24 <?php echo __('items','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('The maximum number of items shown by listings template gallery widgets.','wplister'); ?>
+							</p>
+
 						</div>
 					</div>
 
@@ -209,6 +227,7 @@
 						<h3 class="hndle"><span><?php echo __('User Interface','wplister') ?></span></h3>
 						<div class="inside">
 
+							<?php if ( ! defined('WPLISTER_RESELLER_VERSION') ) : ?>
 							<label for="wpl-text-admin_menu_label" class="text_label">
 								<?php echo __('Menu label','wplister') ?>
                                 <?php wplister_tooltip('You can change the main admin menu label in your dashboard from WP-Lister to anything you like.') ?>
@@ -217,17 +236,30 @@
 							<p class="desc" style="display: block;">
 								<?php echo __('Customize the main admin menu label of WP-Lister.','wplister'); ?><br>
 							</p>
+							<?php endif; ?>
 
 							<label for="wpl-option-preview_in_new_tab" class="text_label">
 								<?php echo __('Open preview in new tab','wplister') ?>
                                 <?php wplister_tooltip('WP-Lister uses a Thickbox modal window to display the preview by default. However, this can cause issues in rare cases where you embed some JavaScript code (like NivoSlider) - or you might just want more screen estate to preview your listings.') ?>
 							</label>
 							<select id="wpl-option-preview_in_new_tab" name="wpl_e2e_option_preview_in_new_tab" class="required-entry select">
-								<option value="0" <?php if ( $wpl_option_preview_in_new_tab != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
+								<option value="0" <?php if ( $wpl_option_preview_in_new_tab != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
 								<option value="1" <?php if ( $wpl_option_preview_in_new_tab == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('Select if you want the listing preview open in a new tab by default.','wplister'); ?><br>
+							</p>
+
+							<label for="wpl-option-enable_thumbs_column" class="text_label">
+								<?php echo __('Listing thumbnails','wplister') ?>
+                                <?php wplister_tooltip('Enable this to show product thumbnails on the listings page. Disabled by default to save screen estate.') ?>
+							</label>
+							<select id="wpl-option-enable_thumbs_column" name="wpl_e2e_enable_thumbs_column" class="required-entry select">
+								<option value="0" <?php if ( $wpl_enable_thumbs_column != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
+								<option value="1" <?php if ( $wpl_enable_thumbs_column == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Show product images on listings page.','wplister'); ?><br>
 							</p>
 
 							<label for="wpl-enable_categories_page" class="text_label">
@@ -235,7 +267,7 @@
                                 <?php wplister_tooltip('This will add a <em>Categories</em> submenu entry visible to users who can manage listings.') ?>
 							</label>
 							<select id="wpl-enable_categories_page" name="wpl_e2e_enable_categories_page" class="required-entry select">
-								<option value="0" <?php if ( $wpl_enable_categories_page != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
+								<option value="0" <?php if ( $wpl_enable_categories_page != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
 								<option value="1" <?php if ( $wpl_enable_categories_page == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
@@ -247,7 +279,7 @@
                                 <?php wplister_tooltip('Depending in your listing template content, you might want to disable the built in WP editor to edit your template content.') ?>
 							</label>
 							<select id="wpl-option-disable_wysiwyg_editor" name="wpl_e2e_option_disable_wysiwyg_editor" class="required-entry select">
-								<option value="0" <?php if ( $wpl_option_disable_wysiwyg_editor != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
+								<option value="0" <?php if ( $wpl_option_disable_wysiwyg_editor != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
 								<option value="1" <?php if ( $wpl_option_disable_wysiwyg_editor == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
@@ -259,7 +291,7 @@
                                 <?php wplister_tooltip('Technically, WP-Lister allows you to list the same product multiple times on eBay - in order to increase your visibility. However, this is not recommended as WP-Lister Pro would not be able to decrease the stock on eBay accordingly when the product is sold in WooCommerce.') ?>
 							</label>
 							<select id="wpl-hide_dupe_msg" name="wpl_e2e_hide_dupe_msg" class="required-entry select">
-								<option value=""  <?php if ( $wpl_hide_dupe_msg == ''  ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (recommended)</option>
+								<option value=""  <?php if ( $wpl_hide_dupe_msg == ''  ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (<?php _e('recommended','wplister'); ?>)</option>
 								<option value="1" <?php if ( $wpl_hide_dupe_msg == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes, I know what I am doing.','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
@@ -293,7 +325,7 @@
                                 <?php wplister_tooltip('WP-Lister assumes that you use the same dimension unit in WooCommerce as on eBay. Enable this to convert length, width and height from one unit to another.') ?>
 							</label>
 							<select id="wpl-convert_dimensions" name="wpl_e2e_convert_dimensions" class="required-entry select">
-								<option value=""  <?php if ( $wpl_convert_dimensions == ''  ): ?>selected="selected"<?php endif; ?>><?php echo __('No conversion','wplister'); ?> (default)</option>
+								<option value=""  <?php if ( $wpl_convert_dimensions == ''  ): ?>selected="selected"<?php endif; ?>><?php echo __('No conversion','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
 								<option value="in-cm" <?php if ( $wpl_convert_dimensions == 'in-cm' ): ?>selected="selected"<?php endif; ?>><?php echo __('Convert inches to centimeters','wplister'); ?> ( in &raquo; cm )</option>
 								<option value="mm-cm" <?php if ( $wpl_convert_dimensions == 'mm-cm' ): ?>selected="selected"<?php endif; ?>><?php echo __('Convert milimeters to centimeters','wplister'); ?> ( mm &raquo; cm )</option>
 							</select>
@@ -307,7 +339,7 @@
 							</label>
 							<select id="wpl-enable_item_compat_tab" name="wpl_e2e_enable_item_compat_tab" class="required-entry select">
 								<option value=""  <?php if ( $wpl_enable_item_compat_tab == ''  ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
-								<option value="1" <?php if ( $wpl_enable_item_compat_tab == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?> (default)</option>
+								<option value="1" <?php if ( $wpl_enable_item_compat_tab == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('Show eBay Item Compatibility List as new tab on single product page.','wplister'); ?>
@@ -319,11 +351,11 @@
                                 <?php wplister_tooltip('Since eBay relies on each item having a definitive quantity, allowing backorders for WooCommerce products can cause issues when the last item is sold. WP-Lister can force WooCommerce to mark an product as out of stock when the quantity reaches zero, even with backorders allowed.') ?>
 							</label>
 							<select id="wpl-option-allow_backorders" name="wpl_e2e_option_allow_backorders" class="required-entry select">
-								<option value="0" <?php if ( $wpl_option_allow_backorders != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (recommended)</option>
+								<option value="0" <?php if ( $wpl_option_allow_backorders != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (<?php _e('recommended','wplister'); ?>)</option>
 								<option value="1" <?php if ( $wpl_option_allow_backorders == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
-								<?php echo __('Should WP-Lister mark a product as out of stock even when it has backorders enabled?','wplister'); ?><br>
+								<?php echo __('Should a product be marked as out of stock even when it has backorders enabled?','wplister'); ?><br>
 							</p>
 
 							<label for="wpl-api_enable_auto_relist" class="text_label">
@@ -331,7 +363,7 @@
                                 <?php wplister_tooltip('When a locked product is marked out of stock via the API or CSV import, WP-Lister automatically ends the listing on eBay. Enable this option to allow WP-Lister to automatically relist the item when it is back in stock.') ?>
 							</label>
 							<select id="wpl-api_enable_auto_relist" name="wpl_e2e_api_enable_auto_relist" class="required-entry select">
-								<option value="0" <?php if ( $wpl_api_enable_auto_relist != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
+								<option value="0" <?php if ( $wpl_api_enable_auto_relist != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
 								<option value="1" <?php if ( $wpl_api_enable_auto_relist == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
@@ -344,7 +376,7 @@
                                 <?php wplister_tooltip('This can be helpful if you manually relisted items on eBay - which is not recommended.<br>Use it with care as it might cause performance issues and unexpected results.') ?>
 							</label>
 							<select id="wpl-auto_update_ended_items" name="wpl_e2e_auto_update_ended_items" class="required-entry select">
-								<option value="0" <?php if ( $wpl_auto_update_ended_items != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
+								<option value="0" <?php if ( $wpl_auto_update_ended_items != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
 								<option value="1" <?php if ( $wpl_auto_update_ended_items == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">

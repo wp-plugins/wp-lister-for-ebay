@@ -275,16 +275,16 @@ class EbayShippingModel extends WPL_Model {
 		$services = self::fixShippingCategory( $services );
 		return $services;		
 	}
-	function getAllLocal( $type = 'flat' ) {
+	static function getAllLocal( $type = 'flat' ) {
 		global $wpdb;	
-		$this->tablename = $wpdb->prefix . self::table;
+		$table = $wpdb->prefix . self::table;
 
 		// either find only flat or only calculated services
 		$type_sql = $type == 'flat' ? 'isFlat = 1' : 'isCalculated = 1';
 
 		$services = $wpdb->get_results("
 			SELECT * 
-			FROM $this->tablename
+			FROM $table
 			WHERE international = 0
 			  AND $type_sql
 			ORDER BY ShippingCategory, service_description
@@ -293,16 +293,16 @@ class EbayShippingModel extends WPL_Model {
 		$services = self::fixShippingCategory( $services );
 		return $services;		
 	}
-	function getAllInternational( $type = 'flat' ) {
+	static function getAllInternational( $type = 'flat' ) {
 		global $wpdb;	
-		$this->tablename = $wpdb->prefix . self::table;
+		$table = $wpdb->prefix . self::table;
 
 		// either find only flat or only calculated services
 		$type_sql = $type == 'flat' ? 'isFlat = 1' : 'isCalculated = 1';
 
 		$services = $wpdb->get_results("
 			SELECT * 
-			FROM $this->tablename
+			FROM $table
 			WHERE international = 1
 			  AND $type_sql
 			ORDER BY ShippingCategory, service_description
@@ -350,19 +350,19 @@ class EbayShippingModel extends WPL_Model {
 		return $item;		
 	}
 
-	function getShippingLocations() {
+	static function getShippingLocations() {
 		$locations = maybe_unserialize( get_option( 'wplister_ShippingLocationDetails' ) );
 		// $this->logger->info('wplister_ShippingLocationDetails'.print_r($locations,1));
 		if ( ! is_array($locations) ) return array();
 		return $locations;
 	}
-	function getExcludeShippingLocations() {
+	static function getExcludeShippingLocations() {
 		$locations = maybe_unserialize( get_option( 'wplister_ExcludeShippingLocationDetails' ) );
 		// $this->logger->info('wplister_ExcludeShippingLocationDetails'.print_r($locations,1));
 		if ( ! is_array($locations) ) return array();
 		return $locations;
 	}
-	function getEbayCountries() {
+	static function getEbayCountries() {
 		$countries = maybe_unserialize( get_option( 'wplister_CountryDetails' ) );
 		// $this->logger->info('wplister_CountryDetails'.print_r($countries,1));
 		if ( ! is_array($countries) ) return array();
@@ -370,7 +370,7 @@ class EbayShippingModel extends WPL_Model {
 		return $countries;
 	}
 
-	function fixShippingCategory( $services ) {
+	static function fixShippingCategory( $services ) {
 		foreach ($services as &$service) {
 
 			switch ( $service['ShippingCategory'] ) {

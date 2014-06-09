@@ -107,6 +107,7 @@ class WPL_Model {
 
 	/* Generic message display */
 	public function showMessage($message, $errormsg = false, $echo = false) {		
+		if ( defined('WPLISTER_RESELLER_VERSION') ) $message = apply_filters( 'wplister_tooltip_text', $message );
 		$class = ($errormsg) ? 'error' : 'updated';			// error or success
 		$class = ($errormsg == 2) ? 'updated update-nag' : $class; 	// warning
 		$message = '<div id="message" class="'.$class.'" style="display:block !important"><p>'.$message.'</p></div>';

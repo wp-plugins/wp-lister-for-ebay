@@ -61,7 +61,7 @@
 	<p>
     	<?php echo __('This is where you can assign eBay categories to your all your WooCommerce product categories.','wplister') ?>
     </p><p>
-    	<?php echo __('Once you selected a destination category for each local category, you can remove the category settings from your profile and WP-Lister will automatically select the category according to this list.','wplister') ?>
+    	<?php echo __('Once you selected a destination category for each local category, you can leave the profile category settings empty to automatically select the category according to this list.','wplister') ?>
     	<!-- <br> -->
     	<?php echo __('In order to access item specifics and custom item conditions in a profile without a primary category it is recommended to select a default category at the bottom of this page.','wplister') ?>
 	</p>

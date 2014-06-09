@@ -366,97 +366,95 @@ class EbayCategoriesModel extends WPL_Model {
 	
 	/* the following methods could go into another class, since they use wpdb instead of EbatNs_DatabaseProvider */
 	
-	function getAll() {
+	static function getAll() {
 		global $wpdb;	
-		$this->tablename = $wpdb->prefix . self::table;
+		$table = $wpdb->prefix . self::table;
 		$profiles = $wpdb->get_results("
 			SELECT * 
-			FROM $this->tablename
+			FROM $table
 			ORDER BY cat_name
 		", ARRAY_A);		
 
 		return $profiles;		
 	}
 
-	function getItem( $id ) {
+	static function getItem( $id ) {
 		global $wpdb;	
-		$this->tablename = $wpdb->prefix . self::table;
+		$table = $wpdb->prefix . self::table;
 		$item = $wpdb->get_row("
 			SELECT * 
-			FROM $this->tablename
+			FROM $table
 			WHERE cat_id = '$id'
 		", ARRAY_A);		
 
 		return $item;		
 	}
 
-	function getCategoryName( $id ) {
+	static function getCategoryName( $id ) {
 		global $wpdb;	
-		$this->tablename = $wpdb->prefix . self::table;
+		$table = $wpdb->prefix . self::table;
 		$value = $wpdb->get_var("
 			SELECT cat_name 
-			FROM $this->tablename
+			FROM $table
 			WHERE cat_id = '$id'
 		");		
 
 		return $value;		
 	}
 
-	function getCategoryType( $id ) {
+	static function getCategoryType( $id ) {
 		global $wpdb;	
-		$this->tablename = $wpdb->prefix . self::table;
+		$table = $wpdb->prefix . self::table;
 		$value = $wpdb->get_var("
 			SELECT leaf 
-			FROM $this->tablename
+			FROM $table
 			WHERE cat_id = '$id'
 		");		
 
 		return $value ? 'leaf' : 'parent';		
 	}
 
-	function getChildrenOf( $id ) {
+	static function getChildrenOf( $id ) {
 		global $wpdb;	
-		$this->tablename = $wpdb->prefix . self::table;
+		$table = $wpdb->prefix . self::table;
 		$items = $wpdb->get_results("
 			SELECT DISTINCT * 
-			FROM $this->tablename
+			FROM $table
 			WHERE parent_cat_id = '$id'
 		", ARRAY_A);		
 
 		return $items;		
 	}
 
-	function getStoreCategoryName( $id ) {
+	static function getStoreCategoryName( $id ) {
 		global $wpdb;	
-		// $this->tablename = $wpdb->prefix . self::table;
-		$this->tablename = $wpdb->prefix . 'ebay_store_categories';
+		$table = $wpdb->prefix . 'ebay_store_categories';
 		$value = $wpdb->get_var("
 			SELECT cat_name 
-			FROM $this->tablename
+			FROM $table
 			WHERE cat_id = '$id'
 		");		
 
 		return $value;		
 	}
-	function getStoreCategoryType( $id ) {
+	static function getStoreCategoryType( $id ) {
 		global $wpdb;	
 		// $this->tablename = $wpdb->prefix . self::table;
-		$this->tablename = $wpdb->prefix . 'ebay_store_categories';
+		$table = $wpdb->prefix . 'ebay_store_categories';
 		$value = $wpdb->get_var("
 			SELECT leaf 
-			FROM $this->tablename
+			FROM $table
 			WHERE cat_id = '$id'
 		");		
 
 		return $value ? 'leaf' : 'parent';		
 	}
-	function getChildrenOfStoreCategory( $id ) {
+	static function getChildrenOfStoreCategory( $id ) {
 		global $wpdb;	
-		// $this->tablename = $wpdb->prefix . self::table;
-		$this->tablename = $wpdb->prefix . 'ebay_store_categories';
+		$table = $wpdb->prefix . 'ebay_store_categories';
 		$items = $wpdb->get_results("
 			SELECT DISTINCT * 
-			FROM $this->tablename
+			FROM $table
 			WHERE parent_cat_id = '$id'
 			ORDER BY `order` ASC
 		", ARRAY_A);		
@@ -467,7 +465,7 @@ class EbayCategoriesModel extends WPL_Model {
 
 		
 	/* recursively get full ebay category name */	
-	function getFullEbayCategoryName( $cat_id ) {
+	static function getFullEbayCategoryName( $cat_id ) {
 		global $wpdb;
 		if ( intval($cat_id) == 0 ) return null;
 
@@ -484,7 +482,7 @@ class EbayCategoriesModel extends WPL_Model {
 	}
 
 	/* recursively get full store category name */	
-	function getFullStoreCategoryName( $cat_id ) {
+	static function getFullStoreCategoryName( $cat_id ) {
 		global $wpdb;
 		if ( intval($cat_id) == 0 ) return null;
 

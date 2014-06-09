@@ -107,7 +107,7 @@ class ProfilesModel extends WPL_Model {
 	}
 
 	// make sure, $options array contains at least one item
-	function fixShippingArray( $options = false ) {
+	static function fixShippingArray( $options = false ) {
 		if ( !is_array( $options )  ) $options = array( '' );
 		if ( count( $options ) == 0 ) $options = array( '' );
 		return $options;

@@ -58,7 +58,7 @@ class EbayMessagesPage extends WPL_Page {
 
 
 	public function onDisplayEbayMessagesPage() {
-		WPL_Setup::checkSetup();
+		$this->check_wplister_setup();
 
 		// handle update ALL from eBay action
 		if ( $this->requestAction() == 'update_messages' ) {

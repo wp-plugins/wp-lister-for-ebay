@@ -17,7 +17,7 @@ class WPL_Page extends WPL_Core {
 		self::$PLUGIN_URL = WPLISTER_URL;
 		self::$PLUGIN_DIR = WPLISTER_PATH;
 
-		$this->main_admin_menu_label = get_option( 'wplister_admin_menu_label', 'WP-Lister' );
+		$this->main_admin_menu_label = get_option( 'wplister_admin_menu_label', $this->app_name );
 		$this->main_admin_menu_slug  = sanitize_key( str_replace(' ', '-', $this->main_admin_menu_label ) );
 
 		add_action( 'admin_menu', 			array( &$this, 'onWpAdminMenu' ), 20 );
@@ -55,8 +55,10 @@ class WPL_Page extends WPL_Core {
 		ob_end_clean();
 
 		// change admin footer on wplister pages
-		add_filter('admin_footer_text', array( &$this, 'change_admin_footer_text') ); 
-		add_filter('update_footer', array( &$this, 'change_admin_footer_version') ); 
+		if ( apply_filters( 'wplister_enable_admin_footer', true ) ) {
+			add_filter('admin_footer_text', array( &$this, 'change_admin_footer_text') ); 
+			add_filter('update_footer', array( &$this, 'change_admin_footer_version') ); 
+		}
 
 		// MOVED to wp-lister.php
 		// fix thickbox display problems caused by other plugins 
@@ -74,13 +76,13 @@ class WPL_Page extends WPL_Core {
 	}
 
 	function change_admin_footer_text() {  
-		$plugin_name = WPLISTER_LIGHT ? 'WP-Lister' : 'WP-Lister Pro';  
+		$plugin_name = WPLISTER_LIGHT ? $this->app_name : $this->app_name . ' Pro';  
 	    echo '<span id="footer-thankyou">';
 	    echo sprintf( __('Thank you for listing with %s','wplister'), '<a href="http://www.wplab.com/plugins/wp-lister/" target="_blank">'.$plugin_name.'</a>' );
 	    echo '</span>';
 	}  
 	function change_admin_footer_version( $version ) {
-		$plugin_name  = WPLISTER_LIGHT ? 'WP-Lister' : 'WP-Lister Pro';  
+		$plugin_name  = WPLISTER_LIGHT ? $this->app_name : $this->app_name . ' Pro';  
 		$plugin_name .= ' ' . $this->get_plugin_version();
 		$network_activated = get_option('wplister_is_network_activated') == 1 ? true : false;
 		if ( $network_activated ) $plugin_name .= 'n';
@@ -119,6 +121,10 @@ class WPL_Page extends WPL_Core {
 		return false;
 	}
 
+	function check_wplister_setup( $page = false )	{
+		$Setup = new WPL_Setup();
+		$Setup->checkSetup( $page );
+	}
 
 
 }

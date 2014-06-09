@@ -58,7 +58,14 @@ class ItemBuilderModel extends WPL_Model {
 		// omit ListingType when revising item
 		if ( ! $reviseItem ) {
 			$product_listing_type = get_post_meta( $post_id, '_ebay_auction_type', true );
-			$item->ListingType = $product_listing_type ? $product_listing_type : $listing['auction_type'];
+			$ListingType = $product_listing_type ? $product_listing_type : $listing['auction_type'];
+
+			// handle classified ads
+			if ( $ListingType == 'ClassifiedAd' ) {
+				$ListingType = 'LeadGeneration';
+				$item->setListingSubtype2( 'ClassifiedAd' );
+			}
+			$item->setListingType( $ListingType );
 		}
 
 
@@ -110,6 +117,9 @@ class ItemBuilderModel extends WPL_Model {
 		// add item specifics (attributes) - after variations
 		$item = $this->buildItemSpecifics( $id, $item, $listing, $post_id );			
 
+		// add part compatibility list
+		$item = $this->buildCompatibilityList( $id, $item, $listing, $post_id );			
+
 		// adjust item if this is a ReviseItem request
 		if ( $reviseItem ) {
 			$item = $this->adjustItemForRevision( $id, $item, $profile_details, $listing );			
@@ -147,10 +157,11 @@ class ItemBuilderModel extends WPL_Model {
 		} else {
 
 			// fixed price listing
-			if ( $listing['quantity_sold'] > 0 ) {
-				$item->setTitle( null );
-				$item->setSubTitle( null );
-			}
+			// (disabled for now - eBay does seem to allow title changes when an item has sales)
+			// if ( $listing['quantity_sold'] > 0 ) {
+			// 	$item->setTitle( null );
+			// 	$item->setSubTitle( null );
+			// }
 
 		}
 
@@ -629,6 +640,9 @@ class ItemBuilderModel extends WPL_Model {
 
 	public function buildPayment( $item, $profile_details ) {
 
+		// no payment options for classified ads
+		if ( $item->ListingType == 'LeadGeneration' ) return $item;
+
 		// Set Payment Methods
 		// $item->PaymentMethods[] = 'PersonalCheck';
 		// $item->PaymentMethods[] = 'PayPal';
@@ -679,6 +693,9 @@ class ItemBuilderModel extends WPL_Model {
 
 
 	public function buildShipping( $id, $item, $post_id, $profile_details ) {
+
+		// no shipping options for classified ads
+		if ( $item->ListingType == 'LeadGeneration' ) return $item;
 
 		// handle flat and calc shipping
 		$this->logger->info('shipping_service_type: '.$profile_details['shipping_service_type'] );
@@ -1058,6 +1075,44 @@ class ItemBuilderModel extends WPL_Model {
 		return $item;
 
 	} /* end of buildItemSpecifics() */
+
+	public function buildCompatibilityList( $id, $item, $listing, $post_id ) {
+
+		// get compatibility list and names from product
+		$compatibility_list   = get_post_meta( $post_id, '_ebay_item_compatibility_list', true );
+		$compatibility_names  = get_post_meta( $post_id, '_ebay_item_compatibility_names', true );
+		if ( empty($compatibility_list) ) return $item;
+
+    	// new ItemCompatibilityList
+    	$ItemCompatibilityList = new ItemCompatibilityListType();
+    	$ItemCompatibilityList->setReplaceAll( 1 );
+
+        foreach ($compatibility_list as $comp) {
+
+        	$ItemCompatibility = new ItemCompatibilityType();
+        	$ItemCompatibility->setCompatibilityNotes( $comp->notes );
+
+        	foreach ( $comp->applications as $app ) {
+
+        		$value = html_entity_decode( $app->value, ENT_QUOTES );
+
+	            $NameValueList = new NameValueListType();
+		    	$NameValueList->setName ( $app->name  );
+	    		$NameValueList->setValue( $value );
+
+	        	$ItemCompatibility->addNameValueList( $NameValueList );
+        	}
+
+        	// add to list
+        	$ItemCompatibilityList->addCompatibility( $ItemCompatibility );
+        }
+
+		$item->setItemCompatibilityList( $ItemCompatibilityList );        	
+		$this->logger->info( count($ItemCompatibilityList) . " compatible applications were added.");
+
+		return $item;
+
+	} /* end of buildCompatibilityList() */
 
 	public function buildVariations( $id, $item, $profile_details, $listing, $session ) {
 

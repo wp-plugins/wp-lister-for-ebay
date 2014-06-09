@@ -127,12 +127,12 @@ class EbayPaymentModel extends WPL_Model {
 	
 	/* the following methods could go into another class, since they use wpdb instead of EbatNs_DatabaseProvider */
 	
-	function getAll() {
+	static function getAll() {
 		global $wpdb;	
-		$this->tablename = $wpdb->prefix . self::table;
+		$table = $wpdb->prefix . self::table;
 		$profiles = $wpdb->get_results("
 			SELECT * 
-			FROM $this->tablename
+			FROM $table
 			ORDER BY payment_description
 		", ARRAY_A);
 

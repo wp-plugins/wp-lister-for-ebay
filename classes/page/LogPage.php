@@ -176,7 +176,7 @@ class LogPage extends WPL_Page {
 		$headers     = '';
 		$message     = '';
 
-		$user_name  = $_REQUEST['user_name'] ? $_REQUEST['user_name'] : 'WP-Lister';
+		$user_name  = $_REQUEST['user_name'] ? $_REQUEST['user_name'] : $this->app_name;
 		$user_email = sanitize_email( $_REQUEST['user_email'] );
 		$user_msg   = stripslashes( $_REQUEST['user_msg'] );
 		$headers    = 'From: '.$user_name.' <'.$user_email.'>' . "\r\n";

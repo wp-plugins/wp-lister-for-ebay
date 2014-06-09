@@ -134,15 +134,6 @@ class WPLister_Toolbar  {
 			);
 			$wp_admin_bar->add_node($args);
 
-			// Settings - License tab
-			$args = array(
-				'id'    => 'wplister_settings_license',
-				'title' => __('Updates', 'wplister'),
-				'href'  => admin_url( 'admin.php?page=wplister-settings&tab=license' ),
-				'parent'  => 'wplister_settings',
-				'meta'  => array('class' => 'wplister-toolbar-page')
-			);
-			$wp_admin_bar->add_node($args);
 
 		} // if current_user_can('manage_ebay_options')
 
