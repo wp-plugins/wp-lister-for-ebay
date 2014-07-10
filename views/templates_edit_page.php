@@ -324,13 +324,17 @@
 								<code>[[ebay_store_category_id]]</code><br>
 								<code>[[ebay_store_category_name]]</code><br>
 							</p>
+							
+							<?php if ( ! get_option('wpl_reseller_enable_whitelabel' ) ) : ?>
 							<p>
-								<!-- For more information visit the  -->
-								<!-- <a href="http://www.wplab.com/plugins/wp-lister/faq/" target="_blank">FAQ</a>. -->
+								For more information visit the 
+								<a href="http://www.wplab.com/plugins/wp-lister/faq/" target="_blank">FAQ</a>.
 							</p>
 							<p>
 								<!-- If you need help setting up your template, please contact support at wplab.com. -->
 							</p>
+							<?php endif; ?>
+							
 						</div>
 					</div>
 

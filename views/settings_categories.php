@@ -93,18 +93,30 @@
 
 		<div class="submit" style="padding-top: 0; float: right;">
             <input type="button" value="<?php echo __('Select default category','wplister') ?>" class="button btn_select_default_category">
-	        <a href="#" onclick="jQuery('#import_export_container').slideToggle();return false;" class="button"><?php echo __('Import / Export','wplister'); ?></a> 
+	        <!-- <a href="#" onclick="jQuery('#import_export_container').slideToggle();return false;" class="button"><?php echo __('Import / Export','wplister'); ?></a>  -->
 			<input type="submit" value="<?php echo __('Update','wplister') ?>" name="submit" class="button-primary">
 		</div>
+		<br style="clear:both;"/>
 	
 
-	
+		<!-- Update eBay data --> 
+		<h3><?php echo __('Update from eBay','wplister'); ?></h3>
+		<a id="btn_update_ebay_data" class="button right"><?php echo __('Update eBay data','wplister'); ?></a>
+		<p><?php echo __('This will load available categories, shipping services, payment options and your custom store categories from eBay','wplister'); ?></p>
+		<br style="clear:both;"/>
+
+		<!-- Import / Export --> 
+        <h3><?php echo __('Backup and restore category mappings','wplister'); ?></h3>
+        <a href="#" onclick="jQuery('#import_export_container').slideToggle();return false;" class="button right"><?php echo __('Import / Export','wplister'); ?></a> 
+		<p><?php echo __('Export and import your category mappings as JSON.','wplister'); ?></p>
+		<!-- <br style="clear:both;"/> -->
+
 	</form>
 
 
     <div id="import_export_container" style="display:none; clear:both;">
-        <hr>
-        <h3><?php echo __('Backup and restore category mappings','wplister'); ?></h3>
+        <!-- <hr> -->
+        <!-- <h3><?php echo __('Backup and restore category mappings','wplister'); ?></h3> -->
 
             <p>
                 <a href="<?php echo $wpl_form_action ?>&action=wplister_export_categories_map" class="button"><?php echo __('Export category mappings','wplister'); ?></a> 

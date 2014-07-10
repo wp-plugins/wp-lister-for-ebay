@@ -64,7 +64,9 @@ class WPL_Page extends WPL_Core {
 		// fix thickbox display problems caused by other plugins 
 		// like woocommerce-pip which enqueues media-upload on every admin page
 		// if ( did_action( 'init' ) ) wp_dequeue_script( 'media-upload' );
-		
+
+		// filter content before output
+		$sContents = apply_filters( 'wplister_admin_page_content', $sContents );
 
 		if ($echo) {
 			echo $sContents;

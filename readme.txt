@@ -94,6 +94,19 @@ Working on it. Contact us if you want to become a beta tester.
 2. Profile Editor
 
 == Changelog ==
+= 1.4.6 =
+* fixed missing setup assistant messages 
+* added option to remove part compatibility table from product 
+
+= 1.4.5 =
+* added support for adding new part compatibility tables 
+* added filter to show only locked items on listings page 
+* added update eBay data option to category settings page 
+* improved behavior of listings and orders table - remember filter and search when using action links 
+* fixed issue with listing title not being updated for items with sales 
+* fixed width of profile selectors on edit product page 
+* fixed word wrap in task window 
+
 = 1.4.4 =
 * added option to show product thumbnails on listings page 
 * improved warning before deleting listings from archive 

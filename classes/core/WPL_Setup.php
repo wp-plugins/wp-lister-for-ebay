@@ -46,7 +46,7 @@ class WPL_Setup extends WPL_Core {
 			$link = '<a href="admin.php?page=wplister-settings">'.__('Settings','wplister').'</a>';
 			$msg2 = sprintf($msg2, $link);
 			$msg = "<p><b>$msg1</b></p><p>$msg2</p>";
-			$this->showMessage($msg);
+			$this->showMessage($msg,0,1);
 		
 		} elseif ( '2' == self::getOption('setup_next_step') ) {
 		
@@ -60,7 +60,7 @@ class WPL_Setup extends WPL_Core {
 			$msg   = "<p><b>$title</b></p><p>$msg1</p><p>$msg2</p>";
 			// $msg  .= "<form method='post' action='$url'>$hidden".wp_nonce_field( 'e2e_tools_page',"_wpnonce", true, false )."$button</form>";
 			$msg  .= $button;
-			$this->showMessage($msg);
+			$this->showMessage($msg,0,1);
 		
 		} elseif ( '3' == self::getOption('setup_next_step') ) {
 		
@@ -77,7 +77,7 @@ class WPL_Setup extends WPL_Core {
 				$link = '<a href="admin.php?page=wplister-templates&action=add_new_template">'.__('New Template', 'wplister').'</a>';
 				$msg2 = sprintf($msg2, $link);
 				$msg = "<p><b>$title</b></p><p><b>$msg1</b></p><p>$msg2</p>";
-				$this->showMessage($msg);			
+				$this->showMessage($msg,0,1);			
 			}
 		
 		} elseif ( '4' == self::getOption('setup_next_step') ) {
@@ -93,7 +93,7 @@ class WPL_Setup extends WPL_Core {
 				$link  = '<a href="admin.php?page=wplister-profiles&action=add_new_profile">'.__('New Profile', 'wplister').'</a>';
 				$msg2  = sprintf($msg2, $link);
 				$msg   = "<p><b>$msg1</b></p><p>$msg2</p>";
-				$this->showMessage($msg);
+				$this->showMessage($msg,0,1);
 			}
 		
 		} elseif ( '5' == self::getOption('setup_next_step') ) {
@@ -102,7 +102,7 @@ class WPL_Setup extends WPL_Core {
 			$msg1  = __('You are ready now to list your first items.', 'wplister');
 			$msg2  = __('Visit your Products page, select a few items and select "Prepare listings" from the bulk actions menu.','wplister');
 			$msg   = "<p><b>$msg1</b></p><p>$msg2</p>";
-			$this->showMessage($msg);
+			$this->showMessage($msg,0,1);
 			update_option('wplister_setup_next_step', '0');
 		
 		}
@@ -114,7 +114,7 @@ class WPL_Setup extends WPL_Core {
 			$msg1  = __('Your eBay token seems to be invalid.', 'wplister');
 			$msg2  = __('To re-authenticate WP-Lister visit the Settings page, click on "Change Account" and follow the instructions.','wplister');
 			$msg   = "<p><b>$msg1</b></p><p>$msg2</p>";
-			$this->showMessage($msg);
+			$this->showMessage($msg,0,1);
 		
 		}
 		

@@ -504,7 +504,7 @@
 						</div>
 					</div>
 
-
+					<?php if ( ! get_option('wpl_reseller_enable_whitelabel' ) ) : ?>
 					<div class="postbox" id="HelpBox">
 						<h3><span><?php echo __('Help','wplister'); ?></span></h3>
 						<div class="inside">
@@ -529,6 +529,7 @@
 							</p>
 						</div>
 					</div>
+					<?php endif; ?>
 
 
 

@@ -575,53 +575,75 @@ class WpLister_Product_MetaBox {
 	// show editable parts compatibility table
 	function showCompatibilityTable() {
 		global $post;
+		$has_compat_table = true;
 
 		// get compatibility list and names
 		$compatibility_list   = get_post_meta( $post->ID, '_ebay_item_compatibility_list', true );
 		$compatibility_names  = get_post_meta( $post->ID, '_ebay_item_compatibility_names', true );
-		// echo "<pre>";print_r($compatibility_list);echo"</pre>";#die();
+		// echo "<pre>cols: ";print_r($compatibility_names);echo"</pre>";#die();
+		// echo "<pre>rows: ";print_r($compatibility_list);echo"</pre>";#die();
 
 		// return if there is no compatibility list
-		if ( ( ! is_array($compatibility_list) ) || ( sizeof($compatibility_list) == 0 ) ) return;
+		// if ( ( ! is_array($compatibility_list) ) || ( sizeof($compatibility_list) == 0 ) ) return;
+
+		// empty default table
+		if ( ( ! is_array($compatibility_list) ) || ( sizeof($compatibility_list) == 0 ) ) {
+			// if ( ! get_option( 'wplister_enable_compatibility_table' ) ) return;
+
+			// $compatibility_names = array('Make','Model','Year');
+			// $compatibility_list  = array();
+			$has_compat_table = false;
+		}
 
 		// echo '<h2>'.  __('Item Compatibility List','wplister') . '</h2>';
 
 		?>
-			<table class="ebay_item_compatibility_table">
+			<div class="ebay_item_compatibility_table_wrapper" style="<?php echo $has_compat_table ? '' : 'display:none' ?>">
 
-				<tr>
-					<?php foreach ($compatibility_names as $name) : ?>
-						<th><?php echo $name ?></th>
-					<?php endforeach; ?>
-					<th><?php echo 'Notes' ?></th>
-				</tr>
-
-				<?php foreach ($compatibility_list as $comp) : ?>
+				<?php if ( $has_compat_table ) : ?>
+				<table class="ebay_item_compatibility_table">
 
 					<tr>
 						<?php foreach ($compatibility_names as $name) : ?>
-
-							<td><?php echo $comp->applications[ $name ]->value ?></td>
-
+							<th><?php echo $name ?></th>
 						<?php endforeach; ?>
-
-						<td><?php echo $comp->notes ?></td>
-
+						<th><?php echo 'Notes' ?></th>
 					</tr>
-					
-				<?php endforeach; ?>
 
-			</table>
+					<?php foreach ($compatibility_list as $comp) : ?>
 
-			<input type="hidden" name="wpl_e2e_compatibility_list"  id="wpl_e2e_compatibility_list"  value='<?php #echo json_encode($compatibility_list)  ?>' />
-			<input type="hidden" name="wpl_e2e_compatibility_names" id="wpl_e2e_compatibility_names" value='<?php #echo json_encode($compatibility_names) ?>' />
+						<tr>
+							<?php foreach ($compatibility_names as $name) : ?>
 
-			<div style="float:right; margin-top:1em;">
-				<a href="#" id="wpl_btn_add_compatibility_row" class="button"><?php echo __('Add row','wplister') ?></a>
+								<td><?php echo $comp->applications[ $name ]->value ?></td>
+
+							<?php endforeach; ?>
+
+							<td><?php echo $comp->notes ?></td>
+
+						</tr>
+						
+					<?php endforeach; ?>
+				</table>
+				<?php endif; ?>
+
+				<div style="float:right; margin-top:1em;">
+					<a href="#" id="wpl_btn_remove_compatibility_table" class="button"><?php echo __('Clear all','wplister') ?></a>
+					<a href="#" id="wpl_btn_add_compatibility_row" class="button"><?php echo __('Add row','wplister') ?></a>
+				</div>
+				<p>
+					<?php echo __('To remove a row empty the first column and update.','wplister') ?>
+				</p>
+
 			</div>
-			<p>
-				To remove a row empty the first column and update.
-			</p>
+
+			<a href="#" id="wpl_btn_add_compatibility_table" class="button" style="<?php echo $has_compat_table ? 'display:none' : '' ?>">
+				<?php echo __('Add compatibility table','wplister') ?>
+			</a>
+
+			<input type="hidden" name="wpl_e2e_compatibility_list"   id="wpl_e2e_compatibility_list"   value='<?php #echo json_encode($compatibility_list)  ?>' />
+			<input type="hidden" name="wpl_e2e_compatibility_names"  id="wpl_e2e_compatibility_names"  value='<?php #echo json_encode($compatibility_names) ?>' />
+			<input type="hidden" name="wpl_e2e_compatibility_remove" id="wpl_e2e_compatibility_remove" value='' />
 
 			<style type="text/css">
 
@@ -646,6 +668,81 @@ class WpLister_Product_MetaBox {
 				jQuery( document ).ready( function () {
 
 					// make table editable
+					wpl_initCompatTable();
+
+					// handle add row button
+					jQuery('#wpl_btn_add_compatibility_row').on('click', function(evt) {
+
+						// clone the last row and append to table
+						jQuery('table.ebay_item_compatibility_table tr:last').last().clone().insertAfter('table.ebay_item_compatibility_table tr:last');
+
+						// update listener
+						jQuery('table.ebay_item_compatibility_table td').on('change', function(evt, newValue) {
+							wpl_updateTableData();
+						});
+
+						return false; // reject change
+					});
+
+					// handle remove table button
+					jQuery('#wpl_btn_remove_compatibility_table').on('click', function(evt) {
+						var confirmed = confirm("<?php echo __('Are you sure you want to remove the entire table?','wplister') ?>");
+						if ( confirmed ) {
+
+							// remove table
+							jQuery('table.ebay_item_compatibility_table').remove();
+
+							// hide table wrapper
+							jQuery('.ebay_item_compatibility_table_wrapper').slideUp();
+
+							// show add table button
+							jQuery('#wpl_btn_add_compatibility_table').show();
+
+							// clear data
+				            jQuery('#wpl_e2e_compatibility_list'  ).attr('value', '' );
+				            jQuery('#wpl_e2e_compatibility_names' ).attr('value', '' );
+				            jQuery('#wpl_e2e_compatibility_remove').attr('value', 'yes' );
+
+						}
+						return false;
+					});
+
+					// handle add table button
+					jQuery('#wpl_btn_add_compatibility_table').on('click', function(evt) {
+
+						// var default_headers = ['Make','Model','Year'];
+						var default_headers = prompt('Please enter the table columns separated by comma:','Make,Model,Year').split(',');
+
+						// create table
+						jQuery('div.ebay_item_compatibility_table_wrapper').prepend('<table class="ebay_item_compatibility_table"></table>');
+						jQuery('table.ebay_item_compatibility_table').append('<tr></tr>');
+						jQuery('table.ebay_item_compatibility_table').append('<tr></tr>');
+						for (var i = default_headers.length - 1; i >= 0; i--) {
+							var col_name = default_headers[i];
+							jQuery('table.ebay_item_compatibility_table tr:first').prepend('<th>'+jQuery.trim(col_name)+'</th>');
+							jQuery('table.ebay_item_compatibility_table tr:last' ).prepend('<td>Enter '+col_name+'...</td>');
+						};
+						jQuery('table.ebay_item_compatibility_table tr:first').append('<th>'+'Notes'+'</th>');
+						jQuery('table.ebay_item_compatibility_table tr:last' ).append('<td></td>');
+
+						// show table
+						jQuery('.ebay_item_compatibility_table_wrapper').slideToggle();
+
+						// hide button
+						jQuery('#wpl_btn_add_compatibility_table').hide();
+
+						// make table editable
+						wpl_initCompatTable();
+
+						return false; // reject change
+					});
+
+				});	
+
+
+		        function wpl_initCompatTable() {
+
+					// make table editable
 					jQuery('table.ebay_item_compatibility_table').editableTableWidget();
 
 					// listen to submit
@@ -663,16 +760,7 @@ class WpLister_Product_MetaBox {
 						// return false; // reject change
 					});
 
-					// handle add row button
-					jQuery('#wpl_btn_add_compatibility_row').on('click', function(evt) {
-
-						// clone the last row and append to table
-						jQuery('table.ebay_item_compatibility_table tr:last').last().clone().insertAfter('table.ebay_item_compatibility_table tr:last');
-
-						return false; // reject change
-					});
-
-				});	
+				};	
 
 
 		        function wpl_updateTableData() {
@@ -696,12 +784,13 @@ class WpLister_Product_MetaBox {
 		            data.splice(0, 2);
 
 		            console.log('data',data);
-		            console.log('string', JSON.stringify(data) );
+		            // console.log('string', JSON.stringify(data) );
 		            // alert(data);
 
 		            // update hidden field
 		            jQuery('#wpl_e2e_compatibility_list').attr('value', JSON.stringify(data) );
 		            jQuery('#wpl_e2e_compatibility_names').attr('value', JSON.stringify(cols) );
+		            jQuery('#wpl_e2e_compatibility_remove').attr('value', '' );
 
 		            // return data;
 		        }

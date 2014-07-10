@@ -39,6 +39,8 @@ class ListingsModel extends WPL_Model {
 			$where_sql = "WHERE ( status = 'ended' OR status = 'sold' ) AND quantity > 0 ";
 		} elseif ( $listing_status == 'autorelist' ) {
 			$where_sql = "WHERE relist_date IS NOT NULL ";
+		} elseif ( $listing_status == 'locked' ) {
+			$where_sql = "WHERE locked = '1' AND NOT status = 'archived' ";
 		} else {
 			$where_sql = "WHERE status = '".$listing_status."' ";
 		} 
@@ -292,6 +294,15 @@ class ListingsModel extends WPL_Model {
 			$status = $row->status;
 			$summary->$status = $row->total;
 		}
+
+		// count locked items
+		$locked = $wpdb->get_var("
+			SELECT COUNT( id ) AS locked
+			FROM $this->tablename
+			WHERE locked = '1'
+			  AND NOT status = 'archived'
+		");
+		$summary->locked = $locked;
 
 		// count relist candidates
 		$relist = $wpdb->get_var("

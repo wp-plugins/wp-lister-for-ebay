@@ -35,7 +35,7 @@ class EbayController {
 
     static function loadEbayClasses() {
         // we want to be patient when talking to ebay
-        if( ! ini_get('safe_mode') ) set_time_limit(600);
+        if( ! ini_get('safe_mode') ) @set_time_limit(600);
 
         ini_set( 'mysql.connect_timeout', 600 );
         ini_set( 'default_socket_timeout', 600 );
@@ -165,6 +165,12 @@ class EbayController {
 
         // depends on the site working on (needs ID-Value !)
         $session->setSiteId($site_id);
+
+        // regard WP proxy server
+        if ( defined('WP_USEPROXY') || WP_USEPROXY ) {
+            if ( defined('WP_PROXY_HOST') && defined('WP_PROXY_PORT') )
+                $session->setProxyServer( WP_PROXY_HOST . ':' . WP_PROXY_PORT );
+        }
 
         // environment (0=production, 1=sandbox)
         if ( $sandbox_enabled == '1' ) {

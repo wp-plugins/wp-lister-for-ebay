@@ -108,11 +108,17 @@ class EbayOrdersTable extends WP_List_Table {
      **************************************************************************/
     function column_details($item){
         
+        // get current page with paging as url param
+        $page = $_REQUEST['page'];
+        if ( isset( $_REQUEST['paged'] ))           $page .= '&paged='.$_REQUEST['paged'];
+        if ( isset( $_REQUEST['s'] ))               $page .= '&s=' . urlencode( $_REQUEST['s'] );
+        if ( isset( $_REQUEST['order_status'] ))    $page .= '&order_status='.$_REQUEST['order_status'];
+
         //Build row actions
         $actions = array(
-            'view_ebay_order_details' => sprintf('<a href="?page=%s&action=%s&ebay_order=%s&width=600&height=470" class="thickbox">%s</a>',$_REQUEST['page'],'view_ebay_order_details',$item['id'],__('Details','wplister')),
-            // 'create_order' => sprintf('<a href="?page=%s&action=%s&ebay_order=%s">%s</a>',$_REQUEST['page'],'create_order',$item['id'],__('Create Order','wplister')),
-            // 'edit'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$_REQUEST['page'],'edit',$item['id'],__('Edit','wplister')),
+            'view_ebay_order_details' => sprintf('<a href="?page=%s&action=%s&ebay_order=%s&width=600&height=470" class="thickbox">%s</a>',$page,'view_ebay_order_details',$item['id'],__('Details','wplister')),
+            // 'create_order' => sprintf('<a href="?page=%s&action=%s&ebay_order=%s">%s</a>',$page,'create_order',$item['id'],__('Create Order','wplister')),
+            // 'edit'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'edit',$item['id'],__('Edit','wplister')),
         );
 
         // try to find created order
@@ -124,7 +130,7 @@ class EbayOrdersTable extends WP_List_Table {
 
         // create or edit order link
         if ( ! $order ) {
-            $actions['create_order'] = sprintf('<a href="?page=%s&action=%s&ebay_order=%s">%s</a>',$_REQUEST['page'],'create_order',$item['id'],__('Create Order','wplister'));
+            $actions['create_order'] = sprintf('<a href="?page=%s&action=%s&ebay_order=%s">%s</a>',$page,'create_order',$item['id'],__('Create Order','wplister'));
         } else {
             $actions['edit_order'] = sprintf('<a href="post.php?action=%s&post=%s">%s</a>','edit',$item['post_id'],__('View Order','wplister'));
             $actions['edit_order'] .= ' '.$order->get_order_number();

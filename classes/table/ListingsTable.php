@@ -126,7 +126,9 @@ class ListingsTable extends WP_List_Table {
         
         // get current page with paging as url param
         $page = $_REQUEST['page'];
-        if ( isset( $_REQUEST['paged'] )) $page .= '&paged='.$_REQUEST['paged'];
+        if ( isset( $_REQUEST['paged'] ))           $page .= '&paged='.$_REQUEST['paged'];
+        if ( isset( $_REQUEST['s'] ))               $page .= '&s=' . urlencode( $_REQUEST['s'] );
+        if ( isset( $_REQUEST['listing_status'] ))  $page .= '&listing_status='.$_REQUEST['listing_status'];
 
         // handle preview target
         $preview_target = get_option( 'wplister_preview_in_new_tab' ) == 1 ? '_blank' : '_self';
@@ -972,6 +974,14 @@ class ListingsTable extends WP_List_Table {
            $class = ($current == 'autorelist' ? ' class="current"' :'');
            $views['autorelist'] = "<a href='{$sold_url}' {$class} title='Show ended listings which are scheduled to be relisted.'>".__('Scheduled','wplister')."</a>";
            if ( isset($summary->autorelist) ) $views['autorelist'] .= '<span class="count">('.$summary->autorelist.')</span>';        
+       }
+
+       // locked link
+       if ( $summary->locked ) {
+           $sold_url = add_query_arg( 'listing_status', 'locked', $base_url );
+           $class = ($current == 'locked' ? ' class="current"' :'');
+           $views['locked'] = "<a href='{$sold_url}' {$class} title='Show locked listings'>".__('Locked','wplister')."</a>";
+           if ( isset($summary->locked) ) $views['locked'] .= '<span class="count">('.$summary->locked.')</span>';        
        }
 
        return $views;

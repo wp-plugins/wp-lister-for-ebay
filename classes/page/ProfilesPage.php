@@ -539,7 +539,7 @@ class ProfilesPage extends WPL_Page {
 	}
 
 
-	public function wpl_generate_shipping_option_tags( $services, $selected_service ) {
+	static public function wpl_generate_shipping_option_tags( $services, $selected_service ) {
 		?>
 
 		<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
