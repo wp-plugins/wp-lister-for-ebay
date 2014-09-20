@@ -5,16 +5,16 @@ function my_tpl_register_custom_fields() {
 
 	// register custom template options
     // parameters are: $type, $id, $default, $label, $config
-	wplister_register_custom_fields( 'title', 'section_title', '', 'Section Header Bar' );
-	wplister_register_custom_fields( 'color', 'section_head_color', '#FFFFFF', 'Text Color' );
-	wplister_register_custom_fields( 'color', 'section_head_bgcolor_top', '#555555', 'Background Top' );
-	wplister_register_custom_fields( 'color', 'section_head_bgcolor_bottom', '#000000', 'Background Bottom' );
-	wplister_register_custom_fields( 'title', 'hotline_title', '', 'Hotline Box' );
-	wplister_register_custom_fields( 'color', 'hotline_color', '#FFFFFF', 'Text Color' );
-	wplister_register_custom_fields( 'color', 'hotline_bgcolor', '#FFA500', 'Background Color' );
-	wplister_register_custom_fields( 'title', 'other_title', '', 'Other Colors' );
-	wplister_register_custom_fields( 'color', 'title_color', '#000000', 'Product Title' );
-	wplister_register_custom_fields( 'title', 'other_title2', '', 'Other Options' );
+	wplister_register_custom_fields( 'title', 'section_title', '', __('Section Header Bar','wplister') );
+	wplister_register_custom_fields( 'color', 'section_head_color', '#FFFFFF', __('Text Color','wplister') );
+	wplister_register_custom_fields( 'color', 'section_head_bgcolor_top', '#555555', __('Background Top','wplister') );
+	wplister_register_custom_fields( 'color', 'section_head_bgcolor_bottom', '#000000', __('Background Bottom','wplister') );
+	wplister_register_custom_fields( 'title', 'hotline_title', '', __('Hotline Box','wplister') );
+	wplister_register_custom_fields( 'color', 'hotline_color', '#FFFFFF', __('Text Color','wplister') );
+	wplister_register_custom_fields( 'color', 'hotline_bgcolor', '#FFA500', __('Background Color','wplister') );
+	wplister_register_custom_fields( 'title', 'other_title', '', __('Other Colors','wplister') );
+	wplister_register_custom_fields( 'color', 'title_color', '#000000', __('Product Title','wplister') );
+	wplister_register_custom_fields( 'title', 'other_title2', '', __('Other Options','wplister') );
 	
 	$radius_options = array(
 		'none' => '0px',

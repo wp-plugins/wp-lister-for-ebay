@@ -52,7 +52,10 @@ class TemplatesPage extends WPL_Page {
 		if ( $this->requestAction() == 'save_template' ) {
 			$this->saveTemplate();
 			if ( @$_POST['return_to'] == 'listings' ) {
-				wp_redirect( get_admin_url().'admin.php?page=wplister' );
+				$return_url = get_admin_url().'admin.php?page=wplister';
+		        if ( isset($_REQUEST['listing_status']) )	$return_url = add_query_arg( 'listing_status', $_REQUEST['listing_status'], $return_url );
+		        if ( isset($_REQUEST['s']) )				$return_url = add_query_arg( 's', $_REQUEST['s'], $return_url );
+				wp_redirect( $return_url );
 			}
 		}
 		// handle preview action

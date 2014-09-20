@@ -11,6 +11,10 @@ class WPL_WooBackendIntegration {
 		add_filter( 'manage_edit-product_columns', array( &$this, 'wpl_woocommerce_edit_product_columns' ), 11 );
 		add_action( 'manage_product_posts_custom_column', array( &$this, 'wplister_woocommerce_custom_product_columns' ), 3 );
 
+		// custom column for products table
+		add_filter( 'manage_edit-shop_order_columns', array( &$this, 'wpl_woocommerce_edit_shop_order_columns' ), 11 );
+		add_action( 'manage_shop_order_posts_custom_column', array( &$this, 'wplister_woocommerce_custom_shop_order_columns' ), 3 );
+
 		// hook into save_post to mark listing as changed when a product is updated
 		add_action( 'save_post', array( &$this, 'wplister_on_woocommerce_product_bulk_edit_save' ), 20, 2 );
 		add_action( 'save_post', array( &$this, 'wplister_on_woocommerce_product_quick_edit_save' ), 20, 2 );
@@ -34,7 +38,7 @@ class WPL_WooBackendIntegration {
 		// add_action( 'woocommerce_order_get_items', array( &$this, 'wpl_woocommerce_order_get_items' ), 10, 2 );
 		add_filter( 'woocommerce_get_product_from_item', array( &$this, 'wpl_woocommerce_get_product_from_item' ), 10, 3 );
 
-		// add Prepare Listing action link on products table
+		// add "List on eBay" action link on products table
 		add_filter( 'post_row_actions', array( &$this, 'wpl_post_row_actions' ), 10, 2 );
 
 		// prevent WooCommerce from sending out notification emails when updating order status manually
@@ -129,6 +133,53 @@ class WPL_WooBackendIntegration {
 		global $wpl_logger;
 		$wpl_logger->info('wpl_woocommerce_order_get_items - items: '.print_r($items,1));
 		// $wpl_logger->info('wpl_woocommerce_order_get_items - order: '.print_r($order,1));
+	}
+
+
+	/**
+	 * Columns for Orders page
+	 **/
+	// add_filter('manage_edit-shop_order_columns', 'wpl_woocommerce_edit_shop_order_columns', 11 );
+
+	function wpl_woocommerce_edit_shop_order_columns($columns){
+		return $columns;
+	}
+
+
+	/**
+	 * Custom Columns for Orders page
+	 **/
+	// add_action('manage_shop_order_posts_custom_column', 'wplister_woocommerce_custom_shop_order_columns', 3 );
+
+	function wplister_woocommerce_custom_shop_order_columns( $column ) {
+		global $post, $woocommerce;
+		// $product = new WC_Product($post->ID);
+
+		if ( $column != 'wpl_order_src' ) return;
+
+		$ebay_order_id = get_post_meta( $post->ID, '_ebay_order_id', true );
+		$ebay_transaction_id = get_post_meta( $post->ID, '_ebay_transaction_id', true );
+		// echo $ebay_transaction_id;
+
+		if ( intval($ebay_transaction_id) != 0 ) {
+
+			$ebay_item_id = get_post_meta( $post->ID, '_ebay_item_id', true );
+			$listingsModel = new ListingsModel();
+			$listing = $listingsModel->getItemByEbayID( $ebay_item_id, false );
+			
+			if ( $listing ) {
+				$ebayUrl = $listing->ViewItemURL;
+				echo '<a href="'.$ebayUrl.'" title="Transaction #'.$ebay_transaction_id.'" target="_blank"><img src="'.WPLISTER_URL.'img/ebay-16x16.png" alt="yes" /></a>';		
+			} else {
+				echo '<img src="'.WPLISTER_URL.'img/ebay-16x16.png" title="Transaction #'.$ebay_transaction_id.' - listing has been removed from WP-Lister." />';		
+			}
+
+		} elseif ( intval( $ebay_order_id ) != 0 ) {
+
+			echo '<img src="'.WPLISTER_URL.'img/ebay-42x16.png" style="width:32px;vertical-align:bottom;padding:0;" class="tips" data-tip="This order was placed on eBay" />';		
+
+		}
+
 	}
 
 
@@ -293,18 +344,6 @@ class WPL_WooBackendIntegration {
 	    	// filter by ebay status
 	    	if ( ! empty( $_GET['is_on_ebay'] ) ) {
 
-	        	// find all products that are already on ebay
-	        	$sql = "
-	        			SELECT {$wpdb->prefix}posts.ID 
-	        			FROM {$wpdb->prefix}posts 
-					    LEFT JOIN {$wpdb->prefix}ebay_auctions
-					         ON ( {$wpdb->prefix}posts.ID = {$wpdb->prefix}ebay_auctions.post_id )
-					    WHERE {$wpdb->prefix}ebay_auctions.status != 'archived'
-	        	";
-					    // WHERE {$wpdb->prefix}ebay_auctions.ebay_id != ''
-	        	$post_ids_on_ebay = $wpdb->get_col( $sql );
-	        	// echo "<pre>";print_r($post_ids_on_ebay);echo"</pre>";#die();
-
 	        	// find all products that hidden from ebay
 	        	$sql = "
 	        			SELECT post_id 
@@ -318,22 +357,54 @@ class WPL_WooBackendIntegration {
 
 		    	if ( $_GET['is_on_ebay'] == 'yes' ) {
 
+		        	// find all products that are already on ebay
+		        	// (all products which are actually published or changed)
+		        	$sql = "
+		        			SELECT {$wpdb->prefix}posts.ID 
+		        			FROM {$wpdb->prefix}posts 
+						    LEFT JOIN {$wpdb->prefix}ebay_auctions
+						         ON ( {$wpdb->prefix}posts.ID = {$wpdb->prefix}ebay_auctions.post_id )
+						    WHERE {$wpdb->prefix}ebay_auctions.status = 'published'
+						       OR {$wpdb->prefix}ebay_auctions.status = 'changed'
+		        	";
+						    // WHERE {$wpdb->prefix}ebay_auctions.ebay_id != ''
+		        	$post_ids_on_ebay = $wpdb->get_col( $sql );
+		        	// echo "<pre>";print_r($post_ids_on_ebay);echo"</pre>";#die();
+
 					// combine arrays
 					$post_ids = array_diff( $post_ids_on_ebay, $post_ids_hidden_from_ebay );
 		        	// echo "<pre>";print_r($post_ids);echo"</pre>";die();
 
 		        	if ( is_array($post_ids) && ( sizeof($post_ids) > 0 ) ) {
-			        	$query->query_vars['post__in'] = $post_ids;
+			        	if ( ! empty( $query->query_vars['post__in'] ) ) {
+				        	$query->query_vars['post__in'] = array_intersect( $query->query_vars['post__in'], $post_ids );
+			        	} else {
+				        	$query->query_vars['post__in'] = $post_ids;
+			        	}
 		        	}
 
 		        } elseif ( $_GET['is_on_ebay'] == 'no' ) {
+
+		        	// find all products that are already on ebay
+		        	// (all products which exist in WP-Lister, except for archived items)
+		        	$sql = "
+		        			SELECT {$wpdb->prefix}posts.ID 
+		        			FROM {$wpdb->prefix}posts 
+						    LEFT JOIN {$wpdb->prefix}ebay_auctions
+						         ON ( {$wpdb->prefix}posts.ID = {$wpdb->prefix}ebay_auctions.post_id )
+						    WHERE {$wpdb->prefix}ebay_auctions.status != 'archived'
+		        	";
+						    // WHERE {$wpdb->prefix}ebay_auctions.ebay_id != ''
+		        	$post_ids_on_ebay = $wpdb->get_col( $sql );
+		        	// echo "<pre>";print_r($post_ids_on_ebay);echo"</pre>";#die();
 
 					// combine arrays
 					$post_ids = array_merge( $post_ids_on_ebay, $post_ids_hidden_from_ebay );
 		        	// echo "<pre>";print_r($post_ids);echo"</pre>";die();
 
 		        	if ( is_array($post_ids) && ( sizeof($post_ids) > 0 ) ) {
-			        	$query->query_vars['post__not_in'] = $post_ids;
+			        	// $query->query_vars['post__not_in'] = $post_ids;
+			        	$query->query_vars['post__not_in'] = array_merge( $query->query_vars['post__not_in'], $post_ids );
 		        	}
 
 		        	// $query->query_vars['meta_value'] 	= null;
@@ -439,14 +510,14 @@ class WPL_WooBackendIntegration {
 
 		if ( ! current_user_can('edit_others_pages') ) return $views;
 
-		// On eBay
+		// Placed on eBay
 		// $class = ( isset( $wp_query->query['is_from_ebay'] ) && $wp_query->query['is_from_ebay'] == 'no' ) ? 'current' : '';
 		$class = ( isset( $_REQUEST['is_from_ebay'] ) && $_REQUEST['is_from_ebay'] == 'yes' ) ? 'current' : '';
 		$query_string = remove_query_arg(array( 'is_from_ebay' ));
 		$query_string = add_query_arg( 'is_from_ebay', urlencode('yes'), $query_string );
 		$views['listed'] = '<a href="'. $query_string . '" class="' . $class . '">' . __('Placed on eBay', 'wplister') . '</a>';
 
-		// Not on eBay
+		// Not placed on eBay
 		$class = ( isset( $_REQUEST['is_from_ebay'] ) && $_REQUEST['is_from_ebay'] == 'no' ) ? 'current' : '';
 		$query_string = remove_query_arg(array( 'is_from_ebay' ));
 		$query_string = add_query_arg( 'is_from_ebay', urlencode('no'), $query_string );

@@ -33,7 +33,7 @@ class ListingsModel extends WPL_Model {
 
         // filter listing_status
 		$listing_status = ( isset($_REQUEST['listing_status']) ? $_REQUEST['listing_status'] : 'all');
-		if ( $listing_status == 'all' ) {
+		if ( ! $listing_status || $listing_status == 'all' ) {
 			$where_sql = "WHERE NOT status = 'archived' ";
 		} elseif ( $listing_status == 'relist' ) {
 			$where_sql = "WHERE ( status = 'ended' OR status = 'sold' ) AND quantity > 0 ";
@@ -45,6 +45,14 @@ class ListingsModel extends WPL_Model {
 			$where_sql = "WHERE status = '".$listing_status."' ";
 		} 
 
+        // filter profile_id
+		$profile_id = ( isset($_REQUEST['profile_id']) ? $_REQUEST['profile_id'] : false);
+		if ( $profile_id ) {
+			$where_sql .= "
+				 AND l.profile_id = '".$profile_id."'
+			";
+		} 
+
         // filter search_query
 		$search_query = ( isset($_REQUEST['s']) ? $_REQUEST['s'] : false);
 		if ( $search_query ) {
@@ -52,8 +60,8 @@ class ListingsModel extends WPL_Model {
 				LEFT JOIN {$wpdb->prefix}ebay_profiles p  ON l.profile_id =  p.profile_id
 				LEFT JOIN {$wpdb->prefix}postmeta      pm ON l.post_id    = pm.post_id AND pm.meta_key = '_sku'
 			";
-			$where_sql = "
-				WHERE l.auction_title LIKE '%".$search_query."%'
+			$where_sql .= "
+				 AND ( l.auction_title LIKE '%".$search_query."%'
 				    OR l.template     LIKE '%".$search_query."%'
 				    OR p.profile_name LIKE '%".$search_query."%'
 				    OR l.history      LIKE '%".$search_query."%'
@@ -62,7 +70,7 @@ class ListingsModel extends WPL_Model {
 					OR l.listing_duration = '".$search_query."'
 					OR l.status           = '".$search_query."'
 					OR l.post_id          = '".$search_query."'
-					OR pm.meta_value      = '".$search_query."'
+					OR pm.meta_value      = '".$search_query."' )
 			";
 		} 
 
@@ -234,6 +242,7 @@ class ListingsModel extends WPL_Model {
 			SELECT status
 			FROM $this->tablename
 			WHERE post_id = '$post_id'
+			  AND NOT status = 'archived'
 			ORDER BY id DESC
 		");
 		return $item;
@@ -244,6 +253,7 @@ class ListingsModel extends WPL_Model {
 			SELECT id
 			FROM $this->tablename
 			WHERE post_id = '$post_id'
+			  AND NOT status = 'archived'
 			ORDER BY id DESC
 		");
 		return $item;
@@ -254,6 +264,7 @@ class ListingsModel extends WPL_Model {
 			SELECT *
 			FROM $this->tablename
 			WHERE post_id = '$post_id'
+			  AND NOT status = 'archived'
 			ORDER BY id DESC
 		");
 		return $items;
@@ -274,6 +285,7 @@ class ListingsModel extends WPL_Model {
 			SELECT ViewItemURL
 			FROM $this->tablename
 			WHERE post_id = '$post_id'
+			  AND NOT status = 'archived'
 			ORDER BY id DESC
 		");
 		return $item;
@@ -767,11 +779,16 @@ class ListingsModel extends WPL_Model {
 			$data['ebay_id'] = $res->ItemID;
 			$data['fees'] = $listingFee;
 			$data['status'] = 'published';
+			
+			// update listing status
+			if (  17 == $this->handle_error_code ) $data['status'] = 'archived'; 
 			$this->updateListing( $id, $data );
 			
-			// get details like ViewItemURL from ebay automatically
-			$this->updateItemDetails( $id, $session );
-			$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
+			// get details like ViewItemURL from ebay automatically - unless item does not exist on eBay (17)
+			if (  17 != $this->handle_error_code ) {
+				$this->updateItemDetails( $id, $session );
+				$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
+			}
 
 			$this->logger->info( "Item #$id relisted on ebay, NEW ItemID is ".$res->ItemID );
 
@@ -835,11 +852,16 @@ class ListingsModel extends WPL_Model {
 			$data['fees']        = $listingFee;
 			$data['status']      = 'published';
 			$data['relist_date'] = NULL;
+			
+			// update listing status
+			if (  17 == $this->handle_error_code ) $data['status'] = 'archived'; 
 			$this->updateListing( $id, $data );
 			
-			// get details like ViewItemURL from ebay automatically
-			$this->updateItemDetails( $id, $session );
-			$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
+			// get details like ViewItemURL from ebay automatically - unless item does not exist on eBay (17)
+			if (  17 != $this->handle_error_code ) {
+				$this->updateItemDetails( $id, $session );
+				$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
+			}
 
 			$this->logger->info( "Item #$id auto-relisted on ebay, NEW ItemID is ".$res->ItemID );
 
@@ -919,11 +941,14 @@ class ListingsModel extends WPL_Model {
 			// update listing status
 			$data['status'] = 'published';
 			if ( 291 == $this->handle_error_code ) $data['status'] = 'ended'; 
+			if (  17 == $this->handle_error_code ) $data['status'] = 'archived'; 
 			$this->updateListing( $id, $data );
 			
-			// get details like ViewItemURL from ebay automatically
-			$this->updateItemDetails( $id, $session );
-			$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
+			// get details like ViewItemURL from ebay automatically - unless item does not exist on eBay (17)
+			if (  17 != $this->handle_error_code ) {
+				$this->updateItemDetails( $id, $session );
+				$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
+			}
 
 			$this->logger->info( "Item #$id was revised, ItemID is ".$res->ItemID );
 
@@ -1043,8 +1068,16 @@ class ListingsModel extends WPL_Model {
 
 			} else {
 				// default - simple product
+
+				// regard custom eBay price for locked items as well
+				if ( $ebay_start_price = get_post_meta( $post_id, '_ebay_start_price', true ) ) {
+					$listing_item['price'] = $ebay_start_price;
+				}
+				// skip price when revising inventory during checkout
+				if ( ! $cart_item ) {
+					$stat->setStartPrice( $listing_item['price'] );
+				}
 				$stat->setQuantity( min( $max_quantity, $listing_item['quantity'] ) );
-				$stat->setStartPrice( $listing_item['price'] );
 				$req->addInventoryStatus( $stat );
 				$this->logger->info( "Revising inventory status #$id ($post_id) - qty: ".$stat->Quantity );
 			}
@@ -1061,6 +1094,8 @@ class ListingsModel extends WPL_Model {
 			// update listing status for ended items
 			if ( 291 == $this->handle_error_code ) {
 				$this->updateListing( $id, array( 'status' => 'ended' ) );				
+			} elseif ( 17 == $this->handle_error_code ) {
+				$this->updateListing( $id, array( 'status' => 'archived' ) );				
 			} elseif ( ! $cart_item ) {
 				$this->updateListing( $id, array( 'status' => 'published' ) );				
 			}
@@ -1276,7 +1311,8 @@ class ListingsModel extends WPL_Model {
 
 		$req = new EndItemRequestType(); # ***
         $req->setItemID( $item_id );
-        $req->setEndingReason('LostOrBroken');
+        // $req->setEndingReason('LostOrBroken');
+        $req->setEndingReason('NotAvailable');
 
 		$this->logger->info( "calling EndItem($id) #$item_id " );
 		$this->logger->debug( "Request: ".print_r($req,1) );
@@ -1295,8 +1331,10 @@ class ListingsModel extends WPL_Model {
 			if ( ! $this->checkStockLevel( $item ) )
 				$data['status'] = 'sold';
 
+			// update listing status
+			if (  17 == $this->handle_error_code ) $data['status'] = 'archived'; 
 			$this->updateListing( $id, $data );
-			
+					
 			$this->logger->info( "Item #$id was ended manually. " );
 
 		} // call successful
@@ -1349,6 +1387,7 @@ class ListingsModel extends WPL_Model {
 		
 		$fees = new FeesType();
 		$fees = $res->GetFees();
+		if ( ! $fees ) return false;
 		foreach ($fees->getFee() as $fee) {
 			if ( $fee->GetName() == 'ListingFee' ) {
 				$listingFee = $fee->GetFee()->getTypeValue();
@@ -1565,6 +1604,16 @@ class ListingsModel extends WPL_Model {
 
 	public function updateEndedListings( $session ) {
 		global $wpdb;
+
+
+		// set listing status to archived for all listings with an end_date < 90 days in the past
+		$items = $this->getAllOldListingsToBeArchived();
+		$this->logger->info('getAllOldListingsToBeArchived() found '.sizeof($items).' items');
+		foreach ($items as $item) {
+			$wpdb->update( $this->tablename, array( 'status' => 'archived' ), array( 'id' => $item['id'] ) );
+			$this->logger->info('updateEndedListings() changed item '.$item['id'].' to status archived');
+		}
+
 
 		// set listing status to ended for all listings with an end_date in the past
 		$items = $this->getAllPastEndDate();
@@ -1929,6 +1978,18 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
+	function getAllOldListingsToBeArchived() {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT id 
+			FROM $this->tablename
+			WHERE ( status = 'ended' OR status = 'sold' )
+			  AND end_date < NOW() - INTERVAL 90 DAY
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
 	function getItemsByIdArray( $listing_ids ) {
 		global $wpdb;	
 		if ( ! is_array( $listing_ids )  ) return array();
@@ -2044,6 +2105,25 @@ class ListingsModel extends WPL_Model {
 				$wpdb->update( $this->tablename, array( 'status' => 'reselected' ), array( 'id' => $id ) );
 			} else {
 				$wpdb->update( $this->tablename, array( 'status' => 'selected' ), array( 'id' => $id ) );
+			}
+		}
+	}
+
+	public function cancelSelectingListings() {
+		global $wpdb;
+
+		// $selectedProducts = $this->selectedProducts();
+		$selected = $this->getAllSelected();
+
+		foreach( $selected as $listing ) {
+			$id     = $listing['id'];
+			$status = $listing['status'];
+			if ( ( $status == 'changed_profile' ) ) {
+				$wpdb->update( $this->tablename, array( 'status' => 'changed' ), array( 'id' => $id ) );
+			} elseif ( $status == 'reselected' ) {
+				$wpdb->update( $this->tablename, array( 'status' => 'ended' ), array( 'id' => $id ) );
+			} else {
+				$wpdb->update( $this->tablename, array( 'status' => 'archived' ), array( 'id' => $id ) );
 			}
 		}
 	}

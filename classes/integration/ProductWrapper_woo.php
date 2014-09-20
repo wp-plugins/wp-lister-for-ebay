@@ -312,7 +312,7 @@ class ProductWrapper {
 		global $product; // make $product globally available for some badly coded themes...		
 
 		$product = self::getProduct( $post_id );
-		if ( $product->product_type != 'variable' ) return array();
+		if ( ! $product || $product->product_type != 'variable' ) return array();
 
 		// force all variations to show, regardless if woocommerce_hide_out_of_stock_items is yes or no
 		// by forcing visibility to true
@@ -326,9 +326,9 @@ class ProductWrapper {
 		// remove filter again
 		remove_filter( 'woocommerce_product_is_visible', array( 'ProductWrapper', 'returnTrue' ), 999, 2 );
 
-		// echo "<pre>";print_r($default_attributes);echo"</pre>";
-		// echo "<pre>";print_r($available_variations);die();echo"</pre>";
-		// echo "<pre>";print_r($variation_attributes);die();echo"</pre>";
+		// echo "<pre>default_attributes: ";print_r($default_attributes);echo"</pre>";
+		// echo "<pre>available_variations: ";print_r($available_variations);echo"</pre>";
+		// echo "<pre>variation_attributes: ";print_r($variation_attributes);echo"</pre>";
 		// (
 		//     [pa_size] => Array
 		//         (
@@ -359,7 +359,7 @@ class ProductWrapper {
 
 		} // foreach $variation_attributes
 
-		// print_r($attribute_labels);die();
+		// echo "<pre>attribute_labels: ";print_r($attribute_labels);echo"</pre>";#die();
 		// (
 		//     [attribute_pa_size] => Size
 		//     [attribute_pa_colour] => Colour
@@ -385,16 +385,36 @@ class ProductWrapper {
 				// v2
 				$taxonomy = str_replace('attribute_', '', $key); // attribute_pa_color -> pa_color
 				$term = get_term_by('slug', $value, $taxonomy );
-				// echo "<pre>";print_r($key);echo"</pre>";#die();
-				// echo "<pre>";print_r($term);echo"</pre>";#die();
+				// echo "<pre>key  : ";print_r($key);echo"</pre>";
+				// echo "<pre>term : ";print_r($term);echo"</pre>";
+				// echo "<pre>value: ";print_r($value);echo"</pre>";
+
+				// try to fetch term by name - required for values like "0" or "000"
+				if ( ! $term ) {
+					$term = get_term_by('name', $value, $taxonomy );
+				}
+
+				// get attribute label
+				$attribute_label = isset( $attribute_labels[ $key ] ) ? $attribute_labels[ $key ] : false;
+
 				if ( $term ) {
 					// handle proper attribute taxonomies
 					$term_name = html_entity_decode( $term->name, ENT_QUOTES, 'UTF-8' ); // US Shoe Size (Men&#039;s) => US Shoe Size (Men's)
 					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $term_name;
 					$value = $term->slug;
+				} elseif ( isset( $variation_attributes[ $attribute_label ] ) ) {
+					// handle fake custom product attributes with custom values red|green|blue
+					$custom_value = $value;
+					foreach ($variation_attributes[ $attribute_label ] as $custom_name ) {
+						if ( $value == sanitize_title($custom_name) ) $custom_value = $custom_name;
+					}
+					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $custom_value;
+					// echo "no term* found for $key<br>";
+					// echo "no term* found for $value<br>";
 				} elseif ( $value ) {
 					// handle fake custom product attributes
 					$newvar['variation_attributes'][ @$attribute_labels[ $key ] ] = $value;
+					// echo "no term found for $key<br>";
 					// echo "no term found for $value<br>";
 				} elseif ( isset( $attribute_labels[ $key ] ) && ( $attribute_labels[ $key ] != '' ) ) {
 					// handle product attributes without value ("all Colors")
@@ -469,12 +489,13 @@ class ProductWrapper {
 				// echo "<pre>";print_r($newvar);echo"</pre>";die();
 
 			}
+		
+		} // foreach $available_variations
+		
 
-			// if no default variation was found, make the first on default
-			if ( ! $has_default_variation && sizeof($variations) ) {
-				$variations[0]['is_default'] = true;
-			}
-			
+		// if no default variation was found, make the first on default
+		if ( ! $has_default_variation && sizeof($variations) ) {
+			$variations[0]['is_default'] = true;
 		}
 
         // global $wpl_logger;
@@ -587,9 +608,12 @@ class ProductWrapper {
 	}	
 	
 	// find variation by attributes (private)
-	static function findVariationID( $parent_id, $VariationSpecifics ) {
+	static function findVariationID( $parent_id, $VariationSpecifics, $sku ) {
 		global $wpl_logger;
 		$variations = self::getVariations( $parent_id );
+		$wpl_logger->info('findVariationID('.$parent_id.','.$sku.') checking '.count($variations).' variations...');
+
+		// search variations for matching attributes
 		foreach ($variations as $var) {
 			$diffs = array_diff_assoc( $var['variation_attributes'], $VariationSpecifics );
 			if ( count($diffs) == 0 ) {
@@ -598,6 +622,16 @@ class ProductWrapper {
 				return $var['post_id'];
 			}
 		}
+
+		// fall back to search for SKU
+		if ( ! $sku ) return false;
+		foreach ($variations as $var) {
+			if ( $sku == $var['sku'] ) {
+				$wpl_logger->info('findVariationID('.$parent_id.','.$sku.') found: '.$var['post_id']);
+				return $var['post_id'];				
+			}
+		}
+		$wpl_logger->info('findVariationID('.$parent_id.','.$sku.') found nothing...');
 		return false;
 	}	
 	

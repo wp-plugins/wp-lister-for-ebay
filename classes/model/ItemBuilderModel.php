@@ -135,6 +135,9 @@ class ItemBuilderModel extends WPL_Model {
 			$this->logger->info('UUID src: '.$uuid_src);
 		}
 
+		// filter final item object before it's sent to eBay
+		$item = apply_filters( 'wplister_filter_listing_item', $item, $listing, $profile_details, $post_id );
+
 		return $item;
 
 	} /* end of buildItem() */
@@ -334,6 +337,18 @@ class ItemBuilderModel extends WPL_Model {
 			$profile_details['condition_id']			= get_post_meta( $post_id, '_ebay_condition_id', true );
 		if ( get_post_meta( $post_id, '_ebay_condition_description', true ) )
 			$profile_details['condition_description']	= get_post_meta( $post_id, '_ebay_condition_description', true );
+
+		// check for custom product level bestoffer options
+		if ( get_post_meta( $post_id, '_ebay_bestoffer_enabled', true ) )
+			$profile_details['bestoffer_enabled']			= get_post_meta( $post_id, '_ebay_bestoffer_enabled', true );
+		if ( get_post_meta( $post_id, '_ebay_bo_autoaccept_price', true ) )
+			$profile_details['bo_autoaccept_price']			= get_post_meta( $post_id, '_ebay_bo_autoaccept_price', true );
+		if ( get_post_meta( $post_id, '_ebay_bo_minimum_price', true ) )
+			$profile_details['bo_minimum_price']			= get_post_meta( $post_id, '_ebay_bo_minimum_price', true );
+
+		// check for custom product level autopay options
+		if ( get_post_meta( $post_id, '_ebay_autopay', true ) )
+			$profile_details['autopay']						= get_post_meta( $post_id, '_ebay_autopay', true );
 
 		// check for custom product level seller profiles
 		// if ( get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true ) )
@@ -850,6 +865,11 @@ class ItemBuilderModel extends WPL_Model {
 			$shippingDetails->setCalculatedShippingRate( $calculatedShippingRate );
 		}
 
+		// handle option to always send weight and dimensions
+		if ( get_option( 'wplister_send_weight_and_size', 'default' ) == 'always' ) {
+			$hasWeight = ProductWrapper::getWeight( $post_id );
+		}
+
 		// set ShippingPackageDetails
 		if ( $hasWeight ) {
 			$shippingPackageDetails = new ShipPackageDetailsType();
@@ -968,6 +988,10 @@ class ItemBuilderModel extends WPL_Model {
 			$item->setShippingDetails($shippingDetails);
 		}
 
+		// force AutoPay off for Freight shipping 
+		if ( $service_type == 'FreightFlat' ) {
+			$item->setAutoPay( 0 );			
+		}
 
 		return $item;
 
@@ -1026,21 +1050,33 @@ class ItemBuilderModel extends WPL_Model {
         			}
         		}
         		// if ( '_sku' == $spec['attribute'] ) $value = ProductWrapper::getSKU( $post_id );
-        		if ( $this->mb_strlen( $value ) > 50 ) continue;
 
 	            $NameValueList = new NameValueListType();
 		    	$NameValueList->setName ( $spec['name']  );
-	    		$NameValueList->setValue( $value );
+	    		// $NameValueList->setValue( $value );
+	
+	    		// support for multi value attributes
+	    		// $value = 'blue|red|green';
+	    		$values = explode('|', $value);
+	    		foreach ($values as $value) {
+	        		if ( $this->mb_strlen( $value ) > 50 ) continue;
+		    		$NameValueList->addValue( $value );
+	    		}	        	
+
 	        	if ( ! in_array( $spec['name'], $this->variationAttributes ) ) {
 		        	$ItemSpecifics->addNameValueList( $NameValueList );
 		        	$processed_attributes[] = $spec['attribute'];
-					$this->logger->info("specs: added product attribute: {$spec['name']} - $value");
+					$this->logger->info("specs: added product attribute: {$spec['name']} - " . join(', ',$values) );
 	        	}
         	}
         }
 
         // skip if item has no attributes
         // if ( count($attributes) == 0 ) return $item;
+
+        // get excluded attributes and merge with processed attributes
+        $excluded_attributes  = $this->getExcludedAttributes();
+		$processed_attributes = array_merge( $processed_attributes, $excluded_attributes ); 
 
     	// add ItemSpecifics from product attributes
     	// disabled for now, since it causes duplicates and it's not actually required anymore
@@ -1075,6 +1111,19 @@ class ItemBuilderModel extends WPL_Model {
 		return $item;
 
 	} /* end of buildItemSpecifics() */
+
+	public function getExcludedAttributes() {
+		$excluded_attributes = get_option('wplister_exclude_attributes');
+		if ( ! $excluded_attributes ) return array();
+
+		$attribute_names = split(',', $excluded_attributes);
+		$attributes = array();
+		foreach ($attribute_names as $name) {
+			$attributes[] = trim($name);
+		}
+
+		return $attributes;
+	} // getExcludedAttributes()
 
 	public function buildCompatibilityList( $id, $item, $listing, $post_id ) {
 
@@ -1226,6 +1275,7 @@ class ItemBuilderModel extends WPL_Model {
         	if ( in_array( $VariationValue, $VariationValuesForPictures ) ) {
 
     			$image_url = $this->encodeUrl( $var['image'] );
+    			$image_url = $this->removeHttpsFromUrl( $image_url );
 
 
 				if ( ! $image_url ) continue;
@@ -1754,7 +1804,7 @@ class ItemBuilderModel extends WPL_Model {
 		
 		return $image_url;
 
-	}
+	} // getProductMainImageURL()
 
 	public function getProductImagesURL( $id ) {
 		global $wpdb;
@@ -1822,7 +1872,7 @@ class ItemBuilderModel extends WPL_Model {
 		$product_images = apply_filters( 'wplister_product_images', $product_images, $id );
 
 		return $product_images;
-	}
+	} // getProductImagesURL()
 
 
 	// ebay doesn't accept image urls using https - only http and ftp

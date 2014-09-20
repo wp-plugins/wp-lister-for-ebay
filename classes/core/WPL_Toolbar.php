@@ -156,7 +156,7 @@ class WPLister_Toolbar  {
 		global $wp_query;
 		$post_id = false;
 
-		if ( isset( $wp_query->post->post_type ) && ( $wp_query->post->post_type == 'product' ) ) {
+		if ( $wp_query->in_the_loop && isset( $wp_query->post->post_type ) && ( $wp_query->post->post_type == 'product' ) ) {
 			$post_id = $wp_query->post->ID;
 		} elseif ( isset( $post->post_type ) && ( $post->post_type == 'product' ) ) {
 			$post_id = $post->ID;
@@ -220,7 +220,7 @@ class WPLister_Toolbar  {
 		$url = '';
 		$args = array(
 			'id'    => 'wplister_prepare_listing',
-			'title' => __('Prepare listing', 'wplister'),
+			'title' => __('List on eBay', 'wplister'),
 			'href'  => $url,
 			'parent'  => 'wplister_top'
 		);
@@ -235,7 +235,7 @@ class WPLister_Toolbar  {
 			$profile_id = $profile['profile_id'];
 			$url = admin_url( 'admin.php?page=wplister&action=wpl_prepare_single_listing&product_id='.$post_id.'&profile_id='.$profile_id );
 			$args = array(
-				'id'    => 'wplister_view_on_ebay_'.$profile['profile_id'],
+				'id'    => 'wplister_list_on_ebay_'.$profile['profile_id'],
 				'title' => $profile['profile_name'],
 				'href'  => $url,
 				'parent'  => 'wplister_prepare_listing'
@@ -245,7 +245,7 @@ class WPLister_Toolbar  {
 		}
 
 		return $args;
-	}
+	} // addPrepareActions()
 	
 
 } // class WPLister_Toolbar

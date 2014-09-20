@@ -100,7 +100,7 @@ class ListingsPage extends WPL_Page {
 			exit();
 		}
 
-	}
+	} // handleSubmitOnInit()
 
 	function addScreenOptions() {
 		
@@ -323,6 +323,14 @@ class ListingsPage extends WPL_Page {
 			$this->showMessage( __('Profiles were re-applied to selected items.','wplister') );
 		}
 
+		// cancel (re-)selecting profile process
+		if ( $this->requestAction() == 'cancel_profile_selection' ) {
+
+			$listingsModel = new ListingsModel();
+	        $listingsModel->cancelSelectingListings();
+
+		}
+
 	} // handleActions()
 
 
@@ -365,7 +373,6 @@ class ListingsPage extends WPL_Page {
 				$msg .= '<a id="btn_revise_all_changed_items_reminder" class="btn_revise_all_changed_items_reminder button wpl_job_button">' . __('Revise all changed items','wplister') . '</a>';
 				$msg .= '</p>';
 				$this->showMessage( $msg );				
-
 	        }
 
 	        // check for relisted items and display reminder
@@ -375,8 +382,7 @@ class ListingsPage extends WPL_Page {
 				$msg .= '&nbsp;&nbsp;';
 				$msg .= '<a id="btn_update_all_relisted_items_reminder" class="btn_update_all_relisted_items_reminder button wpl_job_button">' . __('Update all relisted items','wplister') . '</a>';
 				$msg .= '</p>';
-				$this->showMessage( $msg );				
-
+				$this->showMessage( $msg, 2 );				
 	        }
 
 			// get all items

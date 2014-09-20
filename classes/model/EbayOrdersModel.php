@@ -279,7 +279,7 @@ class EbayOrdersModel extends WPL_Model {
 		        } 
 
 				// update listing sold quantity and status
-				$this->processListingItem( $data['order_id'], $Transaction->Item->ItemID, $Transaction->QuantityPurchased, $data, $VariationSpecifics );
+				$this->processListingItem( $data['order_id'], $Transaction->Item->ItemID, $Transaction->QuantityPurchased, $data, $VariationSpecifics, $Transaction );
 
 				// create transaction record for future reference
 				$tm->createTransactionFromEbayOrder( $data, $Transaction );
@@ -302,7 +302,8 @@ class EbayOrdersModel extends WPL_Model {
 		$_order = new WC_Order();
 		if ( $_order->get_order( $post_id ) ) {
 
-			if ( $_order->post_status != 'publish' ) return false;
+			// $this->logger->info( 'post_status for order ID '.$post_id.' is '.$_order->post_status );
+			if ( $_order->post_status == 'trash' ) return false;
 
 			return $_order->id;
 
@@ -313,7 +314,7 @@ class EbayOrdersModel extends WPL_Model {
 
 
 	// update listing sold quantity and status
-	function processListingItem( $order_id, $ebay_id, $quantity_purchased, $data, $VariationSpecifics ) {
+	function processListingItem( $order_id, $ebay_id, $quantity_purchased, $data, $VariationSpecifics, $Transaction ) {
 		global $wpdb;
 
 		// check if this listing exists in WP-Lister
@@ -327,8 +328,8 @@ class EbayOrdersModel extends WPL_Model {
 
 		// get current values from db
 		// $quantity_purchased = $data['quantity'];
-		$quantity_total = $wpdb->get_var( 'SELECT quantity FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$ebay_id );
-		$quantity_sold = $wpdb->get_var( 'SELECT quantity_sold FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$ebay_id );
+		$quantity_total = $wpdb->get_var( 'SELECT quantity      FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$ebay_id );
+		$quantity_sold  = $wpdb->get_var( 'SELECT quantity_sold FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$ebay_id );
 
 		// increase the listing's quantity_sold
 		$quantity_sold = $quantity_sold + $quantity_purchased;
@@ -339,7 +340,7 @@ class EbayOrdersModel extends WPL_Model {
 
 		// add history record
 		$history_message = "Sold quantity increased by $quantity_purchased for listing #{$ebay_id} - sold $quantity_sold";
-		$history_details = array( 'newstock' => $newstock, 'ebay_id' => $ebay_id );
+		$history_details = array( 'ebay_id' => $ebay_id, 'quantity_sold' => $quantity_sold, 'quantity_total' => $quantity_total );
 		$this->addHistory( $order_id, 'reduce_stock', $history_message, $history_details );
 
 
@@ -436,13 +437,17 @@ class EbayOrdersModel extends WPL_Model {
 		// process transactions / items
 		$items = array();
 		foreach ( $Detail->TransactionArray as $Transaction ) {
+			$sku = $Transaction->Item->SKU;
+			if ( is_object( @$Transaction->Variation ) ) {
+				$sku = $Transaction->Variation->SKU;
+			}
 			$newitem = array();
-			$newitem['item_id'] = $Transaction->Item->ItemID;
-			$newitem['title'] = $Transaction->Item->Title;
-			$newitem['sku'] = $Transaction->Item->SKU;
-			$newitem['quantity'] = $Transaction->QuantityPurchased;
-			$newitem['transaction_id'] = $Transaction->TransactionID;
-			$newitem['OrderLineItemID'] = $Transaction->OrderLineItemID;
+			$newitem['item_id']          = $Transaction->Item->ItemID;
+			$newitem['title']            = $Transaction->Item->Title;
+			$newitem['sku']              = $sku;
+			$newitem['quantity']         = $Transaction->QuantityPurchased;
+			$newitem['transaction_id']   = $Transaction->TransactionID;
+			$newitem['OrderLineItemID']  = $Transaction->OrderLineItemID;
 			$newitem['TransactionPrice'] = $Transaction->TransactionPrice->value;
 			$items[] = $newitem;
 			// echo "<pre>";print_r($Transaction);echo"</pre>";die();
@@ -466,15 +471,14 @@ class EbayOrdersModel extends WPL_Model {
 
 		}
 
-		// skip orders that are older than the oldest order in WP-Lister
-		if ( $first_order_date_created = $this->getDateOfFirstOrder() ) {
+		// skip orders that are older than the oldest order in WP-Lister / when WP-Lister was first connected to eBay
+		if ( $first_order_date_created_ts = $this->getDateOfFirstOrder() ) {
 
 			// convert to timestamps
-			$this_order_date_created  = strtotime( $data['date_created'] );
-			$first_order_date_created = strtotime( $first_order_date_created );
+			$this_order_date_created_ts = strtotime( $data['date_created'] );
 
 			// skip if order date is older
-			if ( $this_order_date_created < $first_order_date_created ) {
+			if ( $this_order_date_created_ts < $first_order_date_created_ts ) {
 				$this->logger->info( "skipped old order #".$Detail->OrderID." created at ".$data['date_created'] );			
 				$this->addToReport( 'skipped', $data );
 				return false;						
@@ -687,16 +691,22 @@ class EbayOrdersModel extends WPL_Model {
 		return $lastdate;
 	}
 
-	// get the creation date of the oldest order in WP-Lister
+	// get the creation date of the oldest order in WP-Lister - as unix timestamp
 	function getDateOfFirstOrder() {
 		global $wpdb;
+
+		// regard ignore_orders_before_ts timestamp if set
+		if ( $ts = get_option('ignore_orders_before_ts') ) {
+			return $ts;
+		}
+
 		$date = $wpdb->get_var( "
 			SELECT date_created
 			FROM $this->tablename
 			ORDER BY date_created ASC LIMIT 1
 		" );
 
-		return $date;
+		return strtotime($date);
 	}
 
 	function deleteItem( $id ) {

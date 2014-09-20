@@ -163,6 +163,8 @@ class SettingsPage extends WPL_Page {
 			'option_enable_ebay_motors'	=> self::getOption( 'enable_ebay_motors' ),
 			'option_ebay_update_mode'	=> self::getOption( 'ebay_update_mode', 'order' ),
 			'local_auction_display'     => self::getOption( 'local_auction_display', 'off' ),
+			'send_weight_and_size'      => self::getOption( 'send_weight_and_size', 'default' ),
+			'is_staging_site'     		=> $this->isStagingSite(),
 	
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'auth_url'					=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab='.$active_tab.'&action=wplRedirectToAuthURL',
@@ -231,6 +233,7 @@ class SettingsPage extends WPL_Page {
 			'option_disable_wysiwyg_editor' => self::getOption( 'disable_wysiwyg_editor', 0 ),
 			'enable_item_compat_tab'        => self::getOption( 'enable_item_compat_tab', 1 ),
 			'convert_dimensions'        	=> self::getOption( 'convert_dimensions' ),
+			'exclude_attributes'        	=> self::getOption( 'exclude_attributes' ),
 			'option_local_timezone'         => self::getOption( 'local_timezone', '' ),
 			'text_admin_menu_label'         => self::getOption( 'admin_menu_label', $this->app_name ),
 			'timezones'                     => self::get_timezones(),
@@ -258,6 +261,8 @@ class SettingsPage extends WPL_Page {
 			'log_days_limit'			=> self::getOption( 'log_days_limit', 30 ),
 			'xml_formatter'				=> self::getOption( 'xml_formatter', 'default' ),
 			'force_table_items_limit'	=> self::getOption( 'force_table_items_limit' ),
+			'ignore_orders_before_ts'	=> self::getOption( 'ignore_orders_before_ts' ),
+			'staging_site_pattern'		=> self::getOption( 'staging_site_pattern', '' ),
 
 			'text_ebay_token'			=> self::getOption( 'ebay_token' ),
 			'text_log_level'			=> self::getOption( 'log_level' ),
@@ -293,12 +298,13 @@ class SettingsPage extends WPL_Page {
 			}
 
 			self::updateOption( 'ebay_site_id',			$this->getValueFromPost( 'text_ebay_site_id' ) );
-			self::updateOption( 'paypal_email',			$this->getValueFromPost( 'text_paypal_email' ) );
+			self::updateOption( 'paypal_email',			trim( $this->getValueFromPost( 'text_paypal_email' ) ) );
 			
 			self::updateOption( 'cron_auctions',		$this->getValueFromPost( 'option_cron_auctions' ) );
 			self::updateOption( 'enable_ebay_motors', 	$this->getValueFromPost( 'option_enable_ebay_motors' ) );
 			self::updateOption( 'ebay_update_mode', 	$this->getValueFromPost( 'option_ebay_update_mode' ) );
 			self::updateOption( 'local_auction_display',$this->getValueFromPost( 'local_auction_display' ) );
+			self::updateOption( 'send_weight_and_size', $this->getValueFromPost( 'send_weight_and_size' ) );
 
 			$this->handleCronSettings( $this->getValueFromPost( 'option_cron_auctions' ) );
 			if ( ! $changed_site_id ) $this->showMessage( __('Settings saved.','wplister') );
@@ -310,46 +316,7 @@ class SettingsPage extends WPL_Page {
 		// TODO: check nonce
 		if ( isset( $_POST['wpl_e2e_process_shortcodes'] ) ) {
 
-        	$wp_roles = new WP_Roles();
-        	$available_roles = $wp_roles->role_names;
-
-        	// echo "<pre>";print_r($wp_roles);echo"</pre>";die();
-
-			$wpl_caps = array(
-				'manage_ebay_listings'  => 'Manage Listings',
-				'manage_ebay_options'   => 'Manage Settings',
-				'prepare_ebay_listings' => 'Prepare Listings',
-				'publish_ebay_listings' => 'Publish Listings',
-			);
-
-			// echo "<pre>";print_r($_POST['wpl_permissions']);echo"</pre>";die();
-			$permissions = $_POST['wpl_permissions'];
-
-			foreach ( $available_roles as $role => $role_name ) {
-
-				// admin permissions can't be modified
-				if ( $role == 'administrator' ) continue;
-
-				// get the the role object
-				$role_object = get_role( $role );
-
-				foreach ( $wpl_caps as $capability_name => $capability_title ) {
-
-					if ( isset( $permissions[ $role ][ $capability_name ] ) ) {
-
-						// add capability to this role
-						$role_object->add_cap( $capability_name );
-
-					} else {
-
-						// remove capability from this role
-						$role_object->remove_cap( $capability_name );
-
-					}
-				
-				}
-
-			}
+			$this->savePermissions();
 
 			self::updateOption( 'process_shortcodes', 		$this->getValueFromPost( 'process_shortcodes' ) );
 			self::updateOption( 'remove_links',     		$this->getValueFromPost( 'remove_links' ) );
@@ -365,6 +332,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'disable_wysiwyg_editor',	$this->getValueFromPost( 'option_disable_wysiwyg_editor' ) );
 			self::updateOption( 'enable_item_compat_tab', 	$this->getValueFromPost( 'enable_item_compat_tab' ) );
 			self::updateOption( 'convert_dimensions', 		$this->getValueFromPost( 'convert_dimensions' ) );
+			self::updateOption( 'exclude_attributes', 		$this->getValueFromPost( 'exclude_attributes' ) );
 			self::updateOption( 'local_timezone',			$this->getValueFromPost( 'option_local_timezone' ) );
 			self::updateOption( 'allow_backorders',			$this->getValueFromPost( 'option_allow_backorders' ) );
 			self::updateOption( 'api_enable_auto_relist',	$this->getValueFromPost( 'api_enable_auto_relist' ) );
@@ -376,7 +344,56 @@ class SettingsPage extends WPL_Page {
 
 			$this->showMessage( __('Settings saved.','wplister') );
 		}
-	}
+	} // saveAdvancedSettings()
+
+
+	protected function savePermissions() {
+
+		// don't update capabilities when options are disabled
+		if ( ! apply_filters( 'wpl_enable_capabilities_options', true ) ) return;
+
+    	$wp_roles = new WP_Roles();
+    	$available_roles = $wp_roles->role_names;
+
+    	// echo "<pre>";print_r($wp_roles);echo"</pre>";die();
+
+		$wpl_caps = array(
+			'manage_ebay_listings'  => 'Manage Listings',
+			'manage_ebay_options'   => 'Manage Settings',
+			'prepare_ebay_listings' => 'Prepare Listings',
+			'publish_ebay_listings' => 'Publish Listings',
+		);
+
+		// echo "<pre>";print_r($_POST['wpl_permissions']);echo"</pre>";die();
+		$permissions = $_POST['wpl_permissions'];
+
+		foreach ( $available_roles as $role => $role_name ) {
+
+			// admin permissions can't be modified
+			if ( $role == 'administrator' ) continue;
+
+			// get the the role object
+			$role_object = get_role( $role );
+
+			foreach ( $wpl_caps as $capability_name => $capability_title ) {
+
+				if ( isset( $permissions[ $role ][ $capability_name ] ) ) {
+
+					// add capability to this role
+					$role_object->add_cap( $capability_name );
+
+				} else {
+
+					// remove capability from this role
+					$role_object->remove_cap( $capability_name );
+
+				}
+			
+			}
+
+		}
+
+	} // savePermissions()
 
 
 	protected function saveCategoriesSettings() {
@@ -469,6 +486,11 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'log_days_limit',			$this->getValueFromPost( 'log_days_limit' ) );
 			self::updateOption( 'xml_formatter',			$this->getValueFromPost( 'xml_formatter' ) );
 			self::updateOption( 'force_table_items_limit',	$this->getValueFromPost( 'force_table_items_limit' ) );
+			self::updateOption( 'staging_site_pattern',	    trim( $this->getValueFromPost( 'staging_site_pattern' ) ) );
+
+			// ignore_orders_before_ts
+			$ignore_orders_before_ts = trim( $this->getValueFromPost( 'ignore_orders_before_ts' ) );
+			self::updateOption( 'ignore_orders_before_ts',	$ignore_orders_before_ts ? strtotime($ignore_orders_before_ts) : '' );
 			
 			$this->handleChangedUpdateChannel();
 
@@ -808,6 +830,8 @@ class SettingsPage extends WPL_Page {
 	    $timestamp = wp_next_scheduled(  'wplister_update_auctions' );
     	wp_unschedule_event( $timestamp, 'wplister_update_auctions' );
 
+    	if ( $schedule == 'external' ) return;
+    	
 		if ( !wp_next_scheduled( 'wplister_update_auctions' ) ) {
 			wp_schedule_event( time(), $schedule, 'wplister_update_auctions' );
 		}
@@ -838,7 +862,7 @@ class SettingsPage extends WPL_Page {
 				<h5>Show on screen</h5>
 				<div class="metabox-prefs">
 						<label for="dev-hide">
-							<input type="checkbox" onclick="jQuery('#DeveloperToolBox').toggle();" value="dev" id="dev-hide" name="dev-hide" class="hide-column-tog">
+							<input type="checkbox" onclick="jQuery('#DeveloperToolBox').toggle();jQuery('.dev_box').toggle();" value="dev" id="dev-hide" name="dev-hide" class="hide-column-tog">
 							Developer options
 						</label>
 					<br class="clear">

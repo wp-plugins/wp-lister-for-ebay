@@ -354,6 +354,11 @@
 								<option value="MoneyBackOrReplacement"  <?php if ( @$item_details['RefundOption'] == 'MoneyBackOrReplacement'  ): ?>selected="selected"<?php endif; ?>><?php echo ('Money Back or Replacement'); ?></option>
 							</select>
 							<br class="clear" />
+							<?php if ( get_option('wplister_ebay_site_id') ) : ?>
+							<p class="desc">
+								<?php echo __('Not applicable on AU and EU sites.','wplister'); ?>
+							</p>
+							<?php endif; ?>
 
 							<label for="wpl-text-RestockingFee" class="text_label">
 								<?php echo __('Restocking fee','wplister'); ?>

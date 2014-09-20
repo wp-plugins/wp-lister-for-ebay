@@ -20,7 +20,7 @@ class NetworkAdminPage extends WPL_Page {
 	public function onWpNetworkAdminMenu() {
 		global $oWPL_WPLister;
 
-		$page_id = add_menu_page( __('WP-Lister','wplister'), __('WP-Lister','wplister'), self::ParentPermissions, 
+		$page_id = add_menu_page( __('eBay','wplister'), __('eBay','wplister'), self::ParentPermissions, 
 					   self::ParentMenuId, array( $this, 'onDisplayNetworkAdminPage' ), $this->getImageUrl( 'hammer-16x16.png' ), ProductWrapper::menu_page_position );
 
 	}

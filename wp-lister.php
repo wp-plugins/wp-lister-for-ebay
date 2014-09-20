@@ -3,15 +3,15 @@
 Plugin Name: WP-Lister for eBay
 Plugin URI: http://www.wplab.com/plugins/wp-lister/
 Description: List your products on eBay the easy way.
-Version: 1.4.6
+Version: 1.5.0.8
 Author: Matthias Krok
 Author URI: http://www.wplab.com/ 
-Max WP Version: 3.9.1
+Max WP Version: 4.0
 Text Domain: wp-lister
 License: GPL2+
 */
 
-define('WPLISTER_VERSION', '1.4.6' );
+define('WPLISTER_VERSION', '1.5.0.8' );
 define('WPLISTER_PATH', realpath( dirname(__FILE__) ) );
 define('WPLISTER_URL', plugins_url() . '/' . basename(dirname(__FILE__)) . '/' );
 
@@ -135,8 +135,8 @@ class WPL_WPLister extends WPL_BasePlugin {
 		?>
 	    <script type="text/javascript">
     	    jQuery(document).ready(function() {
-        	    jQuery('<option>').val('prepare_auction').text('<?php echo __('Prepare Listings','wplister') ?>').appendTo("select[name='action']");
-            	jQuery('<option>').val('prepare_auction').text('<?php echo __('Prepare Listings','wplister') ?>').appendTo("select[name='action2']");
+        	    jQuery('<option>').val('prepare_auction').text('<?php echo __('List on eBay','wplister') ?>').appendTo("select[name='action']");
+            	jQuery('<option>').val('prepare_auction').text('<?php echo __('List on eBay','wplister') ?>').appendTo("select[name='action2']");
 	        });
     	</script>
     	<?php
@@ -152,7 +152,7 @@ class WPL_WPLister extends WPL_BasePlugin {
 	public function printOrdersPageStyles() {	
 		?>
     	<style type="text/css">
-			table.wp-list-table .column-ebay { width: 25px; }    	
+			table.wp-list-table .column-wpl_order_src { width: 25px; text-align: center; padding-left: 1px; }    	
     	</style>
     	<?php
 	}

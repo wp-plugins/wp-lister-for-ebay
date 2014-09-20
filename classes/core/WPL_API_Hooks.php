@@ -28,6 +28,9 @@ class WPL_API_Hooks extends WPL_Core {
 		// re-apply profile and mark listing item as changed
 		add_action( 'wplister_product_has_changed', array( &$this, 'wplister_product_has_changed' ), 10, 1 );
 
+		// create new prepared listing from product and profile
+		add_action( 'wplister_prepare_listing', array( &$this, 'wplister_prepare_listing' ), 10, 2 );
+
 		// process inventory changes from amazon
 		add_action( 'wpla_inventory_status_changed', array( &$this, 'wpla_inventory_status_changed' ), 10, 1 );
 
@@ -131,8 +134,29 @@ class WPL_API_Hooks extends WPL_Core {
 
 	}
 
+	// create new prepared listing from product and apply profile
+	function wplister_prepare_listing( $post_id, $profile_id ) {
+
+		// prepare product
+		$listingsModel = new ListingsModel();
+        $listingsModel->prepareProductForListing( $post_id );
+        if ( ! $profile_id ) return;
+
+        // get profile
+		$profilesModel = new ProfilesModel();
+        $profile = $profilesModel->getItem( $profile_id );
+        if ( ! $profile ) return;
+		
+        $listingsModel->applyProfileToNewListings( $profile );
+	}
+
 	// process inventory changes from amazon
 	function wpla_inventory_status_changed( $post_id ) {
+
+		// re-apply profile to update ebay_auctions table
+		$lm = new ListingsModel();
+		$listing_id = $lm->markItemAsModified( $post_id );
+
 		// $this->wplister_revise_inventory_status( $post_id );
 		do_action( 'wplister_revise_inventory_status', $post_id );
 	}

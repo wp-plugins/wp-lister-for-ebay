@@ -167,6 +167,14 @@ class WPL_Model {
 				$longMessage .= '<br><br>'. '<b>Note:</b> Listing status was changed to ended.';				
 			}
 			
+			// #17 - This item cannot be accessed because the listing has been deleted, ... or you are not the seller.
+			if ( $error->getErrorCode() == 17 ) { 
+				// change status from Error to Warning to allow post processing of this error
+				$res->setAck('Warning');
+				$this->handle_error_code = 17;
+				$longMessage .= '<br><br>'. '<b>Note:</b> Listing status was changed to archived.';
+			}
+			
 			// #302 - Invalid auction listing type
 			if ( $error->getErrorCode() == 302 ) { 
 				$longMessage .= '<br><br>'. '<b>Note:</b> eBay does not allow changing the listing type of an active listing.';
@@ -258,6 +266,13 @@ class WPL_Model {
 				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
 				$longMessage .= 'Your listing template probably contains CDATA tags which can not be used in a listing description.<br>';
 				$longMessage .= 'Please remove all CDATA tags from your listing template and try again - or contact support. ';
+			}
+			
+			// #10007 - Error: Internal error to the application
+			if ( $error->getErrorCode() == 10007 ) { 
+				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
+				$longMessage .= 'This message indicates an error on the eBay server side.<br>';
+				$longMessage .= 'You should try using a different primary category for your listing - if that does not help, please contact support.';
 			}
 			
 

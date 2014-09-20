@@ -31,6 +31,11 @@
 	<?php if ( 'order' == get_option( 'wplister_ebay_update_mode', 'order' ) ) : ?>
 	
 		<p>
+		<?php if ( get_option('wplister_cron_last_run') ) : ?>
+			<?php echo __('Last run','wplister'); ?>: 
+			<?php echo human_time_diff( get_option('wplister_cron_last_run'), current_time('timestamp',1) ) ?> ago &ndash;
+		<?php endif; ?>
+
 		<?php if ( wp_next_scheduled( 'wplister_update_auctions' ) ) : ?>
 			<?php echo __('Next scheduled update','wplister'); ?>: 
 			<?php echo human_time_diff( wp_next_scheduled( 'wplister_update_auctions' ), current_time('timestamp',1) ) ?>

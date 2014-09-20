@@ -78,7 +78,7 @@ class EbayController {
 
         // build auth url
         $query = array( 'RuName' => $this->RuName, 'SessID' => $SessionID );
-        $url = $this->GetEbaySignInUrl() . '&'. http_build_query( $query );
+        $url = $this->GetEbaySignInUrl() . '&' . http_build_query( $query, '', '&' );
         $this->logger->info( 'AuthUrl: ' . $url );
 
         return $url;
@@ -158,6 +158,11 @@ class EbayController {
 
             $this->apiurl = 'https://api.ebay.com/ws/api.dll';
             $this->signin = 'https://signin.ebay.com/ws/eBayISAPI.dll?SignIn&';
+        }
+
+        // filter RuName
+        if ( defined('WPLISTER_RESELLER_VERSION') ) {
+            $this->RuName = apply_filters( 'wplister_runame', $this->RuName, $sandbox_enabled );            
         }
 
         // init session
@@ -247,6 +252,7 @@ class EbayController {
             echo "<p>Only your hosting company can sort out the problems causing cURL not to connect properly. Your hosting company's server administrator should be able to resolve the permission problems preventing cURL from working. They've probably got overly limiting restrictions configured on the server, preventing it from being able to do the communication required for listing items on eBay.</p>";
             echo "<p>debug output:</p>";
             echo "<pre>"; print_r($res); echo "</pre>";
+            echo "<pre>"; print_r($req); echo "</pre>";
             die();
         }
 

@@ -122,6 +122,9 @@ class EbayOrdersPage extends WPL_Page {
 	    $ordersTable = new EbayOrdersTable();
     	//Fetch, prepare, sort, and filter our data...
 	    $ordersTable->prepare_items();
+
+		// load eBay classes to decode details in table
+		EbayController::loadEbayClasses();
 		
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,

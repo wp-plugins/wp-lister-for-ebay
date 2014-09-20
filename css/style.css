@@ -338,3 +338,7 @@ div#message.updated.update-nag {
 	text-align: left;
 }
 
+/* fix cursor on metabox title bars */
+.js .wplister-page .postbox .hndle {
+	cursor: inherit;
+}

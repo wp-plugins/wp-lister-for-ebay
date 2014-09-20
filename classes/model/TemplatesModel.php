@@ -450,15 +450,36 @@ class TemplatesModel extends WPL_Model {
 		$item['post_content'] = str_replace( $whitespace, ' ', $item['post_content'] );
 
 
-		// main content
+		// process and insert main content
  		if ( 'off' == get_option( 'wplister_process_shortcodes', 'content' ) ) {
+
+ 			// off - do nothing, except wpautop() for proper paragraphs
 	 		$tpl_html = str_replace( '[[product_content]]', wpautop( $item['post_content'] ), $tpl_html );
+
+ 		} elseif ( 'remove' == get_option( 'wplister_process_shortcodes', 'content' ) ) {
+
+ 			// remove - remove all shortcodes from product description
+ 			$post_content = $item['post_content'];
+
+			// find and remove all placeholders
+			if ( preg_match_all( '/\[([^\]]+)\]/', $post_content, $matches ) ) {
+				foreach ($matches[0] as $placeholder) {
+			 		$post_content = str_replace( $placeholder, '', $post_content );
+				}
+			}
+
+			// insert content into template html
+	 		$tpl_html = str_replace( '[[product_content]]', wpautop( $post_content ), $tpl_html );
+
  		} else {
+
+ 			// default - apply the_content filter to make description look the same as in WP
 	 		$tpl_html = str_replace( '[[product_content]]', apply_filters('the_content', $item['post_content'] ), $tpl_html );
+
  		}
 
 		return $tpl_html;
-	}
+	} // processMainContentShortcode()
 
 
 	public function processAllTextShortcodes( $post_id, $tpl_html, $max_length = false ) {
@@ -708,7 +729,7 @@ class TemplatesModel extends WPL_Model {
             // last column: price
             $variations_html .= '<td align="right">';
             $price = $listingsModel->applyProfilePrice( $var['price'], $profile_data['details']['start_price'] );
-            $variations_html .= number_format_i18n( $price, 2 );
+            $variations_html .= number_format_i18n( floatval($price), 2 );
 
             $variations_html .= '</td></tr>';
 

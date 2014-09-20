@@ -24,6 +24,14 @@ class WPL_CronActions extends WPL_Core {
 	public function cron_update_auctions() {
         $this->logger->info("WP-CRON: cron_update_auctions()");
 
+        // check if this is a staging site
+        if ( $this->isStagingSite() ) {
+	        $this->logger->info("WP-CRON: staging site detected! terminating execution...");
+			self::updateOption( 'cron_auctions', '' );
+			self::updateOption( 'create_orders', '' );
+        	return;
+        }
+
         // check if update is already running
         if ( ! $this->checkLock() ) {
 	        $this->logger->error("WP-CRON: already running! terminating execution...");
@@ -46,6 +54,9 @@ class WPL_CronActions extends WPL_Core {
 		// clean up
 		$this->EC->closeEbay();
 		$this->removeLock();
+
+		// store timestamp
+		self::updateOption( 'cron_last_run', time() );
 
         $this->logger->info("WP-CRON: cron_update_auctions() finished");
 	} // cron_update_auctions()

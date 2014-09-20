@@ -108,6 +108,8 @@
 			<?php endforeach; ?>
 
 			<br style="clear:both;">
+
+			<a href="<?php echo $wpl_form_action; ?>&action=cancel_profile_selection" class="button" style="float:right"><?php echo __('Cancel profile selection','wplister') ?></a>
 			
 			<input type="submit" value="<?php echo __('Apply Profile','wplister') ?>" name="submit" class="button-primary" style="margin-right:10px;">
 

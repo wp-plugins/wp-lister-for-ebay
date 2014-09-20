@@ -116,6 +116,7 @@ class LogTable extends WP_List_Table {
     }    
 
     function column_user($item){
+        if ( ! $item['user_id'] ) return '<i>cron</i>';
         $user_info = get_userdata($item['user_id']);
         if ( $user_info ) return $user_info->user_login;
         return false;
@@ -191,6 +192,7 @@ class LogTable extends WP_List_Table {
         // }
 
         $link .= $this->displayErrors( $item['errors'] );
+        $link .= $this->displayExtraMessage( $item );
 
         return $link;
     }
@@ -209,6 +211,25 @@ class LogTable extends WP_List_Table {
             $html .= '</div>';
             
         }
+        return $html;
+    }    
+
+    function displayExtraMessage( $item ) {
+        $html = '';
+
+        // show extra <Message>
+        if ( preg_match("/<Message>(.*)<\/Message>/Usm", $item['response'], $matches_msg) ) {
+            $message = strip_tags( html_entity_decode( $matches_msg[1] ) );
+            if ( strlen( $message ) > 100 ) {
+                $message = html_entity_decode( $matches_msg[1] );
+            }
+
+            $color_code = '';
+            $html .= '<div class="error_details" style="margin-top:.5em">';
+            $html .= '<b style="color:'.$color_code.'">'.'Message'.':</b> ';
+            $html .= $message . ' <br>';
+            $html .= '</div>';
+        }          
         return $html;
     }    
 

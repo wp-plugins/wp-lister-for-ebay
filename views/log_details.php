@@ -66,6 +66,17 @@ if ( preg_match_all("/<ShortMessage>(.*)<\/ShortMessage>/", $res, $matches_sm) )
 		$errors .= $lm.'<br>';
 	}
 
+	// show extra <Message>
+	if ( preg_match("/<Message>(.*)<\/Message>/Usm", $res, $matches_msg) ) {
+		$message = strip_tags( html_entity_decode( $matches_msg[1] ) );
+		if ( strlen( $message ) > 100 ) {
+			$message = html_entity_decode( $matches_msg[1] );
+		}
+		$message = str_replace("\n", ' ', $message);
+		$message = str_replace('  ', ' ', $message);
+		$errors .= '<br><b>Message: </b> ' . $message . '<br>';		
+	}
+
 }
 
 // hide Description content for better readability

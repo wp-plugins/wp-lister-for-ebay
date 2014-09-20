@@ -145,6 +145,13 @@ class EbayOrdersTable extends WP_List_Table {
             $title .= ' <i style="color:silver">'.$item['buyer_userid'].'</i>';
         }
 
+        $item_details = maybe_unserialize( $item['details'] );
+        if ( $item_details ) {
+            if ( $item_details->IsMultiLegShipping ) {
+                $title .= '<br><small>Global Shipping Program</small>';
+            }
+        }
+
         //Return the title contents
         return sprintf('%1$s %2$s',
             /*$1%s*/ $title,
@@ -191,11 +198,19 @@ class EbayOrdersTable extends WP_List_Table {
                 $value = $item['eBayPaymentStatus'];
         }
 
+        $item_details = maybe_unserialize( $item['details'] );
+        $paid = '';
+        if ( $item_details ) {
+            $PaidTime = $this->convertEbayDateToSql( $item_details->PaidTime );
+            if ( $PaidTime ) $paid = __('Paid','wplister') .': '. sprintf( __('%s ago','wplister'), human_time_diff( strtotime( $PaidTime ) ) );
+        }
+        
         // return formatted html
-        return sprintf('<span>%1$s</span><br><span style="color:%2$s">%3$s</span>',
+        return sprintf('<span>%1$s</span><br><span style="color:%2$s">%3$s</span><br><small style="color:gray;">%4$s</small>',
             /*$1%s*/ $item['PaymentMethod'],
             /*$2%s*/ $color,
-            /*$3%s*/ $value
+            /*$3%s*/ $value,
+            /*$4%s*/ $paid
         );
     }
 
@@ -224,7 +239,15 @@ class EbayOrdersTable extends WP_List_Table {
         );
 	}
 	  
-	
+    // convert 2013-02-14T08:00:58.000Z to 2013-02-14 08:00:58
+    public function convertEbayDateToSql( $ebay_date ) {
+        $search = array( 'T', '.000Z' );
+        $replace = array( ' ', '' );
+        $sql_date = str_replace( $search, $replace, $ebay_date );
+        return $sql_date;
+    }
+
+
     /** ************************************************************************
      * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
      * is given special treatment when columns are processed. It ALWAYS needs to

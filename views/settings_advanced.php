@@ -82,7 +82,7 @@
 
 
 			<!-- #postbox-container-3 -->
-			<?php if ( ( ! is_multisite() ) || ( is_main_site() ) ) : ?>
+			<?php if ( ( ! is_multisite() || is_main_site() ) && apply_filters( 'wpl_enable_capabilities_options', true ) ) : ?>
 			<div id="postbox-container-3" class="postbox-container">
 				<div class="meta-box-sortables ui-sortable">
 					
@@ -139,7 +139,6 @@
 						</div>
 					</div>
 
-					<?php #include('profile/edit_sidebar.php') ?>
 				</div>
 			</div> <!-- #postbox-container-1 -->
 			<?php endif; ?>
@@ -161,6 +160,7 @@
 								<option value="off"     <?php if ( $wpl_process_shortcodes == 'off' ): ?>selected="selected"<?php endif; ?>><?php echo __('off','wplister'); ?></option>
 								<option value="content" <?php if ( $wpl_process_shortcodes == 'content' ): ?>selected="selected"<?php endif; ?>><?php echo __('only in product description','wplister'); ?></option>
 								<option value="full"    <?php if ( $wpl_process_shortcodes == 'full' ): ?>selected="selected"<?php endif; ?>><?php echo __('in description and listing template','wplister'); ?></option>
+								<option value="remove"  <?php if ( $wpl_process_shortcodes == 'remove' ): ?>selected="selected"<?php endif; ?>><?php echo __('remove all shortcodes from description','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('Enable this if you want to use WordPress shortcodes in your product description or your listing template.','wplister'); ?><br>
@@ -331,6 +331,15 @@
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('Convert length, width and height to the unit required by eBay.','wplister'); ?>
+							</p>
+
+							<label for="wpl-exclude_attributes" class="text_label">
+								<?php echo __('Exclude attributes','wplister') ?>
+                                <?php wplister_tooltip('If you want to hide certain product attributes from eBay enter their names separated by commas here.<br>Example: Brand,Size,MPN') ?>
+							</label>
+							<input type="text" name="wpl_e2e_exclude_attributes" id="wpl-exclude_attributes" value="<?php echo $wpl_exclude_attributes; ?>" class="text_input" />
+							<p class="desc" style="display: block;">
+								<?php echo __('Enter a comma separated list of product attributes to exclude from eBay.','wplister'); ?><br>
 							</p>
 
 							<label for="wpl-enable_item_compat_tab" class="text_label">

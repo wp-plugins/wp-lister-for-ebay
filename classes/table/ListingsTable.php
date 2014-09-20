@@ -195,9 +195,12 @@ class ListingsTable extends WP_List_Table {
             }
         } 
 
+        // hide View on eBay link when there is no ebay_id and no ViewItemURL
+        if ( empty($item['ebay_id']) && empty($item['ViewItemURL']) ) unset( $actions['open'] );
+
         // show warning if WooCommerce product has been deleted
         if ( ! ProductWrapper::getProduct( $item['post_id'] ) && ($item['status'] != 'archived') ) {
-            $tip_msg = 'This product has been deleted!<br>Please do <i>not</i> delete products from WooCommerce, or archive the listing first.';
+            $tip_msg = 'This product has been deleted!<br>Please do <i>not</i> delete products - unless you plan to archive the listing as well.';
             $img_url  = WPLISTER_URL . '/img/error.gif';
             $listing_title .= '&nbsp;<img src="'.$img_url.'" style="height:12px; padding:0;" class="tips" data-tip="'.$tip_msg.'"/>&nbsp;';
             $listing_title = str_replace('product_title_link', 'missing_product_title_link', $listing_title);
@@ -268,10 +271,10 @@ class ListingsTable extends WP_List_Table {
             // echo "<pre>";print_r($result);echo"</pre>";#die();
 
 
-            // show warning if not variations found
+            // show warning if no variations found
             if ( ! is_array($variations) || ! sizeof($variations) ) {
                 $img_url  = WPLISTER_URL . '/img/error.gif';
-                $variations_html .= '(<a href="#" onClick="jQuery(\'#pvars_'.$item['id'].'\').toggle();return false;">&raquo;Variations</a>)<!br>';
+                $variations_html .= '(<a href="#" onClick="jQuery(\'#pvars_'.$item['id'].'\').toggle();return false;">&raquo;'.__('Variations','wplister').'</a>)<!br>';
                 $variations_html .= '&nbsp;<img src="'.$img_url.'" style="height:12px; padding:0;"/>&nbsp;<br>';
                 $variations_html .= '<b style="color:darkred">No variations found.</b><br>';
                 $variations_html .= '<div id="pvars_'.$item['id'].'" class="variations_list" style="display:none;margin-bottom:10px;">';
@@ -285,7 +288,7 @@ class ListingsTable extends WP_List_Table {
 
             // add Variations link and container
             $variations_html .= '(<a href="#TB_inline?width=600&inlineId=pvars_'.$item['id'].'" class="thickbox">&raquo;</a>';
-            $variations_html .= '<a href="#" onClick="jQuery(\'#pvars_'.$item['id'].'\').toggle();return false;">Variations</a>)<br>';
+            $variations_html .= '<a href="#" onClick="jQuery(\'#pvars_'.$item['id'].'\').toggle();return false;"> '.sizeof($variations).' '.__('Variations','wplister').'</a>)<br>';
             $variations_html .= '<div id="pvars_'.$item['id'].'" class="variations_list" style="display:none;margin-bottom:10px;">';
 
             // show variation mode message
@@ -330,7 +333,7 @@ class ListingsTable extends WP_List_Table {
                 // column: SKU
                 $variations_html .= '<td>';
                 $variations_html .= $var['sku'] ? $var['sku'] : '<span style="color:darkred">SKU is missing!</span';
-                $variations_html .= @$var['is_default'] ? ' *' : '';
+                $variations_html .= @$var['is_default'] ? '&nbsp;<span class="tips" data-tip="'.__('Default variation','wplister').'">*</span>' : '';
                 $variations_html .= '</td>';
 
                 // last column: price
@@ -506,6 +509,8 @@ class ListingsTable extends WP_List_Table {
             if ( ( $item['quantity_sold'] > 0 ) && ( $item['status'] != 'changed' ) ) {
                 $qty_available = $item['quantity'] - $item['quantity_sold'];
                 $quantity = $qty_available . ' / ' . $item['quantity'];
+                // prevent negative qty when sold or ended product has been updated in wc
+                if ( $quantity < 0 ) $quantity = $item['quantity'];
             } else {
                 $quantity = $item['quantity']; 
             }
@@ -699,9 +704,16 @@ class ListingsTable extends WP_List_Table {
             return $profile_name;
         }
 
+        $edit_url = "admin.php?page=wplister-profiles&action=edit";
+        $edit_url = add_query_arg( 'profile', $item['profile_id'], $edit_url );
+        $edit_url = add_query_arg( 'return_to', 'listings', $edit_url );
+
+        if ( isset($_REQUEST['s']) )                $edit_url = add_query_arg( 's', $_REQUEST['s'], $edit_url );
+        if ( isset($_REQUEST['listing_status']) )   $edit_url = add_query_arg( 'listing_status', $_REQUEST['listing_status'], $edit_url );
+
         return sprintf(
-            '<a href="admin.php?page=wplister-profiles&action=edit&profile=%1$s&return_to=listings" title="%2$s">%3$s</a>',
-            /*$1%s*/ $item['profile_id'],  
+            '<a href="%1$s" title="%2$s">%3$s</a>',
+            /*$1%s*/ $edit_url,  
             /*$2%s*/ __('Edit','wplister'),  
             /*$3%s*/ $profile_name        
         );
@@ -718,9 +730,16 @@ class ListingsTable extends WP_List_Table {
             return $template_name;
         }
 
+        $edit_url = "admin.php?page=wplister-templates&action=edit";
+        $edit_url = add_query_arg( 'template', $item['template'], $edit_url );
+        $edit_url = add_query_arg( 'return_to', 'listings', $edit_url );
+
+        if ( isset($_REQUEST['s']) )                $edit_url = add_query_arg( 's', $_REQUEST['s'], $edit_url );
+        if ( isset($_REQUEST['listing_status']) )   $edit_url = add_query_arg( 'listing_status', $_REQUEST['listing_status'], $edit_url );
+
         return sprintf(
-            '<a href="admin.php?page=wplister-templates&action=edit&template=%1$s&return_to=listings" title="%2$s">%3$s</a>',
-            /*$1%s*/ $template_id,  
+            '<a href="%1$s" title="%2$s">%3$s</a>',
+            /*$1%s*/ $edit_url,  
             /*$2%s*/ __('Edit','wplister'),  
             /*$3%s*/ $template_name        
         );
@@ -826,6 +845,7 @@ class ListingsTable extends WP_List_Table {
             'date_published'  	=> array('date_published',false),     //true means its already sorted
             'end_date'  		=> array('end_date',false),
             'auction_title'     => array('auction_title',false),
+            'price'             => array('price',false),
             'status'            => array('status',false)
         );
         return $sortable_columns;
@@ -906,91 +926,115 @@ class ListingsTable extends WP_List_Table {
     // status filter links
     // http://wordpress.stackexchange.com/questions/56883/how-do-i-create-links-at-the-top-of-wp-list-table
     function get_views(){
-       $views    = array();
-       $current  = ( !empty($_REQUEST['listing_status']) ? $_REQUEST['listing_status'] : 'all');
-       $base_url = remove_query_arg( array( 'action', 'auction', 'listing_status' ) );
+        $views    = array();
+        $current  = ( !empty($_REQUEST['listing_status']) ? $_REQUEST['listing_status'] : 'all');
+        $base_url = remove_query_arg( array( 'action', 'auction', 'listing_status' ) );
 
-       // get listing status summary
-       $lm = new ListingsModel();
-       $summary = $lm->getStatusSummary();
+        // handle profile query
+        if ( isset($_REQUEST['profile_id']) && $_REQUEST['profile_id'] ) {
+            $base_url = add_query_arg( 'profile_id', $_REQUEST['profile_id'], $base_url );
+        }
+        // handle search query
+        if ( isset($_REQUEST['s']) && $_REQUEST['s'] ) {
+            $base_url = add_query_arg( 's', $_REQUEST['s'], $base_url );
+        }
 
-       // All link
-       $class = ($current == 'all' ? ' class="current"' :'');
-       $all_url = remove_query_arg( 'listing_status', $base_url );
-       $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
-       $views['all'] .= '<span class="count">('.$summary->total_items.')</span>';
+        // get listing status summary
+        $lm = new ListingsModel();
+        $summary = $lm->getStatusSummary();
 
-       // prepared link
-       $prepared_url = add_query_arg( 'listing_status', 'prepared', $base_url );
-       $class = ($current == 'prepared' ? ' class="current"' :'');
-       $views['prepared'] = "<a href='{$prepared_url}' {$class} >".__('Prepared','wplister')."</a>";
-       if ( isset($summary->prepared) ) $views['prepared'] .= '<span class="count">('.$summary->prepared.')</span>';
+        // All link
+        $class = ($current == 'all' ? ' class="current"' :'');
+        $all_url = remove_query_arg( 'listing_status', $base_url );
+        $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
+        $views['all'] .= '<span class="count">('.$summary->total_items.')</span>';
 
-       // verified link
-       $verified_url = add_query_arg( 'listing_status', 'verified', $base_url );
-       $class = ($current == 'verified' ? ' class="current"' :'');
-       $views['verified'] = "<a href='{$verified_url}' {$class} >".__('Verified','wplister')."</a>";
-       if ( isset($summary->verified) ) $views['verified'] .= '<span class="count">('.$summary->verified.')</span>';
+        // prepared link
+        $prepared_url = add_query_arg( 'listing_status', 'prepared', $base_url );
+        $class = ($current == 'prepared' ? ' class="current"' :'');
+        $views['prepared'] = "<a href='{$prepared_url}' {$class} >".__('Prepared','wplister')."</a>";
+        if ( isset($summary->prepared) ) $views['prepared'] .= '<span class="count">('.$summary->prepared.')</span>';
 
-       // published link
-       $published_url = add_query_arg( 'listing_status', 'published', $base_url );
-       $class = ($current == 'published' ? ' class="current"' :'');
-       $views['published'] = "<a href='{$published_url}' {$class} >".__('Published','wplister')."</a>";
-       if ( isset($summary->published) ) $views['published'] .= '<span class="count">('.$summary->published.')</span>';
+        // verified link
+        $verified_url = add_query_arg( 'listing_status', 'verified', $base_url );
+        $class = ($current == 'verified' ? ' class="current"' :'');
+        $views['verified'] = "<a href='{$verified_url}' {$class} >".__('Verified','wplister')."</a>";
+        if ( isset($summary->verified) ) $views['verified'] .= '<span class="count">('.$summary->verified.')</span>';
 
-       // changed link
-       $changed_url = add_query_arg( 'listing_status', 'changed', $base_url );
-       $class = ($current == 'changed' ? ' class="current"' :'');
-       $views['changed'] = "<a href='{$changed_url}' {$class} >".__('Changed','wplister')."</a>";
-       if ( isset($summary->changed) ) $views['changed'] .= '<span class="count">('.$summary->changed.')</span>';
+        // published link
+        $published_url = add_query_arg( 'listing_status', 'published', $base_url );
+        $class = ($current == 'published' ? ' class="current"' :'');
+        $views['published'] = "<a href='{$published_url}' {$class} >".__('Published','wplister')."</a>";
+        if ( isset($summary->published) ) $views['published'] .= '<span class="count">('.$summary->published.')</span>';
 
-       // ended link
-       $ended_url = add_query_arg( 'listing_status', 'ended', $base_url );
-       $class = ($current == 'ended' ? ' class="current"' :'');
-       $views['ended'] = "<a href='{$ended_url}' {$class} >".__('Ended','wplister')."</a>";
-       if ( isset($summary->ended) ) $views['ended'] .= '<span class="count">('.$summary->ended.')</span>';
+        // changed link
+        $changed_url = add_query_arg( 'listing_status', 'changed', $base_url );
+        $class = ($current == 'changed' ? ' class="current"' :'');
+        $views['changed'] = "<a href='{$changed_url}' {$class} >".__('Changed','wplister')."</a>";
+        if ( isset($summary->changed) ) $views['changed'] .= '<span class="count">('.$summary->changed.')</span>';
 
-       // archived link
-       $archived_url = add_query_arg( 'listing_status', 'archived', $base_url );
-       $class = ($current == 'archived' ? ' class="current"' :'');
-       $views['archived'] = "<a href='{$archived_url}' {$class} >".__('Archived','wplister')."</a>";
-       if ( isset($summary->archived) ) $views['archived'] .= '<span class="count">('.$summary->archived.')</span>';
+        // ended link
+        $ended_url = add_query_arg( 'listing_status', 'ended', $base_url );
+        $class = ($current == 'ended' ? ' class="current"' :'');
+        $views['ended'] = "<a href='{$ended_url}' {$class} >".__('Ended','wplister')."</a>";
+        if ( isset($summary->ended) ) $views['ended'] .= '<span class="count">('.$summary->ended.')</span>';
 
-       // sold link
-       $sold_url = add_query_arg( 'listing_status', 'sold', $base_url );
-       $class = ($current == 'sold' ? ' class="current"' :'');
-       $views['sold'] = "<a href='{$sold_url}' {$class} >".__('Sold','wplister')."</a>";
-       if ( isset($summary->sold) ) $views['sold'] .= '<span class="count">('.$summary->sold.')</span>';
+        // archived link
+        $archived_url = add_query_arg( 'listing_status', 'archived', $base_url );
+        $class = ($current == 'archived' ? ' class="current"' :'');
+        $views['archived'] = "<a href='{$archived_url}' {$class} >".__('Archived','wplister')."</a>";
+        if ( isset($summary->archived) ) $views['archived'] .= '<span class="count">('.$summary->archived.')</span>';
 
-       // relist link
-       $sold_url = add_query_arg( 'listing_status', 'relist', $base_url );
-       $class = ($current == 'relist' ? ' class="current"' :'');
-       $views['relist'] = "<a href='{$sold_url}' {$class} title='Show ended listings which are in stock and can be relisted.'>".__('Relist','wplister')."</a>";
-       if ( isset($summary->relist) ) $views['relist'] .= '<span class="count">('.$summary->relist.')</span>';
+        // sold link
+        $sold_url = add_query_arg( 'listing_status', 'sold', $base_url );
+        $class = ($current == 'sold' ? ' class="current"' :'');
+        $views['sold'] = "<a href='{$sold_url}' {$class} >".__('Sold','wplister')."</a>";
+        if ( isset($summary->sold) ) $views['sold'] .= '<span class="count">('.$summary->sold.')</span>';
 
-       // autorelist link
-       if ( $summary->autorelist ) {
+        // relist link
+        $sold_url = add_query_arg( 'listing_status', 'relist', $base_url );
+        $class = ($current == 'relist' ? ' class="current"' :'');
+        $views['relist'] = "<a href='{$sold_url}' {$class} title='Show ended listings which are in stock and can be relisted.'>".__('Relist','wplister')."</a>";
+        if ( isset($summary->relist) ) $views['relist'] .= '<span class="count">('.$summary->relist.')</span>';
+
+        // autorelist link
+        if ( $summary->autorelist ) {
            $sold_url = add_query_arg( 'listing_status', 'autorelist', $base_url );
            $class = ($current == 'autorelist' ? ' class="current"' :'');
            $views['autorelist'] = "<a href='{$sold_url}' {$class} title='Show ended listings which are scheduled to be relisted.'>".__('Scheduled','wplister')."</a>";
            if ( isset($summary->autorelist) ) $views['autorelist'] .= '<span class="count">('.$summary->autorelist.')</span>';        
-       }
+        }
 
-       // locked link
-       if ( $summary->locked ) {
+        // locked link
+        if ( $summary->locked ) {
            $sold_url = add_query_arg( 'listing_status', 'locked', $base_url );
            $class = ($current == 'locked' ? ' class="current"' :'');
            $views['locked'] = "<a href='{$sold_url}' {$class} title='Show locked listings'>".__('Locked','wplister')."</a>";
            if ( isset($summary->locked) ) $views['locked'] .= '<span class="count">('.$summary->locked.')</span>';        
-       }
+        }
 
-       return $views;
+        return $views;
     }    
 
     function extra_tablenav( $which ) {
         if ( 'top' != $which ) return;
+        $pm = new ProfilesModel();
+        $wpl_profiles = $pm->getAll();
+        $profile_id = ( isset($_REQUEST['profile_id']) ? $_REQUEST['profile_id'] : false);
+        // echo "<pre>";print_r($wpl_profiles);echo"</pre>";die();
         ?>
         <div class="alignleft actions" style="">
+
+            <select name="profile_id">
+                <option value=""><?php _e('All profiles','wplister') ?></option>
+                <?php foreach ($wpl_profiles as $profile) : ?>
+                    <option value="<?php echo $profile['profile_id'] ?>"
+                        <?php if ( $profile_id == $profile['profile_id'] ) echo 'selected'; ?>
+                        ><?php echo $profile['profile_name'] ?></option>
+                <?php endforeach; ?>
+            </select>            
+            <input type="submit" name="" id="post-query-submit" class="button" value="Filter">
+
 
             <a class="btn_verify_all_prepared_items button wpl_job_button"
                title="<?php echo __('Verify all prepared items with eBay and get listing fees.','wplister') ?>"
@@ -1007,7 +1051,29 @@ class ListingsTable extends WP_List_Table {
         </div>
         <?php
     }
-    
+
+    /**
+     * Generates the table navigation above or bellow the table and removes the
+     * _wp_http_referrer and _wpnonce because it generates a error about URL too large
+     * 
+     * @param string $which 
+     * @return void
+     */
+    function display_tablenav( $which ) {
+        ?>
+        <div class="tablenav <?php echo esc_attr( $which ); ?>">
+            <div class="alignleft actions">
+                <?php $this->bulk_actions(); ?>
+            </div>
+            <?php
+                $this->extra_tablenav( $which );
+                $this->pagination( $which );
+            ?>
+            <br class="clear" />
+        </div>
+        <?php
+    }
+       
     /** ************************************************************************
      * REQUIRED! This is where you prepare your data for display. This method will
      * usually be used to query the database, sort and filter the data, and generally

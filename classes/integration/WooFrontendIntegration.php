@@ -23,7 +23,7 @@ class WPL_WooFrontendIntegration {
 
 		if ( $auction_display_mode == 'forced' ) {
 
-			if ( $listing = $this->is_on_ebay( $product->id ) ) {
+			if ( $listing = $this->is_published_on_ebay( $product->id ) ) {
 
 				// replace add to cart button with view details button
 				$html = sprintf('<a href="%s" class="add_to_cart_button button product_type_simple">%s</a>', get_permalink( $product->id ), __('View details','wplister') );
@@ -53,7 +53,7 @@ class WPL_WooFrontendIntegration {
 
 		if ( $auction_display_mode == 'forced' ) {
 
-			if ( $listing = $this->is_on_ebay( $post->ID ) ) {
+			if ( $listing = $this->is_published_on_ebay( $post->ID ) ) {
 
 				// view on ebay button
 				echo '<p>';
@@ -185,8 +185,8 @@ class WPL_WooFrontendIntegration {
 
 	} // is_on_auction()
 
-	// check if product is currently on ebay
-	function is_on_ebay( $post_id ) {
+	// check if product is currently published on ebay
+	function is_published_on_ebay( $post_id ) {
 
 		$lm = new ListingsModel();
 		$listings = $lm->getAllListingsFromPostID( $post_id );
@@ -205,7 +205,7 @@ class WPL_WooFrontendIntegration {
 
 		return false;
 
-	} // is_on_ebay()
+	} // is_published_on_ebay()
 
     public function add_custom_product_tabs( $tabs ) {
 		global $post;

@@ -76,6 +76,23 @@
 					</div>
 					<?php endif; ?>
 
+					<div class="postbox dev_box" id="VersionInfoBox" style="<?php echo defined('WPLISTER_RESELLER_VERSION') ? 'display:none' : ''; ?>">
+						<h3 class="hndle"><span><?php echo __('Version Info','wplister') ?></span></h3>
+						<div class="inside">
+
+							<table style="width:100%">
+								<tr><td>WP-Lister</td><td>	<?php echo WPLISTER_VERSION ?> </td></tr>
+								<tr><td>Database</td><td> <?php echo get_option('wplister_db_version') ?> </td></tr>
+								<tr><td>WordPress</td><td> <?php global $wp_version; echo $wp_version ?> </td></tr>
+								<tr><td>WooCommerce</td><td> <?php echo defined('WC_VERSION') ? WC_VERSION : WOOCOMMERCE_VERSION ?> </td></tr>
+								<?php if ( defined('WPLISTER_RESELLER_VERSION') ) : ?>
+									<tr><td>Reseller Add-On</td><td> <?php echo WPLISTER_RESELLER_VERSION ?> </td></tr>
+								<?php endif; ?>
+							</table>
+
+						</div>
+					</div>
+
 				</div>
 			</div> <!-- #postbox-container-1 -->
 
@@ -157,12 +174,34 @@
 						</div>
 					</div>
 
+					<div class="postbox" id="StagingSiteSettingsBox">
+						<h3 class="hndle"><span><?php echo __('Staging site','wplister') ?></span></h3>
+						<div class="inside">
+
+							<p>
+								<?php echo __('If you frequently clone your WordPress installation to a staging site, you can make WP-Lister automatically disable background updates and order creation when running on the staging site.','wplister'); ?>
+								<?php echo __('Enter a unique part of your staging domain below to activate this feature.','wplister'); ?><br>
+							</p>
+							<label for="wpl-staging_site_pattern" class="text_label">
+								<?php echo __('Staging site pattern','wplister') ?>
+								<?php $tip_msg  = __('You do not need to enter the full domain name of your staging site.','wplister'); ?>
+								<?php $tip_msg .= __('If your staging domain is mydomain.staging.wpengine.com enter staging.wpengine.com as a general pattern.','wplister'); ?>
+                                <?php wplister_tooltip($tip_msg) ?>
+							</label>
+							<input type="text" name="wpl_e2e_staging_site_pattern" id="wpl-staging_site_pattern" value="<?php echo $wpl_staging_site_pattern; ?>" class="text_input" />
+							<p class="desc" style="display: block;">
+								Example: staging.wpengine.com
+							</p>
+
+						</div>
+					</div>
+
 					<div class="postbox" id="ErrorHandlingBox">
 						<h3 class="hndle"><span><?php echo __('Debug options','wplister') ?></span></h3>
 						<div class="inside">
 
 							<p>
-								Warning: These options are for debugging purposes only. Please do not change them unless WP Lab support told you to do so.
+								<?php echo __('Warning: These options are for debugging purposes only. Please do not change them unless our support told you to do so.','wplister'); ?>
 							</p>
 
 							<label for="wpl-option-php_error_handling" class="text_label">
@@ -210,6 +249,15 @@
 								<option value="5" <?php if ( $wpl_force_table_items_limit == '5' ): ?>selected="selected"<?php endif; ?>>5 items</option>
 								<option value="10" <?php if ( $wpl_force_table_items_limit == '10' ): ?>selected="selected"<?php endif; ?>>10 items</option>
 							</select>
+
+							<label for="wpl-ignore_orders_before_ts" class="text_label">
+								<?php echo __('Ignore orders before','wplister') ?>
+								<?php wplister_tooltip('This is where WP-Lister remembers when it was connected to your eBay account. Orders placed before that date will be ignored.') ?>
+							</label>
+							<input type="text" name="wpl_e2e_ignore_orders_before_ts" id="wpl-ignore_orders_before_ts" value="<?php echo $wpl_ignore_orders_before_ts ? date('Y-m-d H:i:s T',$wpl_ignore_orders_before_ts) : ''; ?>" class="text_input" />
+							<p class="desc" style="display: block;">
+								Example: <?php echo date('Y-m-d H:i:s T') ?>
+							</p>
 
 						</div>
 					</div>

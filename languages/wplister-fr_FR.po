@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WP-Lister Pro v1.1.6.8\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-04-04 10:55:09+0000\n"
+"PO-Revision-Date: 2014-09-11 08:52:30+0000\n"
 "Last-Translator: ali <ali@deen-ul-islam.org>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -2007,7 +2007,7 @@ msgstr "Permettre de supprimer complètement annonces, les transactions et les p
 #: views/settings_page.php:101
 #@ wplister
 msgid "To remove your listing templates as well, please delete the folder <code>wp-content/uploads/wp-lister/templates/</code>."
-msgstr "Pour supprimer vos modèles d'annonces ainsi, s'il vous plaît supprimer le dossier <code> wp-content/uploads/wp-lister/templates / </ code>."
+msgstr "Pour supprimer vos modèles d'annonces ainsi, s'il vous plaît supprimer le dossier <code>wp-content/uploads/wp-lister/templates/</code>."
 
 #: views/settings_page.php:124
 #@ wplister

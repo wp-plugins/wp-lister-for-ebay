@@ -87,6 +87,8 @@
 										<input type="hidden" name="action" value="save_profile" />
 										<input type="hidden" name="wpl_e2e_profile_id" value="<?php echo $wpl_item['profile_id']; ?>" />
 										<input type="hidden" name="return_to" value="<?php echo @$_GET['return_to']; ?>" />
+										<input type="hidden" name="listing_status" value="<?php echo @$_GET['listing_status']; ?>" />
+										<input type="hidden" name="s" value="<?php echo @$_GET['s']; ?>" />
 										<input type="submit" value="<?php echo __('Save profile','wplister'); ?>" id="publish" class="button-primary" name="save">
 									</div>
 									<div class="clear"></div>
@@ -504,7 +506,8 @@
 						</div>
 					</div>
 
-					<?php if ( ! get_option('wpl_reseller_enable_whitelabel' ) ) : ?>
+					<?php #if ( ! get_option('wpl_reseller_enable_whitelabel' ) ) : ?>
+					<?php if ( defined('WPLISTER_RESELLER_VERSION') ) : ?>
 					<div class="postbox" id="HelpBox">
 						<h3><span><?php echo __('Help','wplister'); ?></span></h3>
 						<div class="inside">

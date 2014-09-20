@@ -166,6 +166,8 @@
 										<input type="hidden" name="action" value="save_template" />
 										<input type="hidden" name="wpl_e2e_template_id" value="<?php echo $wpl_item['template_id']; ?>" />
 										<input type="hidden" name="return_to" value="<?php echo @$_GET['return_to']; ?>" />
+										<input type="hidden" name="listing_status" value="<?php echo @$_GET['listing_status']; ?>" />
+										<input type="hidden" name="s" value="<?php echo @$_GET['s']; ?>" />
 										<input type="submit" value="<?php echo __('Save template','wplister'); ?>" id="publish" class="button-primary" name="save">
 									</div>
 									<div class="clear"></div>

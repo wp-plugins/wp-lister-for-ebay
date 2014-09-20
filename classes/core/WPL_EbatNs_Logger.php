@@ -24,7 +24,7 @@ class WPL_EbatNs_Logger{
 		// insert row into db
 		$data = array();
 		$data['timestamp'] = date( 'Y-m-d H:i:s' );
-		$data['user_id'] = $this->currentUserID;
+		$data['user_id']   = ( defined('DOING_CRON') && DOING_CRON ) ? 'wp_cron' : $this->currentUserID;
 		$wpdb->insert($wpdb->prefix.'ebay_log', $data);
 		if ( $wpdb->last_error ) echo 'Error in WPL_EbatNs_Logger::__construct: '.$wpdb->last_error.'<br>'.$wpdb->last_query;
 		$this->id = $wpdb->insert_id;

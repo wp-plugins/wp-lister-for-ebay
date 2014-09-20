@@ -82,10 +82,12 @@ class LogPage extends WPL_Page {
 	    $logTable = new LogTable();
 	    $logTable->prepare_items();
 
-	    // parse errors
-	    foreach ( $logTable->items as & $item ) {
+	    // parse errors - tmp var $items required for php 5.4
+	    $items = $logTable->items;
+	    foreach ( $items as & $item ) {
     		$item['errors'] = $this->parseErrors( $item );
 	    }
+	    $logTable->items = $items;
 
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,

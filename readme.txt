@@ -2,7 +2,7 @@
 Contributors: wp-lab
 Tags: ebay, woocommerce, products, export
 Requires at least: 3.6
-Tested up to: 3.9.1
+Tested up to: 4.0
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -54,7 +54,7 @@ To find out more about the different versions have a look on this feature compar
 == Installation ==
 
 1. Install WP-Lister for eBay either via the WordPress.org plugin repository, or by uploading the files to your server
-2. After activating the plugin, visit the new page WP-Lister and follow the setup instructions. 
+2. After activating the plugin, visit the new eBay page and follow the setup instructions. 
 
 == Frequently Asked Questions ==
 
@@ -78,15 +78,15 @@ But if you need to import all your items from eBay to WooCommerce first to be ab
 
 = Does WP-Lister support windows servers? =
 
-Nope.
+No, and there are no plans on adding support for IIS.
 
 = Are there any more FAQ? =
 
 Yes, there are more questions and answers on http://www.wplab.com/plugins/wp-lister/faq/
 
-= Any plans for WP-Lister for Amazon? =
+= What about for WP-Lister for Amazon? =
 
-Working on it. Contact us if you want to become a beta tester.
+WP-Lister for Amazon is currently in beta. You are welcome to follow the development on wplab.com - a free version on wordpress.org should follow later this year.
 
 == Screenshots ==
 
@@ -94,6 +94,105 @@ Working on it. Contact us if you want to become a beta tester.
 2. Profile Editor
 
 == Changelog ==
+= 1.5.0.8 =
+* fixed long multi value attributes / item specifics 
+* fixed possible php warning when preparing listings without price 
+* never update shipping address for orders with multi leg shipping enabled 
+
+= 1.5.0.7 =
+* archive ended and sold listings automatically after 90 days 
+* archive listings which do not exist on eBay when Error 17 is returned for revise, end, or relist 
+* fixed javascript error for item specific values containing single quotes 
+* fixed variations with null values as variation attributes (sizes likes "0" and "000") 
+* hide View on eBay link when ebay_id and ViewItemURL are empty 
+
+= 1.5.0.6 =
+* fixed invalid StartPrice error when revising inventory of locked items 
+* added GLS to the list of shipping providers 
+* added filter wplister_available_shipping_providers to clean up the list of shipping services on the order details page 
+* don't show negative quantity in listings table (when a sold or ended product was updated in WooCommerce) 
+* renamed "Prepare Listings" to "List on eBay" to avoid confusion with WP-Lister for Amazon 
+
+= 1.5.0.5 =
+* fixed duplicate orders issue in WooCommerce 2.2 
+* fixed php warning when search query returned no results 
+* fixed font in advanced settings page on french sites 
+* skip price when revising inventory during checkout 
+* added filter wplister_set_tracking_number_for_order to allow 3rd party code to fill in the tracking number automatically 
+* added wplister_prepare_listing action hook 
+
+= 1.5.0.4 =
+* added button to cancel profile selection 
+* skip price when revising inventory during checkout 
+* fixed pagination on listings page when using search box 
+
+= 1.5.0.3 =
+* added option to use eBay shipping center address in created WooCommerce orders (Global Shipping Program) 
+* added explanation for Error 10007 (Internal error to the application) 
+* identify purchased variations by SKU if no matching variation attributes are found 
+
+= 1.5.0.2 =
+* changed default menu label to eBay 
+* fixed custom eBay price for locked items 
+* fixed issue with spaces in image folder path when uploading to EPS 
+* fixed "On eBay" product filter when combined with "On Amazon" filter 
+* made price column sortable on listing page 
+* improved message display in log records 
+* improved variation display in listings table 
+* added more details to eBay order history section (include original stock value before processing) 
+* added filter wplister_filter_listing_item 
+
+= 1.5.0.1 =
+* added option to always send weight and dimensions (restoring default 1.4.x behavior) 
+* merged order type column for eBay and Amazon 
+
+= 1.5.0 =
+* added note that refund option is not applicable on AU and EU sites 
+* always send weight and dimensions in ShippingPackageDetails node 
+* fixed missing setup check messages 
+
+= 1.4.9.4 =
+* added option to filter listings by profile 
+* added proper setup instructions for external cron jobs 
+* show when cron schedule was last run in settings and orders page 
+* fixed ignoring archived listings when queried by post_id 
+* fixed rare price rounding issue 
+* fixed update notification message 
+* fixed PHP notice on WordPress 4.0 beta 
+
+= 1.4.9.3 =
+* fixed staging site option 
+* fixed multi value attributes when attribute is mapped to item specifics 
+* fixed eBay authentication on servers with non-standard arg_separator.output setting 
+
+= 1.4.9.2 =
+* remove ebay specific meta data from duplicated products 
+* handle ebay error code 17 and automatically move deleted listings to the archive 
+
+= 1.4.9.1 =
+* fixed handling orders as unpaid when PaidTime is empty 
+* fixed listing search when no status filter is selected 
+
+= 1.4.9 =
+* added best offer options on edit product page 
+* improved payment methods in created WooCommerce orders for bacs and cod 
+* improved order processing - fixed handling orders as unpaid when PaidTime is empty 
+* improved behavior of listing filters and search box - remember filters when editing profile and template 
+* improved german localization 
+* fixed missing page reload after step 2 of the setup process 
+* fixed warning when external cron was enabled 
+
+= 1.4.8 =
+* handle orders as unpaid when PaidTime is empty 
+* show whether an order was paid and when in orders table 
+* fixed attribute values when custom product attributes are used for variations 
+
+= 1.4.7 =
+* added option to use external cron jobs instead of wp_cron 
+* added option to define staging site domain where updates should be disabled 
+* fixed quantity in listings table not being updated when item was sold on Amazon 
+* force AutoPay to be disabled when Freight shipping is used 
+
 = 1.4.6 =
 * fixed missing setup assistant messages 
 * added option to remove part compatibility table from product 

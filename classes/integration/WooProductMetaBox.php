@@ -14,6 +14,8 @@ class WpLister_Product_MetaBox {
 			add_action( 'woocommerce_process_product_meta_external', array( &$this, 'save_external_inventory' ) );
 		}
 
+		// remove ebay specific meta data from duplicated products
+		add_action( 'woocommerce_duplicate_product', array( &$this, 'woocommerce_duplicate_product' ), 0, 2 );
 	}
 
 	function add_meta_box() {
@@ -65,7 +67,7 @@ class WpLister_Product_MetaBox {
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_title',
 			'label' 		=> __('Listing title', 'wplister'),
-			'placeholder' 	=> __('Custom listing title'),
+			'placeholder' 	=> __('Custom listing title', 'wplister'),
 			'description' 	=> __('Leave empty to generate title from product name. Maximum length: 80 characters','wplister'),
 			'custom_attributes' => array( 'maxlength' => 80 ),
 			'value'			=> get_post_meta( $post->ID, '_ebay_title', true )
@@ -223,8 +225,12 @@ class WpLister_Product_MetaBox {
             	clear: both;
             	margin-left: 33%;
             }
-            #wplister-ebay-advanced .wpl_ebay_hide_from_unlisted_field .description { 
-            	margin-left: 0;
+            #wplister-ebay-advanced .wpl_ebay_hide_from_unlisted_field .description,
+            #wplister-ebay-advanced .wpl_ebay_bestoffer_enabled_field .description { 
+            	margin-left: 0.3em;
+				height: 1.4em;
+				display: inline-block;
+            	vertical-align: bottom;
             }
             #wplister-ebay-advanced h2 {
             	padding-top: 0.5em;
@@ -282,6 +288,29 @@ class WpLister_Product_MetaBox {
 			'description' 	=> __('Hide this product from the list of products currently not listed on eBay.','wplister'),
 			'value' 		=> get_post_meta( $post->ID, '_ebay_hide_from_unlisted', true )
 		) );
+
+		woocommerce_wp_checkbox( array( 
+			'id'    		=> 'wpl_ebay_bestoffer_enabled', 
+			'label' 		=> __('Best Offer', 'wplister'),
+			'description' 	=> __('Enable Best Offer to allow a buyer to make a lower-priced binding offer.','wplister'),
+			'value' 		=> get_post_meta( $post->ID, '_ebay_bestoffer_enabled', true )
+		) );
+
+		woocommerce_wp_text_input( array(
+			'id' 			=> 'wpl_ebay_bo_autoaccept_price',
+			'label' 		=> __('Auto accept price', 'wplister'),
+			'placeholder' 	=> __('The price at which Best Offers are automatically accepted.', 'wplister'),
+			'value'			=> get_post_meta( $post->ID, '_ebay_bo_autoaccept_price', true )
+		) );
+
+		woocommerce_wp_text_input( array(
+			'id' 			=> 'wpl_ebay_bo_minimum_price',
+			'label' 		=> __('Minimum price', 'wplister'),
+			'placeholder' 	=> __('Specifies the minimum acceptable Best Offer price.', 'wplister'),
+			'value'			=> get_post_meta( $post->ID, '_ebay_bo_minimum_price', true )
+		) );
+
+
 
 
 		$wpl_seller_profiles_enabled	= get_option('wplister_ebay_seller_profiles_enabled');
@@ -1017,8 +1046,11 @@ class WpLister_Product_MetaBox {
 			update_post_meta( $post_id, '_ebay_category_2_id', $wpl_ebay_category_2_id );
 			update_post_meta( $post_id, '_ebay_gallery_image_url', $wpl_ebay_gallery_image_url );
 
-			update_post_meta( $post_id, '_ebay_seller_payment_profile_id', esc_attr( @$_POST['wpl_ebay_seller_payment_profile_id'] ) );
-			update_post_meta( $post_id, '_ebay_seller_return_profile_id', esc_attr( @$_POST['wpl_ebay_seller_return_profile_id'] ) );
+			update_post_meta( $post_id, '_ebay_seller_payment_profile_id', 	esc_attr( @$_POST['wpl_ebay_seller_payment_profile_id'] ) );
+			update_post_meta( $post_id, '_ebay_seller_return_profile_id', 	esc_attr( @$_POST['wpl_ebay_seller_return_profile_id'] ) );
+			update_post_meta( $post_id, '_ebay_bestoffer_enabled', 			esc_attr( @$_POST['wpl_ebay_bestoffer_enabled'] ) );
+			update_post_meta( $post_id, '_ebay_bo_autoaccept_price', 		esc_attr( @$_POST['wpl_ebay_bo_autoaccept_price'] ) );
+			update_post_meta( $post_id, '_ebay_bo_minimum_price', 			esc_attr( @$_POST['wpl_ebay_bo_minimum_price'] ) );
 
 			// shipping options
 			$ebay_shipping_service_type = esc_attr( @$_POST['wpl_e2e_shipping_service_type'] );
@@ -1071,6 +1103,18 @@ class WpLister_Product_MetaBox {
 		}
 
 	} // save_meta_box()
+
+	function woocommerce_duplicate_product( $new_id, $post ) {
+
+		// remove ebay specific meta data from duplicated products
+		delete_post_meta( $new_id, '_ebay_title' 			);
+		delete_post_meta( $new_id, '_ebay_start_price' 		);
+		delete_post_meta( $new_id, '_ebay_upc' 				);
+		delete_post_meta( $new_id, '_ebay_gallery_image_url');
+		delete_post_meta( $new_id, '_ebay_item_id'			); // created by importer add-on
+		delete_post_meta( $new_id, '_ebay_item_source'		); // created by importer add-on
+
+	} // woocommerce_duplicate_product()
 
 	function save_external_inventory( $post_id ) {
 

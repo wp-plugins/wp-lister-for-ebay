@@ -55,12 +55,15 @@ class WPL_Setup extends WPL_Core {
 			$msg2  = __('This includes shipping options, payment methods, your custom store categories as well as the whole eBay category tree, which might take a while.','wplister');
 			$url   = $pagenow . '?page=' . $_GET['page'];
 			// $hidden  = '<input type="hidden" name="action" value="update_ebay_details_setup" />';
-			$button  = '<a href="#" id="btn_update_ebay_data" class="button-primary">'.__('Update eBay details','wplister').'</a>';
+			$button  = '<a href="#" id="btn_update_ebay_data" onclick="return false;" class="button-primary">'.__('Update eBay details','wplister').'</a>';
 			#$msg2  = sprintf($msg2, $link);
 			$msg   = "<p><b>$title</b></p><p>$msg1</p><p>$msg2</p>";
 			// $msg  .= "<form method='post' action='$url'>$hidden".wp_nonce_field( 'e2e_tools_page',"_wpnonce", true, false )."$button</form>";
 			$msg  .= $button;
 			$this->showMessage($msg,0,1);
+
+			// remember when WP-Lister was connected to an eBay account for the first time
+			update_option( 'ignore_orders_before_ts', time() );
 		
 		} elseif ( '3' == self::getOption('setup_next_step') ) {
 		
@@ -100,7 +103,7 @@ class WPL_Setup extends WPL_Core {
 		
 			$title = $this->app_name .' '. __('Setup is complete.','wplister');
 			$msg1  = __('You are ready now to list your first items.', 'wplister');
-			$msg2  = __('Visit your Products page, select a few items and select "Prepare listings" from the bulk actions menu.','wplister');
+			$msg2  = __('Visit your Products page, select a few items and select "List on eBay" from the bulk actions menu.','wplister');
 			$msg   = "<p><b>$msg1</b></p><p>$msg2</p>";
 			$this->showMessage($msg,0,1);
 			update_option('wplister_setup_next_step', '0');
@@ -995,9 +998,48 @@ class WPL_Setup extends WPL_Core {
 			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
+		// upgrade to version 35  (1.5.0)
+		if ( 35 > $db_version ) {
+			$new_db_version = 35;
+
+			// change price column type to DECIMAL(13,2)
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
+			        CHANGE price price DECIMAL(13,2) ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+						
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_orders`
+			        CHANGE total total DECIMAL(13,2) ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+						
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+		// upgrade to version 36  (1.5.0)
+		if ( 36 > $db_version ) {
+			$new_db_version = 36;
+
+			// add indices to ebay_auctions table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions` ADD INDEX `ebay_id` (`ebay_id`) ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions` ADD INDEX `status` (`status`) ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions` ADD INDEX `post_id` (`post_id`) ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions` ADD INDEX `profile_id` (`profile_id`) ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions` ADD INDEX `locked` (`locked`) ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions` ADD INDEX `relist_date` (`relist_date`) ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = $this->app_name .' '. __('database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
 
 		// show update message
-		if ( ($msg) && (!$hide_message) ) self::showMessage($msg);		
+		if ( ($msg) && (!$hide_message) ) self::showMessage($msg,0,1);		
 
 		#debug: update_option('wplister_db_version', 0);
 		
@@ -1026,7 +1068,7 @@ class WPL_Setup extends WPL_Core {
 				If you are on a shared host, you need to ask your hoster to enable the cURL php extension for you.<br>
 				<br>
 				For more information on how to install the cURL php extension on other servers check <a href='http://stackoverflow.com/questions/1347146/how-to-enable-curl-in-php' target='_blank'>this page on stackoverflow</a>.
-			",1);
+			",1,1);
 			return false;
 		}
 
@@ -1045,7 +1087,7 @@ class WPL_Setup extends WPL_Core {
 				<br>
 				WP-Lister currently only supports unixoid operating systems like Linux, FreeBSD and OS X.<br>
 				Support for windows servers is still experimental and should not be used on production sites!
-			");
+			",2,1);
 			return true;
 		}
 
@@ -1062,7 +1104,7 @@ class WPL_Setup extends WPL_Core {
 				<br>
 				Your server seems to have PHP safe mode enabled, which can cause unexpected behaviour or prevent WP-Lister from working properly.<br>
 				PHP safe mode has been deprecated for years and will be completely removed in the next PHP version - so it is highly recommended to disable it or ask your hoster to do it for you.
-			");
+			",2,1);
 			return true;
 		}
 
@@ -1083,7 +1125,7 @@ class WPL_Setup extends WPL_Core {
 				<br>
 				You seem to have the <i>iThemes Slideshow</i> plugin installed, which is known to cause issues with WP-Lister.<br>
 				Version 2.0.23 of this plugin will slow down loading the listings page if you are using variations. This can render the entire listings page inaccessible, so please deactivate this plugin.
-			");
+			",2,1);
 			return false;
 
 		}
@@ -1100,7 +1142,7 @@ class WPL_Setup extends WPL_Core {
 				<b>WooCommerce is not installed.</b><br>
 				<br>
 				WP-Lister requires <a href='http://wordpress.org/plugins/woocommerce/' target='_blank'>WooCommerce</a> to be installed.<br>
-			",1);
+			",1,1);
 			return false;
 
 		}
@@ -1115,7 +1157,7 @@ class WPL_Setup extends WPL_Core {
 				<br>
 				WP-Lister requires WooCommerce $required_version to be installed. You are using WooCommerce $woocommerce_version.<br>
 				You should always keep your site and plugins updated.<br>
-			",1);
+			",1,1);
 			return false;
 
 		}
@@ -1161,6 +1203,7 @@ class WPL_Setup extends WPL_Core {
 		$cron_interval  = get_option( 'wplister_cron_auctions' );
 		$next_scheduled = wp_next_scheduled( 'wplister_update_auctions' ) ;
 		if ( ! $cron_interval ) return;
+		if ( 'external' == $cron_interval ) return;
 
 		// check if schedule is active
 		if ( $cron_interval && ! $next_scheduled ) {
@@ -1173,7 +1216,7 @@ class WPL_Setup extends WPL_Core {
 				. '<br><br>'
 				. 'If this message does not disappear, please visit the <a href="admin.php?page=wplister-settings">Settings</a> page and click <i>Save Settings</i> or contact support.'
 				. '</p>'
-			,1);
+			,2,1);
 
 			// this should fix it:
 			wp_schedule_event( time(), $cron_interval, 'wplister_update_auctions' );
@@ -1194,6 +1237,8 @@ class WPL_Setup extends WPL_Core {
 				. '<br><br>'
 				. 'You should contact your hoster or site administrator to get this fixed as soon as possible. Until then, WP-Lister will not be able to sync the inventory correctly nor process new orders from eBay.'
 				. '<br><br>'
+				. 'The quickest way to make sure this will not happen again is using an external cron job to trigger the inventory sync every 5 minutes. To do so, change the "update interval" setting option to "use external cron job" and follow the instructions. This is strongly recommended if you are using WP-Lister for Amazon as well.'
+				. '<br><br>'
 				. 'Keep in mind that this issue is not related to WP-Lister but to WordPress itself. All plugins and features which rely on scheduled tasks are affected by this issue - which includes scheduled posts, internal cleanup routines in WooCommerce and more.'
 				. '<br><br>'
 				. 'To see all your scheduled tasks and when they were last executed, we recommend installing '
@@ -1203,7 +1248,7 @@ class WPL_Setup extends WPL_Core {
 				. '<a href="https://wordpress.org/plugins/wp-cron-control/" target="_blank">WP Cron Control</a> plugin, '
 				. 'but we recommend to find out what is causing this and fixing it instead.'
 				. '</p>'
-			,1);
+			,1,1);
 
 		}
 
@@ -1237,16 +1282,27 @@ class WPL_Setup extends WPL_Core {
 		if ( ! $exptime = strtotime($expdate) ) return;
 		$two_weeks_from_now = time() + 3600 * 24 * 7 * 2;
 
-		if ( $exptime < $two_weeks_from_now ) {
+		if ( $exptime < time() ) {
 
 			$this->showMessage( 
 				'<p>'
-				. '<b>Warning: '. __('Your token will expire on','wplister') . ' ' . $expdate
+				. '<b>Warning: '. __('Your ebay token has expired on','wplister') . ' ' . $expdate
+				. ' (' . human_time_diff( strtotime($expdate) ) . ' ago) '.'</b>'
+				. '<br><br>'
+				. 'You need to reconnect your eBay account. To do so, please click the "Change account" button on Settings page and follow the instructions.'
+				. '</p>'
+			,1,1);
+
+		} elseif ( $exptime < $two_weeks_from_now ) {
+
+			$this->showMessage( 
+				'<p>'
+				. '<b>Warning: '. __('Your eBay token will expire on','wplister') . ' ' . $expdate
 				. ' (in ' . human_time_diff( strtotime($expdate) ) . ') '.'</b>'
 				. '<br><br>'
 				. 'You need to reconnect your eBay account. To do so, please click the "Change account" button on Settings page and follow the instructions.'
 				. '</p>'
-			,1);
+			,2,1);
 
 		}
 
@@ -1267,7 +1323,7 @@ class WPL_Setup extends WPL_Core {
 
 			$result  = @mkdir( $wpldir );
 			if ($result===false) {
-				$this->showMessage( "Could not create template folder: " . $wpldir, 1 );	
+				$this->showMessage( "Could not create template folder: " . $wpldir, 1, 1 );	
 				return false;
 			}
 
@@ -1278,7 +1334,7 @@ class WPL_Setup extends WPL_Core {
 
 			$result  = @mkdir( $tpldir );
 			if ($result===false) {
-				$this->showMessage( "Could not create template folder: " . $tpldir, 1 );	
+				$this->showMessage( "Could not create template folder: " . $tpldir, 1, 1 );	
 				return false;
 			}
 

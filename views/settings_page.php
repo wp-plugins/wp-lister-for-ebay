@@ -101,6 +101,19 @@
 						</div>
 					</div>
 
+					<?php if ( $wpl_is_staging_site ) : ?>
+					<div class="postbox" id="StagingSiteBox">
+						<h3 class="hndle"><span><?php echo __('Staging Site','wplister') ?></span></h3>
+						<div class="inside">
+							<p>
+								<span style="color:darkred; font-weight:bold">
+									Note: Automatic background updates and order creation have been disabled on this staging site.
+								</span>
+							</p>
+						</div>
+					</div>
+					<?php endif; ?>
+
 					<?php if ( get_option( 'wplister_cron_auctions' ) ) : ?>
 					<div class="postbox" id="UpdateScheduleBox">
 						<h3 class="hndle"><span><?php echo __('Update Schedule','wplister') ?></span></h3>
@@ -111,6 +124,48 @@
 								<?php echo __('Next scheduled update','wplister'); ?> 
 								<?php echo human_time_diff( wp_next_scheduled( 'wplister_update_auctions' ), current_time('timestamp',1) ) ?>
 								<?php echo wp_next_scheduled( 'wplister_update_auctions' ) < current_time('timestamp',1) ? 'ago' : '' ?>
+							<?php elseif ( $wpl_option_cron_auctions == 'external' ) : ?>
+								<?php echo __('Background updates are handled by an external cron job.','wplister'); ?> 
+								<a href="#TB_inline?height=420&width=900&inlineId=cron_setup_instructions" class="thickbox">
+									<?php echo __('Details','wplister'); ?>
+								</a>
+
+								<div id="cron_setup_instructions" style="display: none;">
+									<h2>
+										<?php echo __('How to set up an external cron job','wplister'); ?>
+									</h2>
+									<p>
+										<?php echo __('Luckily, you don\'t have to be a server admin to set up an external cron job.','wplister'); ?>
+										<?php echo __('You can ask your server admin to set up a cron job on your own server - or use a 3rd party service like CronBlast, which provides a user friendly interface and additional features for a small monthly fee.','wpla'); ?>
+									</p>
+
+									<h3>
+										<?php echo __('Option A: Web cron service','wplister'); ?>
+									</h3>
+									<p>
+										<?php $ec_link = '<a href="https://www.cronblast.com/" target="_blank">www.cronblast.com</a>' ?>
+										<?php echo sprintf( __('The easiest way to set up a cron job is to sign up with %s and use the following URL to create a new task.','wplister'), $ec_link ); ?><br>
+									</p>
+									<code>
+										<?php echo bloginfo('siteurl') ?>/wp-admin/admin-ajax.php?action=wplister_run_scheduled_tasks
+									</code>
+
+									<h3>
+										<?php echo __('Option B: Server cron job','wplister'); ?>
+									</h3>
+									<p>
+										<?php echo __('If you prefer to set up a cron job on your own server you can create a cron job that will execute the following command:','wplister'); ?>
+									</p>
+
+									<code style="font-size:0.8em;">
+										wget -q -O - <?php echo bloginfo('siteurl') ?>/wp-admin/admin-ajax.php?action=wplister_run_scheduled_tasks >/dev/null 2>&1
+									</code>
+
+									<p>
+										<?php echo __('Note: Your cron job should run at least every 15 minutes but not more often than every 5 minutes.','wplister'); ?>
+									</p>
+								</div>
+
 							<?php else: ?>
 								<span style="color:darkred; font-weight:bold">
 									Warning: Update schedule is disabled.
@@ -118,6 +173,13 @@
 								Please click the "Save Settings" button above in order to reset the update schedule.
 							<?php endif; ?>
 							</p>
+
+							<?php if ( get_option('wplister_cron_last_run') ) : ?>
+							<p>
+								<?php echo __('Last run','wplister'); ?>: 
+								<?php echo human_time_diff( get_option('wplister_cron_last_run'), current_time('timestamp',1) ) ?> ago
+							</p>
+							<?php endif; ?>
 
 						</div>
 					</div>
@@ -292,6 +354,18 @@
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('Enable this to modify the product details page for items currently on auction.','wplister'); ?>
+							</p>
+
+							<label for="wpl-send_weight_and_size" class="text_label">
+								<?php echo __('Send weight and dimensions','wplister'); ?>
+                                <?php wplister_tooltip('By default, product weight and dimensions are only sent to eBay when calculated shipping is used.<br>Enable this option to send weight and dimensions for all listings.') ?>
+							</label>
+							<select id="wpl-send_weight_and_size" name="wpl_e2e_send_weight_and_size" class=" required-entry select">
+								<option value="default" <?php if ( $wpl_send_weight_and_size == 'default'): ?>selected="selected"<?php endif; ?>><?php echo __('Only for calculated shipping services','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
+								<option value="always"  <?php if ( $wpl_send_weight_and_size == 'always' ): ?>selected="selected"<?php endif; ?>><?php echo __('Always send weight and dimensions if set','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Enable this if eBay requires package weight or dimensions for flat shipping.','wplister'); ?>
 							</p>
 
 						</div>
