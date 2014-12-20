@@ -6,7 +6,7 @@ Description: List your products on eBay the easy way.
 Version: 1.5.0.8
 Author: Matthias Krok
 Author URI: http://www.wplab.com/ 
-Max WP Version: 4.0
+Max WP Version: 4.1
 Text Domain: wp-lister
 License: GPL2+
 */
