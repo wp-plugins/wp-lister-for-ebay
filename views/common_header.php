@@ -18,21 +18,26 @@
 <?php endif; ?>
 
 
+<?php 
+	// make sure we show all admin messages - even the ones generated after the WP admin_notices hook has fired
+	do_action( 'wple_admin_notices' );
+?>
+
 
 <!-- jobs window -->
-<div id="jobs_window_container" style="display:none">
-	<div id="jobs_window">
+<div id="wple_jobs_window_container" style="display:none">
+	<div id="wple_jobs_window">
 		
-		<h2 id="jobs_title">Jobs</h2>
+		<h2 id="wple_jobs_title">Jobs</h2>
 		
-		<div id="progressbar"><span class="caption">loading...</span></div>			
-		<div id="jobs_message">warming up...</div>
+		<div id="wple_progressbar"><span class="caption">loading...</span></div>			
+		<div id="wple_jobs_message">warming up...</div>
 		
-		<div id="jobs_log">
+		<div id="wple_jobs_log">
 			<span></span>
 		</div>
 		
-		<div id="job_bottom_notice" style="">
+		<div id="wple_jobs_footer_msg" style="">
 			<?php echo __("Please don't close this window until all tasks are completed.",'wplister') ?>
 		</div>
 		<div class="submit" style="float:right; padding: 10px 0 0 0; margin: 0;">
@@ -58,6 +63,15 @@
 			// btn_update_ebay_data
 			jQuery('#btn_update_ebay_data').click( function(event) {
 				WpLister.JobRunner.runJob( 'updateEbayData', 'Loading data from eBay...' );
+			});
+			jQuery('.btn_update_ebay_data_for_site').click( function(event,a,b) {			
+				var params = {
+					'site_id':    jQuery(this).data('site_id'),
+					'account_id': jQuery(this).data('account_id')
+				}
+				console.log('runjob(updateEbayData) parameters: ',params);
+				WpLister.JobRunner.runJob( 'updateEbayData', 'Updating site specific details from eBay...', params );
+				return false;
 			});
 
 			// btn_verify_all_prepared_items
@@ -86,6 +100,11 @@
 			// btn_update_all_published_items
 			jQuery('.btn_update_all_published_items').click( function(event) {
 				WpLister.JobRunner.runJob( 'updateAllPublishedItems', 'Updating items...' );
+			});
+
+			// btn_run_delayed_profile_application
+			jQuery('.btn_run_delayed_profile_application').click( function(event) {
+				WpLister.JobRunner.runJob( 'runDelayedProfileApplication', 'Applying profile...' );
 			});
 
 

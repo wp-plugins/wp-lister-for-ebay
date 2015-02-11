@@ -17,7 +17,7 @@ class ToolsPage extends WPL_Page {
 		add_screen_options_panel('wplister_setting_options', '', array( &$this, 'renderSettingsOptions'), $this->main_admin_menu_slug.'_page_wplister-tools' );
 
 		// load styles and scripts for this page only
-		add_action( 'admin_print_styles', array( &$this, 'onWpPrintStyles' ) );
+		// add_action( 'admin_print_styles', array( &$this, 'onWpPrintStyles' ) );
 		add_action( 'admin_enqueue_scripts', array( &$this, 'onWpEnqueueScripts' ) );		
 		add_thickbox();
 	}
@@ -37,14 +37,15 @@ class ToolsPage extends WPL_Page {
 
             // global $wpdb;
             // $wpdb->query("update wp_options set option_value='' where option_name='_site_transient_update_plugins'");
-            set_site_transient('update_plugins', null);
+            // set_site_transient('update_plugins', null);
+            delete_site_transient('update_plugins');
 
-			$this->showMessage( 
-				'<big>'. __('Check for updates was initiated.','wplister') . '</big><br><br>'
-				. __('You can visit your WordPress Updates now.','wplister') . '<br><br>'
-				. __('Since the updater runs in the background, it might take a little while before new updates appear.','wplister') . '<br><br>'
-				. '<a href="update-core.php" class="button-primary">'.__('view updates','wplister') . '</a>'
-			);
+			// $this->showMessage( 
+			// 	'<big>'. __('Check for updates was initiated.','wplister') . '</big><br><br>'
+			// 	. __('You can visit your WordPress Updates now.','wplister') . '<br><br>'
+			// 	. __('Since the updater runs in the background, it might take a little while before new updates appear.','wplister') . '<br><br>'
+			// 	. '<a href="update-core.php" class="button-primary">'.__('view updates','wplister') . '</a>'
+			// );
 		}
 
 	}
@@ -92,8 +93,9 @@ class ToolsPage extends WPL_Page {
 				if ( $_REQUEST['action'] == 'check_wc_out_of_sync') {				
 					require_once( WPLISTER_PATH . '/classes/core/WPL_InventoryCheck.php' );
 					$ic = new WPL_InventoryCheck();
-					$mode = isset( $_REQUEST['mode'] ) ? $_REQUEST['mode'] : 'published';
-					$ic->checkProductInventory( $mode );
+					$mode   = isset( $_REQUEST['mode'] )   ? $_REQUEST['mode']   : 'published';
+					$prices = isset( $_REQUEST['prices'] ) ? $_REQUEST['prices'] : false;
+					$ic->checkProductInventory( $mode, $prices );
 				}
 
 				// check_wc_out_of_stock
@@ -132,6 +134,12 @@ class ToolsPage extends WPL_Page {
 					$lm = new ListingsModel();
 					$count = $lm->lockAll( 0 );
 		    		$this->showMessage( $count .' '. 'items were unlocked.' );
+				}
+
+				// assign_all_data_to_default_account
+				if ( $_REQUEST['action'] == 'assign_all_data_to_default_account') {				
+					WPL_Setup::assignAllDataToDefaultAccount();
+		    		$this->showMessage( sprintf( 'All listings, orders and profiles have been assigned to your default account %s.', get_option('wplister_default_account_id') ) );
 				}
 
 
@@ -193,7 +201,7 @@ class ToolsPage extends WPL_Page {
 					$msg  = $om->count_total .' '. __('Orders were loaded from eBay.','wplister') . '<br>';
 					$msg .= __('Timespan','wplister') .': '. $om->getHtmlTimespan();
 					$msg .= '&nbsp;&nbsp;';
-					$msg .= '<a href="#" onclick="jQuery(\'#ebay_order_report\').toggle();return false;">'.__('show details','wplister').'</a>';
+					$msg .= '<a href="#" onclick="jQuery(\'.ebay_order_report\').toggle();return false;">'.__('show details','wplister').'</a>';
 					$msg .= $om->getHtmlReport();
 					$this->showMessage( $msg );
 				}
@@ -274,7 +282,7 @@ class ToolsPage extends WPL_Page {
 				<h5>Show on screen</h5>
 				<div class="metabox-prefs">
 						<label for="dev-hide">
-							<input type="checkbox" onclick="jQuery('#DeveloperToolBox').toggle();" value="dev" id="dev-hide" name="dev-hide" class="hide-column-tog">
+							<input type="checkbox" onclick="jQuery('.dev_box').toggle();" value="dev" id="dev-hide" name="dev-hide" class="hide-column-tog">
 							Developer options
 						</label>
 					<br class="clear">
@@ -291,8 +299,8 @@ class ToolsPage extends WPL_Page {
 		// testing:
 		// jQuery UI theme - for progressbar
 		// wp_register_style('jQueryUITheme', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/cupertino/jquery-ui.css');
-		wp_register_style('jQueryUITheme', plugins_url( 'css/smoothness/jquery-ui-1.8.22.custom.css' , WPLISTER_PATH.'/wp-lister.php' ) );
-		wp_enqueue_style('jQueryUITheme'); 
+		// wp_register_style('jQueryUITheme', plugins_url( 'css/smoothness/jquery-ui-1.8.22.custom.css' , WPLISTER_PATH.'/wp-lister-ebay.php' ) );
+		// wp_enqueue_style('jQueryUITheme'); 
 
 	}
 

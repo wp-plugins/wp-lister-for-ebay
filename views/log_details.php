@@ -91,7 +91,7 @@ error_reporting( E_ALL & ~E_DEPRECATED & ~E_STRICT );
 
 // try to include PEAR and hide php warnings on fail
 @include_once ('PEAR.php');
-if ( class_exists('PEAR') && ( 'custom' != get_option( 'wplister_xml_formatter', 'default' ) ) ) {
+if ( class_exists('PEAR') && ! is_numeric($req) && ( 'custom' != get_option( 'wplister_xml_formatter', 'default' ) ) ) {
 	// add XML dir to include path
 	$incPath = WPLISTER_PATH.'/includes';
 	set_include_path( get_include_path() . ':' . $incPath );
@@ -128,6 +128,10 @@ $req = htmlspecialchars( $req );
 
 // replace placeholder with link after htmlspecialchars()
 if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $description_link, $req );
+
+// check if account exists
+$account_exists = isset( WPLE()->accounts[ $wpl_row->account_id ] ) ? true : false;
+$ebay_account   = $account_exists ? WPLE()->accounts[ $wpl_row->account_id ] : null;
 
 ?><html>
 <head>
@@ -167,11 +171,12 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
 	<?php if ( ( ! isset($_REQUEST['send_to_support']) ) && ( ! isset($_REQUEST['new_tab']) ) ) : ?>
 		<div id="support_request_wrap" style="">
 			<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>" onsubmit="jQuery('#support_request_wrap').slideUp();" target="_blank" >
+                <?php wp_nonce_field( 'wple_send_to_support' ); ?>
 				<input type="hidden" name="log_id" value="<?php echo $wpl_row->id ?>" />
 				<input type="hidden" name="send_to_support" value="yes" />
 
 				<h2><?php echo __('Send to support','wplister') ?></h2>
-				Please to to provide as many details as possible about what steps you took and what we might need to do to reproduce the issue.
+				Please try to provide as many details as possible about what steps you took and what we might need to do to reproduce the issue.
 				<br><br>
 
 				<label for="user_name"><?php echo __('Your Name','wplister') ?></label>
@@ -197,6 +202,14 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
 
     <h2>Call: <?php echo $wpl_row->callname ?> (#<?php echo $wpl_row->id ?>)</h2>
 
+    <?php if ( ! $account_exists ) : ?>
+	<div class="error">
+		<p>
+			Warning: The account ID <?php echo $wpl_row->account_id ?> does not exist.
+		</p>
+	</div>
+	<?php endif; ?>
+
     <h3>Request URL</h3>
     <pre><?php echo $url ?></pre>
 
@@ -211,26 +224,40 @@ if ( isset($description_link) ) $req = preg_replace( "/___desc___/", $descriptio
     <h3>Response</h3>
     <pre><?php echo htmlentities( $res ) ?></pre>
 
+    <?php if ( $account_exists ) : ?>
+    <h3>Account Details</h3>
+    <pre>
+    	Account Name : <?php echo $ebay_account->title ?>
+
+    	Account User : <?php echo $ebay_account->user_name ?>
+
+    	Account ID   : <?php echo $wpl_row->account_id ?>
+
+    	eBay Site    : <?php echo $ebay_account->site_code ?> (<?php echo $ebay_account->site_id ?>)</pre>
+	<?php endif; ?>
+
     <h3>Debug Info</h3>
     <pre>
-    	WP-Lister: <?php echo $wpl_version ?> <?php echo WPLISTER_LIGHT ? '' : 'Pro' ?>
+    	WP-Lister : <?php echo $wpl_version ?> <?php echo WPLISTER_LIGHT ? '' : 'Pro' ?>
 
-    	Database : <?php echo get_option('wplister_db_version') ?>
+    	WC        : <?php echo WC_VERSION ?>    	
+    	DB        : <?php echo get_option('wplister_db_version') ?>
     	
-    	PHP      : <?php echo phpversion() ?>
+    	PHP       : <?php echo phpversion() ?>
     	
-    	WordPress: <?php echo get_bloginfo ( 'version' ); echo ' (' . ProductWrapper::plugin . ')' ?>    	
-    	Locale   : <?php echo get_bloginfo ( 'language' ) ?>
+    	WordPress : <?php echo get_bloginfo ( 'version' ) ?>    	
+    	Locale    : <?php echo get_bloginfo ( 'language' ) ?>
 
-    	Charset  : <?php echo get_bloginfo ( 'charset' ) ?>
+    	Charset   : <?php echo get_bloginfo ( 'charset' ) ?>
 
-    	Site URL : <?php echo get_bloginfo ( 'wpurl' ) ?>
+    	Account   : <?php echo $wpl_row->account_id ?>
+
+    	Site URL  : <?php echo get_bloginfo ( 'wpurl' ) ?>
     	
-    	Admin    : <?php echo get_bloginfo ( 'admin_email' ) ?>
+    	Admin     : <?php echo get_bloginfo ( 'admin_email' ) ?>
 
-    	Email    : <?php echo get_option('wplister_license_email') ?>
+    	Email     : <?php echo get_option('wplister_license_email') ?>
     </pre>
-
 
 </body>
 </html>

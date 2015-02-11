@@ -4,7 +4,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 	
 
 	// check_wc_out_of_sync
-	public function checkProductInventory( $mode = 'published' ) {
+	public function checkProductInventory( $mode = 'published', $compare_prices = false ) {
 
 		// get all published listings
 		$lm = new ListingsModel();
@@ -39,6 +39,12 @@ class WPL_InventoryCheck extends WPL_Model  {
     	    if ( $max_quantity )
     	    	$stock = min( $max_quantity, intval( $stock ) );
 
+	        // apply price modified from profile
+    	    $profile_start_price = ( isset( $profile_details['start_price'] ) && ! empty( $profile_details['start_price'] ) ) ? $profile_details['start_price'] : false ; 
+    	    if ( $profile_start_price ) {
+    	    	// echo "<pre>price: ";print_r($profile_start_price);echo"</pre>";#die();
+    	    }
+    	    	
 
 			// check if product has variations
 			if ( $_product ) {
@@ -75,6 +81,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 
 				// check eBay variations
 		        $cached_variations = maybe_unserialize( $item['variations'] );
+		        if ( is_array($cached_variations) )
 				foreach ($cached_variations as $var) {
 					$ebay_stock    += $var['stock'];
 					$ebay_price_min = min( $ebay_price_min, $var['price'] );
@@ -82,11 +89,18 @@ class WPL_InventoryCheck extends WPL_Model  {
 				}
 
 				// set default values
-				$price             = $price;
 				$item['qty']       = $ebay_stock;
-				$item['price']     = $ebay_price_min;
+				$item['price']     = $ebay_price_min != PHP_INT_MAX ? $ebay_price_min : 0;
 				$item['price_max'] = $ebay_price_max;
 				// echo "<pre>";print_r($cached_variations);echo"</pre>";die();
+
+			} else {
+
+				$price_min      = false;
+				$price_max      = false;
+				$ebay_price_min = false;
+				$ebay_price_max = false;
+
 			}
 
 
@@ -98,12 +112,20 @@ class WPL_InventoryCheck extends WPL_Model  {
 				$in_sync = false;
 
 			// check price
-			if ( round( $price, 2 ) != round( $item['price'], 2 ) )
-				$in_sync = false;
+			if ( $compare_prices ) {
 
-			// check max price
-			if ( isset( $price_max ) && isset( $item['price_max'] ) && ( round( $price_max, 2 ) != round ( $item['price_max'], 2 ) ) )
-				$in_sync = false;
+				$price_to_compare = $price;
+				if ( $profile_start_price ) {
+					$price_to_compare = $lm->applyProfilePrice( $price, $profile_start_price );
+				}
+				if ( round( $price_to_compare, 2 ) != round( $item['price'], 2 ) )
+					$in_sync = false;
+
+				// check max price
+				if ( isset( $price_max ) && isset( $item['price_max'] ) && ( round( $price_max, 2 ) != round ( $item['price_max'], 2 ) ) )
+					$in_sync = false;
+
+			}
 
 			// if in sync, continue with next item
 			if ( $in_sync )
@@ -124,13 +146,24 @@ class WPL_InventoryCheck extends WPL_Model  {
 				$item['status'] = 'changed';
 			}
 
+			// remove unneccessary data to consume less memory - doesn't seem to work...
+			// unset( $item['profile_data'] );
+			// unset( $item['post_content'] );
+			// unset( $item['details'] );
+			// unset( $item['variations'] );
+			// unset( $item['last_errors'] );
+			// unset( $item['history'] );
+			// unset( $item['eps'] );
+			// unset( $item['template'] );
+
 
 			// add to list of out of sync products
-			$item['price_woo']      = $price;
-			$item['price_woo_max']  = isset( $price_max ) ? $price_max : false;
-			$item['stock']          = $stock;
-			$item['exists']         = $_product ? true : false;
-			$item['type']           = $_product ? $_product->product_type : 'missing';
+			$item['price_woo']           = $price;
+			$item['price_woo_max']       = isset( $price_max ) ? $price_max : false;
+			$item['stock']               = $stock;
+			$item['exists']              = $_product ? true : false;
+			$item['type']                = $_product ? $_product->product_type : 'missing';
+			$item['profile_start_price'] = $profile_start_price;
 			$out_of_sync_products[] = $item;
 
 			// count products which have not yet been marked as changed
@@ -150,6 +183,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 		// table header
 		$msg .= '<table style="width:100%">';
 		$msg .= "<tr>";
+		$msg .= "<th style='text-align:left'>SKU</th>";
 		$msg .= "<th style='text-align:left'>Product</th>";
 		$msg .= "<th style='text-align:left'>Local Qty</th>";
 		$msg .= "<th style='text-align:left'>eBay Qty</th>";
@@ -165,6 +199,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 
 			// get column data
 			$qty          = $item['qty'];
+			$sku          = get_post_meta( $item['post_id'], '_sku', true );
 			$stock        = $item['stock'];
 			$title        = $item['auction_title'];
 			$post_id      = $item['post_id'];
@@ -180,8 +215,9 @@ class WPL_InventoryCheck extends WPL_Model  {
 			$changed_stock     =   intval( $item['qty']   )     ==   intval( $item['stock']     )     ? false : true;
 			$changed_price     = floatval( $item['price'] )     == floatval( $item['price_woo'] )     ? false : true;
 			$changed_price_max = floatval(@$item['price_max'] ) == floatval( $item['price_woo_max'] ) ? false : true;
-			$stock_css         = $changed_stock                       ? 'color:darkred;' : '';
-			$price_css         = $changed_price || $changed_price_max ? 'color:darkred;' : '';
+			$stock_css         = $changed_stock                       ? 'color:darkred; font-weight:bold;' : '';
+			$price_css         = $changed_price || $changed_price_max ? 'color:darkred;'                   : '';
+			if ( ! $compare_prices ) $price_css = '';
 
 			// build links
 			$ebay_url = $item['ViewItemURL'] ? $item['ViewItemURL'] : $ebay_url = 'http://www.ebay.com/itm/'.$ebay_id;
@@ -200,8 +236,12 @@ class WPL_InventoryCheck extends WPL_Model  {
 			if ( @$item['price_max'] )
 				$price .= ' - '.woocommerce_price( $item['price_max'] );
 
+			if ( $item['profile_start_price'] )
+				$price .= ' ('. $item['profile_start_price'] .')';
+
 			// build table row
 			$msg .= "<tr>";
+			$msg .= "<td>$sku</td>";
 			$msg .= "<td>$edit_link <span style='color:silver'>$locked $product_type (#$post_id)</span></td>";
 			$msg .= "<td style='$stock_css'>$stock</td>";
 			$msg .= "<td style='$stock_css'>$qty</td>";
@@ -217,13 +257,13 @@ class WPL_InventoryCheck extends WPL_Model  {
 		$msg .= '<p>';
 
 		// show 'check again' button
-		$url  = 'admin.php?page=wplister-tools&action=check_wc_out_of_sync&mode='.$mode.'&_wpnonce='.wp_create_nonce('e2e_tools_page');
+		$url  = 'admin.php?page=wplister-tools&action=check_wc_out_of_sync&mode='.$mode.'&prices='.$compare_prices.'&_wpnonce='.wp_create_nonce('e2e_tools_page');
 		$msg .= '<a href="'.$url.'" class="button">'.__('Check again','wplister').'</a> &nbsp; ';
 
 		// show 'mark all as changed' button
 		if ( $mode == 'published' )
 		if ( $published_count ) {
-			$url = 'admin.php?page=wplister-tools&action=check_wc_out_of_sync&mark_as_changed=yes&_wpnonce='.wp_create_nonce('e2e_tools_page');
+			$url = 'admin.php?page=wplister-tools&action=check_wc_out_of_sync&mode='.$mode.'&prices='.$compare_prices.'&mark_as_changed=yes&_wpnonce='.wp_create_nonce('e2e_tools_page');
 			$msg .= '<a href="'.$url.'" class="button">'.__('Mark all as changed','wplister').'</a> &nbsp; ';
 			$msg .= 'Click this button to mark all found listings as changed in WP-Lister, then revise all changed listings.';
 		} else {
@@ -290,6 +330,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 		$msg .= '<table style="width:100%">';
 		$msg .= "<tr>";
 		$msg .= "<th style='text-align:left'>Stock</th>";
+		$msg .= "<th style='text-align:left'>SKU</th>";
 		$msg .= "<th style='text-align:left'>Product</th>";
 		$msg .= "<th style='text-align:left'>Qty</th>";
 		$msg .= "<th style='text-align:left'>eBay ID</th>";
@@ -300,6 +341,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 		foreach ( $out_of_stock_products as $item ) {
 
 			// get column data
+			$sku     = get_post_meta( $item['post_id'], '_sku', true );
 			$qty     = $item['quantity'];
 			$stock   = $item['stock'] . ' x ';
 			$title   = $item['auction_title'];
@@ -322,6 +364,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 			// build table row
 			$msg .= "<tr>";
 			$msg .= "<td>$stock</td>";
+			$msg .= "<td>$sku</td>";
 			$msg .= "<td>$edit_link (ID $post_id)</td>";
 			$msg .= "<td>$qty x </td>";
 			$msg .= "<td>$ebay_link</td>";
@@ -394,6 +437,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 		$msg .= '<table style="width:100%">';
 		$msg .= "<tr>";
 		$msg .= "<th style='text-align:left'>Stock</th>";
+		$msg .= "<th style='text-align:left'>SKU</th>";
 		$msg .= "<th style='text-align:left'>Product</th>";
 		$msg .= "<th style='text-align:left'>Qty</th>";
 		$msg .= "<th style='text-align:left'>eBay ID</th>";
@@ -406,6 +450,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 
 			// get column data
 			$qty     = $item['quantity'] - $item['quantity_sold'];
+			$sku     = get_post_meta( $item['post_id'], '_sku', true );
 			$stock   = $item['stock'] . ' x ';
 			$title   = $item['auction_title'];
 			$post_id = $item['post_id'];
@@ -428,6 +473,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 			// build table row
 			$msg .= "<tr>";
 			$msg .= "<td>$stock</td>";
+			$msg .= "<td>$sku</td>";
 			$msg .= "<td>$edit_link (ID $post_id)</td>";
 			$msg .= "<td>$qty x </td>";
 			$msg .= "<td>$ebay_link</td>";

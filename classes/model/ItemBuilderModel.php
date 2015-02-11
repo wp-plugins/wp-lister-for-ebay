@@ -12,7 +12,12 @@ class ItemBuilderModel extends WPL_Model {
 	// var $_cs;
 	
 	var $variationAttributes = array();
+	var $variationSplitAttributes = array();
+	var $tmpVariationSpecificsSet = array();
 	var $result = false;
+	var $site_id = null;
+	var $listing_id = null;
+	var $account_id = null;
 
 	function ItemBuilderModel()
 	{
@@ -35,6 +40,10 @@ class ItemBuilderModel extends WPL_Model {
 		$hasVariations   = ProductWrapper::hasVariations( $post_id );
 		$isVariation     = ProductWrapper::isSingleVariation( $post_id );
 			
+		// remember listing id and account id for checkItem() and buildPayment()
+		$this->listing_id = $id;
+		$this->account_id = $listing['account_id'];
+
 		// adjust profile details from product level options
 		$profile_details = $this->adjustProfileDetails( $id, $post_id, $profile_details );
 
@@ -44,6 +53,7 @@ class ItemBuilderModel extends WPL_Model {
 
 		// set quantity
 		$item->Quantity = $listing['quantity'];
+    	if ( $item->Quantity < 0 ) $item->Quantity = 0; // prevent error for negative qty
 
 		// set listing title
 		$item->Title = $this->prepareTitle( $listing['auction_title'] );
@@ -81,6 +91,11 @@ class ItemBuilderModel extends WPL_Model {
 
 		// if this is a split variation, use parent post_id for all further processing
 		if ( $isVariation ) {
+
+			// prepare item specifics / variation attributes
+			$this->prepareSplitVariation( $id, $post_id, $listing );	
+
+			// use parent post_id for all further processing
 			$post_id = ProductWrapper::getVariationParent( $post_id );
 		}
 
@@ -89,7 +104,7 @@ class ItemBuilderModel extends WPL_Model {
 		$item = $this->buildProfileOptions( $item, $profile_details );			
 
 		// add various options that depend on $profile_details and $post_id
-		$item = $this->buildProductOptions( $id, $item, $post_id, $profile_details );			
+		$item = $this->buildProductOptions( $id, $item, $post_id, $profile_details, $listing, $isVariation );			
 
 		// add payment and return options
 		$item = $this->buildPayment( $item, $profile_details );			
@@ -180,6 +195,9 @@ class ItemBuilderModel extends WPL_Model {
 		$sites = EbayController::getEbaySites();
 		$site_name = $sites[$site_id];
 		$item->Site = $site_name; 
+
+		// remember site_id for checkItem()	
+		$this->site_id = $site_id;
 
 		return $item;
 
@@ -368,6 +386,7 @@ class ItemBuilderModel extends WPL_Model {
 			$profile_details['PackagingHandlingCosts']              = get_post_meta( $post_id, '_ebay_PackagingHandlingCosts', true );
 			$profile_details['InternationalPackagingHandlingCosts'] = get_post_meta( $post_id, '_ebay_InternationalPackagingHandlingCosts', true );
 			$profile_details['shipping_loc_enable_free_shipping']   = get_post_meta( $post_id, '_ebay_shipping_loc_enable_free_shipping', true );
+			$profile_details['shipping_package']   					= get_post_meta( $post_id, '_ebay_shipping_package', true );
 
 			// check for custom product level seller profiles
 			if ( get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true ) ) {
@@ -518,13 +537,18 @@ class ItemBuilderModel extends WPL_Model {
 	} /* end of buildImages() */
 
 
-	public function buildProductOptions( $id, $item, $post_id, $profile_details ) {
+	public function buildProductOptions( $id, $item, $post_id, $profile_details, $listing, $isVariation ) {
 
-		// add SKU - omit if empty
+		// get product SKU
 		$product_sku = ProductWrapper::getSKU( $post_id );
-		if ( trim( $product_sku ) == '' ) $product_sku = false;
 
+		// if this is a single split variation, use variation SKU instead of parent SKU
+		if ( $isVariation ) $product_sku = ProductWrapper::getSKU( $listing['post_id'] );
+
+		// set SKU - if not empty
+		if ( trim( $product_sku ) == '' ) $product_sku = false;
 		if ( $product_sku ) $item->SKU = $product_sku;
+
 
 		// include prefilled info by default
 		$include_prefilled_info = isset( $profile_details['include_prefilled_info'] ) ? (bool)$profile_details['include_prefilled_info'] : true;  
@@ -545,6 +569,17 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $product_upc = get_post_meta( $post_id, '_ebay_upc', true ) ) {
 			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setUPC( $product_upc );
+			$ProductListingDetails->setListIfNoProduct( true );
+			$ProductListingDetails->setIncludeStockPhotoURL( true );
+			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
+			$ProductListingDetails->setUseFirstProduct( true );
+			$item->setProductListingDetails( $ProductListingDetails );
+		}
+
+		// set EPID from product - if provided
+		if ( $product_epid = get_post_meta( $post_id, '_ebay_epid', true ) ) {
+			$ProductListingDetails = new ProductListingDetailsType();
+			$ProductListingDetails->setProductReferenceID( $product_epid );
 			$ProductListingDetails->setListIfNoProduct( true );
 			$ProductListingDetails->setIncludeStockPhotoURL( true );
 			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
@@ -658,10 +693,15 @@ class ItemBuilderModel extends WPL_Model {
 		// no payment options for classified ads
 		if ( $item->ListingType == 'LeadGeneration' ) return $item;
 
-		// Set Payment Methods
-		// $item->PaymentMethods[] = 'PersonalCheck';
-		// $item->PaymentMethods[] = 'PayPal';
-		// $item->PayPalEmailAddress = 'youraccount@yourcompany.com';
+		// get paypal email address
+		$accounts = WPLE()->accounts;
+		if ( isset( $accounts[ $this->account_id ] ) && ( $accounts[ $this->account_id ]->paypal_email ) ) {
+			$PayPalEmailAddress = $accounts[ $this->account_id ]->paypal_email;
+		} else {
+			$PayPalEmailAddress = get_option( 'wplister_paypal_email' );
+		}
+
+		// set payment methods
 		foreach ( $profile_details['payment_options'] as $payment_method ) {
 
 			if ( $payment_method['payment_name'] == '' ) continue;			
@@ -669,7 +709,7 @@ class ItemBuilderModel extends WPL_Model {
 			# BuyerPaymentMethodCodeType
 			$item->addPaymentMethods( $payment_method['payment_name'] );
 			if ( $payment_method['payment_name'] == 'PayPal' ) {
-				$item->PayPalEmailAddress = get_option( 'wplister_paypal_email' );
+				$item->PayPalEmailAddress = $PayPalEmailAddress;
 			}
 		}
 
@@ -1019,6 +1059,8 @@ class ItemBuilderModel extends WPL_Model {
 			$specifics = array_merge( $specifics, $product_specifics ); 
 
 		$this->logger->debug('item_specifics: '.print_r($specifics,1));
+		// $this->logger->debug('get variationAttributes: '.print_r($this->variationAttributes,1));
+		// $this->logger->debug('get variationSplitAttributes: '.print_r($this->variationSplitAttributes,1));
         foreach ($specifics as $spec) {
         	if ( $spec['value'] != '' ) {
 
@@ -1050,6 +1092,12 @@ class ItemBuilderModel extends WPL_Model {
         			}
         		}
         		// if ( '_sku' == $spec['attribute'] ) $value = ProductWrapper::getSKU( $post_id );
+
+        		// handle variation attributes for a single split variation
+        		// instead of listing all values, use the correct attribute value from variationSplitAttributes
+        		if ( array_key_exists( $spec['attribute'], $this->variationSplitAttributes ) ) {
+        			$value = $this->variationSplitAttributes[ $spec['attribute'] ];
+        		}
 
 	            $NameValueList = new NameValueListType();
 		    	$NameValueList->setName ( $spec['name']  );
@@ -1100,6 +1148,7 @@ class ItemBuilderModel extends WPL_Model {
         	// only add attribute to ItemSpecifics if not already present in variations or processed attributes
         	if ( ( ! in_array( $name, $this->variationAttributes ) ) && ( ! in_array( $name, $processed_attributes ) ) ) {
 	        	$ItemSpecifics->addNameValueList( $NameValueList );
+				$this->logger->info("attrib: added product attribute: {$name} - " . join(', ',$values) );
         	}
         }
 
@@ -1126,6 +1175,7 @@ class ItemBuilderModel extends WPL_Model {
 	} // getExcludedAttributes()
 
 	public function buildCompatibilityList( $id, $item, $listing, $post_id ) {
+		if ( get_option( 'wplister_disable_compat_list' ) == 1 ) return $item;
 
 		// get compatibility list and names from product
 		$compatibility_list   = get_post_meta( $post_id, '_ebay_item_compatibility_list', true );
@@ -1183,8 +1233,12 @@ class ItemBuilderModel extends WPL_Model {
         	// handle price
 			$newvar->StartPrice = $this->lm->applyProfilePrice( $var['price'], $profile_details['start_price'] );
 
-			// handle StartPrice on product level
+			// handle StartPrice on parent product level
 			if ( $product_start_price = get_post_meta( $listing['post_id'], '_ebay_start_price', true ) ) {
+				$newvar->StartPrice = $product_start_price;
+			}
+			// handle StartPrice on variation level
+			if ( $product_start_price = get_post_meta( $var['post_id'], '_ebay_start_price', true ) ) {
 				$newvar->StartPrice = $product_start_price;
 			}
 
@@ -1195,6 +1249,7 @@ class ItemBuilderModel extends WPL_Model {
         	} else {
 	        	$newvar->Quantity 	= min( $max_quantity, $item->Quantity ); // should be removed in future versions
         	}
+        	if ( $newvar->Quantity < 0 ) $newvar->Quantity = 0; // prevent error for negative qty
 
 			// handle sku
         	if ( $var['sku'] != '' ) {
@@ -1216,22 +1271,22 @@ class ItemBuilderModel extends WPL_Model {
         }
 
         // build temporary array for VariationSpecificsSet
-    	$tmpVariationSpecificsSet = array();
+    	$this->tmpVariationSpecificsSet = array();
         foreach ($variations as $var) {
 
             foreach ($var['variation_attributes'] as $name => $value) {
-    	    	if ( ! is_array($tmpVariationSpecificsSet[ $name ]) ) {
-		        	$tmpVariationSpecificsSet[ $name ] = array();
+    	    	if ( ! is_array($this->tmpVariationSpecificsSet[ $name ]) ) {
+		        	$this->tmpVariationSpecificsSet[ $name ] = array();
     	    	}
-	        	if ( ! in_array( $value, $tmpVariationSpecificsSet[ $name ] ) ) {
-	        		$tmpVariationSpecificsSet[ $name ][] = $value;	        		
+	        	if ( ! in_array( $value, $this->tmpVariationSpecificsSet[ $name ], true ) ) {
+	        		$this->tmpVariationSpecificsSet[ $name ][] = $value;	        		
 	        	}
             }
 
         }
         // build VariationSpecificsSet
     	$VariationSpecificsSet = new NameValueListArrayType();
-        foreach ($tmpVariationSpecificsSet as $name => $values) {
+        foreach ($this->tmpVariationSpecificsSet as $name => $values) {
 
 			$NameValueList = new NameValueListType();
         	$NameValueList->setName ( $name );
@@ -1246,21 +1301,21 @@ class ItemBuilderModel extends WPL_Model {
         
         // build array of variation attributes, which will be needed in builtItemSpecifics()
         $this->variationAttributes = array();
-        foreach ($tmpVariationSpecificsSet as $key => $value) {
+        foreach ($this->tmpVariationSpecificsSet as $key => $value) {
         	$this->variationAttributes[] = $key;
         }
-        // $this->logger->info('variationAttributes: '.print_r($this->variationAttributes,1));
+        $this->logger->debug('set variationAttributes: '.print_r($this->variationAttributes,1));
 
 
         // select *one* VariationSpecificsSet for Pictures set
         // currently the first one is selected automatically, but there will be preferences for this later
-        $VariationValuesForPictures =  reset($tmpVariationSpecificsSet);
-        $VariationNameForPictures   =    key($tmpVariationSpecificsSet);
+        $VariationValuesForPictures =  reset($this->tmpVariationSpecificsSet);
+        $VariationNameForPictures   =    key($this->tmpVariationSpecificsSet);
 
         // apply variation image attribute from profile - if set
         $variation_image_attribute = isset( $profile_details['variation_image_attribute'] ) ? $profile_details['variation_image_attribute'] : false;
-        if ( $variation_image_attribute && isset( $tmpVariationSpecificsSet[ $variation_image_attribute ] ) ) {
-	        $VariationValuesForPictures = $tmpVariationSpecificsSet[ $variation_image_attribute ];
+        if ( $variation_image_attribute && isset( $this->tmpVariationSpecificsSet[ $variation_image_attribute ] ) ) {
+	        $VariationValuesForPictures = $this->tmpVariationSpecificsSet[ $variation_image_attribute ];
 	        $VariationNameForPictures   = $variation_image_attribute;
         }
 
@@ -1275,7 +1330,7 @@ class ItemBuilderModel extends WPL_Model {
         	if ( in_array( $VariationValue, $VariationValuesForPictures ) ) {
 
     			$image_url = $this->encodeUrl( $var['image'] );
-    			$image_url = $this->removeHttpsFromUrl( $image_url );
+    			// $image_url = $this->removeHttpsFromUrl( $image_url );
 
 
 				if ( ! $image_url ) continue;
@@ -1409,7 +1464,32 @@ class ItemBuilderModel extends WPL_Model {
 		$this->logger->info("variation images: ".print_r($variation_images,1));
 
         return $variation_images;
-	}
+	} // getVariationImages()
+
+
+	public function prepareSplitVariation( $id, $post_id, $listing ) {
+		$this->logger->info("prepareSplitVariation( $id ) - parent_id: ".$listing['parent_id']);
+		$parent_id = $listing['parent_id'];
+
+		// get (all) parent variations
+        $variations = ProductWrapper::getVariations( $parent_id );
+
+        // find this single variation
+        $single_variation = false;
+        foreach ($variations as $var) {
+        	if ( $var['post_id'] == $post_id ) {
+        		$single_variation = $var;
+        	}
+        }
+        if ( ! $single_variation ) return;
+
+	    // add variation attributes to $this->variationSplitAttributes - to be used in builtItemSpecifics()
+        foreach ($single_variation['variation_attributes'] as $name => $value) {
+        	$this->variationSplitAttributes[ $name ] = $value;
+        }
+        $this->logger->debug('set variationSplitAttributes: '.print_r($this->variationSplitAttributes,1));
+
+	} // prepareSplitVariation()
 
 
 	public function flattenVariations( $id, $item, $post_id, $profile_details ) {
@@ -1505,6 +1585,149 @@ class ItemBuilderModel extends WPL_Model {
 
 
 
+
+
+	// check if there are existing variations on eBay which do not exist in WooCommerce and need to be deleted
+	// called from ListingsModel::reviseItem()
+    function fixDeletedVariations( $item, $listing_item ) {
+
+        $cached_variations = maybe_unserialize( $listing_item['variations'] );
+        if ( empty($cached_variations) ) return $item;
+
+        // loop cached variations
+        foreach ($cached_variations as $key => $var) {
+        	
+        	if ( ! $this->checkIfVariationExistsInItem( $var, $item ) ) {
+
+        		// build new variation to be deleted
+	        	$newvar = new VariationType();
+
+	        	// set quantity to zero - effectively remove variations that have sales
+	        	$newvar->Quantity = 0;
+				// $newvar->StartPrice = $var['price'];
+
+				// handle sku
+	        	if ( $var['sku'] != '' ) {
+	        		$newvar->SKU = $var['sku'];
+	        	}
+
+	        	// add VariationSpecifics (v2)
+	        	$VariationSpecifics = new NameValueListArrayType();
+	            foreach ($var['variation_attributes'] as $name => $value) {
+		            $NameValueList = new NameValueListType();
+	    	    	$NameValueList->setName ( $name  );
+	        		$NameValueList->setValue( $value );
+		        	$VariationSpecifics->addNameValueList( $NameValueList );
+	            }
+	        	$newvar->setVariationSpecifics( $VariationSpecifics );
+
+	        	// tell eBay to delete this variation - only possible for items without sales
+	        	if ( isset($var['sold']) && ( intval($var['sold']) == 0 ) ) {
+		        	$newvar->setDelete( true );
+	                $this->logger->info('setDelete(true) - sold qty: '.$var['sold']);
+	        	}
+
+				$item->Variations->addVariation( $newvar );
+                $this->logger->info('added variation to be deleted: '.print_r($newvar,1) );
+
+                //
+                // update VariationSpecificsSet - to avoid Error 21916608: Variation cannot be deleted during restricted revise
+                //
+
+		        // build extra (!) temporary array for VariationSpecificsSet
+		    	$extraVariationSpecificsSet = array();
+	            foreach ($var['variation_attributes'] as $name => $value) {
+	    	    	if ( ! is_array($this->tmpVariationSpecificsSet[ $name ]) ) {
+			        	$this->tmpVariationSpecificsSet[ $name ] = array(); 	// make sure the second level array exists
+	    	    	}
+	    	    	if ( ! is_array($extraVariationSpecificsSet[ $name ]) ) {
+			        	$extraVariationSpecificsSet[ $name ] = array();			// make sure the second level array exists
+	    	    	}
+		        	if ( ! in_array( $value, $this->tmpVariationSpecificsSet[ $name ] ) ) {
+		        		$extraVariationSpecificsSet[ $name ][]     = $value;	// add extra value which doesn't exist yet        		
+		        		$this->tmpVariationSpecificsSet[ $name ][] = $value;	// add extra value which doesn't exist yet        		
+		        	}
+	            }
+		        // build VariationSpecificsSet
+		    	// $VariationSpecificsSet = new NameValueListArrayType();
+		        foreach ($extraVariationSpecificsSet as $name => $values) {
+
+		        	foreach ($item->Variations->VariationSpecificsSet->NameValueList as $NameValueList) {
+
+		        		// check if this is the attribute we're looking for
+		        		if ( $NameValueList->Name != $name ) continue;
+
+						// add missing attribute values
+			            foreach ($values as $value) {
+				        	$NameValueList->addValue( $value );
+				        }
+
+		        	}
+
+		        } // foreach $extraVariationSpecificsSet
+
+
+        	} // if checkIfVariationExistsInItem()
+
+        } // foreach $cached_variations
+
+    	return $item;
+	} // fixDeletedVariations()
+
+    function checkIfVariationExistsInItem( $variation, $item ) {
+    	$variation_attributes = $variation['variation_attributes'];
+
+        // loop existing item variations
+        foreach ( $item->Variations->Variation as $Variation ) {
+            $found_match = true;
+
+            // compare variation SKU
+            if ( ! empty( $variation['sku'] ) ) {
+            	if ( $variation['sku'] == $Variation->SKU ) {
+	                // $this->logger->info('found matching variation by SKU: '.$Variation->SKU);
+	                return true;
+            	}
+            }
+
+            // compare variation attributes
+        	foreach ($Variation->VariationSpecifics->NameValueList as $spec) {
+        		$name = $spec->Name;
+        		$val  = $spec->Value;
+        		if ( isset( $variation_attributes[ $name ] ) ) {
+
+        			if ( $variation_attributes[ $name ] == $val ) {
+	                	// $this->logger->info('found matching name value pair: '.print_r($spec,1) );
+        				// $found_match = true;
+        			} else {
+	                	// $this->logger->info('variation spec value does not match with "'.$variation_attributes[ $name ].'": '.print_r($spec,1) );
+        				$found_match = false;
+        			}
+
+        		} else {
+                	// $this->logger->info('variation spec name does not exist "'.$name.'" does not exist in attributes: '.print_r($variation_attributes,1) );
+    				$found_match = false;        			
+        		}
+        	}
+
+            if ( $found_match ) {
+                // $this->logger->info('found matching variation by attributes: '.print_r($Variation->VariationSpecifics->NameValueList,1) );
+                return true;
+            }
+
+        }
+
+        return false;
+    } // checkIfVariationExistsInItem()
+
+
+
+
+
+
+
+
+
+
 	public function checkItem( $item, $reviseItem = false ) {
 
 		$success = true;
@@ -1572,7 +1795,7 @@ class ItemBuilderModel extends WPL_Model {
 				// $success = false;
 			}
 
-			if ( ! $VariationsHaveStock && ! $reviseItem ) {
+			if ( ! $VariationsHaveStock && ! $reviseItem && ! $this->lm->thisAccountUsesOutOfStockControl( $this->account_id ) ) {
 				$longMessage = __('None of these variations are in stock.','wplister');
 				$success = false;
 			}
@@ -1590,7 +1813,10 @@ class ItemBuilderModel extends WPL_Model {
 			}
 
 			// check minimum start price if found
-			$min_prices = get_option( 'wplister_MinListingStartPrices', array() );
+			// $min_prices = get_option( 'wplister_MinListingStartPrices', array() );
+			$min_prices = $this->site_id ? maybe_unserialize( WPLE_eBaySite::getSiteObj( $this->site_id )->MinListingStartPrices ) : array();
+			if ( ! is_array($min_prices) ) $min_prices = array();
+
 			$listing_type = $item->ListingType ? $item->ListingType : 'FixedPriceItem';
 			if ( isset( $min_prices[ $listing_type ] ) ) {
 				$min_price = $min_prices[ $listing_type ];
@@ -1604,11 +1830,14 @@ class ItemBuilderModel extends WPL_Model {
 
 		// ItemSpecifics values can't be longer than 50 characters
 		foreach ($item->ItemSpecifics->NameValueList as $spec) {
-			if ( strlen($spec->Value) > 50 ) {
-				$longMessage = __('eBay does not allow attribute values longer than 50 characters.','wplister');
-				$longMessage .= '<br>';
-				$longMessage .= __('You need to shorten this value:','wplister') . ' <code>'.$spec->Value.'</code>';
-				$success = false;
+			$values = is_array( $spec->Value ) ? $spec->Value : array( $spec->Value );
+			foreach ($values as $value) {
+				if ( strlen($value) > 50 ) {
+					$longMessage = __('eBay does not allow attribute values longer than 50 characters.','wplister');
+					$longMessage .= '<br>';
+					$longMessage .= __('You need to shorten this value:','wplister') . ' <code>'.$value.'</code>';
+					$success = false;
+				}
 			}
 		}
 
@@ -1856,12 +2085,6 @@ class ItemBuilderModel extends WPL_Model {
 			$this->logger->info( "found WC2 product gallery images for product #$id " . print_r($images,1) );
 		}
 
-		// Shopp stores images in db by default...
-		if ( ProductWrapper::plugin == 'shopp' ) {
-			$images = ProductWrapper::getAllImages( $id );
-			// $this->logger->info( "SHOPP - getAllImages( $id ) : " . print_r($images,1) );
-		}
-
 		$product_images = array();
 		foreach($images as $imageurl) {
 			$product_images[] = $this->removeHttpsFromUrl( $imageurl );
@@ -1882,6 +2105,9 @@ class ItemBuilderModel extends WPL_Model {
 		if ( '/wp-content/' == substr( $url, 0, 12 ) ) {
 			$url = str_replace('/wp-content', content_url(), $url);
 		}
+		if ( '//wp-content/' == substr( $url, 0, 13 ) ) {
+			$url = str_replace('//wp-content', content_url(), $url);
+		}
 
 		// fix https urls
 		$url = str_replace( 'https://', 'http://', $url );
@@ -1896,6 +2122,7 @@ class ItemBuilderModel extends WPL_Model {
 		// $url = str_replace(' ', '%20', $url );
 		$url = str_replace('%2F', '/', $url );
 		$url = str_replace('%3A', ':', $url );
+		$url = $this->removeHttpsFromUrl( $url );
 		return $url;
 	}
 

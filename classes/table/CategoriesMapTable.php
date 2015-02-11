@@ -75,10 +75,12 @@ class CategoriesMapTable extends WP_List_Table {
     }
     
     function column_ebay_category( $item ) {
+        $account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : get_option('wplister_default_account_id') );
+        $site_id    = isset( WPLE()->accounts[ $account_id ] ) ? WPLE()->accounts[ $account_id ]->site_id : false;
 
         $id   = $item['term_id'];
         $name = $item['ebay_category_name'];
-        $leaf = EbayCategoriesModel::getCategoryType( $item['ebay_category_id'] ) == 'leaf' ? true : false;
+        $leaf = EbayCategoriesModel::getCategoryType( $item['ebay_category_id'], $site_id ) == 'leaf' ? true : false;
         $name = apply_filters( 'wplister_get_ebay_category_name', $name, $item['ebay_category_id'] );
 
         if ( $item['ebay_category_id'] && ! $name ) $name = '<span style="color:darkred;">' . __('Unknown category ID','wplister').': '.$item['ebay_category_id'] . '</span>';
@@ -88,7 +90,9 @@ class CategoriesMapTable extends WP_List_Table {
         <div class="row-actions-wrapper" style="position:relative;">
             <p class="categorySelector" style="margin:0;">
                 <input type="hidden" name="wpl_e2e_ebay_category_id['.$id.']"   id="ebay_category_id_'.$id.'"   value="' . $item['ebay_category_id'] .'" class="" />
+                <!--
                 <!input type="text"   name="wpl_e2e_ebay_category_name['.$id.']" id="ebay_category_name_'.$id.'" value="' . $item['ebay_category_name'] . '" class="text_input" disabled="true" style="width:35%"/>
+                -->
                 <span id="ebay_category_name_'.$id.'" class="text_input" >' . $name . '</span>
             </p>
             <span class="row-actions" id="sel_ebay_cat_id_'.$id.'" >
@@ -102,20 +106,23 @@ class CategoriesMapTable extends WP_List_Table {
     }
         
      function column_store_category( $item ) {
+        $account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : get_option('wplister_default_account_id') );
 
         $id   = $item['term_id'];
         $name = $item['store_category_name'];
-        $leaf = EbayCategoriesModel::getStoreCategoryType( $item['store_category_id'] ) == 'leaf' ? true : false;
+        $leaf = EbayCategoriesModel::getStoreCategoryType( $item['store_category_id'], $account_id ) == 'leaf' ? true : false;
         $name = apply_filters( 'wplister_get_store_category_name', $name, $item['store_category_id'] );
 
         if ( $item['store_category_id'] && ! $name ) $name = '<span style="color:darkred;">' . __('Unknown category ID','wplister').': '.$item['store_category_id'] . '</span>';
-        elseif ( $item['store_category_id'] && ! $leaf ) $name .= '<br><span style="color:darkred;">' . __('This is not a leaf category','wplister').'!</span>';
+        // elseif ( $item['store_category_id'] && ! $leaf ) $name .= '<br><span style="color:darkred;">' . __('This is not a leaf category','wplister').'!</span>';
 
         $tpl  = '
         <div class="row-actions-wrapper" style="position:relative;">
             <p class="categorySelector" style="margin:0;">
                 <input type="hidden" name="wpl_e2e_store_category_id['.$id.']"   id="store_category_id_'.$id.'"   value="' . $item['store_category_id'] .'" class="" />
+                <!--
                 <!input type="text"   name="wpl_e2e_store_category_name['.$id.']" id="store_category_name_'.$id.'" value="' . $item['store_category_name'] . '" class="text_input" disabled="true" style="width:35%"/>
+                -->
                 <span id="store_category_name_'.$id.'" class="text_input" >' . $name . '</span>
             </p>
             <span class="row-actions" id="sel_store_cat_id_'.$id.'" >
@@ -127,7 +134,64 @@ class CategoriesMapTable extends WP_List_Table {
 
         return $tpl;
     }
-           
+
+
+    function extra_tablenav( $which ) {
+        if ( 'top' != $which ) return;
+        $account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : get_option('wplister_default_account_id') );
+        $selected_account = WPLE()->accounts[ $account_id ];
+        ?>
+        <div class="alignleft actions" style="">
+
+            <?php if ( WPLE()->multi_account ) : ?>
+
+                <select name="account_id">
+                    <!-- <option value=""><?php _e('All accounts','wplister') ?></option> -->
+                    <?php foreach ( WPLE()->accounts as $account ) : ?>
+                        <option value="<?php echo $account->id ?>"
+                            <?php if ( $account_id == $account->id ) echo 'selected'; ?>
+                            ><?php echo $account->title ?></option>
+                    <?php endforeach; ?>
+                </select>            
+
+                <input type="submit" name="select_account" id="post-query-submit" class="button" value="Select Account">
+
+                <a href="#" data-site_id="<?php echo $selected_account->site_id ?>" data-account_id="<?php echo $selected_account->id ?>" class="btn_update_ebay_data_for_site button" style="vertical-align:bottom"><?php echo sprintf( __('Refresh categories for account %s','wplister'), $selected_account->title ) ?></a>
+
+            <?php else : ?>
+
+                <input type="hidden" name="account_id" value="<?php echo $account_id ?>">
+
+                <a href="#" data-site_id="<?php echo $selected_account->site_id ?>" data-account_id="<?php echo $selected_account->id ?>" class="btn_update_ebay_data_for_site button" style="vertical-align:bottom"><?php echo sprintf( __('Refresh categories for account %s','wplister'), $selected_account->title ) ?></a>
+
+            <?php endif; ?>
+
+        </div>
+        <?php
+    }
+
+    /**
+     * Generates the table navigation above or bellow the table and removes the
+     * _wp_http_referer and _wpnonce because it generates a error about URL too large
+     * 
+     * @param string $which 
+     * @return void
+     */
+    function display_tablenav( $which ) {
+        ?>
+        <div class="tablenav <?php echo esc_attr( $which ); ?>">
+            <div class="alignleft actions" style="display:none">
+                <?php $this->bulk_actions(); ?>
+            </div>
+            <?php
+                $this->extra_tablenav( $which );
+                $this->pagination( $which );
+            ?>
+            <br class="clear" />
+        </div>
+        <?php
+    }
+
     /** ************************************************************************
      * REQUIRED! This method dictates the table's columns and titles. This should
      * return an array where the key is the column slug (and class) and the value 

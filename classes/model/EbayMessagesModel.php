@@ -16,8 +16,7 @@ class EbayMessagesModel extends WPL_Model {
 	var $count_inserted = 0;
 	var $count_failed   = 0;
 	var $report         = array();
-	var $ModTimeTo      = false;
-	var $ModTimeFrom    = false;
+	var $StartTime      = false;
 	var $NumberOfDays   = false;
 
 	var $total_items;
@@ -72,15 +71,33 @@ class EbayMessagesModel extends WPL_Model {
 		// save lastdate for next page
 		$this->current_lastdate = $lastdate;
 
+		if ( is_array( $message_ids ) ) {
+
+			$MyMessagesMessageIDArray = new MyMessagesMessageIDArrayType();
+			foreach ( $message_ids as $id ) {
+				$message = $this->getItem( $id );
+				$MyMessagesMessageIDArray->addMessageID( $message['message_id'] );
+			}
+			$req->setMessageIDs( $MyMessagesMessageIDArray );
+
+		} elseif ( $lastdate ) {
+
+			$req->StartTime  = gmdate( 'Y-m-d H:i:s', $lastdate );
+			$this->StartTime = $req->StartTime;
+			$this->logger->info('lastdate: '.$lastdate);
+			$this->logger->info('StartTime: '.$req->StartTime);
+
+		}
+
 		/*
 		// fetch messages by IDs
 		if ( is_array( $message_ids ) ) {
-			$MessageIDArray = new MessageIDArrayType();
+			$MyMessagesMessageIDArray = new MyMessagesMessageIDArrayType();
 			foreach ( $message_ids as $id ) {
 				$message = $this->getItem( $id );
-				$MessageIDArray->addMessageID( $message['message_id'] );
+				$MyMessagesMessageIDArray->addMessageID( $message['message_id'] );
 			}
-			$req->setMessageIDArray( $MessageIDArray );
+			$req->setMyMessagesMessageIDArray( $MyMessagesMessageIDArray );
 		// parameter $days
 		} elseif ( $days ) {
 			$req->NumberOfDays  = $days;
@@ -89,13 +106,10 @@ class EbayMessagesModel extends WPL_Model {
 
 		// default: messages since last change
 		} elseif ( $lastdate ) {
-			$req->ModTimeFrom  = gmdate( 'Y-m-d H:i:s', $lastdate );
-			$req->ModTimeTo    = gmdate( 'Y-m-d H:i:s', time() );
-			$this->ModTimeFrom = $req->ModTimeFrom;
-			$this->ModTimeTo   = $req->ModTimeTo;
+			$req->StartTime  = gmdate( 'Y-m-d H:i:s', $lastdate );
+			$this->StartTime = $req->StartTime;
 			$this->logger->info('lastdate: '.$lastdate);
-			$this->logger->info('ModTimeFrom: '.$req->ModTimeFrom);
-			$this->logger->info('ModTimeTo: '.$req->ModTimeTo);
+			$this->logger->info('StartTime: '.$req->StartTime);
 
 		// fallback: one day (max allowed by ebay: 30 days)
 		} else {
@@ -282,6 +296,8 @@ class EbayMessagesModel extends WPL_Model {
 		$data['msg_text']        = $Detail->Text;
 		$data['msg_content']     = $Detail->Content;
 		$data['response_url']    = $Detail->ResponseDetails->ResponseURL;
+		$data['site_id']    	 = $this->site_id;
+		$data['account_id']    	 = $this->account_id;
 
         // save GetMyMessages reponse in details
 		$data['details'] = $this->encodeObject( $Detail );
@@ -328,8 +344,8 @@ class EbayMessagesModel extends WPL_Model {
 	function getHtmlTimespan() {
 		if ( $this->NumberOfDays ) {
 			return sprintf( __('the last %s days','wplister'), $this->NumberOfDays );
-		} elseif ( $this->ModTimeFrom ) {
-			return sprintf( __('from %s to %s','wplister'), $this->ModTimeFrom , $this->ModTimeTo );
+		} elseif ( $this->StartTime ) {
+			return sprintf( __('from %s to %s','wplister'), $this->StartTime , $this->ModTimeTo );
 		}
 	}
 
@@ -432,16 +448,6 @@ class EbayMessagesModel extends WPL_Model {
 			ORDER BY LastTimeModified DESC LIMIT 1
 		" );
 
-		// if there are no messages yet, check the date of the last transaction
-		if ( ! $lastdate ) {
-			$tm = new TransactionsModel();
-			$lastdate = $tm->getDateOfLastCreatedTransaction();
-			if ($lastdate) {
-				// add one minute to prevent importing the same transaction again
-				$lastdate = mysql2date('U', $lastdate) + 60;
-				$lastdate = date('Y-m-d H:i:s', $lastdate );
-			}
-		}
 		return $lastdate;
 	}
 

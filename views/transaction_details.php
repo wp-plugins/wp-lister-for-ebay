@@ -7,7 +7,7 @@
     <title>Transaction details</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <style type="text/css">
-        body,td,p { color:#2f2f2f; font:12px/16px Verdana, Arial, Helvetica, sans-serif; }
+        body,td,p { color:#2f2f2f; font:12px/16px "Open Sans",sans-serif; }
     </style>
 </head>
 

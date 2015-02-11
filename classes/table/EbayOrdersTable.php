@@ -166,8 +166,14 @@ class EbayOrdersTable extends WP_List_Table {
         $item_count = $items ? count($items).' items' : '';
         if ( count($items) == 1 ) $item_count = '1 item';
 
+        if ( $item['currency'] ) {
+            $display_price = $item['total'] .' '. $item['currency'];
+        } else {
+            $display_price = woocommerce_price( $item['total'] );
+        }
+
         return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
-            /*$1%s*/ woocommerce_price( $item['total'] ),
+            /*$1%s*/ $display_price,
             /*$2%s*/ $item_count
         );
     }
@@ -239,6 +245,14 @@ class EbayOrdersTable extends WP_List_Table {
         );
 	}
 	  
+    function column_account($item) {
+        $account_title = isset( WPLE()->accounts[ $item['account_id'] ] ) ? WPLE()->accounts[ $item['account_id'] ]->title : 'NONE';
+        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
+            /*$1%s*/ $account_title,
+            /*$2%s*/ EbayController::getEbaySiteCode( $item['site_id'] )
+        );
+    }
+    
     // convert 2013-02-14T08:00:58.000Z to 2013-02-14 08:00:58
     public function convertEbayDateToSql( $ebay_date ) {
         $search = array( 'T', '.000Z' );
@@ -292,8 +306,11 @@ class EbayOrdersTable extends WP_List_Table {
             'CompleteStatus'	=> __('Status','wplister'),
             'order_id'          => __('Order ID','wplister'),
             // 'status'		 	=> __('Status','wplister'),
-            'LastTimeModified'	=> __('Last change','wplister')
+            'LastTimeModified'	=> __('Last change','wplister'),
+            'account'           => __('Account','wplister'),
         );
+        if ( ! WPLE()->multi_account ) unset( $columns['account'] );
+
         return $columns;
     }
     
@@ -402,6 +419,33 @@ class EbayOrdersTable extends WP_List_Table {
 
        return $views;
     }    
+
+
+    function extra_tablenav( $which ) {
+        if ( 'top' != $which ) return;
+        $account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : false);
+        ?>
+        <div class="alignleft actions" style="">
+
+            <?php if ( WPLE()->multi_account ) : ?>
+
+            <select name="account_id">
+                <option value=""><?php _e('All accounts','wplister') ?></option>
+                <?php foreach ( WPLE()->accounts as $account ) : ?>
+                    <option value="<?php echo $account->id ?>"
+                        <?php if ( $account_id == $account->id ) echo 'selected'; ?>
+                        ><?php echo $account->title ?></option>
+                <?php endforeach; ?>
+            </select>            
+
+            <input type="submit" name="" id="post-query-submit" class="button" value="Filter">
+
+            <?php endif; ?>
+
+        </div>
+        <?php
+    }
+
     
     /** ************************************************************************
      * REQUIRED! This is where you prepare your data for display. This method will

@@ -1,9 +1,9 @@
 <?php
 /* 
-Plugin Name: WP-Lister for eBay
+Plugin Name: WP-Lister for eBay for eBay
 Plugin URI: http://www.wplab.com/plugins/wp-lister/
 Description: List your products on eBay the easy way.
-Version: 1.5.0.8
+Version: 2.0.7.7
 Author: Matthias Krok
 Author URI: http://www.wplab.com/ 
 Max WP Version: 4.1
@@ -11,9 +11,12 @@ Text Domain: wp-lister
 License: GPL2+
 */
 
-define('WPLISTER_VERSION', '1.5.0.8' );
+if ( class_exists('WPL_WPLister') ) die(sprintf( 'WP-Lister for eBay %s is already installed and activated. Please deactivate any other version before you activate this one.', WPLISTER_VERSION ));
+
+define('WPLISTER_VERSION', '2.0.7.7' );
 define('WPLISTER_PATH', realpath( dirname(__FILE__) ) );
 define('WPLISTER_URL', plugins_url() . '/' . basename(dirname(__FILE__)) . '/' );
+define('WPLE_VERSION', WPLISTER_VERSION );
 
 // force production error reporting level
 if ( get_option('wplister_php_error_handling') == '9' ) error_reporting( E_ERROR );
@@ -47,23 +50,55 @@ $wpl_logger = new WPL_Logger();
 
 if ( ! defined('WPLISTER_LIGHT')) define('WPLISTER_LIGHT', true );
 
+
+if ( ! class_exists('WPL_WPLister') ) {
 class WPL_WPLister extends WPL_BasePlugin {
 	
-	var $pages = array();
+	var $pages         = array();
+	var $accounts      = array();
+	var $multi_account = false;
+	var $db_version    = 0;
 	
 	public function __construct() {
 		parent::__construct();
-		
+
+		// load current DB version
+		$this->db_version = get_option('wplister_db_version');
+
+		$this->initClasses();
+		$this->loadAccounts();
+
 		if ( is_admin() ) {
 			require_once( WPLISTER_PATH . '/classes/integration/WooBackendIntegration.php' );
 			require_once( WPLISTER_PATH . '/classes/integration/WooProductMetaBox.php' );
 			require_once( WPLISTER_PATH . '/classes/integration/WooOrderMetaBox.php' );
-			if ( ProductWrapper::plugin == 'woo' ) require_once( WPLISTER_PATH . '/classes/integration/WooEbayProduct.php' );
+			require_once( WPLISTER_PATH . '/classes/integration/WooEbayProduct.php' );
 			$oInstall 	= new WPLister_Install( __FILE__ );
 			$oUninstall = new WPLister_Uninstall( __FILE__ );
 			$this->loadPages();
 		}
 
+	}
+		
+	// initialize core classes
+	public function initClasses() {
+
+		// $this->api_hooks      = new WPLE_API_Hooks();	
+		// $this->ajax_hactions  = new WPLE_AjaxHandler();
+		// $this->cron_actions   = new WPLE_CronActions();
+		// $this->toolbar        = new WPLE_Toolbar();
+		$this->memcache       = new WPLE_MemCache();
+		$this->messages       = new WPLE_AdminMessages();
+		
+	}
+
+	public function loadAccounts() {
+		// $accounts = $this->db_version > 37 ? WPLE_eBayAccount::getAll( true ) : array();
+		$accounts = get_option('wplister_db_version') > 37 ? WPLE_eBayAccount::getAll( true ) : array();
+		foreach ($accounts as $account) {
+			$this->accounts[ $account->id ] = $account;
+		}
+		$this->multi_account = count( $this->accounts ) > 1 ? true : false;
 	}
 		
 	public function loadPages() {
@@ -85,6 +120,7 @@ class WPL_WPLister extends WPL_BasePlugin {
 			$this->pages['messages']     = new EbayMessagesPage();
 			$this->pages['tools']        = new ToolsPage();
 			$this->pages['settings']     = new SettingsPage();
+			$this->pages['accounts']     = new WPLE_AccountsPage();
 			$this->pages['tutorial']     = new HelpPage();
 			$this->pages['log']          = new LogPage();
 
@@ -115,6 +151,7 @@ class WPL_WPLister extends WPL_BasePlugin {
 		if ( ProductWrapper::isProductsPage() ) {
 			add_action( 'admin_footer', array( &$this, 'modifyProductsBulkActionMenu' ) );
 			add_action( 'admin_print_styles', array( &$this, 'printProductsPageStyles' ) );
+			add_action( 'wp_print_scripts', array( &$this, 'printProductsPageScripts' ) );
 		}
 		add_action( 'admin_print_styles', array( &$this, 'printOrdersPageStyles' ) );
 
@@ -123,7 +160,7 @@ class WPL_WPLister extends WPL_BasePlugin {
 	
 	public function onWpPrintStyles() {
 		if  ( ( isset( $_GET['page'] ) ) && ( substr( $_GET['page'], 0, 8 ) == 'wplister') ) {
-			wp_register_style( 'wplister_style', self::$PLUGIN_URL.'css/style.css' );
+			wp_register_style( 'wplister_style', self::$PLUGIN_URL.'css/style.css', array(), WPLISTER_VERSION );
 			wp_enqueue_style( 'wplister_style' );
 		}
 	}
@@ -142,6 +179,18 @@ class WPL_WPLister extends WPL_BasePlugin {
     	<?php
 	}
 
+	public function printProductsPageScripts() {
+
+		// ProfileSelector
+		wp_register_script( 'wple_profile_selector', self::$PLUGIN_URL.'/js/classes/ProfileSelector.js', array( 'jquery' ), WPLISTER_VERSION );
+		wp_enqueue_script ( 'wple_profile_selector' );
+		wp_localize_script( 'wple_profile_selector', 'wple_ProfileSelector_i18n', array(
+				'WPLE_URL' 	=> WPLISTER_URL
+			)
+		);
+
+	}
+	
 	public function printProductsPageStyles() {	
 		?>
     	<style type="text/css">
@@ -177,6 +226,7 @@ class WPL_WPLister extends WPL_BasePlugin {
 	}
 	
 } // class WPL_WPLister
+} // if class does not exists
 
 // instantiate object
 $oWPL_WPLister = new WPL_WPLister();

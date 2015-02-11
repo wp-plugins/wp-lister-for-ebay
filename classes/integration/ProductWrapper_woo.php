@@ -21,8 +21,13 @@ class ProductWrapper {
 	
 	// get product price
 	static function getPrice( $post_id ) {
+
+		$disable_sale_price = get_option('wplister_disable_sale_price');
+		if ( $disable_sale_price ) return self::getOriginalPrice( $post_id );
+
 		$sale_price = get_post_meta( $post_id, '_sale_price', true);
 		if ( floatval($sale_price) > 0 ) return $sale_price;
+
 		return get_post_meta( $post_id, '_price', true);
 	}	
 	static function getOriginalPrice( $post_id ) {
@@ -47,7 +52,7 @@ class ProductWrapper {
 
 	// get product stock (deprecated)
 	static function getStock( $post_id ) {
-		return get_post_meta( $post_id, '_stock', true);
+		return intval( get_post_meta( $post_id, '_stock', true) );
 	}	
 	
 	// set product stock (deprecated)
@@ -177,7 +182,6 @@ class ProductWrapper {
 	
 	// get all product attributes
 	static function getAttributes( $post_id ) {
-		global $woocommerce;
 		$attributes = array();
 
 		$product = self::getProduct( $post_id );
@@ -203,7 +207,7 @@ class ProductWrapper {
 					continue;
 				}
 				if ( count( $terms ) > 0 ) {
-					$attribute_name = $woocommerce->attribute_label( $attribute['name'] );
+					$attribute_name = self::getAttributeLabel( $attribute['name'] );
 					$attribute_name = html_entity_decode( $attribute_name, ENT_QUOTES, 'UTF-8' ); // US Shoe Size (Men&#039;s) => US Shoe Size (Men's)
 					// $attributes[ $attribute_name ] = $terms[0]->name;
 
@@ -308,15 +312,20 @@ class ProductWrapper {
 
 	// get all product variations
 	static function getVariations( $post_id ) {
-		global $woocommerce;
 		global $product; // make $product globally available for some badly coded themes...		
 
 		$product = self::getProduct( $post_id );
 		if ( ! $product || $product->product_type != 'variable' ) return array();
 
 		// force all variations to show, regardless if woocommerce_hide_out_of_stock_items is yes or no
-		// by forcing visibility to true
+		// by forcing visibility to true - doesn't work with WC2.2 :-(
 		add_filter( 'woocommerce_product_is_visible', array( 'ProductWrapper', 'returnTrue' ), 999, 2 );
+		// this works for WC2.2 as well:
+		// TODO: implement an alternative get_available_variations() method for better performance
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+			$reenable_woocommerce_hide_out_of_stock_items = true;
+		}
 
 		$available_variations  = $product->get_available_variations();
 		$variation_attributes  = $product->get_variation_attributes();
@@ -325,6 +334,11 @@ class ProductWrapper {
 
 		// remove filter again
 		remove_filter( 'woocommerce_product_is_visible', array( 'ProductWrapper', 'returnTrue' ), 999, 2 );
+		// reset wc option
+		if ( isset( $reenable_woocommerce_hide_out_of_stock_items ) ) {
+			update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		}
+
 
 		// echo "<pre>default_attributes: ";print_r($default_attributes);echo"</pre>";
 		// echo "<pre>available_variations: ";print_r($available_variations);echo"</pre>";
@@ -350,7 +364,7 @@ class ProductWrapper {
 		$attribute_labels = array();
 		foreach ( $variation_attributes as $name => $options ) {
 
-			$label = $woocommerce->attribute_label($name); 
+			$label = self::getAttributeLabel($name); 
 			if ($label == '') $label = $name;
 			$label = html_entity_decode( $label, ENT_QUOTES, 'UTF-8' ); // US Shoe Size (Men&#039;s) => US Shoe Size (Men's)
 			
@@ -371,6 +385,9 @@ class ProductWrapper {
 			
 			// find child post_id for this variation
 			$var_id = $var['variation_id'];
+
+			// ignore hidden variations
+			if ( get_post_meta( $var_id, '_ebay_is_disabled', true ) == 'on' ) continue;
 
 			// build variation array for wp-lister
 			$newvar = array();
@@ -396,6 +413,7 @@ class ProductWrapper {
 
 				// get attribute label
 				$attribute_label = isset( $attribute_labels[ $key ] ) ? $attribute_labels[ $key ] : false;
+				if ( ! $attribute_label ) continue;
 
 				if ( $term ) {
 					// handle proper attribute taxonomies
@@ -439,6 +457,11 @@ class ProductWrapper {
 			$newvar['sku']        = self::getSKU( $var_id );
 			$newvar['weight']     = self::getWeight( $var_id );
 			$newvar['dimensions'] = self::getDimensions( $var_id );
+
+			// regard custom eBay price for variation (even locked)
+			if ( $ebay_start_price = get_post_meta( $var_id, '_ebay_start_price', true ) ) {
+				$newvar['price'] = $ebay_start_price;
+			}
 
 			// check parent if variation has no dimensions
 			// if ( ($newvar['dimensions']['length'] == 0) && ($newvar['dimensions']['width'] == 0) ) {
@@ -551,17 +574,20 @@ class ProductWrapper {
 	static function getAttributeTaxonomies() {
 		global $woocommerce;
 
-		// $attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
-		$attribute_taxonomies = $woocommerce->get_attribute_taxonomy_names();
+		if ( function_exists('wc_get_attribute_taxonomy_names') ) {
+			$attribute_taxonomies = wc_get_attribute_taxonomy_names();	// WC2.2+
+		} else {
+			$attribute_taxonomies = $woocommerce->get_attribute_taxonomy_names(); // legacy support for WC2.0
+		}
 		// print_r($attribute_taxonomies);
 		
 		$attributes = array();
-		foreach ($attribute_taxonomies as $tax) {
+		foreach ( $attribute_taxonomies as $taxonomy_name ) {
 			$attrib = new stdClass();
 
 			// US Shoe Size (Men&#039;s) => US Shoe Size (Men's)
-			$attrib->name  = html_entity_decode( $woocommerce->attribute_label( $tax ), ENT_QUOTES, 'UTF-8' );
-			$attrib->label = html_entity_decode( $woocommerce->attribute_label( $tax ), ENT_QUOTES, 'UTF-8' );
+			$attrib->name  = html_entity_decode( self::getAttributeLabel( $taxonomy_name ), ENT_QUOTES, 'UTF-8' );
+			$attrib->label = html_entity_decode( self::getAttributeLabel( $taxonomy_name ), ENT_QUOTES, 'UTF-8' );
 
 			$attributes[]  = $attrib;
 		}
@@ -624,13 +650,26 @@ class ProductWrapper {
 		}
 
 		// fall back to search for SKU
-		if ( ! $sku ) return false;
-		foreach ($variations as $var) {
-			if ( $sku == $var['sku'] ) {
-				$wpl_logger->info('findVariationID('.$parent_id.','.$sku.') found: '.$var['post_id']);
-				return $var['post_id'];				
+		if ( $sku ) {	
+			foreach ($variations as $var) {
+				if ( $sku == $var['sku'] ) {
+					$wpl_logger->info('findVariationID('.$parent_id.','.$sku.') found SKU match: '.$var['post_id']);
+					return $var['post_id'];				
+				}
 			}
 		}
+
+		// if still nothing found, try a more fuzzy (case insensitive) search for attributes
+		// (this will find the right variation when "Size" has been imported as "size" for example)
+		foreach ($variations as $var) {
+			$diffs = array_udiff( $var['variation_attributes'], $VariationSpecifics, 'strcasecmp' );
+			if ( count($diffs) == 0 ) {
+				$wpl_logger->info('findVariationID('.$parent_id.') found fuzzy match: '.$var['post_id']);
+				$wpl_logger->info('VariationSpecifics: '.print_r($VariationSpecifics,1));
+				return $var['post_id'];
+			}
+		}
+
 		$wpl_logger->info('findVariationID('.$parent_id.','.$sku.') found nothing...');
 		return false;
 	}	
@@ -640,10 +679,25 @@ class ProductWrapper {
 
 		// use get_product() on WC 2.0+
 		if ( function_exists('get_product') ) {
-			return get_product( $post_id );
+			// return get_product( $post_id );
+			return WPLE()->memcache->getProductObject( $post_id );
 		} else {
 			// instantiate WC_Product on WC 1.x
 			return $is_variation ? new WC_Product_Variation( $post_id ) : new WC_Product( $post_id );
+		}
+
+	}	
+	
+	// get WooCommerce attribute name (private)
+	static function getAttributeLabel( $name ) {
+
+		// use get_product() on WC 2.1+
+		if ( function_exists('wc_attribute_label') ) {
+			return wc_attribute_label( $name );
+		} else {
+			// use WC 2.0 method
+			global $woocommerce;
+			return $woocommerce->attribute_label( $name );
 		}
 
 	}	

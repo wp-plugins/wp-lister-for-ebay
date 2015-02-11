@@ -99,11 +99,13 @@
 		<br style="clear:both;"/>
 	
 
-		<!-- Update eBay data --> 
+		<!-- Update eBay data -->
+		<!-- 
 		<h3><?php echo __('Update from eBay','wplister'); ?></h3>
 		<a id="btn_update_ebay_data" class="button right"><?php echo __('Update eBay data','wplister'); ?></a>
 		<p><?php echo __('This will load available categories, shipping services, payment options and your custom store categories from eBay','wplister'); ?></p>
 		<br style="clear:both;"/>
+		-->
 
 		<!-- Import / Export --> 
         <h3><?php echo __('Backup and restore category mappings','wplister'); ?></h3>
@@ -141,6 +143,9 @@
 	<script type="text/javascript">
 		jQuery( document ).ready(
 			function () {
+
+				var wpl_site_id    = '<?php echo $wpl_site_id ?>';
+				var wpl_account_id = '<?php echo $wpl_account_id ?>';
 
 				// select default ebay category button
 				// jQuery('.select_default_category input.btn_select_category').click( function(event) {
@@ -192,7 +197,7 @@
 				// jqueryFileTree 1
 			    jQuery('#ebay_categories_tree_container').fileTree({
 			        root: '/0/',
-			        script: ajaxurl+'?action=e2e_get_ebay_categories_tree',
+			        script: ajaxurl+'?action=e2e_get_ebay_categories_tree&site_id='+wpl_site_id,
 			        expandSpeed: 400,
 			        collapseSpeed: 400,
 			        loadMessage: 'loading eBay categories...',
@@ -220,7 +225,7 @@
 				// jqueryFileTree 2
 			    jQuery('#store_categories_tree_container').fileTree({
 			        root: '/0/',
-			        script: ajaxurl+'?action=e2e_get_store_categories_tree',
+			        script: ajaxurl+'?action=e2e_get_store_categories_tree&account_id='+wpl_account_id,
 			        expandSpeed: 400,
 			        collapseSpeed: 400,
 			        loadMessage: 'loading store categories...',
@@ -235,6 +240,11 @@
 
 			        var pathname = wpl_getCategoryPathName( catpath.split('/') );
 					// console.log('pathname: ',pathname);
+
+					if ( pathname.indexOf('[use this category]') > -1 ) {
+						catpath = catpath + '/';
+						pathname = wpl_getCategoryPathName( catpath.split('/') );
+					}
 			        
 			        // update fields
 			        jQuery('#store_category_id_'+e2e_selecting_cat).attr( 'value', cat_id );

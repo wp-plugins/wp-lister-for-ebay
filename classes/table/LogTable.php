@@ -174,11 +174,25 @@ class LogTable extends WP_List_Table {
             }
         }
 
+        if ( 'CompleteSale' == $item['callname'] ) {
+            if ( preg_match("/<OrderID>(.*)<\/OrderID>/", $item['request'], $matches) ) {
+                $match = str_replace('<![CDATA[', '', $matches[1] );
+                $match = str_replace(']]>', '', $match );
+                $link .= ' - ' . strip_tags( $match );
+            }
+        }
+
         if ( in_array( $item['callname'], array('GetCategorySpecifics','GetCategoryFeatures') ) ) {
             if ( preg_match("/<CategoryID>(.*)<\/CategoryID>/", $item['request'], $matches) ) {
                 $match = str_replace('<![CDATA[', '', $matches[1] );
                 $match = str_replace(']]>', '', $match );
                 $link .= ' - ' . strip_tags( $match );
+            }
+        }
+
+        if ( in_array( $item['callname'], array('wplister_revise_inventory_status','wplister_revise_item') ) ) {
+            if ( is_numeric( $item['request'] ) ) {
+                $link .= ' - ID: ' . $item['request'];
             }
         }
 
@@ -216,7 +230,8 @@ class LogTable extends WP_List_Table {
 
     function displayExtraMessage( $item ) {
         $html = '';
-
+        if ( 'GetMyMessages' == $item['callname'] ) return $html;
+        
         // show extra <Message>
         if ( preg_match("/<Message>(.*)<\/Message>/Usm", $item['response'], $matches_msg) ) {
             $message = strip_tags( html_entity_decode( $matches_msg[1] ) );
@@ -248,6 +263,14 @@ class LogTable extends WP_List_Table {
 
     }
 
+    function column_account($item) {
+        $account_title = isset( WPLE()->accounts[ $item['account_id'] ] ) ? WPLE()->accounts[ $item['account_id'] ]->title : '<span style="color:darkred">Invalid Account ID: '.$item['account_id'].'</span>';
+        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
+            /*$1%s*/ $account_title,
+            /*$2%s*/ EbayController::getEbaySiteCode( $item['site_id'] )
+        );
+    }
+
     function column_cb($item){
         return sprintf(
             '<input type="checkbox" name="%1$s[]" value="%2$s" />',
@@ -276,8 +299,11 @@ class LogTable extends WP_List_Table {
             'callname'			=> __('Request','wplister'),
             'ebay_id'			=> __('Item ID','wplister'),
             'user'	     		=> __('User','wplister'),
-            'success'           => __('Status','wplister')
+            'account'           => __('Account','wplister'),
+            'success'           => __('Status','wplister'),
         );
+        // if ( ! WPLE()->multi_account ) unset( $columns['account'] );
+
         return $columns;
     }
     
@@ -400,6 +426,64 @@ class LogTable extends WP_List_Table {
         return $summary;
     }
 
+
+    function extra_tablenav( $which ) {
+        if ( 'top' != $which ) return;
+        $callname = ( isset($_REQUEST['callname']) ? $_REQUEST['callname'] : false);
+        $wpl_callnames = array(
+            'AddItem',
+            'AddFixedPriceItem',
+            'VerifyAddItem',
+            'VerifyAddFixedPriceItem',
+            'ReviseItem',
+            'ReviseFixedPriceItem',
+            'ReviseInventoryStatus',
+            'EndItem',
+            'EndFixedPriceItem',
+            'RelistItem',
+            'RelistFixedPriceItem',
+            'GetItem',
+            'GetOrders',
+            'GetCategoryFeatures',
+            'GetCategorySpecifics',
+            'GetStore',
+            'GetUser',
+            'GetUserPreferences',
+            'GeteBayDetails',
+            'GetShippingDiscountProfiles',
+        );
+        $usertype = ( isset($_REQUEST['usertype']) ? $_REQUEST['usertype'] : false);
+        $wpl_usertypes = array(
+            'cron' => 'Background requests',
+            'not_cron' => 'Manual requests',
+        );
+        ?>
+        <div class="alignleft actions" style="">
+
+            <select name="callname">
+                <option value=""><?php _e('All requests','wplister') ?></option>
+                <?php foreach ($wpl_callnames as $call) : ?>
+                    <option value="<?php echo $call ?>"
+                        <?php if ( $callname == $call ) echo 'selected'; ?>
+                        ><?php echo $call ?></option>
+                <?php endforeach; ?>
+            </select>            
+
+            <select name="usertype">
+                <option value=""><?php _e('All users','wplister') ?></option>
+                <?php foreach ($wpl_usertypes as $type => $label) : ?>
+                    <option value="<?php echo $type ?>"
+                        <?php if ( $usertype == $type ) echo 'selected'; ?>
+                        ><?php echo $label ?></option>
+                <?php endforeach; ?>
+            </select>            
+
+            <input type="submit" name="" id="post-query-submit" class="button" value="Filter">
+
+        </div>
+        <?php
+    }
+
     
     /** ************************************************************************
      * REQUIRED! This is where you prepare your data for display. This method will
@@ -497,11 +581,29 @@ class LogTable extends WP_List_Table {
         // views
         if ( isset( $_REQUEST['log_status'] ) ) {
             $status = $_REQUEST['log_status'];
-            if ( in_array( $status, array('Success','Warning','Failure','unknown') ) ) {
+            if ( in_array( $status, array('Success','Warning','Failure','PartialFailure','unknown') ) ) {
                 if ( $status == 'unknown' ) {
                     $where_sql .= " AND success IS NULL ";
                 } else {
                     $where_sql .= " AND success = '$status' ";
+                }
+            }
+        }
+
+        // callname
+        if ( isset( $_REQUEST['callname'] ) && $_REQUEST['callname'] ) {
+            $callname = $_REQUEST['callname'];
+            $where_sql .= " AND callname = '$callname' ";
+        }
+
+        // usertype
+        if ( isset( $_REQUEST['usertype'] ) && $_REQUEST['usertype'] ) {
+            $usertype = $_REQUEST['usertype'];
+            if ( in_array( $usertype, array('cron','not_cron') ) ) {
+                if ( $usertype == 'cron' ) {
+                    $where_sql .= " AND ( user_id IS NULL OR user_id = '0' ) ";
+                } else {
+                    $where_sql .= " AND ( user_id IS NOT NULL AND NOT user_id = '0' ) ";
                 }
             }
         }

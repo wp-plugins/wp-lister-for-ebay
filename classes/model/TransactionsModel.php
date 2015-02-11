@@ -42,6 +42,7 @@ class TransactionsModel extends WPL_Model {
 	}
 
 
+	// deprecated - only createTransactionFromEbayOrder() is used now
 	function updateTransactions( $session, $days = null, $current_page = 1 ) {
 		$this->logger->info('*** updateTransactions('.$days.') - page '.$current_page);
 
@@ -195,6 +196,7 @@ class TransactionsModel extends WPL_Model {
 		$this->logger->info( 'handlePaginationResultType()'.print_r( $Detail, 1 ) );
 	}
 
+	// deprecated - only createTransactionFromEbayOrder() is used now
 	function handleTransactionType( $type, & $Detail ) {
 		//global $wpdb;
 		//#type $Detail TransactionType
@@ -229,6 +231,8 @@ class TransactionsModel extends WPL_Model {
 		// this will remove item from result
 		return true;
 	}
+
+	// deprecated - only createTransactionFromEbayOrder() is used now
 	function insertOrUpdate( $data, $hasVariations, $VariationSpecifics ) {
 		global $wpdb;
 
@@ -389,7 +393,7 @@ class TransactionsModel extends WPL_Model {
 
 	function createTransactionFromEbayOrder( $order, $Detail ) {
 		global $wpdb;
-		$this->logger->debug( 'createTransactionFromEbayOrder()'.print_r( $Detail, 1 ) );
+		// $this->logger->debug( 'createTransactionFromEbayOrder()'.print_r( $Detail, 1 ) );
 
 		// map TransactionType to DB columns
 		$data = $this->mapItemDetailToDB( $Detail, true );
@@ -412,6 +416,9 @@ class TransactionsModel extends WPL_Model {
 		$data['buyer_name']           = $order['buyer_name'];
 		$data['details']              = maybe_serialize( $Detail );
 		$data['history']              = $order['history'];
+
+		$data['site_id']    	      = $order['site_id'];
+		$data['account_id']    	      = $order['account_id'];
 
 		// create new transaction
 		$this->logger->info( 'insert transaction #'.$data['transaction_id'].' for item #'.$data['item_id'].' from order #'.$data['order_id'] );
@@ -503,6 +510,9 @@ class TransactionsModel extends WPL_Model {
 		$data['CompleteStatus']            = $Detail->Status->CompleteStatus;
 		$data['LastTimeModified']          = $this->convertEbayDateToSql( $Detail->Status->LastTimeModified );
 		$data['OrderLineItemID']           = $Detail->OrderLineItemID;
+
+		$data['site_id']    	           = $this->site_id;
+		$data['account_id']    	           = $this->account_id;
 
 		$listingsModel = new ListingsModel();
 		$listingItem = $listingsModel->getItemByEbayID( $Detail->Item->ItemID );
@@ -745,11 +755,12 @@ class TransactionsModel extends WPL_Model {
 			ORDER BY LastTimeModified DESC LIMIT 1
 		" );
 	}
-	function getDateOfLastCreatedTransaction() {
+	function getDateOfLastCreatedTransaction( $account_id ) {
 		global $wpdb;
 		return $wpdb->get_var( "
 			SELECT date_created
 			FROM $this->tablename
+			WHERE account_id = '$account_id'
 			ORDER BY date_created DESC LIMIT 1
 		" );
 	}

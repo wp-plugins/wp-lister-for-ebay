@@ -11,3 +11,23 @@ function wplister_tooltip( $desc ) {
     echo '<img class="help_tip" data-tip="' . esc_attr( $desc ) . '" src="' . WPLISTER_URL . '/img/help.png" height="16" width="16" />';
 }
 
+// fetch eBay ItemID for a specific product_id / variation_id
+// Note: this function does not return archived listings
+function wplister_get_ebay_id_from_post_id( $post_id ) {
+	$lm = new ListingsModel();
+	$ebay_id = $lm->getEbayIDFromPostID( $post_id );
+	return $ebay_id;
+}
+
+
+// show admin message (since 2.0.2)
+function wple_show_message( $message, $type = 'info', $params = null ) {
+	WPLE()->messages->add_message( $message, $type, $params );
+}
+
+// get instance of WP-Lister object
+// TODO: singleton pattern
+function WPLE() {
+	global $oWPL_WPLister;
+	return $oWPL_WPLister;
+}

@@ -190,6 +190,14 @@ class TransactionsTable extends WP_List_Table {
         );
 	}
 	  
+    function column_account($item) {
+        $account_title = isset( WPLE()->accounts[ $item['account_id'] ] ) ? WPLE()->accounts[ $item['account_id'] ]->title : 'NONE';
+        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
+            /*$1%s*/ $account_title,
+            /*$2%s*/ EbayController::getEbaySiteCode( $item['site_id'] )
+        );
+    }
+    
 	
     /** ************************************************************************
      * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
@@ -238,8 +246,11 @@ class TransactionsTable extends WP_List_Table {
             #'CheckoutStatus'	=> __('Checkout status','wplister'),
             'CompleteStatus'	=> __('Status','wplister'),
             #'status'		 	=> __('Status','wplister'),
-            'LastTimeModified'	=> __('Last change','wplister')
+            'LastTimeModified'	=> __('Last change','wplister'),
+            'account'           => __('Account','wplister'),
         );
+        if ( ! WPLE()->multi_account ) unset( $columns['account'] );
+
         return $columns;
     }
     

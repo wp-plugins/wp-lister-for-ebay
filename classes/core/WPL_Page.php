@@ -37,7 +37,7 @@ class WPL_Page extends WPL_Core {
 
 
 	// display view
-	protected function display( $insView, $inaData = array(), $echo = true ) {
+	public function display( $insView, $inaData = array(), $echo = true ) {
 		// $sFile = dirname(__FILE__).DS.self::ViewDir.DS.$insView.self::ViewExt;
 		$sFile = WPLISTER_PATH . '/views/' . $insView . '.php';
 		
@@ -79,31 +79,35 @@ class WPL_Page extends WPL_Core {
 	}
 
 	function change_admin_footer_text() {  
-		$plugin_name = WPLISTER_LIGHT ? $this->app_name : $this->app_name . ' Pro';  
+		// $plugin_name = WPLISTER_LIGHT ? $this->app_name : $this->app_name . ' Pro';  
+		$plugin_name = WPLISTER_LIGHT ? 'WP-Lister for eBay' : 'WP-Lister Pro for eBay';  
 	    echo '<span id="footer-thankyou">';
 	    echo sprintf( __('Thank you for listing with %s','wplister'), '<a href="http://www.wplab.com/plugins/wp-lister/" target="_blank">'.$plugin_name.'</a>' );
 	    echo '</span>';
 	}  
 	function change_admin_footer_version( $version ) {
-		$plugin_name  = WPLISTER_LIGHT ? $this->app_name : $this->app_name . ' Pro';  
-		$plugin_name .= ' ' . $this->get_plugin_version();
+		// $plugin_name  = WPLISTER_LIGHT ? $this->app_name : $this->app_name . ' Pro';  
+		$plugin_name  = WPLISTER_LIGHT ? 'WP-Lister for eBay' : 'WP-Lister Pro';  
+		$plugin_name .= ' ' . WPLE_VERSION;
 		$network_activated = get_option('wplister_is_network_activated') == 1 ? true : false;
 		if ( $network_activated ) $plugin_name .= 'n';
 	    return $version . ' / ' . $plugin_name;
 	}  
 
+	// deprecated
 	function get_plugin_version() {
-	    
-	    if ( ! function_exists( 'get_plugins' ) )
-	    	require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-	    
-	    // $plugin_folder = get_plugins( '/' . plugin_basename( dirname( __FILE__ ) ) );
-	    // $plugin_file = basename( ( __FILE__ ) );
-	    $plugin_folder = get_plugins( '/' . plugin_basename( WPLISTER_PATH ) );
-	    $plugin_file = 'wp-lister.php';
 
-	    return $plugin_folder[$plugin_file]['Version'];
+		return WPLE_VERSION;
 
+	    // if ( ! function_exists( 'get_plugins' ) )
+	    // 	require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+	    
+	    // // $plugin_folder = get_plugins( '/' . plugin_basename( dirname( __FILE__ ) ) );
+	    // // $plugin_file = basename( ( __FILE__ ) );
+	    // $plugin_folder = get_plugins( '/' . plugin_basename( WPLISTER_PATH ) );
+	    // $plugin_file = 'wp-lister.php';
+
+	    // return $plugin_folder[$plugin_file]['Version'];
 	}
 
 	function get_i8n_html( $basename )	{

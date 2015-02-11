@@ -30,6 +30,7 @@ class WPLister_Install {
 
 					$this->createOptions( $networkwide );
 					$this->createFolders();
+					// $this->runInitialDbUpgrade();
 					// $this->createTables();
 
 					restore_current_blog();
@@ -43,6 +44,7 @@ class WPLister_Install {
 	    	// no multisite
 			$this->createOptions( $networkwide );
 			$this->createFolders();
+			// $this->runInitialDbUpgrade();
 			// $this->createTables();
 	    }
 
@@ -55,8 +57,15 @@ class WPLister_Install {
 
 	}
 	
+	public function runInitialDbUpgrade() {
+
+		// db upgrade
+		WPLE_UpgradeHelper::upgradeDB();
+
+	}
+	
 	public function onWpmuNewBlog( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {
-	    if (is_plugin_active_for_network('wp-lister/wp-lister.php')) {
+	    if (is_plugin_active_for_network('wp-lister-ebay/wp-lister-ebay.php')) {
 	        switch_to_blog($blog_id);
 			$this->createOptions( $networkwide );
 			$this->createFolders();
@@ -323,7 +332,9 @@ class WPLister_Uninstall {
 		global $wpdb;
 
 		// always uninstall on multisite networks
-		if ( ( is_multisite() ) || ( WPL_WPLister::getOption('uninstall') == 1 ) ) {
+		// if ( ( is_multisite() ) || ( WPL_WPLister::getOption('uninstall') == 1 ) ) {
+		// never uninstall on multisite networks - we don't want to loose data when upgrading to 2.0
+		if ( WPL_WPLister::getOption('uninstall') == 1 ) {
 
 			// remove tables
 			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_auctions' );
@@ -335,6 +346,10 @@ class WPLister_Uninstall {
 			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_transactions' );
 			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_log' );			
 			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_jobs' );			
+			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_messages' );			
+			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_orders' );			
+			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_accounts' );			
+			$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'ebay_sites' );			
 
 			// remove options
 			$wpdb->query( 'DELETE FROM '.$wpdb->prefix."options WHERE option_name LIKE 'wplister_%' " );

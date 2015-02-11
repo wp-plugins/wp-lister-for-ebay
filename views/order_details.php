@@ -7,7 +7,7 @@
     <title>Transaction details</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <style type="text/css">
-        body,td,p { color:#2f2f2f; font:12px/16px Verdana, Arial, Helvetica, sans-serif; }
+        body,td,p { color:#2f2f2f; font:12px/16px "Open Sans",sans-serif; }
         a { text-decoration: none; }
         a:hover { color: #000; }
     </style>
@@ -112,15 +112,17 @@
                 <a href="admin.php?page=wplister&amp;s=<?php echo $item['item_id'] ?>" target="_blank">
                     <?php echo $item['title'] ?>
                 </a>
-                <?php if ( is_object( @$d->Variation ) ) : ?>
-                    <?php foreach ($d->Variation->VariationSpecifics as $spec) : ?>
-                        <br> -
-                        <?php echo $spec->Name ?>:
-                        <?php echo $spec->Value[0] ?>
+                <?php if ( isset( $item['VariationSpecifics'] ) && is_array( $item['VariationSpecifics'] ) ) : ?>
+                    <?php foreach ($item['VariationSpecifics'] as $attribute_name => $attribute_value) : ?>
+                        <br>
+                        <?php echo $attribute_name ?>:
+                        <?php echo $attribute_value ?>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </td><td>
-                <?php echo woocommerce_price( $item['TransactionPrice'] ) ?> 
+                <?php #echo woocommerce_price( $item['TransactionPrice'] ) ?> 
+                <?php echo $item['TransactionPrice'] ?> 
+                <?php echo $wpl_ebay_order['currency'] ?> 
             </td></tr>
 
         <?php endforeach; ?>

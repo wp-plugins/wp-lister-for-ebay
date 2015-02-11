@@ -56,9 +56,9 @@ class EbayController {
     {
         $s = $this->session;
         if ($s->getAppMode() == 0) 
-            $url = 'https://signin.' . $this->_getDomainnameBySiteId( $s->getSiteId() ) . '/ws/eBayISAPI.dll?SignIn';
+            $url = 'https://signin.' . self::getDomainnameBySiteId( $s->getSiteId() ) . '/ws/eBayISAPI.dll?SignIn';
         else 
-            $url = 'https://signin.sandbox.' . $this->_getDomainnameBySiteId( $s->getSiteId() ) . '/ws/eBayISAPI.dll?SignIn';
+            $url = 'https://signin.sandbox.' . self::getDomainnameBySiteId( $s->getSiteId() ) . '/ws/eBayISAPI.dll?SignIn';
         if ($RuName != null)
             $url .= '&runame=' . $RuName;
         if ($Params != null)
@@ -75,6 +75,8 @@ class EbayController {
 
         // save SessionID to DB
         update_option('wplister_ebay_sessionid', $SessionID);
+        $this->logger->info( 'new SessionID: ' . $SessionID );
+
 
         // build auth url
         $query = array( 'RuName' => $this->RuName, 'SessID' => $SessionID );
@@ -85,17 +87,36 @@ class EbayController {
     }
  
     // do FetchToken and save to DB
-    public function doFetchToken(){ 
+    public function doFetchToken( $account_id = false ){ 
         
-        $SessionID = get_option('wplister_ebay_sessionid');        
-        $token = $this->FetchToken( $SessionID );
+        $account_id = $account_id ? $account_id : get_option('wplister_default_account_id');
+        $SessionID  = get_option('wplister_ebay_sessionid');        
+        $token      = $this->FetchToken( $SessionID );
 
         if ($token) {
+
             update_option('wplister_ebay_token', $token);
-            update_option('wplister_setup_next_step', '2');
             update_option('wplister_ebay_token_is_invalid', false );
+
+            if ( $account_id ) {
+                $account = new WPLE_eBayAccount( $account_id );
+                $account->token = $token;
+                $account->update();
+            }
+
+            // check if setup wizard is still active
+            if ( get_option( 'wplister_setup_next_step' ) == 1 ) {
+
+                // move setup to step 2
+                update_option('wplister_setup_next_step', '2');                
+
+                // remember when WP-Lister was connected to an eBay account for the first time
+                update_option( 'ignore_orders_before_ts', time() );
+            }
+
         }
         
+        return $token;
     }
  
     // do getTokenExpirationTime and save to DB (deprecated)
@@ -104,34 +125,37 @@ class EbayController {
         $token = get_option('wplister_ebay_token');
         $expdate = $this->fetchTokenExpirationTime( $token );
 
+        // update legacy option (1.x)
         update_option('wplister_ebay_token_expirationtime', $expdate);
+        
         return $expdate;
     }
  
     // establish connection to eBay API
-    public function initEbay( $site_id, $sandbox_enabled, $token = false){ 
+    public function initEbay( $site_id, $sandbox_enabled, $token = false, $account_id = false ){ 
 
         // init autoloader fro EbatNs classes
         $this->loadEbayClasses();
 
-        $this->logger->info('initEbay()');
+        $this->logger->info("initEbay( $account_id )");
         // require_once 'EbatNs_ServiceProxy.php';
         // require_once 'EbatNs_Logger.php';
 
         // hide inevitable cURL warnings from SDK 
         // *** DISABLE FOR DEBUGGING ***
         $this->error_reporting_level = error_reporting();
-        $this->logger->info( 'original error reporting level: '.$this->error_reporting_level );
+        $this->logger->debug( 'original error reporting level: '.$this->error_reporting_level );
 
-        // regard php_error_handling option
-        // first bit (1) will show all php errors if set
-        if ( 1 & get_option( 'wplister_php_error_handling', 0 ) ) {
-            error_reporting( E_ALL | E_STRICT );            
-        } else {
-            // only show fatal errors (default)
-            error_reporting( E_ERROR );            
-        }
-        $this->logger->info( 'new error reporting level: '.error_reporting() );
+        // // regard php_error_handling option
+        // // first bit (1) will show all php errors if set
+        // if ( 1 & get_option( 'wplister_php_error_handling', 0 ) ) {
+        //     error_reporting( E_ALL | E_STRICT );            
+        // } else {
+        //     // only show fatal errors (default)
+        //     error_reporting( E_ERROR );            
+        // }
+        error_reporting( E_ERROR );            
+        $this->logger->debug( 'new error reporting level: '.error_reporting() );
 
         $this->siteId = $site_id;
         $this->sandbox = $sandbox_enabled;
@@ -170,9 +194,10 @@ class EbayController {
 
         // depends on the site working on (needs ID-Value !)
         $session->setSiteId($site_id);
+        $session->wple_account_id = $account_id;
 
         // regard WP proxy server
-        if ( defined('WP_USEPROXY') || WP_USEPROXY ) {
+        if ( defined('WP_USEPROXY') && WP_USEPROXY ) {
             if ( defined('WP_PROXY_HOST') && defined('WP_PROXY_PORT') )
                 $session->setProxyServer( WP_PROXY_HOST . ':' . WP_PROXY_PORT );
         }
@@ -216,13 +241,18 @@ class EbayController {
         // attach custom DB Logger for Tools page
         // if ( get_option('wplister_log_to_db') == '1' ) {
         if ( 'wplister-tools' == $_REQUEST['page'] ) {
-            $sp->attachLogger( new WPL_EbatNs_Logger( false, 'db' ) );
+            $sp->attachLogger( new WPL_EbatNs_Logger( false, 'db', $account_id, $site_id ) );
         }
         
         // save service proxy - and session
         $this->sp = $sp;
         $this->session = $session;
 
+    }
+
+    // re-attach logger - required to log multiple requests in the same session
+    public function initLogger(){ 
+        $this->sp->attachLogger( new WPL_EbatNs_Logger( false, 'db', $this->session->wple_account_id, $this->siteId ) );
     }
 
     // close connection to eBay API
@@ -271,9 +301,14 @@ class EbayController {
         // send request
         $res = $this->sp->FetchToken($req);
 
-        // TODO: handle error        
-        return ( $res->eBayAuthToken );
-        
+        // TODO: handle error
+        if ( ! $res->eBayAuthToken ) {
+            echo "<pre>Error in FetchToken(): ";print_r($res);echo"</pre>";
+            // echo "<pre>Request: ";print_r($req);echo"</pre>";
+            return false;
+        }
+
+        return ( $res->eBayAuthToken );        
     }
 
     public function fetchTokenExpirationTime( $SessionID ){ 
@@ -294,15 +329,14 @@ class EbayController {
 
     // ajax: initialize categories update
     // returns: tasklist
-    public function initCategoriesUpdate(){ 
-        $site_id = get_option('wplister_ebay_site_id');
+    public function initCategoriesUpdate( $site_id ){ 
         $cm = new EbayCategoriesModel();
         return $cm->initCategoriesUpdate( $this->session, $site_id );
     }
     // ajax: load single branch of ebay categories
     // returns: result
-    public function loadEbayCategoriesBranch( $cat_id ){ 
-        $site_id = get_option('wplister_ebay_site_id');
+    public function loadEbayCategoriesBranch( $cat_id, $site_id ){ 
+        // $site_id = get_option('wplister_ebay_site_id');
         $cm = new EbayCategoriesModel();
         return $cm->loadEbayCategoriesBranch( $cat_id, $this->session, $site_id );
     }
@@ -315,33 +349,48 @@ class EbayController {
     }
 
     // load Store categories list and insert to db
-    public function loadStoreCategories(){ 
+    public function loadStoreCategories( $account_id ) { 
         $cm = new EbayCategoriesModel();
-        $cm->downloadStoreCategories( $this->session );
+        $cm->downloadStoreCategories( $this->session, $account_id );
     }
 
     // load shipping services and insert to db
-    public function loadShippingServices(){ 
+    public function loadShippingServices( $site_id ){ 
         $sm = new EbayShippingModel();
-        $sm->downloadCountryDetails( $this->session );
-        $sm->downloadShippingLocations( $this->session );
-        $sm->downloadShippingDetails( $this->session );
-        $sm->downloadDispatchTimes( $this->session );      
-        $sm->downloadShippingPackages( $this->session );      
-        $sm->downloadShippingDiscountProfiles( $this->session );      
-        $sm->downloadExcludeShippingLocations( $this->session );
+        $sm->downloadCountryDetails( $this->session, $site_id );
+        $sm->downloadShippingLocations( $this->session, $site_id );
+        $sm->downloadShippingDetails( $this->session, $site_id );
+        $sm->downloadDispatchTimes( $this->session, $site_id );      
+        $sm->downloadShippingPackages( $this->session, $site_id );      
+        $sm->downloadExcludeShippingLocations( $this->session, $site_id );
+        // $sm->downloadShippingDiscountProfiles( $this->session );      
     }
 
     // load shipping services and insert to db
-    public function loadPaymentOptions(){ 
+    public function loadPaymentOptions( $site_id ){ 
         $sm = new EbayPaymentModel();
-        $sm->downloadPaymentDetails( $this->session );      
-        $sm->downloadMinimumStartPrices( $this->session );      
-        $sm->downloadReturnPolicyDetails( $this->session );      
+        $sm->downloadPaymentDetails( $this->session, $site_id );      
+        $sm->downloadMinimumStartPrices( $this->session, $site_id );      
+        $sm->downloadReturnPolicyDetails( $this->session, $site_id );      
+
+        // set date of last update for site
+        $Site = new WPLE_eBaySite( $site_id );
+        $Site->last_refresh = date('Y-m-d H:i:s');
+        $Site->update();
+    }
+
+    // load user / account specific details from eBay
+    public function loadUserAccountDetails() { 
 
         // update user details
+        $this->initLogger();
         $this->GetUser();
+        $this->initLogger();
         $this->GetUserPreferences();
+
+        // TODO: store ShippingDiscountProfiles in ebay_accounts table
+        $sm = new EbayShippingModel();
+        $sm->downloadShippingDiscountProfiles( $this->session );      
     }
 
     // load available dispatch times
@@ -364,11 +413,11 @@ class EbayController {
 
 
     // update transactions
-    public function loadTransactions( $days = null ){ 
-        $tm = new TransactionsModel();
-        $tm->updateTransactions( $this->session, $days );
-        return $tm;
-    }
+    // public function loadTransactions( $days = null ){ 
+    //     $tm = new TransactionsModel();
+    //     $tm->updateTransactions( $this->session, $days );
+    //     return $tm;
+    // }
     // update ebay orders (deprecated)
     public function loadEbayOrders( $days = null ){ 
         $m = new EbayOrdersModel();
@@ -492,6 +541,16 @@ class EbayController {
         $lm = new ListingsModel();
         foreach( $product_ids as $post_id ) {
             $listing_id = $lm->getListingIDFromPostID( $post_id );
+
+            // if no listing found, check parent_id for variations
+            if ( ! $listing_id ) {
+                $_product = get_product( $post_id );
+                if ( ! $_product ) continue;
+
+                if ( $_product->product_type == 'variation' ) {
+                    $listing_id = $lm->getListingIDFromPostID( $_product->parent->id );                                        
+                }
+            }
 
             // check if API is allowed to relist ended items
             if ( get_option( 'wplister_api_enable_auto_relist' ) ) {
@@ -700,16 +759,16 @@ class EbayController {
     }
 
     // call updateItemDetails on all published and changed items
-    public function updateAllPublishedItems(){   
+    // public function updateAllPublishedItems(){   
 
-        $sm = new ListingsModel();
-        $items = $sm->getAllPublished();
+    //     $sm = new ListingsModel();
+    //     $items = $sm->getAllPublished();
         
-        foreach( $items as $item ) {
-            $sm->updateItemDetails( $item['id'], $this->session );  
-        }
+    //     foreach( $items as $item ) {
+    //         $sm->updateItemDetails( $item['id'], $this->session );  
+    //     }
         
-    }
+    // }
 
 
     // call updateSingleTransaction on selected transactions
@@ -809,11 +868,12 @@ class EbayController {
 
 
     // GetUserPreferences
-    public function GetUserPreferences(){ 
+    public function GetUserPreferences( $return_result = false ){ 
 
         // prepare request
         $req = new GetUserPreferencesRequestType();
         $req->setShowSellerProfilePreferences( true );
+        // $req->setShowOutOfStockControlPreference( true );
         // $req->setShowSellerExcludeShipToLocationPreference( true );
 
         // send request
@@ -824,19 +884,21 @@ class EbayController {
         if ( 'EbatNs_ResponseError' == get_class( $res ) )
             return false;
 
-        $SellerProfileOptedIn = $res->SellerProfilePreferences->SellerProfileOptedIn;
-        update_option('wplister_ebay_seller_profiles_enabled', $SellerProfileOptedIn ? 'yes' : 'no' );
+        $result = new stdClass();
+        $result->success                  = true;
+        $result->seller_shipping_profiles = array();
+        $result->seller_payment_profiles  = array();
+        $result->seller_return_profiles   = array();
+
+        $result->SellerProfileOptedIn     = $res->SellerProfilePreferences->SellerProfileOptedIn;
+        // $result->OutOfStockControl     = $res->OutOfStockControlPreference;
 
         $profiles = $res->getSellerProfilePreferences()->getSupportedSellerProfiles()->getSupportedSellerProfile();
         // echo "<pre>";print_r($profiles);echo"</pre>";#die();
 
-        // if ( $SellerProfileOptedIn ) {
+        // if ( $result->SellerProfileOptedIn ) {
         if ( sizeof( $res->SellerProfilePreferences->SupportedSellerProfiles->SupportedSellerProfile ) > 0 ) {
             
-            $seller_shipping_profiles = array();
-            $seller_payment_profiles = array();
-            $seller_return_profiles = array();
-
             foreach ( $res->SellerProfilePreferences->SupportedSellerProfiles->SupportedSellerProfile as $profile ) {
             
                 $seller_profile = new stdClass();
@@ -847,29 +909,34 @@ class EbayController {
                 
                 switch ( $profile->ProfileType ) {
                     case 'SHIPPING':
-                        $seller_shipping_profiles[] = $seller_profile;
+                        $result->seller_shipping_profiles[] = $seller_profile;
                         break;
                     
                     case 'PAYMENT':
-                        $seller_payment_profiles[] = $seller_profile;
+                        $result->seller_payment_profiles[] = $seller_profile;
                         break;
                     
                     case 'RETURN_POLICY':
-                        $seller_return_profiles[] = $seller_profile;
+                        $result->seller_return_profiles[] = $seller_profile;
                         break;
                 }
 
             }
-            update_option('wplister_ebay_seller_shipping_profiles', $seller_shipping_profiles);
-            update_option('wplister_ebay_seller_payment_profiles', $seller_payment_profiles);
-            update_option('wplister_ebay_seller_return_profiles', $seller_return_profiles);
+            if ( $return_result ) return $result;
+
+            update_option('wplister_ebay_seller_shipping_profiles', $result->seller_shipping_profiles);
+            update_option('wplister_ebay_seller_payment_profiles', $result->seller_payment_profiles);
+            update_option('wplister_ebay_seller_return_profiles', $result->seller_return_profiles);
 
         } else {
+            if ( $return_result ) return $result;
             delete_option( 'wplister_ebay_seller_shipping_profiles' );
             delete_option( 'wplister_ebay_seller_payment_profiles' );
             delete_option( 'wplister_ebay_seller_return_profiles' );
         }
 
+        if ( $return_result ) return $result;
+        update_option('wplister_ebay_seller_profiles_enabled', $result->SellerProfileOptedIn ? 'yes' : 'no' );
         delete_option( 'wplister_ebay_seller_profiles' );
 
     }
@@ -877,16 +944,13 @@ class EbayController {
 
 
     // GetUser
-    public function GetUser(){ 
+    public function GetUser( $return_result = false ){ 
 
         // prepare request
         $req = new GetUserRequestType();
         
         // send request
         $res = $this->sp->GetUser($req);
-
-        $UserID = $res->User->UserID;
-        update_option('wplister_ebay_token_userid', $UserID);
 
         $user = new stdClass();
         $user->UserID              = $res->User->UserID;
@@ -909,13 +973,17 @@ class EbayController {
         $user->ExpressEligible     = $res->User->SellerInfo->ExpressEligible;
         $user->StoreSite           = $res->User->SellerInfo->StoreSite;
 
+        if ( $return_result ) return $user;
+
+        $UserID = $res->User->UserID;
+        update_option('wplister_ebay_token_userid', $UserID);
         update_option('wplister_ebay_user', $user);
 
         return ( $UserID );        
     }
 
     // GetTokenStatus
-    public function GetTokenStatus(){ 
+    public function GetTokenStatus( $return_result = false ){ 
         // require_once 'GetTokenStatusRequestType.php';
 
         // prepare request
@@ -930,6 +998,8 @@ class EbayController {
 
             $expdate = str_replace('T', ' ', $expdate);
             $expdate = str_replace('.000Z', '', $expdate);
+
+            if ( $return_result ) return $expdate;
 
             update_option( 'wplister_ebay_token_expirationtime', $expdate );
             update_option( 'wplister_ebay_token_is_invalid', false );
@@ -982,6 +1052,74 @@ class EbayController {
         
     }
 
+    // call Shopping API to fetch matching products
+    public function callFindProducts( $query ) { 
+        // $query = "test";
+
+        // $api_url = 'http://open.api.ebay.com/shopping?callname=FindProducts&responseencoding=XML&appid=LWSWerbu-6147-43ed-9835-853f7b5dc6cb&siteid=0&version=525&QueryKeywords=harry%20potter&AvailableItemsOnly=true&MaxEntries=2'
+        $api_url = $this->sandbox ? 'http://open.api.sandbox.ebay.com/shopping' : 'http://open.api.ebay.com/shopping';
+        $params = array(
+            'callname'           => 'FindProducts',
+            'responseencoding'   => 'JSON',
+            'appid'              => $this->appId,
+            'siteid'             => $this->siteId,
+            // 'version'            => '885',
+            'version'            => '789',
+            'QueryKeywords'      => urlencode( $query ),
+            'AvailableItemsOnly' => 'true',
+            'MaxEntries'         => '2',
+        );
+        $request_url = add_query_arg( $params, $api_url );
+        // echo "<pre>";print_r($request_url);echo"</pre>";#die();
+        
+        // call API
+        $response = wp_remote_get( $request_url );
+        // echo "<pre>";print_r($response);echo"</pre>";#die();
+
+        // skip further processing if an error was returned
+        if ( is_wp_error( $response ) ) return $response;
+
+        // decode result
+        $result = json_decode( $response['body'] );
+        // echo "<pre>";print_r($result);echo"</pre>";#die();
+
+        // check if result was decoded
+        if ( ! $result ) return 'Unable to parse FindProducts result for query '.$query;
+
+        // check if no products found for query
+        if ( $result->Ack == 'Failure' && is_array( $result->Errors ) ) {
+            if ( $result->Errors[0]->ErrorCode == '10.20' ) {
+                return array();                
+            } else {
+                return $result->Errors[0]->LongMessage;
+            }
+        }
+
+        // return products array
+        $products = $result->Product;
+
+        // parse products and make EPID available
+        foreach ($products as $product) {
+
+            // parse all ProductID nodes
+            foreach ( $product->ProductID as $pid ) {
+                if ( $pid->Type == 'Reference' ) {
+                    $product->EPID = $pid->Value;
+                }
+            }
+
+        }
+
+        return $products;
+    } // callFindProducts()
+
+    // get site code by site_id
+    static public function getEbaySiteCode( $site_id ) {
+        $sites = self::getEbaySites();
+        if ( ! array_key_exists( $site_id, $sites) ) return false;
+        return $sites[ $site_id ];        
+    } // getEbaySiteCode()
+
     // TODO: fetch ebaySites from eBay
     static public function getEbaySites() {
 
@@ -1013,7 +1151,7 @@ class EbayController {
     }
 
     // 
-    function _getDomainnameBySiteId($siteid = 0)
+    static function getDomainnameBySiteId($siteid = 0)
     {
         switch ($siteid) {
             case 0:
@@ -1065,7 +1203,7 @@ class EbayController {
         }
         return 'ebay.com';
 
-    } // _getDomainnameBySiteId()
+    } // getDomainnameBySiteId()
 
 
 }

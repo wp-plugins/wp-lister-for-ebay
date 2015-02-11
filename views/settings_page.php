@@ -38,58 +38,27 @@
 					<!-- first sidebox -->
 					<div class="postbox" id="submitdiv">
 						<!--<div title="Click to toggle" class="handlediv"><br></div>-->
-						<h3><span><?php echo __('Your Account','wplister'); ?></span></h3>
+						<h3><span><?php echo __('Update','wplister'); ?></span></h3>
 						<div class="inside">
 
 							<div id="submitpost" class="submitbox">
 
 								<div id="misc-publishing-actions">
 									<div class="misc-pub-section">
-									<?php if ( $wpl_ebay_token_userid ): ?>
-										<p>
-											<!-- <b><?php echo __('Account Details','wplister') ?></b> -->
-											<table style="width:95%">
-												<tr><td><?php echo __('User ID','wplister') . ':</td><td>' . $wpl_ebay_token_userid ?></td></tr>
-												<tr><td><?php echo __('Status','wplister') . ':</td><td>' . $wpl_ebay_user->Status ?></td></tr>
-												<tr><td><?php echo __('Score','wplister') . ':</td><td>' . $wpl_ebay_user->FeedbackScore ?></td></tr>
-												<tr><td><?php echo __('Site','wplister') . ':</td><td>' . $wpl_ebay_user->Site ?></td></tr>
-												<?php if ( $wpl_ebay_user->StoreOwner ) : ?>
-												<tr><td><?php echo __('Store','wplister') . ':</td><td>' ?><a href="<?php echo $wpl_ebay_user->StoreURL ?>" target="_blank"><?php echo __('visit store','wplister') ?></a></td></tr>
-												<?php endif; ?>
-												<?php if ( $expdate = get_option( 'wplister_ebay_token_expirationtime' ) ) : ?>
-												<!--
-												<tr><td><?php echo __('eBay token valid for','wplister') . ':</td><td>' ?><?php echo human_time_diff( strtotime($expdate) ) ?></td></tr>
-												-->
-												<?php endif; ?>
-											</table>												
-										</p>
-									<?php elseif ( $wpl_text_ebay_token ): ?>
-										<p><?php echo sprintf( __('%s has been linked to your eBay account.','wplister'), $this->app_name ) ?></p>
-										<p><?php echo __('Please visit the Tools page and click on "Update user details".','wplister') ?></p>
+									<?php if ( ! empty( WPLE()->accounts ) ): ?>
+										<p><?php echo __('These are the most commonly used configuration options.','wplister') ?></p>
 									<?php else: ?>
-										<p><?php echo sprintf( __('%s is not linked to your eBay account yet.','wplister'), $this->app_name ) ?></p>
+										<p><?php echo __('No eBay account has been set up yet.','wplister') ?></p>
 									<?php endif; ?>
 									</div>
 								</div>
 
 								<div id="major-publishing-actions">
-									<?php if ( $wpl_ebay_token_userid ): ?>
-										<div id="publishing-action" style="float:left">
-										<form method="post" id="removeTokenForm" action="<?php echo $wpl_form_action; ?>">
-											<?php wp_nonce_field( 'remove_token' ); ?>
-											<input type="hidden" name="action" value="remove_token" >
-											<input type="submit" value="<?php echo __('Change Account','wplister'); ?>" id="remove_token" class="button" name="remove_token">
-										</form>
-										</div>
-									<?php elseif ( $wpl_text_ebay_token ): ?>
-										<div id="publishing-action" style="float:left">
-										<form method="post" id="removeTokenForm" action="<?php echo $wpl_form_action; ?>">
-											<?php wp_nonce_field( 'remove_token' ); ?>
-											<input type="hidden" name="action" value="remove_token" >
-											<input type="submit" value="<?php echo __('Reset Account','wplister'); ?>" id="remove_token" class="button" name="remove_token">
-										</form>
-										</div>
-									<?php endif; ?>
+
+									<?php #if ( $wpl_ebay_token_userid ): ?>
+									<?php #elseif ( $wpl_text_ebay_token ): ?>
+									<?php #endif; ?>
+
 									<div id="publishing-action">
 										<input type="submit" value="<?php echo __('Save Settings','wplister'); ?>" id="save_settings" class="button-primary" name="save">
 									</div>
@@ -185,7 +154,8 @@
 					</div>
 					<?php endif; ?>
 
-					<div class="postbox" id="PayPalSettingsBox">
+					<!--
+					<div class="postbox" id="PayPalSettingsBox" style="display:none">
 						<h3 class="hndle"><span><?php echo __('PayPal','wplister') ?></span></h3>
 						<div class="inside">
 
@@ -197,6 +167,7 @@
 
 						</div>
 					</div>
+					-->
 
 				</div>
 			</div> <!-- #postbox-container-1 -->
@@ -206,8 +177,8 @@
 			<div id="postbox-container-2" class="postbox-container">
 				<div class="meta-box-sortables ui-sortable">
 					
-				<?php if ( $wpl_text_ebay_token == '' ) : ?>
-				
+				<?php #if ( $wpl_text_ebay_token == '' ) : ?>
+					<!--
 					<div class="postbox" id="AuthSettingsBox">
 						<h3 class="hndle"><span><?php echo __('eBay authorization','wplister') ?></span></h3>
 						<div class="inside">
@@ -260,13 +231,14 @@
 
 						</div>
 					</div>
-
-				<?php else: // $wpl_text_ebay_token != ''  ?>
+					-->
+				<?php #else: // $wpl_text_ebay_token != ''  ?>
 
 				<form method="post" id="settingsForm" action="<?php echo $wpl_form_action; ?>">
 					<input type="hidden" name="action" value="save_wplister_settings" >
 					<input type="hidden" name="wpl_e2e_text_paypal_email" id="wpl_text_paypal_email" value="<?php echo $wpl_text_paypal_email; ?>" >
 
+					<!--
 					<div class="postbox" id="ConnectionSettingsBox">
 						<h3 class="hndle"><span><?php echo __('eBay settings','wplister') ?></span></h3>
 						<div class="inside">
@@ -279,24 +251,14 @@
 								<?php endforeach; ?>
 							</select>
 
-							<div id="wrap_enable_ebay_motors" style="<?php echo $wpl_text_ebay_site_id != 0 ? 'display:none' : '' ?>">
-								<label for="wpl-option-enable_ebay_motors" class="text_label"><?php echo __('Include eBay Motors','wplister') ?></label>
-								<select id="wpl-option-enable_ebay_motors" name="wpl_e2e_option_enable_ebay_motors" class=" required-entry select">
-									<option value="1" <?php if ( $wpl_option_enable_ebay_motors == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
-									<option value="0" <?php if ( $wpl_option_enable_ebay_motors != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
-								</select>
-							</div>
-
 						</div>
 					</div>
+					-->
 
-
-					<div class="postbox" id="UpdateOptionBox"
-						<?php if ( $wpl_text_ebay_token == '' ) echo 'style="display:none;"' ?>
-						>
+					<div class="postbox" id="UpdateOptionBox">
 						<h3 class="hndle"><span><?php echo __('Automatic updates','wplister') ?></span></h3>
 						<div class="inside">
-							<p><?php echo __('Enable to update listings and transactions using WP-Cron.','wplister'); ?></p>
+							<!-- <p><?php echo __('Enable to update listings and transactions using WP-Cron.','wplister'); ?></p> -->
 
 							<label for="wpl-option-cron_auctions" class="text_label">
 								<?php echo __('Update interval','wplister') ?>
@@ -308,32 +270,6 @@
 								<option value="daily" <?php if ( $wpl_option_cron_auctions == 'daily' ): ?>selected="selected"<?php endif; ?>><?php echo __('daily','wplister') ?></option>
 							</select>
 
-
-							<?php if ( $wpl_option_ebay_update_mode != 'order' ): ?>
-							<label for="wpl-option-ebay_update_mode" class="text_label">
-								<?php echo __('Update mode','wplister') ?>
-                                <?php wplister_tooltip('Set this to "Order" if you want to create a single WooCommerce order from a combined order on eBay. This is a transitory option which will be removed in future versions.') ?>
-							</label>
-							<select id="wpl-option-ebay_update_mode" name="wpl_e2e_option_ebay_update_mode" class=" required-entry select">
-								<option value="transaction" <?php if ( $wpl_option_ebay_update_mode == 'transaction' ): ?>selected="selected"<?php endif; ?>><?php echo __('Transaction','wplister'); ?> (legacy)</option>
-								<option value="order"       <?php if ( $wpl_option_ebay_update_mode == 'order'       ): ?>selected="selected"<?php endif; ?>><?php echo __('Order','wplister'); ?> (default)</option>
-							</select>
-							<p class="desc" style="display: block;">
-								<?php if ( $wpl_option_ebay_update_mode == 'transaction' ): ?>
-									Set this to "Order" to enable the new order processing and disable the old transaction processing mode.<br>
-								<?php else: ?>
-									Note: Once you enabled the new order processing mode you should not switch back to transaction mode.<br>
-								<?php endif; ?>
-
-								<?php global $woocommerce; ?>
-								<?php if ( ( isset($woocommerce->version) ) && ( version_compare( $woocommerce->version, '2.0' ) < 0 ) ) : ?>
-									<span style="color:darkred;">Warning: You need to update to WooCommerce 2.0 to use the new "Order" update mode.<br></span>
-								<?php endif; ?>
-								
-							</p>
-							<?php else: ?>
-								<input type="hidden" id="wpl-option-ebay_update_mode" name="wpl_e2e_option_ebay_update_mode" value="order" />
-							<?php endif; ?>
 
 						</div>
 					</div>
@@ -350,7 +286,7 @@
 							<select id="wpl-local_auction_display" name="wpl_e2e_local_auction_display" class=" required-entry select">
 								<option value="off" 	<?php if ( $wpl_local_auction_display == 'off'    ): ?>selected="selected"<?php endif; ?>><?php echo __('Off','wplister'); ?></option>
 								<option value="always"  <?php if ( $wpl_local_auction_display == 'always' ): ?>selected="selected"<?php endif; ?>><?php echo __('Always show link to eBay for products on auction','wplister'); ?></option>
-								<option value="forced"  <?php if ( $wpl_local_auction_display == 'forced' ): ?>selected="selected"<?php endif; ?>><?php echo __('Always show link to eBay for auctions and fixed price items','wplister'); ?></option>
+								<option value="forced"  <?php if ( $wpl_local_auction_display == 'forced' ): ?>selected="selected"<?php endif; ?>><?php echo __('Always show link to eBay for auctions and fixed price items','wplister'); ?> (<?php _e('not recommended','wplister'); ?>)</option>
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('Enable this to modify the product details page for items currently on auction.','wplister'); ?>
@@ -373,7 +309,7 @@
 
 
 				</form>
-				<?php endif; // $wpl_text_ebay_token == ''  ?>
+				<?php #endif; // $wpl_text_ebay_token == ''  ?>
 
 				<?php if ( ( is_multisite() ) && ( is_main_site() ) ) : ?>
 				<p>
@@ -410,24 +346,10 @@
 					
 				});
 
-				// show eBay Motors option only for US site
-				jQuery('#ConnectionSettingsBox #wpl-text-ebay_site_id').change( function(event, a, b) {					
-
-					var site_id = event.target.value;
-					if ( site_id == '0') {
-						jQuery('#wrap_enable_ebay_motors').slideDown(300);
-					} else {
-						jQuery('#wrap_enable_ebay_motors').slideUp(300);						
-					}
-					
-				});
-
-				// change account button
-				jQuery('#remove_token').click( function() {					
-
-					return confirm('Do you really want to do this?');
-					
-				});
+				// change account button (1.x)
+				// jQuery('#remove_token').click( function() {					
+				// 	return confirm('Do you really want to do this?');				
+				// });
 
 				// save changes button
 				jQuery('#save_settings').click( function() {					

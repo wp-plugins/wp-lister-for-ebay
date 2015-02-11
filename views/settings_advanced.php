@@ -262,6 +262,16 @@
 								<?php echo __('Show product images on listings page.','wplister'); ?><br>
 							</p>
 
+							<label for="wpl-enable_custom_product_prices" class="text_label">
+								<?php echo __('Enable custom price field','wplister') ?>
+                                <?php wplister_tooltip('If do not use custom prices in eBay and prefer less options when editing a product, you can disable the custom price fields here.') ?>
+							</label>
+							<select id="wpl-enable_custom_product_prices" name="wpl_e2e_enable_custom_product_prices" class=" required-entry select">
+								<option value="0" <?php if ( $wpl_enable_custom_product_prices == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+								<option value="1" <?php if ( $wpl_enable_custom_product_prices == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
+								<option value="2" <?php if ( $wpl_enable_custom_product_prices == '2' ): ?>selected="selected"<?php endif; ?>><?php echo __('Hide for variations','wplister'); ?></option>
+							</select>
+
 							<label for="wpl-enable_categories_page" class="text_label">
 								<?php echo __('Categories in main menu','wplister') ?>
                                 <?php wplister_tooltip('This will add a <em>Categories</em> submenu entry visible to users who can manage listings.') ?>
@@ -272,6 +282,18 @@
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('Enable this to make category settings available to users without access to other eBay settings.','wplister'); ?><br>
+							</p>
+
+							<label for="wpl-enable_accounts_page" class="text_label">
+								<?php echo __('Accounts in main menu','wplister') ?>
+                                <?php wplister_tooltip('This will add a <em>Accounts</em> submenu entry visible to users who can manage listings.') ?>
+							</label>
+							<select id="wpl-enable_accounts_page" name="wpl_e2e_enable_accounts_page" class="required-entry select">
+								<option value="0" <?php if ( $wpl_enable_accounts_page != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
+								<option value="1" <?php if ( $wpl_enable_accounts_page == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Enable this to make account settings available to users without access to other eBay settings.','wplister'); ?><br>
 							</p>
 
 							<label for="wpl-option-disable_wysiwyg_editor" class="text_label">
@@ -352,6 +374,18 @@
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('Show eBay Item Compatibility List as new tab on single product page.','wplister'); ?>
+							</p>
+
+							<label for="wpl-disable_sale_price" class="text_label">
+								<?php echo __('Use sale price','wplister'); ?>
+                                <?php wplister_tooltip('Set this to No if you want your sale prices to be ignored. You can still use a relative profile price to increase your prices by a percentage.') ?>
+							</label>
+							<select id="wpl-disable_sale_price" name="wpl_e2e_disable_sale_price" class="required-entry select">
+								<option value="0" <?php if ( $wpl_disable_sale_price != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
+								<option value="1" <?php if ( $wpl_disable_sale_price == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Should sale prices be used automatically on eBay?','wplister'); ?><br>
 							</p>
 
 

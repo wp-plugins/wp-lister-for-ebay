@@ -10,7 +10,7 @@ class WPL_EbatNs_Logger{
 	protected $success = false;
 	protected $id = 0;
 	
-	function __construct( $beautfyXml = false, $destination = 'db' )
+	function __construct( $beautfyXml = false, $destination = 'db', $account_id = false, $site_id = false )
 	{
 		global $wpdb;
 
@@ -23,8 +23,10 @@ class WPL_EbatNs_Logger{
 
 		// insert row into db
 		$data = array();
-		$data['timestamp'] = date( 'Y-m-d H:i:s' );
-		$data['user_id']   = ( defined('DOING_CRON') && DOING_CRON ) ? 'wp_cron' : $this->currentUserID;
+		$data['timestamp']  = date( 'Y-m-d H:i:s' );
+		$data['user_id']    = ( defined('DOING_CRON') && DOING_CRON ) ? 'wp_cron' : $this->currentUserID;
+		$data['site_id']    = $site_id;
+		$data['account_id'] = $account_id;
 		$wpdb->insert($wpdb->prefix.'ebay_log', $data);
 		if ( $wpdb->last_error ) echo 'Error in WPL_EbatNs_Logger::__construct: '.$wpdb->last_error.'<br>'.$wpdb->last_query;
 		$this->id = $wpdb->insert_id;

@@ -132,7 +132,9 @@
 									Item condition:
 								</th>
 								<td colspan="3" class="vi-is1-clr">
-									<span class="vi-is1-condText">New</span>
+									<span class="vi-is1-condText">
+										<?php echo $wpl_item->ConditionName ?>
+									</span>
 								</td>
 							</tr>
 							<tr>
@@ -436,10 +438,10 @@
 									<?php 
 
 										if ( $wpl_item->PrimaryCategory->CategoryID )
-											echo EbayCategoriesModel::getFullEbayCategoryName( $wpl_item->PrimaryCategory->CategoryID );
+											echo EbayCategoriesModel::getFullEbayCategoryName( $wpl_item->PrimaryCategory->CategoryID, $wpl_site_id );
 
 										if ( $wpl_item->SecondaryCategory->CategoryID )
-											echo '<br>'.EbayCategoriesModel::getFullEbayCategoryName( $wpl_item->SecondaryCategory->CategoryID );
+											echo '<br>'.EbayCategoriesModel::getFullEbayCategoryName( $wpl_item->SecondaryCategory->CategoryID, $wpl_site_id );
 
 									?>
 								</td>

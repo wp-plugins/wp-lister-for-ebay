@@ -168,7 +168,15 @@ class EbayMessagesTable extends WP_List_Table {
             /*$2%s*/ $item['CheckoutStatus']
         );
 	}
-	  
+
+    function column_account($item) {
+        $account_title = isset( WPLE()->accounts[ $item['account_id'] ] ) ? WPLE()->accounts[ $item['account_id'] ]->title : 'NONE';
+        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
+            /*$1%s*/ $account_title,
+            /*$2%s*/ EbayController::getEbaySiteCode( $item['site_id'] )
+        );
+    }
+     
 	
     /** ************************************************************************
      * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
@@ -213,8 +221,11 @@ class EbayMessagesTable extends WP_List_Table {
             'flag_read'         => '&nbsp;', // __('Read','wplister'),
             'message_id'        => __('Message ID','wplister'),
             // 'status'		 	=> __('Status','wplister'),
-            'expiration_date'	=> __('Expires at','wplister')
+            'expiration_date'	=> __('Expires at','wplister'),
+            'account'           => __('Account','wplister'),
         );
+        if ( ! WPLE()->multi_account ) unset( $columns['account'] );
+
         return $columns;
     }
     

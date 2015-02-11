@@ -32,25 +32,26 @@ class EbayCategoriesModel extends WPL_Model {
 		$this->tablename = $wpdb->prefix . self::table;
 	}
 	
-	function initCategoriesUpdate($session, $siteid)
+	function initCategoriesUpdate( $session, $site_id )
 	{
 		$this->initServiceProxy($session);
-		$this->logger->info('initCategoriesUpdate()');
+		$this->logger->info("initCategoriesUpdate( $site_id )");
 
 		// set handler to receive CategoryType items from result
 		$this->_cs->setHandler('CategoryType', array(& $this, 'storeCategory'));	
 		
 		// we will not know the version till the first call went through !
 		$this->_categoryVersion = -1;
-		$this->_siteid = $siteid;
+		$this->_siteid = $site_id;
 		
 		// truncate the db
 		global $wpdb;
-		$wpdb->query('truncate '.$this->tablename);
+		// $wpdb->query('truncate '.$this->tablename);
+		$wpdb->query("DELETE FROM {$this->tablename} WHERE site_id = '$site_id' ");
 		
 		// download the data of level 1 only !
 		$req = new GetCategoriesRequestType();
-		$req->CategorySiteID = $siteid;
+		$req->CategorySiteID = $site_id;
 		$req->LevelLimit = 1;
 		$req->DetailLevel = 'ReturnAll';
 		
@@ -60,30 +61,35 @@ class EbayCategoriesModel extends WPL_Model {
 		// let's update the version information on the top-level entries
 		$data['version'] = $this->_categoryVersion;
 		$data['site_id'] = $this->_siteid;
-		$wpdb->update( $this->tablename, $data, array( 'parent_cat_id' => '0') );
+		$wpdb->update( $this->tablename, $data, array( 'parent_cat_id' => '0', 'site_id' => $site_id ) );
         echo $wpdb->last_error;
 
-		// include other update tasks
+		// include other site specific update tasks
 		$tasks = array();
 		$tasks[] = array( 
 			'task'        => 'loadShippingServices', 
 			'displayName' => 'update shipping services', 
-			'params'      => array() 
+			'params'      => array(),
+			'site_id'     => $site_id,
 		);
 		$tasks[] = array( 
 			'task'        => 'loadPaymentOptions', 
-			'displayName' => 'update payment options'
+			'displayName' => 'update payment options',
+			'site_id'     => $site_id,
 		);
-		$tasks[] = array( 
-			'task'        => 'loadStoreCategories', 
-			'displayName' => 'update custom store categories'
-		);
+		// $tasks[] = array( 
+		// 	'task'        => 'loadStoreCategories', 
+		// 	'displayName' => 'update custom store categories',
+		// 	'account_id'  => $account_id,
+		// );
 
 
-		// include eBay Motors for US site
-		if ( ( $siteid == 0 ) && ( get_option( 'wplister_enable_ebay_motors' ) == 1 ) ) {
+		// include eBay Motors for US site - automatically
+		// if ( ( $site_id === 0 ) && ( get_option( 'wplister_enable_ebay_motors' ) == 1 ) ) {
+		if ( $site_id === 0 || $site_id === '0' ) {
 
 			// insert top level motors category manually
+			$wpdb->query("DELETE FROM {$this->tablename} WHERE site_id = 100 ");
 			$data['cat_id']        = 6000;
 			$data['parent_cat_id'] = 0;
 			$data['level']         = 1;
@@ -92,17 +98,18 @@ class EbayCategoriesModel extends WPL_Model {
 			$data['site_id']       = 100;
 			$wpdb->insert( $this->tablename, $data );
 
-			// $task = array( 
-			// 	'task'        => 'loadEbayCategoriesBranch', 
-			// 	'displayName' => 'eBay Motors', 
-			// 	'cat_id'      => '6000' 
-			// );
-			// $tasks[] = $task;
+			$task = array( 
+				'task'        => 'loadEbayCategoriesBranch', 
+				'displayName' => 'eBay Motors', 
+				'cat_id'      =>  6000,
+				'site_id'     =>  100,
+			);
+			$tasks[] = $task;
 
 		}
 
 		// fetch the data back from the db and add a task for each top-level id
-		$rows = $wpdb->get_results( "select cat_id, cat_name from $this->tablename where parent_cat_id=0", ARRAY_A );
+		$rows = $wpdb->get_results( "select cat_id, cat_name, site_id from $this->tablename where parent_cat_id = 0 and site_id = '$site_id' ", ARRAY_A );
         echo $wpdb->last_error;
 		foreach ($rows as $row)
 		{
@@ -111,28 +118,30 @@ class EbayCategoriesModel extends WPL_Model {
 			$task = array( 
 				'task'        => 'loadEbayCategoriesBranch', 
 				'displayName' => $row['cat_name'], 
-				'cat_id'      => $row['cat_id'] 
+				'cat_id'      => $row['cat_id'],
+				'site_id'     => $row['site_id'],
 			);
 			$tasks[] = $task;
 		}
+
 		return $tasks;
 	}
 	
-	function loadEbayCategoriesBranch( $cat_id, $session, $siteid)
+	function loadEbayCategoriesBranch( $cat_id, $session, $site_id )
 	{
 		$this->initServiceProxy($session);
-		$this->logger->info('loadEbayCategoriesBranch() #'.$cat_id );
+		$this->logger->info("loadEbayCategoriesBranch() - cat_id: $cat_id, site_id: $site_id" );
 
 		// handle eBay Motors category
-		if ( $cat_id == 6000 ) $siteid = 100;
+		if ( $cat_id == 6000 ) $site_id = 100;
 
 		// set handler to receive CategoryType items from result
 		$this->_cs->setHandler('CategoryType', array(& $this, 'storeCategory'));	
-		$this->_siteid = $siteid;
+		$this->_siteid = $site_id;
 
 		// call GetCategories()
 		$req = new GetCategoriesRequestType();
-		$req->CategorySiteID = $siteid;
+		$req->CategorySiteID = $site_id;
 		$req->LevelLimit = 255;
 		$req->DetailLevel = 'ReturnAll';
 		$req->ViewAllNodes = true;
@@ -141,7 +150,7 @@ class EbayCategoriesModel extends WPL_Model {
 
 	}
 	
-	function downloadCategories($session, $siteid)
+	function downloadCategories($session, $site_id)
 	{
 		$this->initServiceProxy($session);
 		$this->logger->info('downloadCategories() - DEPRECATED');
@@ -158,7 +167,7 @@ class EbayCategoriesModel extends WPL_Model {
 		
 		// // download the data of level 1 only !
 		// $req = new GetCategoriesRequestType();
-		// $req->CategorySiteID = $siteid;
+		// $req->CategorySiteID = $site_id;
 		// $req->LevelLimit = 1;
 		// $req->DetailLevel = 'ReturnAll';
 		
@@ -178,7 +187,7 @@ class EbayCategoriesModel extends WPL_Model {
 		// 	$this->logger->info('Loading tree for category #'.$row['cat_id'] . ' - '.$row['cat_name']);
 			
 		// 	$req = new GetCategoriesRequestType();
-		// 	$req->CategorySiteID = $siteid;
+		// 	$req->CategorySiteID = $site_id;
 		// 	$req->LevelLimit = 255;
 		// 	$req->DetailLevel = 'ReturnAll';
 		// 	$req->ViewAllNodes = true;
@@ -196,7 +205,7 @@ class EbayCategoriesModel extends WPL_Model {
 		if ( $Category->CategoryParentID[0] == $Category->CategoryID ) {
 
 			// avoid duplicate main categories due to the structure of the response
-			if ( $this->getItem( $Category->CategoryID ) ) return true;
+			if ( $this->getItem( $Category->CategoryID, $this->_siteid ) ) return true;
 
 			$data['parent_cat_id'] = '0';
 
@@ -226,11 +235,12 @@ class EbayCategoriesModel extends WPL_Model {
 	
 	
 
-	function downloadStoreCategories($session)
+	function downloadStoreCategories( $session, $account_id )
 	{
 		global $wpdb;
 		$this->initServiceProxy($session);
 		$this->logger->info('downloadStoreCategories()');
+		$this->account_id = $account_id;
 		
 		// download store categories
 		$req = new GetStoreRequestType();
@@ -239,7 +249,7 @@ class EbayCategoriesModel extends WPL_Model {
 		$res = $this->_cs->GetStore($req);
 		
 		// empty table
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}ebay_store_categories" );
+		$wpdb->query("DELETE FROM {$wpdb->prefix}ebay_store_categories WHERE account_id = '$account_id' ");
 		
 		// insert each category
 		foreach( $res->Store->CustomCategories as $Category ) {
@@ -262,7 +272,9 @@ class EbayCategoriesModel extends WPL_Model {
 		$data['leaf'] 			= is_array( $Category->ChildCategory ) ? '0' : '1';
 		$data['level'] 			= $level;
 		$data['parent_cat_id'] 	= $parent_cat_id;
-	
+		$data['account_id']     = $this->account_id;
+		$data['site_id']        = WPLE()->accounts[ $account_id ]->site_id;
+
 		// move "Other" category to the end of the list
 		if ( $data['order'] == 0 ) $data['order'] = 999;
 
@@ -378,13 +390,15 @@ class EbayCategoriesModel extends WPL_Model {
 		return $profiles;		
 	}
 
-	static function getItem( $id ) {
+	static function getItem( $id, $site_id = false ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . self::table;
+		$where_site_sql = $site_id === false ? '' : "AND site_id ='$site_id'";
 		$item = $wpdb->get_row("
 			SELECT * 
 			FROM $table
 			WHERE cat_id = '$id'
+			$where_site_sql
 		", ARRAY_A);		
 
 		return $item;		
@@ -402,25 +416,32 @@ class EbayCategoriesModel extends WPL_Model {
 		return $value;		
 	}
 
-	static function getCategoryType( $id ) {
+	static function getCategoryType( $id, $site_id ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . self::table;
+		$ebay_motors_sql = $site_id == 0 ? 'OR site_id = 100' : '';
 		$value = $wpdb->get_var("
 			SELECT leaf 
 			FROM $table
 			WHERE cat_id = '$id'
+			  AND ( site_id = '$site_id'
+			  $ebay_motors_sql )
 		");		
 
+		$value = apply_filters('wplister_get_ebay_category_type', $value, $id );	
 		return $value ? 'leaf' : 'parent';		
 	}
 
-	static function getChildrenOf( $id ) {
+	static function getChildrenOf( $id, $site_id ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . self::table;
+		$ebay_motors_sql = $site_id == 0 ? 'OR site_id = 100' : '';
 		$items = $wpdb->get_results("
 			SELECT DISTINCT * 
 			FROM $table
 			WHERE parent_cat_id = '$id'
+			  AND ( site_id = '$site_id'
+			  $ebay_motors_sql )
 		", ARRAY_A);		
 
 		return $items;		
@@ -437,7 +458,7 @@ class EbayCategoriesModel extends WPL_Model {
 
 		return $value;		
 	}
-	static function getStoreCategoryType( $id ) {
+	static function getStoreCategoryType( $id, $account_id ) {
 		global $wpdb;	
 		// $this->tablename = $wpdb->prefix . self::table;
 		$table = $wpdb->prefix . 'ebay_store_categories';
@@ -445,17 +466,19 @@ class EbayCategoriesModel extends WPL_Model {
 			SELECT leaf 
 			FROM $table
 			WHERE cat_id = '$id'
+			  AND account_id = '$account_id'
 		");		
 
 		return $value ? 'leaf' : 'parent';		
 	}
-	static function getChildrenOfStoreCategory( $id ) {
+	static function getChildrenOfStoreCategory( $id, $account_id ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . 'ebay_store_categories';
 		$items = $wpdb->get_results("
 			SELECT DISTINCT * 
 			FROM $table
 			WHERE parent_cat_id = '$id'
+			  AND account_id = '$account_id'
 			ORDER BY `order` ASC
 		", ARRAY_A);		
 
@@ -465,37 +488,53 @@ class EbayCategoriesModel extends WPL_Model {
 
 		
 	/* recursively get full ebay category name */	
-	static function getFullEbayCategoryName( $cat_id ) {
+	static function getFullEbayCategoryName( $cat_id, $site_id = false ) {
 		global $wpdb;
-		if ( intval($cat_id) == 0 ) return null;
+		$table = $wpdb->prefix . self::table;
 
-		$result = $wpdb->get_row('SELECT * FROM '.$wpdb->prefix.'ebay_categories WHERE cat_id = '.$cat_id );
+		if ( intval($cat_id) == 0 ) return null;
+		if ( $site_id === false ) $site_id = get_option('wplister_ebay_site_id');
+		$ebay_motors_sql = $site_id == 0 ? 'OR site_id = 100' : '';
+
+		$result = $wpdb->get_row("
+			SELECT * 
+			FROM $table
+			WHERE cat_id = '$cat_id'
+			  AND ( site_id = '$site_id'
+			  $ebay_motors_sql )
+		");
+
 		if ( $result ) { 
 			if ( $result->parent_cat_id != 0 ) {
-				$parentname = self::getFullEbayCategoryName( $result->parent_cat_id ) . ' &raquo; ';
+				$parentname = self::getFullEbayCategoryName( $result->parent_cat_id, $site_id ) . ' &raquo; ';
 			} else {
 				$parentname = '';
 			}
 			return $parentname . $result->cat_name;
 		}
 
+		// if there is a category ID, but no category found, return warning
+        return '<span style="color:darkred;">' . __('Unknown category ID','wplister').': '.$cat_id . '</span>';
 	}
 
 	/* recursively get full store category name */	
-	static function getFullStoreCategoryName( $cat_id ) {
+	static function getFullStoreCategoryName( $cat_id, $account_id = false ) {
 		global $wpdb;
 		if ( intval($cat_id) == 0 ) return null;
+		if ( ! $account_id ) $account_id = get_option('wplister_default_account_id');
 
-		$result = $wpdb->get_row('SELECT * FROM '.$wpdb->prefix.'ebay_store_categories WHERE cat_id = '.$cat_id );
+		$result = $wpdb->get_row('SELECT * FROM '.$wpdb->prefix.'ebay_store_categories WHERE cat_id = '.$cat_id.' AND account_id = '.$account_id );
 		if ( $result ) { 
 			if ( $result->parent_cat_id != 0 ) {
-				$parentname = self::getFullStoreCategoryName( $result->parent_cat_id ) . ' &raquo; ';
+				$parentname = self::getFullStoreCategoryName( $result->parent_cat_id, $account_id ) . ' &raquo; ';
 			} else {
 				$parentname = '';
 			}
 			return $parentname . $result->cat_name;
 		}
 
+		// if there is a category ID, but no category found, return warning
+        return '<span style="color:darkred;">' . __('Unknown category ID','wplister').': '.$cat_id . '</span>';
 	}
 	
 	

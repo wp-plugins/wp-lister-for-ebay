@@ -55,10 +55,10 @@
 										</select>
 									</td><td>
 										<input type="text" name="wpl_e2e_int_shipping_options_flat[][price]" 
-											value="<?php echo @$service['price']; ?>" class="price_input field_price" />
+											value="<?php echo isset( $service['price'] ) ? $service['price'] : '' ?>" class="price_input field_price" />
 									</td><td>
 										<input type="text" name="wpl_e2e_int_shipping_options_flat[][add_price]" 
-											value="<?php echo @$service['add_price']; ?>" class="price_input field_add_price" />
+											value="<?php echo isset( $service['add_price'] ) ? $service['add_price'] : '' ?>" class="price_input field_add_price" />
 									</td><td>
 										<input type="button" value="<?php echo __('remove','wplister'); ?>" class="button" 
 											onclick="jQuery(this).parent().parent().remove();" />
@@ -181,8 +181,8 @@
 								</label>
 								<select name="wpl_e2e_InternationalPromotionalShippingDiscount" id="wpl-InternationalPromotionalShippingDiscount" 
 										title="Type" class="required-entry select select_InternationalPromotionalShippingDiscount" style="width:auto">
-									<option value="0" <?php if ( @$item_details['InternationalPromotionalShippingDiscount'] != 1 ): ?>selected="selected"<?php endif; ?> ><?php echo __('No','wplister') ?></option>
-									<option value="1" <?php if ( @$item_details['InternationalPromotionalShippingDiscount'] == 1 ): ?>selected="selected"<?php endif; ?> ><?php echo __('Yes','wplister') ?></option>
+									<option value="0" <?php if ( isset($item_details['InternationalPromotionalShippingDiscount']) && $item_details['InternationalPromotionalShippingDiscount'] != 1 ): ?>selected="selected"<?php endif; ?> ><?php echo __('No','wplister') ?></option>
+									<option value="1" <?php if ( isset($item_details['InternationalPromotionalShippingDiscount']) && $item_details['InternationalPromotionalShippingDiscount'] == 1 ): ?>selected="selected"<?php endif; ?> ><?php echo __('Yes','wplister') ?></option>
 								</select>
 								
 							</div>

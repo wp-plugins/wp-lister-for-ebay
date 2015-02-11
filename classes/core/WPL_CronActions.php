@@ -14,7 +14,11 @@ class WPL_CronActions extends WPL_Core {
 		parent::__construct();
 		
 		// add cron handler
-		add_action('wplister_update_auctions', array( &$this, 'cron_update_auctions' ) );
+		add_action('wplister_update_auctions', 			array( &$this, 'cron_update_auctions' ) );
+		add_action('wple_daily_schedule', 	   			array( &$this, 'cron_daily_schedule' ) );
+
+		// add internal action hooks
+		add_action('wple_clean_log_table', 				array( &$this, 'action_clean_log_table' ) );
 
 
 	}
@@ -38,21 +42,42 @@ class WPL_CronActions extends WPL_Core {
         	return;
         }
 
-		$this->initEC();
-		
-		// decide if the old transactions update or the new orders update mode is to be used
-		$mode = get_option( 'wplister_ebay_update_mode', 'order' );
-		if ( $mode == 'order' ) {
-			$this->EC->updateEbayOrders(); // new
+        // get accounts
+		$accounts = WPLE_eBayAccount::getAll();
+		if ( ! empty( $accounts) ) {
+
+			// loop each active account
+			foreach ( $accounts as $account ) {
+
+				$this->initEC( $account->id );
+				$this->EC->updateEbayOrders();
+				$this->EC->updateListings(); // TODO: specify account
+				$this->EC->closeEbay();
+
+			}
+
 		} else {
-			$this->EC->loadTransactions(); // old
+
+			// fallback to pre 1.5.2 behaviour
+			$this->initEC();
+			$this->EC->updateEbayOrders(); // force new mode in 1.5.2
+			
+			// decide if the old transactions update or the new orders update mode is to be used
+			// $mode = get_option( 'wplister_ebay_update_mode', 'order' );
+			// if ( $mode == 'order' ) {
+			// 	$this->EC->updateEbayOrders(); // new
+			// } else {
+			// 	$this->EC->loadTransactions(); // old
+			// }
+
+			// update ended items and process relist schedule
+			$this->EC->updateListings(); 
+			$this->EC->closeEbay();
+
 		}
 
-		// update ended items and process relist schedule
-		$this->EC->updateListings(); 
 
 		// clean up
-		$this->EC->closeEbay();
 		$this->removeLock();
 
 		// store timestamp
@@ -60,6 +85,29 @@ class WPL_CronActions extends WPL_Core {
 
         $this->logger->info("WP-CRON: cron_update_auctions() finished");
 	} // cron_update_auctions()
+
+
+	// run daily schedule - called by wp_cron
+	public function cron_daily_schedule() {
+        $this->logger->info("*** WP-CRON: cron_daily_schedule()");
+
+		// clean log table
+		do_action('wple_clean_log_table');
+
+		// store timestamp
+		update_option( 'wple_daily_cron_last_run', time() );
+
+        $this->logger->info("*** WP-CRON: cron_daily_schedule() finished");
+	}
+
+	public function action_clean_log_table() {
+		global $wpdb;
+		if ( get_option('wplister_log_to_db') == '1' ) {
+			$days_to_keep = get_option( 'wplister_log_days_limit', 30 );
+			$wpdb->query('DELETE FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.$days_to_keep.' DAY )');
+		}
+	} // action_clean_log_table()
+
 
 	public function checkLock() {
 

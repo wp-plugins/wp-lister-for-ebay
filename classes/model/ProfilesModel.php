@@ -58,6 +58,7 @@ class ProfilesModel extends WPL_Model {
 			"profile_name"        => "New profile",
 			"profile_description" => "",
 			"listing_duration"    => "Days_7",
+			"account_id"    	  => get_option( 'wplister_default_account_id' ),
 		);
 
 		$item['details'] = array(	
@@ -176,6 +177,10 @@ class ProfilesModel extends WPL_Model {
 
 	function getAllNames() {
 		global $wpdb;	
+
+		// return if DB has not been initialized yet
+		if ( get_option('wplister_db_version') < 37 ) return array();
+
 		$results = $wpdb->get_results("
 			SELECT profile_id, profile_name 
 			FROM $this->tablename

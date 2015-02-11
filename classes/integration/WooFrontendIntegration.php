@@ -212,6 +212,7 @@ class WPL_WooFrontendIntegration {
 
 		// check if compatibility tab is enabled
 		if ( ! get_option( 'wplister_enable_item_compat_tab', 1 ) ) return $tabs;
+		if ( ! $post ) return $tabs;
 
 		// don't add tab if there is no compatibility list
 		$compatibility_list   = get_post_meta( $post->ID, '_ebay_item_compatibility_list', true );

@@ -10,6 +10,8 @@ class ListingsModel extends WPL_Model {
 
 	var $_session;
 	var $_cs;
+	var $errors = array();
+	var $warnings = array();
 
 	function ListingsModel()
 	{
@@ -50,6 +52,14 @@ class ListingsModel extends WPL_Model {
 		if ( $profile_id ) {
 			$where_sql .= "
 				 AND l.profile_id = '".$profile_id."'
+			";
+		} 
+
+        // filter account_id
+		$account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : false);
+		if ( $account_id ) {
+			$where_sql .= "
+				 AND l.account_id = '".$account_id."'
 			";
 		} 
 
@@ -236,6 +246,19 @@ class ListingsModel extends WPL_Model {
 		");
 		return $item;
 	}
+	function getAccountID( $id ) {
+		global $wpdb;
+
+		// if there are multiple listing IDs, use the first one
+		if ( is_array($id) ) $id = $id[0];
+
+		$item = $wpdb->get_var("
+			SELECT account_id
+			FROM $this->tablename
+			WHERE id = '$id'
+		");
+		return $item;
+	}
 	function getStatusFromPostID( $post_id ) {
 		global $wpdb;
 		$item = $wpdb->get_var("
@@ -304,6 +327,7 @@ class ListingsModel extends WPL_Model {
 		// $summary->changed = false;
 		foreach ($result as $row) {
 			$status = $row->status;
+			if ( ! $status ) continue;
 			$summary->$status = $row->total;
 		}
 
@@ -424,89 +448,6 @@ class ListingsModel extends WPL_Model {
 
         return $with_variation_images;
 	}
-
-	// check if there are existing variations on eBay which do not exist in WooCommerce and need to be deleted
-    function fixDeletedVariations( $item, $listing_item ) {
-
-        $cached_variations  = maybe_unserialize( $listing_item['variations'] );
-        if ( empty($cached_variations) ) return $item;
-
-        // loop cached variations
-        foreach ($cached_variations as $key => $var) {
-        	
-        	if ( ! $this->checkIfVariationExistsInItem( $var, $item ) ) {
-
-        		// build new variation to be deleted
-	        	$newvar = new VariationType();
-
-	        	// set quantity to zero - effectively remove variations that have sales
-	        	$newvar->Quantity = 0;
-				// $newvar->StartPrice = $var['price'];
-
-				// handle sku
-	        	if ( $var['sku'] != '' ) {
-	        		$newvar->SKU = $var['sku'];
-	        	}
-
-	        	// add VariationSpecifics (v2)
-	        	$VariationSpecifics = new NameValueListArrayType();
-	            foreach ($var['variation_attributes'] as $name => $value) {
-		            $NameValueList = new NameValueListType();
-	    	    	$NameValueList->setName ( $name  );
-	        		$NameValueList->setValue( $value );
-		        	$VariationSpecifics->addNameValueList( $NameValueList );
-	            }
-	        	$newvar->setVariationSpecifics( $VariationSpecifics );
-
-	        	// tell eBay to delete this variation - only possible for items without sales
-	        	$newvar->setDelete( true );
-
-				$item->Variations->addVariation( $newvar );
-                $this->logger->info('added variation to be deleted: '.print_r($newvar,1) );
-
-                // TODO: update VariationSpecificsSet ?
-        	}
-        }
-
-    	return $item;
-	}
-
-    function checkIfVariationExistsInItem( $variation, $item ) {
-    	$variation_attributes = $variation['variation_attributes'];
-
-        // loop cached variations
-        foreach ( $item->Variations->Variation as $Variation ) {
-            $found_match = true;
-
-            // compare variation attributes
-        	foreach ($Variation->VariationSpecifics->NameValueList as $spec) {
-        		$name = $spec->Name;
-        		$val  = $spec->Value;
-        		if ( isset( $variation_attributes[ $name ] ) ) {
-
-        			if ( $variation_attributes[ $name ] == $val ) {
-	                	// $this->logger->info('found matching name value pair: '.print_r($spec,1) );
-        				// $found_match = true;
-        			} else {
-	                	// $this->logger->info('variation spec value does not match with "'.$variation_attributes[ $name ].'": '.print_r($spec,1) );
-        				$found_match = false;
-        			}
-
-        		} else {
-                	// $this->logger->info('variation spec name does not exist "'.$name.'" does not exist in attributes: '.print_r($variation_attributes,1) );
-    				$found_match = false;        			
-        		}
-        	}
-
-            if ( $found_match ) {
-                // $this->logger->info('found matching variation by attributes: '.print_r($Variation->VariationSpecifics->NameValueList,1) );
-                return true;
-            }
-
-        }
-
-        return false;
-    } // checkIfVariationExistsInItem()
 
 
 	// check if there are new variations in WooCommerce which do not exist in the cache
@@ -719,6 +660,7 @@ class ListingsModel extends WPL_Model {
 			$this->logger->info( "Item #$id sent to ebay, ItemID is ".$res->ItemID );
 
 		} // call successful
+		$this->processErrorsAndWarnings( $id, $this->result );
 
 		return $this->result;
 
@@ -793,6 +735,7 @@ class ListingsModel extends WPL_Model {
 			$this->logger->info( "Item #$id relisted on ebay, NEW ItemID is ".$res->ItemID );
 
 		} // call successful
+		$this->processErrorsAndWarnings( $id, $this->result );
 
 		return $this->result;
 
@@ -814,7 +757,8 @@ class ListingsModel extends WPL_Model {
 		$item->setItemID( $listing_item['ebay_id'] );
 
 		// use Item.Site from listing details - this way we don't need to check primary category for eBayMotors
-		$listing_details = maybe_unserialize( $listing_item['details'] );
+		// $listing_details = maybe_unserialize( $listing_item['details'] );
+        $listing_details = $this->decodeObject( $listing_item['details'] );
 		$item->Site = $listing_details->Site;
 
 		// eBay Motors (beta)
@@ -866,6 +810,7 @@ class ListingsModel extends WPL_Model {
 			$this->logger->info( "Item #$id auto-relisted on ebay, NEW ItemID is ".$res->ItemID );
 
 		} // call successful
+		$this->processErrorsAndWarnings( $id, $this->result );
 
 		return $this->result;
 
@@ -893,10 +838,10 @@ class ListingsModel extends WPL_Model {
 		if ( ! $ibm->checkItem( $item, true ) ) return $ibm->result;
 
 		// check for variations to be deleted
-		$item = $this->fixDeletedVariations( $item, $listing_item );
+		$item = $ibm->fixDeletedVariations( $item, $listing_item );
 
 		// if quantity is zero, end item instead
-		if ( ( $item->Quantity == 0 ) && ( ! $ibm->VariationsHaveStock ) ) {
+		if ( ( $item->Quantity == 0 ) && ( ! $ibm->VariationsHaveStock ) && ( ! $this->thisAccountUsesOutOfStockControl( $listing_item['account_id'] ) ) ) {
 			$this->logger->info( "Item #$id has no stock, switching from reviseItem() to endItem()" );
 			return $this->endItem( $id, $session );
 		}
@@ -940,8 +885,9 @@ class ListingsModel extends WPL_Model {
 
 			// update listing status
 			$data['status'] = 'published';
-			if ( 291 == $this->handle_error_code ) $data['status'] = 'ended'; 
-			if (  17 == $this->handle_error_code ) $data['status'] = 'archived'; 
+			if ( 1047 == $this->handle_error_code ) $data['status'] = 'ended'; 
+			if (  291 == $this->handle_error_code ) $data['status'] = 'ended'; 
+			if (   17 == $this->handle_error_code ) $data['status'] = 'archived'; 
 			$this->updateListing( $id, $data );
 			
 			// get details like ViewItemURL from ebay automatically - unless item does not exist on eBay (17)
@@ -953,6 +899,7 @@ class ListingsModel extends WPL_Model {
 			$this->logger->info( "Item #$id was revised, ItemID is ".$res->ItemID );
 
 		} // call successful
+		$this->processErrorsAndWarnings( $id, $this->result );
 
 		return $this->result;
 
@@ -993,7 +940,7 @@ class ListingsModel extends WPL_Model {
 		}
 
 		// if stock level is zero, end item instead
-		if ( ! $this->checkStockLevel( $listing_item ) ) {
+		if ( ( ! $this->thisAccountUsesOutOfStockControl( $listing_item['account_id'] ) ) && ( ! $this->checkStockLevel( $listing_item ) ) ) {
 			$this->logger->info( "Item #$id has no stock, switching from reviseInventoryStatus() to endItem()" );
 			return $this->endItem( $id, $session );
 		}
@@ -1062,7 +1009,13 @@ class ListingsModel extends WPL_Model {
 				// get stock level for this variation in cart
 				$variation_qty = get_post_meta( $cart_item->variation_id, '_stock', true );
 				$stat->setQuantity( min( $max_quantity, $variation_qty ) );
-				$stat->setSKU( $cart_item->sku );
+				$revised_quantity = min( $max_quantity, $variation_qty );
+
+				// do not set SKU for single split variations
+				if ( ! $listing_item['parent_id'] ) {				
+					$stat->setSKU( $cart_item->sku ); 
+				}
+
 				$req->addInventoryStatus( $stat );
 				$this->logger->info( "Revising inventory status for cart variation #$id ($post_id) - sku: ".$stat->SKU." - qty: ".$stat->Quantity );
 
@@ -1078,6 +1031,8 @@ class ListingsModel extends WPL_Model {
 					$stat->setStartPrice( $listing_item['price'] );
 				}
 				$stat->setQuantity( min( $max_quantity, $listing_item['quantity'] ) );
+				$revised_quantity = min( $max_quantity, $listing_item['quantity'] );
+
 				$req->addInventoryStatus( $stat );
 				$this->logger->info( "Revising inventory status #$id ($post_id) - qty: ".$stat->Quantity );
 			}
@@ -1091,8 +1046,15 @@ class ListingsModel extends WPL_Model {
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
 
+			// update listing quantity after revising inventory status
+			if ( isset($revised_quantity) ) {
+				$this->updateListing( $id, array( 'quantity' => $revised_quantity ) );
+			}
+
 			// update listing status for ended items
 			if ( 291 == $this->handle_error_code ) {
+				$this->updateListing( $id, array( 'status' => 'ended' ) );				
+			} elseif ( 1047 == $this->handle_error_code ) {
 				$this->updateListing( $id, array( 'status' => 'ended' ) );				
 			} elseif ( 17 == $this->handle_error_code ) {
 				$this->updateListing( $id, array( 'status' => 'archived' ) );				
@@ -1103,6 +1065,7 @@ class ListingsModel extends WPL_Model {
 			$this->logger->info( "Inventory status for #$id was revised successfully" );
 
 		} // call successful
+		$this->processErrorsAndWarnings( $id, $this->result );
 
 		return $this->result;
 
@@ -1205,6 +1168,18 @@ class ListingsModel extends WPL_Model {
 	} // checkVariationSKUs()
 
 
+	function thisAccountUsesOutOfStockControl( $account_id ) {
+		if ( ! $account_id ) $account_id = get_option( 'wplister_default_account_id' );
+
+		$accounts = WPLE()->accounts;
+		if ( isset( $accounts[ $account_id ] ) && ( $accounts[ $account_id ]->oosc_mode == 1 ) ) {
+			return true;
+		}
+
+		return false;
+	} // thisAccountUsesOutOfStockControl()
+
+
 	function checkStockLevel( $listing_item ) {
 		if ( ! is_array( $listing_item) ) $listing_item = (array) $listing_item;
 
@@ -1290,10 +1265,68 @@ class ListingsModel extends WPL_Model {
 			$this->logger->info( "Item #$id verified with ebay, getAck(): ".$res->getAck() );
 
 		} // call successful
-		
+		$this->processErrorsAndWarnings( $id, $this->result );
+
 		return $this->result;
 
 	} // verifyAddItem()
+
+
+	function processErrorsAndWarnings( $id, $preprocessed_result ) {
+		// echo "<pre>";print_r($preprocessed_result);echo"</pre>";#die();
+
+		// handle errors and warnings
+		$errors         = array();
+		$warnings       = array();
+		$listing_data   = array();
+
+		if ( is_array( $preprocessed_result->errors ) )
+		foreach ( $preprocessed_result->errors as $original_error_obj ) {
+
+			// clone error object and remove HtmlMessage
+			$error_obj = clone $original_error_obj;
+			unset( $error_obj->HtmlMessage );
+
+			if ( 'Error' == $error_obj->SeverityCode ) {
+				$errors[]         = $error_obj;
+			} elseif ( 'Warning' == $error_obj->SeverityCode ) {
+				$warnings[]       = $error_obj;
+			}
+
+		} // foreach error or warning
+
+
+		// update listing
+		if ( ! empty( $errors ) ) {
+
+			// $listing_data['status']  = 'failed';
+			$listing_data['last_errors'] = serialize( array( 'errors' => $errors, 'warnings' => $warnings ) );
+			$this->updateListing( $id, $listing_data );				
+			// $this->logger->info('changed status to FAILED: '.$id);
+
+			// $this->errors   = array_merge( $this->errors, $errors);
+			// $this->warnings = array_merge( $this->warnings, $warnings);
+
+		} elseif ( ! empty( $warnings ) ) {
+
+			// $listing_data['status']  = 'published';
+			$listing_data['last_errors'] = serialize( array( 'errors' => $errors, 'warnings' => $warnings ) );
+			$this->updateListing( $id, $listing_data );				
+
+			// $this->logger->info('changed status to published: '.$id);
+			// $this->warnings = array_merge( $this->warnings, $warnings);
+
+		} else {
+
+			$listing_data['last_errors'] = '';
+			$this->updateListing( $id, $listing_data );				
+
+		}
+
+		// echo "<pre>id: ";print_r($id);echo"</pre>";#die();
+		// echo "<pre>data: ";print_r($listing_data);echo"</pre>";#die();
+
+	} // processErrorsAndWarnings()
 
 
 	function endItem( $id, $session )
@@ -1338,6 +1371,7 @@ class ListingsModel extends WPL_Model {
 			$this->logger->info( "Item #$id was ended manually. " );
 
 		} // call successful
+		$this->processErrorsAndWarnings( $id, $this->result );
 
 		return $this->result;
 
@@ -1448,6 +1482,14 @@ class ListingsModel extends WPL_Model {
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
 			$this->logger->info( "Item #$id was updated from eBay, ItemID is ".$item['ebay_id'] );
+
+			// archive listing if API returned error 17: "This item cannot be accessed..."
+			if ( 17 == $this->handle_error_code ) {
+				$data = array();
+				$data['status'] = 'archived'; 
+				$this->updateListing( $id, $data );
+			}
+
 		} // call successful
 
 		return $this->result;
@@ -1534,6 +1576,7 @@ class ListingsModel extends WPL_Model {
 				$new_var['sku']      = $Variation->SKU;
 				$new_var['price']    = $Variation->StartPrice->value;
 				$new_var['stock']    = $Variation->Quantity - $Variation->SellingStatus->QuantitySold;
+				$new_var['sold']     = $Variation->SellingStatus->QuantitySold;
 
 				$new_var['variation_attributes'] = array();
 				foreach ( $Variation->VariationSpecifics as $VariationSpecifics ) {
@@ -1645,7 +1688,7 @@ class ListingsModel extends WPL_Model {
 			if ( intval( $item['quantity_sold'] ) >= intval( $item['quantity'] ) ) {
 
 				// if eBay indicates item was sold, check WooCommerce stock - updateDetails does the same
-				if ( $this->checkStockLevel( $item ) ) 
+				if ( ! $this->checkStockLevel( $item ) ) 
 					$status = 'sold';
 
 			}
@@ -1725,6 +1768,7 @@ class ListingsModel extends WPL_Model {
 			$order_sql
 			LIMIT $limit
 		", ARRAY_A);		
+		// echo "<pre>";print_r($wpdb->last_query);echo"</pre>";#die();
 
 		if ( $type == 'ending' )
 			$wpdb->query("SET time_zone='SYSTEM'"); // revert back to original
@@ -1865,10 +1909,12 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
+
+	// get limited $item arrays for applyProfileToItem()
 	function getAllPreparedWithProfile( $profile_id ) {
 		global $wpdb;	
 		$items = $wpdb->get_results("
-			SELECT * 
+			SELECT id, post_id, locked, status 
 			FROM $this->tablename
 			WHERE status = 'prepared'
 			  AND profile_id = '$profile_id'
@@ -1877,10 +1923,11 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
+	// get limited $item arrays for applyProfileToItem()
 	function getAllVerifiedWithProfile( $profile_id ) {
 		global $wpdb;	
 		$items = $wpdb->get_results("
-			SELECT * 
+			SELECT id, post_id, locked, status 
 			FROM $this->tablename
 			WHERE status = 'verified'
 			  AND profile_id = '$profile_id'
@@ -1889,10 +1936,11 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
+	// get limited $item arrays for applyProfileToItem()
 	function getAllPublishedWithProfile( $profile_id ) {
 		global $wpdb;	
 		$items = $wpdb->get_results("
-			SELECT * 
+			SELECT id, post_id, locked, status 
 			FROM $this->tablename
 			WHERE ( status = 'published' OR status = 'changed' )
 			  AND profile_id = '$profile_id'
@@ -1901,10 +1949,11 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
+	// get limited $item arrays for applyProfileToItem()
 	function getAllEndedWithProfile( $profile_id ) {
 		global $wpdb;	
 		$items = $wpdb->get_results("
-			SELECT * 
+			SELECT id, post_id, locked, status 
 			FROM $this->tablename
 			WHERE status = 'ended'
 			  AND profile_id = '$profile_id'
@@ -1913,18 +1962,25 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
-	function getAllLockedWithProfile( $profile_id ) {
-		global $wpdb;	
-		$items = $wpdb->get_results("
-			SELECT * 
-			FROM $this->tablename
-			WHERE locked = '1'
-			  AND profile_id = '$profile_id'
-			ORDER BY id DESC
-		", ARRAY_A);		
 
-		return $items;		
+	// count items using profile and status (optimized version of the above methods)
+	function countItemsUsingProfile( $profile_id, $status = false ) {
+		global $wpdb;	
+
+		$where_and_sql = $status ? " AND status = '$status' " : '';
+		if ( $status == 'locked' )    $where_and_sql = " AND locked = '1' ";
+		if ( $status == 'published' ) $where_and_sql = " AND ( status = 'published' OR status = 'changed' ) ";
+
+		$item_count = $wpdb->get_var("
+			SELECT count(id) 
+			FROM $this->tablename
+			WHERE profile_id = '$profile_id'
+			$where_and_sql
+		");
+
+		return $item_count;
 	}
+
 	function getAllPreparedWithTemplate( $template ) {
 		global $wpdb;	
 		$items = $wpdb->get_results("
@@ -1961,6 +2017,26 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
+
+	// count items using template and status (optimized version of the above methods)
+	function countItemsUsingTemplate( $template, $status = false ) {
+		global $wpdb;	
+
+		$where_and_sql = $status ? " AND status = '$status' " : '';
+		if ( $status == 'locked' )    $where_and_sql = " AND locked = '1' ";
+		if ( $status == 'published' ) $where_and_sql = " AND ( status = 'published' OR status = 'changed' ) ";
+
+		$item_count = $wpdb->get_var("
+			SELECT count(id) 
+			FROM $this->tablename
+			WHERE template LIKE '%$template'
+			$where_and_sql
+		");
+
+		return $item_count;
+	}
+
+
 	function getAllPastEndDate() {
 		global $wpdb;	
 		$wpdb->query("SET time_zone='+0:00'"); // tell SQL to use GMT
@@ -2056,6 +2132,19 @@ class ListingsModel extends WPL_Model {
 		return $items;		
 	}
 
+	function productExistsInAccount( $post_id, $account_id ) {
+		global $wpdb;	
+		$item = $wpdb->get_row("
+			SELECT *
+			FROM $this->tablename
+			WHERE post_id = '$post_id'
+			  AND account_id = '$account_id'
+			  AND NOT status = 'archived'
+		", OBJECT);		
+
+		return $item;
+	}
+
 	public function setListingQuantity( $post_id, $quantity ) {
 		global $wpdb;	
 		$wpdb->update( $this->tablename, array( 'quantity' => $quantity ), array( 'post_id' => $post_id ) );
@@ -2141,17 +2230,37 @@ class ListingsModel extends WPL_Model {
     	return $title;
 	}
 
-	public function prepareListings( $ids ) {
+	public function prepareListings( $ids, $profile_id = false ) {
 		$listings = array();
+		$prepared_count = 0;
+		$skipped_count  = 0;
+		$this->errors   = array();
+		$this->warnings = array();
+
 		foreach( $ids as $id ) {
-			if ( $listing_id = $this->prepareProductForListing( $id ) ) {
+			$listing_id = $this->prepareProductForListing( $id, $profile_id );
+			if ( $listing_id ) {
 				$listings[] = $listing_id;
-			}
+				$prepared_count++;	
+			} else {
+				$skipped_count++;
+			}			
 		}
-		return $listings;
+
+		// build response
+		$response = new stdClass();
+		// $response->success     = $prepared_count ? true : false;
+		$response->success        = true;
+		$response->prepared_count = $prepared_count;
+		$response->skipped_count  = $skipped_count;
+		$response->profile_id     = $profile_id;
+		$response->errors         = $this->errors;
+		$response->warnings       = $this->warnings;
+
+		return $response;
 	}
 
-	public function prepareProductForListing( $post_id, $post_content = false, $post_title = false, $parent_id = false ) {
+	public function prepareProductForListing( $post_id, $profile_id = false, $post_content = false, $post_title = false, $parent_id = false ) {
 		global $wpdb;
 		
 		// get wp post record
@@ -2167,6 +2276,26 @@ class ListingsModel extends WPL_Model {
 			return false; 
 		}
 
+		// skip duplicates
+		if ( $profile_id ) {
+
+			// get profile
+			$pm      = new ProfilesModel();
+			$profile = $pm->getItem( $profile_id );
+
+			// check if this product already exists in profile account
+			if ( $this->productExistsInAccount( $post_id, $profile['account_id'] ) ) {
+				$this->warnings[] = sprintf( __('"%s" already exists in account %s and has been skipped.','wpla'), get_the_title($post_id), $profile['account_id'] );
+				return false;
+			}
+		}
+
+		// skip non-existing products
+		$product = get_product( $post_id );
+		if ( ! $product || ! $product->exists() ) {
+			$this->errors[] = "Product $post_id could not be found.";
+			return false;
+		}
 
 		// support for qTranslate
 		if ( function_exists('qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage') ) {
@@ -2259,6 +2388,7 @@ class ListingsModel extends WPL_Model {
 	
 	} // calculateProfilePrice()
 
+	// applyProfileToItem() received a limited $item array with only id, post_id, locked and status
 	public function applyProfileToItem( $profile, $item, $update_title = true ) {
 		global $wpdb;
 
@@ -2299,6 +2429,8 @@ class ListingsModel extends WPL_Model {
 		// gather profile data
 		$data = array();
 		$data['profile_id'] 		= $profile['profile_id'];
+		$data['account_id'] 		= $profile['account_id'];
+		$data['site_id'] 			= $profile['site_id'];
 		$data['auction_type'] 		= $profile['type'];
 		$data['listing_duration'] 	= $profile['listing_duration'];
 		$data['template'] 			= $profile['details']['template'];
@@ -2395,8 +2527,12 @@ class ListingsModel extends WPL_Model {
 	public function applyProfileToItems( $profile, $items, $update_title = true ) {
 
 		// apply profile to all items
+		$current     = 1;
+		$total_count = sizeof($items);
 		foreach( $items as $item ) {
-			$this->applyProfileToItem( $profile, $item, $update_title );			
+			$this->logger->info('applying profile to item '.$item['id'].' ( '.$current.' / '.$total_count.' )');
+			$this->applyProfileToItem( $profile, $item, $update_title );
+			$current++;
 		}
 
 		return $items;		

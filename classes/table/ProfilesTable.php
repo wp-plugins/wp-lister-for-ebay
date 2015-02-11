@@ -135,6 +135,14 @@ class ProfilesTable extends WP_List_Table {
             /*$3%s*/ $template_name        
         );
     }
+
+    function column_account($item) {
+        $account_title = isset( WPLE()->accounts[ $item['account_id'] ] ) ? WPLE()->accounts[ $item['account_id'] ]->title : 'NONE';
+        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
+            /*$1%s*/ $account_title,
+            /*$2%s*/ EbayController::getEbaySiteCode( $item['site_id'] )
+        );
+    }
     
     /** ************************************************************************
      * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
@@ -175,8 +183,11 @@ class ProfilesTable extends WP_List_Table {
             'price'				=> __('Price','wplister'),
             'category'			=> __('Category','wplister'),
             'type'				=> __('Type','wplister'),
-            'template'			=> __('Template','wplister')
+            'template'			=> __('Template','wplister'),
+            'account'           => __('Account','wplister'),
         );
+        if ( ! WPLE()->multi_account ) unset( $columns['account'] );
+
         return $columns;
     }
     

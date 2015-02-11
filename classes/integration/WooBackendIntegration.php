@@ -21,6 +21,8 @@ class WPL_WooBackendIntegration {
 
 		// show messages when listing was updated from edit product page
 		add_action( 'post_updated_messages', array( &$this, 'wplister_product_updated_messages' ), 20, 1 );
+		// show errors
+		add_action( 'admin_notices', array( &$this, 'wple_product_admin_notices' ), 20 );
 
 		// custom views for products table
 		add_filter( 'parse_query', array( &$this, 'wplister_woocommerce_admin_product_filter_query' ) );
@@ -34,22 +36,82 @@ class WPL_WooBackendIntegration {
 		add_action( 'post_submitbox_misc_actions', array( &$this, 'wplister_product_submitbox_misc_actions' ), 100 );
 		add_action( 'woocommerce_process_product_meta', array( &$this, 'wplister_product_handle_submitbox_actions' ), 100, 2 );
 
+		// make orders searchable by OrderID at WooCommerce -> Orders
+		add_filter( 'woocommerce_shop_order_search_fields', array( &$this, 'woocommerce_shop_order_search_ebay_order_id' ) );
+
 		// hook into WooCommerce orders to create product objects for ebay listings (debug)
 		// add_action( 'woocommerce_order_get_items', array( &$this, 'wpl_woocommerce_order_get_items' ), 10, 2 );
 		add_filter( 'woocommerce_get_product_from_item', array( &$this, 'wpl_woocommerce_get_product_from_item' ), 10, 3 );
 
 		// add "List on eBay" action link on products table
-		add_filter( 'post_row_actions', array( &$this, 'wpl_post_row_actions' ), 10, 2 );
+		// add_filter( 'post_row_actions', array( &$this, 'wpl_post_row_actions' ), 10, 2 );
 
 		// prevent WooCommerce from sending out notification emails when updating order status manually
 		if ( get_option( 'wplister_disable_changed_order_emails' ) ) {
-			add_filter( 'woocommerce_email_enabled_new_order', array( $this, 'check_order_email_enabled' ), 10, 2 );
+			// add_filter( 'woocommerce_email_enabled_new_order', array( $this, 'check_order_email_enabled' ), 10, 2 );  // disabled as this would *always* prevent admin new order emails for eBay orders
 			add_filter( 'woocommerce_email_enabled_customer_completed_order', array( $this, 'check_order_email_enabled' ), 10, 2 );
 			add_filter( 'woocommerce_email_enabled_customer_processing_order', array( $this, 'check_order_email_enabled' ), 10, 2 );		
 		}
 
 	}
 
+	// make orders searchable by OrderID at WooCommerce -> Orders
+	function woocommerce_shop_order_search_ebay_order_id( $search_fields ) {
+		$search_fields[] = '_ebay_order_id';
+		$search_fields[] = '_ebay_user_id';
+		return $search_fields;
+	}
+
+	function wple_product_admin_notices() {
+		global $post, $post_ID;
+		if ( ! $post ) return;
+		if ( ! $post_ID ) return;
+		$errors_msg = '';
+
+		// warn about missing details
+        // $this->checkForMissingData( $post );
+
+		// get listing item
+		$lm = new ListingsModel();
+		$listing_id = $lm->getListingIDFromPostID( $post_ID );
+		$listing = $lm->getItem( $listing_id );
+		if ( ! $listing ) return;
+
+
+		// parse history
+		$history = maybe_unserialize( $listing['last_errors'] );
+		if ( empty($history) ) return;
+		// echo "<pre>";print_r($history);echo"</pre>";#die();
+
+		// process errors and warnings
+        $tips_errors   = array();
+        $tips_warnings = array();
+        if ( is_array( $history ) ) {
+                foreach ($history['errors'] as $result) {
+                    $tips_errors[] = '<b>'.$result->SeverityCode.':</b> '.$result->ShortMessage.' ('.$result->ErrorCode.')<br>'.$result->LongMessage;
+                }
+                foreach ($history['warnings'] as $result) {
+                    $tips_warnings[] = '<b>'.$result->SeverityCode.':</b> '.$result->ShortMessage.' ('.$result->ErrorCode.')<br>'.$result->LongMessage;
+                }
+        }
+        if ( ! empty( $tips_errors ) ) {
+            $errors_msg .= 'eBay returned the following error(s):'.'<br>';
+            $errors_msg .= '<small style="color:darkred">'.join('<br>',$tips_errors).'</small>';
+        }
+
+        if ( $errors_msg )
+            self::showMessage( $errors_msg, 1, 1 );
+
+	} // wple_product_admin_notices()
+
+	/* Generic message display */
+	public function showMessage($message, $errormsg = false, $echo = true) {		
+		if ( defined('WPLISTER_RESELLER_VERSION') ) $message = apply_filters( 'wplister_tooltip_text', $message );
+		$class = ($errormsg) ? 'error' : 'updated';			// error or success
+		$class = ($errormsg == 2) ? 'update-nag' : $class; 	// top warning
+		$message = '<div id="message" class="'.$class.'" style="display:block !important"><p>'.$message.'</p></div>';
+		if ($echo) echo $message;
+	}
 
 
 	/**
@@ -69,7 +131,7 @@ class WPL_WooBackendIntegration {
 
 
 	/**
-	 * add Prepare Listing action link on products table
+	 * add Prepare Listing action link on products table (DISABLED and replaced by search icon on ebay column)
 	 **/
 	// add_filter( 'post_row_actions', array( &$this, 'wpl_post_row_actions' ), 10, 2 );
 
@@ -153,32 +215,29 @@ class WPL_WooBackendIntegration {
 
 	function wplister_woocommerce_custom_shop_order_columns( $column ) {
 		global $post, $woocommerce;
-		// $product = new WC_Product($post->ID);
 
 		if ( $column != 'wpl_order_src' ) return;
 
+		// check if order was placed on eBay
 		$ebay_order_id = get_post_meta( $post->ID, '_ebay_order_id', true );
-		$ebay_transaction_id = get_post_meta( $post->ID, '_ebay_transaction_id', true );
-		// echo $ebay_transaction_id;
+		if ( ! $ebay_order_id ) return;
 
-		if ( intval($ebay_transaction_id) != 0 ) {
 
-			$ebay_item_id = get_post_meta( $post->ID, '_ebay_item_id', true );
-			$listingsModel = new ListingsModel();
-			$listing = $listingsModel->getItemByEbayID( $ebay_item_id, false );
-			
-			if ( $listing ) {
-				$ebayUrl = $listing->ViewItemURL;
-				echo '<a href="'.$ebayUrl.'" title="Transaction #'.$ebay_transaction_id.'" target="_blank"><img src="'.WPLISTER_URL.'img/ebay-16x16.png" alt="yes" /></a>';		
-			} else {
-				echo '<img src="'.WPLISTER_URL.'img/ebay-16x16.png" title="Transaction #'.$ebay_transaction_id.' - listing has been removed from WP-Lister." />';		
-			}
+		// get order details
+		$om      = new EbayOrdersModel();
+		$order   = $om->getOrderByOrderID( $ebay_order_id );
+		$account = $order ? WPLE_eBayAccount::getAccount( $order['account_id'] ) : false;
 
-		} elseif ( intval( $ebay_order_id ) != 0 ) {
+		$tooltip = 'This order was placed on eBay.';
+		if ( $account ) $tooltip .= '<br>('.$account->title.')';
 
-			echo '<img src="'.WPLISTER_URL.'img/ebay-42x16.png" style="width:32px;vertical-align:bottom;padding:0;" class="tips" data-tip="This order was placed on eBay" />';		
+		echo '<img src="'.WPLISTER_URL.'img/ebay-42x16.png" style="width:32px;vertical-align:bottom;padding:0;" class="tips" data-tip="'.$tooltip.'" />';		
 
-		}
+
+		// show shipping status - if _date_shipped is set
+        if ( $date_shipped = get_post_meta( $post->ID, '_date_shipped', true ) ) {
+			echo '<br><img src="'.WPLISTER_URL.'img/icon-success-32x32.png" style="width:12px;vertical-align:middle;padding:0;" class="tips" data-tip="This order was marked as shipped on eBay on '.$date_shipped.'" />';		
+        }
 
 	}
 
@@ -208,7 +267,7 @@ class WPL_WooBackendIntegration {
 			case "listed" :
 				$listingsModel = new ListingsModel();
 				$status = $listingsModel->getStatusFromPostID( $post->ID );
-				if ( ! $status ) break;
+				// if ( ! $status ) break;
 
 				switch ($status) {
 					case 'published':
@@ -233,8 +292,12 @@ class WPL_WooBackendIntegration {
 						echo '<img src="'.WPLISTER_URL.'/img/hammer-16x16.png" title="This product has been listed on eBay in the past but it is currently archived." />';
 						break;
 					
-					default:
+					case 'default':
 						echo '<img src="'.WPLISTER_URL.'/img/hammer-16x16.png" alt="yes" />';
+						break;
+
+					default:
+						echo '<a href="#" class="wple_btn_select_profile_for_product" data-post_id="'.$post->ID.'" title="'.__('List on eBay','wplister').'"><img src="'.WPLISTER_URL.'/img/search3.png" alt="select profile" /></a>';
 						break;
 				}
 
@@ -458,7 +521,8 @@ class WPL_WooBackendIntegration {
 		        } elseif ( $_GET['is_from_ebay'] == 'no' ) {
 
 		        	if ( is_array($post_ids) && ( sizeof($post_ids) > 0 ) ) {
-			        	$query->query_vars['post__not_in'] = $post_ids;
+			        	// $query->query_vars['post__not_in'] = $post_ids;
+			        	$query->query_vars['post__not_in'] = array_merge( $query->query_vars['post__not_in'], $post_ids );
 		        	}
 
 
@@ -509,6 +573,7 @@ class WPL_WooBackendIntegration {
 		global $wp_query;
 
 		if ( ! current_user_can('edit_others_pages') ) return $views;
+		if ( WPLISTER_LIGHT ) return $views;
 
 		// Placed on eBay
 		// $class = ( isset( $wp_query->query['is_from_ebay'] ) && $wp_query->query['is_from_ebay'] == 'no' ) ? 'current' : '';
@@ -637,7 +702,8 @@ class WPL_WooBackendIntegration {
 
 		if ( $item->locked ) {
 
-			$tip = 'This listing is locked. WP-Lister will update prices and stock levels automatically on eBay when updating the product.<br>'; 
+			$tip = __('This listing is locked. When this product is changed, its price and stock level will be updated automatically on eBay.', 'wplister');
+			$tip .= '<br>'; 
 			$tip .= __('If the product is out of stock, the listing will be ended on eBay.', 'wplister');
 			$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 

@@ -201,9 +201,14 @@ class TemplatesPage extends WPL_Page {
 		}
 
 		$listingsModel = new ListingsModel();
-		$prepared_listings  = $listingsModel->getAllPreparedWithTemplate( $template );
-		$verified_listings  = $listingsModel->getAllVerifiedWithTemplate( $template );
-		$published_listings = $listingsModel->getAllPublishedWithTemplate( $template );
+		$prepared_listings  = $listingsModel->countItemsUsingTemplate( $template, 'prepared' );
+		$verified_listings  = $listingsModel->countItemsUsingTemplate( $template, 'verified' );
+		$published_listings = $listingsModel->countItemsUsingTemplate( $template, 'published' );
+
+		// this turned out to be to ressource intensive with 10k listings:
+		// $prepared_listings  = $listingsModel->getAllPreparedWithTemplate( $template );
+		// $verified_listings  = $listingsModel->getAllVerifiedWithTemplate( $template );
+		// $published_listings = $listingsModel->getAllPublishedWithTemplate( $template );
 
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,
@@ -219,9 +224,9 @@ class TemplatesPage extends WPL_Page {
 			'add_new_template'			=> ( $this->requestAction() == 'add_new_template' ) ? true : false,
 			'tpl_fields'  			    => $templatesModel->fields,
 
-			'prepared_listings'         => $prepared_listings,
-			'verified_listings'         => $verified_listings,
-			'published_listings'        => $published_listings,
+			'prepared_listings_count'   => $prepared_listings,
+			'verified_listings_count'   => $verified_listings,
+			'published_listings_count'  => $published_listings,
 			'disable_wysiwyg_editor'    => self::getOption( 'disable_wysiwyg_editor', 0 ),
 			
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-templates'

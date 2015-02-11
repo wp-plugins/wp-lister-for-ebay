@@ -21,6 +21,13 @@ class WPL_AjaxHandler extends WPL_Core {
 		// logfile viewer
 		add_action('wp_ajax_wplister_tail_log', array( &$this, 'ajax_wplister_tail_log' ) );
 
+		// profile selector
+		add_action('wp_ajax_wple_select_profile', array( &$this, 'ajax_wple_select_profile' ) );
+		add_action('wp_ajax_wple_show_profile_selection', array( &$this, 'ajax_wple_show_profile_selection' ) );
+
+		// product matcher
+		add_action('wp_ajax_wple_show_product_matches', array( &$this, 'ajax_wple_show_product_matches' ) );
+
 		// handle dynamic listing galleries
 		add_action('wp_ajax_wpl_gallery', array( &$this, 'ajax_wpl_gallery' ) );
 		add_action('wp_ajax_nopriv_wpl_gallery', array( &$this, 'ajax_wpl_gallery' ) );
@@ -30,12 +37,121 @@ class WPL_AjaxHandler extends WPL_Core {
 		add_action('wp_ajax_nopriv_handle_ebay_notify', array( &$this, 'ajax_handle_ebay_notify' ) );
 	}
 	
+
+	// show profile selection
+	public function ajax_wple_show_profile_selection() {
+
+		// fetch profiles
+		$pm = new ProfilesModel();
+		$profiles = $pm->getAll();
+
+		// load template
+		$tpldata = array(
+			'plugin_url'				=> self::$PLUGIN_URL,
+			'message'					=> $this->message,
+			'profiles'					=> $profiles,				
+			'form_action'				=> 'admin.php?page='.self::ParentMenuId
+		);
+
+		WPLE()->pages['listings']->display( 'profile/select_profile', $tpldata );
+		exit();
+	
+	} // ajax_wple_show_profile_selection()
+
+
+	// match product
+	public function ajax_wple_select_profile() {
+
+		// TODO: check nonce
+		if ( isset( $_REQUEST['profile_id'] ) && isset( $_REQUEST['product_ids'] ) ) {
+
+			$profile_id  = $_REQUEST['profile_id'];
+			$product_ids = $_REQUEST['product_ids'];
+			$select_mode = $_REQUEST['select_mode'];
+			$default_account_id = get_option( 'wplister_default_account_id', 1 );
+
+			$lm = new ListingsModel();
+			if ( 'products' == $select_mode ) {
+
+		        // get profile
+				$pm = new ProfilesModel();
+				$profile = $pm->getItem( $profile_id );
+		
+				// prepare new listings from products
+				// $response = $lm->prepareListings( $product_ids, $profile_id );
+				$response = $lm->prepareListings( $product_ids, $profile_id );
+
+		        $lm->applyProfileToNewListings( $profile );		      
+
+			} elseif ( 'listings' == $select_mode ) {
+
+				// change profile for existing listings
+				// $profile = WPLE_AmazonProfile::getProfile( $profile_id ); // doesn't work
+				$pm = new ProfilesModel();
+				$profile = $pm->getItem( $profile_id );
+				// $items = $lm->applyProfileToListings( $profile, $product_ids );
+				foreach ($product_ids as $listing_id) {
+					$item = $lm->getItem( $listing_id );
+					$lm->applyProfileToItem( $profile, $item );
+				}
+
+				// build response
+				$response = new stdClass();
+				// $response->success     = $prepared_count ? true : false;
+				$response->success        = true;
+				$response->msg 			  = sprintf( __('Profile "%s" was applied to %s items.','wplister'), $profile['profile_name'], count($product_ids) );
+				$this->returnJSON( $response );
+				exit();
+			} else {
+				die('invalid select mode: '.$select_mode);
+			}
+		
+			if ( $response->success ) {
+
+				// store ASIN as product meta
+				// update_post_meta( $post_id, '_wple_asin', $asin );
+
+				// show message
+				if ( $response->skipped_count ) {
+					$response->msg = sprintf( __('%s product(s) have been prepared and %s products were skipped.','wplister'), $response->prepared_count, $response->skipped_count );
+				} else {
+					$response->msg = sprintf( __('%s product(s) have been prepared.','wplister'), $response->prepared_count );
+				}
+
+				// include link to prepared listings
+				$response->msg .= '&nbsp; <a href="admin.php?page=wplister&listing_status=prepared" class="button button-small">'.__('View prepared listings','wplister').'</a>';
+
+				// show shorter message if no listings were prepared
+				if ( ! $response->prepared_count )
+					$response->msg = sprintf( __('%s products have been skipped.','wplister'), $response->skipped_count );
+
+				if ( $response->errors )
+					$response->msg .= '<br>'.join('<br>',$response->errors);
+				if ( $response->warnings )
+					$response->msg .= '<br>'.join('<br>',$response->warnings);
+
+
+				$this->returnJSON( $response );
+				exit();
+
+			} else {
+				if ( isset($lm->lastError) ) echo $lm->lastError."\n";
+				echo "Failed to prepare product!";
+				exit();
+			}
+
+		}
+
+	} // ajax_wple_select_profile()
+
+
 	// fetch category specifics
 	public function ajax_getCategorySpecifics() {
 		
 		$category_id = $_REQUEST['id'];
+		$account_id  = isset( $_REQUEST['account_id'] ) ? $_REQUEST['account_id'] : get_option( 'wplister_default_account_id' );
 
-		$this->initEC();
+		$this->initEC( $account_id );
 		$result = $this->EC->getCategorySpecifics( $category_id );
 		$this->EC->closeEbay();
 
@@ -47,8 +163,9 @@ class WPL_AjaxHandler extends WPL_Core {
 	public function ajax_getCategoryConditions() {
 		
 		$category_id = $_REQUEST['id'];
+		$account_id  = isset( $_REQUEST['account_id'] ) ? $_REQUEST['account_id'] : get_option( 'wplister_default_account_id' );
 
-		$this->initEC();
+		$this->initEC( $account_id );
 		$result = $this->EC->getCategoryConditions( $category_id );
 		$this->EC->closeEbay();
 
@@ -86,8 +203,10 @@ class WPL_AjaxHandler extends WPL_Core {
 		if ( ! isset( $_REQUEST['job'] ) ) return false;
 		if ( ! isset( $_REQUEST['task'] ) ) return false;
 
-		$job  = $_REQUEST['job'];
-		$task = $_REQUEST['task'];
+		$job        = $_REQUEST['job'];
+		$task       = $_REQUEST['task'];
+		$site_id    = isset( $task['site_id'] ) ? $task['site_id'] : false;
+		$account_id = isset( $task['account_id'] ) ? $task['account_id'] : false;
 
 		// register shutdown handler
 		global $wpl_shutdown_handler_enabled;
@@ -101,8 +220,8 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'loadShippingServices':
 				
 				// call EbayController
-				$this->initEC();
-				$result = $this->EC->loadShippingServices();
+				$this->initEC( $account_id, $site_id );
+				$result = $this->EC->loadShippingServices( $site_id );
 				$this->EC->closeEbay();
 
 				// build response
@@ -119,8 +238,8 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'loadPaymentOptions':
 				
 				// call EbayController
-				$this->initEC();
-				$result = $this->EC->loadPaymentOptions();
+				$this->initEC( $account_id, $site_id );
+				$result = $this->EC->loadPaymentOptions( $site_id );
 				$this->EC->closeEbay();
 
 				// build response
@@ -137,8 +256,26 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'loadStoreCategories':
 				
 				// call EbayController
-				$this->initEC();
-				$result = $this->EC->loadStoreCategories();
+				$this->initEC( $account_id );
+				$result = $this->EC->loadStoreCategories( $account_id );
+				$this->EC->closeEbay();
+
+				// build response
+				$response = new stdClass();
+				$response->job  	= $job;
+				$response->task 	= $task;
+				$response->result 	= $result;
+				$response->errors   = array();
+				$response->success  = true;
+				
+				$this->returnJSON( $response );
+				exit();
+			
+			case 'loadUserAccountDetails':
+				
+				// call EbayController
+				$this->initEC( $account_id );
+				$result = $this->EC->loadUserAccountDetails();
 				$this->EC->closeEbay();
 
 				// build response
@@ -155,8 +292,8 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'loadEbayCategoriesBranch':
 				
 				// call EbayController
-				$this->initEC();
-				$result = $this->EC->loadEbayCategoriesBranch( $task['cat_id'] );
+				$this->initEC( $account_id, $site_id );
+				$result = $this->EC->loadEbayCategoriesBranch( $task['cat_id'], $task['site_id'] );
 				$this->EC->closeEbay();
 
 				// build response
@@ -173,7 +310,7 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'verifyItem':
 				
 				// call EbayController
-				$this->initEC();
+				$this->initEC( $account_id );
 				$results = $this->EC->verifyItems( $task['id'] );
 				$this->EC->closeEbay();
 				$this->handleSubTasksInResults( $results, $job, $task );
@@ -191,7 +328,7 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'publishItem':
 				
 				// call EbayController
-				$this->initEC();
+				$this->initEC( $account_id );
 				$results = $this->EC->sendItemsToEbay( $task['id'] );
 				$this->EC->closeEbay();
 				$this->handleSubTasksInResults( $results, $job, $task );
@@ -209,7 +346,7 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'reviseItem':
 				
 				// call EbayController
-				$this->initEC();
+				$this->initEC( $account_id );
 				$results = $this->EC->reviseItems( $task['id'] );
 				$this->EC->closeEbay();
 				$this->handleSubTasksInResults( $results, $job, $task );
@@ -227,7 +364,7 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'updateItem':
 				
 				// call EbayController
-				$this->initEC();
+				$this->initEC( $account_id );
 				$results = $this->EC->updateItemsFromEbay( $task['id'] );
 				$this->EC->closeEbay();
 
@@ -244,7 +381,7 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'endItem':
 				
 				// call EbayController
-				$this->initEC();
+				$this->initEC( $account_id );
 				$results = $this->EC->endItemsOnEbay( $task['id'] );
 				$this->EC->closeEbay();
 				$this->handleSubTasksInResults( $results, $job, $task );
@@ -262,7 +399,7 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'relistItem':
 				
 				// call EbayController
-				$this->initEC();
+				$this->initEC( $account_id );
 				$results = $this->EC->relistItems( $task['id'] );
 				$this->EC->closeEbay();
 				$this->handleSubTasksInResults( $results, $job, $task );
@@ -280,7 +417,7 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'uploadToEPS':
 				
 				// call EbayController
-				$this->initEC();
+				$this->initEC( $account_id );
 
 				$lm = new ListingsModel();
 				$eps_url = $lm->uploadPictureToEPS( $task['img'], $task['id'], $this->EC->session );
@@ -295,6 +432,44 @@ class WPL_AjaxHandler extends WPL_Core {
 				$response->errors   = is_array( $lm->result->errors ) ? $lm->result->errors : array();
 				// $response->success  = $lm->result->success;
 				$response->success  = $eps_url ? true : false;
+				
+				$this->returnJSON( $response );
+				exit();
+			
+			case 'applyProfileDelayed':
+				
+				$profile_id = $task['profile_id'];
+				$offset     = $task['offset'];
+				$limit      = $task['limit'];
+
+				$profilesModel = new ProfilesModel();
+		        $profile = $profilesModel->getItem( $profile_id );
+
+		        $lm = new ListingsModel();
+				$items1 = $lm->getAllPreparedWithProfile( $profile_id );
+				$items2 = $lm->getAllVerifiedWithProfile( $profile_id );
+				$items3 = $lm->getAllPublishedWithProfile( $profile_id );
+				$items  = array_merge( $items1, $items2, $items3 );
+				$total_items = sizeof($items);
+
+				// extract batch
+				$items = array_slice( $items, $offset, $limit );
+
+				// apply profile to items
+		        $lm->applyProfileToItems( $profile, $items );
+
+		        // reset reminder option when last batch is run
+		        if ( $offset + $limit >= $total_items ) {
+		        	update_option( 'wple_job_reapply_profile_id', '' );
+		        }
+
+				// build response
+				$response = new stdClass();
+				$response->job  	= $job;
+				$response->task 	= $task;
+				$response->errors   = array();
+				// $response->errors   = array( array( 'HtmlMessage' => ' Profile was applied to '.sizeof($items).' items ') );
+				$response->success  = true;
 				
 				$this->returnJSON( $response );
 				exit();
@@ -342,9 +517,35 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'updateEbayData':
 				
 				// call EbayController
-				$this->initEC();
-				$tasks = $this->EC->initCategoriesUpdate();
+				$site_id    = ( isset($_REQUEST['site_id']) ? $_REQUEST['site_id'] : get_option('wplister_ebay_site_id') );
+				$account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : get_option('wplister_default_account_id') );
+
+				$this->initEC( $account_id );
+				$tasks = $this->EC->initCategoriesUpdate( $site_id );
 				$this->EC->closeEbay();
+
+				// update store categories for each account using this site_id
+				$accounts = WPLE_eBayAccount::getAll();
+				foreach ( $accounts as $account ) {
+
+					if ( $site_id != $account->site_id ) continue;
+				
+					// add task - load user specific details
+					$tasks[] = array( 
+						'task'        => 'loadUserAccountDetails', 
+						'displayName' => 'update eBay account details for '.$account->title,
+						'account_id'  => $account->id,
+					);
+
+					// add task - load store categories
+					$tasks[] = array( 
+						'task'        => 'loadStoreCategories', 
+						'displayName' => 'update custom store categories for '.$account->title,
+						'account_id'  => $account->id,
+					);
+
+				} // for each account
+
 
 				// build response
 				$response = new stdClass();
@@ -454,6 +655,59 @@ class WPL_AjaxHandler extends WPL_Core {
 				$this->returnJSON( $response );
 				exit();
 			
+			case 'runDelayedProfileApplication':
+				
+				// get items using given profile
+				$profile_id = get_option('wple_job_reapply_profile_id' );
+				if ( ! $profile_id ) return;
+
+		        $lm = new ListingsModel();
+				$items1 = $lm->getAllPreparedWithProfile( $profile_id );
+				$items2 = $lm->getAllVerifiedWithProfile( $profile_id );
+				$items3 = $lm->getAllPublishedWithProfile( $profile_id );
+				$items  = array_merge( $items1, $items2, $items3 );
+
+				$total_items = sizeof($items);
+				$batch_size  = 1000;
+				$tasks       = array();
+
+				// echo "<pre>profile_id: ";echo $profile_id;echo"</pre>";
+				// echo "<pre>total: ";echo $total_items;echo"</pre>";die();
+		        
+				for ( $page=0; $page < ($total_items / $batch_size); $page++ ) { 
+
+					$from = $page * $batch_size + 1;
+					$to   = $page * $batch_size + $batch_size;
+					$to   = min( $to, $total_items );
+
+					// add task - load user specific details
+					$tasks[] = array( 
+						'task'        => 'applyProfileDelayed', 
+						'displayName' => 'Apply profile to items '.$from.' to '.$to,
+						'profile_id'  => $profile_id,
+						'offset'      => $page * $batch_size,
+						'limit'       => $batch_size,
+					);
+
+				}
+
+				// build response
+				$response = new stdClass();
+				$response->tasklist    = $tasks;
+				$response->total_tasks = count( $tasks );
+				$response->error       = '';
+				$response->success     = true;
+				
+				// create new job
+				$newJob = new stdClass();
+				$newJob->jobname = $jobname;
+				$newJob->tasklist = $tasks;
+				$job = new JobsModel( $newJob );
+				$response->job_key = $job->key;
+
+				$this->returnJSON( $response );
+				exit();
+			
 			default:
 				// echo "unknown job";
 				// break;
@@ -475,7 +729,9 @@ class WPL_AjaxHandler extends WPL_Core {
 			$task = array( 
 				'task'        => $taskname, 
 				'displayName' => $item['auction_title'], 
-				'id'          => $item['id'] 
+				'id'          => $item['id'],
+				'site_id'     => $item['site_id'],
+				'account_id'  => $item['account_id']
 			);
 			$tasks[] = $task;
         }
@@ -537,19 +793,37 @@ class WPL_AjaxHandler extends WPL_Core {
 
 	}
 
+	public function addAdminMessagesToResult( $data ) {
+		if ( ! is_object($data) ) return $data;
+		if ( ! isset($data->errors) ) return $data;
+		if ( ! is_array($data->errors) ) $data->errors = array();
+
+		// merge admin notices with result errors
+		$admin_errors = WPLE()->messages->get_admin_notices_for_json_result();
+		$data->errors = array_merge( $data->errors, $admin_errors );
+
+		return $data;
+	}
+
 	public function returnJSON( $data ) {
 		global $wpl_shutdown_handler_enabled;
 		$wpl_shutdown_handler_enabled = false;
+
+		// add WPLE admin messages to result errors
+		$data = $this->addAdminMessagesToResult( $data );
+
 		header('content-type: application/json; charset=utf-8');
 		echo json_encode( $data );
 	}
 	
 	// get categories tree node - used on ProfilesPage
 	public function ajax_get_ebay_categories_tree() {
+
+		$site_id = isset($_REQUEST['site_id']) ? $_REQUEST['site_id'] : get_option('wplister_ebay_site_id');
 	
 		$path = $_POST["dir"];	
 		$parent_cat_id = basename( $path );
-		$categories = EbayCategoriesModel::getChildrenOf( $parent_cat_id );		
+		$categories = EbayCategoriesModel::getChildrenOf( $parent_cat_id, $site_id );		
 		$categories = apply_filters( 'wplister_get_ebay_categories_node', $categories, $parent_cat_id, $path );
 
 		if( count($categories) > 0 ) { 
@@ -577,13 +851,24 @@ class WPL_AjaxHandler extends WPL_Core {
 	// get categories tree node - used on ProfilesPage
 	public function ajax_get_store_categories_tree() {
 	
+		$account_id = isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : get_option('wplister_default_account_id');
+		$site_id    = WPLE()->accounts[ $account_id ]->site_id;
+
 		$path = $_POST["dir"];	
 		$parent_cat_id = basename( $path );
-		$categories = EbayCategoriesModel::getChildrenOfStoreCategory( $parent_cat_id );		
+		$categories = EbayCategoriesModel::getChildrenOfStoreCategory( $parent_cat_id, $account_id );		
 		$categories = apply_filters( 'wplister_get_store_categories_node', $categories, $parent_cat_id, $path );
 		
 		if( count($categories) > 0 ) { 
+
 			echo "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
+
+			// add reference to parent node - non-leaf Store Categories are allowed as well
+			if ( $parent_cat_id != 0 ) {
+				$parent_path = substr( $_POST['dir'], 0, -1 ); // strip trailing slash
+				echo '<li class="file ext_txt"><a href="#" rel="' . $parent_path . '">' . '[use this category]' . '</a></li>';
+			}
+
 			// All dirs
 			foreach( $categories as $cat ) {
 				if ( $cat['leaf'] == '0' ) {
@@ -599,22 +884,150 @@ class WPL_AjaxHandler extends WPL_Core {
 						. ($_POST['dir'] . $cat['cat_id']) . '">' . ($cat['cat_name']) . '</a></li>';
 				}
 			}
+
 			echo "</ul>";	
 		}
 		exit();
 	}
 
+
+	// show matching products
+	public function ajax_wple_show_product_matches() {
+
+		// TODO: check nonce
+		if ( isset( $_REQUEST['id'] ) ) {
+
+			// $market = WPLA_AmazonMarket::getMarket( $_REQUEST['market_id'] );
+			$product = get_product( $_REQUEST['id'] );
+			// echo "<pre>";print_r($product);echo"</pre>";
+
+			if ( $product ) {
+
+				$product_attributes	= ProductWrapper::getAttributes( $product->id, true );
+
+			    $wpl_default_matcher_selection = get_option( 'wple_default_matcher_selection', 'title' );
+			    switch ($wpl_default_matcher_selection) {
+			    	case 'title':
+			    		# product title
+						$query = $product->post->post_title;
+			    		break;
+			    	
+			    	case 'sku':
+			    		# product sku
+						$query = $product->sku;
+			    		break;
+			    	
+			    	default:
+			    		# else check for attributes
+			    		foreach ($product_attributes as $attribute_label => $attribute_value) {
+			    			if ( $attribute_label == $wpl_default_matcher_selection )
+			    				$query = $attribute_value;
+			    		}
+			    		break;
+			    }
+				// echo '<h2>'.$query.'</h2>';
+
+			    // fall back to title when query is empty
+			    if ( empty($query) ) $query = $product->post->post_title;
+
+			    // handle custom query
+				if ( isset( $_REQUEST['query'] ) ) $query = trim( $_REQUEST['query'] );
+
+				// get product attributes - if possible from cache
+				$transient_key = 'wple_product_match_results_'.sanitize_key( $query );
+				$products = get_transient( $transient_key );
+				if ( empty( $products ) ){
+	
+					// call API
+					$this->initEC();
+					$products = $this->EC->callFindProducts( $query );
+					$this->EC->closeEbay();
+	
+					if ( is_array( $products ) ) {
+		
+						// save cache
+						set_transient( $transient_key, $products, 300 );
+					}
+					// echo "<pre>";print_r($transient_key);echo"</pre>";#die();
+				}
+				// echo "<pre>products: ";print_r($products);echo"</pre>";#die();
+
+				// get market / site domain - for "view" links
+	            // $market  = new WPLA_AmazonMarket( $account->market_id );
+
+				if ( is_array( $products ) )  {
+
+					// load template
+					global $oWPL_WPLister;
+					$tpldata = array(
+						'plugin_url'				=> self::$PLUGIN_URL,
+						'message'					=> $this->message,
+						'query'						=> $query,				
+						'query_product'				=> $product,				
+						'query_product_attributes'	=> $product_attributes,
+						'products'					=> $products,				
+						// 'market_url'				=> $market->url,				
+						'post_id'					=> $_REQUEST['id'],				
+						'query_select'				=> isset($_REQUEST['query_select']) ? $_REQUEST['query_select'] : false,
+						'form_action'				=> 'admin.php?page='.self::ParentMenuId
+					);
+
+					$oWPL_WPLister->pages['listings']->display( 'match_product', $tpldata );
+
+				// } elseif ( $product->Error->Message ) {
+				// 	$errors  = sprintf( __('There was a problem fetching product details for %s.','wpla'), $product->post->post_title ) .'<br>Error: '. $reports->Error->Message;
+				} else {
+					$errors  = sprintf( __('There were no products found for query %s.','wpla'), $query );
+					echo $errors;
+				}
+				exit();
+
+			} else {
+				echo "invalid product";
+			}
+
+		}
+	
+	} // ajax_wple_show_product_matches()
+
+
+
 	// show dynamic listing gallery
 	public function ajax_wpl_gallery() {
 	
 		$default_limit = get_option( 'wplister_gallery_items_limit', 12 );
-		$type          = isset( $_REQUEST['type'] )  ? $_REQUEST['type']  : 'new';	
-		$limit         = isset( $_REQUEST['limit'] ) ? $_REQUEST['limit'] : $default_limit;	
-		$id            = isset( $_REQUEST['id'] )    ? $_REQUEST['id']    : false;	
+		$type          = isset( $_REQUEST['type'] )   ? $_REQUEST['type']   : 'new';	
+		$limit         = isset( $_REQUEST['limit'] )  ? $_REQUEST['limit']  : $default_limit;	
+		$id            = isset( $_REQUEST['id'] )     ? $_REQUEST['id']     : false;	
+		$format        = isset( $_REQUEST['format'] ) ? $_REQUEST['format'] : 'html';	
 
 		$lm = new ListingsModel();
 		$items = $lm->getItemsForGallery( $type, $id, $limit );
 		// echo "<pre>";print_r($items);echo"</pre>";die();
+
+		if ( $format == 'json' ) {
+
+			$json_data = array();
+			foreach ($items as $item) {
+				$json_item = new stdClass();
+				$json_item->ebay_id        = $item['ebay_id'];
+				$json_item->post_id        = $item['post_id'];
+				$json_item->listing_id     = $item['id'];
+				$json_item->title          = $item['auction_title'];
+				$json_item->type           = $item['auction_type'];
+				$json_item->price          = $item['price'];
+				$json_item->quantity       = $item['quantity'];
+				$json_item->quantity_sold  = $item['quantity_sold'];
+				$json_item->main_image_url = $item['GalleryURL'];
+				$json_item->ebay_url       = $item['ViewItemURL'];
+				$json_item->site_id        = $item['site_id'];
+				$json_item->status         = $item['status'];
+				$json_data[] = $json_item;
+			}
+			header('content-type: application/json; charset=utf-8');
+			echo json_encode( $json_data );
+			exit();
+		}
 
 		// get from_item and template path
 		$view = WPLISTER_PATH.'/views/template/gallery.php';

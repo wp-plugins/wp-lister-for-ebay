@@ -129,8 +129,8 @@
 
 										<div class="misc-pub-section">
 										<!-- optional save and apply to all prepared listings already using this template -->
-										<?php if ( count($wpl_prepared_listings) > -1 ): ?>
-											<p><?php printf( __('There are %s prepared, %s verified and %s published items using this template.','wplister'), count($wpl_prepared_listings), count($wpl_verified_listings), count($wpl_published_listings) ) ?></p>
+										<?php if ( $wpl_prepared_listings_count > -1 ): ?>
+											<p><?php printf( __('There are %s prepared, %s verified and %s published items using this template.','wplister'), $wpl_prepared_listings_count, $wpl_verified_listings_count, $wpl_published_listings_count ) ?></p>
 										<?php else: ?>
 											<p><?php echo __('There are no prepared items using this template.','wplister'); ?></p>
 										<?php endif; ?>
@@ -266,6 +266,10 @@
 								<?php echo __('product price','wplister'); ?><br>
 							</p>
 							<p>
+								<code>[[product_sku]]</code><br>
+								<?php echo __('product SKU','wplister'); ?><br>
+							</p>
+							<p>
 								<code>[[product_main_image]]</code><br>
 								<?php echo __('main product image as HTML tag','wplister'); ?><br>
 							</p>
@@ -321,13 +325,14 @@
 							</p>
 							<p>
 								<!-- For advanced developers:<br> -->
-								<!-- <code>[[ebay_item_id]]</code><br> -->
+								<code>[[ebay_item_id]]</code><br>
 								<code>[[ebay_store_url]]</code><br>
 								<code>[[ebay_store_category_id]]</code><br>
 								<code>[[ebay_store_category_name]]</code><br>
 							</p>
 							
-							<?php if ( ! get_option('wpl_reseller_enable_whitelabel' ) ) : ?>
+							<?php #if ( ! get_option('wpl_reseller_enable_whitelabel' ) ) : ?>
+							<?php if ( ! defined('WPLISTER_RESELLER_VERSION') ) : ?>
 							<p>
 								For more information visit the 
 								<a href="http://www.wplab.com/plugins/wp-lister/faq/" target="_blank">FAQ</a>.
@@ -462,12 +467,6 @@
 				    </div>
 
 
-
-					<!-- optional save and apply to all prepared listings already using this template -->
-					<?php if ( (isset($wpl_prepared_auctions)) && ( count($wpl_prepared_auctions) > 0 ) ): ?>
-						<input type="checkbox" name="wpl_e2e_apply_changes_to_all_prepared" value="yes" id="apply_changes_to_all_prepared" />
-						<label for="apply_changes_to_all_prepared"><?php printf( __('apply changes to all %s prepared listings using this template','wplister'), count($wpl_prepared_auctions) ) ?></label>
-					<?php endif; ?>
 
 					<div class="submit" style="padding-top: 0; float: right; display:none;">
 						<input type="hidden" name="action" value="save_template" />

@@ -99,11 +99,18 @@
 					value="<?php echo $p_id ?>" class="profile_radio_btn"
 					<?php if ( $wpl_last_selected_profile == $p_id ): ?>checked="checked"<?php endif; ?> 
 				/>
-				<label for="wpl-selected-profile_<?php echo $p_id ?>"><?php echo $profile['profile_name'] ?></label>
+				<label for="wpl-selected-profile_<?php echo $p_id ?>">
+					<?php echo $profile['profile_name'] ?>
+					<?php if ( WPLE()->multi_account ) : ?>
+						&nbsp;<span style="color:silver;"><?php echo WPLE()->accounts[ $profile['account_id'] ]->title ?></span>
+					<?php endif; ?>
+				</label>
 				<br class="clear" />
+
 				<?php if ( trim( $profile['profile_description'] ) != '' ) : ?>
 				<p class="desc" style="display: block;"><?php echo $profile['profile_description'] ?></p>
 				<?php endif; ?>
+
 			</div>
 			<?php endforeach; ?>
 

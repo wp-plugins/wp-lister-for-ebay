@@ -66,24 +66,39 @@ class EbayOrdersPage extends WPL_Page {
 			// regard update options
 			$days = is_numeric( $_REQUEST['wpl_number_of_days'] ) ? $_REQUEST['wpl_number_of_days'] : false;
 
-			$this->initEC();
-			// $tm = $this->EC->loadEbayOrders();
-			$tm = $this->EC->updateEbayOrders( $days );
-			$this->EC->updateListings();
-			$this->EC->closeEbay();
+			$accounts = WPLE_eBayAccount::getAll();
+			$msg = '';
 
-			// show ebay_order report
-			$msg  = $tm->count_total .' '. __('order(s) found on eBay.','wplister') . '<br>';
-			$msg .= __('Timespan','wplister') .': '. $tm->getHtmlTimespan() . '&nbsp;&nbsp;';
-			$msg .= '<a href="#" onclick="jQuery(\'#ebay_order_report\').toggle();return false;">'.__('show details','wplister').'</a>';
-			$msg .= $tm->getHtmlReport();
+			// loop each active account
+			foreach ( $accounts as $account ) {
+
+				$this->initEC( $account->id );
+				$tm = $this->EC->updateEbayOrders( $days );
+				$this->EC->updateListings();
+				$this->EC->closeEbay();
+
+				// show ebay_order report
+				$msg .= sprintf( __('%s order(s) found on eBay for account %s.','wplister'), $tm->count_total, $account->title ) . '<br>';
+				$msg .= __('Timespan','wplister') .': '. $tm->getHtmlTimespan() . '&nbsp;&nbsp;';
+				$msg .= '<a href="#" onclick="jQuery(\'.ebay_order_report\').toggle();return false;">'.__('show details','wplister').'</a>';
+				$msg .= $tm->getHtmlReport();
+				$msg .= '<hr>';
+
+			}
 			$this->showMessage( $msg );
+
 		}
 
 		// handle update from eBay action
 		if ( $this->requestAction() == 'update' ) {
 			if ( isset( $_REQUEST['ebay_order'] ) ) {
-				$this->initEC();
+
+				// use account_id of first item (todo: group items by account)
+				$om         = new EbayOrdersModel();
+				$order      = $om->getItem( $_REQUEST['ebay_order'][0] );
+				$account_id = $order['account_id'];
+
+				$this->initEC( $account_id );
 				$tm = $this->EC->updateEbayOrders( false, $_REQUEST['ebay_order'] );
 				$this->EC->updateListings();
 				$this->EC->closeEbay();
@@ -91,7 +106,7 @@ class EbayOrdersPage extends WPL_Page {
 
 				// show ebay_order report
 				$msg  = $tm->count_total .' '. __('orders were updated from eBay.','wplister') . '<!br>' . '&nbsp;&nbsp;';
-				$msg .= '<a href="#" onclick="jQuery(\'#ebay_order_report\').toggle();return false;">'.__('show details','wplister').'</a>';
+				$msg .= '<a href="#" onclick="jQuery(\'.ebay_order_report\').toggle();return false;">'.__('show details','wplister').'</a>';
 				$msg .= $tm->getHtmlReport();
 				$this->showMessage( $msg );
 

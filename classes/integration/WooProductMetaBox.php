@@ -5,10 +5,16 @@
 
 class WpLister_Product_MetaBox {
 
+	var $_ebay_item = null;
+
 	function __construct() {
 
 		add_action( 'add_meta_boxes', array( &$this, 'add_meta_box' ) );
 		add_action( 'woocommerce_process_product_meta', array( &$this, 'save_meta_box' ), 0, 2 );
+
+        // add options to variable products
+        add_action('woocommerce_product_after_variable_attributes', array(&$this, 'woocommerce_variation_options'), 1, 2);
+        add_action('woocommerce_process_product_meta_variable', array(&$this, 'process_product_meta_variable'), 10, 1);
 
 		if ( get_option( 'wplister_external_products_inventory' ) == 1 ) {
 			add_action( 'woocommerce_process_product_meta_external', array( &$this, 'save_external_inventory' ) );
@@ -54,7 +60,7 @@ class WpLister_Product_MetaBox {
             	margin-left: 33%;
             #wplister-ebay-details .de.input_specs,
             #wplister-ebay-details .de.select_specs { 
-            	clear:100%h;
+            	clear: both;
             	margin-left: 33%;
             }
 
@@ -119,7 +125,7 @@ class WpLister_Product_MetaBox {
 		) );
 
 		$this->showItemConditionOptions();
-
+		$this->include_character_count_script();
 	}
 
 	function showItemConditionOptions() {
@@ -127,9 +133,18 @@ class WpLister_Product_MetaBox {
 
 		// default conditions - used when no primary category has been selected
 		$default_conditions = array( 
-			''     => __('-- use profile setting --', 'wplister'),
-			'1000' => __('New', 'wplister'),
-			'3000' => __('Used', 'wplister')
+			''   => __('-- use profile setting --', 'wplister'),
+			1000 => __('New', 						'wplister'),
+			1000 => __('New', 						'wplister'),
+			1500 => __('New other', 				'wplister'),
+			1750 => __('New with defects', 			'wplister'),
+			2000 => __('Manufacturer refurbished', 	'wplister'),
+			2500 => __('Seller refurbished', 		'wplister'),
+			3000 => __('Used', 						'wplister'),
+			4000 => __('Very Good', 				'wplister'),
+			5000 => __('Good', 						'wplister'),
+			6000 => __('Acceptable', 				'wplister'),
+			7000 => __('For parts or not working', 	'wplister'),
 		);
 
 		// do we have a primary category?
@@ -209,9 +224,15 @@ class WpLister_Product_MetaBox {
             #wplister-ebay-advanced input.checkbox { 
             	width:auto; 
             }
-            #wplister-ebay-advanced #ItemSpecifics_container input,
             #wplister-ebay-advanced input.input_specs,
             #wplister-ebay-advanced input.select_specs { 
+            	width:100%; 
+            }
+            #wplister-ebay-advanced #ItemSpecifics_container input, 
+            #wplister-ebay-advanced #ItemSpecifics_container select.select_specs { 
+            	width:90%; 
+            }
+            #wplister-ebay-advanced #ItemSpecifics_container input.select_specs_attrib { 
             	width:100%; 
             }
             #wplister-ebay-advanced #ItemSpecifics_container th { 
@@ -262,6 +283,26 @@ class WpLister_Product_MetaBox {
 			'value'			=> get_post_meta( $post->ID, '_ebay_reserve_price', true )
 		) );
 
+		// woocommerce_wp_text_input( array(
+		// 	'id' 			=> 'wpl_ebay_epid',
+		// 	'label' 		=> __('eBay Product ID', 'wplister'),
+		// 	'placeholder' 	=> __('Enter a eBay Product ID (EPID) or click the search icon on the right.', 'wplister'),
+		// 	'value'			=> get_post_meta( $post->ID, '_ebay_epid', true )
+		// ) );
+
+		$tb_url    = 'admin-ajax.php?action=wple_show_product_matches&id='.$post->ID.'&width=640&height=420';
+		$match_btn = '<a href="'.$tb_url.'" class="thickbox" title="'.__('Find matching product on eBay','wplister').'" style="margin-left:9px;"><img src="'.WPLISTER_URL.'/img/search3.png" alt="search" /></a>';
+
+		?>
+		<p class="form-field wpl_ebay_epid_field ">
+		 	<label for="wpl_ebay_epid">EPID</label>
+		 	<input type="text" class="short" name="wpl_ebay_epid" id="wpl_ebay_epid" 
+		 		   value="<?php echo get_post_meta( $post->ID, '_ebay_epid', true ) ?>" 
+		 		   placeholder="<?php _e('Enter a eBay Product ID (EPID) or click the search icon on the right.', 'wplister') ?>"> 
+			<?php echo $match_btn ?>
+		</p>
+		<?php
+
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_upc',
 			'label' 		=> __('UPC', 'wplister'),
@@ -277,9 +318,9 @@ class WpLister_Product_MetaBox {
 		) );
 
 		woocommerce_wp_checkbox( array( 
-			'id'    => 'wpl_ebay_global_shipping', 
-			'label' => __('Global Shipping', 'wplister'),
-			'value' => get_post_meta( $post->ID, '_ebay_global_shipping', true )
+			'id'    		=> 'wpl_ebay_global_shipping', 
+			'label' 		=> __('Global Shipping', 'wplister'),
+			'value' 		=> get_post_meta( $post->ID, '_ebay_global_shipping', true )
 		) );
 
 		woocommerce_wp_checkbox( array( 
@@ -375,7 +416,38 @@ class WpLister_Product_MetaBox {
 
 		// woocommerce_wp_checkbox( array( 'id' => 'wpl_update_ebay_on_save', 'wrapper_class' => 'update_ebay', 'label' => __('Update on save?', 'wplister') ) );
 	
-	}
+	} // meta_box_advanced()
+
+
+	function include_character_count_script() {
+		?>
+		<script type="text/javascript">
+
+			jQuery( document ).ready( function () {
+
+				// ebay title character count
+				jQuery('p.wpl_ebay_title_field').append('<br><span id="wpl_ebay_title_character_count" class="description" style="display:none"></span>');
+				jQuery('#wpl_ebay_title').keyup( function(event) {
+					var current_value = jQuery(this).val();
+					var max_length    = jQuery(this).attr('maxlength');
+					var msg           = ( max_length - current_value.length ) + ' characters left';
+					jQuery('#wpl_ebay_title_character_count').html(msg).show();
+				});
+
+				// ebay subtitle character count
+				jQuery('p.wpl_ebay_subtitle_field').append('<br><span id="wpl_ebay_subtitle_character_count" class="description" style="display:none"></span>');
+				jQuery('#wpl_ebay_subtitle').keyup( function(event) {
+					var current_value = jQuery(this).val();
+					var max_length    = jQuery(this).attr('maxlength');
+					var msg           = ( max_length - current_value.length ) + ' characters left';
+					jQuery('#wpl_ebay_subtitle_character_count').html(msg).show();
+				});
+
+			});
+	
+		</script>
+		<?php		
+	} // include_character_count_script()
 
 	function meta_box_compat() {
 		$this->showCompatibilityTable();
@@ -393,6 +465,11 @@ class WpLister_Product_MetaBox {
 		// secondary ebay category
 		$ebay_category_2_id   = get_post_meta( $post->ID, '_ebay_category_2_id', true );
 		$ebay_category_2_name = $ebay_category_2_id ? EbayCategoriesModel::getFullEbayCategoryName( $ebay_category_2_id ) : '-- default --';
+
+		// get listing object
+		$listing        = $this->get_current_ebay_item();
+		$wpl_account_id = $listing && $listing->account_id ? $listing->account_id : get_option( 'wplister_default_account_id' );
+		$wpl_site_id    = $listing && $listing->site_id    ? $listing->site_id    : get_option( 'wplister_ebay_site_id' );
 
 		?>
 		<div style="position:relative; margin: 0 5px;">
@@ -455,6 +532,9 @@ class WpLister_Product_MetaBox {
 		</style>
 
 		<script type="text/javascript">
+
+			var wpl_site_id    = '<?php echo $wpl_site_id ?>';
+			var wpl_account_id = '<?php echo $wpl_account_id ?>';
 
 			/* recusive function to gather the full category path names */
 	        function wpl_getCategoryPathName( pathArray, depth ) {
@@ -531,7 +611,7 @@ class WpLister_Product_MetaBox {
 					// jqueryFileTree 1 - ebay categories
 				    jQuery('#ebay_categories_tree_container').fileTree({
 				        root: '/0/',
-				        script: ajaxurl+'?action=e2e_get_ebay_categories_tree',
+				        script: ajaxurl+'?action=e2e_get_ebay_categories_tree&site_id='+wpl_site_id,
 				        expandSpeed: 400,
 				        collapseSpeed: 400,
 				        loadMessage: 'loading eBay categories...',
@@ -546,7 +626,7 @@ class WpLister_Product_MetaBox {
 
 				        var pathname = wpl_getCategoryPathName( catpath.split('/') );
 						// console.log('pathname: ',pathname);
-				        
+
 				        // update fields
 				        jQuery('#ebay_category_id_'+e2e_selecting_cat).attr( 'value', cat_id );
 				        jQuery('#ebay_category_name_'+e2e_selecting_cat).html( pathname );
@@ -564,7 +644,7 @@ class WpLister_Product_MetaBox {
 					// jqueryFileTree 2 - store categories
 				    jQuery('#store_categories_tree_container').fileTree({
 				        root: '/0/',
-				        script: ajaxurl+'?action=e2e_get_store_categories_tree',
+				        script: ajaxurl+'?action=e2e_get_store_categories_tree&account_id='+wpl_account_id,
 				        expandSpeed: 400,
 				        collapseSpeed: 400,
 				        loadMessage: 'loading store categories...',
@@ -580,6 +660,11 @@ class WpLister_Product_MetaBox {
 				        var pathname = wpl_getCategoryPathName( catpath.split('/') );
 						// console.log('pathname: ',pathname);
 				        
+						if ( pathname.indexOf('[use this category]') > -1 ) {
+							catpath = catpath + '/';
+							pathname = wpl_getCategoryPathName( catpath.split('/') );
+						}
+				        			        
 				        // update fields
 				        jQuery('#store_category_id_'+e2e_selecting_cat).attr( 'value', cat_id );
 				        jQuery('#store_category_name_'+e2e_selecting_cat).html( pathname );
@@ -909,16 +994,22 @@ class WpLister_Product_MetaBox {
 	function showShippingOptions() {
 		global $woocommerce, $post;
 
-		$wpl_loc_flat_shipping_options = EbayShippingModel::getAllLocal('flat');
-		$wpl_int_flat_shipping_options = EbayShippingModel::getAllInternational('flat');
-		$wpl_shipping_locations        = EbayShippingModel::getShippingLocations();
-		$wpl_exclude_locations         = EbayShippingModel::getExcludeShippingLocations();
-		$wpl_countries                 = EbayShippingModel::getEbayCountries();
+		// get listing object
+		$listing        = $this->get_current_ebay_item();
+		$wpl_account_id = $listing && $listing->account_id ? $listing->account_id : get_option( 'wplister_default_account_id' );
+		$wpl_site_id    = $listing && $listing->site_id    ? $listing->site_id    : get_option( 'wplister_ebay_site_id' );
 
-		$wpl_loc_calc_shipping_options   = EbayShippingModel::getAllLocal('calculated');
-		$wpl_int_calc_shipping_options   = EbayShippingModel::getAllInternational('calculated');
+		$wpl_loc_flat_shipping_options = EbayShippingModel::getAllLocal( $wpl_site_id, 'flat' );
+		$wpl_int_flat_shipping_options = EbayShippingModel::getAllInternational( $wpl_site_id, 'flat' );
+		$wpl_shipping_locations        = EbayShippingModel::getShippingLocations( $wpl_site_id );
+		$wpl_exclude_locations         = EbayShippingModel::getExcludeShippingLocations( $wpl_site_id );
+		$wpl_countries                 = EbayShippingModel::getEbayCountries( $wpl_site_id );
+
+		$wpl_loc_calc_shipping_options   = EbayShippingModel::getAllLocal( $wpl_site_id, 'calculated' );
+		$wpl_int_calc_shipping_options   = EbayShippingModel::getAllInternational( $wpl_site_id, 'calculated' );
 		$wpl_calc_shipping_enabled       = in_array( get_option('wplister_ebay_site_id'), array(0,2,15,100) );
-		$wpl_available_shipping_packages = get_option('wplister_ShippingPackageDetails');
+		// $wpl_available_shipping_packages = get_option('wplister_ShippingPackageDetails');
+		$wpl_available_shipping_packages = WPLE_eBaySite::getSiteObj( $wpl_site_id )->getShippingPackageDetails();
 
 		$wpl_seller_profiles_enabled	= get_option('wplister_ebay_seller_profiles_enabled');
 		$wpl_seller_shipping_profiles	= get_option('wplister_ebay_seller_shipping_profiles');
@@ -1023,6 +1114,7 @@ class WpLister_Product_MetaBox {
 			$wpl_ebay_reserve_price         = esc_attr( @$_POST['wpl_ebay_reserve_price'] );
 			$wpl_ebay_buynow_price          = esc_attr( @$_POST['wpl_ebay_buynow_price'] );
 			$wpl_ebay_upc          			= esc_attr( @$_POST['wpl_ebay_upc'] );
+			$wpl_ebay_epid          		= esc_attr( @$_POST['wpl_ebay_epid'] );
 			$wpl_ebay_hide_from_unlisted  	= esc_attr( @$_POST['wpl_ebay_hide_from_unlisted'] );
 			$wpl_ebay_category_1_id      	= esc_attr( @$_POST['wpl_ebay_category_1_id'] );
 			$wpl_ebay_category_2_id      	= esc_attr( @$_POST['wpl_ebay_category_2_id'] );
@@ -1041,6 +1133,7 @@ class WpLister_Product_MetaBox {
 			update_post_meta( $post_id, '_ebay_reserve_price', $wpl_ebay_reserve_price );
 			update_post_meta( $post_id, '_ebay_buynow_price', $wpl_ebay_buynow_price );
 			update_post_meta( $post_id, '_ebay_upc', $wpl_ebay_upc );
+			update_post_meta( $post_id, '_ebay_epid', $wpl_ebay_epid );
 			update_post_meta( $post_id, '_ebay_hide_from_unlisted', $wpl_ebay_hide_from_unlisted );
 			update_post_meta( $post_id, '_ebay_category_1_id', $wpl_ebay_category_1_id );
 			update_post_meta( $post_id, '_ebay_category_2_id', $wpl_ebay_category_2_id );
@@ -1104,12 +1197,89 @@ class WpLister_Product_MetaBox {
 
 	} // save_meta_box()
 
+
+
+
+
+
+	/* show additional fields for variations */
+    function woocommerce_variation_options( $loop, $variation_data ) {
+        // echo "<pre>";print_r($variation_data);echo"</pre>";#die();
+    
+		// current values
+		$_ebay_start_price	= isset( $variation_data['_ebay_start_price'][0] )	? $variation_data['_ebay_start_price'][0]	: '';
+		$_ebay_is_disabled	= isset( $variation_data['_ebay_is_disabled'][0] )	? $variation_data['_ebay_is_disabled'][0]	: '';
+
+        ?>
+            <?php if ( get_option( 'wplister_enable_custom_product_prices', 1 ) == 1 ) : ?>
+            <tr>
+                <td>
+                    <label>
+                        <?php _e('eBay Price', 'wplister'); ?>
+                        <a class="tips" data-tip="Custom price to be used when listing this variation on eBay. This will override price modifier settings in your listing profile." href="#">[?]</a>
+                    </label> 
+                    <input type="text" name="variable_ebay_start_price[<?php echo $loop; ?>]" class="" value="<?php echo $_ebay_start_price ?>" />
+                </td>
+                <td>
+                    <label>
+                        <?php _e('eBay Visibility', 'wplister'); ?>
+                        <a class="tips" data-tip="Tick the checkbox below to omit this particular variation when this product is listed on eBay." href="#">[?]</a>
+                    </label> 
+                	<label>
+                		<input type="checkbox" class="checkbox" name="variable_ebay_is_disabled[<?php echo $loop; ?>]" 
+                			<?php if ( $_ebay_is_disabled ) echo 'checked="checked"' ?> >
+                		<?php _e('Hide on eBay', 'wplister'); ?>
+                	</label>
+                </td>
+            </tr>
+	        <?php endif; ?>
+        <?php
+
+    } // woocommerce_variation_options()
+
+    public function process_product_meta_variable( $post_id ) {
+        // echo "<pre>";print_r($_POST);echo"</pre>";die();
+
+        if (isset($_POST['variable_sku'])) {
+
+			$variable_post_id              = $_POST['variable_post_id'];
+			$variable_ebay_start_price     = isset( $_POST['variable_ebay_start_price'] ) ? $_POST['variable_ebay_start_price'] : '';
+			$variable_ebay_is_disabled     = isset( $_POST['variable_ebay_is_disabled'] ) ? $_POST['variable_ebay_is_disabled'] : '';
+
+            // if (isset($_POST['variable_enabled']))
+            //     $variable_enabled           = $_POST['variable_enabled'];
+
+            $max_loop = max( array_keys( $_POST['variable_post_id'] ) );
+
+            for ( $i=0; $i <= $max_loop; $i++ ) {
+
+                if ( ! isset( $variable_post_id[$i] ) ) continue;
+                $variation_id = (int) $variable_post_id[$i];
+
+                // Update post meta
+                update_post_meta( $variation_id, '_ebay_start_price', isset( $variable_ebay_start_price[$i] ) ? $variable_ebay_start_price[$i] : '' );
+                update_post_meta( $variation_id, '_ebay_is_disabled', isset( $variable_ebay_is_disabled[$i] ) ? $variable_ebay_is_disabled[$i] : '' );
+
+            } // each variation
+
+        } // if product has variations
+
+    } // process_product_meta_variable()
+
+
+
+
+
+
+
+
 	function woocommerce_duplicate_product( $new_id, $post ) {
 
 		// remove ebay specific meta data from duplicated products
-		delete_post_meta( $new_id, '_ebay_title' 			);
-		delete_post_meta( $new_id, '_ebay_start_price' 		);
+		// delete_post_meta( $new_id, '_ebay_title' 			);
+		// delete_post_meta( $new_id, '_ebay_start_price' 		);
 		delete_post_meta( $new_id, '_ebay_upc' 				);
+		delete_post_meta( $new_id, '_ebay_epid' 			);
 		delete_post_meta( $new_id, '_ebay_gallery_image_url');
 		delete_post_meta( $new_id, '_ebay_item_id'			); // created by importer add-on
 		delete_post_meta( $new_id, '_ebay_item_source'		); // created by importer add-on
@@ -1132,6 +1302,18 @@ class WpLister_Product_MetaBox {
 	        update_post_meta( $post_id, '_stock_status', 'outofstock' );
         } 
 
+	}
+
+	function get_current_ebay_item() {
+		global $post;
+
+		if ( $this->_ebay_item === null ) {
+			$lm               = new ListingsModel();
+			$listings         = $lm->getAllListingsFromPostID( $post->ID );
+			$this->_ebay_item = is_array($listings) && !empty($listings) ? $listings[0] : false;
+		}
+
+		return $this->_ebay_item;
 	}
 
 } // class WpLister_Product_MetaBox

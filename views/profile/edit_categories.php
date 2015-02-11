@@ -36,10 +36,10 @@
 
 					<?php
 						// fetch full category names
-						$item_details['ebay_category_1_name']  = EbayCategoriesModel::getFullEbayCategoryName( $item_details['ebay_category_1_id'] );
-						$item_details['ebay_category_2_name']  = EbayCategoriesModel::getFullEbayCategoryName( $item_details['ebay_category_2_id'] );
-						$item_details['store_category_1_name'] = EbayCategoriesModel::getFullStoreCategoryName( $item_details['store_category_1_id'] );
-						$item_details['store_category_2_name'] = EbayCategoriesModel::getFullStoreCategoryName( $item_details['store_category_2_id'] );
+						$item_details['ebay_category_1_name']  = EbayCategoriesModel::getFullEbayCategoryName( $item_details['ebay_category_1_id'], $wpl_site_id );
+						$item_details['ebay_category_2_name']  = EbayCategoriesModel::getFullEbayCategoryName( $item_details['ebay_category_2_id'], $wpl_site_id );
+						$item_details['store_category_1_name'] = EbayCategoriesModel::getFullStoreCategoryName( $item_details['store_category_1_id'], $wpl_account_id );
+						$item_details['store_category_2_name'] = EbayCategoriesModel::getFullStoreCategoryName( $item_details['store_category_2_id'], $wpl_account_id );
 					?>
 
 					<div class="postbox" id="EbayCategorySelectionBox">
@@ -134,6 +134,9 @@
 
 	<script type="text/javascript">
 
+		var wpl_site_id    = '<?php echo $wpl_site_id ?>';
+		var wpl_account_id = '<?php echo $wpl_account_id ?>';
+
 		/* recusive function to gather the full category path names */
         function wpl_getCategoryPathName( pathArray, depth ) {
 			var pathname = '';
@@ -209,7 +212,7 @@
 				// jqueryFileTree 1 - ebay categories
 			    jQuery('#ebay_categories_tree_container').fileTree({
 			        root: '/0/',
-			        script: ajaxurl+'?action=e2e_get_ebay_categories_tree',
+			        script: ajaxurl+'?action=e2e_get_ebay_categories_tree&site_id='+wpl_site_id,
 			        expandSpeed: 400,
 			        collapseSpeed: 400,
 			        loadMessage: 'loading eBay categories...',
@@ -242,7 +245,7 @@
 				// jqueryFileTree 2 - store categories
 			    jQuery('#store_categories_tree_container').fileTree({
 			        root: '/0/',
-			        script: ajaxurl+'?action=e2e_get_store_categories_tree',
+			        script: ajaxurl+'?action=e2e_get_store_categories_tree&account_id='+wpl_account_id,
 			        expandSpeed: 400,
 			        collapseSpeed: 400,
 			        loadMessage: 'loading store categories...',
@@ -257,6 +260,11 @@
 
 			        var pathname = wpl_getCategoryPathName( catpath.split('/') );
 					// console.log('pathname: ',pathname);
+
+					if ( pathname.indexOf('[use this category]') > -1 ) {
+						catpath = catpath + '/';
+						pathname = wpl_getCategoryPathName( catpath.split('/') );
+					}       
 			        
 			        // update fields
 			        jQuery('#store_category_id_'+e2e_selecting_cat).attr( 'value', cat_id );

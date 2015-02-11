@@ -1,7 +1,7 @@
 === WP-Lister for eBay ===
 Contributors: wp-lab
 Tags: ebay, woocommerce, products, export
-Requires at least: 3.6
+Requires at least: 3.9
 Tested up to: 4.1
 Stable tag: trunk
 License: GPLv2 or later
@@ -39,8 +39,6 @@ We worked hard to make WP-Lister easy to use but flexible. The workflow of listi
 * latvian
 * bulgarian
 
-To make WP-Lister available in more languages, we will provide a free license for WP-Lister Pro for everyone who will provide and maintain a new localization.
-
 = Screencast =
 
 http://www.youtube.com/watch?feature=player_embedded&v=zBQilzwr9UI
@@ -64,7 +62,7 @@ Yes, it does.
 
 = What are the requirements to run WP-Lister? =
 
-WP-Lister requires a recent version of WordPress (3.6+) with WooCommerce 2.x installed. Your server should run on Linux and have PHP 5.2 or better with cURL support.
+WP-Lister requires a recent version of WordPress (3.9+) with WooCommerce 2.2+ installed. Your server should run on Linux and have PHP 5.3 or better with cURL support.
 
 = I use products variations on my site but eBay doesn’t allow variations in the selected category. How can I find out in which categories variations are allowed? =
 
@@ -82,7 +80,7 @@ No, and there are no plans on adding support for IIS.
 
 = Are there any more FAQ? =
 
-Yes, there are more questions and answers on http://www.wplab.com/plugins/wp-lister/faq/
+Yes, there are! Please check out our growing knowledgebase at http://www.wplab.com/plugins/wp-lister/faq/
 
 = What about for WP-Lister for Amazon? =
 
@@ -94,6 +92,221 @@ WP-Lister for Amazon is currently in beta. You are welcome to follow the develop
 2. Profile Editor
 
 == Changelog ==
+= 2.0.7.7 =
+* added filter hook wplister_get_ebay_category_type
+* added option to set WooCommerce order status for shipped eBay orders
+* only show "marked as shipped on eBay" checkbox for orders that were placed on eBay
+* send tracking details to eBay when an order is completed from the order details page
+* fixed additional product content shortcode for split variations
+* skip token expiry warning for inactive accounts
+
+= 2.0.7.6 =
+* allow to select non-leaf store categories
+* keep custom eBay title and price when duplicating products
+* fixed issue where ended items would incorrectly be marked as sold
+* fixed eBay categories in listing preview for non-default accounts
+
+= 2.0.7.5 =
+* added option to hide single variations from eBay
+* added support for sales tax when creating orders in WooCommerce
+* added advanced option to disable sale prices
+* fixed Ignore order before developer option on developer settings page
+
+= 2.0.7.4 =
+* fixed issue where items purchased in WooCommerce were not revised on eBay
+* fixed product level shipping Package Type
+* fixed license deactivation message
+
+= 2.0.7.2 =
+* fixed custom eBay price for locked variations
+* fixed php warning when activating license (caused by new WCAM 1.3.8)
+* fixed issue when PHP error reporting was set to forced production mode
+* fixed possible PHP warning in WC_Product_Ebay() class
+* store order note for WooCommerce orders when there are no eBay listings found
+* removed duplicate batch buttons from listing table header (for smaller screens)
+
+= 2.0.7.1 =
+* show warning if a profile uses nonexisting eBay or store categories
+* updated token expiry check for multi account support
+* updated invalid token warning for multi account support
+* fixed "Connect to eBay" button to refresh token
+
+= 2.0.7 =
+* added character count for eBay title and subtitle on edit product page
+* make WooCommerce orders searchable by eBay OrderID and BuyerUserID
+* prevent creation of duplicate listings (same post_id and account) and improved warning messages
+* fixed archiving deleted listings when using "Update details from eBay"
+* fixed inventory sync issue - WooCommerce sales did not reduce the inventory of split variation listings
+* when saving a profile assigned to 1000+ items, apply it in batches to reduce server load
+* when preparing new products show button to view prepared listings
+* improved "Install Update" button in update notification
+
+= 2.0.6 =
+* show warning when trying to activate the plugin when another version is already active
+* fixed missing variation attributes for split variation listing titles when updating profile
+* fixed blank page issue when opening template or profile editor with 10k item using this template
+* fixed empty countries and other issues in profile after upgrading from 1.x
+
+= 2.0.5 =
+* always show account column on listings and log page - and indicate invalid account IDs
+* added 5min and 10min update interval options
+* check for listings, orders and profiles using deleted accounts on accounts page
+* if invalid data is found show warning and offer to assign all found items to the default account
+* fixed "Error 90002: No Password and no token" and show warning if an invalid account is used in any request
+* fixed converting https image URLs to http in some cases
+* fixed inventory check - mark as change didn't work if only prices were different
+
+= 2.0.4.1 =
+* added missing item condition on edit product page
+* added "View item in WP-Lister" toolbar link on single product page
+* improved tooltip on auto-relist profile option
+* improved button visibility and labeling on license page
+* do not mark products with stock management disabled as out of stock when sold on eBay
+
+= 2.0.4 =
+* indicate shipped eBay orders in orders page
+* automatically clean expired log records
+* fixed missing paypal address issue
+* fixed and improved update notification
+* fixed link to account settings in notifications with "Accounts in main menu" option enabled
+
+= 2.0.3 =
+* added inventory check tool to only compare stock levels but ignore prices
+* show inline errors on listings page for changed and verified items
+* automatically set enabled sites for active accounts if no enabled sites found
+* disable transaction conversion if updating from very old versions (1.3.5)
+* fixed search box and status filter on orders page
+* fixed order processing: do not change listing status to sold when quantity reaches zero and out of stock control is enabled for account
+* fixed possible "Duplicate VariationSpecifics trait value" error (21916582)
+* fixed possible "Duplicate custom variation label" error (21916585) - except for restricted revise
+* fixed "Unknown category ID" for eBay Motors categories on category settings page
+* fixed broken store category mappings after database migration from 1.5
+* fixed editing accounts with "Accounts in main menu" option enabled
+
+= 2.0.2 =
+* added advanced option to make account settings page available in eBay main menu
+* added filter hook wple_max_number_of_accounts
+* fixed error when revising item or variation with negative quantity
+* fixed log table filter for PartialFailure
+* implemented new admin messages manager - wple_show_message()
+
+= 2.0.1 =
+* added account setting option to enable Out Of Stock Control for account
+* skip variations stock check and do not end listing on zero quantity when Out Of Stock Control is enabled for account
+* added button to refresh eBay details on category settings page again
+
+= 2.0 =
+* support for multiple eBay sites and accounts
+* new updater - requires new license key
+
+= 1.6.1 =
+* improved stability of db upgrade process
+
+= 1.6.0.11 =
+* fixed attribute shortcodes for split variations
+* fixed an issue with broken variation attributes caused by WP All Import
+* prompt user to refresh site specific eBay data if required
+
+= 1.6.0.10 =
+* added account settings page and updated setup wizard
+* fixed item condition in listing preview
+* fixed WooCommerce deprecated notice
+* fixed possible php warnings on initial plugin activation
+* implemented alternative JSON output for gallery widget data (backend only)
+
+= 1.6.0.9 =
+* refactored JobRunner CSS - do not use jQuery UI custom theme for progress bar
+* fixed eBay errors showing up as undefined in progress window
+* fixed issue preparing listings in WPLA
+
+= 1.6.0.8 =
+* implemented new profile selector (modal window instead of redirect)
+* improved process of preparing new listings - replaced List on eBay link with search icon in eBay column
+* fixed eBay Motors and removed setting option (enabled by default for US site)
+
+= 1.6.0.7 =
+* store and display order currency on eBay Orders page
+* implemented new profile selector (modal window instead of redirect)
+* improved explanation of error 21916543 (ExternalPictureURL server not available) which might be caused by forced SSL
+* explain eBay errors 21916635 and 21916564
+* removed recent listings widget from default listing template
+
+= 1.6.0.6 =
+* remember last API errors and warnings - and display on listings and edit product page
+* store PayPal transaction ID in created WooCommerce orders
+* added maxlength attribute for Returns Description
+* fixed SKU on split variations - use variation SKU instead of parent SKU
+
+= 1.6.0.5 =
+* improved tax rate selection in advanced settings
+* added listing template shortcodes for SKU and eBay ID
+* fixed possible php warning when saving profile
+* fixed listing variable listing with sizes like 0, 00, 000
+
+= 1.6.0.4 =
+* fixed quotes in condition description (edit profile page)
+* fixed issue with shipping cost in WooCommerce orders (was gross instead of net)
+* added option to hide custom ebay price field for variations on edit product page
+* added developer option to disable submitting parts compatibility lists to ebay
+
+= 1.6.0.3 =
+* added APC shipping service on order details page
+* added developer option to enable edit listing link
+* show account type in sidebar details box
+* improved inventory check when using profile price modifier
+* fixed missing db log records for GetUser and GetUserPreferences
+* fixed possible php warnings on listings page
+* fixed php warning when saving listing profile
+
+= 1.6.0.2 =
+* added SKU column in inventory check results
+* added filter hooks wplister_set_shipping_date_for_order and wplister_set_shipping_provider_for_order
+* fixed possible issue when variation attributes on eBay and WooCommerce do not match exactly (Size vs size)
+* display variation attributes in order details view
+* removed legacy code and cleaned up decreaseStockBy() method
+* increased required WooCommerce version to 2.2.4
+
+= 1.6.0.1 =
+* added support for WooCommerce Store Exporter plugin (custom columns for eBay ID and status)
+* fixed wplister_revise_inventory_status action hook for single variation product IDs (inventory sync issue from Amazon to eBay)
+
+= 1.6.0.0 =
+* improved shipping and tax information in created WooCommerce orders (WooCommerce 2.2)
+* added advanced option to enter default tax rate (percentage) to be used on created orders
+* implemented product data caching layer for improved performance on listings page
+* fixed issue with item specifics for split variations
+* fixed issue with product content when using the "Revise listing on update" checkbox on edit product page
+* indicate in order history details when reducing stock for a variation failed because no variation_id was found
+* updated database structure for version 2.0
+* updated russian translation
+
+= 1.5.2 =
+* fixed issue with product content when using the "Revise listing on update" or "Relist item" checkbox on edit product page
+
+= 1.5.1 =
+* added wplister_get_ebay_id_from_post_id() function for 3rd party developers
+
+= 1.5.0.10 =
+* added support for listing eBay catalog products by EPID (eBay Product ID)
+* added UI for searching products using the Shopping API (FindProducts)
+* mark listing as ended if revise action fails with error #1047 (Auction closed)
+* fixed another possible error 21916608 (Variation cannot be deleted during restricted revise)
+* fixed issue with out of stock variations not showing up
+
+= 1.5.0.10 =
+* added support for custom eBay price for single variations
+* fixed missing variation attributes in created orders on WooCommerce 2.2
+* fixed issue on WooCommerce 2.2 when product description contains WooCommerce shortcodes
+* fixed "not on eBay" and "not on Amazon" filters when used in combination on orders page
+* fixed issue with Print Invoice plugin when printing multiple invoices in bulk
+* added filter options to log table
+
+= 1.5.0.9 =
+* fixed bulk actions on listings page
+* fixed missing new order admin emails for orders placed on eBay
+* fixed error 21916608 - delete variations on eBay only when there have been no sales yet
+* added russian translation
+
 = 1.5.0.8 =
 * fixed long multi value attributes / item specifics 
 * fixed possible php warning when preparing listings without price 

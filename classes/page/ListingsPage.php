@@ -45,20 +45,11 @@ class ListingsPage extends WPL_Page {
 		if ( $this->requestAction() == 'prepare_auction' ) {
 
 			$listingsModel = new ListingsModel();
-			if ( ProductWrapper::plugin == 'shopp' ) {
-		        $listings = $listingsModel->prepareListings( $_REQUEST['selected'] );
-			} else {
-		        $listings = $listingsModel->prepareListings( $_REQUEST['post'] );
-			}
+	        $listings = $listingsModel->prepareListings( $_REQUEST['post'] );
 	        
-			if ( is_array($listings) && ( sizeof($listings) > 0 ) ) {
-	
-		        // redirect to listings page
-				wp_redirect( get_admin_url().'admin.php?page=wplister' );
-				exit();
-
-			}
-
+	        // redirect to listings page
+			wp_redirect( get_admin_url().'admin.php?page=wplister' );
+			exit();
 		}
 
 		if ( $this->requestAction() == 'reselect' ) {
@@ -124,7 +115,15 @@ class ListingsPage extends WPL_Page {
 		wp_enqueue_script( 'thickbox' );
 		wp_enqueue_style( 'thickbox' );
 
-	}
+		// ProfileSelector
+		wp_register_script( 'wple_profile_selector', self::$PLUGIN_URL.'/js/classes/ProfileSelector.js?ver='.time(), array( 'jquery' ) );
+		wp_enqueue_script ( 'wple_profile_selector' );
+		wp_localize_script( 'wple_profile_selector', 'wple_ProfileSelector_i18n', array(
+				'WPLE_URL' 	=> WPLISTER_URL
+			)
+		);
+
+	} // addScreenOptions()
 	
 
 
@@ -135,9 +134,13 @@ class ListingsPage extends WPL_Page {
 			$this->saveListing();
 		}
 
+		// set account_id
+		$lm = new ListingsModel();
+		$account_id = isset( $_REQUEST['auction'] ) ? $lm->getAccountID( $_REQUEST['auction'] ) : false;
+
 		// handle verify action
 		if ( $this->requestAction() == 'verify' ) {
-			$this->initEC();
+			$this->initEC( $account_id );
 			$this->EC->verifyItems( $_REQUEST['auction'] );
 			$this->EC->closeEbay();
 			if ( $this->EC->isSuccess ) {
@@ -148,7 +151,7 @@ class ListingsPage extends WPL_Page {
 		}
 		// handle revise action
 		if ( $this->requestAction() == 'revise' ) {
-			$this->initEC();
+			$this->initEC( $account_id );
 			$this->EC->reviseItems( $_REQUEST['auction'] );
 			$this->EC->closeEbay();
 			if ( $this->EC->isSuccess ) {
@@ -159,7 +162,7 @@ class ListingsPage extends WPL_Page {
 		}
 		// handle publish to eBay action
 		if ( $this->requestAction() == 'publish2e' ) {
-			$this->initEC();
+			$this->initEC( $account_id );
 			$this->EC->sendItemsToEbay( $_REQUEST['auction'] );
 			$this->EC->closeEbay();
 			if ( $this->EC->isSuccess ) {
@@ -170,7 +173,7 @@ class ListingsPage extends WPL_Page {
 		}
 		// handle relist action
 		if ( $this->requestAction() == 'relist' ) {
-			$this->initEC();
+			$this->initEC( $account_id );
 			$this->EC->relistItems( $_REQUEST['auction'] );
 			$this->EC->closeEbay();
 			if ( $this->EC->isSuccess ) {
@@ -181,14 +184,14 @@ class ListingsPage extends WPL_Page {
 		}
 		// handle end_item action
 		if ( $this->requestAction() == 'end_item' ) {
-			$this->initEC();
+			$this->initEC( $account_id );
 			$this->EC->endItemsOnEbay( $_REQUEST['auction'] );
 			$this->EC->closeEbay();
 			$this->showMessage( __('Selected listings were ended.','wplister') );
 		}
 		// handle update from eBay action
 		if ( $this->requestAction() == 'update' ) {
-			$this->initEC();
+			$this->initEC( $account_id );
 			$this->EC->updateItemsFromEbay( $_REQUEST['auction'] );
 			$this->EC->closeEbay();
 			$this->showMessage( __('Selected items were updated from eBay.','wplister') );
@@ -300,10 +303,20 @@ class ListingsPage extends WPL_Page {
 		
 				// prepare product
 				$listingsModel = new ListingsModel();
-		        $listingsModel->prepareProductForListing( $_REQUEST['product_id'] );
+		        $listing_id = $listingsModel->prepareProductForListing( $_REQUEST['product_id'], $profile['profile_id'] );
 
-		        $listingsModel->applyProfileToNewListings( $profile );		      
-				$this->showMessage( __('New listing was prepared from product.','wplister') );
+				if ( $listing_id ) {
+			        $listingsModel->applyProfileToNewListings( $profile );		      
+					$this->showMessage( __('New listing was prepared from product.','wplister') );
+				} else {
+					$msg = __('Could not create a new listing from this product.','wplister');
+					if ( $listingsModel->errors )
+						$msg .= '<br>'.join('<br>',$listingsModel->errors);
+					if ( $listingsModel->warnings )
+						$msg .= '<br>'.join('<br>',$listingsModel->warnings);
+					$this->showMessage( $msg, 2 );
+				}			
+
 
 	        } elseif ( isset( $_REQUEST['product_id'] ) ) {
 
@@ -361,6 +374,9 @@ class ListingsPage extends WPL_Page {
 			// show warning if duplicate products found
 			$this->checkForDuplicates();
 
+			// check for profile waiting to be applied
+			$this->checkForDelayedProfiles();
+
 	        // get listing status summary
 	        $summary = $listingsModel->getStatusSummary();
 
@@ -406,7 +422,7 @@ class ListingsPage extends WPL_Page {
 		
 		}
 
-	}
+	} // onDisplayListingsPage()
 
 
 	public function displayPrepareListingsPage( $selectedProducts ) {
@@ -435,7 +451,8 @@ class ListingsPage extends WPL_Page {
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId
 		);
 		$this->display( 'listings_prepare_page', $aData );
-	}
+
+	} // displayPrepareListingsPage()
 	
 
 	public function displayEditPage() {
@@ -445,7 +462,7 @@ class ListingsPage extends WPL_Page {
 		$item = $listingsModel->getItem( $_REQUEST['auction'] );
 
 		// unserialize details
-		$this->initEC();
+		$this->initEC( $item['account_id'] );
 		// $item['details'] = maybe_unserialize( $item['details'] );
 		// echo "<pre>";print_r($item);echo"</pre>";die();
 		
@@ -467,7 +484,7 @@ class ListingsPage extends WPL_Page {
 		);
 		$this->display( 'listings_edit_page', array_merge( $aData, $item ) );
 
-	}
+	} // displayEditPage()
 
 
 	private function saveListing() {
@@ -491,13 +508,15 @@ class ListingsPage extends WPL_Page {
 
 		// handle developer settings
 		if ( $this->getValueFromPost( 'enable_dev_mode' ) == '1' ) {
-			$item['status'] = $this->getValueFromPost( 'listing_status' );
-			$item['ebay_id'] = $this->getValueFromPost( 'ebay_id' );
-			$item['post_id'] = $this->getValueFromPost( 'post_id' );
-			$item['quantity_sold'] = $this->getValueFromPost( 'ebay_id' );
+			$item['status']        = $this->getValueFromPost( 'listing_status' );
+			$item['ebay_id']       = $this->getValueFromPost( 'ebay_id' );
+			$item['post_id']       = $this->getValueFromPost( 'post_id' );
+			$item['quantity_sold'] = $this->getValueFromPost( 'quantity_sold' );
+			$item['site_id']       = $this->getValueFromPost( 'site_id' );
+			$item['account_id']    = $this->getValueFromPost( 'account_id' );
 		}
 
-		// update profile
+		// update listing
 		$result = $wpdb->update( $wpdb->prefix.'ebay_auctions', $item, 
 			array( 'id' => $item['id'] ) 
 		);
@@ -512,14 +531,14 @@ class ListingsPage extends WPL_Page {
 
 		// optionally revise item on save
 		if ( 'yes' == $this->getValueFromPost( 'revise_item_on_save' ) ) {
-			$this->initEC();
+			$account_id = $lm->getAccountID( $item['id'] );
+			$this->initEC( $account_id );
 			$this->EC->reviseItems( $item['id'] );
 			$this->EC->closeEbay();
 			$this->showMessage( __('Your changes were updated on eBay.','wplister') );
 		}
-
 		
-	}
+	} // saveListing()
 
 	public function checkForDuplicates() {
 
@@ -535,8 +554,8 @@ class ListingsPage extends WPL_Page {
 	        $page = $_REQUEST['page'];
 	        if ( isset( $_REQUEST['paged'] )) $page .= '&paged='.$_REQUEST['paged'];
 
-			$msg  = '<p><b>'.__('There are multiple listings for some of your products.','wplister').'</b>';
-			$msg .= '&nbsp; <a href="#" onclick="jQuery(\'#wpl_dupe_details\').toggle()">'.__('Show details','wplister').'</a></p>';
+			$msg  = '<p><b>'.sprintf( __('Warning: There are duplicate listings for %s product(s).','wplister'), sizeof($duplicateProducts) ).'</b>';
+			$msg .= '&nbsp; <a href="#" onclick="jQuery(\'#wpl_dupe_details\').toggle()" class="button button-small">'.__('Show details','wplister').'</a></p>';
 			// $msg .= '<br>';
 			$msg .= '<div id="wpl_dupe_details" style="display:none"><p>';
 			$msg .= __('Creating multiple listings for one product is not recommended as it can cause issues syncing inventory and other unexpected behaviour.','wplister');
@@ -578,16 +597,35 @@ class ListingsPage extends WPL_Page {
 			$msg .= '</p></div>';
 			$this->showMessage( $msg, 2 );				
 		}
-	}
 
-	
+	} // checkForDuplicates()
+
+
+	// check if we need to apply a profile to all its items
+	public function checkForDelayedProfiles() {
+
+		$profile_id = get_option('wple_job_reapply_profile_id' );
+		if ( ! $profile_id ) return;
+
+		$msg  = '<p>';
+		$msg .= 'Please wait a moment while the profile is applied to all linked items.';
+		$msg .= '&nbsp;&nbsp;';
+		$msg .= '<a id="btn_run_delayed_profile_application" class="btn_run_delayed_profile_application button wpl_job_button">' . __('Apply Profile','wplister') . '</a>';
+		$msg .= '</p>';
+		wple_show_message( $msg, 'warn' );				
+
+	} // checkForDelayedProfiles()
+
 
 	public function previewListing( $id ) {
 	
 		// init model
-		$ibm = new ItemBuilderModel();
+		$ibm        = new ItemBuilderModel();
+		$lm         = new ListingsModel();
+		$account_id = $lm->getAccountID( $id );
+		$account    = WPLE_eBayAccount::getAccount( $account_id );
 
-		$this->initEC();
+		$this->initEC( $account_id );
 		$item = $ibm->buildItem( $id, $this->EC->session, false, true );
 		
 		// if ( ! $ibm->checkItem($item) ) return $ibm->result;
@@ -597,8 +635,12 @@ class ListingsPage extends WPL_Page {
 		$preview_html = $item->Description;
 		// echo $preview_html;
 
+		// set condition name
+		$item->ConditionName = $this->getConditionDisplayName( $item->getConditionID() );
+
 		$aData = array(
 			'item'				=> $item,
+			'site_id'			=> $account ? $account->site_id : false,
 			'check_result'		=> $ibm->result,
 			'preview_html'		=> $preview_html
 		);
@@ -606,7 +648,28 @@ class ListingsPage extends WPL_Page {
 		$this->display( 'listings_preview', $aData );
 		exit();		
 
-	}
+	} // previewListing()
+
+
+	public function getConditionDisplayName( $ConditionID ) {
+
+		$conditions = array(
+			1000 => 'New',
+			1500 => 'New other',
+			1750 => 'New with defects',
+			2000 => 'Manufacturer refurbished',
+			2500 => 'Seller refurbished',
+			3000 => 'Used',
+			4000 => 'Very Good',
+			5000 => 'Good',
+			6000 => 'Acceptable',
+			7000 => 'For parts or not working',
+		);
+
+		if ( ! isset( $conditions[ $ConditionID ] ) ) return $ConditionID;
+
+		return $conditions[ $ConditionID ];
+	} // getConditionDisplayName()
 
 	public function fixSubmenu() {
 		global $submenu;
@@ -623,7 +686,7 @@ class ListingsPage extends WPL_Page {
 				<h5>Show on screen</h5>
 				<div class="metabox-prefs">
 						<label for="dev-hide">
-							<input type="checkbox" onclick="jQuery('#DeveloperToolBox').toggle();" value="dev" id="dev-hide" name="dev-hide" class="hide-column-tog">
+							<input type="checkbox" onclick="jQuery('.dev_box').toggle();" value="dev" id="dev-hide" name="dev-hide" class="hide-column-tog">
 							Developer options
 						</label>
 					<br class="clear">

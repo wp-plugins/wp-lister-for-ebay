@@ -79,7 +79,7 @@
 								<option value="Chinese" <?php if ( $item_details['auction_type'] == 'Chinese' ): ?>selected="selected"<?php endif; ?>><?php echo __('Auction','wplister'); ?></option>
 								<option value="FixedPriceItem" <?php if ( $item_details['auction_type'] == 'FixedPriceItem' ): ?>selected="selected"<?php endif; ?>><?php echo __('Fixed Price','wplister'); ?></option>
 							</select>
-							<?php if ($wpl_published_listings) : ?>
+							<?php if ($wpl_published_listings_count) : ?>
 							<p class="desc" style="display: block;">
 								<?php echo __('Note: eBay does not allow changing the listing type for already published items.','wplister'); ?>
 							</p>
@@ -162,7 +162,7 @@
 								<?php echo __('Condition description','wplister'); ?>
                                 <?php wplister_tooltip(__('This field should only be used to further clarify the condition of used items.','wplister')) ?>
 							</label>
-							<input type="text" name="wpl_e2e_condition_description" id="wpl-text-condition_description" value="<?php echo @$item_details['condition_description']; ?>" class="text_input" />
+							<input type="text" name="wpl_e2e_condition_description" id="wpl-text-condition_description" value="<?php echo esc_attr( @$item_details['condition_description'] ); ?>" class="text_input" />
 							<br class="clear" />
 							<p class="desc" style="display: none;">
 								<?php echo __('This field should only be used to further clarify the condition of used items.','wplister'); ?>
@@ -184,7 +184,14 @@
 										><?php echo $desc ?></option>
 								<?php endforeach; ?>
 							<?php else: ?>
-								<option value="1000" selected="selected"><?php echo __('New','wplister'); ?></option>
+								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+								<option value="0"  <?php echo $item_details['dispatch_time'] === 0 ? 'selected="selected"' : '' ?> >0 Days</option>
+								<option value="1"  <?php echo $item_details['dispatch_time'] ==  1 ? 'selected="selected"' : '' ?> >1 Day</option>
+								<option value="2"  <?php echo $item_details['dispatch_time'] ==  2 ? 'selected="selected"' : '' ?> >2 Days</option>
+								<option value="3"  <?php echo $item_details['dispatch_time'] ==  3 ? 'selected="selected"' : '' ?> >3 Days</option>
+								<option value="4"  <?php echo $item_details['dispatch_time'] ==  4 ? 'selected="selected"' : '' ?> >4 Days</option>
+								<option value="5"  <?php echo $item_details['dispatch_time'] ==  5 ? 'selected="selected"' : '' ?> >5 Days</option>
+								<option value="10" <?php echo $item_details['dispatch_time'] == 10 ? 'selected="selected"' : '' ?> >10 Days</option>
 							<?php endif; ?>
 							</select>
 							<br class="clear" />
@@ -299,9 +306,9 @@
                                 <?php wplister_tooltip('The buyer can return the item within this period of time from the day they receive the item. Use the description field to explain the policy details.') ?>
 							</label>
 							<select id="wpl-text-returns_within" name="wpl_e2e_returns_within" class=" required-entry select">
-							<?php $ReturnsWithinOptions = get_option('wplister_ReturnsWithinOptions') ?>
-							<?php if ( isset( $ReturnsWithinOptions ) && is_array( $ReturnsWithinOptions ) ): ?>
-								<?php foreach ($ReturnsWithinOptions as $option_id => $desc) : ?>
+							<?php // $ReturnsWithinOptions = get_option('wplister_ReturnsWithinOptions') ?>
+							<?php if ( isset( $wpl_ReturnsWithinOptions ) && is_array( $wpl_ReturnsWithinOptions ) ): ?>
+								<?php foreach ($wpl_ReturnsWithinOptions as $option_id => $desc) : ?>
 									<option value="<?php echo $option_id ?>" 
 										<?php if ( $item_details['returns_within'] == $option_id ) : ?>
 											selected="selected"
@@ -324,9 +331,9 @@
                                 <?php wplister_tooltip('The party who pays the shipping cost for a returned item.') ?>
 							</label>
 							<select id="wpl-text-ShippingCostPaidBy" name="wpl_e2e_ShippingCostPaidBy" class=" required-entry select">
-							<?php $ShippingCostPaidByOptions = get_option('wplister_ShippingCostPaidByOptions') ?>
-							<?php if ( isset( $ShippingCostPaidByOptions ) && is_array( $ShippingCostPaidByOptions ) ): ?>
-								<?php foreach ($ShippingCostPaidByOptions as $option_id => $desc) : ?>
+							<?php // $ShippingCostPaidByOptions = get_option('wplister_ShippingCostPaidByOptions') ?>
+							<?php if ( isset( $wpl_ShippingCostPaidByOptions ) && is_array( $wpl_ShippingCostPaidByOptions ) ): ?>
+								<?php foreach ($wpl_ShippingCostPaidByOptions as $option_id => $desc) : ?>
 									<option value="<?php echo $option_id ?>" 
 										<?php if ( @$item_details['ShippingCostPaidBy'] == $option_id ) : ?>
 											selected="selected"
@@ -375,9 +382,9 @@
 
 							<label for="wpl-text-returns_description" class="text_label">
 								<?php echo __('Returns description','wplister'); ?>
-                                <?php wplister_tooltip('A detailed description of your return policy.<br>eBay uses this text string as-is in the Return Policy section of the View Item page. Avoid HTML.') ?>
+                                <?php wplister_tooltip('A detailed description of your return policy.<br>eBay uses this text string as-is in the Return Policy section of the View Item page. Avoid HTML. Maximum length: 5000 characters') ?>
 							</label>
-							<textarea name="wpl_e2e_returns_description" id="wpl-text-returns_description" class="textarea"><?php echo stripslashes( $item_details['returns_description'] ); ?></textarea>
+							<textarea name="wpl_e2e_returns_description" id="wpl-text-returns_description" maxlength="5000" class="textarea"><?php echo stripslashes( $item_details['returns_description'] ); ?></textarea>
 							<br class="clear" />
 
 							</div>
@@ -670,6 +677,9 @@
 		// var CurrentItemSpecifics = <?php echo json_encode( @$item_details['item_conditions'] ) ?>;
 		// var default_ebay_category_id = <?php echo @$wpl_default_ebay_category_id ? $wpl_default_ebay_category_id : 0 ?>;
 
+		var wpl_site_id    = '<?php echo $wpl_site_id ?>';
+		var wpl_account_id = '<?php echo $wpl_account_id ?>';
+
 		// handle new primary category
 		// update item conditions
 		function updateItemConditions() {
@@ -682,6 +692,8 @@
 	        var params = {
 	            action: 'wpl_getCategoryConditions',
 	            id: primary_category_id,
+	            site_id: wpl_site_id,
+	            account_id: wpl_account_id,
 	            nonce: 'TODO'
 	        };
 	        var jqxhr = jQuery.getJSON( ajaxurl, params )

@@ -140,6 +140,27 @@
 						</div>
 					</div>
 
+					<?php if ( WPLE()->multi_account ) : ?>
+					<div class="postbox dev_box" id="AccountsBox" style="display:none">
+						<h3><span><?php echo __('Account','wplister'); ?></span></h3>
+						<div class="inside">
+							<?php foreach ( WPLE()->accounts as $account) : ?>
+								<?php
+									$account_id = $account->id;
+									$checked    = $wpl_item['account_id'] == $account_id ? 'checked="checked"' : '';
+									$disabled   = $account->active ? '' : 'disabled="disabled"';
+								?>
+
+								<input type="radio" value="<?php echo $account_id ?>" id="account-<?php echo $account_id ?>" name="wpl_e2e_account_id" class="post-format" <?php echo $checked ?> <?php echo $disabled ?> > 
+								<label for="account-<?php echo $account_id ?>"><?php echo $account->title ?></label><br>
+
+							<?php endforeach; ?>							
+						</div>
+					</div>
+					<?php else : ?>							
+						<input type="hidden" name="wpl_e2e_account_id" value="<?php echo $wpl_item['account_id']; ?>" />
+					<?php endif; ?>							
+
 
 					<div class="postbox" id="HelpBox">
 						<h3><span><?php echo __('Information','wplister'); ?></span></h3>
@@ -205,7 +226,7 @@
 
 
 
-					<div class="postbox" id="DeveloperToolBox" style="display:none;">
+					<div class="postbox dev_box" id="DeveloperToolBox" style="display:none;">
 						<h3><span><?php echo __('Developer options','wplister'); ?></span></h3>
 						<div class="inside">
 							<p>
@@ -245,6 +266,10 @@
 							<input type="text" name="wpl_e2e_post_id" size="30" value="<?php echo $wpl_item['post_id']; ?>" class="text_input" />
 							<br class="clear" />
 
+							<label for="wpl-text-site_id" class="text_label"><?php echo __('Site ID','wplister'); ?>:</label>
+							<input type="text" name="wpl_e2e_site_id" size="30" value="<?php echo $wpl_item['site_id']; ?>" class="text_input" />
+							<br class="clear" />
+
 							<label for="wpl-enable_dev_mode" class="text_label"><?php echo __('Update advanced settings','wplister'); ?>:</label>
 							<input type="checkbox" name="wpl_e2e_enable_dev_mode" id="wpl-enable_dev_mode" value="1" class="checkbox_input" />
 							<span style="line-height: 24px">
@@ -256,7 +281,35 @@
 						</div>
 					</div>
 
+					<div class="postbox dev_box" id="VariationsCacheBox" style="display:none;">
+						<h3><span><?php echo __('Variations Cache','wplister'); ?></span></h3>
+						<div class="inside">
+							<p>
+								This is the information that WP-Lister has stored about this item's variations on eBay.
+							</p>
 
+							<pre><?php
+									$variations_data = maybe_unserialize( $wpl_item['variations'] );
+									print_r($variations_data);
+							?></pre>
+
+						</div>
+					</div>
+
+					<div class="postbox dev_box" id="EPSCacheBox" style="display:none;">
+						<h3><span><?php echo __('EPS Cache','wplister'); ?></span></h3>
+						<div class="inside">
+							<p>
+								This is the information that WP-Lister has stored about product images uploaded to EPS.
+							</p>
+
+							<pre><?php
+									$eps_data = maybe_unserialize( $wpl_item['eps'] );
+									print_r($eps_data);
+							?></pre>
+
+						</div>
+					</div>
 
 
 					<div class="submit" style="padding-top: 0; float: right; display:none;">

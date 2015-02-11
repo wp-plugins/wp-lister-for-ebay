@@ -104,6 +104,16 @@ class WPLister_Toolbar  {
 			);
 			$wp_admin_bar->add_node($args);
 
+			// Settings - Accounts tab
+			$args = array(
+				'id'    => 'wplister_settings_accounts',
+				'title' => __('Account', 'wplister'),
+				'href'  => admin_url( 'admin.php?page=wplister-settings&tab=accounts' ),
+				'parent'  => 'wplister_settings',
+				'meta'  => array('class' => 'wplister-toolbar-page')
+			);
+			$wp_admin_bar->add_node($args);
+
 			// Settings - Categories tab
 			$args = array(
 				'id'    => 'wplister_settings_categories',
@@ -154,62 +164,73 @@ class WPLister_Toolbar  {
 		// product page
 		global $post;
 		global $wp_query;
+		global $pagenow;
 		$post_id = false;
 
 		if ( $wp_query->in_the_loop && isset( $wp_query->post->post_type ) && ( $wp_query->post->post_type == 'product' ) ) {
 			$post_id = $wp_query->post->ID;
-		} elseif ( isset( $post->post_type ) && ( $post->post_type == 'product' ) ) {
+		} elseif ( is_object( $post ) && isset( $post->post_type ) && ( $post->post_type == 'product' ) ) {
 			$post_id = $post->ID;
 		}
 
+		// skip product links on the main products page
+		if ( $pagenow == 'edit.php' ) return;
+
 		// do we have a single product page?
-		if ( $post_id ) {
+		if ( empty($post_id) ) return;
 
-			// get all items
-			$lm = new ListingsModel();
-			$listings = $lm->getAllListingsFromPostID( $post_id );
 
-			if ( sizeof($listings) > 0 ) {
+		// get all items
+		$lm = new ListingsModel();
+		$listings = $lm->getAllListingsFromPostID( $post_id );
 
-				$ebay_id = $lm->getEbayIDFromPostID( $post_id );
-				$url = $lm->getViewItemURLFromPostID( $post_id );
+		if ( sizeof($listings) > 0 ) {
 
-				// View on eBay link
+			$ebay_id = $lm->getEbayIDFromPostID( $post_id );
+			$url = $lm->getViewItemURLFromPostID( $post_id );
+
+			// View on eBay link
+			$args = array(
+				'id'    => 'wplister_view_on_ebay',
+				'title' => __('View item on eBay', 'wplister'), # ." ($ebay_id)",
+				'href'  => $url,
+				'parent'  => 'wplister_top',
+				'meta'  => array('target' => '_blank', 'class' => 'wplister-toolbar-link')
+			);
+			if ( $url ) $wp_admin_bar->add_node($args);
+
+			foreach ($listings as $listing) {
+
 				$args = array(
-					'id'    => 'wplister_view_on_ebay',
-					'title' => __('View item on eBay', 'wplister'), # ." ($ebay_id)",
-					'href'  => $url,
-					'parent'  => 'wplister_top',
+					'id'    => 'wplister_view_on_ebay_'.$listing->id,
+					'title' => '#'.$listing->ebay_id . ': ' . $listing->auction_title,
+					'href'  => $listing->ViewItemURL,
+					'parent'  => 'wplister_view_on_ebay',
 					'meta'  => array('target' => '_blank', 'class' => 'wplister-toolbar-link')
 				);
-				if ( $url ) $wp_admin_bar->add_node($args);
-
-				foreach ($listings as $listing) {
-
-					$args = array(
-						'id'    => 'wplister_view_on_ebay_'.$listing->id,
-						'title' => '#'.$listing->ebay_id . ': ' . $listing->auction_title,
-						'href'  => $listing->ViewItemURL,
-						'parent'  => 'wplister_view_on_ebay',
-						'meta'  => array('target' => '_blank', 'class' => 'wplister-toolbar-link')
-					);
-					if ( $listing->ViewItemURL ) $wp_admin_bar->add_node($args);
-
-				}
-
-
-			} else {
-
-				// $args = $this->addPrepareActions( $args );
+				if ( $listing->ViewItemURL ) $wp_admin_bar->add_node($args);
 
 			}
 
-			if ( current_user_can('prepare_ebay_listings') )
-				$this->addPrepareActions( $wp_admin_bar, $post_id );
+			// View in WP-Lister
+			$url = 'admin.php?page=wplister&s='.$post_id;
+			$args = array(
+				'id'    => 'wplister_view_on_listings_page',
+				'title' => __('View item in WP-Lister', 'wplister'),
+				'href'  => $url,
+				'parent'  => 'wplister_top',
+				'meta'  => array('target' => '_blank', 'class' => 'wplister-toolbar-link')
+			);
+			$wp_admin_bar->add_node($args);
 
+		} else {
 
-		} // if is product page
+			// $args = $this->addPrepareActions( $args );
 
+		}
+
+		if ( current_user_can('prepare_ebay_listings') )
+			$this->addPrepareActions( $wp_admin_bar, $post_id );
 
 
 	} // customize_toolbar()
@@ -217,12 +238,13 @@ class WPLister_Toolbar  {
 	function addPrepareActions( $wp_admin_bar, $post_id ) {
 
 		// Prepare listing link
-		$url = '';
+		$url = '#';
 		$args = array(
-			'id'    => 'wplister_prepare_listing',
+			'id'    => 'wplister_tb_prepare_listing',
 			'title' => __('List on eBay', 'wplister'),
 			'href'  => $url,
-			'parent'  => 'wplister_top'
+			'parent'  => 'wplister_top',
+			'meta'  => array('class' => 'wplister-toolbar-page')
 		);
 		$wp_admin_bar->add_node( $args );
 
@@ -238,7 +260,8 @@ class WPLister_Toolbar  {
 				'id'    => 'wplister_list_on_ebay_'.$profile['profile_id'],
 				'title' => $profile['profile_name'],
 				'href'  => $url,
-				'parent'  => 'wplister_prepare_listing'
+				'parent'  => 'wplister_tb_prepare_listing',
+				'meta'  => array('class' => 'wplister-toolbar-page')
 			);
 			$wp_admin_bar->add_node($args);
 

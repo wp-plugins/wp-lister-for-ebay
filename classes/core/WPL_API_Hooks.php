@@ -50,6 +50,10 @@ class WPL_API_Hooks extends WPL_Core {
 		// example of using wplister_custom_attributes filter to add SKU as a virtual attribute
 		add_filter( 'wplister_custom_attributes', array( &$this, 'wplister_custom_attributes' ), 10, 1 );
 
+		// add support for Store Exporter plugin (http://www.visser.com.au/documentation/store-exporter/usage/)
+		add_filter( 'woo_ce_product_fields', array( &$this, 'woo_ce_product_fields' ) );
+		add_filter( 'woo_ce_product_item',   array( &$this, 'woo_ce_product_item' ), 10, 2 );
+
 	}
 	
 	
@@ -255,6 +259,29 @@ class WPL_API_Hooks extends WPL_Core {
 
 		return $attributes;
 	}	
+
+	// add support for Store Exporter plugin (http://www.visser.com.au/documentation/store-exporter/usage/)
+	function woo_ce_product_fields( $fields ) {
+		$fields[] = array (
+			'name'    => 'ebay_item_id',
+			'label'   => 'eBay Item ID',
+			'default' => 0
+		);
+		$fields[] = array (
+			'name'    => 'ebay_status',
+			'label'   => 'eBay Status',
+			'default' => 0
+		);
+		return $fields;
+	}
+
+	function woo_ce_product_item( $product, $product_id ) {
+		$lm = new ListingsModel();
+		$product->ebay_item_id = $lm->getEbayIDFromPostID( $product_id );
+		$product->ebay_status  = $lm->getStatusFromPostID( $product_id );
+		return $product;
+	}
+
 
 }
 

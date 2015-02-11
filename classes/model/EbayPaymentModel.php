@@ -19,6 +19,7 @@ class EbayPaymentModel extends WPL_Model {
 
 	var $_session;
 	var $_cs;
+	var $site_id;
 
 	function EbayPaymentModel()
 	{
@@ -29,15 +30,16 @@ class EbayPaymentModel extends WPL_Model {
 		$this->tablename = $wpdb->prefix . self::table;
 	}
 	
-	function downloadPaymentDetails($session, $siteid = 77)
+	function downloadPaymentDetails( $session, $site_id )
 	{
 		$this->initServiceProxy($session);
+		$this->site_id = $site_id;
 		
 		$this->_cs->setHandler('PaymentOptionDetailsType', array(& $this, 'storePaymentDetail'));
 		
 		// truncate the db
 		global $wpdb;
-		$wpdb->query('truncate '.$this->tablename);
+		$wpdb->query("DELETE FROM {$this->tablename} WHERE site_id = '$site_id' ");
 		
 		// download the shipping data 
 		$req = new GeteBayDetailsRequestType();
@@ -52,9 +54,10 @@ class EbayPaymentModel extends WPL_Model {
 		global $wpdb;
 
 		//#type $Detail PaymentOptionDetailsType
-		$data['payment_name'] = $Detail->PaymentOption;
+		$data['payment_name']        = $Detail->PaymentOption;
 		$data['payment_description'] = $Detail->Description;
-		$data['version'] = $Detail->DetailVersion;
+		$data['version']             = $Detail->DetailVersion;
+		$data['site_id']             = $this->site_id;
 
 		$wpdb->insert($this->tablename, $data);
 		$this->logger->info('inserted payment option '.$Detail->PaymentOption);
@@ -63,7 +66,7 @@ class EbayPaymentModel extends WPL_Model {
 	}
 	
 	
-	function downloadMinimumStartPrices($session)
+	function downloadMinimumStartPrices( $session, $site_id )
 	{
 		$this->logger->info( "downloadMinimumStartPrices()" );
 		$this->initServiceProxy($session);
@@ -83,13 +86,19 @@ class EbayPaymentModel extends WPL_Model {
 				$price_details[ $Detail->ListingType ] = $Detail->StartPrice->value;
 			}
 			
+			// update site property
+			$Site = new WPLE_eBaySite( $site_id );
+			$Site->MinListingStartPrices = serialize( $price_details );
+			$Site->update();
+
+			// update legacy option
 			update_option('wplister_MinListingStartPrices', $price_details);
 
 		} // call successful
 				
-	}
+	} // downloadMinimumStartPrices()
 	
-	function downloadReturnPolicyDetails($session)
+	function downloadReturnPolicyDetails( $session, $site_id )
 	{
 		$this->logger->info( "downloadReturnPolicyDetails()" );
 		$this->initServiceProxy($session);
@@ -109,6 +118,7 @@ class EbayPaymentModel extends WPL_Model {
 				$ReturnsWithinOptions[ $Detail->ReturnsWithinOption ] = $Detail->Description;
 			}
 			
+			// update legacy option
 			update_option('wplister_ReturnsWithinOptions', $ReturnsWithinOptions);
 
 			// save array of ShippingCostPaidBy options
@@ -117,22 +127,30 @@ class EbayPaymentModel extends WPL_Model {
 				$ShippingCostPaidByOptions[ $Detail->ShippingCostPaidByOption ] = $Detail->Description;
 			}
 			
+			// update legacy option
 			update_option('wplister_ShippingCostPaidByOptions', $ShippingCostPaidByOptions);
+
+			// update site properties
+			$Site = new WPLE_eBaySite( $site_id );
+			$Site->ReturnsWithinOptions      = serialize( $ReturnsWithinOptions );
+			$Site->ShippingCostPaidByOptions = serialize( $ShippingCostPaidByOptions );
+			$Site->update();
 
 		} // call successful
 				
-	}
+	} // downloadReturnPolicyDetails()
 	
 	
 	
 	/* the following methods could go into another class, since they use wpdb instead of EbatNs_DatabaseProvider */
 	
-	static function getAll() {
+	static function getAll( $site_id ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . self::table;
 		$profiles = $wpdb->get_results("
 			SELECT * 
 			FROM $table
+			WHERE site_id = '$site_id'
 			ORDER BY payment_description
 		", ARRAY_A);
 
@@ -152,14 +170,17 @@ class EbayPaymentModel extends WPL_Model {
 	}
 
 
-	function getTitleByServiceName( $payment_name ) {
+	function getTitleByServiceName( $payment_name, $site_id = false ) {
 		global $wpdb;	
 		$this->tablename = $wpdb->prefix . self::table;
+
+		$where_sql = $site_id ? "AND site_id = '$site_id'" : '';
 
 		$payment_description = $wpdb->get_var("
 			SELECT payment_description 
 			FROM $this->tablename
 			WHERE payment_name = '$payment_name'
+			$where_sql
 		");		
 
 		if ( ! $payment_description ) return $payment_name;

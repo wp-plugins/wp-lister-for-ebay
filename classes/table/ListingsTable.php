@@ -27,8 +27,8 @@ if(!class_exists('WP_List_Table')){
  */
 class ListingsTable extends WP_List_Table {
 
-    var $last_product_id = 0;
-    var $last_product_variations = array();
+    // var $last_product_id = 0;
+    // var $last_product_variations = array();
     var $selectedItems = false;
 
     /** ************************************************************************
@@ -213,6 +213,33 @@ class ListingsTable extends WP_List_Table {
         $listing_title .= $this->generateAutoRelistInfo( $item, $profile_data );
 
 
+        // show errors and warnings on published and prepared items
+        if ( in_array( $item['status'], array( 'published','changed','prepared','verified' ) ) ) {
+
+            $history = maybe_unserialize( $item['last_errors'] );
+            $tips_errors   = array();
+            $tips_warnings = array();
+            if ( is_array( $history ) ) {
+                foreach ($history['errors'] as $result) {
+                    $tips_errors[] = '<b>'.$result->SeverityCode.':</b> '.$result->ShortMessage.' ('.$result->ErrorCode.')';
+                }
+                foreach ($history['warnings'] as $result) {
+                    $tips_warnings[] = '<b>'.$result->SeverityCode.':</b> '.$result->ShortMessage.' ('.$result->ErrorCode.')';
+                }
+            }
+            if ( ! empty( $tips_errors ) ) {
+                $listing_title .= '<br><small style="color:darkred">'.join('<br>',$tips_errors).'</small>';
+            }
+            if ( ! empty( $tips_warnings ) ) {
+                $listing_title .= '<small><br><a href="#" onclick="jQuery(\'#warnings_container_'.$item['id'].'\').slideToggle();return false;">&raquo; '.''.sizeof($tips_warnings).' warning(s)'.'</a></small>';
+                $listing_title .= '<div id="warnings_container_'.$item['id'].'" style="display:none">';
+                $listing_title .= '<small>'.join('<br>',$tips_warnings).'</small>';
+                $listing_title .= '</div>';
+            }
+
+        }
+
+
         // disable some actions depending on status
         if ( $item['status'] != 'published' )   unset( $actions['lock'] );
         if ( $item['status'] != 'published' )   unset( $actions['end_item'] );
@@ -223,7 +250,7 @@ class ListingsTable extends WP_List_Table {
         if (($item['status'] != 'published' ) &&
             ($item['status'] != 'changed') &&
             ($item['status'] != 'ended'))       unset( $actions['open'] );
-        if ( $item['status'] == 'ended' )       unset( $actions['preview_auction'] );
+        // if ( $item['status'] == 'ended' )       unset( $actions['preview_auction'] ); // uncomment for debugging
         if ( $item['status'] != 'ended' )       unset( $actions['archive'] );
         if ( $item['status'] != 'archived' )    unset( $actions['delete'] );
         if (($item['status'] != 'sold' ) &&
@@ -236,7 +263,10 @@ class ListingsTable extends WP_List_Table {
         if ( ! $item['locked'] )                unset( $actions['unlock'] );
 
         // make edit listing link only available to developers
-        if ( ! get_option('wplister_log_level') ) unset( $actions['edit'] );
+        if ( ! get_option('wplister_enable_item_edit_link') ) {
+            unset( $actions['edit'] );
+            if ( $item['status'] == 'ended' )   unset( $actions['preview_auction'] ); // developer may preview ended items
+        }
 
         if ( ! current_user_can( 'publish_ebay_listings' ) ) {
             unset( $actions['publish2e'] );
@@ -278,7 +308,9 @@ class ListingsTable extends WP_List_Table {
                 $variations_html .= '&nbsp;<img src="'.$img_url.'" style="height:12px; padding:0;"/>&nbsp;<br>';
                 $variations_html .= '<b style="color:darkred">No variations found.</b><br>';
                 $variations_html .= '<div id="pvars_'.$item['id'].'" class="variations_list" style="display:none;margin-bottom:10px;">';
-                $variations_html .= 'Please read the <a href="http://www.wplab.com/plugins/wp-lister/faq/#Variations" target="_blank">FAQ</a> or contact support.';
+                if ( ! defined('WPLISTER_RESELLER_VERSION') ) {
+                    $variations_html .= 'Please read the <a href="http://www.wplab.com/plugins/wp-lister/faq/#Variations" target="_blank">FAQ</a> or contact support.';
+                }
                 $variations_html .= '</div>';
                 return $variations_html;
             }
@@ -451,7 +483,7 @@ class ListingsTable extends WP_List_Table {
         // check for previous item IDs
         $history = maybe_unserialize( $item['history'] );
         if ( ! is_array($history)) $history = array();
-        $previous_ids = is_array(@$history['previous_ids']) ? $history['previous_ids'] : array();
+        $previous_ids = isset($history['previous_ids']) && is_array($history['previous_ids']) ? $history['previous_ids'] : array();
 
         // if no previous ids, return 
         if ( empty( $previous_ids ) ) return $item['ebay_id'];
@@ -745,6 +777,14 @@ class ListingsTable extends WP_List_Table {
         );
     }
 
+    function column_account($item) {
+        $account_title = isset( WPLE()->accounts[ $item['account_id'] ] ) ? WPLE()->accounts[ $item['account_id'] ]->title : '<span style="color:darkred">Invalid Account ID: '.$item['account_id'].'</span>';
+        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
+            /*$1%s*/ $account_title,
+            /*$2%s*/ EbayController::getEbaySiteCode( $item['site_id'] )
+        );
+    }
+
     function column_sku($item){
         return get_post_meta( $item['post_id'], '_sku', true );
     }
@@ -758,13 +798,15 @@ class ListingsTable extends WP_List_Table {
     // get product variations - if possible from cache
     function getProductVariations( $post_id ) {
 
-        // update cache if required
-        if ( $this->last_product_id != $post_id ) {
-            $this->last_product_variations = ProductWrapper::getVariations( $post_id );
-            $this->last_product_id         = $post_id;
-        }
+        return WPLE()->memcache->getProductVariations( $post_id );
 
-        return $this->last_product_variations;
+        // update cache if required
+        // if ( $this->last_product_id != $post_id ) {
+        //     $this->last_product_variations = ProductWrapper::getVariations( $post_id );
+        //     $this->last_product_id         = $post_id;
+        // }
+
+        // return $this->last_product_variations;
     }
     
     /** ************************************************************************
@@ -814,8 +856,12 @@ class ListingsTable extends WP_List_Table {
             'end_date'          => __('Ends at','wplister'),
             'profile'           => __('Profile','wplister'),
             'template'          => __('Template','wplister'),
-            'status'		 	=> __('Status','wplister')
+            'account'           => __('Account','wplister'),
+            'status'            => __('Status','wplister'),
         );
+
+        // if ( ! WPLE()->multi_account ) 
+        //     unset( $columns['account'] );
 
         if ( ! get_option( 'wplister_enable_thumbs_column' ) )
             unset( $columns['img'] );
@@ -864,19 +910,20 @@ class ListingsTable extends WP_List_Table {
      **************************************************************************/
     function get_bulk_actions() {
         $actions = array(
-            'verify'    => __('Verify with eBay','wplister'),
-            'publish2e' => __('Publish to eBay','wplister'),
-            'update' 	=> __('Update details from eBay','wplister'),
-            'reselect'  => __('Select another profile','wplister'),
-            'reapply'   => __('Re-apply profile','wplister'),
-            'revise'    => __('Revise items','wplister'),
-            'end_item'  => __('End listings','wplister'),
-            'relist'    => __('Re-list ended items','wplister'),
-            'lock'      => __('Lock listings','wplister'),
-            'unlock'    => __('Unlock listings','wplister'),
-            'archive'   => __('Move to archive','wplister'),
-            'delete_listing'  => __('Delete listings','wplister'),
-            'cancel_schedule' => __('Cancel relist schedule','wplister'),
+            'verify'              => __('Verify with eBay','wplister'),
+            'publish2e'           => __('Publish to eBay','wplister'),
+            'update'              => __('Update details from eBay','wplister'),
+            // 'reselect'            => __('Select another profile','wplister'),
+            'wple_change_profile' => __('Select another profile','wplister'),
+            'reapply'             => __('Re-apply profile','wplister'),
+            'revise'              => __('Revise items','wplister'),
+            'end_item'            => __('End listings','wplister'),
+            'relist'              => __('Re-list ended items','wplister'),
+            'lock'                => __('Lock listings','wplister'),
+            'unlock'              => __('Unlock listings','wplister'),
+            'archive'             => __('Move to archive','wplister'),
+            'delete_listing'      => __('Delete listings','wplister'),
+            'cancel_schedule'     => __('Cancel relist schedule','wplister'),
         );
 
         if ( ! current_user_can( 'publish_ebay_listings' ) ) {
@@ -1021,6 +1068,7 @@ class ListingsTable extends WP_List_Table {
         $pm = new ProfilesModel();
         $wpl_profiles = $pm->getAll();
         $profile_id = ( isset($_REQUEST['profile_id']) ? $_REQUEST['profile_id'] : false);
+        $account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : false);
         // echo "<pre>";print_r($wpl_profiles);echo"</pre>";die();
         ?>
         <div class="alignleft actions" style="">
@@ -1033,20 +1081,37 @@ class ListingsTable extends WP_List_Table {
                         ><?php echo $profile['profile_name'] ?></option>
                 <?php endforeach; ?>
             </select>            
+
+            <?php if ( WPLE()->multi_account ) : ?>
+
+            <select name="account_id">
+                <option value=""><?php _e('All accounts','wplister') ?></option>
+                <?php foreach ( WPLE()->accounts as $account ) : ?>
+                    <option value="<?php echo $account->id ?>"
+                        <?php if ( $account_id == $account->id ) echo 'selected'; ?>
+                        ><?php echo $account->title ?></option>
+                <?php endforeach; ?>
+            </select>            
+
+            <?php endif; ?>
+
             <input type="submit" name="" id="post-query-submit" class="button" value="Filter">
 
 
+            <!--
             <a class="btn_verify_all_prepared_items button wpl_job_button"
                title="<?php echo __('Verify all prepared items with eBay and get listing fees.','wplister') ?>"
                 ><?php echo __('Verify all prepared items','wplister'); ?></a>
+            -->
 
-            <?php if ( current_user_can( 'publish_ebay_listings' ) ) : ?>
-
+            <?php #if ( current_user_can( 'publish_ebay_listings' ) ) : ?>
+            <!--
             <a class="btn_publish_all_verified_items button wpl_job_button"
                title="<?php echo __('Publish all verified items on eBay.','wplister') ?>"
                 ><?php echo __('Publish all verified items','wplister'); ?></a>
+            -->
+            <?php #endif; ?>
 
-            <?php endif; ?>
 
         </div>
         <?php
@@ -1054,7 +1119,7 @@ class ListingsTable extends WP_List_Table {
 
     /**
      * Generates the table navigation above or bellow the table and removes the
-     * _wp_http_referrer and _wpnonce because it generates a error about URL too large
+     * _wp_http_referer and _wpnonce because it generates a error about URL too large
      * 
      * @param string $which 
      * @return void

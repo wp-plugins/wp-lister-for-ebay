@@ -62,31 +62,47 @@ class EbayMessagesPage extends WPL_Page {
 
 		// handle update ALL from eBay action
 		if ( $this->requestAction() == 'update_messages' ) {
-			$this->initEC();
-			// $tm = $this->EC->loadEbayMessages();
-			$tm = $this->EC->updateEbayMessages();
-			$this->EC->closeEbay();
 
-			// show ebay_message report
-			$msg  = $tm->count_total .' '. __('message(s) found on eBay.','wplister') . '<br>';
-			$msg .= __('Timespan','wplister') .': '. $tm->getHtmlTimespan() . '&nbsp;&nbsp;';
-			$msg .= '<a href="#" onclick="jQuery(\'#ebay_message_report\').toggle();return false;">'.__('show details','wplister').'</a>';
-			$msg .= $tm->getHtmlReport();
+			$accounts = WPLE_eBayAccount::getAll();
+			$msg = '';
+
+			// loop each active account
+			foreach ( $accounts as $account ) {
+
+				$this->initEC( $account->id );
+				$mm = $this->EC->updateEbayMessages();
+				$this->EC->closeEbay();
+
+				// show ebay_message report
+				$msg .= sprintf( __('%s message(s) found on eBay for account %s.','wplister'), $mm->count_total, $account->title ) . '<br>';
+				$msg .= __('Timespan','wplister') .': '. $mm->getHtmlTimespan() . '&nbsp;&nbsp;';
+				$msg .= '<a href="#" onclick="jQuery(\'#ebay_message_report\').toggle();return false;">'.__('show details','wplister').'</a>';
+				$msg .= $mm->getHtmlReport();
+				$msg .= '<hr>';
+
+			}
 			$this->showMessage( $msg );
+
 		}
 
-		// handle update from eBay action
+		// handle update from eBay bulk action
 		if ( $this->requestAction() == 'update' ) {
 			if ( isset( $_REQUEST['ebay_message'] ) ) {
-				$this->initEC();
-				$tm = $this->EC->updateEbayMessages( false, $_REQUEST['ebay_message'] );
+
+				// use account_id of first item (todo: group items by account)
+				$mm         = new EbayMessagesModel();
+				$message    = $mm->getItem( $_REQUEST['ebay_message'][0] );
+				$account_id = $message['account_id'];
+
+				$this->initEC( $account_id );
+				$mm = $this->EC->updateEbayMessages( false, $_REQUEST['ebay_message'] );
 				$this->EC->closeEbay();
 				// $this->showMessage( __('Selected messages were updated from eBay.','wplister') );		
 
 				// show ebay_message report
-				$msg  = $tm->count_total .' '. __('messages were updated from eBay.','wplister') . '<!br>' . '&nbsp;&nbsp;';
+				$msg  = $mm->count_total .' '. __('messages were updated from eBay.','wplister') . '<!br>' . '&nbsp;&nbsp;';
 				$msg .= '<a href="#" onclick="jQuery(\'#ebay_message_report\').toggle();return false;">'.__('show details','wplister').'</a>';
-				$msg .= $tm->getHtmlReport();
+				$msg .= $mm->getHtmlReport();
 				$this->showMessage( $msg );
 
 			} else {
@@ -97,9 +113,9 @@ class EbayMessagesPage extends WPL_Page {
 		// handle delete action
 		if ( $this->requestAction() == 'delete' ) {
 			if ( isset( $_REQUEST['ebay_message'] ) ) {
-				$tm = new EbayMessagesModel();
+				$mm = new EbayMessagesModel();
 				foreach ( $_REQUEST['ebay_message'] as $id ) {
-					$tm->deleteItem( $id );
+					$mm->deleteItem( $id );
 				}
 				$this->showMessage( __('Selected items were removed.','wplister') );
 			} else {

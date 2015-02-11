@@ -10,13 +10,37 @@ class WPL_Autoloader {
 	);
 
 	/**
+	 * class table
+	 */
+	protected static $class_cache = array(
+
+		// core
+		'WPLE_MemCache'      	=> '/classes/core/WPL_MemCache.php',
+		'WPLE_AdminMessages'   	=> '/classes/core/WPL_AdminMessages.php',
+
+		// helper
+		'WPLE_UpgradeHelper'   	=> '/classes/helper/WPLE_UpgradeHelper.php',
+
+		// integration
+		'ProductWrapper'   		=> '/classes/integration/ProductWrapper_woo.php',
+		'OrderWrapper'   		=> '/classes/integration/OrderWrapper_woo.php',
+
+		// models		
+		'WPLE_eBaySite'         => '/classes/model/eBaySite.php',
+		'WPLE_eBayAccount'      => '/classes/model/eBayAccount.php',
+
+	);
+
+	/**
 	 * @param string $className
 	 * @return string|false
 	 */
 	public static function autoload($className)
 	{
 
-	    if (($classPath = self::getClassPath($className)) !== false) {
+	    if ( array_key_exists( $className, self::$class_cache ) ) {
+   			return include WPLISTER_PATH . self::$class_cache[ $className ];
+	    } elseif ( ( $classPath = self::getClassPath($className) ) !== false ) {
 	        return include $classPath;
 	    } else {
 	        return false;
@@ -26,8 +50,6 @@ class WPL_Autoloader {
 
 	public static function autoloadEbayClasses($className)
 	{
-		// global $wpl_logger;
-		// $wpl_logger->info('autoloadEbayClasses: '.$className);
 
 	    if (($classPath = self::getEbayClassPath($className)) !== false) {
 	        return include $classPath;
@@ -46,6 +68,7 @@ class WPL_Autoloader {
 
 		// load models
 		if ( 'Model' == substr($className, -5) ) {
+			$className = str_replace( 'WPLE_', '', $className );
             $path = WPLISTER_PATH . '/classes/model/' . $className . '.php';
             if (is_readable($path)) {
                 return $path;
@@ -54,6 +77,7 @@ class WPL_Autoloader {
 
 		// load pages
 		if ( 'Page' == substr($className, -4) ) {
+			$className = str_replace( 'WPLE_', '', $className );
             $path = WPLISTER_PATH . '/classes/page/' . $className . '.php';
             if (is_readable($path)) {
                 return $path;
@@ -62,21 +86,13 @@ class WPL_Autoloader {
 
 		// load tables
 		if ( 'Table' == substr($className, -5) ) {
+			$className = str_replace( 'WPLE_', '', $className );
             $path = WPLISTER_PATH . '/classes/table/' . $className . '.php';
             if (is_readable($path)) {
                 return $path;
             }			
 		}
 
-		// load ProductWrapper
-		if ( 'ProductWrapper' == $className ) {
-			return self::selectProductWrapper();
-		}
-
-		// load OrderWrapper
-		if ( 'OrderWrapper' == $className ) {
-			return self::selectOrderWrapper();
-		}
 
 		// conventional autoloader
 	    $parts = explode("_", $className);
@@ -106,72 +122,6 @@ class WPL_Autoloader {
         }			
 	    return false;
 	}
-
-	// load integration wrapper for active shop plugin
-	private static function selectProductWrapper() {
-
-		if ( defined('WC_VERSION') || defined('WOOCOMMERCE_VERSION') || self::is_plugin_active('woocommerce/woocommerce.php') ) {
-			$path = WPLISTER_PATH . '/classes/integration/ProductWrapper_woo.php'; 
-		} elseif ( self::is_plugin_active('wp-e-commerce/wp-shopping-cart.php') ) {
-			$path = WPLISTER_PATH . '/classes/integration/ProductWrapper_wpec.php';
-		} elseif ( self::is_plugin_active('jigoshop/jigoshop.php') ) {
-			$path = WPLISTER_PATH . '/classes/integration/ProductWrapper_jigo.php';
-		} elseif ( self::is_plugin_active('shopp/Shopp.php') ) {
-			$path = WPLISTER_PATH . '/classes/integration/ProductWrapper_shopp.php';
-		} elseif ( self::is_plugin_active('marketpress/marketpress.php') ) {
-			$path = WPLISTER_PATH . '/classes/integration/ProductWrapper_mp.php';
-		} else {
-			$path = WPLISTER_PATH . '/classes/integration/ProductWrapper.php';			
-		}
-
-        if (is_readable($path)) {
-            return $path;
-        } else {
-        	return false;
-        }
-
-	}
-
-	// load integration wrapper for active shop plugin
-	private static function selectOrderWrapper() {
-
-		if ( defined('WC_VERSION') || defined('WOOCOMMERCE_VERSION') || self::is_plugin_active('woocommerce/woocommerce.php') ) {
-			$path = WPLISTER_PATH . '/classes/integration/OrderWrapper_woo.php'; 
-		} elseif ( self::is_plugin_active('wp-e-commerce/wp-shopping-cart.php') ) {
-			$path = WPLISTER_PATH . '/classes/integration/OrderWrapper_wpec.php';
-		// } elseif ( self::is_plugin_active('shopp/Shopp.php') ) {
-		// 	$path = WPLISTER_PATH . '/classes/integration/OrderWrapper_shopp.php';
-		// } elseif ( self::is_plugin_active('marketpress/marketpress.php') ) {
-		// 	$path = WPLISTER_PATH . '/classes/integration/OrderWrapper_mp.php';
-		} else {
-			$path = WPLISTER_PATH . '/classes/integration/OrderWrapper.php';			
-		}
-
-        if (is_readable($path)) {
-            return $path;
-        } else {
-        	return false;
-        }
-
-	}
-
-	// check if given WordPress plugin is active
-	private static function is_plugin_active( $plugin ) {
-
-		if ( is_multisite() ) {
-
-			// check for network activation
-			if ( ! function_exists( 'is_plugin_active_for_network' ) )
-				require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
-
-			if ( function_exists('is_plugin_active_for_network') && is_plugin_active_for_network( $plugin ) )
-				return true;				
-
-		}
-
-    	return in_array( $plugin, (array) get_option( 'active_plugins', array() ) );
-	}
-
 
 }
 

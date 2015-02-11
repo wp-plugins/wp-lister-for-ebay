@@ -60,16 +60,16 @@
 
 
 /* JobRunner styles */
-#jobs_window h2 {
+#wple_jobs_window h2 {
 	margin: 5px 0 15px 0;
 }
-#jobs_message {
+#wple_jobs_window #wple_jobs_message {
 	width: 100%;
 	text-align: center;
 	padding: 3px 5px;
 	font-size: 1em;
 }
-#job_bottom_notice {
+#wple_jobs_window #wple_jobs_footer_msg {
 	float:left; 
 	padding: 15px 0 0 0;
 	font-size: 0.9em;
@@ -77,12 +77,12 @@
 }
 
 /* JobRunner log view */
-#jobs_log {
+#wple_jobs_window #wple_jobs_log {
 	overflow: auto;
 	border: 1px solid #ddd;
 }
 
-#jobs_log .logRow {
+#wple_jobs_window #wple_jobs_log .logRow {
 	position: relative;
 	height: 20px;
 	line-height: 20px;
@@ -90,7 +90,7 @@
 	border-bottom: 1px solid #eee;
 }
 
-#jobs_log .logRowTitle {
+#wple_jobs_window #wple_jobs_log .logRowTitle {
 	/*display: inline;*/
 	display: block;
 	width: 90%;
@@ -98,53 +98,57 @@
 	height: 20px;
 }
 
-#jobs_log .logRowErrors {
+#wple_jobs_window #wple_jobs_log .logRowErrors {
 	position: absolute;
 	top: 0px;
 	right: 32px;
 	line-height: 24px;
 	font-style: italic;
 }
-#jobs_log .logRowErrors a {
+#wple_jobs_window #wple_jobs_log .logRowErrors a {
 	text-decoration: none;
 }
-#jobs_log .logRowErrors a:hover {
+#wple_jobs_window #wple_jobs_log .logRowErrors a:hover {
 	text-decoration: underline;
 }
 
-#jobs_log .logRowStatus {
+#wple_jobs_window #wple_jobs_log .logRowStatus {
 	position: absolute;
 	top: 4px;
 	right: 7px;
 }
 
-#jobs_log img {
+#wple_jobs_window #wple_jobs_log img {
 	max-width: 16px;
 	max-height: 16px;
 }
 
-#jobs_log .taskDetails {
+#wple_jobs_window #wple_jobs_log .taskDetails {
 	/*background-color: #eee;*/
 	border-bottom: 1px solid #ddd;
 	padding-bottom: 5px
 }
 
-#jobs_log div#message {
+#wple_jobs_window #wple_jobs_log div#message {
 	margin: 5px 5px 2px;
 }
 
 
 /* JobRunner progress bar */
-#progressbar {
+#wple_jobs_window #wple_progressbar {
   height: 23px;
+  border: 1px solid #ccc;
 }
-#progressbar .ui-progressbar {
+#wple_jobs_window #wple_progressbar .ui-progressbar {
   position: relative;
 }
-#progressbar .ui-progressbar-value {
+#wple_jobs_window #wple_progressbar .ui-progressbar-value {
   margin-top: -23px;
+  height: 23px;
+  background-color: #0074a2;
+  opacity: 0.2;
 }
-#progressbar span.caption {
+#wple_jobs_window #wple_progressbar span.caption {
   display: block;
   position: static;
   text-align: center;
@@ -152,8 +156,8 @@
 }
 
 /* fix other plugins overriding progressbar style */
-#jobs_window .ui-progressbar .ui-progressbar-value {
-	background: #CCC url( smoothness/images/ui-bg_highlight-soft_75_cccccc_1x100.png ) 50% 50% repeat-x;
+#wple_jobs_window .ui-progressbar .ui-progressbar-value {
+	/*background: #CCC url( smoothness/images/ui-bg_highlight-soft_75_cccccc_1x100.png ) 50% 50% repeat-x;*/
 }
 
 

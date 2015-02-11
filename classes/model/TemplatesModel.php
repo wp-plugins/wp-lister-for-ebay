@@ -473,6 +473,12 @@ class TemplatesModel extends WPL_Model {
 
  		} else {
 
+ 			// make sure, WooCommerce template functions are loaded (WC2.2)
+ 			if ( ! function_exists('woocommerce_product_loop_start') && version_compare( WC_VERSION, '2.2', '>=' ) ) {
+ 				// WC()->include_template_functions(); // won't work unless is_admin() == true
+				include_once( dirname( WC_PLUGIN_FILE) . '/includes/wc-template-functions.php' );
+ 			}
+
  			// default - apply the_content filter to make description look the same as in WP
 	 		$tpl_html = str_replace( '[[product_content]]', apply_filters('the_content', $item['post_content'] ), $tpl_html );
 
@@ -489,14 +495,17 @@ class TemplatesModel extends WPL_Model {
 		$listing_id    = $listingsModel->getListingIDFromPostID( $post_id );
 		$item          = $listingsModel->getItem( $listing_id );
 
-		// main content - [[product_content]]
-	 	$tpl_html = $this->processMainContentShortcode( $post_id, $tpl_html, $item );
+		// main content - [[product_content]] (unless updating title when saving product...)
+		if ( ! isset( $_REQUEST['action'] ) || ( $_REQUEST['action'] != 'editpost' ) || isset( $_REQUEST['wpl_ebay_revise_on_update'] )  || isset( $_REQUEST['wpl_ebay_relist_on_update'] ) ) {
+		 	$tpl_html = $this->processMainContentShortcode( $post_id, $tpl_html, $item );
+		}
 
 		// product excerpt
-		$tpl_html = str_replace( '[[product_excerpt]]', $listingsModel->getRawPostExcerpt( $item['post_id'] ), $tpl_html );
-		$tpl_html = str_replace( '[[product_excerpt_nl2br]]', nl2br( $listingsModel->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
-		$tpl_html = str_replace( '[[product_additional_content]]', wpautop( $listingsModel->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
-		$tpl_html = str_replace( '[[product_additional_content_nl2br]]', nl2br( $listingsModel->getRawPostExcerpt( $item['post_id'] ) ), $tpl_html );
+		$product_id = $item['parent_id'] ? $item['parent_id'] : $item['post_id']; // maybe use parent post_id (for split variations)
+		$tpl_html = str_replace( '[[product_excerpt]]', 				        $listingsModel->getRawPostExcerpt( $product_id )  , $tpl_html );
+		$tpl_html = str_replace( '[[product_excerpt_nl2br]]', 			 nl2br( $listingsModel->getRawPostExcerpt( $product_id ) ), $tpl_html );
+		$tpl_html = str_replace( '[[product_additional_content]]', 	   wpautop( $listingsModel->getRawPostExcerpt( $product_id ) ), $tpl_html );
+		$tpl_html = str_replace( '[[product_additional_content_nl2br]]', nl2br( $listingsModel->getRawPostExcerpt( $product_id ) ), $tpl_html );
 		
 		// product price
 		$tpl_html = str_replace( '[[product_price]]', number_format_i18n( floatval($item['price']), 2 ), $tpl_html );
@@ -505,6 +514,9 @@ class TemplatesModel extends WPL_Model {
 
 		// product_category
 		$tpl_html = str_replace( '[[product_category]]', ProductWrapper::getProductCategoryName( $post_id ), $tpl_html );
+
+		// SKU
+		$tpl_html = str_replace( '[[product_sku]]', ProductWrapper::getSKU( $post_id ), $tpl_html );
 
 		// weight
 		$tpl_html = str_replace( '[[product_weight]]', ProductWrapper::getWeight( $post_id, true ), $tpl_html );
@@ -570,15 +582,26 @@ class TemplatesModel extends WPL_Model {
 
 	public function processAttributeShortcodes( $post_id, $tpl_html, $max_length = false ) {
 
-		// attribute shortcodes i.e. [[attribute_Brand]]
-		$product_attributes = ProductWrapper::getAttributes( $post_id );
-		$this->logger->debug('processAttributeShortcodes() - product_attributes: '.print_r($product_attributes,1));
+		// check for attribute shortcodes
 		if ( preg_match_all("/\\[\\[attribute_(.*)\\]\\]/uUsm", $tpl_html, $matches ) ) {
 
+			// attribute shortcodes i.e. [[attribute_Brand]]
+			$product_attributes = ProductWrapper::getAttributes( $post_id );
+			$this->logger->debug('processAttributeShortcodes() - product_attributes: '.print_r($product_attributes,1));
+
+			// parent attribute for split child variations
+			$parent_post_id    = ProductWrapper::getVariationParent( $post_id );
+			$parent_attributes = $parent_post_id ? ProductWrapper::getAttributes( $parent_post_id ) : array();
+			$this->logger->debug('processAttributeShortcodes() - parent_attributes: '.print_r($parent_attributes,1));
+
+			// process each found shortcode
 			foreach ( $matches[1] as $attribute ) {
 
+				// check product and parent attributes
 				if ( isset( $product_attributes[ $attribute ] )){
 					$attribute_value = $product_attributes[ $attribute ];
+				} elseif ( isset( $parent_attributes[ $attribute ] )){
+					$attribute_value = $parent_attributes[ $attribute ];
 				} else {					
 					$attribute_value = '';
 				}

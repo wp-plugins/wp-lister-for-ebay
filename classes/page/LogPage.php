@@ -145,10 +145,9 @@ class LogPage extends WPL_Page {
 
 
 	public function displayLogEntry( $id ) {
-	global $wpdb;
-
-		$row = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}ebay_log WHERE id = '$id' ");
-		if ( $wpdb->last_error ) echo 'Error in displayLogEntry(): '.$wpdb->last_error;
+		global $wpdb;
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}ebay_log WHERE id = %d", $id ) );
+		if ( ! $row ) die('invalid record id');
 
 		// send log entry to support
 		if ( @$_REQUEST['send_to_support']=='yes' ) {
@@ -156,33 +155,33 @@ class LogPage extends WPL_Page {
 			$this->sendRecordToSupport( $id, $row );
 
 		} else {
-			// display detail page
-			$this->display( 'log_details', array( 'row' => $row, 'version' => $this->get_plugin_version() ) );
-		}
 
+			$this->display( 'log_details', array( 'row' => $row, 'version' => WPLE_VERSION ) );
+
+		}
 		exit();
 	}
 
 	public function sendRecordToSupport( $id, $row ) {
 
-		// trigger full details
-		$_GET['desc'] = 'show';
+		// check nonce
+		if ( ! check_admin_referer( 'wple_send_to_support' ) ) return;
 
 		// get html content
-		$content = $this->display( 'log_details', array( 'row' => $row, 'version' => $this->get_plugin_version() ), false );
+		$_GET['desc'] = 'show'; // trigger full details
+		$content = $this->display( 'log_details', array( 'row' => $row, 'version' => WPLE_VERSION ), false );
 
 		// build email
 		$to          = 'support@wplab.com';
-		$subject     = 'WP-Lister log record #'.$id.' - '. str_replace( 'http://','', get_bloginfo('wpurl') );
+		$subject     = 'WP-Lister for eBay log record #'.$id.' - '. str_replace( 'http://','', get_bloginfo('wpurl') );
+
+		$user_name   = $_REQUEST['user_name'] ? $_REQUEST['user_name'] : 'unknown user';
+		$user_email  = sanitize_email( $_REQUEST['user_email'] );
+		$user_msg    = stripslashes( $_REQUEST['user_msg'] );
+		$headers     = 'From: '.$user_name.' <'.$user_email.'>' . "\r\n";
 		$attachments = array();
-		$headers     = '';
-		$message     = '';
 
-		$user_name  = $_REQUEST['user_name'] ? $_REQUEST['user_name'] : $this->app_name;
-		$user_email = sanitize_email( $_REQUEST['user_email'] );
-		$user_msg   = stripslashes( $_REQUEST['user_msg'] );
-		$headers    = 'From: '.$user_name.' <'.$user_email.'>' . "\r\n";
-
+		$message  = '';
 		$message .= 'Name:  '.$user_name.'<br>';
 		$message .= 'Email: '.$user_email.'<br>';
 		$message .= 'Message: <br><br>'.nl2br($user_msg).'<br>';
@@ -197,8 +196,7 @@ class LogPage extends WPL_Page {
 		echo '<br><div style="text-align:center;font-family:sans-serif;">';
 		echo 'Your log entry was sent to WP Lab support.';
 		echo '<br><br>';
-		echo 'Thank you for helping us improve WP-Lister.</div>';
-
+		echo 'Thank you for helping us improve WP-Lister for eBay.</div>';
 	}
 
 	public function getTableSize() {

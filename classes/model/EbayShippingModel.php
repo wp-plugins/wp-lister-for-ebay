@@ -21,6 +21,7 @@ class EbayShippingModel extends WPL_Model {
 
 	var $_session;
 	var $_cs;
+	var $site_id;
 
 	function EbayShippingModel()
 	{
@@ -32,7 +33,7 @@ class EbayShippingModel extends WPL_Model {
 	}
 	
 
-	function downloadShippingDetails($session)
+	function downloadShippingDetails( $session, $site_id )
 	{
 		// eBay motors (100) uses shipping services from ebay.com (1)
 		if ( $session->getSiteId() == 100 ) {
@@ -40,12 +41,13 @@ class EbayShippingModel extends WPL_Model {
 		}
 
 		$this->initServiceProxy($session);
+		$this->site_id = $site_id;
 		
 		$this->_cs->setHandler('ShippingServiceDetailsType', array(& $this, 'storeShippingDetail'));
 		
 		// truncate the db
 		global $wpdb;
-		$wpdb->query('truncate '.$this->tablename);
+		$wpdb->query("DELETE FROM {$this->tablename} WHERE site_id = '$site_id' ");
 		
 		// download the shipping data 
 		$req = new GeteBayDetailsRequestType();
@@ -61,6 +63,7 @@ class EbayShippingModel extends WPL_Model {
 
 		//#type $Detail ShippingServiceDetailsType
 		$data['service_id'] = $Detail->ShippingServiceID;
+		$data['site_id']    = $this->site_id;
 
 		#$data['carrier'] = $Detail->ShippingCarrier[0];
 		if ( is_array( $Detail->ShippingCarrier ) )
@@ -92,7 +95,7 @@ class EbayShippingModel extends WPL_Model {
 		return true;
 	}
 
-	function downloadShippingLocations($session, $siteid = 77)
+	function downloadShippingLocations($session, $site_id )
 	{
 		$this->initServiceProxy($session);
 		
@@ -106,11 +109,18 @@ class EbayShippingModel extends WPL_Model {
 		foreach ($res->ShippingLocationDetails as $Location) {
 			$locations[$Location->ShippingLocation] = $Location->Description;
 		}
+
+		// update site property
+		$Site = new WPLE_eBaySite( $site_id );
+		$Site->ShippingLocationDetails = serialize( $locations );
+		$Site->update();
+
+		// update legacy option
 		update_option( 'wplister_ShippingLocationDetails', serialize($locations) );
 		
 	}
 
-	function downloadExcludeShippingLocations($session, $siteid = 77)
+	function downloadExcludeShippingLocations($session, $site_id )
 	{
 		$this->initServiceProxy($session);
 		
@@ -124,11 +134,18 @@ class EbayShippingModel extends WPL_Model {
 		foreach ($res->ExcludeShippingLocationDetails as $Location) {
 			$locations[$Location->Location] = $Location->Description;
 		}
+
+		// update site property
+		$Site = new WPLE_eBaySite( $site_id );
+		$Site->ExcludeShippingLocationDetails = serialize( $locations );
+		$Site->update();
+
+		// update legacy option
 		update_option( 'wplister_ExcludeShippingLocationDetails', serialize($locations) );
 		
 	}
 
-	function downloadCountryDetails($session, $siteid = 77)
+	function downloadCountryDetails($session, $site_id )
 	{
 		$this->initServiceProxy($session);
 		
@@ -142,6 +159,13 @@ class EbayShippingModel extends WPL_Model {
 		foreach ($res->CountryDetails as $Country) {
 			$countries[$Country->Country] = $Country->Description;
 		}
+
+		// update site property
+		$Site = new WPLE_eBaySite( $site_id );
+		$Site->CountryDetails = serialize( $countries );
+		$Site->update();
+
+		// update legacy option
 		update_option( 'wplister_CountryDetails', serialize($countries) );
 		
 	}
@@ -150,7 +174,7 @@ class EbayShippingModel extends WPL_Model {
 
 
 
-	function downloadDispatchTimes($session)
+	function downloadDispatchTimes( $session, $site_id )
 	{
 		$this->logger->info( "downloadDispatchTimes()" );
 		$this->initServiceProxy($session);
@@ -170,14 +194,19 @@ class EbayShippingModel extends WPL_Model {
 				$dispatch_times[ $Detail->DispatchTimeMax ] = $Detail->Description;
 			}
 			
-			// update_option('wplister_dispatch_times_available', $dispatch_times);
-			update_option('wplister_DispatchTimeMaxDetails', $dispatch_times);
+			// update site property
+			$Site = new WPLE_eBaySite( $site_id );
+			$Site->DispatchTimeMaxDetails = serialize( $dispatch_times );
+			$Site->update();
+
+			// update legacy option
+			update_option('wplister_DispatchTimeMaxDetails', $dispatch_times );
 
 		} // call successful
 				
 	}
 	
-	function downloadShippingPackages($session)
+	function downloadShippingPackages( $session, $site_id )
 	{
 		$this->logger->info( "downloadShippingPackages()" );
 		$this->initServiceProxy($session);
@@ -203,6 +232,12 @@ class EbayShippingModel extends WPL_Model {
 				$shipping_packages[ $Detail->PackageID ] = $package;
 			}
 			
+			// update site property
+			$Site = new WPLE_eBaySite( $site_id );
+			$Site->ShippingPackageDetails = serialize( $shipping_packages );
+			$Site->update();
+
+			// update legacy option
 			update_option('wplister_ShippingPackageDetails', $shipping_packages);
 
 		} // call successful
@@ -262,20 +297,21 @@ class EbayShippingModel extends WPL_Model {
 	
 	/* the following methods could go into another class, since they use wpdb instead of EbatNs_DatabaseProvider */
 	
-	function getAll() {
+	function getAll( $site_id ) {
 		global $wpdb;	
 		$this->tablename = $wpdb->prefix . self::table;
 		$services = $wpdb->get_results("
 			SELECT * 
 			FROM $this->tablename
 			WHERE isFlat = 1
+			  AND site_id = '$site_id'
 			ORDER BY ShippingCategory, service_description
 		", ARRAY_A);		
 
 		$services = self::fixShippingCategory( $services );
 		return $services;		
 	}
-	static function getAllLocal( $type = 'flat' ) {
+	static function getAllLocal( $site_id, $type = 'flat' ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . self::table;
 
@@ -286,6 +322,7 @@ class EbayShippingModel extends WPL_Model {
 			SELECT * 
 			FROM $table
 			WHERE international = 0
+			  AND site_id = '$site_id'
 			  AND $type_sql
 			ORDER BY ShippingCategory, service_description
 		", ARRAY_A);		
@@ -293,7 +330,7 @@ class EbayShippingModel extends WPL_Model {
 		$services = self::fixShippingCategory( $services );
 		return $services;		
 	}
-	static function getAllInternational( $type = 'flat' ) {
+	static function getAllInternational( $site_id, $type = 'flat' ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . self::table;
 
@@ -304,6 +341,7 @@ class EbayShippingModel extends WPL_Model {
 			SELECT * 
 			FROM $table
 			WHERE international = 1
+			  AND site_id = '$site_id'
 			  AND $type_sql
 			ORDER BY ShippingCategory, service_description
 		", ARRAY_A);		
@@ -350,21 +388,30 @@ class EbayShippingModel extends WPL_Model {
 		return $item;		
 	}
 
-	static function getShippingLocations() {
-		$locations = maybe_unserialize( get_option( 'wplister_ShippingLocationDetails' ) );
+	static function getShippingLocations( $site_id ) {
+		// $locations = maybe_unserialize( get_option( 'wplister_ShippingLocationDetails' ) );
 		// $this->logger->info('wplister_ShippingLocationDetails'.print_r($locations,1));
+
+		$locations = maybe_unserialize( WPLE_eBaySite::getSiteObj( $site_id )->ShippingLocationDetails );
+
 		if ( ! is_array($locations) ) return array();
 		return $locations;
 	}
-	static function getExcludeShippingLocations() {
-		$locations = maybe_unserialize( get_option( 'wplister_ExcludeShippingLocationDetails' ) );
+	static function getExcludeShippingLocations( $site_id ) {
+		// $locations = maybe_unserialize( get_option( 'wplister_ExcludeShippingLocationDetails' ) );
 		// $this->logger->info('wplister_ExcludeShippingLocationDetails'.print_r($locations,1));
+
+		$locations = maybe_unserialize( WPLE_eBaySite::getSiteObj( $site_id )->ExcludeShippingLocationDetails );
+
 		if ( ! is_array($locations) ) return array();
 		return $locations;
 	}
-	static function getEbayCountries() {
-		$countries = maybe_unserialize( get_option( 'wplister_CountryDetails' ) );
+	static function getEbayCountries( $site_id ) {
+		// $countries = maybe_unserialize( get_option( 'wplister_CountryDetails' ) );
 		// $this->logger->info('wplister_CountryDetails'.print_r($countries,1));
+
+		$countries = maybe_unserialize( WPLE_eBaySite::getSiteObj( $site_id )->CountryDetails );
+
 		if ( ! is_array($countries) ) return array();
 		asort($countries);
 		return $countries;

@@ -61,11 +61,49 @@ class WPL_Core {
 
 
 	// init eBay connection
-	public function initEC() { 
+	public function initEC( $account_id = null, $site_id = null ) { 
 		$this->EC = new EbayController();
-		$this->EC->initEbay( self::getOption('ebay_site_id'), 
-							 self::getOption('sandbox_enabled'),
-							 self::getOption('ebay_token') );
+		
+		// use current default account by default (WPL1)
+		$ebay_site_id    = self::getOption('ebay_site_id'); 
+		$sandbox_enabled = self::getOption('sandbox_enabled');
+		$ebay_token      = self::getOption('ebay_token');
+
+		// set site_id dynamically during authentication
+		// if ( isset( $_REQUEST['site_id'] ) && isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'wplRedirectToAuthURL' ) {
+		if ( isset( $_REQUEST['site_id'] ) && isset( $_REQUEST['sandbox'] ) ) {
+			$ebay_site_id    = $_REQUEST['site_id']; 
+			$sandbox_enabled = $_REQUEST['sandbox'];
+			$ebay_token      = '';
+		}
+
+		// use specific account if provided in request or parameter
+		if ( ! $account_id && isset( $_REQUEST['account_id'] ) ) {
+			$account_id = $_REQUEST['account_id'];
+		}
+		if ( $account_id ) {
+			// $account = new WPLE_eBayAccount( $account_id ); // not suitable to check if an account exists
+			$account = WPLE_eBayAccount::getAccount( $account_id );
+			if ( $account ) {
+				$ebay_site_id    = $account->site_id; 
+				$sandbox_enabled = $account->sandbox_mode; 
+				$ebay_token      = $account->token; 
+			} else {
+				$msg = sprintf('<b>Warning: You are trying to use an account which does not exist in WP-Lister</b> (ID %s).',$account_id) . '<br>';
+				$msg .= 'This can happen when you delete an account from WP-Lister without removing all listings, profiles and orders first.'. '<br><br>';
+				$msg .= 'In order to solve this issue, please visit your account settings and follow the instructions to assign all listings, orders and profiles to your default account.';
+				wple_show_message($msg,'warn');
+			}
+		} else {
+			$account_id = get_option('wplister_default_account_id');
+		}
+
+		if ( $site_id ) $ebay_site_id = $site_id;
+
+		$this->EC->initEbay( $ebay_site_id, 
+							 $sandbox_enabled,
+							 $ebay_token,
+							 $account_id );
 	}
 	
 	public function isStagingSite() {

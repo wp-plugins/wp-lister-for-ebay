@@ -6,6 +6,8 @@ class WPL_Model {
 
 	var $logger;
 	public $result;
+	public $site_id;
+	public $account_id;
 	
 	public function __construct() {
 		global $wpl_logger;
@@ -31,13 +33,17 @@ class WPL_Model {
 		// load required classes - moved to EbayController::initEbay()
 		// $this->loadEbayClasses();
 
+		// store site and account for wpdb->insert
+		$this->site_id    = $session->getSiteId();
+		$this->account_id = $session->wple_account_id;
+
 		// preparation - set up new ServiceProxy with given session
 		$this->_session = $session;
 		$this->_cs = new EbatNs_ServiceProxy($this ->_session, 'EbatNs_DataConverterUtf8');
 
 		// attach custom DB Logger if enabled
 		if ( get_option('wplister_log_to_db') == '1' ) {
-			$this->_cs->attachLogger( new WPL_EbatNs_Logger( false, 'db' ) );
+			$this->_cs->attachLogger( new WPL_EbatNs_Logger( false, 'db', $this->account_id, $this->site_id ) );
 		}
 
 		// attach Logger if log level is debug or greater
@@ -159,6 +165,14 @@ class WPL_Model {
 				$longMessage .= '<br>'. 'Below you find an explaination as to what triggered the above error:';
 			}
 			
+			// #1047 - Auction closed / The auction has been closed.
+			if ( $error->getErrorCode() == 1047 ) { 
+				// change status from Error to Warning to allow post processing of this error
+				$res->setAck('Warning');
+				$this->handle_error_code = 1047;
+				$longMessage .= '<br><br>'. '<b>Note:</b> Listing status was changed to ended.';				
+			}
+			
 			// #291 - Auction ended / You are not allowed to revise ended listings.
 			if ( $error->getErrorCode() == 291 ) { 
 				// change status from Error to Warning to allow post processing of this error
@@ -187,8 +201,9 @@ class WPL_Model {
 				// $longMessage .= '<br><br>'. '<b>Your API token is invalid.</b> Please authenticate WP-Lister with eBay again.';
 				$longMessage .= '<br><br>'. '<b>Please authenticate WP-Lister with eBay again.</b>';
 				$longMessage .= '<br>'. 'This can happen if you enabled the sandbox mode or if your token has expired.';
-				$longMessage .= '<br>'. 'To re-authenticate WP-Lister visit the Settings page, click on "Change Account" and follow the instructions.';
-				update_option( 'wplister_ebay_token_is_invalid', true );
+				$longMessage .= '<br>'. 'To refresh your eBay token, please visit Settings &raquo; Account &raquo; Edit and follow the instructions in the sidebar.';
+				// update_option( 'wplister_ebay_token_is_invalid', true ); // update legacy option
+				update_option( 'wplister_ebay_token_is_invalid', array( 'site_id' => $this->site_id, 'account_id' => $this->account_id ) ); // store site and account
 			}
 			
 			// #21916519 - Error: Listing is missing required item specific(s)
@@ -206,8 +221,10 @@ class WPL_Model {
 					$longMessage .= '<li>Define item specifics in your listing profile where you can either enter fixed values or map WooCommerce product attributes to eBay item specifics.'.'</li>';
 				endif;
 				$longMessage .= '</ol>';
-				$longMessage .= 'More detailed information about item specifics in WP-Lister Pro can be found here: ';
-				$longMessage .= '<a href="http://www.wplab.com/list-your-products-with-item-specifics-recommended-by-ebay/" target="_blank">http://www.wplab.com/list-your-products-with-item-specifics-recommended-by-ebay/</a>';
+		        if ( ! defined('WPLISTER_RESELLER_VERSION') ) :
+					$longMessage .= 'More detailed information about item specifics in WP-Lister Pro can be found here: ';
+					$longMessage .= '<a href="http://www.wplab.com/list-your-products-with-item-specifics-recommended-by-ebay/" target="_blank">http://www.wplab.com/list-your-products-with-item-specifics-recommended-by-ebay/</a>';
+				endif;
 			}
 			
 			// #219422   - Error: Invalid PromotionalSale item / Item format does not qualify for promotional sale
@@ -233,6 +250,8 @@ class WPL_Model {
 				$longMessage .= 'eBay tried to fetch an image from your website but your server did not respond in time.<br>';
 				$longMessage .= 'This could be a temporary issue with eBay, but it could as well indicate problems with your server. ';
 				$longMessage .= 'You should wait a few hours and see if this issue disappears, but if it persists you should consider moving to a better hosting provider.';
+				$longMessage .= '<br>';
+				$longMessage .= 'If your site uses SSL, make sure that static content like images is accessible both with and without SSL. eBay is not able to fetch images from SSL-only sites.';
 			}
 			
 			// #21919028 - Error: Portions of this listing cannot be revised if the item has bid or active Best Offers or is ending in 12 hours.
@@ -248,6 +267,21 @@ class WPL_Model {
 				$longMessage .= 'Your shipping profiles on eBay have changed.<br>';
 				$longMessage .= 'Please visit WP-Lister &raquo; Tools and click on <i>Update user details</i> to fetch the current list of profiles from eBay.';
 				$longMessage .= 'You should check your profiles and products after doing so - you might have to update them.';
+			}
+			
+			// #21916635 - Error: Invalid Multi-SKU item id.
+			if ( $error->getErrorCode() == 21916635 ) { 
+				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
+				$longMessage .= 'You are trying to change an existing non-variable eBay listing to a variable listing - which is not allowed by eBay, although it is technically possible in WooCommerce.<br>';
+				$longMessage .= 'In order to revise or relist this product you have to end the eBay listing first, move it to the archive and then create a new listing from your product.';
+			}
+			
+			// #21916564 - Error: Variations not enabled in category
+			if ( $error->getErrorCode() == 21916564 ) { 
+				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
+				$longMessage .= 'Not all eBay categories support listings with variations. If you get this error when attempting to list an item, you will need to select an alternative eBay category to list the item.<br>';
+				$longMessage .= 'To learn more about variations and allowed categories you should visit this page: ';
+				$longMessage .= '<a href="http://pages.ebay.com/help/sell/listing-variations.html" target="_blank">http://pages.ebay.com/help/sell/listing-variations.html</a>';
 			}
 			
 			// #488 - Error: Duplicate UUID used.

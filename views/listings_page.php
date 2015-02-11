@@ -174,7 +174,7 @@
 				})
 
 				// handle bulk actions click
-				jQuery(".bulkactions input[type='submit']").on('click', function() {
+				jQuery(".tablenav .actions input[type='submit'].action").on('click', function() {
 					
 					if ( 'doaction'  == this.id ) var selected_action = jQuery("select[name='action']").first().val();
 					if ( 'doaction2' == this.id ) var selected_action = jQuery("select[name='action2']").first().val();
@@ -240,6 +240,17 @@
 	
 	</script>
 
+
+	<?php if ( get_option('wple_job_reapply_profile_id' ) ) : ?>
+		<script type="text/javascript">
+			jQuery( document ).ready( function () {	
+				// auto start reapply profile job
+				setTimeout(function() {
+					jQuery('#btn_run_delayed_profile_application').click();
+				}, 1000); // delays 1 sec
+			});
+		</script>
+	<?php endif; ?>
 
 	<?php if ( isset( $_GET['action'] ) && ( $_GET['action'] == 'verifyPreparedItemsNow' ) ) : ?>
 		<script type="text/javascript">

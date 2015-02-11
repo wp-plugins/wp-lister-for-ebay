@@ -54,27 +54,55 @@
 								<div id="misc-publishing-actions">
 									<div class="misc-pub-section">
 									<!-- optional save and apply to all prepared listings already using this profile -->
-									<?php if ( count($wpl_prepared_listings) > -1 ): ?>
-										<p><?php printf( __('There are %s prepared, %s verified and %s published items using this profile.','wplister'), count($wpl_prepared_listings), count($wpl_verified_listings), count($wpl_published_listings) ) ?></p>
+									<?php if ( $wpl_total_listings_count > 1000 ): ?>
 
-										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_prepared" value="yes" id="apply_changes_to_all_prepared" <?php if ($wpl_prepared_listings) echo 'checked' ?>/>
-										<label for="apply_changes_to_all_prepared"><?php printf( __('update %s prepared items','wplister'), count($wpl_prepared_listings) ) ?></label>
+										<input type="hidden" name="wple_delay_profile_application" value="yes" />
+										<?php $_GET['return_to'] = 'listings'; ?>
+
+										<p><?php printf( __('There are %s prepared, %s verified and %s published items using this profile.','wplister'), $wpl_prepared_listings_count, $wpl_verified_listings_count, $wpl_published_listings_count ) ?></p>
+
+										<input disabled type="checkbox" name="wpl_e2e_apply_changes_to_all_prepared" value="yes" id="apply_changes_to_all_prepared" <?php if ( $wpl_prepared_listings_count ) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_prepared"><?php printf( __('update %s prepared items','wplister'), $wpl_prepared_listings_count ) ?></label>
 										<br class="clear" />
 
-										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_verified" value="yes" id="apply_changes_to_all_verified" <?php if ($wpl_verified_listings) echo 'checked' ?>/>
-										<label for="apply_changes_to_all_verified"><?php printf( __('update %s verified items','wplister'), count($wpl_verified_listings) ) ?></label>
+										<input disabled type="checkbox" name="wpl_e2e_apply_changes_to_all_verified" value="yes" id="apply_changes_to_all_verified" <?php if ($wpl_verified_listings_count) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_verified"><?php printf( __('update %s verified items','wplister'), ($wpl_verified_listings_count) ) ?></label>
 										<br class="clear" />
 
-										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_published" value="yes" id="apply_changes_to_all_published" <?php if ($wpl_published_listings) echo 'checked' ?>/>
-										<label for="apply_changes_to_all_published"><?php printf( __('update %s published items','wplister'), count($wpl_published_listings) ) ?></label>
+										<input disabled type="checkbox" name="wpl_e2e_apply_changes_to_all_published" value="yes" id="apply_changes_to_all_published" <?php if ($wpl_published_listings_count) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_published"><?php printf( __('update %s published items','wplister'), ($wpl_published_listings_count) ) ?></label>
 										<br class="clear" />
 
-										<input type="checkbox" id="wpl_e2e_apply_changes_to_all_ended" name="wpl_e2e_apply_changes_to_all_ended" value="yes" id="apply_changes_to_all_ended" <?php #if ($wpl_ended_listings) echo 'checked' ?>/>
-										<label for="apply_changes_to_all_ended"><?php printf( __('update %s ended items','wplister'), count($wpl_ended_listings) ) ?></label>
+										<input disabled type="checkbox" id="wpl_e2e_apply_changes_to_all_ended" name="wpl_e2e_apply_changes_to_all_ended" value="yes" id="apply_changes_to_all_ended" <?php #if ($wpl_ended_listings_count) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_ended"><?php printf( __('update %s ended items','wplister'), ($wpl_ended_listings_count) ) ?></label>
 										<br class="clear" />
 
-										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_locked" value="yes" id="apply_changes_to_all_locked" <?php #if ($wpl_locked_listings) echo 'checked' ?>/>
-										<label for="apply_changes_to_all_locked"><?php printf( __('update %s locked items','wplister'), count($wpl_locked_listings) ) ?></label>
+										<!-- <input disabled type="checkbox" name="wpl_e2e_apply_changes_to_all_locked" value="yes" id="apply_changes_to_all_locked" <?php #if ($wpl_locked_listings_count) echo 'checked' ?>/> -->
+										<!-- <label for="apply_changes_to_all_locked"><?php printf( __('update %s locked items','wplister'), ($wpl_locked_listings_count) ) ?></label> -->
+
+										<p><?php printf( __('This profile will be applied to %s listings.','wplister'), $wpl_total_listings_count ) ?></p>
+
+									<?php elseif ( $wpl_total_listings_count || $wpl_ended_listings_count ): ?>
+										<p><?php printf( __('There are %s prepared, %s verified and %s published items using this profile.','wplister'), $wpl_prepared_listings_count, $wpl_verified_listings_count, $wpl_published_listings_count ) ?></p>
+
+										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_prepared" value="yes" id="apply_changes_to_all_prepared" <?php if ( $wpl_prepared_listings_count ) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_prepared"><?php printf( __('update %s prepared items','wplister'), $wpl_prepared_listings_count ) ?></label>
+										<br class="clear" />
+
+										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_verified" value="yes" id="apply_changes_to_all_verified" <?php if ($wpl_verified_listings_count) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_verified"><?php printf( __('update %s verified items','wplister'), ($wpl_verified_listings_count) ) ?></label>
+										<br class="clear" />
+
+										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_published" value="yes" id="apply_changes_to_all_published" <?php if ($wpl_published_listings_count) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_published"><?php printf( __('update %s published items','wplister'), ($wpl_published_listings_count) ) ?></label>
+										<br class="clear" />
+
+										<input type="checkbox" id="wpl_e2e_apply_changes_to_all_ended" name="wpl_e2e_apply_changes_to_all_ended" value="yes" id="apply_changes_to_all_ended" <?php #if ($wpl_ended_listings_count) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_ended"><?php printf( __('update %s ended items','wplister'), ($wpl_ended_listings_count) ) ?></label>
+										<br class="clear" />
+
+										<input type="checkbox" name="wpl_e2e_apply_changes_to_all_locked" value="yes" id="apply_changes_to_all_locked" <?php #if ($wpl_locked_listings_count) echo 'checked' ?>/>
+										<label for="apply_changes_to_all_locked"><?php printf( __('update %s locked items','wplister'), ($wpl_locked_listings_count) ) ?></label>
 
 									<?php else: ?>
 										<p>There are no prepared items using this profile.</p>
@@ -245,6 +273,28 @@
 						</div>
 					</div>
 
+					<?php if ( WPLE()->multi_account ) : ?>
+					<div class="postbox" id="AccountsBox">
+						<h3><span><?php echo __('Account','wplister'); ?></span></h3>
+						<div class="inside">
+							<?php foreach ( WPLE()->accounts as $account) : ?>
+								<?php
+									$account_id = $account->id;
+									$checked    = $wpl_item['account_id'] == $account_id ? 'checked="checked"' : '';
+									$disabled   = $account->active ? '' : 'disabled="disabled"';
+								?>
+
+								<input type="radio" value="<?php echo $account_id ?>" id="account-<?php echo $account_id ?>" name="wpl_e2e_account_id" class="post-format" <?php echo $checked ?> <?php echo $disabled ?> > 
+								<label for="account-<?php echo $account_id ?>"><?php echo $account->title ?></label><br>
+
+							<?php endforeach; ?>							
+							<p><small><?php echo __('When you change the account, you need to save the profile before you make any changes.','wplister'); ?></small></p>
+						</div>
+					</div>
+					<?php else : ?>							
+						<input type="hidden" name="wpl_e2e_account_id" value="<?php echo $wpl_item['account_id']; ?>" />
+					<?php endif; ?>							
+
 
 					<div class="postbox" id="TitleSettingsBox">
 						<h3><span><?php echo __('Title and Subtitle','wplister'); ?></span></h3>
@@ -282,7 +332,7 @@
 
 							<label for="wpl-text-bold_title" class="text_label">
 								<?php echo __('Bold title','wplister'); ?>
-                                <?php wplister_tooltip('Select if you want the listing title to be in boldface type. Applicable listing fees apply. Not applicable to eBay Motors.') ?>
+                                <?php wplister_tooltip('Select if you want the listing title to be in boldface type. <b>Applicable listing fees apply.</b> Not applicable to eBay Motors.') ?>
 							</label>
 							<select id="wpl-text-bold_title" name="wpl_e2e_bold_title" title="Use additional product description as subtitle" class=" required-entry select">
 								<option value="1" <?php if ( @$item_details['bold_title'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
@@ -507,7 +557,7 @@
 					</div>
 
 					<?php #if ( ! get_option('wpl_reseller_enable_whitelabel' ) ) : ?>
-					<?php if ( defined('WPLISTER_RESELLER_VERSION') ) : ?>
+					<?php if ( ! defined('WPLISTER_RESELLER_VERSION') ) : ?>
 					<div class="postbox" id="HelpBox">
 						<h3><span><?php echo __('Help','wplister'); ?></span></h3>
 						<div class="inside">

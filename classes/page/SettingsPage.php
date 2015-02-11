@@ -40,6 +40,13 @@ class SettingsPage extends WPL_Page {
 
 		}
 
+		if ( get_option( 'wplister_enable_accounts_page' ) ) {
+
+			add_submenu_page( self::ParentMenuId, $this->getSubmenuPageTitle( 'Accounts' ), __('Account','wplister'), 
+						  'manage_ebay_listings', $this->getSubmenuId( 'settings-accounts' ), array( &$this, 'displayAccountsPage' ) );
+
+		}
+
 	}
 
 	function addScreenOptions() {
@@ -112,24 +119,8 @@ class SettingsPage extends WPL_Page {
         if ( 'categories' == $active_tab ) return $this->displayCategoriesPage();
         if ( 'developer'  == $active_tab ) return $this->displayDeveloperPage();
         if ( 'advanced'   == $active_tab ) return $this->displayAdvancedSettingsPage();
+        if ( 'accounts'   == $active_tab ) return $this->displayAccountsPage();
 	
-		// action remove_token
-		if ( $this->requestAction() == 'remove_token' ) {
-			check_admin_referer('remove_token');
-
-			// remove_token
-			self::updateOption('ebay_token','');
-			self::updateOption('ebay_token_expirationtime','');
-			self::updateOption('ebay_token_userid','');
-			self::updateOption('ebay_user','');
-
-			// check if we have a token
-			if ( self::getOption('ebay_token') == '' ) {
-				$this->showMessage( "Please link WP-Lister to your eBay account." );
-			}
-
-			$this->check_wplister_setup('settings');
-		}
 
 		// action FetchToken
 		if ( $this->requestAction() == 'FetchToken' ) {
@@ -152,6 +143,7 @@ class SettingsPage extends WPL_Page {
 			'plugin_url'				=> self::$PLUGIN_URL,
 			'message'					=> $this->message,
 
+			// deprecated parameters
 			'text_ebay_token'			=> self::getOption( 'ebay_token' ),
 			'text_ebay_site_id'			=> self::getOption( 'ebay_site_id' ),
 			'text_paypal_email'			=> self::getOption( 'paypal_email' ),
@@ -160,8 +152,7 @@ class SettingsPage extends WPL_Page {
 			'ebay_user'					=> self::getOption( 'ebay_user' ),
 
 			'option_cron_auctions'		=> self::getOption( 'cron_auctions' ),
-			'option_enable_ebay_motors'	=> self::getOption( 'enable_ebay_motors' ),
-			'option_ebay_update_mode'	=> self::getOption( 'ebay_update_mode', 'order' ),
+			// 'option_ebay_update_mode'	=> self::getOption( 'ebay_update_mode', 'order' ),
 			'local_auction_display'     => self::getOption( 'local_auction_display', 'off' ),
 			'send_weight_and_size'      => self::getOption( 'send_weight_and_size', 'default' ),
 			'is_staging_site'     		=> $this->isStagingSite(),
@@ -175,7 +166,9 @@ class SettingsPage extends WPL_Page {
 
 	public function displayCategoriesPage() {
 
-    	$shop_categories = $this->loadProductCategories();
+		$this->account_id = isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : get_option('wplister_default_account_id');
+		$this->site_id    = isset( WPLE()->accounts[ $this->account_id ] ) ? WPLE()->accounts[ $this->account_id ]->site_id : false;
+		$shop_categories  = $this->loadProductCategories();
 
 	    //Create an instance of our package class...
 	    $categoriesMapTable = new CategoriesMapTable();
@@ -183,8 +176,9 @@ class SettingsPage extends WPL_Page {
 	    $categoriesMapTable->items = $shop_categories;
 	    $categoriesMapTable->prepare_items();
 
-	    $default_category_id = self::getOption('default_ebay_category_id');
-	    $default_category_name = EbayCategoriesModel::getFullEbayCategoryName( $default_category_id );
+	    // get default category - from selected account, but fall back to default
+	    $default_category_id   = $this->account_id ? WPLE()->accounts[ $this->account_id ]->default_ebay_category_id : self::getOption('default_ebay_category_id');
+	    $default_category_name = EbayCategoriesModel::getFullEbayCategoryName( $default_category_id, $this->site_id );
 	    if ( ! $default_category_name ) $default_category_name = 'None';
 
 	    $form_action = 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab=categories';
@@ -199,6 +193,8 @@ class SettingsPage extends WPL_Page {
 			'categoriesMapTable'		=> $categoriesMapTable,
 			'default_category_id'		=> $default_category_id,
 			'default_category_name'		=> $default_category_name,
+			'account_id'				=> $this->account_id,
+			'site_id'					=> $this->site_id,
 
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'form_action'				=> $form_action
@@ -225,11 +221,14 @@ class SettingsPage extends WPL_Page {
 			'option_uninstall'              => self::getOption( 'uninstall' ),
 			'option_foreign_transactions'   => self::getOption( 'foreign_transactions' ),
 			'option_allow_backorders'       => self::getOption( 'allow_backorders', 0 ),
+			'disable_sale_price'            => self::getOption( 'disable_sale_price', 0 ),
 			'api_enable_auto_relist'        => self::getOption( 'api_enable_auto_relist', 0 ),
 			'auto_update_ended_items'       => self::getOption( 'auto_update_ended_items', 0 ),
 			'option_preview_in_new_tab'     => self::getOption( 'preview_in_new_tab', 0 ),
 			'enable_categories_page'        => self::getOption( 'enable_categories_page', 0 ),
+			'enable_accounts_page'			=> self::getOption( 'enable_accounts_page', 0 ),
 			'enable_thumbs_column'          => self::getOption( 'enable_thumbs_column', 0 ),
+			'enable_custom_product_prices'  => self::getOption( 'enable_custom_product_prices', 1 ),
 			'option_disable_wysiwyg_editor' => self::getOption( 'disable_wysiwyg_editor', 0 ),
 			'enable_item_compat_tab'        => self::getOption( 'enable_item_compat_tab', 1 ),
 			'convert_dimensions'        	=> self::getOption( 'convert_dimensions' ),
@@ -252,17 +251,19 @@ class SettingsPage extends WPL_Page {
 			'plugin_url'				=> self::$PLUGIN_URL,
 			'message'					=> $this->message,
 
-			'update_channel'			=> self::getOption( 'update_channel', 'stable' ),
+			'update_channel'			=> get_option( 'wple_update_channel', 'stable' ),
 			'ajax_error_handling'		=> self::getOption( 'ajax_error_handling', 'halt' ),
 			'php_error_handling'		=> self::getOption( 'php_error_handling', 0 ),
 			'disable_variations'		=> self::getOption( 'disable_variations', 0 ),
+			'disable_compat_list'		=> self::getOption( 'disable_compat_list', 0 ),
 			'enable_messages_page'		=> self::getOption( 'enable_messages_page', 0 ),
+			'enable_item_edit_link'		=> self::getOption( 'enable_item_edit_link', 0 ),
 			'log_record_limit'			=> self::getOption( 'log_record_limit', 4096 ),
 			'log_days_limit'			=> self::getOption( 'log_days_limit', 30 ),
 			'xml_formatter'				=> self::getOption( 'xml_formatter', 'default' ),
 			'force_table_items_limit'	=> self::getOption( 'force_table_items_limit' ),
-			'ignore_orders_before_ts'	=> self::getOption( 'ignore_orders_before_ts' ),
 			'staging_site_pattern'		=> self::getOption( 'staging_site_pattern', '' ),
+			'ignore_orders_before_ts'	=> get_option( 'ignore_orders_before_ts' ),
 
 			'text_ebay_token'			=> self::getOption( 'ebay_token' ),
 			'text_log_level'			=> self::getOption( 'log_level' ),
@@ -277,37 +278,42 @@ class SettingsPage extends WPL_Page {
 	}
 
 
+	public function displayAccountsPage() {
+		global $oWPL_WPLister;
+    	return $oWPL_WPLister->pages['accounts']->displayAccountsPage();
+	}
+
+
 	protected function saveSettings() {
 
 		// TODO: check nonce
-		if ( isset( $_POST['wpl_e2e_text_ebay_site_id'] ) ) {
+		if ( isset( $_POST['wpl_e2e_option_cron_auctions'] ) ) {
 
 			// reminder to update categories when site id changes
-			$changed_site_id = false;
-			$old_ebay_site_id = self::getOption( 'ebay_site_id' );
-			if ( $old_ebay_site_id != $this->getValueFromPost( 'text_ebay_site_id' ) ) {
-				// $msg  = __('You switched to a different eBay site. Please make sure that you update eBay details on the Tools page.','wplister');
-				$msg  = '<p>';
-				$msg .= __('You switched to a different eBay site.','wplister') . ' ';
-				$msg .= __('Please update site specific eBay details like categories, shipping services and payment options.','wplister');
-				$msg .= '&nbsp;&nbsp;';
-				$msg .= '<a id="btn_update_ebay_data" class="button wpl_job_button">' . __('Update eBay data','wplister') . '</a>';
-				$msg .= '</p>';
-				$this->showMessage( $msg );
-				$changed_site_id = true;
-			}
+			// $changed_site_id = false;
+			// $old_ebay_site_id = self::getOption( 'ebay_site_id' );
+			// if ( $old_ebay_site_id != $this->getValueFromPost( 'text_ebay_site_id' ) ) {
+			// 	$msg  = '<p>';
+			// 	$msg .= __('You switched to a different eBay site.','wplister') . ' ';
+			// 	$msg .= __('Please update site specific eBay details like categories, shipping services and payment options.','wplister');
+			// 	$msg .= '&nbsp;&nbsp;';
+			// 	$msg .= '<a id="btn_update_ebay_data" class="button wpl_job_button">' . __('Update eBay data','wplister') . '</a>';
+			// 	$msg .= '</p>';
+			// 	$this->showMessage( $msg );
+			// 	$changed_site_id = true;
+			// }
 
-			self::updateOption( 'ebay_site_id',			$this->getValueFromPost( 'text_ebay_site_id' ) );
-			self::updateOption( 'paypal_email',			trim( $this->getValueFromPost( 'text_paypal_email' ) ) );
+			// self::updateOption( 'ebay_site_id',			$this->getValueFromPost( 'text_ebay_site_id' ) );
+			// self::updateOption( 'paypal_email',			trim( $this->getValueFromPost( 'text_paypal_email' ) ) );
+			// if ( ! $changed_site_id ) $this->showMessage( __('Settings saved.','wplister') );
 			
 			self::updateOption( 'cron_auctions',		$this->getValueFromPost( 'option_cron_auctions' ) );
-			self::updateOption( 'enable_ebay_motors', 	$this->getValueFromPost( 'option_enable_ebay_motors' ) );
-			self::updateOption( 'ebay_update_mode', 	$this->getValueFromPost( 'option_ebay_update_mode' ) );
+			// self::updateOption( 'ebay_update_mode', 	$this->getValueFromPost( 'option_ebay_update_mode' ) );
 			self::updateOption( 'local_auction_display',$this->getValueFromPost( 'local_auction_display' ) );
 			self::updateOption( 'send_weight_and_size', $this->getValueFromPost( 'send_weight_and_size' ) );
 
 			$this->handleCronSettings( $this->getValueFromPost( 'option_cron_auctions' ) );
-			if ( ! $changed_site_id ) $this->showMessage( __('Settings saved.','wplister') );
+			$this->showMessage( __('Settings saved.','wplister') );
 		}
 	}
 
@@ -318,28 +324,31 @@ class SettingsPage extends WPL_Page {
 
 			$this->savePermissions();
 
-			self::updateOption( 'process_shortcodes', 		$this->getValueFromPost( 'process_shortcodes' ) );
-			self::updateOption( 'remove_links',     		$this->getValueFromPost( 'remove_links' ) );
-			self::updateOption( 'default_image_size',   	$this->getValueFromPost( 'default_image_size' ) );
-			self::updateOption( 'wc2_gallery_fallback', 	$this->getValueFromPost( 'wc2_gallery_fallback' ) );
-			self::updateOption( 'hide_dupe_msg',    		$this->getValueFromPost( 'hide_dupe_msg' ) );
-			self::updateOption( 'gallery_items_limit',  	$this->getValueFromPost( 'gallery_items_limit' ) );
-			self::updateOption( 'uninstall',				$this->getValueFromPost( 'option_uninstall' ) );
-			self::updateOption( 'foreign_transactions',		$this->getValueFromPost( 'option_foreign_transactions' ) );
-			self::updateOption( 'preview_in_new_tab',		$this->getValueFromPost( 'option_preview_in_new_tab' ) );
-			self::updateOption( 'enable_categories_page',	$this->getValueFromPost( 'enable_categories_page' ) );
-			self::updateOption( 'enable_thumbs_column',		$this->getValueFromPost( 'enable_thumbs_column' ) );
-			self::updateOption( 'disable_wysiwyg_editor',	$this->getValueFromPost( 'option_disable_wysiwyg_editor' ) );
-			self::updateOption( 'enable_item_compat_tab', 	$this->getValueFromPost( 'enable_item_compat_tab' ) );
-			self::updateOption( 'convert_dimensions', 		$this->getValueFromPost( 'convert_dimensions' ) );
-			self::updateOption( 'exclude_attributes', 		$this->getValueFromPost( 'exclude_attributes' ) );
-			self::updateOption( 'local_timezone',			$this->getValueFromPost( 'option_local_timezone' ) );
-			self::updateOption( 'allow_backorders',			$this->getValueFromPost( 'option_allow_backorders' ) );
-			self::updateOption( 'api_enable_auto_relist',	$this->getValueFromPost( 'api_enable_auto_relist' ) );
-			self::updateOption( 'auto_update_ended_items',	$this->getValueFromPost( 'auto_update_ended_items' ) );
+			self::updateOption( 'process_shortcodes', 				$this->getValueFromPost( 'process_shortcodes' ) );
+			self::updateOption( 'remove_links',     				$this->getValueFromPost( 'remove_links' ) );
+			self::updateOption( 'default_image_size',   			$this->getValueFromPost( 'default_image_size' ) );
+			self::updateOption( 'wc2_gallery_fallback', 			$this->getValueFromPost( 'wc2_gallery_fallback' ) );
+			self::updateOption( 'hide_dupe_msg',    				$this->getValueFromPost( 'hide_dupe_msg' ) );
+			self::updateOption( 'gallery_items_limit',  			$this->getValueFromPost( 'gallery_items_limit' ) );
+			self::updateOption( 'uninstall',						$this->getValueFromPost( 'option_uninstall' ) );
+			self::updateOption( 'foreign_transactions',				$this->getValueFromPost( 'option_foreign_transactions' ) );
+			self::updateOption( 'preview_in_new_tab',				$this->getValueFromPost( 'option_preview_in_new_tab' ) );
+			self::updateOption( 'enable_categories_page',			$this->getValueFromPost( 'enable_categories_page' ) );
+			self::updateOption( 'enable_accounts_page',				$this->getValueFromPost( 'enable_accounts_page' ) );
+			self::updateOption( 'enable_thumbs_column',				$this->getValueFromPost( 'enable_thumbs_column' ) );
+			self::updateOption( 'enable_custom_product_prices', 	$this->getValueFromPost( 'enable_custom_product_prices' ) );
+			self::updateOption( 'disable_wysiwyg_editor',			$this->getValueFromPost( 'option_disable_wysiwyg_editor' ) );
+			self::updateOption( 'enable_item_compat_tab', 			$this->getValueFromPost( 'enable_item_compat_tab' ) );
+			self::updateOption( 'convert_dimensions', 				$this->getValueFromPost( 'convert_dimensions' ) );
+			self::updateOption( 'exclude_attributes', 				$this->getValueFromPost( 'exclude_attributes' ) );
+			self::updateOption( 'local_timezone',					$this->getValueFromPost( 'option_local_timezone' ) );
+			self::updateOption( 'allow_backorders',					$this->getValueFromPost( 'option_allow_backorders' ) );
+			self::updateOption( 'disable_sale_price',				$this->getValueFromPost( 'disable_sale_price' ) );
+			self::updateOption( 'api_enable_auto_relist',			$this->getValueFromPost( 'api_enable_auto_relist' ) );
+			self::updateOption( 'auto_update_ended_items',			$this->getValueFromPost( 'auto_update_ended_items' ) );
 
 			if ( ! defined('WPLISTER_RESELLER_VERSION') ) 
-				self::updateOption( 'admin_menu_label',		$this->getValueFromPost( 'text_admin_menu_label' ) );
+				self::updateOption( 'admin_menu_label',				$this->getValueFromPost( 'text_admin_menu_label' ) );
 
 
 			$this->showMessage( __('Settings saved.','wplister') );
@@ -399,16 +408,33 @@ class SettingsPage extends WPL_Page {
 	protected function saveCategoriesSettings() {
 
 		// TODO: check nonce
-		if ( isset( $_POST['wpl_e2e_ebay_category_id'] ) ) {
+		if ( isset( $_POST['wpl_e2e_ebay_category_id'] ) && isset( $_POST['submit'] ) ) {
 
-			// save ebay categories mapping
-			self::updateOption( 'categories_map_ebay',	$this->getValueFromPost( 'ebay_category_id' ) );
+	        $account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : get_option('wplister_default_account_id') );
+    	    $site_id    = WPLE()->accounts[ $account_id ]->site_id;
 
-			// save store categories mapping
-			self::updateOption( 'categories_map_store',	$this->getValueFromPost( 'store_category_id' ) );
+    	    if ( $account_id ) {
+    	    	$account = new WPLE_eBayAccount( $account_id );
+				$account->default_ebay_category_id = $this->getValueFromPost( 'default_ebay_category_id' );
+				$account->categories_map_ebay      = maybe_serialize( $this->getValueFromPost( 'ebay_category_id' ) );
+				$account->categories_map_store     = maybe_serialize( $this->getValueFromPost( 'store_category_id' ) );
+    			$account->update();
+    			WPLE()->loadAccounts();
+    	    }
 
-			// save default ebay category
-			self::updateOption( 'default_ebay_category_id', $this->getValueFromPost( 'default_ebay_category_id' ) );
+    	    // update current default account (legacy)
+    	    if ( $account_id == get_option('wplister_default_account_id') ) {
+
+				// save ebay categories mapping
+				self::updateOption( 'categories_map_ebay',	$this->getValueFromPost( 'ebay_category_id' ) );
+
+				// save store categories mapping
+				self::updateOption( 'categories_map_store',	$this->getValueFromPost( 'store_category_id' ) );
+
+				// save default ebay category
+				self::updateOption( 'default_ebay_category_id', $this->getValueFromPost( 'default_ebay_category_id' ) );
+
+    	    }
 
 			$this->showMessage( __('Categories mapping updated.','wplister') );
 		}
@@ -481,16 +507,21 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'ajax_error_handling',		$this->getValueFromPost( 'ajax_error_handling' ) );
 			self::updateOption( 'php_error_handling',		$this->getValueFromPost( 'php_error_handling' ) );
 			self::updateOption( 'disable_variations',		$this->getValueFromPost( 'disable_variations' ) );
+			self::updateOption( 'disable_compat_list',		$this->getValueFromPost( 'disable_compat_list' ) );
 			self::updateOption( 'enable_messages_page',		$this->getValueFromPost( 'enable_messages_page' ) );
+			self::updateOption( 'enable_item_edit_link',	$this->getValueFromPost( 'enable_item_edit_link' ) );
 			self::updateOption( 'log_record_limit',			$this->getValueFromPost( 'log_record_limit' ) );
 			self::updateOption( 'log_days_limit',			$this->getValueFromPost( 'log_days_limit' ) );
 			self::updateOption( 'xml_formatter',			$this->getValueFromPost( 'xml_formatter' ) );
 			self::updateOption( 'force_table_items_limit',	$this->getValueFromPost( 'force_table_items_limit' ) );
 			self::updateOption( 'staging_site_pattern',	    trim( $this->getValueFromPost( 'staging_site_pattern' ) ) );
 
+			// updater instance
+			update_option( 'wple_instance',	    			trim( $this->getValueFromPost( 'wple_instance' ) ) );
+
 			// ignore_orders_before_ts
 			$ignore_orders_before_ts = trim( $this->getValueFromPost( 'ignore_orders_before_ts' ) );
-			self::updateOption( 'ignore_orders_before_ts',	$ignore_orders_before_ts ? strtotime($ignore_orders_before_ts) : '' );
+			update_option( 'ignore_orders_before_ts',	$ignore_orders_before_ts ? strtotime($ignore_orders_before_ts) : '' );
 			
 			$this->handleChangedUpdateChannel();
 
@@ -555,6 +586,12 @@ class SettingsPage extends WPL_Page {
 	function printTree( $tree, $depth = 0, $result = array() ) {
 		$categories_map_ebay  = self::getOption( 'categories_map_ebay'  );
 		$categories_map_store = self::getOption( 'categories_map_store' );
+
+		if ( $this->account_id ) {
+			$categories_map_ebay  = maybe_unserialize( WPLE()->accounts[ $this->account_id ]->categories_map_ebay );
+			$categories_map_store = maybe_unserialize( WPLE()->accounts[ $this->account_id ]->categories_map_store );
+		}
+
 	    if( ($tree != 0) && (count($tree) > 0) ) {
 	        foreach($tree as $node) {
 	        	// indent category name accourding to depth
@@ -571,9 +608,9 @@ class SettingsPage extends WPL_Page {
 					'parent'              => $node->parent,
 					'category'            => $node->name,
 					'ebay_category_id'    => $ebay_category_id,
-					'ebay_category_name'  => EbayCategoriesModel::getFullEbayCategoryName( $ebay_category_id ),
+					'ebay_category_name'  => EbayCategoriesModel::getFullEbayCategoryName( $ebay_category_id, $this->site_id ),
 					'store_category_id'   => $store_category_id,
-					'store_category_name' => EbayCategoriesModel::getFullStoreCategoryName( $store_category_id ),
+					'store_category_name' => EbayCategoriesModel::getFullStoreCategoryName( $store_category_id, $this->account_id ),
 					'description'         => $node->description
 	            );
 
@@ -672,7 +709,7 @@ class SettingsPage extends WPL_Page {
     function get_tax_rates() {
     	global $wpdb;
 
-		$rates = $wpdb->get_results( "SELECT tax_rate_id, tax_rate_country, tax_rate_state, tax_rate_name, tax_rate_priority FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name" );
+		$rates = $wpdb->get_results( "SELECT tax_rate_id, tax_rate_country, tax_rate_state, tax_rate_name, tax_rate_priority, tax_rate_class FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name" );
 
 		return $rates;
     }
@@ -862,7 +899,7 @@ class SettingsPage extends WPL_Page {
 				<h5>Show on screen</h5>
 				<div class="metabox-prefs">
 						<label for="dev-hide">
-							<input type="checkbox" onclick="jQuery('#DeveloperToolBox').toggle();jQuery('.dev_box').toggle();" value="dev" id="dev-hide" name="dev-hide" class="hide-column-tog">
+							<input type="checkbox" onclick="jQuery('.dev_box').toggle();" value="dev" id="dev-hide" name="dev-hide" class="hide-column-tog">
 							Developer options
 						</label>
 					<br class="clear">

@@ -56,8 +56,8 @@ class EbayOrdersModel extends WPL_Model {
 
 			// period 30 days, which is the maximum allowed
 			$now = time();
-			$lastdate = $this->getDateOfLastOrder();
-			$this->logger->info('getDateOfLastOrder() returned: '.$lastdate);
+			$lastdate = $this->getDateOfLastOrder( $this->account_id );
+			$this->logger->info("getDateOfLastOrder( {$this->account_id} ) returned: ".$lastdate);
 			if ($lastdate) $lastdate = mysql2date('U', $lastdate);
 
 			// if last date is older than 30 days, fall back to default
@@ -221,7 +221,11 @@ class EbayOrdersModel extends WPL_Model {
 
 			// update existing order
 			$this->logger->info( 'update order #'.$data['order_id'] );
-			$wpdb->update( $this->tablename, $data, array( 'order_id' => $data['order_id'] ) );
+			$result = $wpdb->update( $this->tablename, $data, array( 'order_id' => $data['order_id'] ) );
+			if ( $result === false ) {
+				$this->logger->error( 'failed to update order - MySQL said: '.$wpdb->last_error );
+				wple_show_message( 'Failed to update order #'.$data['order_id'].' - MySQL said: '.$wpdb->last_error, 'error' );
+			}
 			$insert_id = $order['id'];
 
 
@@ -232,9 +236,10 @@ class EbayOrdersModel extends WPL_Model {
 			// create new order
 			$this->logger->info( 'insert order #'.$data['order_id'] );
 			$result = $wpdb->insert( $this->tablename, $data );
-			if ( ! $result ) {
+			if ( $result === false ) {
 				$this->logger->error( 'insert order failed - MySQL said: '.$wpdb->last_error );
 				$this->addToReport( 'error', $data, false, $wpdb->last_error );
+				wple_show_message( 'Failed to insert order #'.$data['order_id'].' - MySQL said: '.$wpdb->last_error, 'error' );
 				return false;
 			}
 			$Details       = maybe_unserialize( $data['details'] );
@@ -345,14 +350,16 @@ class EbayOrdersModel extends WPL_Model {
 
 
 
-		// mark listing as sold when last item is sold
-		if ( $quantity_sold == $quantity_total ) {
-			$wpdb->update( $wpdb->prefix.'ebay_auctions', 
-				array( 'status' => 'sold', 'date_finished' => $data['date_created'], ), 
-				array( 'ebay_id' => $ebay_id ) 
-			);
-			$this->logger->info( 'marked item #'.$ebay_id.' as SOLD ');
-		}
+		// mark listing as sold when last item is sold - unless Out Of Stock Control (oosc) is enabled
+        if ( ! $lm->thisAccountUsesOutOfStockControl( $data['account_id'] ) ) {
+			if ( $quantity_sold == $quantity_total ) {
+				$wpdb->update( $wpdb->prefix.'ebay_auctions', 
+					array( 'status' => 'sold', 'date_finished' => $data['date_created'], ), 
+					array( 'ebay_id' => $ebay_id ) 
+				);
+				$this->logger->info( 'marked item #'.$ebay_id.' as SOLD ');
+			}
+        }
 
 	} // processListingItem()
 
@@ -389,7 +396,7 @@ class EbayOrdersModel extends WPL_Model {
 			$rec->action  = 'reset_history';
 			$rec->msg     = 'Corrupted history data was cleared';
 			$rec->details = array();
-			$rec->success = 'ERROR';
+			$rec->success = false;
 			$rec->time    = time();
 
 			$history = array();
@@ -417,6 +424,7 @@ class EbayOrdersModel extends WPL_Model {
 
 		$data['order_id']            	   = $Detail->OrderID;
 		$data['total']                     = $Detail->Total->value;
+		$data['currency']                  = $Detail->Total->attributeValues['currencyID'];
 		$data['buyer_userid']              = $Detail->BuyerUserID;
 
 		$data['CompleteStatus']            = $Detail->OrderStatus;
@@ -429,6 +437,9 @@ class EbayOrdersModel extends WPL_Model {
 		$data['buyer_name']                = $Detail->Buyer->RegistrationAddress->Name;
 		$data['buyer_email']               = $Detail->TransactionArray[0]->Buyer->Email;
 
+		$data['site_id']    	 		   = $this->site_id;
+		$data['account_id']    	 		   = $this->account_id;
+
 		// use buyer name from shipping address if registration address is empty
 		if ( $data['buyer_name'] == '' ) {
 			$data['buyer_name'] = $Detail->ShippingAddress->Name;
@@ -437,18 +448,31 @@ class EbayOrdersModel extends WPL_Model {
 		// process transactions / items
 		$items = array();
 		foreach ( $Detail->TransactionArray as $Transaction ) {
+			$VariationSpecifics = false;
 			$sku = $Transaction->Item->SKU;
+
+			// process variation details
 			if ( is_object( @$Transaction->Variation ) ) {
+				$VariationSpecifics = array();
 				$sku = $Transaction->Variation->SKU;
+
+				if ( is_array($Transaction->Variation->VariationSpecifics) )
+				foreach ( $Transaction->Variation->VariationSpecifics as $varspec ) {
+					$attribute_name  = $varspec->Name;
+					$attribute_value = $varspec->Value[0];
+					$VariationSpecifics[ $attribute_name ] = $attribute_value;
+				}
 			}
+
 			$newitem = array();
-			$newitem['item_id']          = $Transaction->Item->ItemID;
-			$newitem['title']            = $Transaction->Item->Title;
-			$newitem['sku']              = $sku;
-			$newitem['quantity']         = $Transaction->QuantityPurchased;
-			$newitem['transaction_id']   = $Transaction->TransactionID;
-			$newitem['OrderLineItemID']  = $Transaction->OrderLineItemID;
-			$newitem['TransactionPrice'] = $Transaction->TransactionPrice->value;
+			$newitem['item_id']            = $Transaction->Item->ItemID;
+			$newitem['title']              = $Transaction->Item->Title;
+			$newitem['sku']                = $sku;
+			$newitem['quantity']           = $Transaction->QuantityPurchased;
+			$newitem['transaction_id']     = $Transaction->TransactionID;
+			$newitem['OrderLineItemID']    = $Transaction->OrderLineItemID;
+			$newitem['TransactionPrice']   = $Transaction->TransactionPrice->value;
+			$newitem['VariationSpecifics'] = $VariationSpecifics;
 			$items[] = $newitem;
 			// echo "<pre>";print_r($Transaction);echo"</pre>";die();
 		}
@@ -480,6 +504,7 @@ class EbayOrdersModel extends WPL_Model {
 			// skip if order date is older
 			if ( $this_order_date_created_ts < $first_order_date_created_ts ) {
 				$this->logger->info( "skipped old order #".$Detail->OrderID." created at ".$data['date_created'] );			
+				$this->logger->info( "timestamps: $this_order_date_created_ts / ".date('Y-m-d H:i:s',$this_order_date_created_ts)." (order)  <  $first_order_date_created_ts ".date('Y-m-d H:i:s',$first_order_date_created_ts)." (ref)" );			
 				$this->addToReport( 'skipped', $data );
 				return false;						
 			}
@@ -541,7 +566,7 @@ class EbayOrdersModel extends WPL_Model {
 
 	function getHtmlReport() {
 
-		$html  = '<div id="ebay_order_report" style="display:none">';
+		$html  = '<div class="ebay_order_report" style="display:none">';
 		$html .= '<br>';
 		$html .= __('New orders created','wplister') .': '. $this->count_inserted .' '. '<br>';
 		$html .= __('Existing orders updated','wplister')  .': '. $this->count_updated  .' '. '<br>';
@@ -670,18 +695,19 @@ class EbayOrdersModel extends WPL_Model {
 	}
 
 	// get the newest modification date of all orders in WP-Lister
-	function getDateOfLastOrder() {
+	function getDateOfLastOrder( $account_id ) {
 		global $wpdb;
 		$lastdate = $wpdb->get_var( "
 			SELECT LastTimeModified
 			FROM $this->tablename
+			WHERE account_id = '$account_id'
 			ORDER BY LastTimeModified DESC LIMIT 1
 		" );
 
 		// if there are no orders yet, check the date of the last transaction
 		if ( ! $lastdate ) {
 			$tm = new TransactionsModel();
-			$lastdate = $tm->getDateOfLastCreatedTransaction();
+			$lastdate = $tm->getDateOfLastCreatedTransaction( $account_id );
 			if ($lastdate) {
 				// add two minutes to prevent importing the same transaction again
 				$lastdate = mysql2date('U', $lastdate) + 120;
@@ -697,6 +723,7 @@ class EbayOrdersModel extends WPL_Model {
 
 		// regard ignore_orders_before_ts timestamp if set
 		if ( $ts = get_option('ignore_orders_before_ts') ) {
+			$this->logger->info( "getDateOfFirstOrder() - using ignore_orders_before_ts: $ts (raw)");
 			return $ts;
 		}
 
@@ -761,25 +788,33 @@ class EbayOrdersModel extends WPL_Model {
         $offset = ( $current_page - 1 ) * $per_page;
 
         $join_sql  = '';
-        $where_sql = '';
+        $where_sql = 'WHERE 1 = 1 ';
 
         // filter order_status
 		$order_status = ( isset($_REQUEST['order_status']) ? $_REQUEST['order_status'] : 'all');
 		if ( $order_status != 'all' ) {
-			$where_sql = "WHERE CompleteStatus = '".$order_status."' ";
+			$where_sql .= "AND o.CompleteStatus = '".$order_status."' ";
+		} 
+
+        // filter account_id
+		$account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : false);
+		if ( $account_id ) {
+			$where_sql .= "
+				 AND o.account_id = '".$account_id."'
+			";
 		} 
 
         // filter search_query
 		$search_query = ( isset($_REQUEST['s']) ? $_REQUEST['s'] : false);
 		if ( $search_query ) {
-			$where_sql = "
-				WHERE  o.buyer_name   LIKE '%".$search_query."%'
+			$where_sql .= "
+				AND  ( o.buyer_name   LIKE '%".$search_query."%'
 					OR o.items        LIKE '%".$search_query."%'
 					OR o.buyer_userid     = '".$search_query."'
 					OR o.buyer_email      = '".$search_query."'
 					OR o.order_id         = '".$search_query."'
 					OR o.post_id          = '".$search_query."'
-					OR o.ShippingAddress_City LIKE '%".$search_query."%'
+					OR o.ShippingAddress_City LIKE '%".$search_query."%' )
 			";
 		} 
 

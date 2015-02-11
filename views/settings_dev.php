@@ -59,23 +59,6 @@
 
 
 
-					<?php if ( $expdate = get_option( 'wplister_ebay_token_expirationtime' ) ) : ?>
-					<div class="postbox" id="TokenExpiryBox">
-						<h3 class="hndle"><span><?php echo __('eBay Token','wplister') ?></span></h3>
-						<div class="inside">
-
-							<p>
-								<?php echo sprintf( __('Your token will expire in %s.','wplister'), human_time_diff( strtotime($expdate) ) ) ?>
-								<!-- expdate <?php echo $expdate ?> -->
-							</p>
-							<p>
-								<?php echo __('When it expires, you will need to reconnect your eBay account.','wplister') ?>
-							</p>
-
-						</div>
-					</div>
-					<?php endif; ?>
-
 					<div class="postbox dev_box" id="VersionInfoBox" style="<?php echo defined('WPLISTER_RESELLER_VERSION') ? 'display:none' : ''; ?>">
 						<h3 class="hndle"><span><?php echo __('Version Info','wplister') ?></span></h3>
 						<div class="inside">
@@ -237,6 +220,24 @@
 								<option value="1" <?php if ( $wpl_disable_variations == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 
+							<label for="wpl-option-disable_compat_list" class="text_label">
+								<?php echo __('Disable parts compatibility','wplister'); ?>
+                                <?php wplister_tooltip('This is intended to work around an issue with the eBay API and will omit Parts Compatibility Lists from being submitted to eBay when an item is listed or revised.') ?>
+							</label>
+							<select id="wpl-option-disable_compat_list" name="wpl_e2e_disable_compat_list" class=" required-entry select">
+								<option value="0" <?php if ( $wpl_disable_compat_list == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
+								<option value="1" <?php if ( $wpl_disable_compat_list == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+							</select>
+
+							<label for="wpl-option-enable_item_edit_link" class="text_label">
+								<?php echo __('Allow direct editing','wplister'); ?>
+                                <?php wplister_tooltip('Shows an additional "edit" link on the listing page, which allows you to edit the listing database fields directly. It is not recommended to use this option at all - all your changes will be overwritten when the linked product is updated again!') ?>
+							</label>
+							<select id="wpl-option-enable_item_edit_link" name="wpl_e2e_enable_item_edit_link" class=" required-entry select">
+								<option value="0" <?php if ( $wpl_enable_item_edit_link == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?> (default)</option>
+								<option value="1" <?php if ( $wpl_enable_item_edit_link == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+							</select>
+
 							<label for="wpl-option-force_table_items_limit" class="text_label">
 								<?php echo __('Limit displayed items','wplister'); ?>
                                 <?php wplister_tooltip('If you can not open the listings or orders page or receive a timeout error when doing so, you can use this option to temporarily limit the maxmimum number of displayed listings or orders.') ?>
@@ -262,7 +263,7 @@
 						</div>
 					</div>
 
-					<div class="postbox" id="DeveloperToolBox" style="display:none;">
+					<div class="postbox dev_box" id="DeveloperToolBox" style="display:none;">
 						<h3 class="hndle"><span><?php echo __('Developer options','wplister') ?></span></h3>
 						<div class="inside">
 
@@ -291,6 +292,12 @@
 								<?php if ( $wpl_text_log_level > 1 ): ?>
 									&raquo; <a href="/wp-content/uploads/wp-lister/wplister.log" target="_blank">view log</a>
 								<?php endif; ?>
+							</p>
+
+							<label for="wpl-wple_instance" class="text_label"><?php echo __('Instance ID','wplister'); ?></label>
+							<input type="text" name="wpl_e2e_wple_instance" id="wpl-wple_instance" value="<?php echo get_option('wple_instance') ?>" class="text_input" />
+							<p class="desc" style="display: block;">
+								Don't change this unless you migrated your installation to a different domain.
 							</p>
 
 							<label for="wpl-text-ebay_token" class="text_label"><?php echo __('eBay token','wplister'); ?></label>

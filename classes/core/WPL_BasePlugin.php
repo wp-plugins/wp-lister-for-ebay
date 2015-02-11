@@ -41,7 +41,7 @@ class WPL_BasePlugin extends WPL_Core {
 
 		// get last error
 	    $error = error_get_last();
-	    if( $error == NULL ) return;
+	    if ( $error == NULL ) return;
 
 		// check if is ajax - doesn't work as it should yet...
 		$is_ajax = ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'WOOCOMMERCE_CHECKOUT' ) && WOOCOMMERCE_CHECKOUT );
@@ -51,10 +51,17 @@ class WPL_BasePlugin extends WPL_Core {
 	    if( $error['type'] === E_ERROR ) {
 	        // fatal error has occured
 	        echo "<pre>FATAL ERROR:\n";print_r($error);echo"</pre>";
+
+	        // backtrace - doesn't work as it will only show the shutdown handler :-(
+			// $e = new Exception;
+			// echo "<pre>Ex. Trace  :\n";print_r( $e->getTraceAsString() );echo"</pre>";
+
 	    } else {
+
         	// third bit (4) will show non-fatal errors too
-        	if ( 2 & get_option( 'wplister_php_error_handling', 0 ) )
+        	if ( 4 & get_option( 'wplister_php_error_handling', 0 ) )
     	    	echo "<pre>OK - last error was: \n";print_r($error);echo"</pre>";
+
 	    }
 
 		if ( $is_ajax ) echo " */";
@@ -63,7 +70,7 @@ class WPL_BasePlugin extends WPL_Core {
 	// add link to settings on plugins page
 	public function onWpPluginActionLinks( $inaLinks, $insFile ) {
 		// if ( $insFile == plugin_basename( __FILE__ ) ) {
-		if ( $insFile == 'wp-lister/wp-lister.php' ) {
+		if ( $insFile == 'wp-lister-ebay/wp-lister-ebay.php' ) {
 			$sSettingsLink = '<a href="'.admin_url( "admin.php" ).'?page=wplister-settings">' . __( 'Settings', 'wplister' ) . '</a>';
 			array_unshift( $inaLinks, $sSettingsLink );
 		}
