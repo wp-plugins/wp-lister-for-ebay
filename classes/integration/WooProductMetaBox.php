@@ -13,7 +13,7 @@ class WpLister_Product_MetaBox {
 		add_action( 'woocommerce_process_product_meta', array( &$this, 'save_meta_box' ), 0, 2 );
 
         // add options to variable products
-        add_action('woocommerce_product_after_variable_attributes', array(&$this, 'woocommerce_variation_options'), 1, 2);
+        add_action('woocommerce_product_after_variable_attributes', array(&$this, 'woocommerce_variation_options'), 1, 3);
         add_action('woocommerce_process_product_meta_variable', array(&$this, 'process_product_meta_variable'), 10, 1);
 
 		if ( get_option( 'wplister_external_products_inventory' ) == 1 ) {
@@ -1203,35 +1203,42 @@ class WpLister_Product_MetaBox {
 
 
 	/* show additional fields for variations */
-    function woocommerce_variation_options( $loop, $variation_data ) {
+    function woocommerce_variation_options( $loop, $variation_data, $variation ) {
         // echo "<pre>";print_r($variation_data);echo"</pre>";#die();
     
 		// current values
-		$_ebay_start_price	= isset( $variation_data['_ebay_start_price'][0] )	? $variation_data['_ebay_start_price'][0]	: '';
-		$_ebay_is_disabled	= isset( $variation_data['_ebay_is_disabled'][0] )	? $variation_data['_ebay_is_disabled'][0]	: '';
+		// $_ebay_start_price	= isset( $variation_data['_ebay_start_price'][0] )	? $variation_data['_ebay_start_price'][0]	: '';
+		// $_ebay_is_disabled	= isset( $variation_data['_ebay_is_disabled'][0] )	? $variation_data['_ebay_is_disabled'][0]	: '';
+
+		// get variation post_id - WC2.3
+		$variation_post_id = $variation ? $variation->ID : $variation_data['variation_post_id']; // $variation exists since WC2.2 (at least)
+
+		// get current values - WC2.3
+		$_ebay_start_price       = get_post_meta( $variation_post_id, '_ebay_start_price'  		, true );
+		$_ebay_is_disabled       = get_post_meta( $variation_post_id, '_ebay_is_disabled'  		, true );
 
         ?>
             <?php if ( get_option( 'wplister_enable_custom_product_prices', 1 ) == 1 ) : ?>
-            <tr>
-                <td>
+            <div>
+                <p class="form-row form-row-first">
                     <label>
                         <?php _e('eBay Price', 'wplister'); ?>
                         <a class="tips" data-tip="Custom price to be used when listing this variation on eBay. This will override price modifier settings in your listing profile." href="#">[?]</a>
                     </label> 
                     <input type="text" name="variable_ebay_start_price[<?php echo $loop; ?>]" class="" value="<?php echo $_ebay_start_price ?>" />
-                </td>
-                <td>
+                </p>
+                <p class="form-row form-row-last">
                     <label>
                         <?php _e('eBay Visibility', 'wplister'); ?>
                         <a class="tips" data-tip="Tick the checkbox below to omit this particular variation when this product is listed on eBay." href="#">[?]</a>
                     </label> 
                 	<label>
-                		<input type="checkbox" class="checkbox" name="variable_ebay_is_disabled[<?php echo $loop; ?>]" 
+                		<input type="checkbox" class="checkbox" name="variable_ebay_is_disabled[<?php echo $loop; ?>]" style="margin-top:5px;"
                 			<?php if ( $_ebay_is_disabled ) echo 'checked="checked"' ?> >
                 		<?php _e('Hide on eBay', 'wplister'); ?>
                 	</label>
-                </td>
-            </tr>
+                </p>
+            </div>
 	        <?php endif; ?>
         <?php
 

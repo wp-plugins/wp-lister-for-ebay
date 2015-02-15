@@ -122,16 +122,6 @@
 		                            <?php endforeach; ?>
 
 		                        </tr>
-
-                                <!--
-                                <input type="text" 
-                                       name="role_discount[<?php echo $role ?>]" 
-                                       id="role_discount_<?php echo $role ?>" class="text_input" 
-                                       placeholder="Enter percentage"
-                                       value="<?php echo @$wpl_role_discounts[$role] ?>"/>
-                                -->
-
-                            	</tr>
                             <?php endforeach; ?>
                         	</table>
 
