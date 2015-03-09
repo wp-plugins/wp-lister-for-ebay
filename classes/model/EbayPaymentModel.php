@@ -39,7 +39,7 @@ class EbayPaymentModel extends WPL_Model {
 		
 		// truncate the db
 		global $wpdb;
-		$wpdb->query("DELETE FROM {$this->tablename} WHERE site_id = '$site_id' ");
+		$wpdb->query( $wpdb->prepare("DELETE FROM {$this->tablename} WHERE site_id = %s ", $site_id ) );
 		
 		// download the shipping data 
 		$req = new GeteBayDetailsRequestType();
@@ -147,12 +147,13 @@ class EbayPaymentModel extends WPL_Model {
 	static function getAll( $site_id ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . self::table;
-		$profiles = $wpdb->get_results("
+		$profiles = $wpdb->get_results( $wpdb->prepare("
 			SELECT * 
 			FROM $table
-			WHERE site_id = '$site_id'
+			WHERE site_id = %s
 			ORDER BY payment_description
-		", ARRAY_A);
+		", $site_id 
+		), ARRAY_A);
 
 		return $profiles;		
 	}
@@ -160,11 +161,12 @@ class EbayPaymentModel extends WPL_Model {
 	function getItem( $id ) {
 		global $wpdb;	
 		$this->tablename = $wpdb->prefix . self::table;
-		$item = $wpdb->get_row("
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT * 
 			FROM $this->tablename
-			WHERE payment_name = '$id'
-		", ARRAY_A);		
+			WHERE payment_name = %s
+		", $id 
+		), ARRAY_A);		
 
 		return $item;		
 	}
@@ -174,19 +176,18 @@ class EbayPaymentModel extends WPL_Model {
 		global $wpdb;	
 		$this->tablename = $wpdb->prefix . self::table;
 
-		$where_sql = $site_id ? "AND site_id = '$site_id'" : '';
+		$where_sql = $site_id ? "AND site_id = '".esc_sql($site_id)."'" : '';
 
-		$payment_description = $wpdb->get_var("
+		$payment_description = $wpdb->get_var( $wpdb->prepare("
 			SELECT payment_description 
 			FROM $this->tablename
-			WHERE payment_name = '$payment_name'
+			WHERE payment_name = %s
 			$where_sql
-		");		
+		", $payment_name ) );		
 
 		if ( ! $payment_description ) return $payment_name;
 		return $payment_description;		
 	}
 
 	
-	
-}
+} // class EbayPaymentModel

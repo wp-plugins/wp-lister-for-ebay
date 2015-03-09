@@ -39,9 +39,7 @@ class TemplatesPage extends WPL_Page {
 		}
 		// handle delete action
 		if ( $this->requestAction() == 'delete_listing_template' ) {
-			$templatesModel = new TemplatesModel();
-			$templates = $templatesModel->deleteTemplate( $_REQUEST['template'] );	
-			$this->showMessage( "Template deleted: ".$_REQUEST['template'] );	
+			$this->deleteTemplate();
 		}
 
 	}
@@ -424,8 +422,8 @@ class TemplatesPage extends WPL_Page {
 
 
 	private function uploadTemplate() {
-		
-		check_admin_referer('wpl_upload_template');
+
+		if ( ! current_user_can( 'manage_ebay_options' ) || ! check_admin_referer( 'wpl_upload_template' ) ) return false;
 
 		// set templates root folder
 		$upload_dir = wp_upload_dir();
@@ -443,7 +441,7 @@ class TemplatesPage extends WPL_Page {
 		// set up WP_Filesystem() required for unzip_file
 		WP_Filesystem();
 
-	    $saved_file_location = $target . $filename;
+	    $saved_file_location = $target . basename($filename);
 	    if (move_uploaded_file($tmp_name, $saved_file_location)) {
 
 	    	// extract zip archive
@@ -462,13 +460,23 @@ class TemplatesPage extends WPL_Page {
 
 	}
 
+	private function deleteTemplate() {
+		if ( ! current_user_can( 'manage_ebay_options' ) || ! check_admin_referer( 'wple_templates_page' ) ) return false;
+
+		$templatesModel = new TemplatesModel();
+		$templatesModel->deleteTemplate( $_REQUEST['template'] );
+
+		$this->showMessage( "Template deleted: ".$_REQUEST['template'] );	
+	}
+
 	private function downloadTemplate() {
+		if ( ! current_user_can( 'manage_ebay_options' ) || ! check_admin_referer( 'wple_templates_page' ) ) return false;
 
 		// set templates root folder
 		$upload_dir = wp_upload_dir();
 		$templates_dir = $upload_dir['basedir'].'/wp-lister/templates/';
 
-		$template_id = $_REQUEST['template'];
+		$template_id = basename( $_REQUEST['template'] );
 	    $folder  = $templates_dir . $template_id . '/';
 	    $tmpfile = $templates_dir . $template_id . '.zip';
 

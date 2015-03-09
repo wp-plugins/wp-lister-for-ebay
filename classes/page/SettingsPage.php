@@ -257,6 +257,7 @@ class SettingsPage extends WPL_Page {
 			'disable_variations'		=> self::getOption( 'disable_variations', 0 ),
 			'disable_compat_list'		=> self::getOption( 'disable_compat_list', 0 ),
 			'enable_messages_page'		=> self::getOption( 'enable_messages_page', 0 ),
+			'log_include_authinfo'		=> self::getOption( 'log_include_authinfo', 0 ),
 			'enable_item_edit_link'		=> self::getOption( 'enable_item_edit_link', 0 ),
 			'log_record_limit'			=> self::getOption( 'log_record_limit', 4096 ),
 			'log_days_limit'			=> self::getOption( 'log_days_limit', 30 ),
@@ -509,6 +510,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'disable_variations',		$this->getValueFromPost( 'disable_variations' ) );
 			self::updateOption( 'disable_compat_list',		$this->getValueFromPost( 'disable_compat_list' ) );
 			self::updateOption( 'enable_messages_page',		$this->getValueFromPost( 'enable_messages_page' ) );
+			self::updateOption( 'log_include_authinfo',		$this->getValueFromPost( 'log_include_authinfo' ) );
 			self::updateOption( 'enable_item_edit_link',	$this->getValueFromPost( 'enable_item_edit_link' ) );
 			self::updateOption( 'log_record_limit',			$this->getValueFromPost( 'log_record_limit' ) );
 			self::updateOption( 'log_days_limit',			$this->getValueFromPost( 'log_days_limit' ) );
@@ -547,7 +549,6 @@ class SettingsPage extends WPL_Page {
 	}
 	
 	protected function loadProductCategories() {
-	global $wpdb;
 
 		$flatlist = array();
 		$tree = get_terms( ProductWrapper::getTaxonomy(), 'orderby=count&hide_empty=0' );

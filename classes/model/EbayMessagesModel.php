@@ -227,58 +227,6 @@ class EbayMessagesModel extends WPL_Model {
 	} // insertOrUpdate()
 
 
-	// add message history entry
-	function addHistory( $message_id, $action, $msg, $details = array(), $success = true ) {
-		global $wpdb;
-
-		// build history record
-		$record = new stdClass();
-		$record->action  = $action;
-		$record->msg     = $msg;
-		$record->details = $details;
-		$record->success = $success;
-		$record->time    = time();
-
-		// load history
-		$history = $wpdb->get_var( "
-			SELECT history
-			FROM $this->tablename
-			WHERE message_id = '$message_id'
-		" );
-
-		// init with empty array
-		$history = maybe_unserialize( $history );
-		if ( ! $history ) $history = array();
-
-		// prevent fatal error if $history is not an array
-		if ( ! is_array( $history ) ) {
-			$this->logger->error( "invalid history value in EbayMessagesModel::addHistory(): ".$history);
-
-			// build history record
-			$rec = new stdClass();
-			$rec->action  = 'reset_history';
-			$rec->msg     = 'Corrupted history data was cleared';
-			$rec->details = array();
-			$rec->success = 'ERROR';
-			$rec->time    = time();
-
-			$history = array();
-			$history[] = $record;
-		}
-
-		// add record
-		$history[] = $record;
-
-		// update history
-		$history = serialize( $history );
-		$wpdb->query( "
-			UPDATE $this->tablename
-			SET history = '$history'
-			WHERE message_id = '$message_id'
-		" );
-
-	}
-
 	function mapItemDetailToDB( $Detail ) {
 		//#type $Detail MyMessagesMessageType
 
@@ -404,11 +352,12 @@ class EbayMessagesModel extends WPL_Model {
 	function getItem( $id ) {
 		global $wpdb;
 
-		$item = $wpdb->get_row( "
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE id = '$id'
-		", ARRAY_A );
+			WHERE id = %s
+		", $id 
+		), ARRAY_A );
 
 		// decode MyMessagesMessageType object with eBay classes loaded
 		$item['details'] = $this->decodeObject( $item['details'], false, true );
@@ -419,11 +368,12 @@ class EbayMessagesModel extends WPL_Model {
 	function getMessageByMessageID( $message_id ) {
 		global $wpdb;
 
-		$message = $wpdb->get_row( "
+		$message = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE message_id = '$message_id'
-		", ARRAY_A );
+			WHERE message_id = %s
+		", $message_id
+		), ARRAY_A );
 
 		return $message;
 	}
@@ -431,11 +381,12 @@ class EbayMessagesModel extends WPL_Model {
 	function getMessageByPostID( $post_id ) {
 		global $wpdb;
 
-		$message = $wpdb->get_row( "
+		$message = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE post_id = '$post_id'
-		", ARRAY_A );
+			WHERE post_id = %s
+		", $post_id
+		), ARRAY_A );
 
 		return $message;
 	}
@@ -453,21 +404,11 @@ class EbayMessagesModel extends WPL_Model {
 
 	function deleteItem( $id ) {
 		global $wpdb;
-		$wpdb->query( "
+		$wpdb->query( $wpdb->prepare("
 			DELETE
 			FROM $this->tablename
-			WHERE id = '$id'
-		" );
-	}
-
-	function updateWpMessageID( $id, $wp_message_id ) {
-		global $wpdb;
-		$wpdb->query( "
-			UPDATE $this->tablename
-			SET post_id = '$wp_message_id'
-			WHERE id = '$id'
-		" );
-		echo $wpdb->last_error;
+			WHERE id = %s
+		", $id ) );
 	}
 
 	function getStatusSummary() {
@@ -499,21 +440,22 @@ class EbayMessagesModel extends WPL_Model {
 	function getPageItems( $current_page, $per_page ) {
 		global $wpdb;
 
-        $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'received_date'; //If no sort, default to title
-        $message = (!empty($_REQUEST['message'])) ? $_REQUEST['message'] : 'desc'; //If no message, default to asc
-        $offset = ( $current_page - 1 ) * $per_page;
+        $orderby  = (!empty($_REQUEST['orderby'])) ? esc_sql( $_REQUEST['orderby'] ) : 'received_date';
+        $order    = (!empty($_REQUEST['order']))   ? esc_sql( $_REQUEST['order']   ) : 'desc';
+        $offset   = ( $current_page - 1 ) * $per_page;
+        $per_page = esc_sql( $per_page );
 
         $join_sql  = '';
         $where_sql = '';
 
         // filter message_status
-		$message_status = ( isset($_REQUEST['message_status']) ? $_REQUEST['message_status'] : 'all');
+		$message_status = ( isset($_REQUEST['message_status']) ? esc_sql( $_REQUEST['message_status'] ) : 'all');
 		if ( $message_status != 'all' ) {
 			$where_sql = "WHERE status = '".$message_status."' ";
 		} 
 
         // filter search_query
-		$search_query = ( isset($_REQUEST['s']) ? $_REQUEST['s'] : false);
+		$search_query = ( isset($_REQUEST['s']) ? esc_sql( $_REQUEST['s'] ) : false);
 		if ( $search_query ) {
 			$where_sql = "
 				WHERE  o.buyer_name   LIKE '%".$search_query."%'
@@ -533,7 +475,7 @@ class EbayMessagesModel extends WPL_Model {
 			FROM $this->tablename o
             $join_sql 
             $where_sql
-			ORDER BY $orderby $message
+			ORDER BY $orderby $order
             LIMIT $offset, $per_page
 		", ARRAY_A);
 
@@ -546,7 +488,7 @@ class EbayMessagesModel extends WPL_Model {
 				FROM $this->tablename o
 	            $join_sql 
     	        $where_sql
-				ORDER BY $orderby $message
+				ORDER BY $orderby $order
 			");			
 		}
 

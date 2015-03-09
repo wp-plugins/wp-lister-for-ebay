@@ -241,7 +241,7 @@ class LogPage extends WPL_Page {
 		global $wpdb;
 		$table = $wpdb->prefix.'ebay_log';
 
-		$days_to_keep = self::getOption( 'log_days_limit', 30 );		
+		$days_to_keep = intval( self::getOption( 'log_days_limit', 30 ) );
 		$delete_count = $wpdb->get_var('SELECT count(id) FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.$days_to_keep.' DAY )');
 		if ( $delete_count ) {
 			$wpdb->query('DELETE FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.$days_to_keep.' DAY )');

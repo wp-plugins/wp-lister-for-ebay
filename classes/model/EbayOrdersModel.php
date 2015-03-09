@@ -302,7 +302,7 @@ class EbayOrdersModel extends WPL_Model {
 
 
 	// check if woocommcer order exists and has not been moved to the trash
-	function wooOrderExists( $post_id ) {
+	static function wooOrderExists( $post_id ) {
 
 		$_order = new WC_Order();
 		if ( $_order->get_order( $post_id ) ) {
@@ -323,7 +323,7 @@ class EbayOrdersModel extends WPL_Model {
 		global $wpdb;
 
 		// check if this listing exists in WP-Lister
-		$listing_id = $wpdb->get_var( 'SELECT id FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$ebay_id );
+		$listing_id = $wpdb->get_var( $wpdb->prepare("SELECT id FROM {$wpdb->prefix}ebay_auctions WHERE ebay_id = %s", $ebay_id ) );
 		if ( ! $listing_id ) {
 			$history_message = "Skipped foreign item #{$ebay_id}";
 			$history_details = array( 'ebay_id' => $ebay_id );
@@ -333,8 +333,8 @@ class EbayOrdersModel extends WPL_Model {
 
 		// get current values from db
 		// $quantity_purchased = $data['quantity'];
-		$quantity_total = $wpdb->get_var( 'SELECT quantity      FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$ebay_id );
-		$quantity_sold  = $wpdb->get_var( 'SELECT quantity_sold FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$ebay_id );
+		$quantity_total = $wpdb->get_var( $wpdb->prepare("SELECT quantity      FROM {$wpdb->prefix}ebay_auctions WHERE ebay_id = %s", $ebay_id ) );
+		$quantity_sold  = $wpdb->get_var( $wpdb->prepare("SELECT quantity_sold FROM {$wpdb->prefix}ebay_auctions WHERE ebay_id = %s", $ebay_id ) );
 
 		// increase the listing's quantity_sold
 		$quantity_sold = $quantity_sold + $quantity_purchased;
@@ -377,11 +377,11 @@ class EbayOrdersModel extends WPL_Model {
 		$record->time    = time();
 
 		// load history
-		$history = $wpdb->get_var( "
+		$history = $wpdb->get_var( $wpdb->prepare("
 			SELECT history
 			FROM $this->tablename
-			WHERE order_id = '$order_id'
-		" );
+			WHERE order_id = %s
+		", $order_id ) );
 
 		// init with empty array
 		$history = maybe_unserialize( $history );
@@ -408,11 +408,11 @@ class EbayOrdersModel extends WPL_Model {
 
 		// update history
 		$history = serialize( $history );
-		$wpdb->query( "
+		$wpdb->query( $wpdb->prepare("
 			UPDATE $this->tablename
-			SET history = '$history'
-			WHERE order_id = '$order_id'
-		" );
+			SET history    = %s
+			WHERE order_id = %s
+		", $history, $order_id ) );
 
 	}
 
@@ -570,7 +570,7 @@ class EbayOrdersModel extends WPL_Model {
 		$html .= '<br>';
 		$html .= __('New orders created','wplister') .': '. $this->count_inserted .' '. '<br>';
 		$html .= __('Existing orders updated','wplister')  .': '. $this->count_updated  .' '. '<br>';
-		if ( $this->count_skipped ) $html .= __('Foreign orders skipped','wplister')  .': '. $this->count_skipped  .' '. '<br>';
+		if ( $this->count_skipped ) $html .= __('Old or foreign orders skipped','wplister')  .': '. $this->count_skipped  .' '. '<br>';
 		if ( $this->count_failed ) $html .= __('Orders failed to create','wplister')  .': '. $this->count_failed  .' '. '<br>';
 		$html .= '<br>';
 
@@ -625,11 +625,12 @@ class EbayOrdersModel extends WPL_Model {
 	function getItem( $id ) {
 		global $wpdb;
 
-		$item = $wpdb->get_row( "
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE id = '$id'
-		", ARRAY_A );
+			WHERE id = %s
+		", $id 
+		), ARRAY_A );
 
 		// decode OrderType object with eBay classes loaded
 		$item['details'] = $this->decodeObject( $item['details'], false, true );
@@ -642,22 +643,24 @@ class EbayOrdersModel extends WPL_Model {
 	function getOrderByOrderID( $order_id ) {
 		global $wpdb;
 
-		$order = $wpdb->get_row( "
+		$order = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE order_id = '$order_id'
-		", ARRAY_A );
+			WHERE order_id = %s
+		", $order_id 
+		), ARRAY_A );
 
 		return $order;
 	}
 	function getAllOrderByOrderID( $order_id ) {
 		global $wpdb;
 
-		$order = $wpdb->get_results( "
+		$order = $wpdb->get_results( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE order_id = '$order_id'
-		", ARRAY_A );
+			WHERE order_id = %s
+		", $order_id 
+		), ARRAY_A );
 
 		return $order;
 	}
@@ -665,11 +668,12 @@ class EbayOrdersModel extends WPL_Model {
 	function getOrderByPostID( $post_id ) {
 		global $wpdb;
 
-		$order = $wpdb->get_row( "
+		$order = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE post_id = '$post_id'
-		", ARRAY_A );
+			WHERE post_id = %s
+		", $post_id 
+		), ARRAY_A );
 
 		return $order;
 	}
@@ -697,12 +701,12 @@ class EbayOrdersModel extends WPL_Model {
 	// get the newest modification date of all orders in WP-Lister
 	function getDateOfLastOrder( $account_id ) {
 		global $wpdb;
-		$lastdate = $wpdb->get_var( "
+		$lastdate = $wpdb->get_var( $wpdb->prepare("
 			SELECT LastTimeModified
 			FROM $this->tablename
-			WHERE account_id = '$account_id'
+			WHERE account_id = %s
 			ORDER BY LastTimeModified DESC LIMIT 1
-		" );
+		", $account_id ) );
 
 		// if there are no orders yet, check the date of the last transaction
 		if ( ! $lastdate ) {
@@ -738,20 +742,20 @@ class EbayOrdersModel extends WPL_Model {
 
 	function deleteItem( $id ) {
 		global $wpdb;
-		$wpdb->query( "
+		$wpdb->query( $wpdb->prepare("
 			DELETE
 			FROM $this->tablename
-			WHERE id = '$id'
-		" );
+			WHERE id = %s
+		", $id ) );
 	}
 
 	function updateWpOrderID( $id, $wp_order_id ) {
 		global $wpdb;
-		$wpdb->query( "
+		$wpdb->query( $wpdb->prepare("
 			UPDATE $this->tablename
-			SET post_id = '$wp_order_id'
-			WHERE id = '$id'
-		" );
+			SET post_id = %s
+			WHERE id    = %s
+		", $wp_order_id, $id ) );
 		echo $wpdb->last_error;
 	}
 
@@ -783,21 +787,22 @@ class EbayOrdersModel extends WPL_Model {
 	function getPageItems( $current_page, $per_page ) {
 		global $wpdb;
 
-        $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'date_created'; //If no sort, default to title
-        $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'desc'; //If no order, default to asc
-        $offset = ( $current_page - 1 ) * $per_page;
+        $orderby  = (!empty($_REQUEST['orderby'])) ? esc_sql( $_REQUEST['orderby'] ) : 'date_created';
+        $order    = (!empty($_REQUEST['order']))   ? esc_sql( $_REQUEST['order']   ) : 'desc';
+        $offset   = ( $current_page - 1 ) * $per_page;
+        $per_page = esc_sql( $per_page );
 
         $join_sql  = '';
         $where_sql = 'WHERE 1 = 1 ';
 
         // filter order_status
-		$order_status = ( isset($_REQUEST['order_status']) ? $_REQUEST['order_status'] : 'all');
+		$order_status = ( isset($_REQUEST['order_status']) ? esc_sql( $_REQUEST['order_status'] ) : 'all');
 		if ( $order_status != 'all' ) {
 			$where_sql .= "AND o.CompleteStatus = '".$order_status."' ";
 		} 
 
         // filter account_id
-		$account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : false);
+		$account_id = ( isset($_REQUEST['account_id']) ? esc_sql( $_REQUEST['account_id'] ) : false);
 		if ( $account_id ) {
 			$where_sql .= "
 				 AND o.account_id = '".$account_id."'
@@ -805,7 +810,7 @@ class EbayOrdersModel extends WPL_Model {
 		} 
 
         // filter search_query
-		$search_query = ( isset($_REQUEST['s']) ? $_REQUEST['s'] : false);
+		$search_query = ( isset($_REQUEST['s']) ? esc_sql( $_REQUEST['s'] ) : false);
 		if ( $search_query ) {
 			$where_sql .= "
 				AND  ( o.buyer_name   LIKE '%".$search_query."%'
@@ -852,4 +857,4 @@ class EbayOrdersModel extends WPL_Model {
 
 
 
-}
+} // class EbayOrdersModel

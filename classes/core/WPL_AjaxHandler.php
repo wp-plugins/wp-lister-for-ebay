@@ -278,6 +278,10 @@ class WPL_AjaxHandler extends WPL_Core {
 				$result = $this->EC->loadUserAccountDetails();
 				$this->EC->closeEbay();
 
+		        // update account (seller profiles etc.)
+		        $account = new WPLE_eBayAccount( $account_id );
+		        if ( $account ) $account->updateUserDetails();
+
 				// build response
 				$response = new stdClass();
 				$response->job  	= $job;

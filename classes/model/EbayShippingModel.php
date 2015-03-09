@@ -47,7 +47,7 @@ class EbayShippingModel extends WPL_Model {
 		
 		// truncate the db
 		global $wpdb;
-		$wpdb->query("DELETE FROM {$this->tablename} WHERE site_id = '$site_id' ");
+		$wpdb->query( $wpdb->prepare("DELETE FROM {$this->tablename} WHERE site_id = %s ", $site_id ) );
 		
 		// download the shipping data 
 		$req = new GeteBayDetailsRequestType();
@@ -300,13 +300,14 @@ class EbayShippingModel extends WPL_Model {
 	function getAll( $site_id ) {
 		global $wpdb;	
 		$this->tablename = $wpdb->prefix . self::table;
-		$services = $wpdb->get_results("
+		$services = $wpdb->get_results( $wpdb->prepare("
 			SELECT * 
 			FROM $this->tablename
-			WHERE isFlat = 1
-			  AND site_id = '$site_id'
+			WHERE isFlat  = 1
+			  AND site_id = %s
 			ORDER BY ShippingCategory, service_description
-		", ARRAY_A);		
+		", $site_id 
+		), ARRAY_A );
 
 		$services = self::fixShippingCategory( $services );
 		return $services;		
@@ -318,14 +319,15 @@ class EbayShippingModel extends WPL_Model {
 		// either find only flat or only calculated services
 		$type_sql = $type == 'flat' ? 'isFlat = 1' : 'isCalculated = 1';
 
-		$services = $wpdb->get_results("
+		$services = $wpdb->get_results( $wpdb->prepare("
 			SELECT * 
 			FROM $table
 			WHERE international = 0
-			  AND site_id = '$site_id'
+			  AND site_id       = %s
 			  AND $type_sql
 			ORDER BY ShippingCategory, service_description
-		", ARRAY_A);		
+		", $site_id 
+		), ARRAY_A );
 
 		$services = self::fixShippingCategory( $services );
 		return $services;		
@@ -337,14 +339,15 @@ class EbayShippingModel extends WPL_Model {
 		// either find only flat or only calculated services
 		$type_sql = $type == 'flat' ? 'isFlat = 1' : 'isCalculated = 1';
 
-		$services = $wpdb->get_results("
+		$services = $wpdb->get_results( $wpdb->prepare("
 			SELECT * 
 			FROM $table
 			WHERE international = 1
-			  AND site_id = '$site_id'
+			  AND site_id       = %s
 			  AND $type_sql
 			ORDER BY ShippingCategory, service_description
-		", ARRAY_A);		
+		", $site_id 
+		), ARRAY_A );
 
 		$services = self::fixShippingCategory( $services );
 		return $services;		
@@ -353,11 +356,11 @@ class EbayShippingModel extends WPL_Model {
 		global $wpdb;	
 		$this->tablename = $wpdb->prefix . self::table;
 
-		$ShippingCategory = $wpdb->get_var("
+		$ShippingCategory = $wpdb->get_var( $wpdb->prepare("
 			SELECT ShippingCategory 
 			FROM $this->tablename
-			WHERE service_name = '$service_name'
-		");		
+			WHERE service_name = %s
+		", $service_name ) );
 
 		return $ShippingCategory;		
 	}
@@ -366,11 +369,11 @@ class EbayShippingModel extends WPL_Model {
 		global $wpdb;	
 		$this->tablename = $wpdb->prefix . self::table;
 
-		$service_description = $wpdb->get_var("
+		$service_description = $wpdb->get_var( $wpdb->prepare("
 			SELECT service_description 
 			FROM $this->tablename
-			WHERE service_name = '$service_name'
-		");		
+			WHERE service_name = %s
+		", $service_name ) );		
 
 		if ( ! $service_description ) return $service_name;
 		return $service_description;		
@@ -379,11 +382,12 @@ class EbayShippingModel extends WPL_Model {
 	function getItem( $id ) {
 		global $wpdb;	
 		$this->tablename = $wpdb->prefix . self::table;
-		$item = $wpdb->get_row("
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT * 
 			FROM $this->tablename
-			WHERE service_id = '$id'
-		", ARRAY_A);		
+			WHERE service_id = %s
+		", $id 
+		), ARRAY_A );
 
 		return $item;		
 	}

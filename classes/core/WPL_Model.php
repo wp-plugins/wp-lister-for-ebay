@@ -189,6 +189,14 @@ class WPL_Model {
 				$longMessage .= '<br><br>'. '<b>Note:</b> Listing status was changed to archived.';
 			}
 			
+			// #21916734 - Error: Pictures cannot be removed. - Variation pictures cannot be removed during restricted revise.
+			if ( $error->getErrorCode() == 21916734 ) { 
+				// change status from Error to Warning to allow post processing of this error (retry in restricted revise mode)
+				$res->setAck('Warning');
+				$this->handle_error_code = 21916734;
+				$longMessage .= '<br><br>'. '<i>Switching to restricted revise mode...</i>';
+			}
+			
 			// #302 - Invalid auction listing type
 			if ( $error->getErrorCode() == 302 ) { 
 				$longMessage .= '<br><br>'. '<b>Note:</b> eBay does not allow changing the listing type of an active listing.';

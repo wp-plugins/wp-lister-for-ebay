@@ -47,7 +47,7 @@ class EbayCategoriesModel extends WPL_Model {
 		// truncate the db
 		global $wpdb;
 		// $wpdb->query('truncate '.$this->tablename);
-		$wpdb->query("DELETE FROM {$this->tablename} WHERE site_id = '$site_id' ");
+		$wpdb->query( $wpdb->prepare("DELETE FROM {$this->tablename} WHERE site_id = %s ", $site_id ) );
 		
 		// download the data of level 1 only !
 		$req = new GetCategoriesRequestType();
@@ -109,7 +109,7 @@ class EbayCategoriesModel extends WPL_Model {
 		}
 
 		// fetch the data back from the db and add a task for each top-level id
-		$rows = $wpdb->get_results( "select cat_id, cat_name, site_id from $this->tablename where parent_cat_id = 0 and site_id = '$site_id' ", ARRAY_A );
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT cat_id, cat_name, site_id FROM {$this->tablename} WHERE parent_cat_id = 0 AND site_id = %s ", $site_id ), ARRAY_A );
         echo $wpdb->last_error;
 		foreach ($rows as $row)
 		{
@@ -249,7 +249,7 @@ class EbayCategoriesModel extends WPL_Model {
 		$res = $this->_cs->GetStore($req);
 		
 		// empty table
-		$wpdb->query("DELETE FROM {$wpdb->prefix}ebay_store_categories WHERE account_id = '$account_id' ");
+		$wpdb->query( $wpdb->prepare("DELETE FROM {$wpdb->prefix}ebay_store_categories WHERE account_id = %s ", $account_id ) );
 		
 		// insert each category
 		foreach( $res->Store->CustomCategories as $Category ) {
@@ -393,13 +393,14 @@ class EbayCategoriesModel extends WPL_Model {
 	static function getItem( $id, $site_id = false ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . self::table;
-		$where_site_sql = $site_id === false ? '' : "AND site_id ='$site_id'";
-		$item = $wpdb->get_row("
+		$where_site_sql = $site_id === false ? '' : "AND site_id ='".esc_sql($site_id)."'";
+        $item = $wpdb->get_row( $wpdb->prepare("
 			SELECT * 
 			FROM $table
-			WHERE cat_id = '$id'
+			WHERE cat_id = %s
 			$where_site_sql
-		", ARRAY_A);		
+		", $id
+		), ARRAY_A);
 
 		return $item;		
 	}
@@ -407,11 +408,11 @@ class EbayCategoriesModel extends WPL_Model {
 	static function getCategoryName( $id ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . self::table;
-		$value = $wpdb->get_var("
+		$value = $wpdb->get_var( $wpdb->prepare("
 			SELECT cat_name 
 			FROM $table
-			WHERE cat_id = '$id'
-		");		
+			WHERE cat_id = %s
+		", $id ) );
 
 		return $value;		
 	}
@@ -420,13 +421,13 @@ class EbayCategoriesModel extends WPL_Model {
 		global $wpdb;	
 		$table = $wpdb->prefix . self::table;
 		$ebay_motors_sql = $site_id == 0 ? 'OR site_id = 100' : '';
-		$value = $wpdb->get_var("
+		$value = $wpdb->get_var( $wpdb->prepare("
 			SELECT leaf 
 			FROM $table
-			WHERE cat_id = '$id'
-			  AND ( site_id = '$site_id'
+			WHERE cat_id    = %s
+			  AND ( site_id = %s
 			  $ebay_motors_sql )
-		");		
+		", $id, $site_id ) );		
 
 		$value = apply_filters('wplister_get_ebay_category_type', $value, $id );	
 		return $value ? 'leaf' : 'parent';		
@@ -436,13 +437,14 @@ class EbayCategoriesModel extends WPL_Model {
 		global $wpdb;	
 		$table = $wpdb->prefix . self::table;
 		$ebay_motors_sql = $site_id == 0 ? 'OR site_id = 100' : '';
-		$items = $wpdb->get_results("
+		$items = $wpdb->get_results( $wpdb->prepare("
 			SELECT DISTINCT * 
 			FROM $table
-			WHERE parent_cat_id = '$id'
-			  AND ( site_id = '$site_id'
+			WHERE parent_cat_id = %s
+			  AND ( site_id     = %s
 			  $ebay_motors_sql )
-		", ARRAY_A);		
+		", $id, $site_id 
+		), ARRAY_A);		
 
 		return $items;		
 	}
@@ -450,11 +452,11 @@ class EbayCategoriesModel extends WPL_Model {
 	static function getStoreCategoryName( $id ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . 'ebay_store_categories';
-		$value = $wpdb->get_var("
+		$value = $wpdb->get_var( $wpdb->prepare("
 			SELECT cat_name 
 			FROM $table
-			WHERE cat_id = '$id'
-		");		
+			WHERE cat_id = %s
+		", $id ) );		
 
 		return $value;		
 	}
@@ -462,25 +464,26 @@ class EbayCategoriesModel extends WPL_Model {
 		global $wpdb;	
 		// $this->tablename = $wpdb->prefix . self::table;
 		$table = $wpdb->prefix . 'ebay_store_categories';
-		$value = $wpdb->get_var("
+		$value = $wpdb->get_var( $wpdb->prepare("
 			SELECT leaf 
 			FROM $table
-			WHERE cat_id = '$id'
-			  AND account_id = '$account_id'
-		");		
+			WHERE cat_id     = %s
+			  AND account_id = %s
+		", $id, $account_id ) );		
 
 		return $value ? 'leaf' : 'parent';		
 	}
 	static function getChildrenOfStoreCategory( $id, $account_id ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . 'ebay_store_categories';
-		$items = $wpdb->get_results("
+		$items = $wpdb->get_results( $wpdb->prepare("
 			SELECT DISTINCT * 
 			FROM $table
-			WHERE parent_cat_id = '$id'
-			  AND account_id = '$account_id'
+			WHERE parent_cat_id = %s
+			  AND account_id    = %s
 			ORDER BY `order` ASC
-		", ARRAY_A);		
+		", $id, $account_id 
+		), ARRAY_A);		
 
 		return $items;		
 	}
@@ -496,13 +499,13 @@ class EbayCategoriesModel extends WPL_Model {
 		if ( $site_id === false ) $site_id = get_option('wplister_ebay_site_id');
 		$ebay_motors_sql = $site_id == 0 ? 'OR site_id = 100' : '';
 
-		$result = $wpdb->get_row("
+		$result = $wpdb->get_row( $wpdb->prepare("
 			SELECT * 
 			FROM $table
-			WHERE cat_id = '$cat_id'
-			  AND ( site_id = '$site_id'
+			WHERE cat_id    = %s
+			  AND ( site_id = %s
 			  $ebay_motors_sql )
-		");
+		", $cat_id, $site_id ) );
 
 		if ( $result ) { 
 			if ( $result->parent_cat_id != 0 ) {
@@ -523,7 +526,14 @@ class EbayCategoriesModel extends WPL_Model {
 		if ( intval($cat_id) == 0 ) return null;
 		if ( ! $account_id ) $account_id = get_option('wplister_default_account_id');
 
-		$result = $wpdb->get_row('SELECT * FROM '.$wpdb->prefix.'ebay_store_categories WHERE cat_id = '.$cat_id.' AND account_id = '.$account_id );
+		$result = $wpdb->get_row( $wpdb->prepare("
+			SELECT * 
+			FROM {$wpdb->prefix}ebay_store_categories
+			WHERE cat_id     = %s
+			  AND account_id = %s
+		", $cat_id, $account_id ) );
+		// $result = $wpdb->get_row('SELECT * FROM '.$wpdb->prefix.'ebay_store_categories WHERE cat_id = '.$cat_id.' AND account_id = '.$account_id );
+
 		if ( $result ) { 
 			if ( $result->parent_cat_id != 0 ) {
 				$parentname = self::getFullStoreCategoryName( $result->parent_cat_id, $account_id ) . ' &raquo; ';
@@ -538,6 +548,4 @@ class EbayCategoriesModel extends WPL_Model {
 	}
 	
 	
-	
-	
-}
+} // class EbayCategoriesModel

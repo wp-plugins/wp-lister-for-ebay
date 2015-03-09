@@ -26,15 +26,16 @@ class ListingsModel extends WPL_Model {
 	function getPageItems( $current_page, $per_page ) {
 		global $wpdb;
 
-        $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'id'; //If no sort, default to title
-        $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'desc'; //If no order, default to asc
-        $offset = ( $current_page - 1 ) * $per_page;
+        $orderby  = (!empty($_REQUEST['orderby'])) ? esc_sql( $_REQUEST['orderby'] ) : 'id';
+        $order    = (!empty($_REQUEST['order']))   ? esc_sql( $_REQUEST['order']   ) : 'desc';
+        $offset   = ( $current_page - 1 ) * $per_page;
+        $per_page = esc_sql( $per_page );
 
         $join_sql  = '';
         $where_sql = '';
 
         // filter listing_status
-		$listing_status = ( isset($_REQUEST['listing_status']) ? $_REQUEST['listing_status'] : 'all');
+		$listing_status = ( isset($_REQUEST['listing_status']) ? esc_sql( $_REQUEST['listing_status'] ) : 'all');
 		if ( ! $listing_status || $listing_status == 'all' ) {
 			$where_sql = "WHERE NOT status = 'archived' ";
 		} elseif ( $listing_status == 'relist' ) {
@@ -48,7 +49,7 @@ class ListingsModel extends WPL_Model {
 		} 
 
         // filter profile_id
-		$profile_id = ( isset($_REQUEST['profile_id']) ? $_REQUEST['profile_id'] : false);
+		$profile_id = ( isset($_REQUEST['profile_id']) ? esc_sql( $_REQUEST['profile_id'] ) : false);
 		if ( $profile_id ) {
 			$where_sql .= "
 				 AND l.profile_id = '".$profile_id."'
@@ -56,7 +57,7 @@ class ListingsModel extends WPL_Model {
 		} 
 
         // filter account_id
-		$account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : false);
+		$account_id = ( isset($_REQUEST['account_id']) ? esc_sql( $_REQUEST['account_id'] ) : false);
 		if ( $account_id ) {
 			$where_sql .= "
 				 AND l.account_id = '".$account_id."'
@@ -64,7 +65,7 @@ class ListingsModel extends WPL_Model {
 		} 
 
         // filter search_query
-		$search_query = ( isset($_REQUEST['s']) ? $_REQUEST['s'] : false);
+		$search_query = ( isset($_REQUEST['s']) ? esc_sql( $_REQUEST['s'] ) : false);
 		if ( $search_query ) {
 			$join_sql = "
 				LEFT JOIN {$wpdb->prefix}ebay_profiles p  ON l.profile_id =  p.profile_id
@@ -109,7 +110,7 @@ class ListingsModel extends WPL_Model {
 		}
 
 		return $items;
-	}
+	} // getPageItems()
 
 
 
@@ -128,11 +129,12 @@ class ListingsModel extends WPL_Model {
 
 	function getItem( $id ) {
 		global $wpdb;
-		$item = $wpdb->get_row("
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE id = '$id'
-		", ARRAY_A);
+			WHERE id = %s
+		", $id 
+		), ARRAY_A );
 
 		if ( !empty($item) ) $item['profile_data'] = $this->decodeObject( $item['profile_data'], true );
 		// $item['details'] = $this->decodeObject( $item['details'] );
@@ -157,20 +159,20 @@ class ListingsModel extends WPL_Model {
 
 	function deleteItem( $id ) {
 		global $wpdb;
-		$wpdb->query("
+		$wpdb->query( $wpdb->prepare("
 			DELETE
 			FROM $this->tablename
-			WHERE id = '$id'
-		");
+			WHERE id = %s
+		", $id ) );
 	}
 
 	function getItemByEbayID( $id, $decode_details = true ) {
 		global $wpdb;
-		$item = $wpdb->get_row("
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE ebay_id = '$id'
-		");
+			WHERE ebay_id = %s
+		", $id ) );
 		if (!$item) return false;
 		if (!$decode_details) return $item;
 
@@ -183,14 +185,15 @@ class ListingsModel extends WPL_Model {
 	// find listing by current item ID - fall back to previous item ID
 	function findItemByEbayID( $id, $decode_details = true ) {
 		global $wpdb;
-		$item = $wpdb->get_row("
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE ebay_id = '$id'
-		");
+			WHERE ebay_id = %s
+		", $id ) );
 
 		// if no listing was found, check previous item IDs 
 		if ( ! $item ) {
+			$id = esc_sql( $id );
 			$item = $wpdb->get_row("
 				SELECT *
 				FROM $this->tablename
@@ -209,41 +212,41 @@ class ListingsModel extends WPL_Model {
 
 	function getTitleFromItemID( $id ) {
 		global $wpdb;
-		$item = $wpdb->get_var("
+		$item = $wpdb->get_var( $wpdb->prepare("
 			SELECT auction_title
 			FROM $this->tablename
-			WHERE ebay_id = '$id'
-		");
+			WHERE ebay_id = %s
+		", $id ) );
 		return $item;
 	}
 
 	function getEbayIDFromID( $id ) {
 		global $wpdb;
-		$item = $wpdb->get_var("
+		$item = $wpdb->get_var( $wpdb->prepare("
 			SELECT ebay_id
 			FROM $this->tablename
-			WHERE id = '$id'
+			WHERE id         = %s
 			  AND NOT status = 'archived'
-		");
+		", $id ) );
 		return $item;
 	}
 	function getEbayIDFromPostID( $post_id ) {
 		global $wpdb;
-		$item = $wpdb->get_var("
+		$item = $wpdb->get_var( $wpdb->prepare("
 			SELECT ebay_id
 			FROM $this->tablename
-			WHERE post_id = '$post_id'
+			WHERE post_id    = %s
 			  AND NOT status = 'archived'
-		");
+		", $post_id ) );
 		return $item;
 	}
 	function getStatus( $id ) {
 		global $wpdb;
-		$item = $wpdb->get_var("
+		$item = $wpdb->get_var( $wpdb->prepare("
 			SELECT status
 			FROM $this->tablename
-			WHERE id = '$id'
-		");
+			WHERE id = %s
+		", $id ) );
 		return $item;
 	}
 	function getAccountID( $id ) {
@@ -252,65 +255,89 @@ class ListingsModel extends WPL_Model {
 		// if there are multiple listing IDs, use the first one
 		if ( is_array($id) ) $id = $id[0];
 
-		$item = $wpdb->get_var("
+		$item = $wpdb->get_var( $wpdb->prepare("
 			SELECT account_id
 			FROM $this->tablename
-			WHERE id = '$id'
-		");
+			WHERE id = %s
+		", $id ) );
 		return $item;
 	}
 	function getStatusFromPostID( $post_id ) {
 		global $wpdb;
-		$item = $wpdb->get_var("
+		$item = $wpdb->get_var( $wpdb->prepare("
 			SELECT status
 			FROM $this->tablename
-			WHERE post_id = '$post_id'
+			WHERE post_id = %s
 			  AND NOT status = 'archived'
 			ORDER BY id DESC
-		");
+		", $post_id ) );
 		return $item;
 	}
 	function getListingIDFromPostID( $post_id ) {
 		global $wpdb;
-		$item = $wpdb->get_var("
+		$item = $wpdb->get_var( $wpdb->prepare("
 			SELECT id
 			FROM $this->tablename
-			WHERE post_id = '$post_id'
+			WHERE post_id = %s
 			  AND NOT status = 'archived'
 			ORDER BY id DESC
-		");
+		", $post_id ) );
 		return $item;
 	}
 	function getAllListingsFromPostID( $post_id ) {
 		global $wpdb;
-		$items = $wpdb->get_results("
+		$items = $wpdb->get_results( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE post_id = '$post_id'
+			WHERE post_id = %s
 			  AND NOT status = 'archived'
 			ORDER BY id DESC
-		");
+		", $post_id ) );
+		return $items;
+	}
+	function getAllListingsFromPostOrParentID( $post_id ) {
+		global $wpdb;
+		$items = $wpdb->get_results( $wpdb->prepare("
+			SELECT *
+			FROM $this->tablename
+			WHERE NOT status = 'archived'
+			  AND ( post_id = %s
+			   OR parent_id = %s )
+			ORDER BY id DESC
+		", $post_id, $post_id ) );
 		return $items;
 	}
 	function getAllListingsFromParentID( $post_id ) {
 		global $wpdb;
-		$items = $wpdb->get_results("
+		$items = $wpdb->get_results( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE parent_id = '$post_id'
+			WHERE parent_id = %s
 			ORDER BY id DESC
-		");
+		", $post_id ) );
+		return $items;
+	}
+	function getAllListingsForProductAndAccount( $post_id, $account_id ) {
+		global $wpdb;
+		$items = $wpdb->get_results( $wpdb->prepare("
+			SELECT *
+			FROM $this->tablename
+			WHERE post_id    = %s
+			  AND account_id = %s
+			  AND NOT status = 'archived'
+			ORDER BY id DESC
+		", $post_id, $account_id ) );
 		return $items;
 	}
 	function getViewItemURLFromPostID( $post_id ) {
 		global $wpdb;
-		$item = $wpdb->get_var("
+		$item = $wpdb->get_var( $wpdb->prepare("
 			SELECT ViewItemURL
 			FROM $this->tablename
-			WHERE post_id = '$post_id'
+			WHERE post_id = %s
 			  AND NOT status = 'archived'
 			ORDER BY id DESC
-		");
+		", $post_id ) );
 		return $item;
 	}
 
@@ -372,18 +399,18 @@ class ListingsModel extends WPL_Model {
 		global $wpdb;
 		$locked = $locked ? 1 : 0;
 
-		$result = $wpdb->query( "UPDATE {$this->tablename} SET locked = $locked WHERE NOT status = 'archived' " );
+		$result = $wpdb->query( $wpdb->prepare("UPDATE {$this->tablename} SET locked = %d WHERE NOT status = 'archived' ", $locked ) );
 		echo $wpdb->last_error;
 		return $result;
 	}
 
 	function getHistory( $ebay_id ) {
 		global $wpdb;
-		$item = $wpdb->get_var("
+		$item = $wpdb->get_var( $wpdb->prepare("
 			SELECT history
 			FROM $this->tablename
-			WHERE ebay_id = '$ebay_id'
-		");
+			WHERE ebay_id = %s
+		", $ebay_id ) );
 		return maybe_unserialize( $item );
 	}
 
@@ -399,7 +426,6 @@ class ListingsModel extends WPL_Model {
 	}
 
 	function addItemIdToHistory( $ebay_id, $previous_id ) {
-		global $wpdb;
 	
 		$history = $this->getHistory( $ebay_id );
 
@@ -428,7 +454,7 @@ class ListingsModel extends WPL_Model {
 	function isUsingEPS( $id ) {
 		$this->logger->info( "isUsingEPS( $id ) " );
 
-		$listing_item = $this->getItem( $id );
+		$listing_item    = $this->getItem( $id );
 		$profile_details = $listing_item['profile_data']['details'];
 
         $with_additional_images = isset( $profile_details['with_additional_images'] ) ? $profile_details['with_additional_images'] : false;
@@ -816,7 +842,7 @@ class ListingsModel extends WPL_Model {
 
 	} // autoRelistItem()
 
-	function reviseItem( $id, $session, $force_full_update = false )
+	function reviseItem( $id, $session, $force_full_update = false, $restricted_mode = false )
 	{
 		// skip this item if item status not allowed
 		$allowed_statuses = array( 'published', 'changed' );
@@ -839,6 +865,11 @@ class ListingsModel extends WPL_Model {
 
 		// check for variations to be deleted
 		$item = $ibm->fixDeletedVariations( $item, $listing_item );
+
+		// handle restricted revise mode
+		if ( $restricted_mode ) {
+			$item = $ibm->applyRestrictedReviseMode( $item );
+		}
 
 		// if quantity is zero, end item instead
 		if ( ( $item->Quantity == 0 ) && ( ! $ibm->VariationsHaveStock ) && ( ! $this->thisAccountUsesOutOfStockControl( $listing_item['account_id'] ) ) ) {
@@ -882,6 +913,14 @@ class ListingsModel extends WPL_Model {
 
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
+
+			// handle Error 21916734: Variation pictures cannot be removed during restricted revise.
+			if ( 21916734 == $this->handle_error_code ) {
+				if ( ! $restricted_mode ) { // make sure we try again only once
+					$this->logger->info( "Error 21916734 - switching to restricted revise mode for item $id" );
+					return $this->reviseItem( $id, $session, $force_full_update, $restricted_mode = true );
+				}
+			}
 
 			// update listing status
 			$data['status'] = 'published';
@@ -1434,8 +1473,6 @@ class ListingsModel extends WPL_Model {
 
 
 	public function getLatestDetails( $ebay_id, $session ) {
-		global $wpdb;
-
 		// get item data
 		// $item = $this->getItemByEbayID( $id );
 
@@ -1461,7 +1498,6 @@ class ListingsModel extends WPL_Model {
 	}
 
 	public function updateItemDetails( $id, $session ) {
-		global $wpdb;
 
 		// get item data
 		$item = $this->getItem( $id );
@@ -1629,7 +1665,8 @@ class ListingsModel extends WPL_Model {
 		// handle NULL values
 		foreach ($data as $key => $value) {
 			if ( NULL === $value ) {
-				$wpdb->query( "UPDATE {$this->tablename} SET $key = NULL WHERE id = $id" );
+				$key = esc_sql( $key );
+				$wpdb->query( $wpdb->prepare("UPDATE {$this->tablename} SET $key = NULL WHERE id = %s ", $id ) );
 				$this->logger->info('SQL to set NULL value: '.$wpdb->last_query );
 				$this->logger->info( $wpdb->last_error );
 				unset( $data[$key] );
@@ -1740,11 +1777,13 @@ class ListingsModel extends WPL_Model {
 
 				if ( is_array( $upsell_ids ) )
 				foreach ($upsell_ids as $post_id) {
+					$post_id = esc_sql( $post_id );
 					$inner_where_sql .= ' OR post_id = "'.$post_id.'" ';
 				}
 
 				if ( is_array( $crosssell_ids ) )
 				foreach ($crosssell_ids as $post_id) {
+					$post_id = esc_sql( $post_id );
 					$inner_where_sql .= ' OR post_id = "'.$post_id.'" ';
 				}
 
@@ -1761,6 +1800,7 @@ class ListingsModel extends WPL_Model {
 				break;
 		}
 
+		$limit = esc_sql( $limit );
 		$items = $wpdb->get_results("
 			SELECT *
 			FROM $this->tablename li
@@ -1870,12 +1910,13 @@ class ListingsModel extends WPL_Model {
 	}
 	function getAllWithStatus( $status ) {
 		global $wpdb;	
-		$items = $wpdb->get_results("
+		$items = $wpdb->get_results( $wpdb->prepare("
 			SELECT * 
 			FROM $this->tablename
-			WHERE status = '$status'
+			WHERE status = %s
 			ORDER BY id DESC
-		", ARRAY_A);		
+		", $status 
+		), ARRAY_A );
 
 		return $items;		
 	}
@@ -1900,12 +1941,13 @@ class ListingsModel extends WPL_Model {
 	}
 	function getAllWithProfile( $profile_id ) {
 		global $wpdb;	
-		$items = $wpdb->get_results("
+		$items = $wpdb->get_results( $wpdb->prepare("
 			SELECT * 
 			FROM $this->tablename
-			WHERE profile_id = '$profile_id'
+			WHERE profile_id = %s
 			ORDER BY id DESC
-		", ARRAY_A);		
+		", $profile_id 
+		), ARRAY_A );
 
 		return $items;		
 	}
@@ -1913,52 +1955,56 @@ class ListingsModel extends WPL_Model {
 	// get limited $item arrays for applyProfileToItem()
 	function getAllPreparedWithProfile( $profile_id ) {
 		global $wpdb;	
-		$items = $wpdb->get_results("
+		$items = $wpdb->get_results( $wpdb->prepare("
 			SELECT id, post_id, locked, status 
 			FROM $this->tablename
 			WHERE status = 'prepared'
-			  AND profile_id = '$profile_id'
+			  AND profile_id = %s
 			ORDER BY id DESC
-		", ARRAY_A);		
+		", $profile_id 
+		), ARRAY_A );
 
 		return $items;		
 	}
 	// get limited $item arrays for applyProfileToItem()
 	function getAllVerifiedWithProfile( $profile_id ) {
 		global $wpdb;	
-		$items = $wpdb->get_results("
+		$items = $wpdb->get_results( $wpdb->prepare("
 			SELECT id, post_id, locked, status 
 			FROM $this->tablename
 			WHERE status = 'verified'
-			  AND profile_id = '$profile_id'
+			  AND profile_id = %s
 			ORDER BY id DESC
-		", ARRAY_A);		
+		", $profile_id 
+		), ARRAY_A );
 
 		return $items;		
 	}
 	// get limited $item arrays for applyProfileToItem()
 	function getAllPublishedWithProfile( $profile_id ) {
 		global $wpdb;	
-		$items = $wpdb->get_results("
+		$items = $wpdb->get_results( $wpdb->prepare("
 			SELECT id, post_id, locked, status 
 			FROM $this->tablename
 			WHERE ( status = 'published' OR status = 'changed' )
-			  AND profile_id = '$profile_id'
+			  AND profile_id = %s
 			ORDER BY id DESC
-		", ARRAY_A);		
+		", $profile_id 
+		), ARRAY_A );
 
 		return $items;		
 	}
 	// get limited $item arrays for applyProfileToItem()
 	function getAllEndedWithProfile( $profile_id ) {
 		global $wpdb;	
-		$items = $wpdb->get_results("
+		$items = $wpdb->get_results( $wpdb->prepare("
 			SELECT id, post_id, locked, status 
 			FROM $this->tablename
 			WHERE status = 'ended'
-			  AND profile_id = '$profile_id'
+			  AND profile_id = %s
 			ORDER BY id DESC
-		", ARRAY_A);		
+		", $profile_id 
+		), ARRAY_A );
 
 		return $items;		
 	}
@@ -1967,22 +2013,23 @@ class ListingsModel extends WPL_Model {
 	function countItemsUsingProfile( $profile_id, $status = false ) {
 		global $wpdb;	
 
-		$where_and_sql = $status ? " AND status = '$status' " : '';
+		$where_and_sql = $status ? " AND status = '".esc_sql($status)."' " : '';
 		if ( $status == 'locked' )    $where_and_sql = " AND locked = '1' ";
 		if ( $status == 'published' ) $where_and_sql = " AND ( status = 'published' OR status = 'changed' ) ";
 
-		$item_count = $wpdb->get_var("
+		$item_count = $wpdb->get_var( $wpdb->prepare("
 			SELECT count(id) 
 			FROM $this->tablename
-			WHERE profile_id = '$profile_id'
+			WHERE profile_id = %s
 			$where_and_sql
-		");
+		", $profile_id ) );
 
 		return $item_count;
 	}
 
 	function getAllPreparedWithTemplate( $template ) {
 		global $wpdb;	
+		$template = esc_sql( $template );
 		$items = $wpdb->get_results("
 			SELECT * 
 			FROM $this->tablename
@@ -1995,6 +2042,7 @@ class ListingsModel extends WPL_Model {
 	}
 	function getAllVerifiedWithTemplate( $template ) {
 		global $wpdb;	
+		$template = esc_sql( $template );
 		$items = $wpdb->get_results("
 			SELECT * 
 			FROM $this->tablename
@@ -2007,6 +2055,7 @@ class ListingsModel extends WPL_Model {
 	}
 	function getAllPublishedWithTemplate( $template ) {
 		global $wpdb;	
+		$template = esc_sql( $template );
 		$items = $wpdb->get_results("
 			SELECT * 
 			FROM $this->tablename
@@ -2022,10 +2071,11 @@ class ListingsModel extends WPL_Model {
 	function countItemsUsingTemplate( $template, $status = false ) {
 		global $wpdb;	
 
-		$where_and_sql = $status ? " AND status = '$status' " : '';
+		$where_and_sql = $status ? " AND status = '".esc_sql($status)."' " : '';
 		if ( $status == 'locked' )    $where_and_sql = " AND locked = '1' ";
 		if ( $status == 'published' ) $where_and_sql = " AND ( status = 'published' OR status = 'changed' ) ";
 
+		$template = esc_sql( $template );
 		$item_count = $wpdb->get_var("
 			SELECT count(id) 
 			FROM $this->tablename
@@ -2071,11 +2121,14 @@ class ListingsModel extends WPL_Model {
 		if ( ! is_array( $listing_ids )  ) return array();
 		if ( sizeof( $listing_ids ) == 0 ) return array();
 
-		$where = ' id = ' . join( ' OR id = ', $listing_ids);
+		// sanitize input
+		$id_list = implode( ',', esc_sql( $listing_ids ) ); 
+
+		// $where = ' id = ' . join( ' OR id = ', $listing_ids);
 		$items = $wpdb->get_results("
 			SELECT * 
 			FROM $this->tablename
-			WHERE $where
+			WHERE id IN ( $id_list )
 			ORDER BY id DESC
 		", ARRAY_A);		
 		echo $wpdb->last_error;
@@ -2086,32 +2139,33 @@ class ListingsModel extends WPL_Model {
 	function getAllDuplicateProducts() {
 		global $wpdb;	
 		$items = $wpdb->get_results("
-			SELECT post_id, COUNT(*) c
+			SELECT post_id, account_id, COUNT(*) c
 			FROM $this->tablename
 			WHERE NOT status = 'archived'
-			GROUP BY post_id 
+			GROUP BY post_id, account_id
 			HAVING c > 1
+			LIMIT 1000
 		", OBJECT_K);		
 
-		if ( ! empty($items) ) {
-			foreach ($items as &$item) {
+		// if ( ! empty($items) ) {
+		// 	foreach ($items as &$item) {
 				
-				$listings = $this->getAllListingsFromPostID( $item->post_id );
-				$item->listings = $listings;
+		// 		$listings = $this->getAllListingsFromPostID( $item->post_id );
+		// 		$item->listings = $listings;
 
-			}
-		}
+		// 	}
+		// }
 
 		return $items;		
 	}
 
 	function getRawPostExcerpt( $post_id ) {
 		global $wpdb;	
-		$excerpt = $wpdb->get_var("
+		$excerpt = $wpdb->get_var( $wpdb->prepare("
 			SELECT post_excerpt 
 			FROM {$wpdb->prefix}posts
-			WHERE ID = '$post_id'
-		");
+			WHERE ID = %s
+		", $post_id ) );
 
 		return $excerpt;		
 	}
@@ -2134,13 +2188,14 @@ class ListingsModel extends WPL_Model {
 
 	function productExistsInAccount( $post_id, $account_id ) {
 		global $wpdb;	
-		$item = $wpdb->get_row("
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE post_id = '$post_id'
-			  AND account_id = '$account_id'
+			WHERE post_id    = %s
+			  AND account_id = %s
 			  AND NOT status = 'archived'
-		", OBJECT);		
+		", $post_id, $account_id 
+		), OBJECT);		
 
 		return $item;
 	}
@@ -2191,9 +2246,9 @@ class ListingsModel extends WPL_Model {
 			if ( ( $status == 'published' ) || ( $status == 'changed' ) ) {
 				$wpdb->update( $this->tablename, array( 'status' => 'changed_profile' ), array( 'id' => $id ) );
 			} elseif ( $status == 'ended' ) {
-				$wpdb->update( $this->tablename, array( 'status' => 'reselected' ), array( 'id' => $id ) );
+				$wpdb->update( $this->tablename, array( 'status' => 'reselected'      ), array( 'id' => $id ) );
 			} else {
-				$wpdb->update( $this->tablename, array( 'status' => 'selected' ), array( 'id' => $id ) );
+				$wpdb->update( $this->tablename, array( 'status' => 'selected'        ), array( 'id' => $id ) );
 			}
 		}
 	}
@@ -2208,9 +2263,9 @@ class ListingsModel extends WPL_Model {
 			$id     = $listing['id'];
 			$status = $listing['status'];
 			if ( ( $status == 'changed_profile' ) ) {
-				$wpdb->update( $this->tablename, array( 'status' => 'changed' ), array( 'id' => $id ) );
+				$wpdb->update( $this->tablename, array( 'status' => 'changed'  ), array( 'id' => $id ) );
 			} elseif ( $status == 'reselected' ) {
-				$wpdb->update( $this->tablename, array( 'status' => 'ended' ), array( 'id' => $id ) );
+				$wpdb->update( $this->tablename, array( 'status' => 'ended'    ), array( 'id' => $id ) );
 			} else {
 				$wpdb->update( $this->tablename, array( 'status' => 'archived' ), array( 'id' => $id ) );
 			}
@@ -2321,9 +2376,8 @@ class ListingsModel extends WPL_Model {
 		$this->logger->debug('sql: '.$wpdb->last_query );
 		$this->logger->debug( $wpdb->last_error );
 		
-		return $wpdb->insert_id;
-		
-	}
+		return $wpdb->insert_id;		
+	} // prepareProductForListing()
 
 	function applyProfilePrice( $product_price, $profile_price ) {
 		$price = $this->calculateProfilePrice( $product_price, $profile_price );
@@ -2385,7 +2439,6 @@ class ListingsModel extends WPL_Model {
 		}
 	
 		return $product_price;		
-	
 	} // calculateProfilePrice()
 
 	// applyProfileToItem() received a limited $item array with only id, post_id, locked and status
@@ -2474,7 +2527,7 @@ class ListingsModel extends WPL_Model {
 
 		// apply profile price
 		$data['price'] = ProductWrapper::getPrice( $post_id );
-		$data['price']  = $this->applyProfilePrice( $data['price'], $profile['details']['start_price'] );
+		$data['price'] = $this->applyProfilePrice( $data['price'], $profile['details']['start_price'] );
 		
 		// fetch product stock if no quantity set in profile - and apply max_quantity limit
 		if ( intval( $data['quantity'] ) == 0 ) {

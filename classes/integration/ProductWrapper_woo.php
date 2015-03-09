@@ -327,6 +327,9 @@ class ProductWrapper {
 			$reenable_woocommerce_hide_out_of_stock_items = true;
 		}
 
+		// fix bug in woocommerce-woowaitlist (codecanyon version)
+		if ( class_exists('Woocommerce_Waitlist') ) remove_all_filters( 'woocommerce_get_availability' );
+
 		$available_variations  = $product->get_available_variations();
 		$variation_attributes  = $product->get_variation_attributes();
 		$default_attributes    = $product->get_variation_default_attributes();

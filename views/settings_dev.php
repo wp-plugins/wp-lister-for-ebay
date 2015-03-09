@@ -135,28 +135,6 @@
 						</div>
 					</div>
 
-					<div class="postbox" id="SandboxSettingsBox">
-						<h3 class="hndle"><span><?php echo __('eBay Sandbox','wplister') ?></span></h3>
-						<div class="inside">
-
-							<p>
-								<?php echo __('The eBay sandbox allows you to list items to a testing area free of charge.','wplister'); ?>
-								<?php echo __('This is feature intended for developers only and not recommended for end users.','wplister'); ?><br>
-							</p>
-							<label for="wpl-option-sandbox_enabled" class="text_label">
-								<?php echo __('Sandbox enabled','wplister') ?>
-								<?php $tip_msg  = __('To use the sandbox, you need to create a dedicated sandbox account and connect WP-Lister with it.','wplister'); ?>
-								<?php $tip_msg .= __('After enabling sandbox mode click "Change Account" and authenticate WP-Lister using your sandbox account.','wplister'); ?>
-                                <?php wplister_tooltip($tip_msg) ?>
-							</label>
-							<select id="wpl-option-sandbox_enabled" name="wpl_e2e_option_sandbox_enabled" title="Sandbox" class=" required-entry select">
-								<option value="1" <?php if ( $wpl_option_sandbox_enabled == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
-								<option value="0" <?php if ( $wpl_option_sandbox_enabled != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
-							</select>
-
-						</div>
-					</div>
-
 					<div class="postbox" id="StagingSiteSettingsBox">
 						<h3 class="hndle"><span><?php echo __('Staging site','wplister') ?></span></h3>
 						<div class="inside">
@@ -294,6 +272,15 @@
 								<?php endif; ?>
 							</p>
 
+							<label for="wpl-option-log_include_authinfo" class="text_label">
+								<?php echo __('Include auth debug info in log','wplister'); ?>
+                                <?php wplister_tooltip('Collect additional debug information when the database log option is enabled.') ?>
+							</label>
+							<select id="wpl-option-log_include_authinfo" name="wpl_e2e_log_include_authinfo" class=" required-entry select">
+								<option value="0" <?php if ( $wpl_log_include_authinfo == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('Disabled','wplister'); ?> (default)</option>
+								<option value="1" <?php if ( $wpl_log_include_authinfo == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Enabled','wplister'); ?></option>
+							</select>
+
 							<label for="wpl-wple_instance" class="text_label"><?php echo __('Instance ID','wplister'); ?></label>
 							<input type="text" name="wpl_e2e_wple_instance" id="wpl-wple_instance" value="<?php echo get_option('wple_instance') ?>" class="text_input" />
 							<p class="desc" style="display: block;">
@@ -306,6 +293,28 @@
 								<?php #echo __('To use this application you need to generate an eBay token.','wplister'); ?>
 								Please use the setup wizard to link WP-Lister to your eBay account. Entering the token manually should only be neccessary for developers when using sandbox mode.
 							</p>
+
+						</div>
+					</div>
+
+					<div class="postbox dev_box" id="SandboxSettingsBox" style="display:none;">
+						<h3 class="hndle"><span><?php echo __('eBay Sandbox','wplister') ?></span></h3>
+						<div class="inside">
+
+							<p>
+								<?php #echo __('The eBay sandbox allows you to list items to a testing area free of charge.','wplister'); ?>
+								<?php echo __('This is feature intended for developers only and not recommended for end users.','wplister'); ?><br>
+							</p>
+							<label for="wpl-option-sandbox_enabled" class="text_label">
+								<?php echo __('Sandbox enabled','wplister') ?>
+								<?php $tip_msg  = __('To use the sandbox, you need to create a dedicated sandbox account and connect WP-Lister with it.','wplister'); ?>
+								<?php $tip_msg .= __('After enabling sandbox mode click "Change Account" and authenticate WP-Lister using your sandbox account.','wplister'); ?>
+                                <?php wplister_tooltip($tip_msg) ?>
+							</label>
+							<select id="wpl-option-sandbox_enabled" name="wpl_e2e_option_sandbox_enabled" title="Sandbox" class=" required-entry select">
+								<option value="1" <?php if ( $wpl_option_sandbox_enabled == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="0" <?php if ( $wpl_option_sandbox_enabled != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+							</select>
 
 						</div>
 					</div>

@@ -104,7 +104,7 @@ class WPL_CronActions extends WPL_Core {
 		global $wpdb;
 		if ( get_option('wplister_log_to_db') == '1' ) {
 			$days_to_keep = get_option( 'wplister_log_days_limit', 30 );
-			$wpdb->query('DELETE FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.$days_to_keep.' DAY )');
+			$wpdb->query('DELETE FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.intval($days_to_keep).' DAY )');
 		}
 	} // action_clean_log_table()
 

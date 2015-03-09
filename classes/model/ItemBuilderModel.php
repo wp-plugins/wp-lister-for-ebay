@@ -52,8 +52,21 @@ class ItemBuilderModel extends WPL_Model {
 		$item = new ItemType();
 
 		// set quantity
-		$item->Quantity = $listing['quantity'];
+		// $item->Quantity = $listing['quantity'];
+
+		// get current quantity from WooCommerce
+		$woocom_stock   = ProductWrapper::getStock( $post_id );
+
+        // get max_quantity from profile
+        $max_quantity   = ( isset( $profile_details['max_quantity'] ) && intval( $profile_details['max_quantity'] )  > 0 ) ? $profile_details['max_quantity'] : PHP_INT_MAX ; 
+		$item->Quantity = min( $max_quantity, intval( $woocom_stock ) );
+
+        // handle fixed quantity
+    	if ( intval( $profile_details['quantity'] ) > 0 ) {
+        	$item->Quantity = $profile_details['quantity'];
+    	}
     	if ( $item->Quantity < 0 ) $item->Quantity = 0; // prevent error for negative qty
+
 
 		// set listing title
 		$item->Title = $this->prepareTitle( $listing['auction_title'] );
@@ -1587,6 +1600,20 @@ class ItemBuilderModel extends WPL_Model {
 
 
 
+	// remove specific item details to allow revising in restricted mode
+	// called from ListingsModel::reviseItem()
+    function applyRestrictedReviseMode( $item ) {
+
+    	// remove Item->Variations->Pictures node
+    	if ( $item->Variations ) {
+	    	$item->Variations->setPictures( null );
+    	}
+
+    	return $item;
+	} // applyRestrictedReviseMode()
+
+
+
 	// check if there are existing variations on eBay which do not exist in WooCommerce and need to be deleted
 	// called from ListingsModel::reviseItem()
     function fixDeletedVariations( $item, $listing_item ) {
@@ -1856,7 +1883,7 @@ class ItemBuilderModel extends WPL_Model {
 		if ( ! $success && ! $this->is_ajax() ) {
 			$this->showMessage( $longMessage, 1, true );
 		} elseif ( ( $longMessage != '' ) && ! $this->is_ajax() ) {
-			$this->showMessage( $longMessage, 0, true );
+			$this->showMessage( $longMessage, 2, true );
 		}
 
 		$htmlMsg  = '<div id="message" class="error" style="display:block !important;"><p>';
@@ -2038,15 +2065,13 @@ class ItemBuilderModel extends WPL_Model {
 	public function getProductImagesURL( $id ) {
 		global $wpdb;
 
-    	$results = $wpdb->get_results( 
-			"
+    	$results = $wpdb->get_results( $wpdb->prepare(" 
 			SELECT id, guid 
 			FROM {$wpdb->prefix}posts
 			WHERE post_type = 'attachment' 
-			  AND post_parent = '$id' 
+			  AND post_parent = %s
 			ORDER BY menu_order
-			"
-		);
+		", $id ) );
 		$this->logger->debug( "getProductImagesURL( $id ) : " . print_r($results,1) );
         #echo "<pre>";print_r($results);echo"</pre>";#die();
 

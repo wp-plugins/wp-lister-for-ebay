@@ -121,23 +121,42 @@ class EbayOrdersTable extends WP_List_Table {
             // 'edit'         => sprintf('<a href="?page=%s&action=%s&auction=%s">%s</a>',$page,'edit',$item['id'],__('Edit','wplister')),
         );
 
+
         // try to find created order
-        $order = false;
-        if ( $item['post_id'] ) {
-            $order = new WC_Order( $item['post_id'] );
-            if ( ! $order->id ) $order = false;
+        $order_post_id = $item['post_id'];
+        $order_exists  = false;
+        $order_msg     = '';
+
+        if ( $order_post_id ) {
+
+            $order = new WC_Order();
+            if ( $order->get_order( $order_post_id ) ) { 
+
+                // order exists - but might be trashed
+                if ( $order->post_status == 'trash' ) {
+                    $order_msg = '<br><small style="color:darkred;">Order #'.$order_post_id.' has been trashed.</small>';
+                } else {
+                    $order_exists = true;
+                    $order_msg = '<br><small>Order #'.$order->get_order_number().' is '.$order->get_status().'.</small>';
+                }
+
+            } else {
+                // order does not exist - probably deleted
+                $order_msg = '<br><small style="color:darkred;">Order #'.$order_post_id.' has been deleted.</small>';
+            }
+
         }
 
         // create or edit order link
-        if ( ! $order ) {
-            $actions['create_order'] = sprintf('<a href="?page=%s&action=%s&ebay_order=%s">%s</a>',$page,'create_order',$item['id'],__('Create Order','wplister'));
-        } else {
+        if ( $order_exists ) {
             $actions['edit_order'] = sprintf('<a href="post.php?action=%s&post=%s">%s</a>','edit',$item['post_id'],__('View Order','wplister'));
-            $actions['edit_order'] .= ' '.$order->get_order_number();
+        } else {
+            $actions['create_order'] = sprintf('<a href="?page=%s&action=%s&ebay_order=%s">%s</a>',$page,'create_order',$item['id'],__('Create Order','wplister'));
         }
 
         // free version can't create orders
         if ( WPLISTER_LIGHT ) unset( $actions['create_order'] );
+
 
         // item title
         $title = $item['buyer_name'];
@@ -154,7 +173,7 @@ class EbayOrdersTable extends WP_List_Table {
 
         //Return the title contents
         return sprintf('%1$s %2$s',
-            /*$1%s*/ $title,
+            /*$1%s*/ $title . $order_msg,
             /*$2%s*/ $this->row_actions($actions)
         );
     }

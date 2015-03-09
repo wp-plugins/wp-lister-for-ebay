@@ -562,35 +562,9 @@ class ListingsPage extends WPL_Page {
 			$msg .= '<br>';
 			$msg .= __('Please keep only one listing and move unwanted duplicates to the archive.','wplister');
 			$msg .= '<br><br>';
-			foreach ($duplicateProducts as $dupe) {
 
+			$msg .= $this->renderDupeTable( $duplicateProducts );
 
-				$msg .= '<b>'.__('Listings for product','wplister').' #'.$dupe->post_id.':</b>';
-				$msg .= '<br>';
-				
-				foreach ($dupe->listings as $listing) {
-					$color = $listing->status == 'archived' ? 'silver' : '';
-					$msg .= '<span style="color:'.$color.'">';					
-					$msg .= '&nbsp;&bull;&nbsp;';					
-					$msg .= ''.$listing->auction_title.'';					
-					if ($listing->ebay_id) $msg .= ' (#'.$listing->ebay_id.')';
-					$msg .= ' &ndash; <i>'.$listing->status.'</i>';					
-					$msg .= '<br>';
-					if ( in_array( $listing->status, array( 'prepared', 'verified', 'ended', 'sold' ) ) ) {
-						$archive_link = sprintf('<a class="archive button button-small" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'archive',$listing->id,__('Click to move to archive','wplister'));
-						$msg .= '&nbsp;&nbsp;&nbsp;&nbsp;'.$archive_link;
-						$msg .= '<br>';
-					}
-					if ( in_array( $listing->status, array( 'selected' ) ) ) {
-						$delete_link = sprintf('<a class="delete button button-small button-primary" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete_listing',$listing->id,__('Click to remove this listing','wplister'));
-						$msg .= '&nbsp;&nbsp;&nbsp;&nbsp;'.$delete_link;
-						$msg .= '<br>';
-					}
-					$msg .= '</span>';
-				}
-				$msg .= '<br>';
-
-			}
 			$msg .= __('If you are not planning to use the inventory sync, you can hide this warning in settings.','wplister');
 			// $msg .= '<br>';
 			// $msg .= 'If you need to list single products multiple times for some reason, please contact support@wplab.com and we will find a solution.';
@@ -599,6 +573,53 @@ class ListingsPage extends WPL_Page {
 		}
 
 	} // checkForDuplicates()
+
+	public function renderDupeTable( $listings, $column = 'post_id' ) {
+		if ( empty($listings) ) return '';
+
+        // get current page with paging as url param
+        $page = $_REQUEST['page'];
+        if ( isset( $_REQUEST['paged'] )) $page .= '&paged='.$_REQUEST['paged'];
+
+		$listingsModel = new ListingsModel();
+		$msg           = '';
+
+		foreach ($listings as $dupe) {
+
+			$account_title = WPLE_eBayAccount::getAccountTitle( $dupe->account_id );
+
+			$msg .= '<b>'.__('Listings for product','wplister').' #'.$dupe->post_id.' ('.$account_title.'):</b>';
+			$msg .= '<br>';
+
+			$duplicateListings = $listingsModel->getAllListingsForProductAndAccount( $dupe->post_id, $dupe->account_id );
+			
+			foreach ($duplicateListings as $listing) {
+				$color = $listing->status == 'archived' ? 'silver' : '';
+				$msg .= '<span style="color:'.$color.'">';					
+				$msg .= '&nbsp;&bull;&nbsp;';					
+				$msg .= ''.$listing->auction_title.'';					
+				if ($listing->ebay_id) $msg .= ' (#'.$listing->ebay_id.')';
+				$msg .= ' &ndash; <i>'.$listing->status.'</i>';					
+				$msg .= '<br>';
+				if ( in_array( $listing->status, array( 'prepared', 'verified', 'ended', 'sold' ) ) ) {
+					$archive_link = sprintf('<a class="archive button button-small" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'archive',$listing->id,__('Click to move to archive','wplister'));
+					$msg .= '&nbsp;&nbsp;&nbsp;&nbsp;'.$archive_link;
+					$msg .= '<br>';
+				}
+				if ( in_array( $listing->status, array( 'selected' ) ) ) {
+					$delete_link = sprintf('<a class="delete button button-small button-primary" href="?page=%s&action=%s&auction=%s">%s</a>',$page,'delete_listing',$listing->id,__('Click to remove this listing','wplister'));
+					$msg .= '&nbsp;&nbsp;&nbsp;&nbsp;'.$delete_link;
+					$msg .= '<br>';
+				}
+				$msg .= '</span>';
+			}
+			$msg .= '<br>';
+
+		}
+
+		return $msg;
+	} // renderDupeTable()
+
 
 
 	// check if we need to apply a profile to all its items

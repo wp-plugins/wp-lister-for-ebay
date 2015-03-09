@@ -160,9 +160,13 @@
 								</label>
 								<select name="wpl_e2e_shipping_package" id="wpl-shipping_package" 
 										title="Type" class="required-entry select select_shipping_package" style="width:auto">
-									<?php foreach ($wpl_available_shipping_packages as $shipping_package) : ?>
-										<option value="<?php echo $shipping_package->ShippingPackage ?>" <?php if ( @$item_details['shipping_package'] == $shipping_package->ShippingPackage ): ?>selected="selected"<?php endif; ?>><?php echo $shipping_package->Description ?></option>
-									<?php endforeach; ?>
+									<?php if ( is_array($wpl_available_shipping_packages) ) : ?>
+										<?php foreach ($wpl_available_shipping_packages as $shipping_package) : ?>
+											<option value="<?php echo $shipping_package->ShippingPackage ?>" <?php if ( @$item_details['shipping_package'] == $shipping_package->ShippingPackage ): ?>selected="selected"<?php endif; ?>><?php echo $shipping_package->Description ?></option>
+										<?php endforeach; ?>
+									<?php else : ?>
+										<option value=""><?php echo '-- no options available --' ?></option>
+									<?php endif; ?>
 								</select>
 								<br class="clear" />
 
@@ -185,7 +189,7 @@
 							<?php if ( isset( $wpl_seller_shipping_profiles ) && is_array( $wpl_seller_shipping_profiles ) ): ?>
 							<label for="wpl-text-seller_shipping_profile_id" class="text_label">
 								<?php echo __('Shipping profile','wplister'); ?> (beta)
-                                <?php wplister_tooltip('Instead of setting your shipping details in WP-Lister you can select a predefined shipping profile from your eBay account.') ?>
+                                <?php wplister_tooltip('Instead of setting your shipping details in WP-Lister you can select a predefined shipping profile from your eBay account.<br><br>Please note: Due to limitations in the eBay API you need to select at least one shipping service above, even though it will be overwritten by your shipping profile.') ?>
 							</label>
 							<select id="wpl-text-seller_shipping_profile_id" name="wpl_e2e_seller_shipping_profile_id" class=" required-entry select">
 								<option value="">-- <?php echo __('no profile','wplister'); ?> --</option>

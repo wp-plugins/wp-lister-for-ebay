@@ -265,6 +265,7 @@ class LogTable extends WP_List_Table {
 
     function column_account($item) {
         $account_title = isset( WPLE()->accounts[ $item['account_id'] ] ) ? WPLE()->accounts[ $item['account_id'] ]->title : '<span style="color:darkred">Invalid Account ID: '.$item['account_id'].'</span>';
+        if ( ! $item['account_id'] ) $account_title = '&mdash;';
         return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
             /*$1%s*/ $account_title,
             /*$2%s*/ EbayController::getEbaySiteCode( $item['site_id'] )
@@ -567,9 +568,10 @@ class LogTable extends WP_List_Table {
 
         $this->tablename = $wpdb->prefix . 'ebay_log';
 
-        $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'id'; //If no sort, default to title
-        $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'desc'; //If no order, default to asc
-        $offset = ( $current_page - 1 ) * $per_page;
+        $orderby  = (!empty($_REQUEST['orderby'])) ? esc_sql( $_REQUEST['orderby'] ) : 'id';
+        $order    = (!empty($_REQUEST['order']))   ? esc_sql( $_REQUEST['order']   ) : 'desc';
+        $offset   = ( $current_page - 1 ) * $per_page;
+        $per_page = esc_sql( $per_page );
 
         // handle filters
         // $where_sql = ' WHERE 1 = 1 ';
@@ -580,7 +582,7 @@ class LogTable extends WP_List_Table {
 
         // views
         if ( isset( $_REQUEST['log_status'] ) ) {
-            $status = $_REQUEST['log_status'];
+            $status = esc_sql( $_REQUEST['log_status'] );
             if ( in_array( $status, array('Success','Warning','Failure','PartialFailure','unknown') ) ) {
                 if ( $status == 'unknown' ) {
                     $where_sql .= " AND success IS NULL ";
@@ -592,13 +594,13 @@ class LogTable extends WP_List_Table {
 
         // callname
         if ( isset( $_REQUEST['callname'] ) && $_REQUEST['callname'] ) {
-            $callname = $_REQUEST['callname'];
+            $callname = esc_sql( $_REQUEST['callname'] );
             $where_sql .= " AND callname = '$callname' ";
         }
 
         // usertype
         if ( isset( $_REQUEST['usertype'] ) && $_REQUEST['usertype'] ) {
-            $usertype = $_REQUEST['usertype'];
+            $usertype = esc_sql( $_REQUEST['usertype'] );
             if ( in_array( $usertype, array('cron','not_cron') ) ) {
                 if ( $usertype == 'cron' ) {
                     $where_sql .= " AND ( user_id IS NULL OR user_id = '0' ) ";
@@ -632,9 +634,7 @@ class LogTable extends WP_List_Table {
         }
 
         return $items;
-    }
-
+    } // getPageItems()
 
     
 }
-

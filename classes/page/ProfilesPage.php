@@ -212,6 +212,22 @@ class ProfilesPage extends WPL_Page {
 		}
 		// echo "<pre>";print_r($shipping_flat_profiles);echo"</pre>";
 
+
+		// get available seller profiles
+		$seller_profiles_enabled  = get_option('wplister_ebay_seller_profiles_enabled');
+		$seller_shipping_profiles = get_option('wplister_ebay_seller_shipping_profiles');
+		$seller_payment_profiles  = get_option('wplister_ebay_seller_payment_profiles');
+		$seller_return_profiles   = get_option('wplister_ebay_seller_return_profiles');
+
+		if ( isset( WPLE()->accounts[ $account_id ] ) ) {
+			$account = WPLE()->accounts[ $account_id ];
+			$seller_profiles_enabled  = $account->seller_profiles;
+			$seller_shipping_profiles = maybe_unserialize( $account->shipping_profiles );
+			$seller_payment_profiles  = maybe_unserialize( $account->payment_profiles );
+			$seller_return_profiles   = maybe_unserialize( $account->return_profiles );
+		}
+
+
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,
 			'message'					=> $this->message,
@@ -246,10 +262,10 @@ class ProfilesPage extends WPL_Page {
 			'cod_available'  			=> $cod_available,
 			'ReturnsWithinOptions'  	=> $ReturnsWithinOptions,
 			'ShippingCostPaidByOptions' => $ShippingCostPaidByOptions,
-			'seller_profiles_enabled'	=> get_option('wplister_ebay_seller_profiles_enabled'),
-			'seller_shipping_profiles'	=> get_option('wplister_ebay_seller_shipping_profiles'),
-			'seller_payment_profiles'	=> get_option('wplister_ebay_seller_payment_profiles'),
-			'seller_return_profiles'	=> get_option('wplister_ebay_seller_return_profiles'),
+			'seller_profiles_enabled'	=> $seller_profiles_enabled,
+			'seller_shipping_profiles'	=> $seller_shipping_profiles,
+			'seller_payment_profiles'	=> $seller_payment_profiles,
+			'seller_return_profiles'	=> $seller_return_profiles,
 			
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-profiles'
 		);
@@ -498,7 +514,8 @@ class ProfilesPage extends WPL_Page {
 		if ( ! $profile_id ) return array();
 
 		// get saved conditions for profile
-		$saved_conditions = $wpdb->get_var('SELECT conditions FROM '.$wpdb->prefix.'ebay_profiles WHERE profile_id = '.$profile_id );
+		// $saved_conditions = $wpdb->get_var('SELECT conditions FROM '.$wpdb->prefix.'ebay_profiles WHERE profile_id = '.$profile_id );
+		$saved_conditions = $wpdb->get_var( $wpdb->prepare( "SELECT conditions FROM {$wpdb->prefix}ebay_profiles WHERE profile_id = %d", $profile_id ) );
 		$saved_conditions = unserialize( $saved_conditions );
 
 		if ( ( isset( $saved_conditions[ $ebay_category_id ] ) ) && ( $saved_conditions[ $ebay_category_id ] != 'none' ) ) {
@@ -531,7 +548,7 @@ class ProfilesPage extends WPL_Page {
 	public function getStoreCategories( $account_id ) {
 		global $wpdb;
 		
-		$results = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}ebay_store_categories WHERE account_id = '$account_id' " );		
+		$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}ebay_store_categories WHERE account_id = %d", $account_id ) );
 		return $results;
 	}
 

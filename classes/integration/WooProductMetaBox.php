@@ -954,7 +954,19 @@ class WpLister_Product_MetaBox {
 	function meta_box_shipping() {
 		global $woocommerce, $post;
 
+		// enqueue chosen.js from WooCommerce
+	   	wp_enqueue_script( 'chosen' );
+
         ?>
+		<script type="text/javascript">
+			jQuery( document ).ready( function () {
+
+				// enable chosen.js
+				jQuery("select.wple_chosen_select").chosen();
+				
+			});
+		</script>
+
         <style type="text/css">
             #wplister-ebay-shipping label { 
             	float: left;

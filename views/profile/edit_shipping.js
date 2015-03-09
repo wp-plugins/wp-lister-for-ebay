@@ -65,7 +65,7 @@
 		function handleAddShippingServiceRow( mode ) {
 			
 			// disable chosen before cloning fields
-			jQuery("select.chosen_select").chosen('destroy');
+			jQuery("select.wple_chosen_select").chosen('destroy');
 
 			var shipping_type = jQuery('.select_shipping_type')[0] ? jQuery('.select_shipping_type')[0].value : 'flat';
 			if ( shipping_type == 'flat' ) {
@@ -88,7 +88,7 @@
 			enumerateShippingTableFields();
 
 			// enable chosen.js again
-			jQuery("select.chosen_select").chosen();
+			jQuery("select.wple_chosen_select").chosen();
 
 		}
 

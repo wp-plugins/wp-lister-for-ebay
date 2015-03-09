@@ -147,6 +147,9 @@ Version: 1.2.1
     #wpl_wrapper .section p {
         padding-left: 10px;
         padding-right: 10px;
+        /* fix for firefox: */
+        line-height: 1.2em;
+        margin: 1em 0;
     }
 
     #wpl_wrapper .section big {

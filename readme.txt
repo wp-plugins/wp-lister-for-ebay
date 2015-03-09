@@ -2,7 +2,7 @@
 Contributors: wp-lab
 Tags: ebay, woocommerce, products, export
 Requires at least: 3.9
-Tested up to: 4.1
+Tested up to: 4.1.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -92,6 +92,33 @@ WP-Lister for Amazon is currently in beta. You are welcome to follow the develop
 2. Profile Editor
 
 == Changelog ==
+= 2.0.8 =
+* improved performance on Products page
+* database upgrade to version 43
+
+= 2.0.7.11 =
+* improved display of eBay status in WooCommerce - split variations / multiple items per product
+* show WooCommerce order status on Orders page and indicate when an order has been trashed or deleted (show Create Order link then)
+* fixed seller profiles being shown for default account instead of selected account when editing listing profile
+* fixed check for duplicates when multiple accounts are used
+* fixed reducing eBay stock during checkout for multiple accounts
+* fixed bug in woocommerce-woowaitlist (codecanyon version)
+* fixed selecting shipping destinations on edit product page on WooCommerce 2.3 (chosen.js)
+* fixed updating seller profiles when refreshing eBay account
+
+= 2.0.7.10 =
+* update legacy account data when adding new eBay account or when updating default account
+* fixed rare issue where incorrect quantity was sent to eBay (when revising items with sales)
+* prevent php warning on profile editor when no shipping packages are available
+
+= 2.0.7.9 =
+* retry without variation pictures when ReviseItem fails with error 21916734 (Variation pictures cannot be removed during restricted revise)
+* tweaked default template to prevent issues in firefox
+* various smaller improvements
+
+= 2.0.7.8 =
+* fixed variation options in WooCommerce 2.3
+
 = 2.0.7.7 =
 * added filter hook wplister_get_ebay_category_type
 * added option to set WooCommerce order status for shipped eBay orders

@@ -47,11 +47,12 @@ class JobsModel extends WPL_Model {
 
 	function getItem( $id ) {
 		global $wpdb;	
-		$item = $wpdb->get_row("
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT * 
 			FROM $this->tablename
-			WHERE job_id = '$id'
-		", ARRAY_A);		
+			WHERE job_id = %s
+		", $id 
+		), ARRAY_A);		
 
 		$item['tasklist'] = $this->decodeObject( $item['tasklist'], true );
 
@@ -60,11 +61,12 @@ class JobsModel extends WPL_Model {
 
 	function getItemByKey( $key ) {
 		global $wpdb;	
-		$item = $wpdb->get_row("
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT * 
 			FROM $this->tablename
-			WHERE job_key = '$key'
-		", ARRAY_A);		
+			WHERE job_key = %s
+		", $key 
+		), ARRAY_A);		
 
 		$item['tasklist'] = $this->decodeObject( $item['tasklist'], true );
 
@@ -75,11 +77,11 @@ class JobsModel extends WPL_Model {
 
 	function deleteItem( $id ) {
 		global $wpdb;
-		$wpdb->query("
+		$wpdb->query( $wpdb->prepare("
 			DELETE
 			FROM $this->tablename
-			WHERE job_id = '$id'
-		");
+			WHERE job_id = %s
+		", $id ) );
 	}
 
 
@@ -132,5 +134,4 @@ class JobsModel extends WPL_Model {
 	}
 
 
-
-}
+} // class JobsModel

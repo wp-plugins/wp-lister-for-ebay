@@ -28,7 +28,7 @@
 									<td>
 										<?php if ( ! isset( $service['location'] ) ) $service['location'] = ''; // prevent undefined index warning on old profiles ?>
 										<?php $service['location'] = is_array( $service['location'] ) ? $service['location'] : array( $service['location'] ); ?>
-										<select multiple="multiple" class="chosen_select select_location" id="" name="wpl_e2e_int_shipping_options_flat[][location][]" data-placeholder="Select locations" style="">
+										<select multiple="multiple" class="wple_chosen_select select_location" id="" name="wpl_e2e_int_shipping_options_flat[][location][]" data-placeholder="Select locations" style="">
 											<?php
 												foreach ( $wpl_shipping_locations as $location => $desc )
 													echo '<option value="' . $location . '" ' . selected( ! empty( $service['location'] ) && in_array( $location, $service['location'] ), true ) . '>' . $desc . '</option>';
@@ -98,7 +98,7 @@
 										<?php $service = is_array( $service ) ? $service : array(); ?>
 										<?php $service = isset( $service['location'] ) ? $service : array( 'location' => array() ); ?>
 										<?php $service['location'] = is_array( $service['location'] ) ? $service['location'] : array( $service['location'] ); ?>
-										<select multiple="multiple" class="chosen_select select_location" id="" name="wpl_e2e_int_shipping_options_calc[][location][]" data-placeholder="Select locations" style="">
+										<select multiple="multiple" class="wple_chosen_select select_location" id="" name="wpl_e2e_int_shipping_options_calc[][location][]" data-placeholder="Select locations" style="">
 											<?php
 												foreach ( $wpl_shipping_locations as $location => $desc )
 													echo '<option value="' . $location . '" ' . selected( ! empty( $service['location'] ) && in_array( $location, $service['location'] ), true ) . '>' . $desc . '</option>';
@@ -194,7 +194,7 @@
 									<?php echo __('Ship to locations','wplister'); ?>
 		                            <?php wplister_tooltip('Select the locations you want to ship to. (optional)') ?>
 								</label>
-								<select multiple="multiple" class="chosen_select" id="wpl_e2e_ShipToLocations" name="wpl_e2e_ShipToLocations[]" data-placeholder="Select locations" style="width: 65%;">
+								<select multiple="multiple" class="wple_chosen_select" id="wpl_e2e_ShipToLocations" name="wpl_e2e_ShipToLocations[]" data-placeholder="Select locations" style="width: 65%;">
 									<?php
 										foreach ( $wpl_shipping_locations as $location => $desc )
 											echo '<option value="' . $location . '" ' . selected( ! empty( $item_details['ShipToLocations'] ) && in_array( $location, $item_details['ShipToLocations'] ), true ) . '>' . $desc . '</option>';
@@ -206,7 +206,7 @@
 									<?php echo __('Exclude locations','wplister'); ?>
 		                            <?php wplister_tooltip('Select the locations you do not want to ship to. (optional)') ?>
 								</label>
-								<select multiple="multiple" class="chosen_select" id="wpl_e2e_ExcludeShipToLocations" name="wpl_e2e_ExcludeShipToLocations[]" data-placeholder="Select locations" style="width: 65%;">
+								<select multiple="multiple" class="wple_chosen_select" id="wpl_e2e_ExcludeShipToLocations" name="wpl_e2e_ExcludeShipToLocations[]" data-placeholder="Select locations" style="width: 65%;">
 									<?php
 										foreach ( $wpl_exclude_locations as $location => $desc )
 											echo '<option value="' . $location . '" ' . selected( ! empty( $item_details['ExcludeShipToLocations'] ) && in_array( $location, $item_details['ExcludeShipToLocations'] ), true ) . '>' . $desc . '</option>';

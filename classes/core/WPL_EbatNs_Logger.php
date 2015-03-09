@@ -14,8 +14,9 @@ class WPL_EbatNs_Logger{
 	{
 		global $wpdb;
 
-		$this->debugXmlBeautify = $beautfyXml;
+		$this->debugXmlBeautify    = $beautfyXml;
 		$this->debugLogDestination = $destination;
+		$this->debugSecureLogging  = get_option('wplister_log_include_authinfo') ? false : true;
 
 		// get current user id
 		$user = wp_get_current_user();

@@ -69,11 +69,12 @@ class WPLE_eBaySite extends WPL_Core {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLENAME;
 		
-		$item = $wpdb->get_row("
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $table
-			WHERE id = '$id'
-		", OBJECT);
+			WHERE id = %s
+		", $id 
+		), OBJECT);
 
 		// $item->allowed_sites = maybe_unserialize( $item->allowed_sites );
 		return $item;
@@ -100,11 +101,11 @@ class WPLE_eBaySite extends WPL_Core {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLENAME;
 		
-		$site_title = $wpdb->get_var("
+		$site_title = $wpdb->get_var( $wpdb->prepare("
 			SELECT title
 			FROM $table
-			WHERE id = '$id'
-		");
+			WHERE id = %s
+		", $id ) );
 		return $site_title;
 	}
 
@@ -207,9 +208,10 @@ class WPLE_eBaySite extends WPL_Core {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLENAME;
 
-        $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'title'; //If no sort, default to title
-        $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'asc'; //If no order, default to asc
-        $offset = ( $current_page - 1 ) * $per_page;
+        $orderby  = (!empty($_REQUEST['orderby'])) ? esc_sql( $_REQUEST['orderby'] ) : 'title';
+        $order    = (!empty($_REQUEST['order']))   ? esc_sql( $_REQUEST['order']   ) : 'asc';
+        $offset   = ( $current_page - 1 ) * $per_page;
+        $per_page = esc_sql( $per_page );
 
         // get items
 		$items = $wpdb->get_results("
@@ -234,6 +236,4 @@ class WPLE_eBaySite extends WPL_Core {
 	}
 
 
-} // WPLE_eBaySite()
-
-
+} // class WPLE_eBaySite()

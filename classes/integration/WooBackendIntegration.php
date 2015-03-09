@@ -11,7 +11,7 @@ class WPL_WooBackendIntegration {
 		add_filter( 'manage_edit-product_columns', array( &$this, 'wpl_woocommerce_edit_product_columns' ), 11 );
 		add_action( 'manage_product_posts_custom_column', array( &$this, 'wplister_woocommerce_custom_product_columns' ), 3 );
 
-		// custom column for products table
+		// custom column for orders table
 		add_filter( 'manage_edit-shop_order_columns', array( &$this, 'wpl_woocommerce_edit_shop_order_columns' ), 11 );
 		add_action( 'manage_shop_order_posts_custom_column', array( &$this, 'wplister_woocommerce_custom_shop_order_columns' ), 3 );
 
@@ -266,26 +266,32 @@ class WPL_WooBackendIntegration {
 		switch ($column) {
 			case "listed" :
 				$listingsModel = new ListingsModel();
-				$status = $listingsModel->getStatusFromPostID( $post->ID );
-				// if ( ! $status ) break;
+				// $status = $listingsModel->getStatusFromPostID( $post->ID );
+				$status = false;
+
+				// get all listings for product ID - including split variations
+				$listings = $listingsModel->getAllListingsFromPostOrParentID( $post->ID );
+			
+				// get status of first listing
+				if ( ! empty($listings) ) $status = $listings[0]->status;
 
 				switch ($status) {
 					case 'published':
 					case 'changed':
 						$ebayUrl = $listingsModel->getViewItemURLFromPostID( $post->ID );
-						echo '<a href="'.$ebayUrl.'" title="View on eBay" target="_blank"><img src="'.WPLISTER_URL.'img/ebay-16x16.png" alt="yes" /></a>';
+						echo '<a href="'.$ebayUrl.'" title="View on eBay" target="_blank"><img src="'.WPLISTER_URL.'img/ebay-16x16.png" alt="eBay" /></a>';
 						break;
 					
 					case 'prepared':
-						echo '<img src="'.WPLISTER_URL.'/img/hammer-orange-16x16.png" title="prepared" />';
+						echo '<img src="'.WPLISTER_URL.'/img/hammer-orange-16x16.png" title="eBay listing is prepared." />';
 						break;
 					
 					case 'verified':
-						echo '<img src="'.WPLISTER_URL.'/img/hammer-green-16x16.png" title="verified" />';
+						echo '<img src="'.WPLISTER_URL.'/img/hammer-green-16x16.png" title="eBay listing is verified." />';
 						break;
 					
 					case 'ended':
-						echo '<img src="'.WPLISTER_URL.'/img/hammer-16x16.png" title="ended" />';
+						echo '<img src="'.WPLISTER_URL.'/img/hammer-16x16.png" title="eBay listing is ended." />';
 						break;
 					
 					case 'archived':
@@ -616,13 +622,25 @@ class WPL_WooBackendIntegration {
 
 		// check listing status
 		$listingsModel = new ListingsModel();
-		$status = $listingsModel->getStatusFromPostID( $post->ID );
-		if ( ! in_array($status, array('published','changed','ended','sold','prepared','verified') ) ) return;
+		// $status = $listingsModel->getStatusFromPostID( $post->ID );
+		// if ( ! in_array($status, array('published','changed','ended','sold','prepared','verified') ) ) return;
 
 		// get first item
-		$listings = $listingsModel->getAllListingsFromPostID( $post->ID );
-		if ( sizeof($listings) == 0 ) return;
-		$item = $listings[0];
+		// $listings = $listingsModel->getAllListingsFromPostID( $post->ID );
+		// if ( sizeof($listings) == 0 ) return;
+		// $item = $listings[0];
+
+		// get all listings for product ID - including check for split variations
+		$listings = $listingsModel->getAllListingsFromPostOrParentID( $post->ID );
+		if ( empty($listings) ) return;
+
+		// use different template if there are multiple results
+		if ( sizeof($listings) > 1 )
+			return $this->wplister_product_submitbox_for_multiple_items( $listings );
+
+		// get status of first listing
+		$item   = $listings[0];
+		$status = $listings[0]->status;
 
         // show locked indicator
         if ( @$item->locked ) {
@@ -691,6 +709,39 @@ class WPL_WooBackendIntegration {
 		</div>
 		<?php
 	} // wplister_product_submitbox_misc_actions()
+
+	// show list of all found items
+	function wplister_product_submitbox_for_multiple_items( $listings ) {
+		?>
+		<div class="misc-pub-section" id="wplister-submit-options">
+		<?php echo sprintf( __( 'This product is linked to %s eBay listings', 'wplister' ), sizeof($listings) ); ?>:<br>
+		<?php foreach( $listings as $item ) : ?>
+
+			<b><?php echo $item->ebay_id; ?></b>
+			<i><?php echo $item->status; ?></i>
+
+			<?php if ( isset($locktip) ) echo $locktip ?>
+
+			<?php if ( isset($item->ViewItemURL) && $item->ViewItemURL ) : ?>
+				<a href="<?php echo $item->ViewItemURL ?>" target="_blank" style="float:right;">
+					<?php echo __('View on eBay', 'wplister') ?>
+				</a>
+			<?php elseif ( $item->status == 'prepared' ) : ?>
+				<a href="admin.php?page=wplister&amp;action=verify&amp;auction=<?php echo $item->id ?>" style="float:right;">
+					<?php echo __('Verify', 'wplister') ?>
+				</a>
+			<?php elseif ( $item->status == 'verified' ) : ?>
+				<a href="admin.php?page=wplister&amp;action=publish2e&amp;auction=<?php echo $item->id ?>" style="float:right;">
+					<?php echo __('Publish', 'wplister') ?>
+				</a>
+			<?php endif; ?>
+
+			<br>
+
+		<?php endforeach; ?>
+		</div>
+		<?php
+	} // wplister_product_submitbox_for_multiple_items()
 
 	// draw checkbox to revise item
 	function wplister_product_submitbox_revise_checkbox( $item ) {

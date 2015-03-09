@@ -87,7 +87,7 @@
 
 							<label for="wpl-text-start_price" class="text_label">
 								<?php echo __('Price / Start price','wplister'); ?>
-                                <?php wplister_tooltip('You can adjust the price for fixed price listings - or the start price for auctions.<br>' . __('Leave this empty to use the product price as it is.','wplister') ) ?>
+                                <?php wplister_tooltip('You can adjust the price for fixed price listings - or the start price for auctions.<br>Leave empty to use the product price as it is.<br>Note: This option is ignored for locked items!' ) ?>
 							</label>
 							<input type="text" name="wpl_e2e_start_price" id="wpl-text-start_price" value="<?php echo $item_details['start_price']; ?>" class="text_input" />
 							<br class="clear" />
@@ -440,7 +440,7 @@
 			function () {
 
 				// enable chosen.js
-				jQuery("select.chosen_select").chosen();
+				jQuery("select.wple_chosen_select").chosen();
 				
 
 				// hide fixed price field for fixed price listings

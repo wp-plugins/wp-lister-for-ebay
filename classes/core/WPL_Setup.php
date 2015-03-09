@@ -467,7 +467,9 @@ class WPL_Setup extends WPL_Core {
 		if ( ! $account_id ) die('No default account set!');
 		if ( ! isset( $accounts[ $account_id ] ) ) die('Invalid default account set!');
 
-		$site_id = $accounts[ $account_id ]->site_id;
+		$site_id    = $accounts[ $account_id ]->site_id;
+		$site_id    = intval( $site_id    ); // sanitize parameters 
+		$account_id = intval( $account_id );
 
 		$wpdb->query("UPDATE ".$wpdb->prefix."ebay_auctions         SET account_id = $account_id, site_id = $site_id ");
 		echo $wpdb->last_error;

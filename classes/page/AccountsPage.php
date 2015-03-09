@@ -69,6 +69,7 @@ class WPLE_AccountsPage extends WPL_Page {
 		// set default account
 		if ( $this->requestAction() == 'make_default' ) {
 			$this->makeDefaultAccount( $_REQUEST['ebay_account'] );
+			$this->showMessage( __('Default account has been changed successfully.','wplister') );
 		}
 
 		// add empty developer account
@@ -135,7 +136,6 @@ class WPLE_AccountsPage extends WPL_Page {
 		update_option( 'wplister_categories_map_ebay', 			maybe_unserialize( $account->categories_map_ebay ) );
 		update_option( 'wplister_categories_map_store', 		maybe_unserialize( $account->categories_map_store ) );
 
-		$this->showMessage( __('Default account has been changed successfully.','wplister') );
 	}
 
 	function addScreenOptions() {
@@ -266,6 +266,11 @@ class WPLE_AccountsPage extends WPL_Page {
 			$site->enabled = 1;
 			$site->update();	
 			
+			// update default account
+			if ( $account->id == get_option('wplister_default_account_id') ) {
+				$this->makeDefaultAccount( $account->id );
+			}
+
 			$this->showMessage( __('Account was updated.','wplister') );
 		}
 	}
@@ -330,11 +335,6 @@ class WPLE_AccountsPage extends WPL_Page {
 			$account->active       = 1;
 			$account->add();
 
-			// set default account automatically
-			if ( ! get_option( 'wplister_default_account_id' ) ) {
-				update_option( 'wplister_default_account_id', $account->id );
-			}
-
 			// set enabled flag for site
 			$site = WPLE_eBaySite::getSiteObj($account->site_id);
 			$site->enabled = 1;
@@ -342,6 +342,13 @@ class WPLE_AccountsPage extends WPL_Page {
 
 			// update user details
 			$account->updateUserDetails();
+
+			// set default account automatically
+			if ( ! get_option( 'wplister_default_account_id' ) ) {
+				update_option( 'wplister_default_account_id', $account->id );
+				$this->makeDefaultAccount( $account->id );
+			}
+
 			$this->check_wplister_setup('settings');
 
 			$this->showMessage( __('New account was added.','wplister') .' '. __('Please refresh account and site specific details now.','wplister')   );

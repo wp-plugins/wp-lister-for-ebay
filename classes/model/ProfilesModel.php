@@ -30,11 +30,12 @@ class ProfilesModel extends WPL_Model {
 
 	function getItem( $id ) {
 		global $wpdb;	
-		$item = $wpdb->get_row("
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT * 
 			FROM $this->tablename
-			WHERE profile_id = '$id'
-		", ARRAY_A);		
+			WHERE profile_id = %s
+		", $id 
+		), ARRAY_A);		
 
 		$item['details'] = $this->decodeObject( $item['details'], true );
 		$item['conditions'] = unserialize( $item['conditions'] );
@@ -125,11 +126,11 @@ class ProfilesModel extends WPL_Model {
 			return false;
 		}
 
-		$wpdb->query("
+		$wpdb->query( $wpdb->prepare("
 			DELETE
 			FROM $this->tablename
-			WHERE profile_id = '$id'
-		");
+			WHERE profile_id = %s
+		", $id ) );
 	}
 
 
@@ -158,11 +159,12 @@ class ProfilesModel extends WPL_Model {
 		global $wpdb;	
 
 		// get raw db content
-		$data = $wpdb->get_row("
+		$data = $wpdb->get_row( $wpdb->prepare("
 			SELECT * 
 			FROM $this->tablename
-			WHERE profile_id = '$id'
-		", ARRAY_A);
+			WHERE profile_id = %s
+		", $id 
+		), ARRAY_A);
 				
 		// adjust duplicate
 		$data['profile_name'] = $data['profile_name'] .' ('. __('duplicated','wplister').')';
@@ -199,9 +201,10 @@ class ProfilesModel extends WPL_Model {
 	function getPageItems( $current_page, $per_page ) {
 		global $wpdb;
 
-        $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'profile_name'; //If no sort, default to title
-        $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'asc'; //If no order, default to asc
-        $offset = ( $current_page - 1 ) * $per_page;
+        $orderby  = (!empty($_REQUEST['orderby'])) ? esc_sql( $_REQUEST['orderby'] ) : 'profile_name';
+        $order    = (!empty($_REQUEST['order']))   ? esc_sql( $_REQUEST['order']   ) : 'asc';
+        $offset   = ( $current_page - 1 ) * $per_page;
+        $per_page = esc_sql( $per_page );
 
         // regard sort order if sorted by profile name
         if ( $orderby == 'profile_name' ) $orderby = 'sort_order '.$order.', profile_name';
@@ -233,5 +236,4 @@ class ProfilesModel extends WPL_Model {
 	}
 
 
-
-}
+} // class ProfilesModel

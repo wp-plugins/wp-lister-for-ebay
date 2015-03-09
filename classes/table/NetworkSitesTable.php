@@ -145,7 +145,7 @@ class NetworkSitesTable extends WP_List_Table {
 
 
     function fetchBlogDetails( $blog_id ){
-        global $wpdb;
+
         $this->blog = new stdClass();
 
         switch_to_blog( $blog_id );

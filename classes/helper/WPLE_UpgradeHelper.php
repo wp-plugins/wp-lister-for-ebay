@@ -1128,6 +1128,22 @@ class WPLE_UpgradeHelper {
 			$msg  = __('Database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
+		// upgrade to version 43  (2.0.8)
+		if ( 43 > $db_version ) {
+			$new_db_version = 43;
+
+			// add indices to ebay_auctions table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions` ADD INDEX `parent_id` (`parent_id`) ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions` ADD INDEX `site_id` (`site_id`) ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions` ADD INDEX `account_id` (`account_id`) ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('Database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
 
 		// show update message
 		if ( $msg && ! $hide_message ) wple_show_message($msg,'info');		

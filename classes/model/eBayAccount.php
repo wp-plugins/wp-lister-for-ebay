@@ -71,11 +71,12 @@ class WPLE_eBayAccount extends WPL_Core {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLENAME;
 		
-		$item = $wpdb->get_row("
+        $item = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $table
-			WHERE id = '$id'
-		", OBJECT);
+			WHERE id = %d
+		", $id
+		), OBJECT);
 
 		// $item->allowed_sites = maybe_unserialize( $item->allowed_sites );
 		return $item;
@@ -105,19 +106,17 @@ class WPLE_eBayAccount extends WPL_Core {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLENAME;
 		
-		$account_title = $wpdb->get_var("
+		$account_title = $wpdb->get_var( $wpdb->prepare("
 			SELECT title
 			FROM $table
-			WHERE id = '$id'
-		");
+			WHERE id = %d
+		", $id ) );
 		return $account_title;
 	}
 
 	// get this account's site
 	function getSite()	{
-
 		// return WPLA_AmazonSite::getSite( $this->site_id );
-
 	}
 
 	// save account
@@ -216,9 +215,10 @@ class WPLE_eBayAccount extends WPL_Core {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLENAME;
 
-        $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'title'; //If no sort, default to title
-        $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'asc'; //If no order, default to asc
-        $offset = ( $current_page - 1 ) * $per_page;
+        $orderby  = (!empty($_REQUEST['orderby'])) ? esc_sql( $_REQUEST['orderby'] ) : 'title';
+        $order    = (!empty($_REQUEST['order']))   ? esc_sql( $_REQUEST['order']   ) : 'asc';
+        $offset   = ( $current_page - 1 ) * $per_page;
+        $per_page = esc_sql( $per_page );
 
         // get items
 		$items = $wpdb->get_results("
@@ -244,9 +244,7 @@ class WPLE_eBayAccount extends WPL_Core {
 		}
 
 		return $items;
-	}
+	} // getPageItems()
 
 
 } // WPLE_eBayAccount()
-
-

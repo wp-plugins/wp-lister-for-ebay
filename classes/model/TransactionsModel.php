@@ -266,8 +266,8 @@ class TransactionsModel extends WPL_Model {
 
 			// get current values from db
 			$quantity_purchased = $data['quantity'];
-			$quantity_total = $wpdb->get_var( 'SELECT quantity FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$data['item_id'] );
-			$quantity_sold = $wpdb->get_var( 'SELECT quantity_sold FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$data['item_id'] );
+			$quantity_total = $wpdb->get_var( $wpdb->prepare("SELECT quantity      FROM {$wpdb->prefix}ebay_auctions WHERE ebay_id = %s", $data['item_id'] ) );
+			$quantity_sold  = $wpdb->get_var( $wpdb->prepare("SELECT quantity_sold FROM {$wpdb->prefix}ebay_auctions WHERE ebay_id = %s", $data['item_id'] ) );
 
 			// increase the listing's quantity_sold
 			$quantity_sold = $quantity_sold + $quantity_purchased;
@@ -315,7 +315,7 @@ class TransactionsModel extends WPL_Model {
 		// restore listing's quantity_sold
 		// get current values from db
 		$quantity_purchased = $transaction['quantity'];
-		$quantity_sold = $wpdb->get_var( 'SELECT quantity_sold FROM '.$wpdb->prefix.'ebay_auctions WHERE ebay_id = '.$transaction['item_id'] );
+		$quantity_sold = $wpdb->get_var( $wpdb->prepare("SELECT quantity_sold FROM {$wpdb->prefix}ebay_auctions WHERE ebay_id = %s", $transaction['item_id'] ) );
 
 		// decrease the listing's quantity_sold
 		$quantity_sold = $quantity_sold - $quantity_purchased;
@@ -448,11 +448,11 @@ class TransactionsModel extends WPL_Model {
 		$record->time    = time();
 
 		// load history
-		$history = $wpdb->get_var( "
+		$history = $wpdb->get_var( $wpdb->prepare("
 			SELECT history
 			FROM $this->tablename
-			WHERE transaction_id = '$transaction_id'
-		" );
+			WHERE transaction_id = %s
+		", $transaction_id ) );
 
 		// init with empty array
 		$history = maybe_unserialize( $history );
@@ -479,11 +479,11 @@ class TransactionsModel extends WPL_Model {
 
 		// update history
 		$history = serialize( $history );
-		$wpdb->query( "
+		$wpdb->query( $wpdb->prepare("
 			UPDATE $this->tablename
-			SET history = '$history'
-			WHERE transaction_id = '$transaction_id'
-		" );
+			SET history          = %s
+			WHERE transaction_id = %s
+		", $history, $transaction_id ) );
 
 	}
 
@@ -664,11 +664,12 @@ class TransactionsModel extends WPL_Model {
 	function getItem( $id ) {
 		global $wpdb;
 
-		$item = $wpdb->get_row( "
+		$item = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE id = '$id'
-		", ARRAY_A );
+			WHERE id = %s
+		", $id 
+		), ARRAY_A );
 
 		// decode TransactionType object with eBay classes loaded
 		$item['details'] = $this->decodeObject( $item['details'], false, true );
@@ -680,34 +681,37 @@ class TransactionsModel extends WPL_Model {
 	function getTransactionByTransactionID( $transaction_id ) {
 		global $wpdb;
 
-		$transaction = $wpdb->get_row( "
+		$transaction = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE transaction_id = '$transaction_id'
-		", ARRAY_A );
+			WHERE transaction_id = %s
+		", $transaction_id 
+		), ARRAY_A );
 
 		return $transaction;
 	}
 	function getAllTransactionsByTransactionID( $transaction_id ) {
 		global $wpdb;
 
-		$transaction = $wpdb->get_results( "
+		$transaction = $wpdb->get_results( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE transaction_id = '$transaction_id'
+			WHERE transaction_id = %s
 			ORDER BY LastTimeModified DESC
-		", ARRAY_A );
+		", $transaction_id 
+		), ARRAY_A );
 
 		return $transaction;
 	}
 	function getTransactionByOrderID( $wp_order_id ) {
 		global $wpdb;
 
-		$transaction = $wpdb->get_row( "
+		$transaction = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE wp_order_id = '$wp_order_id'
-		", ARRAY_A );
+			WHERE wp_order_id = %s
+		", $wp_order_id 
+		), ARRAY_A );
 
 		return $transaction;
 	}
@@ -715,11 +719,12 @@ class TransactionsModel extends WPL_Model {
 	function getTransactionByEbayOrderID( $order_id ) {
 		global $wpdb;
 
-		$transaction = $wpdb->get_row( "
+		$transaction = $wpdb->get_row( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE order_id = '$order_id'
-		", ARRAY_A );
+			WHERE order_id = %s
+		", $order_id
+		), ARRAY_A );
 
 		return $transaction;
 	}
@@ -757,30 +762,30 @@ class TransactionsModel extends WPL_Model {
 	}
 	function getDateOfLastCreatedTransaction( $account_id ) {
 		global $wpdb;
-		return $wpdb->get_var( "
+		return $wpdb->get_var( $wpdb->prepare("
 			SELECT date_created
 			FROM $this->tablename
-			WHERE account_id = '$account_id'
+			WHERE account_id = %s
 			ORDER BY date_created DESC LIMIT 1
-		" );
+		", $account_id ) );
 	}
 
 	function deleteItem( $id ) {
 		global $wpdb;
-		$wpdb->query( "
+		$wpdb->query( $wpdb->prepare("
 			DELETE
 			FROM $this->tablename
-			WHERE id = '$id'
-		" );
+			WHERE id = %s
+		", $id ) );
 	}
 
 	function updateWpOrderID( $id, $wp_order_id ) {
 		global $wpdb;
-		$wpdb->query( "
+		$wpdb->query( $wpdb->prepare("
 			UPDATE $this->tablename
-			SET wp_order_id = '$wp_order_id'
-			WHERE id = '$id'
-		" );
+			SET wp_order_id = %s
+			WHERE id        = %s
+		", $wp_order_id, $id ) );
 	}
 
 
@@ -811,21 +816,22 @@ class TransactionsModel extends WPL_Model {
 	function getPageItems( $current_page, $per_page ) {
 		global $wpdb;
 
-        $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'date_created'; //If no sort, default to title
-        $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'desc'; //If no order, default to asc
-        $offset = ( $current_page - 1 ) * $per_page;
+        $orderby  = (!empty($_REQUEST['orderby'])) ? esc_sql( $_REQUEST['orderby'] ) : 'date_created';
+        $order    = (!empty($_REQUEST['order']))   ? esc_sql( $_REQUEST['order']   ) : 'desc';
+        $offset   = ( $current_page - 1 ) * $per_page;
+        $per_page = esc_sql( $per_page );
 
         $join_sql  = '';
         $where_sql = '';
 
         // filter transaction_status
-		$transaction_status = ( isset($_REQUEST['transaction_status']) ? $_REQUEST['transaction_status'] : 'all');
+		$transaction_status = ( isset($_REQUEST['transaction_status']) ? esc_sql( $_REQUEST['transaction_status'] ) : 'all');
 		if ( $transaction_status != 'all' ) {
 			$where_sql = "WHERE CompleteStatus = '".$transaction_status."' ";
 		} 
 
         // filter search_query
-		$search_query = ( isset($_REQUEST['s']) ? $_REQUEST['s'] : false);
+		$search_query = ( isset($_REQUEST['s']) ? esc_sql( $_REQUEST['s'] ) : false);
 		if ( $search_query ) {
 			$where_sql = "
 				WHERE  t.buyer_name   LIKE '%".$search_query."%'
@@ -878,7 +884,8 @@ class TransactionsModel extends WPL_Model {
 		// handle NULL values
 		foreach ($data as $key => $value) {
 			if ( NULL === $value ) {
-				$wpdb->query( "UPDATE {$this->tablename} SET $key = NULL WHERE id = $id" );
+				$key = esc_sql( $key );
+				$wpdb->query( $wpdb->prepare("UPDATE {$this->tablename} SET $key = NULL WHERE id = %s", $id ) );
 				$this->logger->info('SQL to set NULL value: '.$wpdb->last_query );
 				$this->logger->info( $wpdb->last_error );
 				unset( $data[$key] );
@@ -893,4 +900,4 @@ class TransactionsModel extends WPL_Model {
 	}
 
 
-}
+} // class TransactionsModel
