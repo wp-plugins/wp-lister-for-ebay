@@ -28,6 +28,7 @@ if(!class_exists('WP_List_Table')){
 class LogTable extends WP_List_Table {
 
     const TABLENAME = 'ebay_log';
+    var $total_items;
 
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 

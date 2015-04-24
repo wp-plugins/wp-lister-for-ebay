@@ -27,6 +27,8 @@ if(!class_exists('WP_List_Table')){
  */
 class WPLE_AccountsTable extends WP_List_Table {
 
+    var $total_items;
+
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
      * use the parent reference to set some default configs.

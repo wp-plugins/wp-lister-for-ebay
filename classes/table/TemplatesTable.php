@@ -28,6 +28,7 @@ if(!class_exists('WP_List_Table')){
 class TemplatesTable extends WP_List_Table {
 
     var $db_items = array();
+    var $total_items;
 
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 

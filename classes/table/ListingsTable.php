@@ -31,6 +31,7 @@ class ListingsTable extends WP_List_Table {
     // var $last_product_variations = array();
     var $selectedItems = false;
     var $profiles = array();
+    var $total_items;
 
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
@@ -214,6 +215,7 @@ class ListingsTable extends WP_List_Table {
         $listing_title .= $this->generateAutoRelistInfo( $item, $profile_data );
 
 
+        /*
         // show errors and warnings on published and prepared items
         if ( in_array( $item['status'], array( 'published','changed','prepared','verified' ) ) ) {
 
@@ -251,6 +253,7 @@ class ListingsTable extends WP_List_Table {
             $msg = '<b>eBay could not process your gallery image:</b><br>'.$item_details->PictureDetails->getGalleryErrorInfo();
             $listing_title .= '<br><small style="color:darkred">'.$msg.'</small>';
         }
+        */
 
         // disable some actions depending on status
         if ( $item['status'] != 'published' )   unset( $actions['lock'] );
@@ -477,6 +480,72 @@ class ListingsTable extends WP_List_Table {
 
         return $html;
     } // generateAutoRelistInfo()
+
+
+
+    /**
+     * overwrite WP_List_Table::single_row to insert optional message row
+     */
+    public function single_row( $item ) {
+        echo '<tr>';
+        $this->single_row_columns( $item );
+        $this->displayMessageRow( $item );
+        echo '</tr>';
+    }
+
+    // show errors and warnings
+    function displayMessageRow( $item ){
+        $listing_title = '';
+
+        // show errors and warnings on published and prepared items
+        if ( in_array( $item['status'], array( 'published','changed','prepared','verified' ) ) ) {
+
+            $history = maybe_unserialize( $item['last_errors'] );
+            $tips_errors   = array();
+            $tips_warnings = array();
+            if ( is_array( $history ) ) {
+                foreach ($history['errors'] as $result) {
+                    $tips_errors[] = '<b>'.$result->SeverityCode.':</b> '.$result->ShortMessage.' ('.$result->ErrorCode.')';
+                }
+                foreach ($history['warnings'] as $result) {
+                    // hide redundant warnings like:
+                    // 21917091 - Warning: Requested StartPrice and Quantity revision is redundant
+                    // 21917092 - Warning: Requested Quantity revision is redundant.
+                    // 21916620 - Warning: Variations with quantity '0' will be removed
+                    if ( in_array( $result->ErrorCode, array( 21917091, 21917092, 21916620 ) ) ) continue;
+                    $tips_warnings[] = '<b>'.$result->SeverityCode.':</b> '.$result->ShortMessage.' ('.$result->ErrorCode.')';
+                }
+            }
+            if ( ! empty( $tips_errors ) ) {
+                $listing_title .= '<!br><small style="color:darkred">'.join('<br>',$tips_errors).'</small><br>';
+            }
+            if ( ! empty( $tips_warnings ) ) {
+                $listing_title .= '<small><!br><a href="#" onclick="jQuery(\'#warnings_container_'.$item['id'].'\').slideToggle();return false;">&raquo; '.''.sizeof($tips_warnings).' warning(s)'.'</a></small><br>';
+                $listing_title .= '<div id="warnings_container_'.$item['id'].'" style="display:none">';
+                $listing_title .= '<small>'.join('<br>',$tips_warnings).'</small>';
+                $listing_title .= '</div>';
+            }
+
+        }
+
+        // check PictureDetails.GalleryStatus
+        $item_details = WPL_Model::decodeObject( $item['details'], false, true );
+        if ( ! empty( $item_details ) && is_object( $item_details->PictureDetails ) && $item_details->PictureDetails->getGalleryStatus() == 'ImageProcessingError' ) {
+            $msg = '<b>eBay could not process your gallery image:</b><br>'.$item_details->PictureDetails->getGalleryErrorInfo();
+            $listing_title .= '<small style="color:darkred">'.$msg.'</small><br>';
+        }
+
+        if ( empty($listing_title) ) return;
+
+        echo '</tr>';
+        echo '<tr>';
+        // echo '<td colspan="'.sizeof( $this->_column_headers[0] ).'">';
+        echo '<td>&nbsp;</td>';
+        echo '<td colspan="7">';
+        echo $listing_title;
+        echo '</td>';
+
+    } // displayMessageRow()
 
 
     function column_img($item) {
