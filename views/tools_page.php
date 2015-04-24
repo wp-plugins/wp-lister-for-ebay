@@ -513,3 +513,20 @@
 	?>
 
 </div>
+
+
+
+<script type="text/javascript">
+	
+	// on page load
+	jQuery( document ).ready( function () {
+	
+		// autosubmit next inventory check step
+		var autosubmit_url = jQuery("#wple_auto_next_step").attr('href')
+		if ( autosubmit_url != undefined ) {
+			window.location.href = autosubmit_url;
+		}
+
+	});
+
+</script>

@@ -30,6 +30,7 @@ class ListingsTable extends WP_List_Table {
     // var $last_product_id = 0;
     // var $last_product_variations = array();
     var $selectedItems = false;
+    var $profiles = array();
 
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
@@ -224,6 +225,11 @@ class ListingsTable extends WP_List_Table {
                     $tips_errors[] = '<b>'.$result->SeverityCode.':</b> '.$result->ShortMessage.' ('.$result->ErrorCode.')';
                 }
                 foreach ($history['warnings'] as $result) {
+                    // hide redundant warnings like:
+                    // 21917091 - Warning: Requested StartPrice and Quantity revision is redundant
+                    // 21917092 - Warning: Requested Quantity revision is redundant.
+                    // 21916620 - Warning: Variations with quantity '0' will be removed
+                    if ( in_array( $result->ErrorCode, array( 21917091, 21917092, 21916620 ) ) ) continue;
                     $tips_warnings[] = '<b>'.$result->SeverityCode.':</b> '.$result->ShortMessage.' ('.$result->ErrorCode.')';
                 }
             }
@@ -239,6 +245,12 @@ class ListingsTable extends WP_List_Table {
 
         }
 
+        // check PictureDetails.GalleryStatus
+        $item_details = WPL_Model::decodeObject( $item['details'], false, true );
+        if ( ! empty( $item_details ) && is_object( $item_details->PictureDetails ) && $item_details->PictureDetails->getGalleryStatus() == 'ImageProcessingError' ) {
+            $msg = '<b>eBay could not process your gallery image:</b><br>'.$item_details->PictureDetails->getGalleryErrorInfo();
+            $listing_title .= '<br><small style="color:darkred">'.$msg.'</small>';
+        }
 
         // disable some actions depending on status
         if ( $item['status'] != 'published' )   unset( $actions['lock'] );
@@ -924,6 +936,7 @@ class ListingsTable extends WP_List_Table {
             'archive'             => __('Move to archive','wplister'),
             'delete_listing'      => __('Delete listings','wplister'),
             'cancel_schedule'     => __('Cancel relist schedule','wplister'),
+            'wple_reset_status'   => __('Reset ended items','wplister'),
         );
 
         if ( ! current_user_can( 'publish_ebay_listings' ) ) {
@@ -975,7 +988,7 @@ class ListingsTable extends WP_List_Table {
     function get_views(){
         $views    = array();
         $current  = ( !empty($_REQUEST['listing_status']) ? $_REQUEST['listing_status'] : 'all');
-        $base_url = remove_query_arg( array( 'action', 'auction', 'listing_status' ) );
+        $base_url = esc_url( remove_query_arg( array( 'action', 'auction', 'listing_status' ) ) );
 
         // handle profile query
         if ( isset($_REQUEST['profile_id']) && $_REQUEST['profile_id'] ) {

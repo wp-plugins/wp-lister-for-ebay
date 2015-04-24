@@ -229,6 +229,19 @@
 								<option value="10" <?php if ( $wpl_force_table_items_limit == '10' ): ?>selected="selected"<?php endif; ?>>10 items</option>
 							</select>
 
+							<label for="wpl-option-apply_profile_batch_size" class="text_label">
+								<?php echo __('Apply profiles in batches of','wplister'); ?>
+                                <?php wplister_tooltip('If your server times out or runs out of memory when applying a profile to a huge number of items you may have to lower this setting.') ?>
+							</label>
+							<select id="wpl-option-apply_profile_batch_size" name="wpl_e2e_apply_profile_batch_size" class=" required-entry select">
+								<option value="20"   <?php if ( $wpl_apply_profile_batch_size == '20'   ): ?>selected="selected"<?php endif; ?>>20 items</option>
+								<option value="50"   <?php if ( $wpl_apply_profile_batch_size == '50'   ): ?>selected="selected"<?php endif; ?>>50 items</option>
+								<option value="100"  <?php if ( $wpl_apply_profile_batch_size == '100'  ): ?>selected="selected"<?php endif; ?>>100 item</option>
+								<option value="200"  <?php if ( $wpl_apply_profile_batch_size == '200'  ): ?>selected="selected"<?php endif; ?>>200 items</option>
+								<option value="500"  <?php if ( $wpl_apply_profile_batch_size == '500'  ): ?>selected="selected"<?php endif; ?>>500 items</option>
+								<option value="1000" <?php if ( $wpl_apply_profile_batch_size == '1000' ): ?>selected="selected"<?php endif; ?>>1000 items (default)</option>
+							</select>
+
 							<label for="wpl-ignore_orders_before_ts" class="text_label">
 								<?php echo __('Ignore orders before','wplister') ?>
 								<?php wplister_tooltip('This is where WP-Lister remembers when it was connected to your eBay account. Orders placed before that date will be ignored.') ?>

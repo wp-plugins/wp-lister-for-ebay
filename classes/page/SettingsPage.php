@@ -263,6 +263,7 @@ class SettingsPage extends WPL_Page {
 			'log_days_limit'			=> self::getOption( 'log_days_limit', 30 ),
 			'xml_formatter'				=> self::getOption( 'xml_formatter', 'default' ),
 			'force_table_items_limit'	=> self::getOption( 'force_table_items_limit' ),
+			'apply_profile_batch_size'	=> self::getOption( 'apply_profile_batch_size', 1000 ),
 			'staging_site_pattern'		=> self::getOption( 'staging_site_pattern', '' ),
 			'ignore_orders_before_ts'	=> get_option( 'ignore_orders_before_ts' ),
 
@@ -516,6 +517,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'log_days_limit',			$this->getValueFromPost( 'log_days_limit' ) );
 			self::updateOption( 'xml_formatter',			$this->getValueFromPost( 'xml_formatter' ) );
 			self::updateOption( 'force_table_items_limit',	$this->getValueFromPost( 'force_table_items_limit' ) );
+			self::updateOption( 'apply_profile_batch_size',	$this->getValueFromPost( 'apply_profile_batch_size' ) );
 			self::updateOption( 'staging_site_pattern',	    trim( $this->getValueFromPost( 'staging_site_pattern' ) ) );
 
 			// updater instance

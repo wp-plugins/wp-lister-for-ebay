@@ -351,6 +351,7 @@ class EbayOrdersModel extends WPL_Model {
 
 
 		// mark listing as sold when last item is sold - unless Out Of Stock Control (oosc) is enabled
+		$lm = new ListingsModel();
         if ( ! $lm->thisAccountUsesOutOfStockControl( $data['account_id'] ) ) {
 			if ( $quantity_sold == $quantity_total ) {
 				$wpdb->update( $wpdb->prefix.'ebay_auctions', 

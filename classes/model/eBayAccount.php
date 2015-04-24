@@ -125,6 +125,14 @@ class WPLE_eBayAccount extends WPL_Core {
 		$table = $wpdb->prefix . self::TABLENAME;
 
 		$data = array();
+		$data['user_details']               = ''; // fix rare "Field 'user_details' doesn't have a default value" error on some MySQL servers
+		$data['shipping_profiles']          = '';
+		$data['payment_profiles']           = '';
+		$data['return_profiles']            = '';
+		$data['shipping_discount_profiles'] = '';
+		$data['categories_map_ebay']        = '';
+		$data['categories_map_store']       = '';
+		
 		foreach ( $this->fieldnames as $key ) {
 			if ( isset( $this->$key ) ) {
 				$data[ $key ] = $this->$key;
@@ -133,7 +141,10 @@ class WPLE_eBayAccount extends WPL_Core {
 
 		if ( sizeof( $data ) > 0 ) {
 			$result = $wpdb->insert( $table, $data );
-			echo $wpdb->last_error;
+
+			if ( ! $wpdb->insert_id ) {
+				wple_show_message( 'There was a problem adding your account. MySQL said: '.$wpdb->last_error, 'error' );
+			}
 
 			$this->id = $wpdb->insert_id;
 			return $wpdb->insert_id;		

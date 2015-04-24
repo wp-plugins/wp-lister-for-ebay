@@ -84,6 +84,16 @@
 				WpLister.JobRunner.runJob( 'publishAllVerifiedItems', 'Listing items...' );
 			});
 
+			// btn_publish_all_prepared_items
+			jQuery('.btn_publish_all_prepared_items').click( function(event) {
+				WpLister.JobRunner.runJob( 'publishAllPreparedItems', 'Listing items...' );
+			});
+
+			// btn_relist_all_restocked_items
+			jQuery('.btn_relist_all_restocked_items').click( function(event) {
+				WpLister.JobRunner.runJob( 'relistAllRestockedItems', 'Relisting items...' );
+			});
+
 			// btn_revise_all_changed_items
 			jQuery('.btn_revise_all_changed_items').click( function(event) {
 				WpLister.JobRunner.runJob( 'reviseAllChangedItems', 'Revising items...' );

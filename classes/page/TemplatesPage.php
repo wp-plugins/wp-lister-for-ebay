@@ -58,7 +58,15 @@ class TemplatesPage extends WPL_Page {
 		}
 		// handle preview action
 		if ( $this->requestAction() == 'preview_template' ) {
-			$this->previewTemplate( $_REQUEST['template'] );
+
+			// handle parameters to select custom listing item
+			$listing_id = isset( $_REQUEST['listing_id'] ) ? $_REQUEST['listing_id'] : false;
+			if ( ! $listing_id && isset( $_REQUEST['post_id'] ) ) {
+				$lm = new ListingsModel();
+				$listing_id = $lm->getListingIDFromPostID( $_REQUEST['post_id'] );
+			}
+
+			$this->previewTemplate( $_REQUEST['template'], $listing_id );
 			exit();
 		}
 
@@ -409,11 +417,11 @@ class TemplatesPage extends WPL_Page {
 	}
 
 
-	public function previewTemplate( $template_id ) {
+	public function previewTemplate( $template_id, $listing_id = false ) {
 	
 		// init model
 		$ibm = new ItemBuilderModel();
-		$preview_html = $ibm->getPreviewHTML( $template_id );
+		$preview_html = $ibm->getPreviewHTML( $template_id, $listing_id );
 		echo $preview_html;
 		exit();		
 

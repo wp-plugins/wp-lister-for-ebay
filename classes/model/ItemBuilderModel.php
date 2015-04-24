@@ -405,13 +405,14 @@ class ItemBuilderModel extends WPL_Model {
 			if ( get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true ) ) {
 
 				$product_level_profile_id = get_post_meta( $post_id, '_ebay_seller_shipping_profile_id', true );
+				$profile_details['seller_shipping_profile_id'] = $product_level_profile_id;
 
-				// check if shipping profile id exists
-				$seller_shipping_profiles	= get_option('wplister_ebay_seller_shipping_profiles');
-				foreach ( $seller_shipping_profiles as $profile ) {
-					if ( $profile->ProfileID == $product_level_profile_id )
-						$profile_details['seller_shipping_profile_id'] = $product_level_profile_id;
-				}
+				// // check if shipping profile id exists (done in buildSellerProfiles())
+				// $seller_shipping_profiles	= get_option('wplister_ebay_seller_shipping_profiles');
+				// foreach ( $seller_shipping_profiles as $profile ) {
+				// 	if ( $profile->ProfileID == $product_level_profile_id )
+				// 		$profile_details['seller_shipping_profile_id'] = $product_level_profile_id;
+				// }
 
 			}
 
@@ -434,8 +435,17 @@ class ItemBuilderModel extends WPL_Model {
 
 		if ( @$profile_details['seller_shipping_profile_id'] ) {
 
+			// get seller profiles for account
+			$accounts = WPLE()->accounts;
+			if ( isset( $accounts[ $this->account_id ] ) && ( $accounts[ $this->account_id ]->shipping_profiles ) ) {
+				$seller_shipping_profiles = maybe_unserialize( $accounts[ $this->account_id ]->shipping_profiles );
+			} else {
+				$seller_shipping_profiles = get_option( 'wplister_ebay_seller_shipping_profiles' );
+			}
+
 			// check if shipping profile id exists
-			$seller_shipping_profiles	= get_option('wplister_ebay_seller_shipping_profiles');
+			// TODO: show warning to user if non-existing seller profile was ignored
+			// $seller_shipping_profiles	= get_option('wplister_ebay_seller_shipping_profiles');
 			$profile_exists = false;
 			foreach ( $seller_shipping_profiles as $profile ) {
 				if ( $profile->ProfileID == $profile_details['seller_shipping_profile_id'] )
@@ -1280,8 +1290,26 @@ class ItemBuilderModel extends WPL_Model {
 
         	$newvar->setVariationSpecifics( $VariationSpecifics );
 
+			// optional Variation.DiscountPriceInfo.OriginalRetailPrice
+			$post_id     = $var['post_id'];
+			$start_price = $newvar->StartPrice;
+			if ( intval($profile_details['strikethrough_pricing']) != 0) {
+				if ( method_exists( ProductWrapper, 'getOriginalPrice' ) ) {
+					$original_price = ProductWrapper::getOriginalPrice( $post_id );
+					if ( ( $original_price ) && ( $start_price != $original_price ) ) {
+						$newvar->DiscountPriceInfo = new DiscountPriceInfoType();
+						$newvar->DiscountPriceInfo->OriginalRetailPrice = new AmountType();
+						$newvar->DiscountPriceInfo->OriginalRetailPrice->setTypeValue( $original_price );
+						$newvar->DiscountPriceInfo->OriginalRetailPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
+					}
+				}
+			}
+
+
 			$item->Variations->addVariation( $newvar );
-        }
+
+        } // each variation
+
 
         // build temporary array for VariationSpecificsSet
     	$this->tmpVariationSpecificsSet = array();
@@ -1620,6 +1648,10 @@ class ItemBuilderModel extends WPL_Model {
 
         $cached_variations = maybe_unserialize( $listing_item['variations'] );
         if ( empty($cached_variations) ) return $item;
+
+        // do nothing if this is not a variable item 
+        // if a user switches a variable product to simple, addVariation() below will throw a fatal error otherwise
+		if ( ! is_object( $item->Variations ) ) return $item;
 
         // loop cached variations
         foreach ($cached_variations as $key => $var) {
@@ -1987,7 +2019,11 @@ class ItemBuilderModel extends WPL_Model {
 	public function getPreviewHTML( $template_id, $id = false ) {
 		
 		// get item data
-		$item = $this->lm->getItemForPreview();
+		if ( $id ) {
+			$item = $this->lm->getItem( $id );
+		} else {
+			$item = $this->lm->getItemForPreview();
+		}
 		if ( ! $item ) {
 			return '<div style="text-align:center; margin-top:5em;">You need to prepare at least one listing in order to preview a listing template.</div>';
 		}

@@ -116,6 +116,11 @@ class EbayMessagesTable extends WP_List_Table {
         
         // item title
         $title = $item['subject'];
+        if ( ! $item['flag_read'] ) {
+            $title = '<b>'.$item['subject'].'</b>';
+        }
+
+        // append sender
         if ( $item['sender'] ) {
             $title .= ' <i style="color:silver">'.$item['sender'].'</i>';
         }
@@ -130,8 +135,8 @@ class EbayMessagesTable extends WP_List_Table {
     function column_item_title($item){
         //Return buyer name and ID
         return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
-            /*$1%s*/ $item['item_title'],
-            /*$2%s*/ $item['item_id']
+            /*$1%s*/ $item['item_title'] ? $item['item_title'] : '&mdash;',
+            /*$2%s*/ $item['item_id']    ? $item['item_id']    : ''
         );
     }
 
@@ -218,7 +223,7 @@ class EbayMessagesTable extends WP_List_Table {
             // 'subject'           => __('Subject','wplister'),
             // 'item_id'  			=> __('eBay ID','wplister'),
             'item_title'  		=> __('Product','wplister'),
-            'flag_read'         => '&nbsp;', // __('Read','wplister'),
+            // 'flag_read'         => '&nbsp;', // __('Read','wplister'),
             'message_id'        => __('Message ID','wplister'),
             // 'status'		 	=> __('Status','wplister'),
             'expiration_date'	=> __('Expires at','wplister'),
@@ -308,7 +313,7 @@ class EbayMessagesTable extends WP_List_Table {
     function get_views(){
        $views    = array();
        $current  = ( !empty($_REQUEST['message_status']) ? $_REQUEST['message_status'] : 'all');
-       $base_url = remove_query_arg( array( 'action', 'message', 'message_status' ) );
+       $base_url = esc_url( remove_query_arg( array( 'action', 'message', 'message_status' ) ) );
 
        // get message status summary
        $om = new EbayMessagesModel();

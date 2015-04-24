@@ -2,15 +2,28 @@
 
 class WPL_InventoryCheck extends WPL_Model  {
 	
+	var $batch_size = 200;
 
 	// check_wc_out_of_sync
-	public function checkProductInventory( $mode = 'published', $compare_prices = false ) {
+	public function checkProductInventory( $mode = 'published', $compare_prices = false, $step = 0 ) {
 
-		// get all published listings
+		$limit  = $this->batch_size;
+		$offset = $this->batch_size * $step;
+
+		// get listings - or return false
 		$lm = new ListingsModel();
-		$listings = $mode == 'published' ? $lm->getAllPublished() : $lm->getAllEnded();
-		$out_of_sync_products = array();
-		$published_count = 0;
+		$listings = $mode == 'published' ? $lm->getAllPublished( $limit, $offset ) : $lm->getAllEnded( $limit, $offset );
+		if ( empty($listings) ) return false;
+
+		// restore previous data
+		$tmp_result = get_option('wple_inventory_check_queue_data', false);
+		if ( $tmp_result ) {
+			$out_of_sync_products = $tmp_result['out_of_sync_products'];
+			$published_count      = $tmp_result['published_count'];
+		} else {
+			$out_of_sync_products = array();
+			$published_count      = 0;
+		}
 
 		// process published listings
 		foreach ( $listings as $item ) {
@@ -133,7 +146,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 
 
 			// mark listing as changed 
-			if ( isset( $_REQUEST['mark_as_changed'] ) ) {
+			if ( isset( $_REQUEST['mark_as_changed'] ) && $_REQUEST['mark_as_changed'] == 'yes' ) {
 
 				if ( $_product ) {
 					// only existing products can have a profile re-applied
@@ -169,6 +182,30 @@ class WPL_InventoryCheck extends WPL_Model  {
 			// count products which have not yet been marked as changed
 			if ( $item['status'] == 'published' ) $published_count += 1;
 		}
+
+		// store result so far
+		$tmp_result = array(
+			'mode'                 => $mode,
+			'compare_prices'       => $compare_prices,
+			'out_of_sync_products' => $out_of_sync_products,
+			'published_count'      => $published_count,
+		);
+		update_option('wple_inventory_check_queue_data', $tmp_result);
+
+		// true means we processed more items
+		return true;
+
+	} // checkProductInventory()
+
+
+	public function showProductInventoryCheckResult( $mode = 'published' ) {
+
+		// restore previous data
+		$tmp_result = get_option('wple_inventory_check_queue_data', false);
+		$out_of_sync_products = $tmp_result['out_of_sync_products'];
+		$published_count      = $tmp_result['published_count'];
+		$compare_prices       = $tmp_result['compare_prices'];
+		$mode                 = $tmp_result['mode'];
 
 		// return if empty
 		if ( empty( $out_of_sync_products ) ) {
@@ -276,7 +313,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 
 		$this->showMessage( $msg, 1, 1 );
 
-	} // checkProductInventory()
+	} // showProductInventoryCheckResult()
 
 
 
@@ -284,12 +321,24 @@ class WPL_InventoryCheck extends WPL_Model  {
 
 
 	// check_wc_out_of_stock
-	public function checkProductStock() {
+	public function checkProductStock( $step = 0 ) {
 
-		// get all published listings
+		$limit  = $this->batch_size;
+		$offset = $this->batch_size * $step;
+
+		// get listings - or return false
 		$lm = new ListingsModel();
-		$listings = $lm->getAllPublished();
-		$out_of_stock_products = array();
+		$listings = $lm->getAllPublished( $limit, $offset );
+		if ( empty($listings) ) return false;
+
+		// restore previous data
+		$tmp_result = get_option('wple_inventory_check_queue_data', false);
+		if ( $tmp_result ) {
+			$out_of_stock_products = $tmp_result['out_of_stock_products'];
+		} else {
+			$out_of_stock_products = array();
+		}
+
 
 		// process published listings
 		foreach ( $listings as $item ) {
@@ -304,7 +353,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 				continue;
 
 			// mark listing as changed
-			if ( isset( $_REQUEST['mark_as_changed'] ) ) {
+			if ( isset( $_REQUEST['mark_as_changed'] ) && $_REQUEST['mark_as_changed'] == 'yes' ) {
 				$lm->updateListing( $item['id'], array( 'status' => 'changed' ) );
 				$item['status'] = 'changed';
 			}
@@ -315,6 +364,29 @@ class WPL_InventoryCheck extends WPL_Model  {
 			$out_of_stock_products[] = $item;
 
 		}
+
+		// store result so far
+		$tmp_result = array(
+			'out_of_stock_products' => $out_of_stock_products,
+		);
+		update_option('wple_inventory_check_queue_data', $tmp_result);
+
+		// true means we processed more items
+		return true;
+
+	} // checkProductStock()
+
+
+
+	public function showProductStockCheckResult( $mode = 'out_of_stock' ) {
+
+		// restore previous data
+		$tmp_result = get_option('wple_inventory_check_queue_data', false);
+		$out_of_stock_products = $tmp_result['out_of_stock_products'];
+		// $published_count      = $tmp_result['published_count'];
+		// $compare_prices       = $tmp_result['compare_prices'];
+		// $mode                 = $tmp_result['mode'];
+
 
 		// return if empty
 		if ( empty( $out_of_stock_products ) ) {
@@ -382,8 +454,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 
 		$this->showMessage( $msg, 1, 1 );
 
-
-	} // checkProductStock()
+	} // showProductStockCheckResult()
 
 
 
@@ -411,7 +482,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 				continue;
 
 			// mark listing as changed
-			// if ( isset( $_REQUEST['mark_as_changed'] ) ) {
+			// if ( isset( $_REQUEST['mark_as_changed'] ) && $_REQUEST['mark_as_changed'] == 'yes' ) {
 			// 	$lm->updateListing( $item['id'], array( 'status' => 'changed' ) );
 			// 	$item['status'] = 'changed';
 			// }

@@ -258,6 +258,21 @@ class WPL_Setup extends WPL_Core {
 
 		}
 
+		// Plugin Name: Yet Another Stars Rating
+		// Plugin URI: http://wordpress.org/plugins/yet-another-stars-rating/
+		// Version: 0.8.2
+		if ( defined('YASR_VERSION_NUM') ) {
+
+			wple_show_message("
+				<b>Warning: An incompatible plugin was found.</b><br>
+				<br>
+				You seem to have the <i>Yet Another Stars Rating</i> plugin installed, which is known to cause issues with WP-Lister.<br>
+				Version 0.8.2 of this plugin can break the process of preparing new eBay listings, so please deactivate this plugin if you experience any issues when applying a listing profile.
+			",'warn');
+			return false;
+
+		}
+
 	}
 
 	// check if a recent version of WooCommerce is installed

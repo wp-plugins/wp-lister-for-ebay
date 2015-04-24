@@ -92,18 +92,82 @@ class ToolsPage extends WPL_Page {
 				// check_wc_out_of_sync
 				if ( $_REQUEST['action'] == 'check_wc_out_of_sync') {				
 					require_once( WPLISTER_PATH . '/classes/core/WPL_InventoryCheck.php' );
+
 					$ic = new WPL_InventoryCheck();
-					$mode   = isset( $_REQUEST['mode'] )   ? $_REQUEST['mode']   : 'published';
-					$prices = isset( $_REQUEST['prices'] ) ? $_REQUEST['prices'] : false;
-					$ic->checkProductInventory( $mode, $prices );
-				}
+					$mode            = isset( $_REQUEST['mode'] )   		 ? $_REQUEST['mode']   			: 'published';
+					$prices          = isset( $_REQUEST['prices'] ) 		 ? $_REQUEST['prices'] 			: false;
+					$mark_as_changed = isset( $_REQUEST['mark_as_changed'] ) ? $_REQUEST['mark_as_changed'] : false;
+					$step            = isset( $_REQUEST['step']   ) 		 ? $_REQUEST['step']   			: 0;
+
+					// check new batch of items
+					$new_items_were_processed = $ic->checkProductInventory( $mode, $prices, $step );
+
+					if ( $new_items_were_processed ) {
+
+						// continue with step+1
+						$msg = 'Checking inventory, please wait... ';
+						if ( $mark_as_changed == 'yes' ) {
+							$msg = 'Updating listing status, please wait... ';
+						} 
+
+						$step++;
+						$msg .= '<br><small>Step '.$step.' / '.($step * $ic->batch_size).' items checked </small>';
+
+						// build button, which is triggered by js automatically
+						$url  = 'admin.php?page=wplister-tools&action=check_wc_out_of_sync&mode='.$mode.'&prices='.$prices.'&mark_as_changed='.$mark_as_changed.'&step='.$step.'&_wpnonce='.wp_create_nonce('e2e_tools_page');
+						$msg .= '<a href="'.$url.'" id="wple_auto_next_step" class="button" style="display:none">Next</a>';
+						wple_show_message( $msg );
+
+					} else {
+				
+						// show results
+						$ic->showProductInventoryCheckResult( $mode );
+
+						// clear tmp data
+						update_option('wple_inventory_check_queue_data', '');
+
+					}
+
+				} // check_wc_out_of_sync
 
 				// check_wc_out_of_stock
 				if ( $_REQUEST['action'] == 'check_wc_out_of_stock') {				
 					require_once( WPLISTER_PATH . '/classes/core/WPL_InventoryCheck.php' );
+
 					$ic = new WPL_InventoryCheck();
-					$ic->checkProductStock();
-				}
+					$mark_as_changed = isset( $_REQUEST['mark_as_changed'] ) ? $_REQUEST['mark_as_changed'] : false;
+					$step            = isset( $_REQUEST['step']   ) 		 ? $_REQUEST['step']   			: 0;
+
+					// check new batch of items
+					$new_items_were_processed = $ic->checkProductStock( $step );
+
+					if ( $new_items_were_processed ) {
+
+						// continue with step+1
+						$msg = 'Checking for out of stock products, please wait... ';
+						if ( $mark_as_changed == 'yes' ) {
+							$msg = 'Updating listing status, please wait... ';
+						} 
+
+						$step++;
+						$msg .= '<br><small>Step '.$step.' / '.($step * $ic->batch_size).' items checked </small>';
+
+						// build button, which is triggered by js automatically
+						$url  = 'admin.php?page=wplister-tools&action=check_wc_out_of_stock&mark_as_changed='.$mark_as_changed.'&step='.$step.'&_wpnonce='.wp_create_nonce('e2e_tools_page');
+						$msg .= '<a href="'.$url.'" id="wple_auto_next_step" class="button" style="display:none">Next</a>';
+						wple_show_message( $msg );
+
+					} else {
+				
+						// show results
+						$ic->showProductStockCheckResult();
+
+						// clear tmp data
+						update_option('wple_inventory_check_queue_data', '');
+
+					}
+
+				} // check_wc_out_of_stock
 
 				// check_wc_sold_stock
 				if ( $_REQUEST['action'] == 'check_wc_sold_stock') {				

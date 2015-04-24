@@ -354,12 +354,32 @@ class WpLister_Product_MetaBox {
 
 
 
+		// get listing object
+		$listing        = $this->get_current_ebay_item();
+		$wpl_account_id = $listing && $listing->account_id ? $listing->account_id : get_option( 'wplister_default_account_id' );
+		$wpl_site_id    = $listing && $listing->site_id    ? $listing->site_id    : get_option( 'wplister_ebay_site_id' );
+
+		// get available seller profiles
 		$wpl_seller_profiles_enabled	= get_option('wplister_ebay_seller_profiles_enabled');
+		$wpl_seller_shipping_profiles	= get_option('wplister_ebay_seller_shipping_profiles');
+		$wpl_seller_payment_profiles	= get_option('wplister_ebay_seller_payment_profiles');
+		$wpl_seller_return_profiles		= get_option('wplister_ebay_seller_return_profiles');
+
+		if ( isset( WPLE()->accounts[ $wpl_account_id ] ) ) {
+			$account = WPLE()->accounts[ $wpl_account_id ];
+			$wpl_seller_profiles_enabled  = $account->seller_profiles;
+			$wpl_seller_shipping_profiles = maybe_unserialize( $account->shipping_profiles );
+			$wpl_seller_payment_profiles  = maybe_unserialize( $account->payment_profiles );
+			$wpl_seller_return_profiles   = maybe_unserialize( $account->return_profiles );
+		}
+
+
+		// $wpl_seller_profiles_enabled	= get_option('wplister_ebay_seller_profiles_enabled');
 		if ( $wpl_seller_profiles_enabled ) {
 
 			// $wpl_seller_shipping_profiles	= get_option('wplister_ebay_seller_shipping_profiles');
-			$wpl_seller_payment_profiles	= get_option('wplister_ebay_seller_payment_profiles');
-			$wpl_seller_return_profiles		= get_option('wplister_ebay_seller_return_profiles');
+			// $wpl_seller_payment_profiles	= get_option('wplister_ebay_seller_payment_profiles');
+			// $wpl_seller_return_profiles		= get_option('wplister_ebay_seller_return_profiles');
 			// echo "<pre>";print_r($wpl_seller_payment_profiles);echo"</pre>";#die();
 
 			if ( is_array( $wpl_seller_payment_profiles ) ) {
@@ -1023,15 +1043,28 @@ class WpLister_Product_MetaBox {
 		// $wpl_available_shipping_packages = get_option('wplister_ShippingPackageDetails');
 		$wpl_available_shipping_packages = WPLE_eBaySite::getSiteObj( $wpl_site_id )->getShippingPackageDetails();
 
+
+		// get available seller profiles
 		$wpl_seller_profiles_enabled	= get_option('wplister_ebay_seller_profiles_enabled');
 		$wpl_seller_shipping_profiles	= get_option('wplister_ebay_seller_shipping_profiles');
 		$wpl_seller_payment_profiles	= get_option('wplister_ebay_seller_payment_profiles');
 		$wpl_seller_return_profiles		= get_option('wplister_ebay_seller_return_profiles');
+	    $ShippingDiscountProfiles       = get_option('wplister_ShippingDiscountProfiles', array() );
+
+		if ( isset( WPLE()->accounts[ $wpl_account_id ] ) ) {
+			$account = WPLE()->accounts[ $wpl_account_id ];
+			$wpl_seller_profiles_enabled  = $account->seller_profiles;
+			$wpl_seller_shipping_profiles = maybe_unserialize( $account->shipping_profiles );
+			$wpl_seller_payment_profiles  = maybe_unserialize( $account->payment_profiles );
+			$wpl_seller_return_profiles   = maybe_unserialize( $account->return_profiles );
+			$ShippingDiscountProfiles     = maybe_unserialize( $account->shipping_discount_profiles );
+		}
+
 
 		// fetch available shipping discount profiles
 		$wpl_shipping_flat_profiles = array();
 		$wpl_shipping_calc_profiles = array();
-	    $ShippingDiscountProfiles = get_option('wplister_ShippingDiscountProfiles', array() );
+	    // $ShippingDiscountProfiles = get_option('wplister_ShippingDiscountProfiles', array() );
 		if ( isset( $ShippingDiscountProfiles['FlatShippingDiscount'] ) ) {
 			$wpl_shipping_flat_profiles = $ShippingDiscountProfiles['FlatShippingDiscount'];
 		}
@@ -1072,8 +1105,10 @@ class WpLister_Product_MetaBox {
 				<option value="FreightFlat" <?php if ( @$item_details['shipping_service_type'] == 'FreightFlat' ): ?>selected="selected"<?php endif; ?>><?php echo __('Use Freight Shipping','wplister'); ?></option>
 			</select>
 		<?php
+
 		
 		echo '<div class="ebay_shipping_options_wrapper">';
+		if ( isset($account) ) echo '<small>The options below are based on the selected account <b>'.$account->title.'</b> ('.$account->site_code.').</small>';
 		echo '<h2>'.  __('Domestic shipping','wplister') . '</h2>';
 		include( WPLISTER_PATH . '/views/profile/edit_shipping_loc.php' );
 
@@ -1211,6 +1246,38 @@ class WpLister_Product_MetaBox {
 
 
 
+	/* show additional fields for variations */
+    function get_updated_item_specifics_for_product_and_category( $post_id, $primary_category_id, $account_id  ) {
+		global $oWPL_WPLister;
+
+		// fetch category specifics for primary category
+		$saved_specifics = maybe_unserialize( get_post_meta( $post_id, '_ebay_category_specifics', true ) );
+
+		// fetch required item specifics for primary category
+		if ( ( isset( $saved_specifics[ $primary_category_id ] ) ) && ( $saved_specifics[ $primary_category_id ] != 'none' ) ) {
+
+			$specifics = $saved_specifics; 
+
+		} elseif ( (int)$primary_category_id != 0 ) {
+
+			$oWPL_WPLister->initEC( $account_id );
+			$specifics = $oWPL_WPLister->EC->getCategorySpecifics( $primary_category_id );
+			$oWPL_WPLister->EC->closeEbay();
+
+		} else {
+
+			$specifics = array();
+
+		}
+
+		// store available item specific as product meta
+		update_post_meta( $post_id, '_ebay_category_specifics', $specifics );
+
+		return $specifics;
+	} // get_updated_item_specifics_for_product_and_category()
+
+
+
 
 
 
@@ -1232,6 +1299,7 @@ class WpLister_Product_MetaBox {
         ?>
             <?php if ( get_option( 'wplister_enable_custom_product_prices', 1 ) == 1 ) : ?>
             <div>
+	        	<h4 style="border-bottom: 1px solid #ddd; margin:0; padding-top:1em; clear:both;"><?php _e('eBay Options', 'wplister'); ?></h4>
                 <p class="form-row form-row-first">
                     <label>
                         <?php _e('eBay Price', 'wplister'); ?>

@@ -25,6 +25,9 @@ class EbayController {
         global $wpl_logger;
         $this->logger = &$wpl_logger;
         // $this->config();
+
+        // set up autoloader for eBay classes
+        self::loadEbayClasses();
     }
 
     public function config() {
@@ -34,6 +37,17 @@ class EbayController {
     }
 
     static function loadEbayClasses() {
+
+        // make sure this only runs once
+        $autoload_functions = spl_autoload_functions();
+        if ( is_array( $autoload_functions ) ) {
+            foreach ( $autoload_functions as $func ) {
+                // return if WPL_Autoloader already loaded
+                if ( is_array($func) && $func[1] == 'autoloadEbayClasses' )
+                    return;
+            }
+        }
+
         // we want to be patient when talking to ebay
         if( ! ini_get('safe_mode') ) @set_time_limit(600);
 
@@ -49,7 +63,7 @@ class EbayController {
         // use autoloader to load EbatNs classes
         spl_autoload_register('WPL_Autoloader::autoloadEbayClasses');
 
-    }
+    } // loadEbayClasses()
 
 
     function GetEbaySignInUrl($RuName = null, $Params = null)
@@ -430,10 +444,21 @@ class EbayController {
         $m->updateOrders( $this->session, $days, 1, $order_ids );
         return $m;
     }
+
     // update ebay messages
-    public function updateEbayMessages( $days = false, $order_ids = false ){ 
+    public function updateEbayMessages( $days = false, $message_ids = false ){ 
+
+        if ( ! get_option( 'wplister_enable_messages_page' ) ) return;
         $m = new EbayMessagesModel();
-        $m->updateMessages( $this->session, $days, 1, $order_ids );
+        $m->updateMessages( $this->session, $days, 1, $message_ids );
+        if ( $message_ids ) return $m;
+
+        // automatically fetch message body for up to 10 messages
+        $message_ids_to_update = EbayMessagesModel::getMessageIDsToFetch( $this->session->wple_account_id );
+        if ( ! empty($message_ids_to_update) ) {
+            $m->updateMessages( $this->session, $days, 1, $message_ids_to_update );
+        }
+
         return $m;
     }
 
@@ -750,7 +775,7 @@ class EbayController {
     public function reviseAllChangedItems(){   
 
         $sm = new ListingsModel();
-        $items = $sm->getAllChanged();
+        $items = $sm->getAllChangedItemsToRevise();
         
         foreach( $items as $item ) {
             $sm->reviseItem( $item['id'], $this->session );  

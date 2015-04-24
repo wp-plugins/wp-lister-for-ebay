@@ -49,7 +49,8 @@ WpLister.JobRunner = function () {
             params.account_id = extra_params.account_id;
         }
 
-        var jqxhr = jQuery.getJSON( ajaxurl, params )
+        // var jqxhr = jQuery.getJSON( ajaxurl, params )
+        var jqxhr = jQuery.post( ajaxurl, params, null, 'json' )
         .success( function( response ) { 
 
             // set global queue

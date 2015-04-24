@@ -2,9 +2,13 @@
 
 	$d = $wpl_ebay_message['details'];
 
+    $content = $wpl_ebay_message['msg_text'];
+    $content = str_replace('<![CDATA[',    '', $content );
+    $content = str_replace(']]>',          '', $content );
+
 ?><html>
 <head>
-    <title>Transaction details</title>
+    <title>Message details</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <style type="text/css">
         body,td,p { color:#2f2f2f; font:12px/16px "Open Sans",sans-serif; }
@@ -15,7 +19,7 @@
 
 <body>
 
-    <h2>Details for eBay message <?php echo $wpl_ebay_message['message_id'] ?></h2>
+    <h2>eBay message <?php echo $wpl_ebay_message['message_id'] ?></h2>
 
     <table width="100%" bmessage="0">
         <tr>
@@ -60,18 +64,25 @@
                 <?php echo $d->Replied ? 'yes' : 'no' ?>
             </td>
         </tr>
+        <!--
         <?php if ( $wpl_ebay_message['msg_content'] ) : ?>
         <tr>
-            <td>            
-                <b>Message:</b>
-            </td><td>
-                <?php echo $wpl_ebay_message['message_content'] ?>
+            <td colspan="2">
+                <?php #echo nl2br( $wpl_ebay_message['msg_content'] )?>
             </td>
         </tr>
         <?php endif; ?>
+        <?php if ( $wpl_ebay_message['msg_text'] ) : ?>
+        <tr>
+            <td colspan="2">
+                <?php #echo $wpl_ebay_message['msg_text'] ?>
+            </td>
+        </tr>
+        <?php endif; ?>
+        -->
     </table>
-
-        
+       
+    <?php if ( $wpl_ebay_message['item_id'] ) : ?>
     <h2>Item Details</h2>
 
     <table width="100%" bmessage="0">
@@ -101,10 +112,16 @@
             </td>
         </tr>
     </table>
-   
+    <?php endif; ?>
+
+    <hr>
+    <div id="wple_message_body_container" style="width:100%;">
+        <?php echo $content ?>
+    </div>
+    <hr>
               
-    <h2>Debug Data</h2>
-    <a href="#" onclick="jQuery(this).hide();jQuery('#wplister_message_details_debug').slideDown();return false;" class="button">Show Debug Info</a>
+    <!-- <h2>Debug Data</h2> -->
+    <a href="#" onclick="jQuery(this).hide();jQuery('#wplister_message_details_debug').slideDown();return false;" class="button">Show Debug Data</a>
     <pre id="wplister_message_details_debug" style="display:none"><?php print_r( $wpl_ebay_message ) ?></pre>
            
     <pre><?php #print_r( $d ); ?></pre>

@@ -8,6 +8,8 @@
 
 class ListingsModel extends WPL_Model {
 
+	const TABLENAME = 'ebay_auctions';
+
 	var $_session;
 	var $_cs;
 	var $errors = array();
@@ -39,7 +41,7 @@ class ListingsModel extends WPL_Model {
 		if ( ! $listing_status || $listing_status == 'all' ) {
 			$where_sql = "WHERE NOT status = 'archived' ";
 		} elseif ( $listing_status == 'relist' ) {
-			$where_sql = "WHERE ( status = 'ended' OR status = 'sold' ) AND quantity > 0 ";
+			$where_sql = "WHERE ( status = 'ended' OR status = 'sold' ) AND ( quantity - quantity_sold > 0 ) "; 
 		} elseif ( $listing_status == 'autorelist' ) {
 			$where_sql = "WHERE relist_date IS NOT NULL ";
 		} elseif ( $listing_status == 'locked' ) {
@@ -88,7 +90,7 @@ class ListingsModel extends WPL_Model {
 
         // get items
 		$items = $wpdb->get_results("
-			SELECT *
+			SELECT *, l.details as details
 			FROM $this->tablename l
             $join_sql 
             $where_sql
@@ -113,6 +115,19 @@ class ListingsModel extends WPL_Model {
 	} // getPageItems()
 
 
+	static function getWhere( $column, $value ) {
+		global $wpdb;	
+		$table = $wpdb->prefix . self::TABLENAME;
+
+		$items = $wpdb->get_results( $wpdb->prepare("
+			SELECT *
+			FROM $table
+			WHERE $column = %s
+		", $value 
+		), OBJECT_K);		
+
+		return $items;
+	}
 
 	/* the following methods could go into another class, since they use wpdb instead of EbatNs_DatabaseProvider */
 
@@ -371,7 +386,8 @@ class ListingsModel extends WPL_Model {
 		$relist = $wpdb->get_var("
 			SELECT COUNT( id ) AS relist
 			FROM $this->tablename
-			WHERE ( status = 'ended' OR status = 'sold' ) AND quantity > 0
+			WHERE ( status = 'ended' OR status = 'sold' ) 
+			  AND ( quantity - quantity_sold > 0 )
 		");
 		$summary->relist = $relist;
 
@@ -1600,6 +1616,7 @@ class ListingsModel extends WPL_Model {
 		$data['price'] 				= $Detail->SellingStatus->CurrentPrice->value;
 		$data['quantity_sold'] 		= $Detail->SellingStatus->QuantitySold;
 		$data['quantity'] 			= $Detail->Quantity;
+		// $data['quantity'] 		= $Detail->Quantity - $Detail->SellingStatus->QuantitySold; // this is how it should work in the future...
 		$data['ViewItemURL'] 		= $Detail->ListingDetails->ViewItemURL;
 		$data['GalleryURL'] 		= $Detail->PictureDetails->GalleryURL;
 
@@ -1681,6 +1698,13 @@ class ListingsModel extends WPL_Model {
 		$this->logger->info( $wpdb->last_error );
 	}
 
+	static public function updateWhere( $where, $data ) {
+		global $wpdb;
+		$table = $wpdb->prefix . self::TABLENAME;
+
+		// update
+		$wpdb->update( $table, $data, $where );
+	}
 
 	public function updateEndedListings( $session ) {
 		global $wpdb;
@@ -1851,6 +1875,7 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
+	// deprecated
 	function getAllChanged() {
 		global $wpdb;	
 		$items = $wpdb->get_results("
@@ -1862,8 +1887,36 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
-	function getAllPublished() {
+	function getAllChangedItemsToRevise() {
 		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT id, auction_title, site_id, account_id, post_id, eps
+			FROM $this->tablename
+			WHERE status = 'changed'
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
+	function getAllEndedItemsToRelist() {
+		global $wpdb;	
+		$items = $wpdb->get_results("
+			SELECT id, auction_title, site_id, account_id, post_id, eps
+			FROM $this->tablename
+			WHERE ( status = 'ended' OR status = 'sold' ) 
+			  AND ( quantity - quantity_sold > 0 )
+			ORDER BY id DESC
+		", ARRAY_A);		
+
+		return $items;		
+	}
+	function getAllPublished( $limit = null, $offset = null ) {
+		global $wpdb;	
+
+		$limit  = intval($limit); 
+		$offset = intval($offset);
+		$limit_sql = $limit ? " LIMIT $limit OFFSET $offset" : '';
+
 		$items = $wpdb->get_results("
 			SELECT * 
 			FROM $this->tablename
@@ -1871,6 +1924,7 @@ class ListingsModel extends WPL_Model {
 			   OR status = 'changed'
 			   OR status = 'relisted'
 			ORDER BY id DESC
+			$limit_sql
 		", ARRAY_A);		
 
 		return $items;		
@@ -1886,13 +1940,19 @@ class ListingsModel extends WPL_Model {
 
 		return $items;		
 	}
-	function getAllEnded() {
+	function getAllEnded( $limit = null, $offset = null ) {
 		global $wpdb;	
+
+		$limit  = intval($limit); 
+		$offset = intval($offset);
+		$limit_sql = $limit ? " LIMIT $limit OFFSET $offset" : '';
+
 		$items = $wpdb->get_results("
 			SELECT * 
 			FROM $this->tablename
 			WHERE status = 'ended'
 			ORDER BY id DESC
+			$limit_sql
 		", ARRAY_A);		
 
 		return $items;		
@@ -2518,9 +2578,11 @@ class ListingsModel extends WPL_Model {
 			}
 
 			// process attribute shortcodes in title - like [[attribute_Brand]]
-			$templatesModel = new TemplatesModel();
-			// $this->logger->info('auction_title before processing: '.$data['auction_title'].'');
-			$data['auction_title'] = $templatesModel->processAllTextShortcodes( $item['post_id'], $data['auction_title'], 80 );
+			if ( strpos( $data['auction_title'], ']]' ) > 0 ) {
+				$templatesModel = new TemplatesModel();
+				$this->logger->info('auction_title before processing: '.$data['auction_title'].'');
+				$data['auction_title'] = $templatesModel->processAllTextShortcodes( $item['post_id'], $data['auction_title'], 80 );				
+			}
 			$this->logger->info('auction_title after processing : '.$data['auction_title'].'');
 
 		}

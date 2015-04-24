@@ -182,6 +182,19 @@ class LogTable extends WP_List_Table {
             }
         }
 
+        if ( 'GetMyMessages' == $item['callname'] ) {
+            if ( preg_match("/<MessageID>(.*)<\/MessageID>/", $item['request'], $matches) ) {
+                $match = str_replace('<![CDATA[', '', $matches[1] );
+                $match = str_replace(']]>', '', $match );
+                $link .= ' - ' . strip_tags( $match );
+            }
+            if ( preg_match("/<DetailLevel>(.*)<\/DetailLevel>/", $item['request'], $matches) ) {
+                $match = str_replace('<![CDATA[', '', $matches[1] );
+                $match = str_replace(']]>', '', $match );
+                $link .= ' <span style="color:silver">' . strip_tags( $match ) . '</span>';
+            }
+        }
+
         if ( in_array( $item['callname'], array('GetCategorySpecifics','GetCategoryFeatures') ) ) {
             if ( preg_match("/<CategoryID>(.*)<\/CategoryID>/", $item['request'], $matches) ) {
                 $match = str_replace('<![CDATA[', '', $matches[1] );
@@ -352,37 +365,38 @@ class LogTable extends WP_List_Table {
     function get_views(){
        $views = array();
        $current = ( !empty($_REQUEST['log_status']) ? $_REQUEST['log_status'] : 'all');
+       $base_url = esc_url( remove_query_arg( array( 'action', 'log', 'log_status' ) ) );
 
        // get status summary
        $summary = $this->getStatusSummary();
 
        // All link
        $class = ($current == 'all' ? ' class="current"' :'');
-       $all_url = remove_query_arg('log_status');
+       $all_url = esc_url( remove_query_arg( 'log_status', $base_url ) );
        $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
        $views['all'] .= '<span class="count">('.$this->all_status_count.')</span>';
 
        // Success link
-       $Success_url = add_query_arg('log_status','Success');
+       $Success_url = add_query_arg( 'log_status', 'Success', $base_url );
        $class = ($current == 'Success' ? ' class="current"' :'');
        $views['Success'] = "<a href='{$Success_url}' {$class} >".__('Successful','wplister')."</a>";
        if ( isset($summary->Success) ) $views['Success'] .= '<span class="count">('.$summary->Success.')</span>';
 
        // Warning link
-       $Warning_url = add_query_arg('log_status','Warning');
+       $Warning_url = add_query_arg( 'log_status', 'Warning', $base_url );
        $class = ($current == 'Warning' ? ' class="current"' :'');
        $views['Warning'] = "<a href='{$Warning_url}' {$class} >".__('Warnings','wplister')."</a>";
        if ( isset($summary->Warning) ) $views['Warning'] .= '<span class="count">('.$summary->Warning.')</span>';
 
        // Failure link
-       $Failure_url = add_query_arg('log_status','Failure');
+       $Failure_url = add_query_arg( 'log_status', 'Failure', $base_url );
        $class = ($current == 'Failure' ? ' class="current"' :'');
        $views['Failure'] = "<a href='{$Failure_url}' {$class} >".__('Failed','wplister')."</a>";
        if ( isset($summary->Failure) ) $views['Failure'] .= '<span class="count">('.$summary->Failure.')</span>';
 
        // PartialFailure link
        if ( isset($summary->PartialFailure) ) {
-           $PartialFailure_url = add_query_arg('log_status','PartialFailure');
+           $PartialFailure_url = add_query_arg( 'log_status', 'PartialFailure', $base_url );
            $class = ($current == 'PartialFailure' ? ' class="current"' :'');
            $views['PartialFailure'] = "<a href='{$PartialFailure_url}' {$class} >".__('Partial Failure','wplister')."</a>";
            $views['PartialFailure'] .= '<span class="count">('.$summary->PartialFailure.')</span>';       
@@ -390,7 +404,7 @@ class LogTable extends WP_List_Table {
 
        // unknown link
        if ( isset($summary->unknown) ) {
-           $unknown_url = add_query_arg('log_status','unknown');
+           $unknown_url = add_query_arg( 'log_status', 'unknown', $base_url );
            $class = ($current == 'unknown' ? ' class="current"' :'');
            $views['unknown'] = "<a href='{$unknown_url}' {$class} >".__('Unknown','wplister')."</a>";
            $views['unknown'] .= '<span class="count">('.$summary->unknown.')</span>';       

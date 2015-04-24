@@ -52,6 +52,7 @@ class WPL_CronActions extends WPL_Core {
 				$this->initEC( $account->id );
 				$this->EC->updateEbayOrders();
 				$this->EC->updateListings(); // TODO: specify account
+				$this->EC->updateEbayMessages();
 				$this->EC->closeEbay();
 
 			}

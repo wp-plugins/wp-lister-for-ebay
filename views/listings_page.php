@@ -97,6 +97,10 @@
 				   title="<?php echo __('Publish all verified items on eBay.','wplister') ?>"
 					><?php echo __('Publish all verified items','wplister'); ?></a>
 
+				<a id="btn_publish_all_prepared_items" class="btn_publish_all_prepared_items button wpl_job_button"
+				   title="<?php echo __('Publish all prepared items on eBay.','wplister') ?>"
+					><?php echo __('Publish all prepared items','wplister'); ?></a>
+
 				<a id="btn_revise_all_changed_items" class="btn_revise_all_changed_items button wpl_job_button"
 				   title="<?php echo __('Revise all changed items on eBay.','wplister') ?>"
 					><?php echo __('Revise all changed items','wplister'); ?></a>
@@ -184,6 +188,11 @@
 
 					if ( selected_action == 'delete_listing' ) {
 						var confirmed = confirm("<?php echo __('Are you sure you want to do this?','wplister') .' '.  __('You should not delete listings which have been recently published on eBay!','wplister') ?>");
+						if ( ! confirmed ) return false;
+					}
+
+					if ( selected_action == 'wple_reset_status' ) {
+						var confirmed = confirm("<?php echo __('Are you sure you want to do this?','wplister') .' '.  __('This will reset the status of all selected items to prepared. Only use this if you want to list them as new listings instead of relisting.','wplister') ?>");
 						if ( ! confirmed ) return false;
 					}
 

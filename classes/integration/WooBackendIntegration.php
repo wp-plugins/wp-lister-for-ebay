@@ -234,12 +234,14 @@ class WPL_WooBackendIntegration {
 		echo '<img src="'.WPLISTER_URL.'img/ebay-42x16.png" style="width:32px;vertical-align:bottom;padding:0;" class="tips" data-tip="'.$tooltip.'" />';		
 
 
-		// show shipping status - if _date_shipped is set
-        if ( $date_shipped = get_post_meta( $post->ID, '_date_shipped', true ) ) {
+		// show shipping status - if _ebay_marked_as_shipped is set to yes
+        if ( get_post_meta( $post->ID, '_ebay_marked_as_shipped', true ) ) {
+            $date_shipped = get_post_meta( $post->ID, '_date_shipped', true );
+            $date_shipped = is_numeric($date_shipped) ? date('Y-m-d',$date_shipped) : $date_shipped; // convert timestamp to date - support for Shipment Tracking plugin
 			echo '<br><img src="'.WPLISTER_URL.'img/icon-success-32x32.png" style="width:12px;vertical-align:middle;padding:0;" class="tips" data-tip="This order was marked as shipped on eBay on '.$date_shipped.'" />';		
         }
 
-	}
+	} // wplister_woocommerce_custom_shop_order_columns()
 
 
 	/**
@@ -557,13 +559,13 @@ class WPL_WooBackendIntegration {
 		// On eBay
 		// $class = ( isset( $wp_query->query['is_on_ebay'] ) && $wp_query->query['is_on_ebay'] == 'no' ) ? 'current' : '';
 		$class = ( isset( $_REQUEST['is_on_ebay'] ) && $_REQUEST['is_on_ebay'] == 'yes' ) ? 'current' : '';
-		$query_string = remove_query_arg(array( 'is_on_ebay' ));
+		$query_string = esc_url( remove_query_arg( array( 'is_on_ebay' ) ) );
 		$query_string = add_query_arg( 'is_on_ebay', urlencode('yes'), $query_string );
 		$views['listed'] = '<a href="'. $query_string . '" class="' . $class . '">' . __('On eBay', 'wplister') . '</a>';
 
 		// Not on eBay
 		$class = ( isset( $_REQUEST['is_on_ebay'] ) && $_REQUEST['is_on_ebay'] == 'no' ) ? 'current' : '';
-		$query_string = remove_query_arg(array( 'is_on_ebay' ));
+		$query_string = esc_url( remove_query_arg( array( 'is_on_ebay' ) ) );
 		$query_string = add_query_arg( 'is_on_ebay', urlencode('no'), $query_string );
 		$views['unlisted'] = '<a href="'. $query_string . '" class="' . $class . '">' . __('Not on eBay', 'wplister') . '</a>';
 
@@ -584,13 +586,13 @@ class WPL_WooBackendIntegration {
 		// Placed on eBay
 		// $class = ( isset( $wp_query->query['is_from_ebay'] ) && $wp_query->query['is_from_ebay'] == 'no' ) ? 'current' : '';
 		$class = ( isset( $_REQUEST['is_from_ebay'] ) && $_REQUEST['is_from_ebay'] == 'yes' ) ? 'current' : '';
-		$query_string = remove_query_arg(array( 'is_from_ebay' ));
+		$query_string = esc_url( remove_query_arg( array( 'is_from_ebay' ) ) );
 		$query_string = add_query_arg( 'is_from_ebay', urlencode('yes'), $query_string );
 		$views['listed'] = '<a href="'. $query_string . '" class="' . $class . '">' . __('Placed on eBay', 'wplister') . '</a>';
 
 		// Not placed on eBay
 		$class = ( isset( $_REQUEST['is_from_ebay'] ) && $_REQUEST['is_from_ebay'] == 'no' ) ? 'current' : '';
-		$query_string = remove_query_arg(array( 'is_from_ebay' ));
+		$query_string = esc_url( remove_query_arg( array( 'is_from_ebay' ) ) );
 		$query_string = add_query_arg( 'is_from_ebay', urlencode('no'), $query_string );
 		$views['unlisted'] = '<a href="'. $query_string . '" class="' . $class . '">' . __('Not placed on eBay', 'wplister') . '</a>';
 
@@ -928,6 +930,7 @@ class WPL_WooBackendIntegration {
 
 		foreach ($errors as $error) {
 			// hide redundant warnings like:
+			// 21917091 - Warning: Requested StartPrice and Quantity revision is redundant
 			// 21917092 - Warning: Requested Quantity revision is redundant.
 			// 21916620 - Warning: Variations with quantity '0' will be removed
 			if ( ! in_array( $error->ErrorCode, array( 21917091, 21917092, 21916620 ) ) )

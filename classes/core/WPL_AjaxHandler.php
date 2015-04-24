@@ -626,14 +626,36 @@ class WPL_AjaxHandler extends WPL_Core {
 				$this->returnJSON( $response );
 				exit();
 			
+			case 'publishAllPreparedItems':
+				
+				// get verified items
+		        $lm = new ListingsModel();
+		        $items = $lm->getAllPrepared();
+		        
+		        // create job from items and send response
+		        $response = $this->_create_bulk_listing_job( 'publishItem', $items, $jobname );
+				$this->returnJSON( $response );
+				exit();
+			
 			case 'reviseAllChangedItems':
 				
 				// get changed items
 		        $lm = new ListingsModel();
-		        $items = $lm->getAllChanged();
+		        $items = $lm->getAllChangedItemsToRevise();
 		        
 		        // create job from items and send response
 		        $response = $this->_create_bulk_listing_job( 'reviseItem', $items, $jobname );
+				$this->returnJSON( $response );
+				exit();
+			
+			case 'relistAllRestockedItems':
+				
+				// get changed items
+		        $lm = new ListingsModel();
+		        $items = $lm->getAllEndedItemsToRelist();
+		        
+		        // create job from items and send response
+		        $response = $this->_create_bulk_listing_job( 'relistItem', $items, $jobname );
 				$this->returnJSON( $response );
 				exit();
 			
@@ -672,7 +694,7 @@ class WPL_AjaxHandler extends WPL_Core {
 				$items  = array_merge( $items1, $items2, $items3 );
 
 				$total_items = sizeof($items);
-				$batch_size  = 1000;
+				$batch_size  = get_option( 'wplister_apply_profile_batch_size', 1000 );
 				$tasks       = array();
 
 				// echo "<pre>profile_id: ";echo $profile_id;echo"</pre>";
@@ -1039,6 +1061,10 @@ class WPL_AjaxHandler extends WPL_Core {
 		if ( $from_item ) {
 			// if gallery.php exists in listing template, use it
 			$gallery_tpl_file = WPLISTER_PATH.'/../../' . $from_item['template'] . '/gallery.php';
+			if ( file_exists( $gallery_tpl_file ) ) $view = $gallery_tpl_file;
+			// the above might fail if wp-content has been moved - better use wp_upload_dir() to get actual template path:
+			$upload_dir = wp_upload_dir();
+			$gallery_tpl_file = $upload_dir['basedir'] . '/wp-lister/templates/' . basename( $from_item['template'] ) . '/gallery.php';
 			if ( file_exists( $gallery_tpl_file ) ) $view = $gallery_tpl_file;
 		}
 

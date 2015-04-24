@@ -54,7 +54,7 @@
 								<div id="misc-publishing-actions">
 									<div class="misc-pub-section">
 									<!-- optional save and apply to all prepared listings already using this profile -->
-									<?php if ( $wpl_total_listings_count > 1000 ): ?>
+									<?php if ( $wpl_total_listings_count > get_option( 'wplister_apply_profile_batch_size', 1000 ) ): ?>
 
 										<input type="hidden" name="wple_delay_profile_application" value="yes" />
 										<?php $_GET['return_to'] = 'listings'; ?>

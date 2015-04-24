@@ -209,10 +209,24 @@ class ProfilesModel extends WPL_Model {
         // regard sort order if sorted by profile name
         if ( $orderby == 'profile_name' ) $orderby = 'sort_order '.$order.', profile_name';
 
+        $join_sql  = '';
+        $where_sql = 'WHERE 1 = 1 ';
+
+        // filter search_query
+		$search_query = isset($_REQUEST['s']) ? esc_sql( $_REQUEST['s'] ) : false;
+		if ( $search_query ) {
+			$where_sql .= "
+				AND  ( profile_name        LIKE '%".$search_query."%'
+					OR profile_description LIKE '%".$search_query."%' )
+			";
+		} 
+
         // get items
 		$items = $wpdb->get_results("
 			SELECT *
 			FROM $this->tablename
+            $join_sql 
+	        $where_sql
 			ORDER BY $orderby $order
             LIMIT $offset, $per_page
 		", ARRAY_A);
@@ -224,6 +238,8 @@ class ProfilesModel extends WPL_Model {
 			$this->total_items = $wpdb->get_var("
 				SELECT COUNT(*)
 				FROM $this->tablename
+	            $join_sql 
+    	        $where_sql
 				ORDER BY $orderby $order
 			");			
 		}

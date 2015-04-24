@@ -2,7 +2,7 @@
 Contributors: wp-lab
 Tags: ebay, woocommerce, products, export
 Requires at least: 3.9
-Tested up to: 4.1.1
+Tested up to: 4.2
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -92,6 +92,53 @@ WP-Lister for Amazon is currently in beta. You are welcome to follow the develop
 2. Profile Editor
 
 == Changelog ==
+= 2.0.8.4 =
+* added search box on profiles page
+* added method ListingsModel::updateWhere()
+* run inventory checks in batches to prevent server timeout and reduce memory requirements
+* fixed XSS issue with add_query_arg() and remove_query_arg()
+* fixed listing profile column on WordPress 4.2
+
+= 2.0.8.3 =
+* show ImageProcessingError message on listings page
+* make sure feedback is only left once - and process Error 55 (Feedback already left)
+* added incompatible plugin warning for Yet Another Stars Rating (causes blank page when applying profile)
+* improved variation options layout
+* fixed rare "Field 'user_details' doesn't have a default value" error on some MySQL servers (when adding new eBay account)
+* fixed issue where sold items without stock would show up in eBay / Listings / Relist
+* fixed php error when fetching order in free version
+* fixed strike-through price (STP) for variable listings
+* fixed custom gallery.php and thumbnails.php files for sites where wp-content folder is not at the default location
+* fixed possible "Fatal error: Class 'WC_Product_Ebay' not found" when orders for foreign eBay items are completed via 3rd party web hooks (Shipstation plugin)
+* fixed possible fatal error when switching a variable product to simple (which isn't possible after all if it has already been listed)
+
+= 2.0.8.2 =
+* added button to "Relist all restocked items" on Listing page / Relist
+* added button to "Publish all prepared items" on listings page
+* added new bulk action on listing page: "Reset ended items" will set the listing status to "prepared" so ended items can be listed a new items (using the same or different account)
+* show when order was shipped on eBay / Orders page
+* use custom order meta _ebay_marked_as_shipped to determine if order was successfully marked as shipped on eBay
+* improved messages page and details view
+* use http post to load task list in JobRunner.js (prevent Request URI Too Large error)
+* added optional post_id url parameter to preview_template action (3rd party dev)
+* added maxlength attribute for feedback text fields - prevent Comment Too Long error on CompleteSale
+* improved error handling (order notice text) on CompleteSale requests
+* fixed issue using seller shipping profiles for non-default accounts
+
+= 2.0.8.1 =
+* edit product page: if product exists in WP-Lister, show shipping and seller profiles based on the linked account instead of default account
+* edit product page: show available item specifics based on profile category and eBay category map
+* improved seller shipping profiles - sort by summary, fixed layout on edit product page
+* improved process of completing orders on eBay  (error handling / order notes)
+* performance improvements when applying profile to listings - check if there are shortcodes before processing
+* optimized memory footprint when revising all changed items
+* improved messages page - fixed search box and filter views
+* fetch messages for active accounts automatically - if messages page is enabled
+* fixed possible php warning with Product Add-Ons plugin installed
+* added wple_get_listings_where() function for 3rd party devs
+* added optional listing_id url parameter to preview_template action (3rd party dev)
+* always init WooBackendIntegration class, even when is_admin() is false - to listen to order status change even triggered by external web hooks (like Shipstation)
+
 = 2.0.8 =
 * improved performance on Products page
 * database upgrade to version 43

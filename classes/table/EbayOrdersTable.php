@@ -137,7 +137,7 @@ class EbayOrdersTable extends WP_List_Table {
                     $order_msg = '<br><small style="color:darkred;">Order #'.$order_post_id.' has been trashed.</small>';
                 } else {
                     $order_exists = true;
-                    $order_msg = '<br><small>Order #'.$order->get_order_number().' is '.$order->get_status().'.</small>';
+                    $order_msg = '<br><small>Order '.$order->get_order_number().' is '.$order->get_status().'.</small>';
                 }
 
             } else {
@@ -255,12 +255,20 @@ class EbayOrdersTable extends WP_List_Table {
                 $value = $item['CompleteStatus'];
         }
 
+        $item_details = maybe_unserialize( $item['details'] );
+        $shipped_status = '';
+        if ( $item_details ) {
+            $ShippedTime = $this->convertEbayDateToSql( $item_details->ShippedTime );
+            if ( $ShippedTime ) $shipped_status = __('Shipped','wplister') .': '. sprintf( __('%s ago','wplister'), human_time_diff( strtotime( $ShippedTime ) ) );
+        }
+
         // return formatted html
-        return sprintf('<span style="color:%1$s">%2$s</span><br><span style="color:%3$s">%4$s</span>',
+        return sprintf('<span style="color:%1$s">%2$s</span><br><span style="color:%3$s">%4$s</span><br><small style="color:gray;">%5$s</small>',
             /*$1%s*/ $color,
             /*$2%s*/ $value,
             /*$2%s*/ 'silver',
-            /*$2%s*/ $item['CheckoutStatus']
+            /*$2%s*/ $item['CheckoutStatus'],
+            /*$2%s*/ $shipped_status
         );
 	}
 	  
@@ -412,7 +420,7 @@ class EbayOrdersTable extends WP_List_Table {
     function get_views(){
        $views    = array();
        $current  = ( !empty($_REQUEST['order_status']) ? $_REQUEST['order_status'] : 'all');
-       $base_url = remove_query_arg( array( 'action', 'order', 'order_status' ) );
+       $base_url = esc_url( remove_query_arg( array( 'action', 'order', 'order_status' ) ) );
 
        // get order status summary
        $om = new EbayOrdersModel();

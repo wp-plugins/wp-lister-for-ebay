@@ -7,6 +7,8 @@
  */
 
 class EbayMessagesModel extends WPL_Model {
+	const TABLENAME = 'ebay_messages';
+
 	var $_session;
 	var $_cs;
 
@@ -44,8 +46,7 @@ class EbayMessagesModel extends WPL_Model {
 
 		// build request
 		$req = new GetMyMessagesRequestType();
-		// $req->setMessageRole( 'Seller' );
-		// $req->setIncludeContainingMessage(true);
+		$req->setDetailLevel( 'ReturnHeaders' ); // default, unless message_ids provided
 
 		// check if we need to calculate lastdate
 		if ( $this->current_lastdate ) {
@@ -79,6 +80,7 @@ class EbayMessagesModel extends WPL_Model {
 				$MyMessagesMessageIDArray->addMessageID( $message['message_id'] );
 			}
 			$req->setMessageIDs( $MyMessagesMessageIDArray );
+			$req->setDetailLevel( 'ReturnMessages' );
 
 		} elseif ( $lastdate ) {
 
@@ -126,7 +128,7 @@ class EbayMessagesModel extends WPL_Model {
 		// $req->setFolderID( 0 ); // Inbox (FolderID = 0) and Sent (FolderID = 1)
 		// $req->setDetailLevel( 'ReturnSummary' );
 		// $req->setDetailLevel( 'ReturnMessages' );
-		$req->setDetailLevel( 'ReturnHeaders' );
+		// $req->setDetailLevel( 'ReturnHeaders' );
 
 		// set pagination for first page
 		$items_per_page = 100; // should be set to 200 for production
@@ -241,11 +243,16 @@ class EbayMessagesModel extends WPL_Model {
 		$data['item_title']      = $Detail->ItemTitle;
 		$data['item_id']         = $Detail->ItemID;
 		$data['folder_id']       = $Detail->Folder->FolderID;
-		$data['msg_text']        = $Detail->Text;
-		$data['msg_content']     = $Detail->Content;
 		$data['response_url']    = $Detail->ResponseDetails->ResponseURL;
 		$data['site_id']    	 = $this->site_id;
 		$data['account_id']    	 = $this->account_id;
+
+		if ( $Detail->Text != '' ) {		
+			$data['msg_text']        = $Detail->Text;
+		}
+		if ( $Detail->Content != '' ) {		
+			$data['msg_content']     = $Detail->Content;
+		}
 
         // save GetMyMessages reponse in details
 		$data['details'] = $this->encodeObject( $Detail );
@@ -378,19 +385,6 @@ class EbayMessagesModel extends WPL_Model {
 		return $message;
 	}
 
-	function getMessageByPostID( $post_id ) {
-		global $wpdb;
-
-		$message = $wpdb->get_row( $wpdb->prepare("
-			SELECT *
-			FROM $this->tablename
-			WHERE post_id = %s
-		", $post_id
-		), ARRAY_A );
-
-		return $message;
-	}
-
 	function getDateOfLastMessage() {
 		global $wpdb;
 		$lastdate = $wpdb->get_var( "
@@ -400,6 +394,22 @@ class EbayMessagesModel extends WPL_Model {
 		" );
 
 		return $lastdate;
+	}
+
+	static function getMessageIDsToFetch( $account_id ) {
+		global $wpdb;
+		$table = $wpdb->prefix . self::TABLENAME;
+
+		$message_ids = $wpdb->get_col( $wpdb->prepare("
+			SELECT id
+			FROM $table
+			WHERE account_id = %s
+			  AND msg_text = ''
+			ORDER BY id DESC
+			LIMIT 10
+		", $account_id ) );
+
+		return $message_ids;
 	}
 
 	function deleteItem( $id ) {
@@ -426,6 +436,22 @@ class EbayMessagesModel extends WPL_Model {
 				$summary->$status = $row->total;
 		}
 
+		// count Read items
+		$total_items = $wpdb->get_var("
+			SELECT COUNT( id ) AS total_items
+			FROM $this->tablename
+			WHERE flag_read = 1
+		");
+		$summary->Read = $total_items;
+
+		// count Unread items
+		$total_items = $wpdb->get_var("
+			SELECT COUNT( id ) AS total_items
+			FROM $this->tablename
+			WHERE NOT flag_read = 1
+		");
+		$summary->Unread = $total_items;
+
 		// count total items as well
 		$total_items = $wpdb->get_var("
 			SELECT COUNT( id ) AS total_items
@@ -446,25 +472,32 @@ class EbayMessagesModel extends WPL_Model {
         $per_page = esc_sql( $per_page );
 
         $join_sql  = '';
-        $where_sql = '';
+        $where_sql = 'WHERE 1 = 1 ';
 
         // filter message_status
 		$message_status = ( isset($_REQUEST['message_status']) ? esc_sql( $_REQUEST['message_status'] ) : 'all');
-		if ( $message_status != 'all' ) {
-			$where_sql = "WHERE status = '".$message_status."' ";
+		// if ( $message_status != 'all' ) {
+		// 	$where_sql .= "AND status = '".$message_status."' ";
+		// } 
+		if ( $message_status == 'Read' ) {
+			$where_sql .= "AND flag_read = 1 ";
+		} 
+		if ( $message_status == 'Unread' ) {
+			$where_sql .= "AND NOT flag_read = 1 ";
 		} 
 
         // filter search_query
 		$search_query = ( isset($_REQUEST['s']) ? esc_sql( $_REQUEST['s'] ) : false);
 		if ( $search_query ) {
-			$where_sql = "
-				WHERE  o.buyer_name   LIKE '%".$search_query."%'
-					OR o.items        LIKE '%".$search_query."%'
-					OR o.buyer_userid     = '".$search_query."'
-					OR o.buyer_email      = '".$search_query."'
-					OR o.message_id         = '".$search_query."'
-					OR o.post_id          = '".$search_query."'
-					OR o.ShippingAddress_City LIKE '%".$search_query."%'
+			$where_sql .= "
+				AND (  m.sender       LIKE '%".$search_query."%'
+					OR m.subject      LIKE '%".$search_query."%'
+					OR m.item_title   LIKE '%".$search_query."%'
+					OR m.item_id          = '".$search_query."'
+					OR m.message_id       = '".$search_query."'
+					OR m.msg_text     LIKE '%".$search_query."%'
+					OR m.msg_content  LIKE '%".$search_query."%' 
+					)
 			";
 		} 
 
@@ -472,7 +505,7 @@ class EbayMessagesModel extends WPL_Model {
         // get items
 		$items = $wpdb->get_results("
 			SELECT *
-			FROM $this->tablename o
+			FROM $this->tablename m
             $join_sql 
             $where_sql
 			ORDER BY $orderby $order
@@ -485,7 +518,7 @@ class EbayMessagesModel extends WPL_Model {
 		} else {
 			$this->total_items = $wpdb->get_var("
 				SELECT COUNT(*)
-				FROM $this->tablename o
+				FROM $this->tablename m
 	            $join_sql 
     	        $where_sql
 				ORDER BY $orderby $order

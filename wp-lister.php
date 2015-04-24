@@ -3,17 +3,17 @@
 Plugin Name: WP-Lister for eBay
 Plugin URI: http://www.wplab.com/plugins/wp-lister/
 Description: List your products on eBay the easy way.
-Version: 2.0.8
+Version: 2.0.8.4
 Author: Matthias Krok
 Author URI: http://www.wplab.com/ 
-Max WP Version: 4.1.1
+Max WP Version: 4.2
 Text Domain: wp-lister
 License: GPL2+
 */
 
 if ( class_exists('WPL_WPLister') ) die(sprintf( 'WP-Lister for eBay %s is already installed and activated. Please deactivate any other version before you activate this one.', WPLISTER_VERSION ));
 
-define('WPLISTER_VERSION', '2.0.8' );
+define('WPLISTER_VERSION', '2.0.8.4' );
 define('WPLISTER_PATH', realpath( dirname(__FILE__) ) );
 define('WPLISTER_URL', plugins_url() . '/' . basename(dirname(__FILE__)) . '/' );
 define('WPLE_VERSION', WPLISTER_VERSION );
@@ -37,8 +37,10 @@ require_once( WPLISTER_PATH . '/classes/core/WPL_Toolbar.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Functions.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_API_Hooks.php' );
 require_once( WPLISTER_PATH . '/classes/core/EbayController.php' );
+require_once( WPLISTER_PATH . '/classes/integration/WooBackendIntegration.php' );
 require_once( WPLISTER_PATH . '/classes/integration/WooFrontendIntegration.php' );
 require_once( WPLISTER_PATH . '/classes/integration/WooOrderBuilder.php' );
+require_once( WPLISTER_PATH . '/classes/integration/WooOrderMetaBox.php' );
 
 // set up autoloader
 spl_autoload_register('WPL_Autoloader::autoload');
@@ -58,6 +60,7 @@ class WPL_WPLister extends WPL_BasePlugin {
 	var $accounts      = array();
 	var $multi_account = false;
 	var $db_version    = 0;
+	var $logger;
 	
 	public function __construct() {
 		parent::__construct();
@@ -65,19 +68,25 @@ class WPL_WPLister extends WPL_BasePlugin {
 		// load current DB version
 		$this->db_version = get_option('wplister_db_version');
 
+		$this->initLogger();
 		$this->initClasses();
 		$this->loadAccounts();
 
 		if ( is_admin() ) {
-			require_once( WPLISTER_PATH . '/classes/integration/WooBackendIntegration.php' );
 			require_once( WPLISTER_PATH . '/classes/integration/WooProductMetaBox.php' );
-			require_once( WPLISTER_PATH . '/classes/integration/WooOrderMetaBox.php' );
-			require_once( WPLISTER_PATH . '/classes/integration/WooEbayProduct.php' );
+			// require_once( WPLISTER_PATH . '/classes/integration/WooOrderMetaBox.php' );
+			// require_once( WPLISTER_PATH . '/classes/integration/WooEbayProduct.php' );
 			$oInstall 	= new WPLister_Install( __FILE__ );
 			$oUninstall = new WPLister_Uninstall( __FILE__ );
 			$this->loadPages();
 		}
 
+	}
+		
+	// initialize logger
+	public function initLogger() {
+		global $wpl_logger;
+		$this->logger = $wpl_logger;
 	}
 		
 	// initialize core classes

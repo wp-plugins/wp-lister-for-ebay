@@ -202,7 +202,7 @@ $ebay_account   = $account_exists ? WPLE()->accounts[ $wpl_row->account_id ] : n
 
     <h2>Call: <?php echo $wpl_row->callname ?> (#<?php echo $wpl_row->id ?>)</h2>
 
-    <?php if ( ! $account_exists ) : ?>
+    <?php if ( ! $account_exists && $wpl_row->account_id ) : ?>
 	<div class="error">
 		<p>
 			Warning: The account ID <?php echo $wpl_row->account_id ?> does not exist.

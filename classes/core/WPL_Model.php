@@ -66,7 +66,7 @@ class WPL_Model {
 	}	
 	
 	// flexible object decoder
-	public function decodeObject( $str, $assoc = false, $loadEbayClasses = false ) {
+	static public function decodeObject( $str, $assoc = false, $loadEbayClasses = false ) {
 
 		// load eBay classes if required
 		if ( $loadEbayClasses ) EbayController::loadEbayClasses();
@@ -76,24 +76,24 @@ class WPL_Model {
 
 		// json_decode
 		$obj = json_decode( $str, $assoc );
-		//$this->logger->info('json_decode: '.print_r($obj,1));
+		// WPLE()->logger->info('json_decode: '.print_r($obj,1));
 		if ( is_object($obj) || is_array($obj) ) return $obj;
 		
 		// unserialize fallback
 		$obj = maybe_unserialize( $str );
-		//$this->logger->info('unserialize: '.print_r($obj,1));
+		// WPLE()->logger->info('unserialize: '.print_r($obj,1));
 		if ( is_object($obj) || is_array($obj) ) return $obj;
 		
 		// mb_unserialize fallback
-		$obj = $this->mb_unserialize( $str );
-		// $this->logger->info('mb_unserialize: '.print_r($obj,1));
+		$obj = self::mb_unserialize( $str );
+		// WPLE()->logger->info('mb_unserialize: '.print_r($obj,1));
 		if ( is_object($obj) || is_array($obj) ) return $obj;
 
 		// log error
 		$e = new Exception;
-		$this->logger->error('backtrace: '.$e->getTraceAsString());
-		$this->logger->error('mb_unserialize returned: '.print_r($obj,1));
-		$this->logger->error('decodeObject() - not an valid object: '.$str);
+		WPLE()->logger->error('backtrace: '.$e->getTraceAsString());
+		WPLE()->logger->error('mb_unserialize returned: '.print_r($obj,1));
+		WPLE()->logger->error('decodeObject() - not an valid object: '.$str);
 		return $str;
 	}	
 
@@ -101,7 +101,7 @@ class WPL_Model {
 	 * Mulit-byte Unserialize
 	 * UTF-8 will screw up a serialized string
 	 */
-	function mb_unserialize($string) {
+	static function mb_unserialize( $string ) {
 
 		// special handling for asterisk wrapped in zero bytes
 	    $string = str_replace( "\0*\0", "*\0", $string);
@@ -197,6 +197,11 @@ class WPL_Model {
 				$longMessage .= '<br><br>'. '<i>Switching to restricted revise mode...</i>';
 			}
 			
+			// #55 - Error: Adding feedback failed: invalid item number or invalid transaction or feedback already left
+			if ( $error->getErrorCode() == 55 ) { 
+				$this->handle_error_code = 55; // remember error code for callCompleteOrder()
+			}
+			
 			// #302 - Invalid auction listing type
 			if ( $error->getErrorCode() == 302 ) { 
 				$longMessage .= '<br><br>'. '<b>Note:</b> eBay does not allow changing the listing type of an active listing.';
@@ -273,7 +278,7 @@ class WPL_Model {
 			if ( $error->getErrorCode() == 21917327 ) { 
 				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
 				$longMessage .= 'Your shipping profiles on eBay have changed.<br>';
-				$longMessage .= 'Please visit WP-Lister &raquo; Tools and click on <i>Update user details</i> to fetch the current list of profiles from eBay.';
+				$longMessage .= 'Please visit WP-Lister &raquo; Settings &raquo; Accounts and click on <i>Refresh details</i> to fetch the current list of profiles from eBay. ';
 				$longMessage .= 'You should check your profiles and products after doing so - you might have to update them.';
 			}
 			

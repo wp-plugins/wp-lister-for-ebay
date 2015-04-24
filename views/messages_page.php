@@ -18,7 +18,7 @@
 
 <div class="wrap">
 	<div class="icon32" style="background: url(<?php echo $wpl_plugin_url; ?>img/hammer-32x32.png) no-repeat;" id="wpl-icon"><br /></div>
-	<h2><?php echo __('Messages','wplister') ?></h2>
+	<h2><?php echo __('eBay Messages','wplister') ?></h2>
 	<?php echo $wpl_message ?>
 
 

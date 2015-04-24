@@ -19,6 +19,12 @@ function wplister_get_ebay_id_from_post_id( $post_id ) {
 	return $ebay_id;
 }
 
+// fetch fetch eBay items by column
+// example: wple_get_listings_where( 'status', 'changed' );
+function wple_get_listings_where( $column, $value ) {
+	return ListingsModel::getWhere( $column, $value );
+}
+
 
 // show admin message (since 2.0.2)
 function wple_show_message( $message, $type = 'info', $params = null ) {

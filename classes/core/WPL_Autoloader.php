@@ -24,6 +24,7 @@ class WPL_Autoloader {
 		// integration
 		'ProductWrapper'   		=> '/classes/integration/ProductWrapper_woo.php',
 		'OrderWrapper'   		=> '/classes/integration/OrderWrapper_woo.php',
+		'WC_Product_Ebay'   	=> '/classes/integration/WooEbayProduct.php',
 
 		// models		
 		'WPLE_eBaySite'         => '/classes/model/eBaySite.php',

@@ -357,6 +357,10 @@ class TemplatesModel extends WPL_Model {
 			// if thumbnails.php exists in listing template, use it
 			$thumbnails_tpl_file = WPLISTER_PATH.'/../../' . $item['template'] . '/thumbnails.php';
 			if ( file_exists( $thumbnails_tpl_file ) ) $view = $thumbnails_tpl_file;
+			// the above might fail if wp-content has been moved - better use wp_upload_dir() to get actual template path:
+			$upload_dir = wp_upload_dir();
+			$thumbnails_tpl_file = $upload_dir['basedir'] . '/wp-lister/templates/' . basename( $item['template'] ) . '/thumbnails.php';
+			if ( file_exists( $thumbnails_tpl_file ) ) $view = $thumbnails_tpl_file;
 		}
 
 		// fetch content
@@ -691,7 +695,7 @@ class TemplatesModel extends WPL_Model {
                 $addons_html .= '<tr><td align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
                 $addons_html .= $addon->name;
                 $addons_html .= '</td><td align="right">';
-                $addons_html .= number_format_i18n( $addon->price, 2 );
+                $addons_html .= number_format_i18n( floatval($addon->price), 2 );
                 $addons_html .= '</td></tr>';
             }
             

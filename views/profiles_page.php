@@ -27,6 +27,7 @@
         <!-- For plugins, we also need to ensure that the form posts back to our current page -->
         <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
         <!-- Now we can render the completed list table -->
+		<?php $wpl_profilesTable->search_box( __('Search','wplister'), 'profile-search-input' ); ?>
         <?php $wpl_profilesTable->display() ?>
     </form>
 	<br style="clear:both;"/>

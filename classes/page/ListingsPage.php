@@ -231,6 +231,27 @@ class ListingsPage extends WPL_Page {
 			$this->showMessage( __('Selected items were archived.','wplister') );
 		}
 
+		// handle wple_reset_status action
+		if ( $this->requestAction() == 'wple_reset_status' ) {
+
+	        $lm = new ListingsModel();
+	        $id = $_REQUEST['auction'];
+	        $data = array( 'status' => 'prepared' );
+
+	        if ( is_array( $id ) ) {
+	            foreach( $id as $single_id ) {
+	            	$status = $lm->getStatus( $single_id );
+	            	if ( ! in_array( $status, array('ended','sold','archived') ) ) {
+	            		wple_show_message("Item with status <i>$status</i> was skipped. Only ended and sold items can have their status reset to <i>prepared</i>.", 'warn' );
+	            		continue;
+	            	}
+	                $lm->updateListing( $single_id, $data );
+	            }
+				wple_show_message( __('Selected items had their status reset to prepared.','wplister') );
+	        }
+
+		}
+
 		// handle lock action
 		if ( $this->requestAction() == 'lock' ) {
 
@@ -391,6 +412,18 @@ class ListingsPage extends WPL_Page {
 				$this->showMessage( $msg );				
 	        }
 
+	        // check for items to be relisted and display message
+	        $listing_status = isset( $_REQUEST['listing_status'] ) ? $_REQUEST['listing_status'] : false;
+	        if ( isset($summary->relist) && current_user_can( 'publish_ebay_listings' ) && $listing_status == 'relist' ) {
+				$msg  = '<p>';
+				$msg .= sprintf( __('There are %s items which are currently ended on eBay, but are in stock on your website and can be relisted.','wplister'), $summary->relist );
+				// $msg .= '<br><br>';
+				$msg .= '&nbsp;&nbsp;';
+				$msg .= '<a id="btn_relist_all_restocked_items" class="btn_relist_all_restocked_items button wpl_job_button">' . __('Relist all restocked items','wplister') . '</a>';
+				$msg .= '</p>';
+				$this->showMessage( $msg );				
+	        }
+
 	        // check for relisted items and display reminder
 	        if ( isset($summary->relisted) ) {
 				$msg  = '<p>';
@@ -405,15 +438,15 @@ class ListingsPage extends WPL_Page {
 			// $listings = $listingsModel->getAll();
 	
 		    //Create an instance of our package class...
-		    $listingsTable = new ListingsTable();
+		    // $this->listingsTable = new ListingsTable();
 	    	//Fetch, prepare, sort, and filter our data...
-		    $listingsTable->prepare_items();
+		    $this->listingsTable->prepare_items();
 	
 			$aData = array(
 				'plugin_url'				=> self::$PLUGIN_URL,
 				'message'					=> $this->message,
 	
-				'listingsTable'				=> $listingsTable,
+				'listingsTable'				=> $this->listingsTable,
 				'preview_html'				=> isset($preview_html) ? $preview_html : '',
 			
 				'form_action'				=> 'admin.php?page='.self::ParentMenuId
@@ -431,10 +464,10 @@ class ListingsPage extends WPL_Page {
 		$this->checkForDuplicates();
 
 	    //Create an instance of our package class...
-	    $listingsTable = new ListingsTable();
+	    // $this->listingsTable = new ListingsTable();
     	//Fetch, prepare, sort, and filter our data...
-	    $listingsTable->selectedItems = $selectedProducts;
-	    $listingsTable->prepare_items();
+	    $this->listingsTable->selectedItems = $selectedProducts;
+	    $this->listingsTable->prepare_items();
 
 		// get profiles
 		$profilesModel = new ProfilesModel();
@@ -446,7 +479,7 @@ class ListingsPage extends WPL_Page {
 
 			'last_selected_profile'		=> self::getOption('last_selected_profile'),
 			'profiles'					=> $profiles,
-			'listingsTable'				=> $listingsTable,
+			'listingsTable'				=> $this->listingsTable,
 		
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId
 		);

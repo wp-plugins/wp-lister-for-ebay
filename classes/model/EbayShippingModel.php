@@ -464,6 +464,14 @@ class EbayShippingModel extends WPL_Model {
 
 		}
 		return $services;
+	} // fixShippingCategory()
+
+	static function sortSellerProfiles( $profiles ) {
+		usort( $profiles, array( 'EbayShippingModel', 'cmpSellerProfiles' ) );
+		return $profiles;		
+	}
+	static function cmpSellerProfiles( $a, $b ) {
+	    return strcmp( $a->ProfileName, $b->ProfileName );
 	}
 
-}
+} // class EbayShippingModel
