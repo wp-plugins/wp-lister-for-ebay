@@ -27,6 +27,8 @@ if(!class_exists('WP_List_Table')){
  */
 class LogTable extends WP_List_Table {
 
+    const TABLENAME = 'ebay_log';
+
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
      * use the parent reference to set some default configs.
@@ -374,7 +376,7 @@ class LogTable extends WP_List_Table {
        $class = ($current == 'all' ? ' class="current"' :'');
        $all_url = esc_url( remove_query_arg( 'log_status', $base_url ) );
        $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
-       $views['all'] .= '<span class="count">('.$this->all_status_count.')</span>';
+       $views['all'] .= '<span class="count">('.$summary->all_status_count.')</span>';
 
        // Success link
        $Success_url = add_query_arg( 'log_status', 'Success', $base_url );
@@ -430,12 +432,12 @@ class LogTable extends WP_List_Table {
             GROUP BY status
         ");
 
-        $this->all_status_count = 0;
         $summary = new stdClass();
+        $summary->all_status_count = 0;
         foreach ($result as $row) {
             $status = $row->status ? $row->status : 'unknown';
             $summary->$status = $row->total;
-            $this->all_status_count += $row->total;
+            $summary->all_status_count += $row->total;
         }
 
         return $summary;
@@ -580,7 +582,8 @@ class LogTable extends WP_List_Table {
     function getPageItems( $current_page, $per_page ) {
         global $wpdb;
 
-        $this->tablename = $wpdb->prefix . 'ebay_log';
+        // $this->tablename = $wpdb->prefix . 'ebay_log';
+        $table = $wpdb->prefix . self::TABLENAME;
 
         $orderby  = (!empty($_REQUEST['orderby'])) ? esc_sql( $_REQUEST['orderby'] ) : 'id';
         $order    = (!empty($_REQUEST['order']))   ? esc_sql( $_REQUEST['order']   ) : 'desc';
@@ -628,7 +631,7 @@ class LogTable extends WP_List_Table {
         // get items
         $items = $wpdb->get_results("
             SELECT *
-            FROM $this->tablename
+            FROM $table
             $where_sql
             ORDER BY $orderby $order
             LIMIT $offset, $per_page
@@ -641,7 +644,7 @@ class LogTable extends WP_List_Table {
         } else {
             $this->total_items = $wpdb->get_var("
                 SELECT COUNT(*)
-                FROM $this->tablename
+                FROM $table
                 $where_sql
                 ORDER BY $orderby $order
             ");         

@@ -136,7 +136,7 @@ class TemplatesPage extends WPL_Page {
 	    //Create an instance of our package class...
 	    $templatesTable = new TemplatesTable();
     	//Fetch, prepare, sort, and filter our data...
-	    $templatesTable->db_items = $templates;
+	    // $templatesTable->db_items = $templates; // no effect on WP4.2
 	    $templatesTable->prepare_items();
 
 	    // refresh cache of template names and descriptions
@@ -149,7 +149,7 @@ class TemplatesPage extends WPL_Page {
 			'plugin_url'				=> self::$PLUGIN_URL,
 			'message'					=> $this->message,
 
-			'templates'					=> $templates,
+			// 'templates'					=> $templates,
 			'templatesTable'			=> $templatesTable,
 		
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-templates'

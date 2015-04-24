@@ -27,6 +27,8 @@ if(!class_exists('WP_List_Table')){
  */
 class TemplatesTable extends WP_List_Table {
 
+    var $db_items = array();
+
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
      * use the parent reference to set some default configs.
@@ -252,6 +254,12 @@ class TemplatesTable extends WP_List_Table {
      **************************************************************************/
     function prepare_items() {
         
+        // init model
+        $templatesModel = new TemplatesModel();
+    
+        // get all items
+        $this->db_items = $templatesModel->getAll();
+
         /**
          * First, lets decide how many records per page to show
          */
