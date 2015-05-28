@@ -189,6 +189,16 @@
 								<option value="retry" <?php if ( $wpl_ajax_error_handling == 'retry' ): ?>selected="selected"<?php endif; ?>><?php echo __('Try again','wplister'); ?></option>
 							</select>
 
+							<label for="wpl-option-eps_xfer_mode" class="text_label">
+								<?php echo __('EPS transfer mode','wplister'); ?>
+								<?php $tip_msg = __('If you have trouble uploading your images to EPS (eBay Picture Service), set the transfer mode to active.','wplister'); ?>
+                                <?php wplister_tooltip($tip_msg) ?>
+							</label>
+							<select id="wpl-option-eps_xfer_mode" name="wpl_e2e_eps_xfer_mode" class=" required-entry select">
+								<option value="passive" <?php if ( $wpl_eps_xfer_mode == 'passive' ): ?>selected="selected"<?php endif; ?>><?php echo __('Passive','wplister'); ?> (default)</option>
+								<option value="active"  <?php if ( $wpl_eps_xfer_mode == 'active'  ): ?>selected="selected"<?php endif; ?>><?php echo __('Active','wplister'); ?></option>
+							</select>
+
 							<label for="wpl-option-disable_variations" class="text_label">
 								<?php echo __('Disable variations','wplister'); ?>
                                 <?php wplister_tooltip('This is intended to work around an issue with the eBay API and will force using AddItem instead of AddFixedPriceItem, RelistItem instead of RelistFixedPriceItem, etc.<br>Do not enable this unless you do not want to list variations!') ?>

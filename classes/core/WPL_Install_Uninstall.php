@@ -95,6 +95,7 @@ class WPLister_Install {
 		WPL_WPLister::addOption( 'uninstall',			'0' );
 		WPL_WPLister::addOption( 'db_version',			'1' );
 		WPL_WPLister::addOption( 'ebay_update_mode',	'order' );
+		WPL_WPLister::addOption( 'wc2_gallery_fallback','none' );
 
 		WPL_WPLister::addOption( 'setup_next_step',		'1' );
 

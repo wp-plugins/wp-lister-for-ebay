@@ -87,7 +87,8 @@ WPLE.ProfileSelector = function () {
         // show jobs window
         // var tbHeight = tb_getPageSize()[1] - 160;
         // var tbURL = "#TB_inline?height="+tbHeight+"&width=500&modal=true&inlineId=wple_profile_selector_window_container"; 
-        var tbURL = ajaxurl + "?action=wple_show_profile_selection&width=640&height=420"; 
+        // var tbURL = ajaxurl + "?action=wple_show_profile_selection&width=640&height=420"; // width parameter causes 404 error on some themes
+        var tbURL = ajaxurl + "?action=wple_show_profile_selection"; 
 
         // jQuery('#wple_jobs_log').html('').css('height', tbHeight - 130 );
         // jQuery('#wple_jobs_title').html( title );

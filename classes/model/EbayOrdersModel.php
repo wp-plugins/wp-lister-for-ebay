@@ -189,14 +189,14 @@ class EbayOrdersModel extends WPL_Model {
 	// 	}
 	// }
 
-	// function handlePaginationResultType( $type, & $Detail ) {
+	// function handlePaginationResultType( $type, $Detail ) {
 	// 	//#type $Detail PaginationResultType
 	// 	$this->total_pages = $Detail->TotalNumberOfPages;
 	// 	$this->total_items = $Detail->TotalNumberOfEntries;
 	// 	$this->logger->info( 'handlePaginationResultType()'.print_r( $Detail, 1 ) );
 	// }
 
-	function handleOrderType( $type, & $Detail ) {
+	function handleOrderType( $type, $Detail ) {
 		//global $wpdb;
 		//#type $Detail OrderType
 		// $this->logger->info( 'handleOrderType()'.print_r( $Detail, 1 ) );
@@ -351,8 +351,8 @@ class EbayOrdersModel extends WPL_Model {
 
 
 		// mark listing as sold when last item is sold - unless Out Of Stock Control (oosc) is enabled
-		$lm = new ListingsModel();
-        if ( ! $lm->thisAccountUsesOutOfStockControl( $data['account_id'] ) ) {
+		// $lm = new ListingsModel();
+        if ( ! ListingsModel::thisAccountUsesOutOfStockControl( $data['account_id'] ) ) {
 			if ( $quantity_sold == $quantity_total ) {
 				$wpdb->update( $wpdb->prefix.'ebay_auctions', 
 					array( 'status' => 'sold', 'date_finished' => $data['date_created'], ), 
@@ -614,13 +614,13 @@ class EbayOrdersModel extends WPL_Model {
 
 	function getAll() {
 		global $wpdb;
-		$profiles = $wpdb->get_results( "
+		$items = $wpdb->get_results( "
 			SELECT *
 			FROM $this->tablename
 			ORDER BY id DESC
 		", ARRAY_A );
 
-		return $profiles;
+		return $items;
 	}
 
 	function getItem( $id ) {

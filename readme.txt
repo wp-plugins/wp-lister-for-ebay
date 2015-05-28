@@ -82,9 +82,9 @@ No, and there are no plans on adding support for IIS.
 
 Yes, there are! Please check out our growing knowledgebase at http://www.wplab.com/plugins/wp-lister/faq/
 
-= What about for WP-Lister for Amazon? =
+= Is there a WP-Lister for Amazon? =
 
-WP-Lister for Amazon is currently in beta. You are welcome to follow the development on wplab.com - a free version on wordpress.org should follow later this year.
+Yes, there is. WP-Lister for Amazon is currently in beta and we still have to work on the documentation, but you are welcome to give it a try: https://wordpress.org/plugins/wp-lister-for-amazon/
 
 == Screenshots ==
 
@@ -92,6 +92,71 @@ WP-Lister for Amazon is currently in beta. You are welcome to follow the develop
 2. Profile Editor
 
 == Changelog ==
+= 2.0.9 =
+* automatically detect whether the Out Of Stock Control option is enabled when updating an eBay account
+* ignore Out Of Stock Control preference when processing non-GTC listings
+
+= 2.0.8.12 =
+* added option to set eBay Store Categories directly on edit product page
+* added option to exclude specific variation attribute values (like colors) from being listed on eBay
+* improved recommended item specifics - fetch up to 15 names and 250 values per name from eBay
+* use HTTP POST to contact update server (fix connection error on pantheon.io)
+
+= 2.0.8.11 =
+* added cancel button to progress window
+* increased HTTP timeout for uploading images to EPS to 300s
+* trigger WooCommerce webhook order.created when creating orders
+* fixed wrong quantity being sent to eBay when revising locked items with sales (since 2.0.8.10)
+* fixed issue with woocommerce-advanced-bulk-edit
+* fixed issue with product titles longer than 255 characters (eBay limit is 80 characters)
+
+= 2.0.8.10 =
+* fixed negative or incorrect quantity in listings table after updating product - should fix a rare sync issue as well
+* fixed previous ItemID not being added to history when item was relisted
+* fixed negative quantity in listings table after revising inventory status
+* fixed end date column for relisted items - use date_finished only for ended items
+
+= 2.0.8.9 =
+* added option to enter EAN on edit product page
+* fixed processing product updates triggered via the WooCommerce REST API
+* fixed profile price modifier being ignored when revising locked variable listings
+* fixed cost of goods integration
+* fixed previous ItemID not being added to history when item was relisted
+* ignore ReservedPrice on fixed price items - prevent Error 82
+* use eBay API version 919
+
+= 2.0.8.8 =
+* implemented support for WooCommerce variation attribute sort order
+* split variations use actual variation weight and dimensions (instead of using parent weight and dimensions)
+* improved eBay category section on edit product page - show eBay and store categories defined by listing profile
+* sanitize prices entered on edit product page - convert decimal comma to decimal point
+* only show products in stock when filtering for products Not on eBay
+* added bulk action to clear EPS cache for selected items (to force re-upload on next revise request)
+* show errors for failed CompleteSale requests on top of order details page
+* improved order meta box - show status for "marked as shipped" and "feedback left"
+* added action hook wple_complete_sale_on_ebay - allow other plugins to call CompleteSale request with tracking information
+* get notified when MCF order was shipped via FBA - submit tracking information to eBay
+
+= 2.0.8.7 =
+* added listing duration options (14 and 28 days)
+* show gallery status warnings on published items only
+* database upgrade to version 44 - change seller profile columns to MEDIUMTEXT
+* improved EPS upload - and added developer option to enable active transfer mode
+* improved order filter views (on eBay/not on eBay) - fixed issue where 3000+ eBay orders would cause an empty result
+* fixed issue combining listing filter views
+* fixed tax amount in created orders not being based on tax rate from listing profile
+* fixed empty VAT / GST column in WooCommerce orders
+* fixed "More than one Item Specifics value provided" warning on split variations - use the right attribute value instead of all values
+
+= 2.0.8.6 =
+* improved displaying errors and warnings on listings page
+* renamed Cross Border Trade to International Site Visibility
+* fixed pagination on WordPress 4.2
+
+= 2.0.8.5 =
+* fixed templates page on WordPress 4.2
+* fixed log page on WordPress 4.2
+
 = 2.0.8.4 =
 * added search box on profiles page
 * added method ListingsModel::updateWhere()

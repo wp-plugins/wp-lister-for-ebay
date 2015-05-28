@@ -176,7 +176,7 @@ class EbayMessagesModel extends WPL_Model {
 		}
 	}
 
-	function handleMyMessagesMessageType( $type, & $Detail ) {
+	function handleMyMessagesMessageType( $type, $Detail ) {
 		//global $wpdb;
 		//#type $Detail MyMessagesMessageType
 		// $this->logger->info( 'handleMyMessagesMessageType()'.print_r( $Detail, 1 ) );
@@ -448,7 +448,7 @@ class EbayMessagesModel extends WPL_Model {
 		$total_items = $wpdb->get_var("
 			SELECT COUNT( id ) AS total_items
 			FROM $this->tablename
-			WHERE NOT flag_read = 1
+			WHERE flag_read <> 1
 		");
 		$summary->Unread = $total_items;
 
@@ -483,7 +483,7 @@ class EbayMessagesModel extends WPL_Model {
 			$where_sql .= "AND flag_read = 1 ";
 		} 
 		if ( $message_status == 'Unread' ) {
-			$where_sql .= "AND NOT flag_read = 1 ";
+			$where_sql .= "AND flag_read <> 1 ";
 		} 
 
         // filter search_query

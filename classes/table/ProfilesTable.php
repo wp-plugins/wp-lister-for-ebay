@@ -78,6 +78,7 @@ class ProfilesTable extends WP_List_Table {
                 if ( $item[$column_name] == 'ClassifiedAd' ) $type = __('Classified Ad','wplister');
                 return $type;
             case 'listing_duration':
+                if ( 'GTC' == $item['listing_duration'] ) return '<span style="color:silver">'.$item['listing_duration'].'</span>';
                 return str_replace('Days_','',$item[$column_name]) .' '. __('days','wplister');
             case 'price':
                 return $item['details']->start_price;

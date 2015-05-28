@@ -1,6 +1,15 @@
 <?php 
-// $Id: EbatNs_Session.php,v 1.4 2008-06-09 10:29:36 michael Exp $
+// $Id: EbatNs_Session.php,v 1.1.2.2 2015-01-09 15:30:04 michaelcoslar Exp $
 // $Log: EbatNs_Session.php,v $
+// Revision 1.1.2.2  2015-01-09 15:30:04  michaelcoslar
+// added handling for OAuth as authentication type
+//
+// Revision 1.1.2.1  2015-01-09 09:50:27  michaelcoslar
+// initial checkin
+//
+// Revision 1.2  2013-04-05 11:15:55  thomasbiniasch
+// bugfixes and template updates, first running version milestone!
+//
 // Revision 1.4  2008-06-09 10:29:36  michael
 // *** empty log message ***
 //
@@ -455,6 +464,28 @@ class EbatNs_Session {
     $this->_props['TokenUsePickupFile'] = $value;
   }
   /**
+   * Read accessor of AuthType.
+   * 
+   * @access public 
+   * @return string Value of the AuthType property
+   */
+  function getAuthType()
+  {
+    return $this->_props['AuthType'];
+  }
+  /**
+   * Write accessor of AuthType.
+   * EBAY_AUTHTYPE_AUTHNAUTH = authnauth
+   * EBAY_AUTHTYPE_OAUTH = oauth
+   * @access public 
+   * @param string $value The new value for the AuthType property
+   * @return void 
+   */
+  function setAuthType($value)
+  {
+    $this->_props['AuthType'] = $value;
+  }
+  /**
    * Read accessor of ApiUrl.
    * returns the API Url
    * 
@@ -852,6 +883,7 @@ class EbatNs_Session {
     $this->_props['TokenMode'] = false;
     $this->_props['TokenPickupFile'] = EBAY_NOTHING;
     $this->_props['TokenUsePickupFile'] = false;
+    $this->_props['AuthType'] = EBAY_AUTHTYPE_AUTHNAUTH;
     $this->_props['ApiUrl'] = EBAY_NOTHING;
     $this->_props['AppMode'] = EBAY_NOTHING;
     $this->_props['PageSize'] = 200;
@@ -876,7 +908,7 @@ class EbatNs_Session {
    */
   function InitFromConfig($configFile)
   {
-    $cfg = parse_ini_file($configFile);
+  	$cfg = is_array($configFile) ? $configFile : parse_ini_file($configFile);
     if ($cfg == false) {
       $this->LogMsg("config file not found", 0, E_ERROR);
     }
@@ -907,6 +939,8 @@ class EbatNs_Session {
         $this->setTokenUsePickupFile(true);
       }
     }
+    if (isset($cfg['auth-type']))
+        $this->setAuthType($cfg['auth-type']);
     // only utf-8 encoding is allowed !!!
     $this->setXmlEncoding(0);
     if (isset($cfg['error-language'])) {

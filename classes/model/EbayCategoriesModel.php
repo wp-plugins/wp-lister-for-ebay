@@ -196,7 +196,7 @@ class EbayCategoriesModel extends WPL_Model {
 		// }
 	}
 	
-	function storeCategory($type, & $Category)
+	function storeCategory( $type, $Category )
 	{
 		global $wpdb;
 		
@@ -260,7 +260,7 @@ class EbayCategoriesModel extends WPL_Model {
 	}
 		
 	
-	function handleStoreCategory( & $Category, $level, $parent_cat_id )
+	function handleStoreCategory( $Category, $level, $parent_cat_id )
 	{
 		global $wpdb;
 		if ( $level > 5 ) return false;		
@@ -341,10 +341,11 @@ class EbayCategoriesModel extends WPL_Model {
 		$req = new GetCategorySpecificsRequestType();
 		$req->setCategoryID( $category_id );
 		$req->setDetailLevel( 'ReturnAll' );
+		$req->setMaxNames( 15 ); 			// eBay default is 10 - maximum is 30
+		$req->setMaxValuesPerName( 250 ); 	// eBay default is 25 - no maximum
 		
 		$res = $this->_cs->GetCategorySpecifics($req);
 		$this->logger->info('getCategorySpecifics() for category ID '.$category_id);
-		// $this->logger->info('getCategorySpecifics: '.print_r($res,1));
 
 		// $specifics as array
 		// if (!isset($res->Category[0]->ConditionValues->Condition)) return null;
@@ -363,7 +364,6 @@ class EbayCategoriesModel extends WPL_Model {
 				}
 			}
 
-			#$specifics[$Recommendation->Name] = $new_specs;
 			$specifics[] = $new_specs;
 		}
 		$this->logger->info('getCategorySpecifics: '.print_r($specifics,1));
@@ -484,6 +484,39 @@ class EbayCategoriesModel extends WPL_Model {
 			ORDER BY `order` ASC
 		", $id, $account_id 
 		), ARRAY_A);		
+
+		return $items;		
+	}
+
+	// recursive method to get entire store category tree
+	static function getEntireStoreCategoryTree( $id, $account_id ) {		
+
+		// get account
+		$accounts = WPLE()->accounts;
+		$account  = isset( $accounts[ $account_id ] ) ? $accounts[ $account_id ] : false;
+		if ( ! $account ) die('Invalid account!');
+
+		// get StoreURL for account
+		$user_details = maybe_unserialize( $account->user_details );
+		$StoreURL     = $user_details->StoreURL;
+
+		$items = self::getChildrenOfStoreCategory( $id, $account_id );
+		foreach ( $items as &$item ) {
+
+			// add store url
+			$item['url'] = $StoreURL . '/?_fsub=' . $item['cat_id'];
+
+			// these should be left out when returning JSON
+			unset( $item['parent_cat_id'] );
+			unset( $item['wp_term_id'] );
+			unset( $item['version'] );
+			unset( $item['site_id'] );
+			unset( $item['account_id'] );
+
+			if ( $item['leaf']      ) continue;
+			if ( $item['level'] > 5 ) continue;
+			$item['children'] = self::getEntireStoreCategoryTree( $item['cat_id'], $account_id );
+		}
 
 		return $items;		
 	}

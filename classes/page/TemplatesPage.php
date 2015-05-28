@@ -19,8 +19,6 @@ class TemplatesPage extends WPL_Page {
 		add_action('wp_ajax_wpl_duplicate_template', array( &$this, 'ajax_wpl_duplicate_template' ));
 
 		add_action('wp_ajax_wpl_get_tpl_css', array( &$this, 'ajax_wpl_get_tpl_css' ));
-
-		$this->handleSubmitOnInit();
 	}
 
 	public function onWpAdminMenu() {
@@ -44,7 +42,9 @@ class TemplatesPage extends WPL_Page {
 
 	}
 
-	public function handleSubmitOnInit() {
+	// handle save template action
+	// this needs to be called after WooCommerce initialized its post types, but before the first byte is sent
+	public function onWpAdminInit() {
 
 		// handle save template
 		if ( $this->requestAction() == 'save_template' ) {
@@ -455,7 +455,12 @@ class TemplatesPage extends WPL_Page {
 	    	// extract zip archive
 	        $return = unzip_file($saved_file_location, $target);
 			if ( is_wp_error($return) ) {
-				$this->showMessage( __('There was a problem while extracting the archive:','wplister') .' '. $return->get_error_message(), 1 ) ;				
+				$msg  = __('There was a problem while extracting the archive:','wplister') . '<br><br>';
+				$msg .= 'WordPress said:     '. $return->get_error_message() . '<br><br>';
+				$msg .= 'archive location:   '. $saved_file_location . '<br>';
+				$msg .= 'destination folder: '. $target . '<br>';
+				$this->showMessage( $msg, 1 ) ;				
+				// echo "<pre>";print_r($return);echo"</pre>";#die();
 			} else {
 				$this->showMessage( __('Your listing template was uploaded and installed.','wplister') );				
 			}
@@ -479,6 +484,7 @@ class TemplatesPage extends WPL_Page {
 
 	private function downloadTemplate() {
 		if ( ! current_user_can( 'manage_ebay_options' ) || ! check_admin_referer( 'wple_templates_page' ) ) return false;
+		if ( ! class_exists('ZipArchive') ) die('Error: Class "ZipArchive" does not exist. To download a listing template, your server requires the PHP zip extension.');
 
 		// set templates root folder
 		$upload_dir = wp_upload_dir();

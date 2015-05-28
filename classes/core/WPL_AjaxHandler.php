@@ -32,6 +32,10 @@ class WPL_AjaxHandler extends WPL_Core {
 		add_action('wp_ajax_wpl_gallery', array( &$this, 'ajax_wpl_gallery' ) );
 		add_action('wp_ajax_nopriv_wpl_gallery', array( &$this, 'ajax_wpl_gallery' ) );
 
+		// handle request for eBay store categories (JSON)
+		add_action('wp_ajax_wpl_ebay_store_categories', array( &$this, 'ajax_wpl_ebay_store_categories' ) );
+		add_action('wp_ajax_nopriv_wpl_ebay_store_categories', array( &$this, 'ajax_wpl_ebay_store_categories' ) );
+
 		// handle incoming ebay notifications
 		add_action('wp_ajax_handle_ebay_notify', array( &$this, 'ajax_handle_ebay_notify' ) );
 		add_action('wp_ajax_nopriv_handle_ebay_notify', array( &$this, 'ajax_handle_ebay_notify' ) );
@@ -1076,7 +1080,22 @@ class WPL_AjaxHandler extends WPL_Core {
 			echo "file not found: ".$view;
 		}
 		exit();
-	}
+	} // ajax_wpl_gallery()
+
+
+	// show dynamic listing gallery
+	public function ajax_wpl_ebay_store_categories() {
+	
+		$default_account_id = get_option( 'wplister_default_account_id' );
+		$account_id         = isset( $_REQUEST['account_id'] ) ? intval($_REQUEST['account_id']) : $default_account_id;	
+
+		$store_categories = EbayCategoriesModel::getEntireStoreCategoryTree( 0, $account_id );
+
+		header('content-type: application/json; charset=utf-8');
+		echo json_encode( $store_categories );
+		exit();
+	} // ajax_wpl_ebay_store_categories()
+
 
 	// handle calls to logfile viewer based on php-tail
 	// http://code.google.com/p/php-tail

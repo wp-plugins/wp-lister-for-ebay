@@ -1,8 +1,14 @@
 <?php
-// $Id: EbatNs_Client.php,v 1.16 2013-04-08 10:27:42 thomasbiniasch Exp $
+// $Id: EbatNs_Client.php,v 1.1.2.2 2015-01-09 15:30:05 michaelcoslar Exp $
 // $Log: EbatNs_Client.php,v $
-// Revision 1.16  2013-04-08 10:27:42  thomasbiniasch
-// small improvments for php 5.4
+// Revision 1.1.2.2  2015-01-09 15:30:05  michaelcoslar
+// added handling for OAuth as authentication type
+//
+// Revision 1.1.2.1  2015-01-09 09:51:08  michaelcoslar
+// initial checkin
+//
+// Revision 1.2  2013-04-05 11:15:57  thomasbiniasch
+// bugfixes and template updates, first running version milestone!
 //
 // Revision 1.15  2013-04-02 13:33:12  carstenharnisch
 // fixed problem with > PHP 5.4, regarding call-time pass-by-reference
@@ -36,17 +42,20 @@
 //
 // Revision 1.3  2008/05/28 16:53:18  michael
 // fixed and moved method getErrorsToString() to Client
-//
+//	
 // Revision 1.2  2008/05/02 15:04:05  carsten
 // Initial, PHP5
 //
 //
 require_once 'UserIdPasswordType.php';
+
 require_once 'EbatNs_RequesterCredentialType.php';
 require_once 'EbatNs_RequestHeaderType.php';
 require_once 'EbatNs_ResponseError.php';
 require_once 'EbatNs_ResponseParser.php';
+
 require_once 'EbatNs_DataConverter.php';
+
 class EbatNs_Client
 { 
 	// endpoint for call
@@ -66,9 +75,14 @@ class EbatNs_Client
 	protected $_paginationElementCounter = 0;
 	protected $_paginationMaxElements = -1;
 	
-	protected $_transportOptions = array();
+    // ***** BEGIN EBATNS PATCH *****
+	// protected $_transportOptions = array();
+	public    $_transportOptions = array(); // made public for ListingsModel::sendMessageXmlStyle()
+    // ***** END EBATNS PATCH *****
+
 	protected $_loggingOptions   = array();
 	protected $_callUsage = array();
+
 	//
 	// timepoint-tracing
 	//
@@ -126,6 +140,7 @@ class EbatNs_Client
 	        return null;
         
 	    $this->_startTp('executeBatchOperation');
+
 	    // lets execute the batch-operation
 	    $running = null;
 	    do {
@@ -172,6 +187,7 @@ class EbatNs_Client
     		} 
     		curl_multi_remove_handle($this->mh, $ch);
         }
+
         curl_multi_close($this->mh);
         $this->chMultiHandles = array();
         $this->resultMethods = array();
@@ -378,7 +394,8 @@ class EbatNs_Client
 			{
 				if ( is_object( $callback['object'] ) )
 				{
-					return call_user_method( $callback['method'], $callback['object'], $typeName, $value, $mapName, $this );
+					//return call_user_method( $callback['method'], $callback['object'], $typeName, $value, $mapName, $this );
+					return call_user_func(array($callback['object'], $callback['method']), $typeName, $value, $mapName, $this );
 				} 
 				else
 				{
@@ -429,7 +446,11 @@ class EbatNs_Client
 		} 
 		
 		$header = new EbatNs_RequestHeaderType();
-		$header->setRequesterCredentials($reqCred);
+
+		if ($this->_session->getTokenMode() == 0 || $this->_session->getAuthType() == EBAY_AUTHTYPE_AUTHNAUTH)
+		{
+			$header->setRequesterCredentials($reqCred);
+		}
 		
 		return $header;
 	} 
@@ -582,6 +603,11 @@ class EbatNs_Client
 		}
 		$reqHeaders[] = 'SOAPAction: "' . $soapaction . '"';
 		
+		if ( $this->_session->getTokenMode() == 1 && $this->_session->getAuthType() == EBAY_AUTHTYPE_OAUTH )
+		{
+			$reqHeaders[] = 'X-EBAY-API-IAF-TOKEN: ' . $this->_session->getRequestToken();
+		}
+		
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, $reqHeaders );
 		curl_setopt( $ch, CURLOPT_USERAGENT, 'ebatns;1.0' );
@@ -594,6 +620,14 @@ class EbatNs_Client
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt( $ch, CURLOPT_HEADER, 1 );
 		curl_setopt( $ch, CURLOPT_HTTP_VERSION, 1 );
+
+        // ***** BEGIN EBATNS PATCH *****
+        // regard WP proxy server
+        if ( defined('WP_USEPROXY') && WP_USEPROXY ) {
+            if ( defined('WP_PROXY_HOST') && defined('WP_PROXY_PORT') )
+				curl_setopt( $ch, CURLOPT_PROXY, WP_PROXY_HOST . ':' . WP_PROXY_PORT );
+        }
+        // ***** END EBATNS PATCH *****	
 		
 		// added support for multi-threaded clients
 		if (isset($this->_transportOptions['HTTP_CURL_MULTITHREADED']))
@@ -631,7 +665,9 @@ class EbatNs_Client
 		{
 			$this->_currentResult = new EbatNs_ResponseError();
 			$this->_currentResult->raise( 'curl_error ' . curl_errno( $ch ) . ' ' . curl_error( $ch ), 80000 + 1, EBAT_SEVERITY_ERROR );
+	        // ***** BEGIN EBATNS PATCH *****
             $this->log( curl_error( $ch ), 'curl_error' );
+	        // ***** END EBATNS PATCH *****
 			curl_close( $ch );
 			
 			return null;
@@ -674,6 +710,7 @@ class EbatNs_Client
 			$ep = 'http://open.api.ebay.com/shopping';
 		
 		$this->_incrementApiUsage($method);
+
 		// place all data into theirs header
 		$reqHeaders[] = 'X-EBAY-API-VERSION: ' . $this->getVersion();
 		$reqHeaders[] = 'X-EBAY-API-APP-ID: ' . $this->_session->getAppId();
@@ -740,6 +777,7 @@ class EbatNs_Client
 			return $responseBody;
 		}
 	}
+
 	function sendMessageShoppingApiStyle( $message, $extraXmlHeaders )
 	{
 		$this->_currentResult = null;
@@ -792,6 +830,14 @@ class EbatNs_Client
 		curl_setopt( $ch, CURLOPT_HEADER, 1 );
 		curl_setopt( $ch, CURLOPT_HTTP_VERSION, 1 );
 		
+        // ***** BEGIN EBATNS PATCH *****
+        // regard WP proxy server
+        if ( defined('WP_USEPROXY') && WP_USEPROXY ) {
+            if ( defined('WP_PROXY_HOST') && defined('WP_PROXY_PORT') )
+				curl_setopt( $ch, CURLOPT_PROXY, WP_PROXY_HOST . ':' . WP_PROXY_PORT );
+        }
+        // ***** END EBATNS PATCH *****	
+
 		// added support for multi-threaded clients
 		if (isset($this->_transportOptions['HTTP_CURL_MULTITHREADED']))
 		{
@@ -804,6 +850,9 @@ class EbatNs_Client
 		{
 			$this->_currentResult = new EbatNs_ResponseError();
 			$this->_currentResult->raise( 'curl_error ' . curl_errno( $ch ) . ' ' . curl_error( $ch ), 80000 + 1, EBAT_SEVERITY_ERROR );
+	        // ***** BEGIN EBATNS PATCH *****
+            $this->log( curl_error( $ch ), 'curl_error' );
+	        // ***** END EBATNS PATCH *****
 			curl_close( $ch );
 			
 			return null;
@@ -837,16 +886,17 @@ class EbatNs_Client
 		
 		return $responseBody;
 	} 
+
 	function callXmlStyle( $method, $request, $parseMode = EBATNS_PARSEMODE_CALL )
 	{
-		// Inject the Credentials into the request here !
-		$request->_elements['RequesterCredentials'] = 
-		    array(
-				'required' => false,
-				'type' => 'EbatNs_RequesterCredentialType',
-				'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
-				'array' => false,
-				'cardinality' => '0..1');
+		$request->addMetaDataElement('RequesterCredentials',
+           		array(
+               		'required' => false,
+               		'type' => 'EbatNs_RequesterCredentialType',
+               		'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
+              		'array' => false,
+              		'cardinality' => '0..1')
+      		 );
 		
 		$reqCred = new EbatNs_RequesterCredentialType();
 		if ( $this->_session->getTokenMode() == 0 )
@@ -857,10 +907,14 @@ class EbatNs_Client
 			$reqCred->Credentials = $cred;
 		} 
 		
-		if ( $this->_session->getTokenMode() == 1 )
+		if ( $this->_session->getTokenMode() == 1)
 		{
 			$this->_session->ReadTokenFile();
-			$reqCred->setEBayAuthToken($this->_session->getRequestToken());
+			
+			if ($this->_session->getAuthType() == EBAY_AUTHTYPE_AUTHNAUTH)
+			{
+				$reqCred->setEBayAuthToken($this->_session->getRequestToken());
+			}
 		} 
 		
 		$request->RequesterCredentials = $reqCred;
@@ -878,6 +932,11 @@ class EbatNs_Client
 		$reqHeaders[] = 'X-EBAY-API-CERT-NAME: ' . $this->_session->getCertId();
 		$reqHeaders[] = 'X-EBAY-API-CALL-NAME: ' . $method;
 		$reqHeaders[] = 'X-EBAY-API-SITEID: ' . $this->_session->getSiteId();
+		
+		if ($this->_session->getAuthType() == EBAY_AUTHTYPE_OAUTH)
+		{
+			$reqHeaders[] = 'X-EBAY-API-IAF-TOKEN: ' . $this->_session->getRequestToken();
+		}
 		
 		$multiPartData = null;
 		if ($method == 'UploadSiteHostedPictures')
@@ -986,6 +1045,14 @@ class EbatNs_Client
 		curl_setopt( $ch, CURLOPT_HEADER, 1 );
 		curl_setopt( $ch, CURLOPT_HTTP_VERSION, 1 );
 		
+        // ***** BEGIN EBATNS PATCH *****
+        // regard WP proxy server
+        if ( defined('WP_USEPROXY') && WP_USEPROXY ) {
+            if ( defined('WP_PROXY_HOST') && defined('WP_PROXY_PORT') )
+				curl_setopt( $ch, CURLOPT_PROXY, WP_PROXY_HOST . ':' . WP_PROXY_PORT );
+        }
+        // ***** END EBATNS PATCH *****	
+
 		// added support for multi-threaded clients
 		if (isset($this->_transportOptions['HTTP_CURL_MULTITHREADED']))
 		{
@@ -998,7 +1065,9 @@ class EbatNs_Client
 		{
 			$this->_currentResult = new EbatNs_ResponseError();
 			$this->_currentResult->raise( 'curl_error ' . curl_errno( $ch ) . ' ' . curl_error( $ch ), 80000 + 1, EBAT_SEVERITY_ERROR );
+	        // ***** BEGIN EBATNS PATCH *****
             $this->log( curl_error( $ch ), 'curl_error' );
+	        // ***** END EBATNS PATCH *****
 			curl_close( $ch );
 			
 			return null;
@@ -1021,6 +1090,7 @@ class EbatNs_Client
 				),
 				$responseRaw
 			);
+
 			$responseBody = null;
 			if ( preg_match( "/^(.*?)\r?\n\r?\n(.*)/s", $responseRaw, $match ) )
 			{
@@ -1082,6 +1152,7 @@ class EbatNs_Client
 		if (count($response->getErrors()))
 			foreach ($response->getErrors() as $errorEle)
 				$errmsg .= '#' . $errorEle->getErrorCode() . ' : ' . ($asHtml ? htmlentities($errorEle->getLongMessage()) :  $errorEle->getLongMessage()) . ($asHtml ? "<br>" : "\r\n");
+
 		if ($addSlashes)
 			return addslashes($errmsg);
 		else   
@@ -1091,6 +1162,7 @@ class EbatNs_Client
 	public function addSelectorModel($callName, $selectorModel, $active)
 	{
 		$this->_selectorModels[$selectorModel->getName()][$callName] = $selectorModel;
+
 		if ($active)
 		{
 			$this->setActiveSelectorModel($selectorModel->getName());
@@ -1100,6 +1172,7 @@ class EbatNs_Client
 	public function setActiveSelectorModel($selectorName)
 	{
 		$this->_activeSelectorModel = $selectorName;
+
 		foreach($this->_selectorModels as $selectorModel)
 		{
 			foreach($selectorModel as $selectorModelCall)
@@ -1111,6 +1184,7 @@ class EbatNs_Client
 			}
 		}
 	}
+
 	public function getSession()
 	{
 		return $this->_session;

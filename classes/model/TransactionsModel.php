@@ -189,7 +189,7 @@ class TransactionsModel extends WPL_Model {
 		}
 	}
 
-	function handlePaginationResultType( $type, & $Detail ) {
+	function handlePaginationResultType( $type, $Detail ) {
 		//#type $Detail PaginationResultType
 		$this->total_pages = $Detail->TotalNumberOfPages;
 		$this->total_items = $Detail->TotalNumberOfEntries;
@@ -197,7 +197,7 @@ class TransactionsModel extends WPL_Model {
 	}
 
 	// deprecated - only createTransactionFromEbayOrder() is used now
-	function handleTransactionType( $type, & $Detail ) {
+	function handleTransactionType( $type, $Detail ) {
 		//global $wpdb;
 		//#type $Detail TransactionType
 		$this->logger->debug( 'handleTransactionType()'.print_r( $Detail, 1 ) );
@@ -735,7 +735,7 @@ class TransactionsModel extends WPL_Model {
 		$items = $wpdb->get_results("
 			SELECT transaction_id, COUNT(*) c
 			FROM $this->tablename
-			WHERE status IS NULL OR NOT status = 'reverted'
+			WHERE status IS NULL OR status <> 'reverted'
 			GROUP BY transaction_id 
 			HAVING c > 1
 		", OBJECT_K);		

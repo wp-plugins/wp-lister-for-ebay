@@ -71,6 +71,28 @@ class ToolsPage extends WPL_Page {
 				return;
 			}
 
+			// custom debug code
+			if ( $_REQUEST['action'] == 'wple_debug_1') {				
+				global $wpdb;
+
+				$post_title = 'this string is 256 characters long - which is 1 too many........................................................................................................................................................................................................';
+				// $post_title = 'TEST';
+
+				$data = array();
+				$data['auction_title'] = $post_title;
+				$data['status']        = 'TEST';
+
+				$table = $wpdb->prefix . 'ebay_auctions';
+				$result = $wpdb->insert( $table, $data );
+
+				echo "<pre>result: ";print_r($result);echo"</pre>";#die();
+				echo "<pre>length: ";print_r(strlen($post_title));echo"</pre>";#die();
+				echo "<pre>insert_id: ";print_r($wpdb->insert_id);echo"</pre>";#die();
+				echo "<pre>last query: ";print_r($wpdb->last_query);echo"</pre>";#die();
+
+				return;
+			}
+
 			// check nonce
 			if ( check_admin_referer( 'e2e_tools_page' ) ) {
 
@@ -185,6 +207,11 @@ class ToolsPage extends WPL_Page {
 				// check_missing_ebay_transactions
 				if ( $_REQUEST['action'] == 'check_missing_ebay_transactions') {				
 					$this->checkTransactions( true );
+				}
+
+				// fix_cog_on_imported_orders
+				if ( $_REQUEST['action'] == 'fix_cog_on_imported_orders') {				
+					$this->fixCostOfGoods();
 				}
 
 				// lock_all_listings
@@ -399,6 +426,44 @@ class ToolsPage extends WPL_Page {
 	    // wp_enqueue_script ( 'jquery-ui-dialog' ); 
 
 	} // onWpEnqueueScripts
+
+
+
+	// create missing COG data eBay orders
+	public function fixCostOfGoods() {
+
+		$om = new EbayOrdersModel();
+		$orders = $om->getAll();
+		// echo "<pre>";print_r($orders);echo"</pre>";#die();
+
+		$updated_orders = 0;
+
+		// loop orders
+		foreach ($orders as $order) {
+
+			$post_id = $order['post_id'];
+			if ( ! $post_id ) continue;
+
+			// check if order exist - prevent fatal error in WC_COG::set_order_item_cost_meta()
+			$_order = wc_get_order( $post_id );
+			if ( ! $_order ) continue;
+
+			// skip orders with existing cog data
+			if ( get_post_meta( $post_id, '_wc_cog_order_total_cost', true ) ) continue;
+
+
+			// trigger COG update
+			do_action( 'wplister_after_create_order', $post_id );
+			// WC_COG::set_order_item_cost_meta( $post_id ); // might work as well...
+
+			$updated_orders++;
+		}
+
+
+		$msg = $updated_orders . ' orders were updated.<br><br>';
+		wple_show_message( $msg );
+
+	} // fixCostOfGoods
 
 
 

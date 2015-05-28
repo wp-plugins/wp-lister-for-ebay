@@ -308,7 +308,21 @@ class ProductWrapper {
 		$wpl_logger->info('addons:'.print_r($options,1));
 
 		return $options;
-	}	
+	}
+
+	// sort variation attributes according to _product_attributes post meta field
+	static function sortVariationAttributes( $variation_attributes, $_product_attributes ) {
+		if ( empty($_product_attributes) ) return $variation_attributes;
+
+		$attributes = array();
+		foreach ( $_product_attributes as $term_key => $product_attribute ) {
+			if ( isset( $variation_attributes['attribute_'.$term_key] ) ) {
+				$attributes['attribute_'.$term_key] = $variation_attributes['attribute_'.$term_key];
+			}
+		}
+
+		return $attributes;
+	} // sortVariationAttributes()
 
 	// get all product variations
 	static function getVariations( $post_id ) {
@@ -396,6 +410,12 @@ class ProductWrapper {
 			$newvar = array();
 			$newvar['post_id'] = $var_id;
 			// $newvar['term_id'] = $var->term_id;
+
+			// sort variation attributes according to _product_attributes
+			if ( sizeof( $var['attributes'] ) > 1 ) {
+				$_product_attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
+				$var['attributes']   = self::sortVariationAttributes( $var['attributes'], $_product_attributes );
+			}		
 			
 			$attributes = $var['attributes'];
 			$newvar['variation_attributes'] = array();
@@ -454,7 +474,21 @@ class ProductWrapper {
 
 			}
 			// $newvar['group_name'] = $attribute_labels[ $key ]; #deprecated
-			
+
+			// skip excluded variation attribute values
+			$exclude_variation_values = get_option( 'wplister_exclude_variation_values' );
+			if ( ! empty( $exclude_variation_values ) ) {
+
+				$excluded_values = explode( ',', $exclude_variation_values );
+				$skip_variation  = false;
+
+				foreach( $newvar['variation_attributes'] as $attribute_value ) {
+					if ( in_array( $attribute_value, $excluded_values ) ) $skip_variation = true;
+				}
+				if ( $skip_variation ) continue;
+			}	
+
+
 			$newvar['price']      = self::getPrice( $var_id );
 			$newvar['stock']      = self::getStock( $var_id );
 			$newvar['sku']        = self::getSKU( $var_id );
@@ -519,7 +553,7 @@ class ProductWrapper {
 		} // foreach $available_variations
 		
 
-		// if no default variation was found, make the first on default
+		// if no default variation was found, make the first one default
 		if ( ! $has_default_variation && sizeof($variations) ) {
 			$variations[0]['is_default'] = true;
 		}

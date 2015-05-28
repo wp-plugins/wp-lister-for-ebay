@@ -215,7 +215,7 @@ class SettingsPage extends WPL_Page {
 			'process_shortcodes'            => self::getOption( 'process_shortcodes', 'content' ),
 			'remove_links'                  => self::getOption( 'remove_links', 'default' ),
 			'default_image_size'            => self::getOption( 'default_image_size', 'full' ),
-			'wc2_gallery_fallback'          => self::getOption( 'wc2_gallery_fallback', 'attached' ),
+			'wc2_gallery_fallback'          => self::getOption( 'wc2_gallery_fallback', 'none' ),
 			'gallery_items_limit'        	=> self::getOption( 'gallery_items_limit', 12 ),
 			'hide_dupe_msg'                 => self::getOption( 'hide_dupe_msg' ),
 			'option_uninstall'              => self::getOption( 'uninstall' ),
@@ -233,6 +233,7 @@ class SettingsPage extends WPL_Page {
 			'enable_item_compat_tab'        => self::getOption( 'enable_item_compat_tab', 1 ),
 			'convert_dimensions'        	=> self::getOption( 'convert_dimensions' ),
 			'exclude_attributes'        	=> self::getOption( 'exclude_attributes' ),
+			'exclude_variation_values'      => self::getOption( 'exclude_variation_values' ),
 			'option_local_timezone'         => self::getOption( 'local_timezone', '' ),
 			'text_admin_menu_label'         => self::getOption( 'admin_menu_label', $this->app_name ),
 			'timezones'                     => self::get_timezones(),
@@ -262,6 +263,7 @@ class SettingsPage extends WPL_Page {
 			'log_record_limit'			=> self::getOption( 'log_record_limit', 4096 ),
 			'log_days_limit'			=> self::getOption( 'log_days_limit', 30 ),
 			'xml_formatter'				=> self::getOption( 'xml_formatter', 'default' ),
+			'eps_xfer_mode'				=> self::getOption( 'eps_xfer_mode', 'passive' ),
 			'force_table_items_limit'	=> self::getOption( 'force_table_items_limit' ),
 			'apply_profile_batch_size'	=> self::getOption( 'apply_profile_batch_size', 1000 ),
 			'staging_site_pattern'		=> self::getOption( 'staging_site_pattern', '' ),
@@ -348,6 +350,8 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'disable_sale_price',				$this->getValueFromPost( 'disable_sale_price' ) );
 			self::updateOption( 'api_enable_auto_relist',			$this->getValueFromPost( 'api_enable_auto_relist' ) );
 			self::updateOption( 'auto_update_ended_items',			$this->getValueFromPost( 'auto_update_ended_items' ) );
+
+			self::updateOption( 'exclude_variation_values', 		str_replace( ', ', ',', $this->getValueFromPost( 'exclude_variation_values' ) ) );
 
 			if ( ! defined('WPLISTER_RESELLER_VERSION') ) 
 				self::updateOption( 'admin_menu_label',				$this->getValueFromPost( 'text_admin_menu_label' ) );
@@ -516,6 +520,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'log_record_limit',			$this->getValueFromPost( 'log_record_limit' ) );
 			self::updateOption( 'log_days_limit',			$this->getValueFromPost( 'log_days_limit' ) );
 			self::updateOption( 'xml_formatter',			$this->getValueFromPost( 'xml_formatter' ) );
+			self::updateOption( 'eps_xfer_mode',			$this->getValueFromPost( 'eps_xfer_mode' ) );
 			self::updateOption( 'force_table_items_limit',	$this->getValueFromPost( 'force_table_items_limit' ) );
 			self::updateOption( 'apply_profile_batch_size',	$this->getValueFromPost( 'apply_profile_batch_size' ) );
 			self::updateOption( 'staging_site_pattern',	    trim( $this->getValueFromPost( 'staging_site_pattern' ) ) );

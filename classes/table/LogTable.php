@@ -368,14 +368,14 @@ class LogTable extends WP_List_Table {
     function get_views(){
        $views = array();
        $current = ( !empty($_REQUEST['log_status']) ? $_REQUEST['log_status'] : 'all');
-       $base_url = esc_url( remove_query_arg( array( 'action', 'log', 'log_status' ) ) );
+       $base_url = esc_url_raw( remove_query_arg( array( 'action', 'log', 'log_status' ) ) );
 
        // get status summary
        $summary = $this->getStatusSummary();
 
        // All link
        $class = ($current == 'all' ? ' class="current"' :'');
-       $all_url = esc_url( remove_query_arg( 'log_status', $base_url ) );
+       $all_url = remove_query_arg( 'log_status', $base_url );
        $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
        $views['all'] .= '<span class="count">('.$summary->all_status_count.')</span>';
 
@@ -423,7 +423,7 @@ class LogTable extends WP_List_Table {
         if ( method_exists( $wpdb, 'check_connection') ) $wpdb->check_connection();
 
         // process search query
-        $where_sql = " WHERE NOT callname = '' ";
+        $where_sql = " WHERE callname <> '' ";
         $where_sql = $this->add_searchquery_to_where_sql( $where_sql );
 
         $result = $wpdb->get_results("
@@ -593,7 +593,7 @@ class LogTable extends WP_List_Table {
 
         // handle filters
         // $where_sql = ' WHERE 1 = 1 ';
-        $where_sql = " WHERE NOT callname = '' ";
+        $where_sql = " WHERE callname <> '' ";
 
         // search box
         $where_sql = $this->add_searchquery_to_where_sql( $where_sql );
@@ -623,7 +623,7 @@ class LogTable extends WP_List_Table {
                 if ( $usertype == 'cron' ) {
                     $where_sql .= " AND ( user_id IS NULL OR user_id = '0' ) ";
                 } else {
-                    $where_sql .= " AND ( user_id IS NOT NULL AND NOT user_id = '0' ) ";
+                    $where_sql .= " AND ( user_id IS NOT NULL AND user_id <> '0' ) ";
                 }
             }
         }

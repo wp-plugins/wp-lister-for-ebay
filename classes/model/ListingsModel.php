@@ -39,13 +39,13 @@ class ListingsModel extends WPL_Model {
         // filter listing_status
 		$listing_status = ( isset($_REQUEST['listing_status']) ? esc_sql( $_REQUEST['listing_status'] ) : 'all');
 		if ( ! $listing_status || $listing_status == 'all' ) {
-			$where_sql = "WHERE NOT status = 'archived' ";
+			$where_sql = "WHERE status <> 'archived' ";
 		} elseif ( $listing_status == 'relist' ) {
 			$where_sql = "WHERE ( status = 'ended' OR status = 'sold' ) AND ( quantity - quantity_sold > 0 ) "; 
 		} elseif ( $listing_status == 'autorelist' ) {
 			$where_sql = "WHERE relist_date IS NOT NULL ";
 		} elseif ( $listing_status == 'locked' ) {
-			$where_sql = "WHERE locked = '1' AND NOT status = 'archived' ";
+			$where_sql = "WHERE locked = '1' AND status <> 'archived' ";
 		} else {
 			$where_sql = "WHERE status = '".$listing_status."' ";
 		} 
@@ -241,7 +241,7 @@ class ListingsModel extends WPL_Model {
 			SELECT ebay_id
 			FROM $this->tablename
 			WHERE id         = %s
-			  AND NOT status = 'archived'
+			  AND status <> 'archived'
 		", $id ) );
 		return $item;
 	}
@@ -251,7 +251,7 @@ class ListingsModel extends WPL_Model {
 			SELECT ebay_id
 			FROM $this->tablename
 			WHERE post_id    = %s
-			  AND NOT status = 'archived'
+			  AND status <> 'archived'
 		", $post_id ) );
 		return $item;
 	}
@@ -283,7 +283,7 @@ class ListingsModel extends WPL_Model {
 			SELECT status
 			FROM $this->tablename
 			WHERE post_id = %s
-			  AND NOT status = 'archived'
+			  AND status <> 'archived'
 			ORDER BY id DESC
 		", $post_id ) );
 		return $item;
@@ -294,7 +294,7 @@ class ListingsModel extends WPL_Model {
 			SELECT id
 			FROM $this->tablename
 			WHERE post_id = %s
-			  AND NOT status = 'archived'
+			  AND status <> 'archived'
 			ORDER BY id DESC
 		", $post_id ) );
 		return $item;
@@ -305,7 +305,7 @@ class ListingsModel extends WPL_Model {
 			SELECT *
 			FROM $this->tablename
 			WHERE post_id = %s
-			  AND NOT status = 'archived'
+			  AND status <> 'archived'
 			ORDER BY id DESC
 		", $post_id ) );
 		return $items;
@@ -315,7 +315,7 @@ class ListingsModel extends WPL_Model {
 		$items = $wpdb->get_results( $wpdb->prepare("
 			SELECT *
 			FROM $this->tablename
-			WHERE NOT status = 'archived'
+			WHERE status <> 'archived'
 			  AND ( post_id = %s
 			   OR parent_id = %s )
 			ORDER BY id DESC
@@ -339,7 +339,7 @@ class ListingsModel extends WPL_Model {
 			FROM $this->tablename
 			WHERE post_id    = %s
 			  AND account_id = %s
-			  AND NOT status = 'archived'
+			  AND status <> 'archived'
 			ORDER BY id DESC
 		", $post_id, $account_id ) );
 		return $items;
@@ -350,7 +350,7 @@ class ListingsModel extends WPL_Model {
 			SELECT ViewItemURL
 			FROM $this->tablename
 			WHERE post_id = %s
-			  AND NOT status = 'archived'
+			  AND status <> 'archived'
 			ORDER BY id DESC
 		", $post_id ) );
 		return $item;
@@ -378,7 +378,7 @@ class ListingsModel extends WPL_Model {
 			SELECT COUNT( id ) AS locked
 			FROM $this->tablename
 			WHERE locked = '1'
-			  AND NOT status = 'archived'
+			  AND status <> 'archived'
 		");
 		$summary->locked = $locked;
 
@@ -403,7 +403,7 @@ class ListingsModel extends WPL_Model {
 		$total_items = $wpdb->get_var("
 			SELECT COUNT( id ) AS total_items
 			FROM $this->tablename
-			WHERE NOT status = 'archived'
+			WHERE status <> 'archived'
 		");
 		$summary->total_items = $total_items;
 
@@ -415,7 +415,7 @@ class ListingsModel extends WPL_Model {
 		global $wpdb;
 		$locked = $locked ? 1 : 0;
 
-		$result = $wpdb->query( $wpdb->prepare("UPDATE {$this->tablename} SET locked = %d WHERE NOT status = 'archived' ", $locked ) );
+		$result = $wpdb->query( $wpdb->prepare("UPDATE {$this->tablename} SET locked = %d WHERE status <> 'archived' ", $locked ) );
 		echo $wpdb->last_error;
 		return $result;
 	}
@@ -515,7 +515,7 @@ class ListingsModel extends WPL_Model {
 
             	// check if price or quantity have changed - if told to do so
             	if ( $filter_unchanged ) {
-            		if ( ! $this->checkIfVariationInventoryHasChanged( $pv, $cv ) ) {
+            		if ( ! $this->checkIfVariationInventoryHasChanged( $pv, $cv, $item ) ) {
             			// remove unchanged variations from the list
 	                    unset( $product_variations[ $key ] );
             		}
@@ -595,7 +595,7 @@ class ListingsModel extends WPL_Model {
         return $key;
     } // generateVariationKeyFromAttributes()
 
-    function checkIfVariationInventoryHasChanged( $pv, $cv ) {
+    function checkIfVariationInventoryHasChanged( $pv, $cv, $listing_item ) {
 
         // compare stock level
         if ( $pv['stock'] != $cv['stock'] ) {
@@ -603,6 +603,11 @@ class ListingsModel extends WPL_Model {
             return true;        	
         }
         
+		// apply profile price - if set
+		$profile_details = $listing_item['profile_data']['details'];
+		$profile_price   = $profile_details['start_price'];
+		$pv['price']     = empty( $profile_price )  ?  $pv['price']  :  $this->applyProfilePrice( $pv['price'], $profile_price );
+
         // compare price
         if ( $pv['price'] != $cv['price'] ) {
             $this->logger->info('found changed price for variation: '.$cv['sku'] );
@@ -775,6 +780,7 @@ class ListingsModel extends WPL_Model {
 			}
 
 			$this->logger->info( "Item #$id relisted on ebay, NEW ItemID is ".$res->ItemID );
+			$this->addItemIdToHistory( $res->ItemID, $listing_item['ebay_id'] );
 
 		} // call successful
 		$this->processErrorsAndWarnings( $id, $this->result );
@@ -850,6 +856,7 @@ class ListingsModel extends WPL_Model {
 			}
 
 			$this->logger->info( "Item #$id auto-relisted on ebay, NEW ItemID is ".$res->ItemID );
+			$this->addItemIdToHistory( $res->ItemID, $listing_item['ebay_id'] );
 
 		} // call successful
 		$this->processErrorsAndWarnings( $id, $this->result );
@@ -888,7 +895,7 @@ class ListingsModel extends WPL_Model {
 		}
 
 		// if quantity is zero, end item instead
-		if ( ( $item->Quantity == 0 ) && ( ! $ibm->VariationsHaveStock ) && ( ! $this->thisAccountUsesOutOfStockControl( $listing_item['account_id'] ) ) ) {
+		if ( ( $item->Quantity == 0 ) && ( ! $ibm->VariationsHaveStock ) && ( ! self::thisListingUsesOutOfStockControl( $listing_item ) ) ) {
 			$this->logger->info( "Item #$id has no stock, switching from reviseItem() to endItem()" );
 			return $this->endItem( $id, $session );
 		}
@@ -995,7 +1002,7 @@ class ListingsModel extends WPL_Model {
 		}
 
 		// if stock level is zero, end item instead
-		if ( ( ! $this->thisAccountUsesOutOfStockControl( $listing_item['account_id'] ) ) && ( ! $this->checkStockLevel( $listing_item ) ) ) {
+		if ( ( ! self::thisListingUsesOutOfStockControl( $listing_item ) ) && ( ! $this->checkStockLevel( $listing_item ) ) ) {
 			$this->logger->info( "Item #$id has no stock, switching from reviseInventoryStatus() to endItem()" );
 			return $this->endItem( $id, $session );
 		}
@@ -1043,7 +1050,7 @@ class ListingsModel extends WPL_Model {
 			for ( $offset=0; $offset < sizeof($variations); $offset += $batch_size ) { 
 
 				// revise inventory status
-				$res = $this->reviseVariableInventoryStatus( $id, $post_id, $session, $variations, $max_quantity, $offset, $batch_size );		
+				$res = $this->reviseVariableInventoryStatus( $id, $post_id, $listing_item, $session, $variations, $max_quantity, $offset, $batch_size );		
 
 			}
 
@@ -1085,8 +1092,13 @@ class ListingsModel extends WPL_Model {
 				if ( ! $cart_item ) {
 					$stat->setStartPrice( $listing_item['price'] );
 				}
-				$stat->setQuantity( min( $max_quantity, $listing_item['quantity'] ) );
-				$revised_quantity = min( $max_quantity, $listing_item['quantity'] );
+
+				// get available stock
+				// $available_stock = $listing_item['quantity'] - intval( $listing_item['quantity_sold'] );
+				$available_stock = intval( ProductWrapper::getStock( $post_id ) );
+
+				$stat->setQuantity( min( $max_quantity, $available_stock ) );
+				$revised_quantity = min( $max_quantity, $available_stock );
 
 				$req->addInventoryStatus( $stat );
 				$this->logger->info( "Revising inventory status #$id ($post_id) - qty: ".$stat->Quantity );
@@ -1102,8 +1114,11 @@ class ListingsModel extends WPL_Model {
 		if ( $this->handleResponse($res) ) {
 
 			// update listing quantity after revising inventory status
+			// (The 'quantity' column holds the total qty of available and sold items! It's a mirror of Item.Quantity)
+			// TODO: process Quantity returned in ReviseInventoryStatus response instead (or not?)
 			if ( isset($revised_quantity) ) {
-				$this->updateListing( $id, array( 'quantity' => $revised_quantity ) );
+				$listing_quantity = $revised_quantity + intval( $listing_item['quantity_sold'] ); 
+				$this->updateListing( $id, array( 'quantity' => $listing_quantity ) );
 			}
 
 			// update listing status for ended items
@@ -1127,7 +1142,7 @@ class ListingsModel extends WPL_Model {
 	} // reviseInventoryStatus()
 
 
-	private function reviseVariableInventoryStatus( $id, $post_id, $session, $variations, $max_quantity, $offset = 0, $batch_size = 4 ) {
+	private function reviseVariableInventoryStatus( $id, $post_id, $listing_item, $session, $variations, $max_quantity, $offset = 0, $batch_size = 4 ) {
 		$this->logger->info( "reviseVariableInventoryStatus() #$id - variations: ".sizeof($variations)." - offset: ".$offset );
 
 		// preparation - set up new ServiceProxy with given session
@@ -1143,7 +1158,14 @@ class ListingsModel extends WPL_Model {
 		// slice variations array
 		$variations = array_slice( $variations, $offset, $batch_size );
 
+		// check for profile price modifier
+		$profile_details = $listing_item['profile_data']['details'];
+		$profile_price   = $profile_details['start_price'];
+
 		foreach ( $variations as $var ) {
+
+			// apply profile price - if set
+			$var['price'] = empty( $profile_price ) ? $var['price'] : $this->applyProfilePrice( $var['price'], $profile_price );
 
 			$stat = new InventoryStatusType();
 			$stat->setItemID( $this->getEbayIDFromID($id) );
@@ -1223,7 +1245,16 @@ class ListingsModel extends WPL_Model {
 	} // checkVariationSKUs()
 
 
-	function thisAccountUsesOutOfStockControl( $account_id ) {
+	public static function thisListingUsesOutOfStockControl( $listing_item ) {
+		if ( ! is_array( $listing_item ) ) return false;
+
+		// only GTC listings can use OOSC 
+		if ( $listing_item['listing_duration'] != 'GTC' ) return false;
+
+		return self::thisAccountUsesOutOfStockControl( $listing_item['account_id'] );
+	} // thisListingUsesOutOfStockControl()
+
+	public static function thisAccountUsesOutOfStockControl( $account_id ) {
 		if ( ! $account_id ) $account_id = get_option( 'wplister_default_account_id' );
 
 		$accounts = WPLE()->accounts;
@@ -1549,7 +1580,7 @@ class ListingsModel extends WPL_Model {
 	}
 
 
-	function handleItemDetail($type, & $Detail)
+	function handleItemDetail( $type, $Detail )
 	{
 		global $wpdb;
 		
@@ -2153,10 +2184,10 @@ class ListingsModel extends WPL_Model {
 		$items = $wpdb->get_results("
 			SELECT id 
 			FROM $this->tablename
-			WHERE NOT status = 'ended'
-			  AND NOT status = 'sold'
-			  AND NOT status = 'archived'
-			  AND NOT listing_duration = 'GTC'
+			WHERE status <> 'ended'
+			  AND status <> 'sold'
+			  AND status <> 'archived'
+			  AND listing_duration <> 'GTC'
 			  AND end_date < NOW()
 			ORDER BY id DESC
 		", ARRAY_A);		
@@ -2201,7 +2232,7 @@ class ListingsModel extends WPL_Model {
 		$items = $wpdb->get_results("
 			SELECT post_id, account_id, COUNT(*) c
 			FROM $this->tablename
-			WHERE NOT status = 'archived'
+			WHERE status <> 'archived'
 			GROUP BY post_id, account_id
 			HAVING c > 1
 			LIMIT 1000
@@ -2253,17 +2284,33 @@ class ListingsModel extends WPL_Model {
 			FROM $this->tablename
 			WHERE post_id    = %s
 			  AND account_id = %s
-			  AND NOT status = 'archived'
+			  AND status <> 'archived'
 		", $post_id, $account_id 
 		), OBJECT);		
 
 		return $item;
 	}
 
+	// set quantity and regarding quantity_sold
+	// (Item.Quantity holds the total quantity of available and sold units combined)
 	public function setListingQuantity( $post_id, $quantity ) {
 		global $wpdb;	
-		$wpdb->update( $this->tablename, array( 'quantity' => $quantity ), array( 'post_id' => $post_id ) );
-	}
+
+		// get current quantity_sold
+		$listings = $this->getAllListingsFromPostID( $post_id );
+		if ( empty($listings) ) return;
+
+		foreach ( $listings as $listing_item ) {
+
+			// get current quantity_sold
+			$quantity_sold = $listing_item->quantity_sold;
+			$quantity      = $quantity + intval( $quantity_sold );
+
+			$wpdb->update( $this->tablename, array( 'quantity' => $quantity ), array( 'id' => $listing_item->id ) );
+
+		}
+
+	} // setListingQuantity()
 
 	public function markItemAsModified( $post_id ) {
 		global $wpdb;	
@@ -2386,8 +2433,10 @@ class ListingsModel extends WPL_Model {
 		// skip pending products and drafts
 		// if ( $post->post_status != 'publish' ) { 
 		if ( ! in_array( $post->post_status, array('publish','private') ) ) { 
-			if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'wpl_prepare_single_listing' )
+			if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'wpl_prepare_single_listing' ) {
 				$this->showMessage( __('Skipped product with status','wplister') . ' <em>' . $post->post_status . '</em>: ' . $post_title, 2, 1 );
+			}
+			$this->warnings[] = sprintf( __('Skipped product %s with status %s.','wpla'), $post_id, $post->post_status );
 			return false; 
 		}
 
@@ -2418,11 +2467,15 @@ class ListingsModel extends WPL_Model {
 			$post_content = qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage( $post_content );			
 		}
 
+		// trim title to 255 characters - longer titles will break $wpdb->insert()
+		$post_title = strlen( $post_title ) < 255 ? $post_title : $this->mb_substr( $post_title, 0, 80 ); // eBay titles can not be longer than 80 characters
+
 		// gather product data
+		$data = array();
 		$data['post_id']       = $post_id;
 		$data['parent_id']     = $parent_id ? $parent_id : 0;
 		$data['auction_title'] = $post_title;
-		$data['post_content']  = $post_content;
+		$data['post_content']  = ''; // not required anymore
 		$data['price']         = ProductWrapper::getPrice( $post_id );
 		$data['locked']        = 0;
 		$data['status']        = 'selected';
@@ -2431,11 +2484,19 @@ class ListingsModel extends WPL_Model {
 		$this->logger->debug( print_r($post,1) );
 		
 		// insert in auctions table
-		$wpdb->insert( $this->tablename, $data );
+		$result = $wpdb->insert( $this->tablename, $data );
 
-		$this->logger->debug('sql: '.$wpdb->last_query );
-		$this->logger->debug( $wpdb->last_error );
-		
+		// handle unexpected SQL issues properly
+		if ( ! $wpdb->insert_id ) {
+			$this->logger->info( 'insert_id: '.$wpdb->insert_id );
+			$this->logger->info( 'result: ' . print_r($result,1) );
+			$this->logger->info( 'sql: '.$wpdb->last_query );
+			$this->logger->info( $wpdb->last_error );
+
+			$this->errors[] = sprintf( __('Error: MySQL failed to create listing record for "%s" (%s) using profile %s. Please contact support and include this error message.','wpla'), get_the_title($post_id), $post_id, $profile['profile_id'] );
+			return false;
+		}
+
 		return $wpdb->insert_id;		
 	} // prepareProductForListing()
 
@@ -2585,6 +2646,11 @@ class ListingsModel extends WPL_Model {
 			}
 			$this->logger->info('auction_title after processing : '.$data['auction_title'].'');
 
+			// trim title to 255 characters - longer titles will break $wpdb->update()
+			if ( strlen( $data['auction_title'] ) > 255 ) {
+				$data['auction_title'] = $this->mb_substr( $data['auction_title'], 0, 80 ); // eBay titles can not be longer than 80 characters
+			}
+
 		}
 
 		// apply profile price
@@ -2595,6 +2661,10 @@ class ListingsModel extends WPL_Model {
 		if ( intval( $data['quantity'] ) == 0 ) {
 			$max = ( isset( $profile['details']['max_quantity'] ) && intval( $profile['details']['max_quantity'] )  > 0 ) ? $profile['details']['max_quantity'] : PHP_INT_MAX ; 
 			$data['quantity'] = min( $max , intval( ProductWrapper::getStock( $post_id ) ) );						
+
+			// update listing quantity properly - using setListingQuantity() which regards current quantity_sold
+			$this->setListingQuantity( $post_id, $data['quantity'] );
+			unset( $data['quantity'] );
 		}
 		
 		// default new status is 'prepared'

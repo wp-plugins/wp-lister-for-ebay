@@ -42,6 +42,7 @@
 		</div>
 		<div class="submit" style="float:right; padding: 10px 0 0 0; margin: 0;">
 			<a class="btn_close button"><?php echo __('Close window','wplister') ?></a>
+			<a class="btn_cancel button-secondary"><?php echo __('Cancel','wplister') ?></a>
 		</div>
 
 	</div>

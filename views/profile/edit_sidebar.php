@@ -433,7 +433,7 @@
 
 							<label for="wpl-text-with_gallery_image" class="text_label">
 								<?php echo __('Gallery image','wplister'); ?>
-                                <?php wplister_tooltip('Select whether listing images are included in the search results (in the Picture Gallery and List Views). This option might increase your listing fees depending on the eBay site and your subscription plan.') ?>
+                                <?php wplister_tooltip('Select whether listing images are included in the search results (in the Picture Gallery and List Views).<br><br>This option might increase your listing fees depending on the eBay site and your subscription plan.') ?>
 							</label>
 							<select id="wpl-text-with_gallery_image" name="wpl_e2e_with_gallery_image" title="Gallery image" class=" required-entry select">
 								<option value="1" <?php if ( $item_details['with_gallery_image'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
@@ -443,12 +443,12 @@
 
 							<label for="wpl-text-gallery_type" class="text_label">
 								<?php echo __('Gallery type','wplister'); ?>
-                                <?php wplister_tooltip('Specifies the Gallery enhancement type for the listing. If you use Plus, you also get the features of Gallery and if you use Featured, you get all the features of Gallery and Plus.') ?>
+                                <?php wplister_tooltip('Specifies the Gallery enhancement type for the listing. If you use Plus, you also get the features of Gallery and if you use Featured, you get all the features of Gallery and Plus.<br><br>This option might increase your listing fees depending on the eBay site and your subscription plan.') ?>
 							</label>
 							<select id="wpl-text-gallery_type" name="wpl_e2e_gallery_type" title="Gallery image" class=" required-entry select">
-								<option value="Gallery"  <?php if ( @$item_details['gallery_type'] == 'Gallery'  ): ?>selected="selected"<?php endif; ?>>Gallery</option>
-								<option value="Plus"     <?php if ( @$item_details['gallery_type'] == 'Plus'     ): ?>selected="selected"<?php endif; ?>>Plus</option>
-								<option value="Featured" <?php if ( @$item_details['gallery_type'] == 'Featured' ): ?>selected="selected"<?php endif; ?>>Featured</option>
+								<option value="Gallery"  <?php if ( @$item_details['gallery_type'] == 'Gallery'  ): ?>selected="selected"<?php endif; ?>><?php echo __('Gallery Standard','wplister'); ?></option>
+								<option value="Plus"     <?php if ( @$item_details['gallery_type'] == 'Plus'     ): ?>selected="selected"<?php endif; ?>><?php echo __('Gallery Plus','wplister'); ?>     (<?php echo __('extra fees','wplister'); ?>)</option>
+								<option value="Featured" <?php if ( @$item_details['gallery_type'] == 'Featured' ): ?>selected="selected"<?php endif; ?>><?php echo __('Gallery Featured','wplister'); ?> (<?php echo __('considerable extra fees','wplister'); ?>)</option>
 							</select>
 							<br class="clear" />
 

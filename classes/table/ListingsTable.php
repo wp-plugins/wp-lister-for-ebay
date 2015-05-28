@@ -246,13 +246,6 @@ class ListingsTable extends WP_List_Table {
             }
 
         }
-
-        // check PictureDetails.GalleryStatus
-        $item_details = WPL_Model::decodeObject( $item['details'], false, true );
-        if ( ! empty( $item_details ) && is_object( $item_details->PictureDetails ) && $item_details->PictureDetails->getGalleryStatus() == 'ImageProcessingError' ) {
-            $msg = '<b>eBay could not process your gallery image:</b><br>'.$item_details->PictureDetails->getGalleryErrorInfo();
-            $listing_title .= '<br><small style="color:darkred">'.$msg.'</small>';
-        }
         */
 
         // disable some actions depending on status
@@ -528,11 +521,16 @@ class ListingsTable extends WP_List_Table {
 
         }
 
-        // check PictureDetails.GalleryStatus
-        $item_details = WPL_Model::decodeObject( $item['details'], false, true );
-        if ( ! empty( $item_details ) && is_object( $item_details->PictureDetails ) && $item_details->PictureDetails->getGalleryStatus() == 'ImageProcessingError' ) {
-            $msg = '<b>eBay could not process your gallery image:</b><br>'.$item_details->PictureDetails->getGalleryErrorInfo();
-            $listing_title .= '<small style="color:darkred">'.$msg.'</small><br>';
+        // show gallery warning on published items - since only published items have an updated details column
+        if ( in_array( $item['status'], array( 'published' ) ) ) {
+
+            // check PictureDetails.GalleryStatus
+            $item_details = WPL_Model::decodeObject( $item['details'], false, true );
+            if ( is_object( $item_details ) && is_object( $item_details->PictureDetails ) && $item_details->PictureDetails->getGalleryStatus() == 'ImageProcessingError' ) {
+                $msg = '<b>eBay could not process your gallery image:</b><br>'.$item_details->PictureDetails->getGalleryErrorInfo();
+                $listing_title .= '<small style="color:darkred">'.$msg.'</small><br>';
+            }
+
         }
 
         if ( empty($listing_title) ) return;
@@ -619,7 +617,7 @@ class ListingsTable extends WP_List_Table {
         // use profile quantity for flattened variations
         if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
 
-            if ( ( $item['quantity_sold'] > 0 ) && ( $item['status'] != 'changed' ) ) {
+            if ( $item['quantity_sold'] > 0 ) {
                 $qty_available = $item['quantity'] - $item['quantity_sold'];
                 $quantity = $qty_available . ' / ' . $item['quantity'];
                 // prevent negative qty when sold or ended product has been updated in wc
@@ -655,7 +653,7 @@ class ListingsTable extends WP_List_Table {
         // }        
 
         // show sold items if there are any - except for changed items, which would possibly show negative values
-        if ( ( $item['quantity_sold'] > 0 ) && ( $item['status'] != 'changed' ) ) {
+        if ( $item['quantity_sold'] > 0 ) {
             $qty_available = $item['quantity'] - $item['quantity_sold'];
             return $qty_available . ' / ' . $item['quantity'];
         }
@@ -717,36 +715,25 @@ class ListingsTable extends WP_List_Table {
 
         $profile_data = $this->getProfileData( $item );
         
-        if ( $item['date_finished'] ) {
-            $date = $item['date_finished'];
+        if ( $item['date_finished'] && in_array( $item['status'], array( 'ended', 'sold', 'archived' ) ) ) {
+            $date  = $item['date_finished'];
             $value = mysql2date( get_option('date_format'), $date );
-            $html = '<span style="color:darkgreen">'.$value.'</span>';
+            $html  = '<span style="color:darkgreen">'.$value.'</span>';
         } elseif ( ( is_array($profile_data['details']) ) && ( 'GTC' == @$profile_data['details']['listing_duration'] ) ) {
             $value = 'GTC';
-            $html = '<span style="color:silver">'.$value.'</span>';
+            $html  = '<span style="color:silver">'.$value.'</span>';
     	} else {
-			$date = $item['end_date'];
+			$date  = $item['end_date'];
 	    	$value = mysql2date( get_option('date_format'), $date );
-			$html = '<span>'.$value.'</span>';
+			$html  = '<span>'.$value.'</span>';
     	}
 
-        // if ( @$item['relist_date'] ) {
-        //     $relist_date = $item['relist_date'];
-        //     $relist_ts   = strtotime( $item['relist_date'] );
-        //     $relist_time = mysql2date( get_option('time_format'), $relist_date );
-
-        //     $time_diff = human_time_diff( $relist_ts, current_time('timestamp',1) ); 
-        //     // $time_diff .= $relist_ts < current_time('timestamp',1) ? 'ago' : ''; 
-
-        //     // if ( $relist_ts < time() ) {
-        //     if ( $relist_ts < current_time('timestamp',1) ) {
-        //         $html .= '<br><span style="color:darkred">Relist at: '.$relist_time.'</span>';
-        //         $html .= '<br><span style="color:darkred">('.$time_diff.' ago)</span>';
-        //     } else {
-        //         $html .= '<br><span style="color:silver">Relist at: '.$relist_time.'</span>';                
-        //         $html .= '<br><span style="color:silver">(in '.$time_diff.')</span>';
-        //     }
-        // }
+        // indicate if OOSC is enabled
+        if ( ListingsModel::thisListingUsesOutOfStockControl( $item ) ) {
+            $tip_msg = 'The <i>Out Of Stock Control</i> option is enabled.<br><br>This listing will not be ended when it is out of stock.';
+            $img_url = WPLISTER_URL . '/img/info.png';
+            $html   .= '&nbsp;<img src="'.$img_url.'" style="height:11px; padding:0;" class="tips" data-tip="'.$tip_msg.'"/>&nbsp;';
+        }
 
         return $html;
 	}
@@ -1006,6 +993,7 @@ class ListingsTable extends WP_List_Table {
             'delete_listing'      => __('Delete listings','wplister'),
             'cancel_schedule'     => __('Cancel relist schedule','wplister'),
             'wple_reset_status'   => __('Reset ended items','wplister'),
+            'wple_clear_eps_data' => __('Clear EPS cache','wplister'),
         );
 
         if ( ! current_user_can( 'publish_ebay_listings' ) ) {
@@ -1057,7 +1045,7 @@ class ListingsTable extends WP_List_Table {
     function get_views(){
         $views    = array();
         $current  = ( !empty($_REQUEST['listing_status']) ? $_REQUEST['listing_status'] : 'all');
-        $base_url = esc_url( remove_query_arg( array( 'action', 'auction', 'listing_status' ) ) );
+        $base_url = esc_url_raw( remove_query_arg( array( 'action', 'auction', 'listing_status' ) ) );
 
         // handle profile query
         if ( isset($_REQUEST['profile_id']) && $_REQUEST['profile_id'] ) {

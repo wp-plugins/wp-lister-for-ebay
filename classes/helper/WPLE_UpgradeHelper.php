@@ -1144,6 +1144,28 @@ class WPLE_UpgradeHelper {
 			$msg  = __('Database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
+		// upgrade to version 44 (2.0.8.7)
+		if ( 44 > $db_version ) {
+			$new_db_version = 44;
+
+			// set column type to mediumtext in table: ebay_accounts
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_accounts`  CHANGE shipping_profiles shipping_profiles MEDIUMTEXT ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_accounts`  CHANGE payment_profiles  payment_profiles  MEDIUMTEXT ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_accounts`  CHANGE return_profiles   return_profiles   MEDIUMTEXT ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_accounts`  CHANGE shipping_discount_profiles shipping_discount_profiles MEDIUMTEXT ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_accounts`  CHANGE categories_map_ebay  categories_map_ebay  MEDIUMTEXT ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_accounts`  CHANGE categories_map_store categories_map_store MEDIUMTEXT ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('Database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
 
 		// show update message
 		if ( $msg && ! $hide_message ) wple_show_message($msg,'info');		

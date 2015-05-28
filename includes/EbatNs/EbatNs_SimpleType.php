@@ -1,6 +1,9 @@
 <?php
-// $Id: EbatNs_SimpleType.php,v 1.3 2008-10-02 13:53:19 carsten Exp $
+// $Id: EbatNs_SimpleType.php,v 1.2 2013-04-05 11:15:53 thomasbiniasch Exp $
 // $Log: EbatNs_SimpleType.php,v $
+// Revision 1.2  2013-04-05 11:15:53  thomasbiniasch
+// bugfixes and template updates, first running version milestone!
+//
 // Revision 1.3  2008-10-02 13:53:19  carsten
 // reopened generic access to all properties without getter/setter
 //
@@ -80,7 +83,7 @@ class EbatNs_SimpleType
 	// will serialize the given value
 	// and return XML-data.
 	// give preserveNull = true to enforce serialization of values that evaluate to false (null or 0 or '')
-	function serialize( $elementName, $value, $attributeValues, $preserveNull, $typeName, &$dataConverter )
+	function serialize( $elementName, $value, $attributeValues, $preserveNull, $typeName, $dataConverter )
 	{
 		if (isset($value))
 		{

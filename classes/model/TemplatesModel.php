@@ -408,7 +408,7 @@ class TemplatesModel extends WPL_Model {
 
 		// use latest post_content from product
 		$post = get_post( $item['post_id'] );
-		if ( ! empty($post->post_content) ) $item['post_content'] = $post->post_content;
+		$item['post_content'] = $post->post_content;
 
 
 		// handle variations

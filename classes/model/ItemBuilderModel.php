@@ -123,7 +123,7 @@ class ItemBuilderModel extends WPL_Model {
 		$item = $this->buildPayment( $item, $profile_details );			
 
 		// add shipping services and options
-		$item = $this->buildShipping( $id, $item, $post_id, $profile_details );			
+		$item = $this->buildShipping( $id, $item, $post_id, $profile_details, $listing, $isVariation );			
 
 		// add seller profiles
 		$item = $this->buildSellerProfiles( $id, $item, $post_id, $profile_details );			
@@ -288,8 +288,13 @@ class ItemBuilderModel extends WPL_Model {
 			$item->SecondaryCategory->CategoryID = 0;			
 		}		
 
+
 		// handle optional store category
-		if ( intval($profile_details['store_category_1_id']) > 0 ) {
+		$store_category_1_id = get_post_meta( $post_id, '_ebay_store_category_1_id', true );
+		if ( intval( $store_category_1_id ) > 0 ) {
+			$item->Storefront = new StorefrontType();
+			$item->Storefront->StoreCategoryID = $store_category_1_id;
+		} elseif ( intval($profile_details['store_category_1_id']) > 0 ) {
 			$item->Storefront = new StorefrontType();
 			$item->Storefront->StoreCategoryID = $profile_details['store_category_1_id'];
 		} else {
@@ -336,9 +341,15 @@ class ItemBuilderModel extends WPL_Model {
             
 		}
 
-		// optional secondary store category
+		// optional secondary store category - from profile
 		if ( intval($profile_details['store_category_2_id']) > 0 ) {
 			$item->Storefront->StoreCategory2ID = $profile_details['store_category_2_id'];
+		}
+
+		// optional secondary store category - from product
+		$store_category_2_id = get_post_meta( $post_id, '_ebay_store_category_2_id', true );
+		if ( intval($store_category_2_id) > 0 ) {
+			$item->Storefront->StoreCategory2ID = $store_category_2_id;
 		}
 
 
@@ -599,6 +610,17 @@ class ItemBuilderModel extends WPL_Model {
 			$item->setProductListingDetails( $ProductListingDetails );
 		}
 
+		// set EAN from product - if provided
+		if ( $product_ean = get_post_meta( $post_id, '_ebay_ean', true ) ) {
+			$ProductListingDetails = new ProductListingDetailsType();
+			$ProductListingDetails->setEAN( $product_ean );
+			$ProductListingDetails->setListIfNoProduct( true );
+			$ProductListingDetails->setIncludeStockPhotoURL( true );
+			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
+			$ProductListingDetails->setUseFirstProduct( true );
+			$item->setProductListingDetails( $ProductListingDetails );
+		}
+
 		// set EPID from product - if provided
 		if ( $product_epid = get_post_meta( $post_id, '_ebay_epid', true ) ) {
 			$ProductListingDetails = new ProductListingDetailsType();
@@ -770,7 +792,7 @@ class ItemBuilderModel extends WPL_Model {
 	} /* end of buildPayment() */
 
 
-	public function buildShipping( $id, $item, $post_id, $profile_details ) {
+	public function buildShipping( $id, $item, $post_id, $profile_details, $listing, $isVariation ) {
 
 		// no shipping options for classified ads
 		if ( $item->ListingType == 'LeadGeneration' ) return $item;
@@ -779,6 +801,9 @@ class ItemBuilderModel extends WPL_Model {
 		$this->logger->info('shipping_service_type: '.$profile_details['shipping_service_type'] );
 		// $isFlat = $profile_details['shipping_service_type'] != 'calc' ? true : false;
 		// $isCalc = $profile_details['shipping_service_type'] == 'calc' ? true : false;
+
+		// if this is a single split variation, use variation post_id instead of parent post_id for weight and dimensions
+		$actual_post_id = $isVariation ? $listing['post_id'] : $post_id;
 
 		// handle flat and calc shipping (new version)
 		$service_type = $profile_details['shipping_service_type'];
@@ -910,17 +935,17 @@ class ItemBuilderModel extends WPL_Model {
 				$calculatedShippingRate->setInternationalPackagingHandlingCosts( floatval( @$profile_details['InternationalPackagingHandlingCosts'] ) );
 			}
 
-			list( $weight_major, $weight_minor ) = ProductWrapper::getEbayWeight( $post_id );
+			list( $weight_major, $weight_minor ) = ProductWrapper::getEbayWeight( $actual_post_id );
 			$calculatedShippingRate->setWeightMajor( floatval( $weight_major) );
 			$calculatedShippingRate->setWeightMinor( floatval( $weight_minor) );
 
-			$dimensions = ProductWrapper::getDimensions( $post_id );
+			$dimensions = ProductWrapper::getDimensions( $actual_post_id );
 			if ( trim( @$dimensions['width']  ) != '' ) $calculatedShippingRate->setPackageWidth( $dimensions['width'] );
 			if ( trim( @$dimensions['length'] ) != '' ) $calculatedShippingRate->setPackageLength( $dimensions['length'] );
 			if ( trim( @$dimensions['height'] ) != '' ) $calculatedShippingRate->setPackageDepth( $dimensions['height'] );
 
 			// debug
-			// $weight = ProductWrapper::getWeight( $post_id ) ;
+			// $weight = ProductWrapper::getWeight( $actual_post_id ) ;
 			// $this->logger->info('weight: '.print_r($weight,1));
 			// $this->logger->info('dimensions: '.print_r($dimensions,1));
 
@@ -930,7 +955,7 @@ class ItemBuilderModel extends WPL_Model {
 
 		// handle option to always send weight and dimensions
 		if ( get_option( 'wplister_send_weight_and_size', 'default' ) == 'always' ) {
-			$hasWeight = ProductWrapper::getWeight( $post_id );
+			$hasWeight = ProductWrapper::getWeight( $actual_post_id );
 		}
 
 		// set ShippingPackageDetails
@@ -941,17 +966,17 @@ class ItemBuilderModel extends WPL_Model {
 			if ( $isCalcInt ) $shippingPackageDetails->setShippingPackage( $profile_details['shipping_package'] );
 			if ( $isCalcLoc ) $shippingPackageDetails->setShippingPackage( $profile_details['shipping_package'] );
 			
-			list( $weight_major, $weight_minor ) = ProductWrapper::getEbayWeight( $post_id );
+			list( $weight_major, $weight_minor ) = ProductWrapper::getEbayWeight( $actual_post_id );
 			$shippingPackageDetails->setWeightMajor( floatval( $weight_major) );
 			$shippingPackageDetails->setWeightMinor( floatval( $weight_minor) );
 
-			$dimensions = ProductWrapper::getDimensions( $post_id );
+			$dimensions = ProductWrapper::getDimensions( $actual_post_id );
 			if ( trim( @$dimensions['width']  ) != '' ) $shippingPackageDetails->setPackageWidth( $dimensions['width'] );
 			if ( trim( @$dimensions['length'] ) != '' ) $shippingPackageDetails->setPackageLength( $dimensions['length'] );
 			if ( trim( @$dimensions['height'] ) != '' ) $shippingPackageDetails->setPackageDepth( $dimensions['height'] );
 
 			// debug
-			// $weight = ProductWrapper::getWeight( $post_id ) ;
+			// $weight = ProductWrapper::getWeight( $actual_post_id ) ;
 			// $this->logger->info('weight: '.print_r($weight,1));
 			// $this->logger->info('dimensions: '.print_r($dimensions,1));
 
@@ -1157,6 +1182,12 @@ class ItemBuilderModel extends WPL_Model {
 
     		$value = html_entity_decode( $value, ENT_QUOTES );
     		if ( $this->mb_strlen( $value ) > 50 ) continue;
+
+    		// handle variation attributes for a single split variation
+    		// instead of listing all values, use the correct attribute value from variationSplitAttributes
+    		if ( array_key_exists( $name, $this->variationSplitAttributes ) ) {
+    			$value = $this->variationSplitAttributes[ $name ];
+    		}
 
             $NameValueList = new NameValueListType();
 	    	$NameValueList->setName ( $name  );
@@ -1854,7 +1885,7 @@ class ItemBuilderModel extends WPL_Model {
 				// $success = false;
 			}
 
-			if ( ! $VariationsHaveStock && ! $reviseItem && ! $this->lm->thisAccountUsesOutOfStockControl( $this->account_id ) ) {
+			if ( ! $VariationsHaveStock && ! $reviseItem && ! ListingsModel::thisAccountUsesOutOfStockControl( $this->account_id ) ) {
 				$longMessage = __('None of these variations are in stock.','wplister');
 				$success = false;
 			}
@@ -1911,6 +1942,14 @@ class ItemBuilderModel extends WPL_Model {
 			$longMessage = __('You need to add at least one image to your product.','wplister');
 			$success = false;
 		}
+
+		// remove ReservedPrice on fixed price items
+		if ( $item->getReservePrice() && $item->getListingType() == 'FixedPriceItem' ) {
+			$item->setReservePrice( null );
+			$longMessage = __('Reserve price does not apply to fixed price listings.','wplister');
+			// $success = false;
+		}
+
 
 		if ( ! $success && ! $this->is_ajax() ) {
 			$this->showMessage( $longMessage, 1, true );
@@ -2122,7 +2161,7 @@ class ItemBuilderModel extends WPL_Model {
 		}
 
 		// support for WooCommerce 2.0 Product Gallery
-		if ( get_option( 'wplister_wc2_gallery_fallback','attached' ) == 'none' ) $images = array(); // discard images if fallback is disabled
+		if ( get_option( 'wplister_wc2_gallery_fallback','none' ) == 'none' ) $images = array(); // discard images if fallback is disabled
 		$product_image_gallery = get_post_meta( $id, '_product_image_gallery', true );
 
 		// use parent product for single (split) variation

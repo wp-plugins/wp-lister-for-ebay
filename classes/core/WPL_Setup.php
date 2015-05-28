@@ -273,6 +273,21 @@ class WPL_Setup extends WPL_Core {
 
 		}
 
+		// Plugin Name: Booki
+		// Plugin URI: http://codecanyon.net/item/booki-a-booking-plugin-for-wordpress/7460830
+		// Version: 2.6
+		if ( defined('BOOKI_VERSION') ) {
+
+			wple_show_message("
+				<b>Warning: An incompatible plugin was found.</b><br>
+				<br>
+				You seem to have the <i>Booki</i> plugin installed, which is known to cause issues with WP-Lister.<br>
+				Version 2.6 of this plugin breaks WP-Lister's ability to talk to the eBay API by loading the PayPal SDK libraries on every page load. You need to deactivate this plugin in order to use WP-Lister for eBay.
+			",'warn');
+			return false;
+
+		}
+
 	}
 
 	// check if a recent version of WooCommerce is installed

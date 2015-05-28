@@ -422,7 +422,7 @@ class EbayOrdersTable extends WP_List_Table {
     function get_views(){
        $views    = array();
        $current  = ( !empty($_REQUEST['order_status']) ? $_REQUEST['order_status'] : 'all');
-       $base_url = esc_url( remove_query_arg( array( 'action', 'order', 'order_status' ) ) );
+       $base_url = esc_url_raw( remove_query_arg( array( 'action', 'order', 'order_status' ) ) );
 
        // get order status summary
        $om = new EbayOrdersModel();

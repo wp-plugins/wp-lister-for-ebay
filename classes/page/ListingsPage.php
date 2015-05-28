@@ -252,6 +252,22 @@ class ListingsPage extends WPL_Page {
 
 		}
 
+		// handle wple_clear_eps_data action
+		if ( $this->requestAction() == 'wple_clear_eps_data' ) {
+	        $id = $_REQUEST['auction'];
+
+	        if ( is_array( $id ) ) {
+	            foreach( $id as $single_id ) {
+	                ListingsModel::updateWhere( 
+	                	array( 'id' => $single_id ), 
+	                	array( 'eps' => '' ) 
+	                );
+	            }
+				wple_show_message( __('EPS cache was cleared for selected items.','wplister') );
+	        }
+
+		}
+
 		// handle lock action
 		if ( $this->requestAction() == 'lock' ) {
 

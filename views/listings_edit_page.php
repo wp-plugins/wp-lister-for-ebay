@@ -209,14 +209,17 @@
 							<label for="wpl-text-listing_duration" class="text_label"><?php echo __('Duration','wplister'); ?>: *</label>
 							<select id="wpl-text-listing_duration" name="wpl_e2e_listing_duration" title="Laufzeit" class=" required-entry select">
 								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
+								<option value="Days_1" <?php if ( $wpl_item['listing_duration'] == 'Days_1' ): ?>selected="selected"<?php endif; ?>>1 <?php echo __('Day','wplister'); ?></option>
 								<option value="Days_3" <?php if ( $wpl_item['listing_duration'] == 'Days_3' ): ?>selected="selected"<?php endif; ?>>3 <?php echo __('Days','wplister'); ?></option>
 								<option value="Days_5" <?php if ( $wpl_item['listing_duration'] == 'Days_5' ): ?>selected="selected"<?php endif; ?>>5 <?php echo __('Days','wplister'); ?></option>
 								<option value="Days_7" <?php if ( $wpl_item['listing_duration'] == 'Days_7' ): ?>selected="selected"<?php endif; ?>>7 <?php echo __('Days','wplister'); ?></option>
 								<option value="Days_10" <?php if ( $wpl_item['listing_duration'] == 'Days_10' ): ?>selected="selected"<?php endif; ?>>10 <?php echo __('Days','wplister'); ?></option>
+								<option value="Days_14" <?php if ( $wpl_item['listing_duration'] == 'Days_14' ): ?>selected="selected"<?php endif; ?>>14 <?php echo __('Days','wplister'); ?></option>
+								<option value="Days_28" <?php if ( $wpl_item['listing_duration'] == 'Days_28' ): ?>selected="selected"<?php endif; ?>>28 <?php echo __('Days','wplister'); ?></option>
 								<option value="Days_30" <?php if ( $wpl_item['listing_duration'] == 'Days_30' ): ?>selected="selected"<?php endif; ?>>30 <?php echo __('Days','wplister'); ?></option>
 								<option value="Days_60" <?php if ( $wpl_item['listing_duration'] == 'Days_60' ): ?>selected="selected"<?php endif; ?>>60 <?php echo __('Days','wplister'); ?></option>
 								<option value="Days_90" <?php if ( $wpl_item['listing_duration'] == 'Days_90' ): ?>selected="selected"<?php endif; ?>>90 <?php echo __('Days','wplister'); ?></option>
-								<option value="GTC" <?php if ( $wpl_item['listing_duration'] == 'GTC' ): ?>selected="selected"<?php endif; ?>><?php echo __('Good Till Canceled','wplister'); ?> (GTC)</option>
+								<option value="GTC"     <?php if ( $wpl_item['listing_duration'] == 'GTC'     ): ?>selected="selected"<?php endif; ?>><?php echo __('Good Till Canceled','wplister'); ?> (GTC)</option>
 							</select>
 							<br class="clear" />
 
@@ -303,10 +306,23 @@
 								This is the information that WP-Lister has stored about product images uploaded to EPS.
 							</p>
 
+							<?php 
+								$eps_data = maybe_unserialize( $wpl_item['eps'] );
+								if ( is_array($eps_data) ) {
+									foreach ( $eps_data as $img ) {
+										echo 'Local URL: <a href="'.$img->local_url.'" target="_blank">'.$img->local_url.'</a><br>';
+										echo 'Remote URL: <a href="'.$img->remote_url.'" target="_blank">'.$img->remote_url.'</a><br>';
+										echo 'Uploaded: '.date('Y-m-d',$img->uploaded_date).' ('.human_time_diff( $img->uploaded_date ).' ago)<br>';
+										echo 'Use by: '.$img->use_by_date.'<br><hr>';
+									}
+								}
+							?>
+							<!--
 							<pre><?php
 									$eps_data = maybe_unserialize( $wpl_item['eps'] );
 									print_r($eps_data);
 							?></pre>
+							-->
 
 						</div>
 					</div>
@@ -329,8 +345,13 @@
 
 	<?php if ( isset($_GET['debug']) || ( get_option('wplister_log_level') > 6 ) ): ?>
 		<pre><?php #print_r($wpl_int_shipping_options); ?></pre>
+		<h2>Profile Data</h2>
+		<pre><?php print_r(maybe_unserialize( $wpl_item['profile_data'] ) ); ?></pre>
+		<h2>Item Details</h2>
 		<pre><?php print_r(maybe_unserialize( $wpl_item['details'] ) ); ?></pre>
-		<pre><?php #print_r($wpl_item); ?></pre>
+		<h2>Item</h2>
+		<pre><?php print_r($wpl_item); ?></pre>
+		<h2>Variations</h2>
 		<pre><?php 
 			$details = maybe_unserialize( $wpl_item['details'] ); 
 			if ( is_array( $details->Variations->Variation ) )

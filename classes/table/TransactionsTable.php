@@ -334,7 +334,7 @@ class TransactionsTable extends WP_List_Table {
     function get_views(){
        $views    = array();
        $current  = ( !empty($_REQUEST['transaction_status']) ? $_REQUEST['transaction_status'] : 'all');
-       $base_url = esc_url( remove_query_arg( array( 'action', 'order', 'transaction_status' ) ) );
+       $base_url = esc_url_raw( remove_query_arg( array( 'action', 'order', 'transaction_status' ) ) );
 
        // get transaction status summary
        $om = new TransactionsModel();

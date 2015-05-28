@@ -284,30 +284,30 @@ class ProfilesPage extends WPL_Page {
 
 	}
 
-	private function convertToDecimal( $price ) {
+	static public function convertToDecimal( $price ) {
 		$price = str_replace(',', '.', $price );
 		$price = str_replace('$', '', $price );
 		// $price = preg_replace( '/[^\d\.]/', '', $price );  
 		return $price;
 	}
 
-	private function fixProfilePrices( $details ) {
+	static public function fixProfilePrices( $details ) {
 	
-		if ( isset( $details['start_price'] ) ) $details['start_price'] = $this->convertToDecimal( $details['start_price'] );
-		if ( isset( $details['fixed_price'] ) ) $details['fixed_price'] = $this->convertToDecimal( $details['fixed_price'] );
-		if ( isset( $details['bo_minimum_price'] ) ) $details['bo_minimum_price'] = $this->convertToDecimal( $details['bo_minimum_price'] );
-		if ( isset( $details['bo_autoaccept_price'] ) ) $details['bo_autoaccept_price'] = $this->convertToDecimal( $details['bo_autoaccept_price'] );
+		if ( isset( $details['start_price'] ) ) $details['start_price'] = self::convertToDecimal( $details['start_price'] );
+		if ( isset( $details['fixed_price'] ) ) $details['fixed_price'] = self::convertToDecimal( $details['fixed_price'] );
+		if ( isset( $details['bo_minimum_price'] ) ) $details['bo_minimum_price'] = self::convertToDecimal( $details['bo_minimum_price'] );
+		if ( isset( $details['bo_autoaccept_price'] ) ) $details['bo_autoaccept_price'] = self::convertToDecimal( $details['bo_autoaccept_price'] );
 
 		if ( is_array( $details['loc_shipping_options'] ) )
 		foreach ($details['loc_shipping_options'] as $key => &$option) {
-			if ( isset( $option['price'] )) $option['price'] = $this->convertToDecimal( $option['price'] );
-			if ( isset( $option['add_price'] )) $option['add_price'] = $this->convertToDecimal( $option['add_price'] );
+			if ( isset( $option['price'] )) $option['price'] = self::convertToDecimal( $option['price'] );
+			if ( isset( $option['add_price'] )) $option['add_price'] = self::convertToDecimal( $option['add_price'] );
 		}
 
 		if ( is_array( $details['int_shipping_options'] ) )
 		foreach ($details['int_shipping_options'] as $key => &$option) {
-			if ( isset( $option['price'] )) $option['price'] = $this->convertToDecimal( $option['price'] );
-			if ( isset( $option['add_price'] )) $option['add_price'] = $this->convertToDecimal( $option['add_price'] );
+			if ( isset( $option['price'] )) $option['price'] = self::convertToDecimal( $option['price'] );
+			if ( isset( $option['add_price'] )) $option['add_price'] = self::convertToDecimal( $option['add_price'] );
 		}
 
 		return $details;
@@ -358,6 +358,9 @@ class ProfilesPage extends WPL_Page {
 		$loc_free_shipping = strstr( 'calc', strtolower($service_type) ) ? $details['shipping_loc_calc_free_shipping'] : $details['shipping_loc_flat_free_shipping'];
 		$details['shipping_loc_enable_free_shipping'] = $loc_free_shipping;
 
+		// fix entered prices
+		$details = self::fixProfilePrices( $details );
+
 		// clean details array
 		unset( $details['loc_shipping_options_flat'] );
 		unset( $details['loc_shipping_options_calc'] );
@@ -378,7 +381,7 @@ class ProfilesPage extends WPL_Page {
 		if ( ! $account_id ) $account_id = get_option( 'wplister_default_account_id' );
 
 		// fix entered prices
-		$details = $this->fixProfilePrices( $details );
+		$details = self::fixProfilePrices( $details );
 
 		// process item specifics
 		$item_specifics = array();
@@ -391,9 +394,10 @@ class ProfilesPage extends WPL_Page {
 		$details['store_category_1_name'] = EbayCategoriesModel::getStoreCategoryName( $details['store_category_1_id'] );
 		$details['store_category_2_name'] = EbayCategoriesModel::getStoreCategoryName( $details['store_category_2_id'] );
 
-		// fix prices
-		$details['start_price'] = str_replace(',', '.', $details['start_price'] );
-		$details['fixed_price'] = str_replace(',', '.', $details['fixed_price'] );
+		// fix prices - already done in fixProfilePrices()
+		// $details['start_price'] = str_replace(',', '.', $details['start_price'] );
+		// $details['fixed_price'] = str_replace(',', '.', $details['fixed_price'] );
+
 		// if the user enters only fixed price but no start price, move fixed price to start price
 		if ( ( $details['start_price'] == '' ) && ( $details['fixed_price'] != '' ) ) {
 			$details['start_price'] = $details['fixed_price'];

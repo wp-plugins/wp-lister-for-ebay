@@ -179,6 +179,7 @@ class WPLE_eBayAccount extends WPL_Core {
 
 		// update token expiration date
 		$this->initEC( $this->id );
+        $this->EC->initLogger();
 		$expdate = $this->EC->GetTokenStatus( true );
 		$this->EC->closeEbay();
 		if ( $expdate ) {
@@ -189,6 +190,7 @@ class WPLE_eBayAccount extends WPL_Core {
 
 		// update user details
 		$this->initEC( $this->id );
+        $this->EC->initLogger();
 		$user_details = $this->EC->GetUser( true );
 		$this->EC->closeEbay();
 		if ( $user_details ) {
@@ -199,9 +201,11 @@ class WPLE_eBayAccount extends WPL_Core {
 
 		// update seller profiles
 		$this->initEC( $this->id );
+        $this->EC->initLogger();
 		$result = $this->EC->GetUserPreferences( true );
 		$this->EC->closeEbay();
 		if ( $result ) {
+			$this->oosc_mode         = $result->OutOfStockControl    ? 1 : 0;
 			$this->seller_profiles   = $result->SellerProfileOptedIn ? 1 : 0;
 			$this->shipping_profiles = maybe_serialize( $result->seller_shipping_profiles );
 			$this->payment_profiles  = maybe_serialize( $result->seller_payment_profiles );
@@ -235,7 +239,7 @@ class WPLE_eBayAccount extends WPL_Core {
 		$items = $wpdb->get_results("
 			SELECT *
 			FROM $table
-			ORDER BY $orderby $order
+            ORDER BY active desc, $orderby $order
             LIMIT $offset, $per_page
 		", ARRAY_A);
 

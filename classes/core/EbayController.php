@@ -898,7 +898,7 @@ class EbayController {
         // prepare request
         $req = new GetUserPreferencesRequestType();
         $req->setShowSellerProfilePreferences( true );
-        // $req->setShowOutOfStockControlPreference( true );
+        $req->setShowOutOfStockControlPreference( true );
         // $req->setShowSellerExcludeShipToLocationPreference( true );
 
         // send request
@@ -916,7 +916,7 @@ class EbayController {
         $result->seller_return_profiles   = array();
 
         $result->SellerProfileOptedIn     = $res->SellerProfilePreferences->SellerProfileOptedIn;
-        // $result->OutOfStockControl     = $res->OutOfStockControlPreference;
+        $result->OutOfStockControl        = $res->OutOfStockControlPreference;
 
         $profiles = $res->getSellerProfilePreferences()->getSupportedSellerProfiles()->getSupportedSellerProfile();
         // echo "<pre>";print_r($profiles);echo"</pre>";#die();

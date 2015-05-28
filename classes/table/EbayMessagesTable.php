@@ -315,7 +315,7 @@ class EbayMessagesTable extends WP_List_Table {
     function get_views(){
        $views    = array();
        $current  = ( !empty($_REQUEST['message_status']) ? $_REQUEST['message_status'] : 'all');
-       $base_url = esc_url( remove_query_arg( array( 'action', 'message', 'message_status' ) ) );
+       $base_url = esc_url_raw( remove_query_arg( array( 'action', 'message', 'message_status' ) ) );
 
        // get message status summary
        $om = new EbayMessagesModel();

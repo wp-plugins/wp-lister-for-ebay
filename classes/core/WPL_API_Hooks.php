@@ -34,6 +34,10 @@ class WPL_API_Hooks extends WPL_Core {
 		// process inventory changes from amazon
 		add_action( 'wpla_inventory_status_changed', array( &$this, 'wpla_inventory_status_changed' ), 10, 1 );
 
+		// process product updates triggered via the WooCommerce REST API
+		// TODO: process 2nd parameter ($data) - if only stock and/or price are updated, use ReviseInventoryStatus
+		add_action( 'woocommerce_api_edit_product', 			array( &$this, 'wplister_product_has_changed' ), 20, 1 ); 		// WC REST API					PUT /wc-api/v2/products/1234 
+
 		// handle ajax requests from third party CSV import plugins
 		add_action( 'wp_ajax_woo-product-importer-ajax',      	array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );	// Woo Product Importer 		https://github.com/dgrundel/woo-product-importer
 		add_action( 'wp_ajax_woocommerce_csv_import_request', 	array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );	// Product CSV Import Suite 	http://www.woothemes.com/products/product-csv-import-suite/
@@ -53,6 +57,9 @@ class WPL_API_Hooks extends WPL_Core {
 		// add support for Store Exporter plugin (http://www.visser.com.au/documentation/store-exporter/usage/)
 		add_filter( 'woo_ce_product_fields', array( &$this, 'woo_ce_product_fields' ) );
 		add_filter( 'woo_ce_product_item',   array( &$this, 'woo_ce_product_item' ), 10, 2 );
+
+		// process CompleteSale requests from other plugins
+		add_action( 'wple_complete_sale_on_ebay', array( &$this, 'wple_complete_sale_on_ebay' ), 10, 2 );
 
 	}
 	
@@ -164,6 +171,48 @@ class WPL_API_Hooks extends WPL_Core {
 		// $this->wplister_revise_inventory_status( $post_id );
 		do_action( 'wplister_revise_inventory_status', $post_id );
 	}
+
+
+	// call CompleteSale for given order post_id and data
+	// example for $data array:
+	// $data['TrackingNumber']  = '123456789';
+	// $data['TrackingCarrier'] = 'UPS';
+	// $data['ShippedTime']     = '2015-12-24';
+	// $data['FeedbackText']    = 'Thank You...';
+	function wple_complete_sale_on_ebay( $post_id, $data ) {
+
+    	// check if this order came in from eBay
+        $ebay_order_id = get_post_meta( $post_id, '_ebay_order_id', true );
+    	if ( ! $ebay_order_id ) return false; // die('This is not an eBay order.');
+
+    	// check if this order was marked as shipped already
+        if ( 'yes' == get_post_meta( $post_id, '_ebay_marked_as_shipped', true ) ) return false;
+
+
+		// make sure ShippedTime is a timestamp
+		if ( isset($data['ShippedTime']) && ! is_numeric($data['ShippedTime']) ) {
+			$data['ShippedTime'] = strtotime( $data['ShippedTime'] );
+		}
+
+		// fuzzy match tracking provider
+		if ( isset($data['TrackingCarrier']) ) {
+			$data['TrackingCarrier'] = WpLister_Order_MetaBox::findMatchingTrackingProvider( $data['TrackingCarrier'] );
+		}
+
+
+    	// complete sale on eBay
+		$response = WpLister_Order_MetaBox::callCompleteOrder( $post_id, $data, true );
+
+		// Update order data if request was successful
+		if ( $response->success ) {
+			if ( isset( $data['TrackingCarrier'] ) ) update_post_meta( $post_id, '_tracking_provider', 	$data['TrackingCarrier'] );
+			if ( isset( $data['TrackingNumber']  ) ) update_post_meta( $post_id, '_tracking_number', 	$data['TrackingNumber'] );
+			if ( isset( $data['ShippedTime'] 	 ) ) update_post_meta( $post_id, '_date_shipped', 		$data['ShippedTime'] );
+			if ( isset( $data['FeedbackText'] 	 ) ) update_post_meta( $post_id, '_feedback_text', 		$data['FeedbackText'] );
+		}
+
+		return $response;
+	} // wple_complete_sale_on_ebay()
 
 
 

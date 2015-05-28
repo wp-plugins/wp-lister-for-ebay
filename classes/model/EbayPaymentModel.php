@@ -49,7 +49,7 @@ class EbayPaymentModel extends WPL_Model {
 				
 	}
 
-	function storePaymentDetail($type, & $Detail)
+	function storePaymentDetail( $type, $Detail )
 	{
 		global $wpdb;
 

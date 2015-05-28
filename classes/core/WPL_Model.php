@@ -105,7 +105,7 @@ class WPL_Model {
 
 		// special handling for asterisk wrapped in zero bytes
 	    $string = str_replace( "\0*\0", "*\0", $string);
-	    $string = preg_replace('!s:(\d+):"(.*?)";!se', "'s:'.strlen('$2').':\"$2\";'", $string);
+	    $string = @preg_replace('!s:(\d+):"(.*?)";!se', "'s:'.strlen('$2').':\"$2\";'", $string); // added @ to avoid deprecated warning in PHP5.5 (TODO: fix)
 	    $string = str_replace('*\0', "\0*\0", $string);
 
 	    return unserialize($string);
@@ -304,8 +304,13 @@ class WPL_Model {
 				$longMessage .= 'Please wait for about one hour and you will be able to list this product again. ';
 			}
 			
+			// #21917091 - Warning: Requested StartPrice and Quantity revision is redundant.
+			if ( $error->getErrorCode() == 21917091 ) {
+				continue; 
+			}
 			// #21917092 - Warning: Requested Quantity revision is redundant.
 			if ( $error->getErrorCode() == 21917092 ) { 
+				continue; 
 			}
 			
 			// #90002 - soap-fault: org.xml.sax.SAXParseException: The element type "Description" must be terminated by the matching end-tag "</Description>".

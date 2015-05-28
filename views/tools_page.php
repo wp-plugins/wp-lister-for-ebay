@@ -293,6 +293,17 @@
 						</form>
 						<br style="clear:both;"/>
 
+						<!-- fix cost of goods on ebay orders --> 
+						<?php if ( class_exists('WC_COG') ) : ?>
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="fix_cog_on_imported_orders" />
+								<input type="submit" value="<?php echo __('Update cost of goods data','wplister'); ?>" name="submit" class="button">
+								<p><?php echo __('Fix missing cost of goods data for eBay orders.','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+						<?php endif; ?>
+
 						<!-- lock all listings --> 
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>

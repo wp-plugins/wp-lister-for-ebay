@@ -87,10 +87,10 @@
 	
 			                <?php if ( WPL_Setup::isV2() ) : ?>
 							<label for="wpl-oosc_mode" class="text_label">
-								<?php echo __('Out Of Stock Control','wplister'); ?> (beta)
-                                <?php wplister_tooltip('Enable this only if you have enabled the Out Of Stock option in your eBay account as well.') ?>
+								<?php echo __('Out Of Stock Control','wplister'); ?>
+                                <?php wplister_tooltip('This option has to be enabled in your eBay account preferences on eBay directly. Please refresh your account details in WP-Lister when you have changed the setting on eBay.') ?>
 							</label>
-							<select id="wpl-oosc_mode" name="wplister_oosc_mode" class=" required-entry select">
+							<select id="wpl-oosc_mode" name="wplister_oosc_mode" class=" required-entry select" disabled >
 								<option value="1" <?php if ( $wpl_account->oosc_mode == 1 ) echo 'selected' ?> ><?php echo __('Active','wplister'); ?></option>
 								<option value="0" <?php if ( $wpl_account->oosc_mode == 0 ) echo 'selected' ?> ><?php echo __('Inactive','wplister'); ?></option>
 							</select>

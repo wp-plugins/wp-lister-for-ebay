@@ -14,6 +14,7 @@ WpLister.JobRunner = function () {
     var currentSubTask = 0;
     var subtaskQueue = {};
     var retryCount = 0;
+    var cancel_operation = 0;
     var self = {};
     
     // this will be a public method
@@ -24,6 +25,12 @@ WpLister.JobRunner = function () {
         jQuery('#wple_jobs_window .btn_close').click( function(event) {
             tb_remove();                    
         }).hide();
+
+        // jobs window "cancel" button
+        jQuery('#wple_jobs_window .btn_cancel').click( function(event) {
+            jQuery('#wple_jobs_message').html('Cancelling...');
+            self.cancel_operation = true;
+        });
 
     }
 
@@ -74,9 +81,10 @@ WpLister.JobRunner = function () {
 
         })
         .error( function(e,xhr,error) { 
-            jQuery('#wple_jobs_log').append( "There was a problem fetching the job list.<br>" );
-            jQuery('#wple_jobs_log').append( "The server responded: " + e.responseText + "<br>" );
+            jQuery('#wple_jobs_log').append( "There was a problem fetching the job list. " );
+            jQuery('#wple_jobs_log').append( "The server responded:<hr>" + self.escapeHtml( e.responseText ) + "<hr>" );
             jQuery('#wple_jobs_window .btn_close').show();
+            jQuery('#wple_jobs_window .btn_cancel').hide();
             // alert( "There was a problem fetching the job list. The server responded:\n\n" + e.responseText ); 
             console.log( "error", xhr, error ); 
             console.log( e.responseText ); 
@@ -161,6 +169,7 @@ WpLister.JobRunner = function () {
             // quit on other errors
             jQuery('#wple_jobs_log').append( "A problem occured while processing this task. The server responded with code " + e.status + ": " + e.responseText + "<br>" );
             jQuery('#wple_jobs_window .btn_close').show();
+            jQuery('#wple_jobs_window .btn_cancel').hide();
             // alert( "There was a problem running the task '"+task.displayName+"'.\n\nThe server responded:\n" + e.responseText + '\n\nPlease contact support@wplab.com.' ); 
             console.log( "XHR object", e ); 
             console.log( "error", xhr, error ); 
@@ -356,6 +365,7 @@ WpLister.JobRunner = function () {
                 // quit on other errors
                 jQuery('#wple_jobs_log').append( "A problem occured while processing this task. The server responded with code " + e.status + ": " + e.responseText + "<br>" );
                 jQuery('#wple_jobs_window .btn_close').show();
+                jQuery('#wple_jobs_window .btn_cancel').hide();
                 // alert( "There was a problem running the task '"+task.displayName+"'.\n\nThe server responded:\n" + e.responseText + '\n\nPlease contact support@wplab.com.' ); 
                 console.log( "XHR object", e ); 
                 console.log( "error", xhr, error ); 
@@ -369,6 +379,13 @@ WpLister.JobRunner = function () {
     }
 
     var nextTask = function () {
+
+        if ( self.cancel_operation ) {
+            jQuery('#wple_jobs_message').html('Processing was cancelled');
+            jQuery('#wple_jobs_window .btn_close').show();
+            jQuery('#wple_jobs_window .btn_cancel').hide();
+            return;
+        }
 
         self.currentTask++;
         self.retryCount=0;
@@ -431,10 +448,13 @@ WpLister.JobRunner = function () {
                 jQuery('#wple_jobs_window .btn_close').show();
             }
 
+            jQuery('#wple_jobs_window .btn_cancel').hide();
+
         })
         .error( function(e,xhr,error) { 
             jQuery('#wple_jobs_log').append( "problem completing job - server responded: " + e.responseText + "<br>" );
             jQuery('#wple_jobs_window .btn_close').show();
+            jQuery('#wple_jobs_window .btn_cancel').hide();
             alert( "There was a problem completing this job.\n\nThe server responded:\n" + e.responseText + '\n\nPlease report this to support.' ); 
             console.log( "error", xhr, error ); 
             console.log( e.responseText ); 
@@ -462,10 +482,21 @@ WpLister.JobRunner = function () {
 
         // hide close button
         jQuery('#wple_jobs_window .btn_close').hide();
+        jQuery('#wple_jobs_window .btn_cancel').show();
 
         // show window
         tb_show("Jobs", tbURL);             
 
+    }
+
+    // js equivalent of htmlspecialchars()
+    var escapeHtml = function ( text ) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
     var updateProgressBar = function ( value ) {
@@ -482,6 +513,7 @@ WpLister.JobRunner = function () {
         nextTask: nextTask,
         completeJob: completeJob,
         updateProgressBar: updateProgressBar,
+        escapeHtml: escapeHtml,
         showWindow: showWindow
     }
 }();

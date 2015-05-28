@@ -57,7 +57,7 @@ class EbayShippingModel extends WPL_Model {
 				
 	}
 
-	function storeShippingDetail($type, & $Detail)
+	function storeShippingDetail( $type, $Detail )
 	{
 		global $wpdb;
 

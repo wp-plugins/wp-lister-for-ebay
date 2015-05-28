@@ -183,16 +183,18 @@
 
 							<label for="wpl-wc2_gallery_fallback" class="text_label">
 								<?php echo __('Product Gallery','wplister'); ?>
-                                <?php wplister_tooltip('In order to get additional product images, WP-Lister first checks if there is a dedicated <i>Product Gallery</i> (WC 2.0+).<br>
-                                						If there\'s not, it can use all images which were uploaded (attached) to the product - as it was the usual behaviour in WooCommerce 1.x.') ?>
+                                <?php wplister_tooltip('In order to find additional product images, WP-Lister first checks if there is a dedicated <i>Product Gallery</i> (WC 2.0+).<br>
+                                						If there\'s none, it can use all images which were uploaded (attached) to the product - as it was the default behaviour in WooCommerce 1.x.') ?>
 							</label>
 							<select id="wpl-wc2_gallery_fallback" name="wpl_e2e_wc2_gallery_fallback" class="required-entry select">
 								<option value="attached" <?php if ( $wpl_wc2_gallery_fallback == 'attached' ): ?>selected="selected"<?php endif; ?>><?php echo __('use attached images if no Gallery found','wplister'); ?></option>
-								<option value="none"     <?php if ( $wpl_wc2_gallery_fallback == 'none'     ): ?>selected="selected"<?php endif; ?>><?php echo __('no fallback','wplister'); ?></option>
+								<option value="none"     <?php if ( $wpl_wc2_gallery_fallback == 'none'     ): ?>selected="selected"<?php endif; ?>><?php echo __('use Product Gallery images','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
 							</select>
+							<?php if ( $wpl_wc2_gallery_fallback == 'attached' ): ?>
 							<p class="desc" style="display: block;">
 								<?php echo __('If you find unwanted images in your listings try disabling this option.','wplister'); ?>
 							</p>
+							<?php endif; ?>
 
 							<label for="wpl-gallery_items_limit" class="text_label">
 								<?php echo __('Gallery Widget limit','wplister'); ?>
@@ -352,6 +354,15 @@
 							<input type="text" name="wpl_e2e_exclude_attributes" id="wpl-exclude_attributes" value="<?php echo $wpl_exclude_attributes; ?>" class="text_input" />
 							<p class="desc" style="display: block;">
 								<?php echo __('Enter a comma separated list of product attributes to exclude from eBay.','wplister'); ?><br>
+							</p>
+
+							<label for="wpl-exclude_variation_values" class="text_label">
+								<?php echo __('Exclude variations','wplister') ?>
+                                <?php wplister_tooltip('If you want to hide certain variations from eBay enter their attribute values separated by commas here.<br>Example: Brown,Blue,Orange') ?>
+							</label>
+							<input type="text" name="wpl_e2e_exclude_variation_values" id="wpl-exclude_variation_values" value="<?php echo $wpl_exclude_variation_values; ?>" class="text_input" />
+							<p class="desc" style="display: block;">
+								<?php echo __('Enter a comma separated list of variation attribute values to exclude from eBay.','wplister'); ?><br>
 							</p>
 
 							<label for="wpl-enable_item_compat_tab" class="text_label">
