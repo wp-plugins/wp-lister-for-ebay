@@ -320,6 +320,19 @@
 						<h3 class="hndle"><span><?php echo __('Misc options','wplister') ?></span></h3>
 						<div class="inside">
 
+							<label for="wpl-autofill_missing_gtin" class="text_label">
+								<?php echo __('Missing Product Identifiers','wplister'); ?>
+                                <?php wplister_tooltip('eBay requires product identifiers (UPC/EAN) in selected categories starting 2015 - missing EANs/UPCs can cause the revise process to fail.<br><br>If your products do not have either UPCs or EANs, please use this option.') ?>
+							</label>
+							<select id="wpl-autofill_missing_gtin" name="wpl_e2e_autofill_missing_gtin" class="required-entry select">
+								<option value=""  <?php if ( $wpl_autofill_missing_gtin == ''  ): ?>selected="selected"<?php endif; ?>><?php echo __('Do nothing','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
+								<option value="upc" <?php if ( $wpl_autofill_missing_gtin == 'upc' ): ?>selected="selected"<?php endif; ?>><?php echo __('If UPC is empty use "Does not apply" instead','wplister'); ?></option>
+								<option value="ean" <?php if ( $wpl_autofill_missing_gtin == 'ean' ): ?>selected="selected"<?php endif; ?>><?php echo __('If EAN is empty use "Does not apply" instead','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Enable this option if your products do not have UPCs or EANs.','wplister'); ?>
+							</p>
+
 							<label for="wpl-option-local_timezone" class="text_label">
 								<?php echo __('Local timezone','wplister') ?>
                                 <?php wplister_tooltip('This is currently used to convert the order creation date from UTC to local time.') ?>
@@ -345,6 +358,19 @@
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('Convert length, width and height to the unit required by eBay.','wplister'); ?>
+							</p>
+
+							<label for="wpl-convert_attributes_mode" class="text_label">
+								<?php echo __('Use attributes as item specifics','wplister'); ?>
+                                <?php wplister_tooltip('The default is to convert all WooCommerce product attributes to item specifics on eBay.<br><br>If you disable this option, only the item specifics defined in your listing profile will be sent to eBay.') ?>
+							</label>
+							<select id="wpl-convert_attributes_mode" name="wpl_e2e_convert_attributes_mode" class="required-entry select">
+								<option value="all"    <?php if ( $wpl_convert_attributes_mode == 'all'    ): ?>selected="selected"<?php endif; ?>><?php echo __('Convert all attributes to item specifics','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
+								<option value="single" <?php if ( $wpl_convert_attributes_mode == 'single' ): ?>selected="selected"<?php endif; ?>><?php echo __('Convert all attributes, but disable multi value attributes','wplister'); ?></option>
+								<option value="none"   <?php if ( $wpl_convert_attributes_mode == 'none'   ): ?>selected="selected"<?php endif; ?>><?php echo __('Disabled','wplister'); ?></option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Disable this option if you do not want all product attributes to be sent to eBay.','wplister'); ?>
 							</p>
 
 							<label for="wpl-exclude_attributes" class="text_label">
@@ -425,6 +451,21 @@
 							</select>
 							<p class="desc" style="display: block;">
 								<?php echo __('Automatically update item details from eBay when a listing has ended.','wplister'); ?> (beta)
+							</p>
+
+							<label for="wpl-archive_days_limit" class="text_label">
+								<?php echo __('Keep archived items for','wplister'); ?>
+                                <?php wplister_tooltip('Select how long archived listings should be kept. Older records are removed automatically. The default is 90 days.') ?>
+							</label>
+							<select id="wpl-archive_days_limit" name="wpl_e2e_archive_days_limit" class=" required-entry select">
+								<option value="7"  <?php if ( $wpl_archive_days_limit == '7' ):  ?>selected="selected"<?php endif; ?>>7 days</option>
+								<option value="14"  <?php if ( $wpl_archive_days_limit == '14' ):  ?>selected="selected"<?php endif; ?>>14 days</option>
+								<option value="30"  <?php if ( $wpl_archive_days_limit == '30' ):  ?>selected="selected"<?php endif; ?>>30 days</option>
+								<option value="60"  <?php if ( $wpl_archive_days_limit == '60' ):  ?>selected="selected"<?php endif; ?>>60 days</option>
+								<option value="90"  <?php if ( $wpl_archive_days_limit == '90' ):  ?>selected="selected"<?php endif; ?>>90 days</option>
+							</select>
+							<p class="desc" style="display: block;">
+								<?php echo __('Select how long archived listings should be kept.','wplister'); ?>
 							</p>
 
 						</div>

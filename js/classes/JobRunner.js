@@ -167,7 +167,7 @@ WpLister.JobRunner = function () {
         .error( function(e,xhr,error) { 
 
             // quit on other errors
-            jQuery('#wple_jobs_log').append( "A problem occured while processing this task. The server responded with code " + e.status + ": " + e.responseText + "<br>" );
+            jQuery('#wple_jobs_log').append( "A problem occurred while processing this task. The server responded with code " + e.status + ": " + e.responseText + "<br>" );
             jQuery('#wple_jobs_window .btn_close').show();
             jQuery('#wple_jobs_window .btn_cancel').hide();
             // alert( "There was a problem running the task '"+task.displayName+"'.\n\nThe server responded:\n" + e.responseText + '\n\nPlease contact support@wplab.com.' ); 
@@ -347,7 +347,7 @@ WpLister.JobRunner = function () {
 
                     // halt task processing
                     var logMsg = '<div class="logRow" style="height:auto;">';
-                    logMsg += 'A problem occured while processing this task. The server responded with HTTP code ' + e.status + ' and returned:<br>' + e.responseText + '<br>';
+                    logMsg += 'A problem occurred while processing this task. The server responded with HTTP code ' + e.status + ' and returned:<br>' + e.responseText + '<br>';
                     logMsg += '</div>';
                     jQuery('#wple_jobs_log').append( logMsg );
                     jQuery('#wple_jobs_window .btn_close').show();
@@ -363,7 +363,7 @@ WpLister.JobRunner = function () {
             } else {
     
                 // quit on other errors
-                jQuery('#wple_jobs_log').append( "A problem occured while processing this task. The server responded with code " + e.status + ": " + e.responseText + "<br>" );
+                jQuery('#wple_jobs_log').append( "A problem occurred while processing this task. The server responded with code " + e.status + ": " + e.responseText + "<br>" );
                 jQuery('#wple_jobs_window .btn_close').show();
                 jQuery('#wple_jobs_window .btn_cancel').hide();
                 // alert( "There was a problem running the task '"+task.displayName+"'.\n\nThe server responded:\n" + e.responseText + '\n\nPlease contact support@wplab.com.' ); 

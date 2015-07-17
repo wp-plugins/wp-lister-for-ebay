@@ -76,6 +76,21 @@ class CategoriesMapTable extends WP_List_Table {
         }
     }
     
+    function column_category( $item ) {
+        $category_name = $item['category'];
+
+        // indicate if category was imported from eBay
+        $term_id = $item['term_id'];
+        if ( $ebay_cat_id = get_woocommerce_term_meta( $term_id, '_ebay_category_id' ) ) {
+            $full_cat_path = strip_tags( EbayCategoriesModel::getFullStoreCategoryName( $ebay_cat_id ) );
+            $tooltip_msg   = 'This category has been imported from eBay.<br><br>Original eBay Store category:<br><b>'.$full_cat_path.'</b><br>(ID '.$ebay_cat_id.')';
+            $img_url       = WPLISTER_URL . '/img/info.png';
+            $category_name .= '&nbsp;<img src="'.$img_url.'" style="height:12px; padding:0;" class="tips" data-tip="'.$tooltip_msg.'"/>';
+        }
+
+        return $category_name;
+    }
+    
     function column_ebay_category( $item ) {
         $account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : get_option('wplister_default_account_id') );
         $site_id    = isset( WPLE()->accounts[ $account_id ] ) ? WPLE()->accounts[ $account_id ]->site_id : false;

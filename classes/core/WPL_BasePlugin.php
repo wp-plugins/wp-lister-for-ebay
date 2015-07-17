@@ -49,7 +49,7 @@ class WPL_BasePlugin extends WPL_Core {
 
 	    // if fatal error
 	    if( $error['type'] === E_ERROR ) {
-	        // fatal error has occured
+	        // fatal error has occurred
 	        echo "<pre>FATAL ERROR:\n";print_r($error);echo"</pre>";
 
 	        // backtrace - doesn't work as it will only show the shutdown handler :-(

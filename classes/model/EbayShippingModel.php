@@ -291,6 +291,33 @@ class EbayShippingModel extends WPL_Model {
 				
 	}
 	
+	// this should go into another class eventually
+	function fetchDoesNotApplyText( $session, $site_id )
+	{
+		$this->logger->info( "fetchDoesNotApplyText()" );
+		$this->initServiceProxy($session);
+		
+		// download ebay details 
+		$req = new GeteBayDetailsRequestType();
+        $req->setDetailName( 'ProductDetails' );
+		
+		$res = $this->_cs->GeteBayDetails($req);
+
+		// handle response and check if successful
+		if ( $this->handleResponse($res) ) {
+
+			// get text - default is 'Does not apply'
+			$DoesNotApplyText = $res->ProductDetails->ProductIdentifierUnavailableText;
+			
+			// update site property
+			$Site = new WPLE_eBaySite( $site_id );
+			$Site->DoesNotApplyText = $DoesNotApplyText;
+			$Site->update();
+
+		} // call successful
+				
+	} // fetchDoesNotApplyText()
+	
 	
 
 

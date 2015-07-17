@@ -130,7 +130,7 @@ class WPL_Model {
 	//  - display any errors
 	//  - display any warning - except #21917103
 	//  - returns true on success (even with warnings) and false on failure
-	function handleResponse( $res )	{
+	function handleResponse( $res, $is_second_request = false )	{
 
 		$errors = array();
 		$this->handle_error_code = null;
@@ -326,6 +326,17 @@ class WPL_Model {
 				$longMessage .= 'This message indicates an error on the eBay server side.<br>';
 				$longMessage .= 'You should try using a different primary category for your listing - if that does not help, please contact support.';
 			}
+
+
+			// handle PartialFailure on CompleteSale requests
+
+			// #21919444 - Warning: Duplicate request, seller has already marked paid. 
+			// (ignore redundant warning for orders already paid on eBay)
+			if ( $error->getErrorCode() == 21919444 ) { 
+				// change status from PartialFailure to Warning - because the request was (partially) successful after all
+				$res->setAck('Warning');
+				continue; 
+			}
 			
 
 			// some errors like #240 may return an extra ErrorParameters array
@@ -393,15 +404,20 @@ class WPL_Model {
 			$success = false;
 		} 
 
-		// save results as local property
-		$this->result = new stdClass();
-		$this->result->success = $success;
-		$this->result->errors  = $errors;
+		// save results as local property - except for GetItem calls following a ReviseItem call
+		// if ( ! isset($this->result) && get_class($res) != 'GetItemResponseType' ) {
+		if ( ! $is_second_request ) {
+			$this->result = new stdClass();
+			$this->result->success = $success;
+			$this->result->errors  = $errors;
+			$this->save_last_result(); // store result in db to show after edit product redirect
+		}
 
-		// save last result - except for GetItem calls which usually follow ReviseItem calls
-		if ( 'GetItemResponseType' != get_class($res) )
-			$this->save_last_result();
-		// $this->logger->info('handleResponse() - result: '.print_r($this->result,1));
+		// // save last result - except for GetItem calls which usually follow ReviseItem calls
+		// if ( 'GetItemResponseType' != get_class($res) )
+		// 	$this->save_last_result();
+		// // $this->logger->info('handleResponse() - type: '.get_class($res));
+		// // $this->logger->info('handleResponse() - result: '.print_r($this->result,1));
 
 		return $success;
 

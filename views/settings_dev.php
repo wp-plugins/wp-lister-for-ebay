@@ -310,13 +310,6 @@
 								Don't change this unless you migrated your installation to a different domain.
 							</p>
 
-							<label for="wpl-text-ebay_token" class="text_label"><?php echo __('eBay token','wplister'); ?></label>
-							<input type="text" name="wpl_e2e_text_ebay_token" id="wpl-text-ebay_token" value="<?php echo $wpl_text_ebay_token; ?>" class="text_input" />
-							<p class="desc" style="display: block;">
-								<?php #echo __('To use this application you need to generate an eBay token.','wplister'); ?>
-								Please use the setup wizard to link WP-Lister to your eBay account. Entering the token manually should only be neccessary for developers when using sandbox mode.
-							</p>
-
 						</div>
 					</div>
 

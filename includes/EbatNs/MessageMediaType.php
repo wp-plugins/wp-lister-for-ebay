@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -9,7 +9,7 @@ require_once 'EbatNs_ComplexType.php';
 /**
   * Container for the image file that is to be sent in a message, which lets sellers share photos in messages using the API. 
   * The photo must be uploaded by the seller or buyer to 
-  * <a href="http://developer.ebay.com/devzone/xml/docs/reference/ebay/uploadsitehostedpictures.html">Zoom/EPS (eBay Picture Services)</a>
+  * <a href="http://developer.ebay.com/devzone/xml/docs/reference/ebay/uploadsitehostedpictures.html">EPS (eBay Picture Services)</a>
   * using a separate API call or the web flow. After the image is on the eBay server, you can 
   * use <b>AddMemberMessage</b> calls to pass the URL of the image in a message. The 
   * uploaded images will be available as part of the email as a thumbnail image. 

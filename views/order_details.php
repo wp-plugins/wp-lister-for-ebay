@@ -4,7 +4,7 @@
 
 ?><html>
 <head>
-    <title>Transaction details</title>
+    <title>eBay order <?php echo $wpl_ebay_order['order_id'] ?></title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <style type="text/css">
         body,td,p { color:#2f2f2f; font:12px/16px "Open Sans",sans-serif; }
@@ -68,6 +68,7 @@
             <br>
             <b>Shipping service:</b><br>
             <?php echo $d->ShippingServiceSelected->ShippingService ?> <br>
+            Shipping cost: <?php echo $d->ShippingServiceSelected->ShippingServiceCost->value ?> <?php echo $d->ShippingServiceSelected->ShippingServiceCost->attributeValues['currencyID'] ?> <br>
             <br>
 
         </td><td width="50%" valign="top">
@@ -88,6 +89,10 @@
             <br>
             <b>Payment method:</b><br>
             <?php echo $d->CheckoutStatus->PaymentMethod ?> <br>
+            <br>
+            <br>
+            <b>Order Total:</b><br>
+            <?php echo $d->Total->value ?> <?php echo $d->Total->attributeValues['currencyID'] ?> <br>
             <br>
             
         </td></tr>

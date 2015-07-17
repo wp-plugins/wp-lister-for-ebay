@@ -19,6 +19,7 @@ class WPL_CronActions extends WPL_Core {
 
 		// add internal action hooks
 		add_action('wple_clean_log_table', 				array( &$this, 'action_clean_log_table' ) );
+		add_action('wple_clean_listing_archive', 		array( &$this, 'action_clean_listing_archive' ) );
 
 
 	}
@@ -95,6 +96,9 @@ class WPL_CronActions extends WPL_Core {
 		// clean log table
 		do_action('wple_clean_log_table');
 
+		// clean archive
+		do_action('wple_clean_listing_archive');
+
 		// store timestamp
 		update_option( 'wple_daily_cron_last_run', time() );
 
@@ -108,6 +112,13 @@ class WPL_CronActions extends WPL_Core {
 			$wpdb->query('DELETE FROM '.$wpdb->prefix.'ebay_log WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.intval($days_to_keep).' DAY )');
 		}
 	} // action_clean_log_table()
+
+	public function action_clean_listing_archive() {
+		global $wpdb;
+		if ( $days_to_keep = get_option( 'wplister_archive_days_limit', 90 ) ) {			
+			$wpdb->query('DELETE FROM '.$wpdb->prefix.'ebay_auctions WHERE status = "archived" AND end_date < DATE_SUB(NOW(), INTERVAL '.intval($days_to_keep).' DAY )');
+		}
+	} // action_clean_listing_archive()
 
 
 	public function checkLock() {

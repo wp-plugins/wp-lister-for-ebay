@@ -41,6 +41,9 @@ class wsScreenOptions10 {
 	 * @return void
 	 */
 	function add_screen_options_panel($id, $title, $callback, $page, $save_callback = null, $autosave = false){
+
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) return; // fix warning on redux framework
+
 		if ( !is_array($page) ){
 			$page = array($page);
 		}

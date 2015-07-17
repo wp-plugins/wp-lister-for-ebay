@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -120,6 +120,9 @@ require_once 'ConditionEnabledDefinitionType.php';
 require_once 'ConditionValuesDefinitionType.php';
 require_once 'ValueCategoryDefinitionType.php';
 require_once 'ProductCreationEnabledDefinitionType.php';
+require_once 'EANEnabledDefinitionType.php';
+require_once 'ISBNEnabledDefinitionType.php';
+require_once 'UPCEnabledDefinitionType.php';
 require_once 'CompatibleVehicleTypeDefinitionType.php';
 require_once 'MaxGranularFitmentCountDefinitionType.php';
 require_once 'PaymentOptionsGroupEnabledDefinitionType.php';
@@ -715,6 +718,21 @@ class FeatureDefinitionsType extends EbatNs_ComplexType
 	* @var ProductCreationEnabledDefinitionType
 	**/
 	protected $ProductCreationEnabled;
+
+	/**
+	* @var EANEnabledDefinitionType
+	**/
+	protected $EANEnabled;
+
+	/**
+	* @var ISBNEnabledDefinitionType
+	**/
+	protected $ISBNEnabled;
+
+	/**
+	* @var UPCEnabledDefinitionType
+	**/
+	protected $UPCEnabled;
 
 	/**
 	* @var CompatibleVehicleTypeDefinitionType
@@ -1708,6 +1726,30 @@ class FeatureDefinitionsType extends EbatNs_ComplexType
 				array(
 					'required' => false,
 					'type' => 'ProductCreationEnabledDefinitionType',
+					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
+					'array' => false,
+					'cardinality' => '0..1'
+				),
+				'EANEnabled' =>
+				array(
+					'required' => false,
+					'type' => 'EANEnabledDefinitionType',
+					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
+					'array' => false,
+					'cardinality' => '0..1'
+				),
+				'ISBNEnabled' =>
+				array(
+					'required' => false,
+					'type' => 'ISBNEnabledDefinitionType',
+					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
+					'array' => false,
+					'cardinality' => '0..1'
+				),
+				'UPCEnabled' =>
+				array(
+					'required' => false,
+					'type' => 'UPCEnabledDefinitionType',
 					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
 					'array' => false,
 					'cardinality' => '0..1'
@@ -3660,6 +3702,54 @@ class FeatureDefinitionsType extends EbatNs_ComplexType
 	function setProductCreationEnabled($value)
 	{
 		$this->ProductCreationEnabled = $value;
+	}
+
+	/**
+	 * @return EANEnabledDefinitionType
+	 **/
+	function getEANEnabled()
+	{
+		return $this->EANEnabled;
+	}
+
+	/**
+	 * @return void
+	 **/
+	function setEANEnabled($value)
+	{
+		$this->EANEnabled = $value;
+	}
+
+	/**
+	 * @return ISBNEnabledDefinitionType
+	 **/
+	function getISBNEnabled()
+	{
+		return $this->ISBNEnabled;
+	}
+
+	/**
+	 * @return void
+	 **/
+	function setISBNEnabled($value)
+	{
+		$this->ISBNEnabled = $value;
+	}
+
+	/**
+	 * @return UPCEnabledDefinitionType
+	 **/
+	function getUPCEnabled()
+	{
+		return $this->UPCEnabled;
+	}
+
+	/**
+	 * @return void
+	 **/
+	function setUPCEnabled($value)
+	{
+		$this->UPCEnabled = $value;
 	}
 
 	/**

@@ -19,7 +19,7 @@
         <a href="<?php echo $wpl_settings_url; ?>&tab=settings"   class="nav-tab <?php echo $active_tab == 'settings' ? 'nav-tab-active' : ''; ?>"><?php echo __('General Settings','wplister') ?></a>  
         <?php endif; ?>
 
-        <a href="<?php echo $wpl_settings_url; ?>&tab=accounts"  class="nav-tab <?php echo $active_tab == 'accounts' ? 'nav-tab-active' : ''; ?>"><?php echo __('Account','wplister') ?></a>  
+        <a href="<?php echo $wpl_settings_url; ?>&tab=accounts"  class="nav-tab <?php echo $active_tab == 'accounts' ? 'nav-tab-active' : ''; ?>"><?php echo __('Accounts','wplister') ?></a>  
 
         <?php if ( ! is_network_admin() ) : ?>
         <a href="<?php echo $wpl_settings_url; ?>&tab=categories" class="nav-tab <?php echo $active_tab == 'categories' ? 'nav-tab-active' : ''; ?>"><?php echo __('Categories','wplister') ?></a>  

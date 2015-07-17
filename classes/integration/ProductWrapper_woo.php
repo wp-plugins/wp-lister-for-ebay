@@ -658,16 +658,22 @@ class ProductWrapper {
 	 * private functions (WooCommerce only)
 	 */
 
-	// check if product is single variation (used for split variations) (private)
+	// check if product is single variation
 	static function getVariationParent( $post_id ) {
 
-        if ( ! $post_id ) return false;
-        $post = get_post( $post_id );
+		$product = self::getProduct( $post_id );
+		if ( $product && $product->product_type == 'variation' ) return $product->parent->post->ID;
 
-        if ( empty( $post->post_parent ) || $post->post_parent == $post->ID )
-                return false;
+		return false;
 
-        return $post->post_parent;
+		// // the code below isn't specific enough - it treats grouped child products as variations as well:
+        // if ( ! $post_id ) return false;
+        // $post = get_post( $post_id );
+
+        // if ( empty( $post->post_parent ) || $post->post_parent == $post->ID )
+        //         return false;
+
+        // return $post->post_parent;
 	}	
 	
 	// find variation by attributes (private)

@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -33,6 +33,7 @@ class DetailNameCodeType extends EbatNs_FacetType
 	const CodeType_ExcludeShippingLocationDetails = 'ExcludeShippingLocationDetails';
 	const CodeType_RecoupmentPolicyDetails = 'RecoupmentPolicyDetails';
 	const CodeType_ShippingCategoryDetails = 'ShippingCategoryDetails';
+	const CodeType_ProductDetails = 'ProductDetails';
 
 	/**
 	 * @return 

@@ -196,6 +196,9 @@ class WPLE_eBayAccount extends WPL_Core {
 		if ( $user_details ) {
 			$this->user_name 	= $user_details->UserID;
 			$this->user_details = maybe_serialize( $user_details );
+			if ( $this->title == 'My Account' ) {
+				$this->title    = $user_details->UserID; // use UserID as default title for new accounts
+			}
 			$this->update();
 		}
 

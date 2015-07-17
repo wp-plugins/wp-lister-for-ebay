@@ -1166,6 +1166,20 @@ class WPLE_UpgradeHelper {
 			$msg  = __('Database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}
 
+		// upgrade to version 45  (2.0.9.5)
+		if ( 45 > $db_version ) {
+			$new_db_version = 45;
+
+			// add column to ebay_sites table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_sites`
+			        ADD COLUMN `DoesNotApplyText` varchar(128) NOT NULL AFTER `ExcludeShippingLocationDetails`
+			";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('Database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
 
 		// show update message
 		if ( $msg && ! $hide_message ) wple_show_message($msg,'info');		
@@ -1174,5 +1188,48 @@ class WPLE_UpgradeHelper {
 		
 	} // upgradeDB()
 
+
+	/**
+	 * If a table only contains utf8 or utf8mb4 or latin1 columns, convert it to utf8mb4.
+	 * (modified version of maybe_convert_table_to_utf8mb4() in wp core)
+	 *
+	 * @since 0.9.6.5
+	 *
+	 * @param string $table The table to convert.
+	 * @return bool true if the table was converted, false if it wasn't.
+	 */
+	static function convert_custom_table_to_utf8mb4( $table ) {
+		global $wpdb;
+		global $wp_version;
+
+		// do nothing before wp42
+		if ( version_compare( $wp_version, '4,2', '<') ) {
+			wple_show_message('WordPress 4.2 or better required - your version is '.$wp_version, 'error');
+			return false;
+		}
+
+		// get column information
+		$results = $wpdb->get_results( "SHOW FULL COLUMNS FROM `$table`" );
+		if ( ! $results ) {
+			wple_show_message("no columns found for $table",'error');
+			return false;
+		}
+
+		// check charset for each column
+		foreach ( $results as $column ) {
+			if ( $column->Collation ) {
+				list( $charset ) = explode( '_', $column->Collation );
+				$charset = strtolower( $charset );
+				if ( 'utf8' !== $charset && 'utf8mb4' !== $charset && 'latin1' !== $charset ) {
+					// Don't upgrade tables that have non-utf8 and non-latin1 columns.
+					wple_show_message("skipped column $column in table $table with charset: $charset",'error');
+					return false;
+				}
+			}
+		}
+
+		// convert
+		return $wpdb->query( "ALTER TABLE $table CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" );
+	}
 
 } // class WPLE_UpgradeHelper

@@ -284,7 +284,7 @@ class TemplatesModel extends WPL_Model {
 
 
 		// process simple text shortcodes (used for title as well)
-		$tpl_html = $this->processAllTextShortcodes( $item['post_id'], $tpl_html );
+		$tpl_html = $this->processAllTextShortcodes( $item['post_id'], $tpl_html, false, $ItemObj );
 
 		// process custom fields
 		$tpl_html = $this->processCustomFields( $tpl_html );
@@ -427,7 +427,12 @@ class TemplatesModel extends WPL_Model {
 		// replace shortcodes
 		$tpl_html = str_replace( '[[product_variations]]', $variations_html, $tpl_html );
 
-		
+		// handle split variations - get description from parent post_id
+		if ( ProductWrapper::isSingleVariation( $post_id ) ) {
+			$post = get_post( $item['parent_id'] );
+			$item['post_content'] = $post->post_content;
+		}
+
 		// handle addons
     	// generate addons table
     	$addons_html = $this->getAddonsHTML( $item );
@@ -492,7 +497,7 @@ class TemplatesModel extends WPL_Model {
 	} // processMainContentShortcode()
 
 
-	public function processAllTextShortcodes( $post_id, $tpl_html, $max_length = false ) {
+	public function processAllTextShortcodes( $post_id, $tpl_html, $max_length = false, $ItemObj = false ) {
 
 		// get item object
 		$listingsModel = new ListingsModel();
@@ -512,9 +517,11 @@ class TemplatesModel extends WPL_Model {
 		$tpl_html = str_replace( '[[product_additional_content_nl2br]]', nl2br( $listingsModel->getRawPostExcerpt( $product_id ) ), $tpl_html );
 		
 		// product price
-		$tpl_html = str_replace( '[[product_price]]', number_format_i18n( floatval($item['price']), 2 ), $tpl_html );
-		$tpl_html = str_replace( '[[product_price_raw]]', $item['price'], $tpl_html );
-
+		$item_price = $item['price'];
+		if ( $ItemObj && $ItemObj->StartPrice ) $item_price = $ItemObj->StartPrice->value;
+		if ( $ItemObj && $ItemObj->Variations ) $item_price = $ItemObj->Variations->Variation[0]->StartPrice;
+		$tpl_html = str_replace( '[[product_price]]', number_format_i18n( floatval($item_price), 2 ), $tpl_html );
+		$tpl_html = str_replace( '[[product_price_raw]]', $item_price, $tpl_html );
 
 		// product_category
 		$tpl_html = str_replace( '[[product_category]]', ProductWrapper::getProductCategoryName( $post_id ), $tpl_html );
@@ -660,6 +667,8 @@ class TemplatesModel extends WPL_Model {
 		if ( preg_match_all("/\\[\\[meta_(.*)\\]\\]/uUsm", $tpl_html, $matches ) ) {
 			foreach ( $matches[1] as $meta_name ) {
 				$meta_value = get_post_meta( $post_id, $meta_name, true );
+				// $meta_value = wpautop( $meta_value ); // might do more harm than good 
+				$meta_value = nl2br( $meta_value );      // required for WYSIWYG fields by Advanced Custom Field plugin (and probably others)
 				$processed_html = str_replace( '[[meta_'.$meta_name.']]', $meta_value,  $tpl_html );		
 
 				// check if string exceeds max_length after processing shortcode

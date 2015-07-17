@@ -10,7 +10,7 @@
 	#wpl_preview_header,
 	#wpl_preview_header th,
 	#wpl_preview_header td {
-		font-family: Arial,Helvetica,sans-serif;
+		font-family: "Helvetica neue",Helvetica,Verdana,Sans-serif;
 		font-size: small;
 	}
 
@@ -21,7 +21,16 @@
 		line-height: normal;
 		margin: 0;
 		padding: 0;
-		font-family: Trebuchet,"Trebuchet MS";
+		/*font-family: Trebuchet,"Trebuchet MS";*/
+	}
+
+	#wpl_preview_header h2.listing-subtitle {
+		font-size: small;
+		color: #777!important;
+		margin: 0;
+		padding: 0;
+		font-weight: normal;
+		line-height: normal;
 	}
 
 	#wpl_preview_header .main_image_wrapper {
@@ -73,7 +82,7 @@
 	.vi-is1-prcp {
 		font-size: medium;
 		font-weight: bold;
-		font-family: Trebuchet MS;
+		/*font-family: Trebuchet MS;*/
 		padding: 0;
 		color: #333;
 		white-space: nowrap;
@@ -122,6 +131,11 @@
 					<h1 class="listing-title">
 						<?php echo $wpl_item->Title ?>
 					</h1>
+					<?php if ( $wpl_item->SubTitle ) : ?>
+					<h2 class="listing-subtitle it-sttl">
+						<?php echo $wpl_item->SubTitle ?>
+					</h2>
+					<?php endif; ?>
 					<hr>
 
 					<table width="100%" cellspacing="0" cellpadding="0">

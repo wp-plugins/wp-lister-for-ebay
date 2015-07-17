@@ -141,6 +141,7 @@ class ProfilesPage extends WPL_Page {
 
 		// process custom attributes
 		$custom_attributes = apply_filters( 'wplister_custom_attributes', array() );
+		if ( is_array( $custom_attributes ) )
 		foreach ( $custom_attributes as $attrib ) {
 
 			$new_attribute = new stdClass();

@@ -193,9 +193,24 @@ class EbayOrdersTable extends WP_List_Table {
             $display_price = woocommerce_price( $item['total'] );
         }
 
-        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
+        // check if WP-Lister did reduce stock for purchased items
+        $history = maybe_unserialize( $item['history'] );
+        $history = is_array( $history ) ? $history : array();
+        $icons   = '';
+        foreach ( $history as $record ) {
+            if ( $record->action == 'reduce_stock' ) {
+                if ( isset( $record->details['product_id'] ) ) {
+                    $tipmsg   = 'Stock level for product #'.$record->details['product_id'].' has been reduced automatically.';
+                    $img_url  = WPLISTER_URL . '/img/icon-success.png';
+                    $icons   .= '&nbsp;<img src="'.$img_url.'" style="height:12px; padding:0;" class="tips" data-tip="'.$tipmsg.'"/>';                
+                }
+            }
+        } // each history record
+
+        return sprintf('%1$s <br><span style="color:silver">%2$s</span>%3$s',
             /*$1%s*/ $display_price,
-            /*$2%s*/ $item_count
+            /*$2%s*/ $item_count,
+            /*$3%s*/ $icons
         );
     }
     function column_buyer_name($item){

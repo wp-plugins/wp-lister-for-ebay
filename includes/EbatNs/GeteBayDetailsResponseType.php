@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -29,9 +29,10 @@ require_once 'VariationDetailsType.php';
 require_once 'ExcludeShippingLocationDetailsType.php';
 require_once 'RecoupmentPolicyDetailsType.php';
 require_once 'ShippingCategoryDetailsType.php';
+require_once 'ProductDetailsType.php';
 
 /**
-  * Details about a specified site in response to <b>GeteBayDetailsRequest</b>. 
+  * Details about a specified site in response to <b>GeteBayDetailsRequest</b>.
   * If no <b>DetailName</b>
   * field is identified in the request, all elements of <b>GeteBayDetailsResponse</b> are
   * returned. Otherwise, eBay returns only the elements corresponding to the specified
@@ -166,6 +167,11 @@ class GeteBayDetailsResponseType extends AbstractResponseType
 	* @var ShippingCategoryDetailsType
 	**/
 	protected $ShippingCategoryDetails;
+
+	/**
+	* @var ProductDetailsType
+	**/
+	protected $ProductDetails;
 
 
 	/**
@@ -377,6 +383,14 @@ class GeteBayDetailsResponseType extends AbstractResponseType
 					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
 					'array' => true,
 					'cardinality' => '0..*'
+				),
+				'ProductDetails' =>
+				array(
+					'required' => false,
+					'type' => 'ProductDetailsType',
+					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
+					'array' => false,
+					'cardinality' => '0..1'
 				)));
 		}
 		$this->_attributes = array_merge($this->_attributes,
@@ -1354,6 +1368,22 @@ class GeteBayDetailsResponseType extends AbstractResponseType
 	function addShippingCategoryDetails($value)
 	{
 		$this->ShippingCategoryDetails[] = $value;
+	}
+
+	/**
+	 * @return ProductDetailsType
+	 **/
+	function getProductDetails()
+	{
+		return $this->ProductDetails;
+	}
+
+	/**
+	 * @return void
+	 **/
+	function setProductDetails($value)
+	{
+		$this->ProductDetails = $value;
 	}
 
 }

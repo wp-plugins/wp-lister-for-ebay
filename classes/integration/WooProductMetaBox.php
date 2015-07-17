@@ -288,7 +288,7 @@ class WpLister_Product_MetaBox {
 		 	<label for="wpl_ebay_epid">EPID</label>
 		 	<input type="text" class="short" name="wpl_ebay_epid" id="wpl_ebay_epid" 
 		 		   value="<?php echo get_post_meta( $post->ID, '_ebay_epid', true ) ?>" 
-		 		   placeholder="<?php _e('Enter a eBay Product ID (EPID) or click the search icon on the right.', 'wplister') ?>"> 
+		 		   placeholder="<?php _e('Enter an eBay Product ID (EPID) or click the search icon on the right.', 'wplister') ?>"> 
 			<?php echo $match_btn ?>
 		</p>
 		<?php
@@ -296,14 +296,20 @@ class WpLister_Product_MetaBox {
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_upc',
 			'label' 		=> __('UPC', 'wplister'),
-			'placeholder' 	=> __('Enter a UPC to use product details from the eBay catalog.', 'wplister'),
+			'placeholder' 	=> __('Enter the UPC for this product, if applicable.', 'wplister'),
+			'description' 	=> __('As of 2015, eBay requires product identifiers (UPC or EAN) in selected categories.<br><br>If your products do have neither UPCs nor EANs, leave this empty and enable the "Missing Product Identifiers" option on the advanced settings page.','wplister'),
+			'desc_tip'		=>  true,
+			'wrapper_class' => 'show_if_simple show_if_external',
 			'value'			=> get_post_meta( $post->ID, '_ebay_upc', true )
 		) );
 
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_ean',
 			'label' 		=> __('EAN', 'wplister'),
-			'placeholder' 	=> __('Enter an EAN to use product details from the eBay catalog.', 'wplister'),
+			'placeholder' 	=> __('Enter the EAN for this product, if applicable.', 'wplister'),
+			'description' 	=> __('As of 2015, eBay requires product identifiers (UPC or EAN) in selected categories.<br><br>If your products do have neither UPCs nor EANs, leave this empty and enable the "Missing Product Identifiers" option on the advanced settings page.','wplister'),
+			'desc_tip'		=>  true,
+			'wrapper_class' => 'show_if_simple show_if_external',
 			'value'			=> get_post_meta( $post->ID, '_ebay_ean', true )
 		) );
 
@@ -388,7 +394,7 @@ class WpLister_Product_MetaBox {
 
 				woocommerce_wp_select( array(
 					'id' 			=> 'wpl_ebay_seller_payment_profile_id',
-					'label' 		=> __('Payment profile', 'wplister'),
+					'label' 		=> __('Payment policy', 'wplister'),
 					'options' 		=> $seller_payment_profiles,
 					// 'description' 	=> __('Available conditions may vary for different categories.','wplister'),
 					'value'			=> get_post_meta( $post->ID, '_ebay_seller_payment_profile_id', true )
@@ -405,7 +411,7 @@ class WpLister_Product_MetaBox {
 
 				woocommerce_wp_select( array(
 					'id' 			=> 'wpl_ebay_seller_return_profile_id',
-					'label' 		=> __('Return profile', 'wplister'),
+					'label' 		=> __('Return policy', 'wplister'),
 					'options' 		=> $seller_return_profiles,
 					// 'description' 	=> __('Available conditions may vary for different categories.','wplister'),
 					'value'			=> get_post_meta( $post->ID, '_ebay_seller_return_profile_id', true )
@@ -1489,11 +1495,30 @@ class WpLister_Product_MetaBox {
 		// get current values - WC2.3
 		$_ebay_start_price       = get_post_meta( $variation_post_id, '_ebay_start_price'  		, true );
 		$_ebay_is_disabled       = get_post_meta( $variation_post_id, '_ebay_is_disabled'  		, true );
+		$_ebay_upc    		     = get_post_meta( $variation_post_id, '_ebay_upc'  				, true );
+		$_ebay_ean    		     = get_post_meta( $variation_post_id, '_ebay_ean'  				, true );
 
         ?>
-            <?php if ( get_option( 'wplister_enable_custom_product_prices', 1 ) == 1 ) : ?>
             <div>
 	        	<h4 style="border-bottom: 1px solid #ddd; margin:0; padding-top:1em; clear:both;"><?php _e('eBay Options', 'wplister'); ?></h4>
+                <p class="form-row form-row-first">
+                    <label>
+                        <?php _e('UPC', 'wplister'); ?>
+                        <a class="tips" data-tip="eBay will require product identifiers (UPC/EAN) for variations in selected categories starting September 2015.<br><br>If your products do not have a UPC or EAN, leave this empty and enable the <i>Missing Product Identifiers</i> option on the advanced settings page." href="#">[?]</a>
+                    </label> 
+                    <input type="text" name="variable_ebay_upc[<?php echo $loop; ?>]" class="" value="<?php echo $_ebay_upc ?>" />
+                </p>
+                <p class="form-row form-row-last">
+                    <label>
+                        <?php _e('EAN', 'wplister'); ?>
+                        <a class="tips" data-tip="eBay will require product identifiers (UPC/EAN) for variations in selected categories starting September 2015.<br><br>If your products do not have a UPC or EAN, leave this empty and enable the <i>Missing Product Identifiers</i> option on the advanced settings page." href="#">[?]</a>
+                    </label> 
+                    <input type="text" name="variable_ebay_ean[<?php echo $loop; ?>]" class="" value="<?php echo $_ebay_ean ?>" />
+                </p>
+            </div>
+
+            <?php if ( get_option( 'wplister_enable_custom_product_prices', 1 ) == 1 ) : ?>
+            <div>
                 <p class="form-row form-row-first">
                     <label>
                         <?php _e('eBay Price', 'wplister'); ?>
@@ -1526,6 +1551,8 @@ class WpLister_Product_MetaBox {
 			$variable_post_id              = $_POST['variable_post_id'];
 			$variable_ebay_start_price     = isset( $_POST['variable_ebay_start_price'] ) ? $_POST['variable_ebay_start_price'] : '';
 			$variable_ebay_is_disabled     = isset( $_POST['variable_ebay_is_disabled'] ) ? $_POST['variable_ebay_is_disabled'] : '';
+			$variable_ebay_upc     	       = isset( $_POST['variable_ebay_upc'] ) 		  ? $_POST['variable_ebay_upc'] 		: '';
+			$variable_ebay_ean     	       = isset( $_POST['variable_ebay_ean'] ) 		  ? $_POST['variable_ebay_ean'] 		: '';
 
             // if (isset($_POST['variable_enabled']))
             //     $variable_enabled           = $_POST['variable_enabled'];
@@ -1540,6 +1567,8 @@ class WpLister_Product_MetaBox {
                 // Update post meta
                 update_post_meta( $variation_id, '_ebay_start_price', isset( $variable_ebay_start_price[$i] ) ? $variable_ebay_start_price[$i] : '' );
                 update_post_meta( $variation_id, '_ebay_is_disabled', isset( $variable_ebay_is_disabled[$i] ) ? $variable_ebay_is_disabled[$i] : '' );
+                update_post_meta( $variation_id, '_ebay_upc', 		  isset( $variable_ebay_upc[$i] ) 		  ? $variable_ebay_upc[$i] 		   : '' );
+                update_post_meta( $variation_id, '_ebay_ean', 		  isset( $variable_ebay_ean[$i] ) 		  ? $variable_ebay_ean[$i] 		   : '' );
 
             } // each variation
 

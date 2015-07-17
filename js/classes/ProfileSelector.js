@@ -55,7 +55,7 @@ WPLE.ProfileSelector = function () {
                 var column_html = '<img src="'+wple_ProfileSelector_i18n.WPLE_URL+'/img/hammer-orange-16x16.png" alt="prepared" />';
                 for (var i = item_ids.length - 1; i >= 0; i--) {
                     post_id = item_ids[i];
-                    jQuery('tr#post-'+post_id+' .column-listed').html( column_html );
+                    jQuery('tr#post-'+post_id+' .column-listed_on_ebay').html( column_html );
                 };
 
             } else {

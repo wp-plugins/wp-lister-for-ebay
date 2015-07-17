@@ -114,7 +114,7 @@ class EbayCategoriesModel extends WPL_Model {
 		foreach ($rows as $row)
 		{
 			$this->logger->info('adding task for category #'.$row['cat_id'] . ' - '.$row['cat_name']);
-			
+
 			$task = array( 
 				'task'        => 'loadEbayCategoriesBranch', 
 				'displayName' => $row['cat_name'], 
@@ -132,8 +132,8 @@ class EbayCategoriesModel extends WPL_Model {
 		$this->initServiceProxy($session);
 		$this->logger->info("loadEbayCategoriesBranch() - cat_id: $cat_id, site_id: $site_id" );
 
-		// handle eBay Motors category
-		if ( $cat_id == 6000 ) $site_id = 100;
+		// handle eBay Motors category (US only)
+		if ( $cat_id == 6000 && $site_id == 0 ) $site_id = 100;
 
 		// set handler to receive CategoryType items from result
 		$this->_cs->setHandler('CategoryType', array(& $this, 'storeCategory'));	

@@ -71,9 +71,6 @@ class ItemBuilderModel extends WPL_Model {
 		// set listing title
 		$item->Title = $this->prepareTitle( $listing['auction_title'] );
 
-		// set listing description
-		$item->Description = $this->getFinalHTML( $id, $item, $preview );
-
 		// set listing duration
 		$product_listing_duration = get_post_meta( $post_id, '_ebay_listing_duration', true );
 		$item->ListingDuration = $product_listing_duration ? $product_listing_duration : $listing['listing_duration'];
@@ -147,6 +144,10 @@ class ItemBuilderModel extends WPL_Model {
 
 		// add part compatibility list
 		$item = $this->buildCompatibilityList( $id, $item, $listing, $post_id );			
+
+		// set listing description - after $item has been built
+		$item->Description = $this->getFinalHTML( $id, $item, $preview );
+
 
 		// adjust item if this is a ReviseItem request
 		if ( $reviseItem ) {
@@ -354,11 +355,12 @@ class ItemBuilderModel extends WPL_Model {
 
 
 		// adjust Site if required - eBay Motors (beta)
-		$cm = new EbayCategoriesModel();
-		$primary_category = $cm->getItem( $item->PrimaryCategory->CategoryID );
-		if ( $primary_category['site_id'] == 100 ) {
-			$item->setSite('eBayMotors');
-			// echo "<pre>";print_r($primary_category);echo"</pre>";die();
+		if ( $item->Site == 'US' ) {
+			// if primary category's site_id is 100, set Site to eBayMotors
+			$primary_category = EbayCategoriesModel::getItem( $item->PrimaryCategory->CategoryID );
+			if ( $primary_category['site_id'] == 100 ) {
+				$item->setSite('eBayMotors');
+			}
 		}
 
 		return $item;
@@ -587,11 +589,16 @@ class ItemBuilderModel extends WPL_Model {
 		// include prefilled info by default
 		$include_prefilled_info = isset( $profile_details['include_prefilled_info'] ) ? (bool)$profile_details['include_prefilled_info'] : true;  
 
+		// handle variation level Product ID (UPC/EAN)
+		$autofill_missing_gtin = get_option('wplister_autofill_missing_gtin');
+		$DoesNotApplyText = WPLE_eBaySite::getSiteObj( $this->site_id )->DoesNotApplyText;
+		$DoesNotApplyText = empty( $DoesNotApplyText ) ? 'Does not apply' : $DoesNotApplyText;
+
 		// set UPC from SKU - if enabled
-		if ( ($product_sku) && ( @$profile_details['use_sku_as_upc'] == '1' ) ) {
+		if ( ($product_sku) && ( $profile_details['use_sku_as_upc'] == '1' ) ) {
 			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setUPC( $product_sku );
-			$ProductListingDetails->setListIfNoProduct( true );
+			// $ProductListingDetails->setListIfNoProduct( true ); // deprecated in API 921
 			$ProductListingDetails->setIncludeStockPhotoURL( true );
 			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
 			$ProductListingDetails->setUseFirstProduct( true );
@@ -603,10 +610,14 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $product_upc = get_post_meta( $post_id, '_ebay_upc', true ) ) {
 			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setUPC( $product_upc );
-			$ProductListingDetails->setListIfNoProduct( true );
+			// $ProductListingDetails->setListIfNoProduct( true ); // deprecated in API 921
 			$ProductListingDetails->setIncludeStockPhotoURL( true );
 			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
 			$ProductListingDetails->setUseFirstProduct( true );
+			$item->setProductListingDetails( $ProductListingDetails );
+		} elseif ( $autofill_missing_gtin == 'upc') {
+			$ProductListingDetails = new ProductListingDetailsType();
+			$ProductListingDetails->setUPC( $DoesNotApplyText );
 			$item->setProductListingDetails( $ProductListingDetails );
 		}
 
@@ -614,10 +625,14 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $product_ean = get_post_meta( $post_id, '_ebay_ean', true ) ) {
 			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setEAN( $product_ean );
-			$ProductListingDetails->setListIfNoProduct( true );
+			// $ProductListingDetails->setListIfNoProduct( true ); // deprecated in API 921
 			$ProductListingDetails->setIncludeStockPhotoURL( true );
 			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
 			$ProductListingDetails->setUseFirstProduct( true );
+			$item->setProductListingDetails( $ProductListingDetails );
+		} elseif ( $autofill_missing_gtin == 'ean') {
+			$ProductListingDetails = new ProductListingDetailsType();
+			$ProductListingDetails->setEAN( $DoesNotApplyText );
 			$item->setProductListingDetails( $ProductListingDetails );
 		}
 
@@ -625,7 +640,7 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $product_epid = get_post_meta( $post_id, '_ebay_epid', true ) ) {
 			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setProductReferenceID( $product_epid );
-			$ProductListingDetails->setListIfNoProduct( true );
+			// $ProductListingDetails->setListIfNoProduct( true ); // deprecated in API 921
 			$ProductListingDetails->setIncludeStockPhotoURL( true );
 			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
 			$ProductListingDetails->setUseFirstProduct( true );
@@ -1136,7 +1151,22 @@ class ItemBuilderModel extends WPL_Model {
         		$custom_attributes = apply_filters( 'wplister_custom_attributes', array() );
         		foreach ( $custom_attributes as $attrib ) {
         			if ( $spec['attribute'] == $attrib['id'] ) {
-        				$value = get_post_meta( $post_id, $attrib['meta_key'], true );
+
+        				// pull value from attribute
+        				if ( isset( $attrib['meta_key'] ) ) {
+	        				$value = get_post_meta( $post_id, $attrib['meta_key'], true );
+        				}
+
+        				// set fixed value (since 2.0.9.5)
+        				if ( isset( $attrib['value'] ) ) {
+	        				$value = $attrib['value'];
+        				}
+
+        				// use callback (since 2.0.9.6)
+        				if ( isset( $attrib['callback'] ) && is_callable( $attrib['callback'] ) ) {
+	        				$value = call_user_func( $attrib['callback'], $post_id, $id );
+        				}
+
         			}
         		}
         		// if ( '_sku' == $spec['attribute'] ) $value = ProductWrapper::getSKU( $post_id );
@@ -1173,15 +1203,14 @@ class ItemBuilderModel extends WPL_Model {
         // get excluded attributes and merge with processed attributes
         $excluded_attributes  = $this->getExcludedAttributes();
 		$processed_attributes = array_merge( $processed_attributes, $excluded_attributes ); 
+		$convert_attributes_mode = get_option( 'wplister_convert_attributes_mode', 'all' );
 
-    	// add ItemSpecifics from product attributes
-    	// disabled for now, since it causes duplicates and it's not actually required anymore
-    	// enabled again - mostly for free version
-    	// TODO: make this an option (globally?)
+    	// add ItemSpecifics from product attributes - if enabled
         foreach ($attributes as $name => $value) {
 
     		$value = html_entity_decode( $value, ENT_QUOTES );
     		if ( $this->mb_strlen( $value ) > 50 ) continue;
+			if ( $convert_attributes_mode == 'none' ) continue;
 
     		// handle variation attributes for a single split variation
     		// instead of listing all values, use the correct attribute value from variationSplitAttributes
@@ -1197,6 +1226,7 @@ class ItemBuilderModel extends WPL_Model {
     		$values = explode('|', $value);
     		foreach ($values as $value) {
 	    		$NameValueList->addValue( $value );
+	    		if ( $convert_attributes_mode == 'single' ) break; // only use first value in 'single' mode
     		}
         	
         	// only add attribute to ItemSpecifics if not already present in variations or processed attributes
@@ -1279,6 +1309,9 @@ class ItemBuilderModel extends WPL_Model {
         // get max_quantity from profile
         $max_quantity = ( isset( $profile_details['max_quantity'] ) && intval( $profile_details['max_quantity'] )  > 0 ) ? $profile_details['max_quantity'] : PHP_INT_MAX ; 
 
+		// get variation attributes / item specifics map according to profile
+		$specifics_map = $profile_details['item_specifics'];
+
         // loop each combination
         foreach ($variations as $var) {
 
@@ -1310,9 +1343,27 @@ class ItemBuilderModel extends WPL_Model {
         		$newvar->SKU = $var['sku'];
         	}
 
-        	// add VariationSpecifics (v2)
+			// // add VariationSpecifics (v2)
+			// $VariationSpecifics = new NameValueListArrayType();
+			// foreach ($var['variation_attributes'] as $name => $value) {
+			//     $NameValueList = new NameValueListType();
+			// 	$NameValueList->setName ( $name  );
+			// 	$NameValueList->setValue( $value );
+			// 	$VariationSpecifics->addNameValueList( $NameValueList );
+			// }
+			// $newvar->setVariationSpecifics( $VariationSpecifics );
+
+        	// add VariationSpecifics (v3 - regard profile mapping)
         	$VariationSpecifics = new NameValueListArrayType();
             foreach ($var['variation_attributes'] as $name => $value) {
+
+	        	// check for matching attribute name - replace woo attribute name with eBay attribute name
+		        foreach ( $specifics_map as $spec ) {
+		        	if ( $name == $spec['attribute'] ) {
+		        		$name = $spec['name'];
+		        	}
+				}
+
 	            $NameValueList = new NameValueListType();
     	    	$NameValueList->setName ( $name  );
         		$NameValueList->setValue( $value );
@@ -1336,6 +1387,36 @@ class ItemBuilderModel extends WPL_Model {
 				}
 			}
 
+			// handle variation level Product ID (UPC/EAN)
+			$autofill_missing_gtin = get_option('wplister_autofill_missing_gtin');
+			$DoesNotApplyText = WPLE_eBaySite::getSiteObj( $this->site_id )->DoesNotApplyText;
+			$DoesNotApplyText = empty( $DoesNotApplyText ) ? 'Does not apply' : $DoesNotApplyText;
+
+			// set UPC from SKU - if enabled
+			if ( $var['sku'] && ( $profile_details['use_sku_as_upc'] == '1' ) ) {
+				$VariationProductListingDetails = new VariationProductListingDetailsType();
+				$VariationProductListingDetails->setUPC( $var['sku'] );
+				$newvar->setVariationProductListingDetails( $VariationProductListingDetails );
+			} elseif ( $product_upc = get_post_meta( $post_id, '_ebay_upc', true ) ) {
+				$VariationProductListingDetails = new VariationProductListingDetailsType();
+				$VariationProductListingDetails->setUPC( $product_upc );
+				$newvar->setVariationProductListingDetails( $VariationProductListingDetails );
+			} elseif ( $autofill_missing_gtin == 'upc') {
+				$VariationProductListingDetails = new VariationProductListingDetailsType();
+				$VariationProductListingDetails->setUPC( $DoesNotApplyText );
+				$newvar->setVariationProductListingDetails( $VariationProductListingDetails );
+			}
+
+			if ( $product_ean = get_post_meta( $post_id, '_ebay_ean', true ) ) {
+				$VariationProductListingDetails = new VariationProductListingDetailsType();
+				$VariationProductListingDetails->setEAN( $product_ean );
+				$newvar->setVariationProductListingDetails( $VariationProductListingDetails );
+			} elseif ( $autofill_missing_gtin == 'ean') {
+				$VariationProductListingDetails = new VariationProductListingDetailsType();
+				$VariationProductListingDetails->setEAN( $DoesNotApplyText );
+				$newvar->setVariationProductListingDetails( $VariationProductListingDetails );
+			}
+
 
 			$item->Variations->addVariation( $newvar );
 
@@ -1347,6 +1428,15 @@ class ItemBuilderModel extends WPL_Model {
         foreach ($variations as $var) {
 
             foreach ($var['variation_attributes'] as $name => $value) {
+
+	        	// check for matching attribute name - replace woo attribute name with eBay attribute name
+		        foreach ( $specifics_map as $spec ) {
+		        	if ( $name == $spec['attribute'] ) {
+			        	$this->variationAttributes[] = $name; // remember original name to exclude in builtItemSpecifics()
+		        		$name = $spec['name'];
+		        	}
+				}
+
     	    	if ( ! is_array($this->tmpVariationSpecificsSet[ $name ]) ) {
 		        	$this->tmpVariationSpecificsSet[ $name ] = array();
     	    	}
@@ -1372,7 +1462,7 @@ class ItemBuilderModel extends WPL_Model {
 
         
         // build array of variation attributes, which will be needed in builtItemSpecifics()
-        $this->variationAttributes = array();
+        // $this->variationAttributes = array();
         foreach ($this->tmpVariationSpecificsSet as $key => $value) {
         	$this->variationAttributes[] = $key;
         }
@@ -1411,6 +1501,32 @@ class ItemBuilderModel extends WPL_Model {
 		    	$VariationSpecificPictureSet = new VariationSpecificPictureSetType();
     	    	$VariationSpecificPictureSet->setVariationSpecificValue( $VariationValue );
         		$VariationSpecificPictureSet->addPictureURL( $image_url );
+
+        		// check for additional variation images (WooCommerce Additional Variation Images Addon) 
+        		if ( class_exists('WC_Additional_Variation_Images') ) {
+
+        			$additional_var_images = get_post_meta( $var['post_id'], '_wc_additional_variation_images', true );
+					$additional_var_images = empty($additional_var_images) ? false : explode( ',', $additional_var_images );
+
+        			if ( is_array( $additional_var_images ) ) {
+        				foreach ( $additional_var_images as $attachment_id ) {
+
+        					// get URL from attachment ID
+							$size = get_option( 'wplister_default_image_size', 'full' );
+							$large_image_url = wp_get_attachment_image_src( $attachment_id, $size );
+			    			$image_url = $this->encodeUrl( $large_image_url[0] );
+							$this->logger->info( "found additional variation image: ".$image_url );
+
+					        // upload variation images if enabled
+					        if ( $with_additional_images ) 
+					        	$image_url = $this->lm->uploadPictureToEPS( $image_url, $id, $session );
+
+					        // add variation image to picture set
+			        		$VariationSpecificPictureSet->addPictureURL( $image_url );
+							$this->logger->info( "added additional variation image: ".$image_url );
+        				}
+        			}
+        		}
 
 		        // only list variation images if enabled
         		if ( @$profile_details['with_variation_images'] != '0' ) {

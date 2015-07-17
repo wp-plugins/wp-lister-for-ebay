@@ -289,7 +289,7 @@ class WPL_WooBackendIntegration {
 
 	function wpl_woocommerce_edit_product_columns($columns){
 		
-		$columns['listed'] = '<img src="'.WPLISTER_URL.'/img/hammer-dark-16x16.png" title="'.__('Listing status', 'wplister').'" />';		
+		$columns['listed_on_ebay'] = '<img src="'.WPLISTER_URL.'/img/hammer-dark-16x16.png" data-tip="'.__('eBay', 'wplister').'" class="tips" />';		
 		return $columns;
 	}
 
@@ -304,48 +304,65 @@ class WPL_WooBackendIntegration {
 		// $product = self::getProduct($post->ID);
 
 		switch ($column) {
-			case "listed" :
-				$listingsModel = new ListingsModel();
-				// $status = $listingsModel->getStatusFromPostID( $post->ID );
-				$status = false;
+			case "listed_on_ebay" :
 
 				// get all listings for product ID - including split variations
-				$listings = $listingsModel->getAllListingsFromPostOrParentID( $post->ID );
+				$listingsModel = new ListingsModel();
+				$listings      = $listingsModel->getAllListingsFromPostOrParentID( $post->ID );
 			
-				// get status of first listing
-				if ( ! empty($listings) ) $status = $listings[0]->status;
-
-				switch ($status) {
-					case 'published':
-					case 'changed':
-						$ebayUrl = $listingsModel->getViewItemURLFromPostID( $post->ID );
-						echo '<a href="'.$ebayUrl.'" title="View on eBay" target="_blank"><img src="'.WPLISTER_URL.'img/ebay-16x16.png" alt="eBay" /></a>';
-						break;
-					
-					case 'prepared':
-						echo '<img src="'.WPLISTER_URL.'/img/hammer-orange-16x16.png" title="eBay listing is prepared." />';
-						break;
-					
-					case 'verified':
-						echo '<img src="'.WPLISTER_URL.'/img/hammer-green-16x16.png" title="eBay listing is verified." />';
-						break;
-					
-					case 'ended':
-						echo '<img src="'.WPLISTER_URL.'/img/hammer-16x16.png" title="eBay listing is ended." />';
-						break;
-					
-					case 'archived':
-						echo '<img src="'.WPLISTER_URL.'/img/hammer-16x16.png" title="This product has been listed on eBay in the past but it is currently archived." />';
-						break;
-					
-					case 'default':
-						echo '<img src="'.WPLISTER_URL.'/img/hammer-16x16.png" alt="yes" />';
-						break;
-
-					default:
-						echo '<a href="#" class="wple_btn_select_profile_for_product" data-post_id="'.$post->ID.'" title="'.__('List on eBay','wplister').'"><img src="'.WPLISTER_URL.'/img/search3.png" alt="select profile" /></a>';
-						break;
+				// show select profile button if no listings found
+				if ( empty($listings) ) {
+					echo '<a href="#" class="wple_btn_select_profile_for_product" data-post_id="'.$post->ID.'" title="'.__('List on eBay','wplister').'"><img src="'.WPLISTER_URL.'/img/search3.png" alt="select profile" /></a>';
+					return;					
 				}
+
+				// show all found listings
+				foreach ( $listings as $listing ) {
+
+					$msg_1   = 'eBay listing is '.$listing->status.'.';
+					$msg_2   = '';
+					$msg_3   = 'Click to view all listings for this product in WP-Lister.';
+					$linkurl = 'admin.php?page=wplister&amp;s='.$post->ID;
+
+					switch ( $listing->status ) {
+
+						case 'published':
+						case 'changed':
+							// $msg_1   = 'This product is published on eBay';
+							$msg_3   = 'Click to open this listing on eBay in a new tab.';
+							$imgfile = 'icon-success-32x32.png';
+							$linkurl = $listing->ViewItemURL;
+							break;
+							
+						case 'prepared':
+							$imgfile = 'hammer-orange-16x16.png';
+							break;
+						
+						case 'verified':
+							$imgfile = 'hammer-green-16x16.png';
+							break;
+						
+						case 'ended':
+						case 'sold':
+						default:
+							$imgfile = 'hammer-16x16.png';
+							break;
+					}
+
+					// get account
+					$accounts = WPLE()->accounts;
+					$account  = isset( $accounts[ $listing->account_id ] ) ? $accounts[ $listing->account_id ] : false;
+					if ( $account && sizeof($accounts) > 0 ) {
+						$msg_2 = '<i>' . $account->title . ' ('.$account->site_code.')</i><br>';
+					}
+
+					// output icon
+					$msg_html = '<b>'.$msg_1.'</b><br/>'.$msg_2.'<br/>'.$msg_3;
+					echo '<a href="'.$linkurl.'" target="_blank">';
+					echo '<img src="'.WPLISTER_URL.'/img/'.$imgfile.'" class="tips" data-tip="' . esc_attr( $msg_html ) . '" style="width:16px;height:16px; padding:0; cursor:pointer;" />';
+					echo '</a>';
+
+				} // each listing
 
 			break;
 

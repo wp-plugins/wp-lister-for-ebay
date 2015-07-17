@@ -103,14 +103,11 @@ class EbayController {
     // do FetchToken and save to DB
     public function doFetchToken( $account_id = false ){ 
         
-        $account_id = $account_id ? $account_id : get_option('wplister_default_account_id');
+        // $account_id = $account_id ? $account_id : get_option('wplister_default_account_id'); // we can *not* fall back to the default account here, or adding a new account would overwrite the default account's token
         $SessionID  = get_option('wplister_ebay_sessionid');        
         $token      = $this->FetchToken( $SessionID );
 
         if ($token) {
-
-            update_option('wplister_ebay_token', $token);
-            update_option('wplister_ebay_token_is_invalid', false );
 
             if ( $account_id ) {
                 $account = new WPLE_eBayAccount( $account_id );
@@ -121,12 +118,18 @@ class EbayController {
             // check if setup wizard is still active
             if ( get_option( 'wplister_setup_next_step' ) == 1 ) {
 
+                // update legacy data
+                update_option('wplister_ebay_token', $token);
+
                 // move setup to step 2
                 update_option('wplister_setup_next_step', '2');                
 
                 // remember when WP-Lister was connected to an eBay account for the first time
                 update_option( 'ignore_orders_before_ts', time() );
             }
+
+            // // obsolete - already called in fetchTokenForAccount()
+            // update_option('wplister_ebay_token_is_invalid', false );
 
         }
         
@@ -377,6 +380,7 @@ class EbayController {
         $sm->downloadDispatchTimes( $this->session, $site_id );      
         $sm->downloadShippingPackages( $this->session, $site_id );      
         $sm->downloadExcludeShippingLocations( $this->session, $site_id );
+        $sm->fetchDoesNotApplyText( $this->session, $site_id );
         // $sm->downloadShippingDiscountProfiles( $this->session );      
     }
 

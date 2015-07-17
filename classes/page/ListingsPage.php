@@ -236,7 +236,13 @@ class ListingsPage extends WPL_Page {
 
 	        $lm = new ListingsModel();
 	        $id = $_REQUEST['auction'];
-	        $data = array( 'status' => 'prepared' );
+	        $data = array( 
+				'status'         => 'prepared',
+				'ebay_id'        => NULL,
+				'end_date'       => NULL,
+				'date_published' => NULL,
+				'last_errors'    => '',
+	        );
 
 	        if ( is_array( $id ) ) {
 	            foreach( $id as $single_id ) {

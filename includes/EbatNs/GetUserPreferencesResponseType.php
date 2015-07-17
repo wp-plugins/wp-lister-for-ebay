@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -18,6 +18,7 @@ require_once 'PurchaseReminderEmailPreferencesType.php';
 require_once 'SellerProfilePreferencesType.php';
 require_once 'SellerReturnPreferencesType.php';
 require_once 'DispatchCutoffTimePreferencesType.php';
+require_once 'eBayPLUSPreferenceType.php';
 
 /**
   * Contains some or all of the authenticated user's preferences. The preferences are
@@ -131,6 +132,11 @@ class GetUserPreferencesResponseType extends AbstractResponseType
 	* @var boolean
 	**/
 	protected $OutOfStockControlPreference;
+
+	/**
+	* @var eBayPLUSPreferenceType
+	**/
+	protected $eBayPLUSPreference;
 
 
 	/**
@@ -310,6 +316,14 @@ class GetUserPreferencesResponseType extends AbstractResponseType
 					'nsURI' => 'http://www.w3.org/2001/XMLSchema',
 					'array' => false,
 					'cardinality' => '0..1'
+				),
+				'eBayPLUSPreference' =>
+				array(
+					'required' => false,
+					'type' => 'eBayPLUSPreferenceType',
+					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
+					'array' => true,
+					'cardinality' => '0..*'
 				)));
 		}
 		$this->_attributes = array_merge($this->_attributes,
@@ -651,6 +665,48 @@ class GetUserPreferencesResponseType extends AbstractResponseType
 	function setOutOfStockControlPreference($value)
 	{
 		$this->OutOfStockControlPreference = $value;
+	}
+
+	/**
+	 * @return eBayPLUSPreferenceType
+	 * @param integer $index 
+	 **/
+	function geteBayPLUSPreference($index = null)
+	{
+		if ($index !== null)
+		{
+			return $this->eBayPLUSPreference[$index];
+		}
+		else
+		{
+			return $this->eBayPLUSPreference;
+		}
+	}
+
+	/**
+	 * @return void
+	 * @param eBayPLUSPreferenceType $value
+	 * @param integer $index 
+	 **/
+	function seteBayPLUSPreference($value, $index = null)
+	{
+		if ($index !== null)
+		{
+			$this->eBayPLUSPreference[$index] = $value;
+		}
+		else
+		{
+			$this->eBayPLUSPreference= $value;
+		}
+	}
+
+	/**
+	 * @return void
+	 * @param eBayPLUSPreferenceType $value
+	 **/
+	function addeBayPLUSPreference($value)
+	{
+		$this->eBayPLUSPreference[] = $value;
 	}
 
 }

@@ -55,6 +55,7 @@ class WPLE_eBaySite extends WPL_Core {
 			'ShippingCostPaidByOptions',
 			'ShippingLocationDetails',
 			'ExcludeShippingLocationDetails',
+			'DoesNotApplyText',
 		);
 
 	}

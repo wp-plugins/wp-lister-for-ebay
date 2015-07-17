@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -21,6 +21,7 @@ require_once 'ItemCompatibilityEnabledCodeType.php';
 require_once 'ConditionEnabledCodeType.php';
 require_once 'ConditionValuesType.php';
 require_once 'ProductCreationEnabledCodeType.php';
+require_once 'ProductIdentiferEnabledCodeType.php';
 require_once 'PaymentOptionsGroupEnabledCodeType.php';
 require_once 'ProfileCategoryGroupCodeType.php';
 
@@ -220,21 +221,6 @@ class CategoryFeatureType extends EbatNs_ComplexType
 	* @var boolean
 	**/
 	protected $PaisaPayFullEscrowEnabled;
-
-	/**
-	* @var boolean
-	**/
-	protected $UPCIdentifierEnabled;
-
-	/**
-	* @var boolean
-	**/
-	protected $EANIdentifierEnabled;
-
-	/**
-	* @var boolean
-	**/
-	protected $ISBNIdentifierEnabled;
 
 	/**
 	* @var boolean
@@ -590,6 +576,21 @@ class CategoryFeatureType extends EbatNs_ComplexType
 	* @var ProductCreationEnabledCodeType
 	**/
 	protected $ProductCreationEnabled;
+
+	/**
+	* @var ProductIdentiferEnabledCodeType
+	**/
+	protected $EANEnabled;
+
+	/**
+	* @var ProductIdentiferEnabledCodeType
+	**/
+	protected $ISBNEnabled;
+
+	/**
+	* @var ProductIdentiferEnabledCodeType
+	**/
+	protected $UPCEnabled;
 
 	/**
 	* @var int
@@ -964,30 +965,6 @@ class CategoryFeatureType extends EbatNs_ComplexType
 					'cardinality' => '0..1'
 				),
 				'PaisaPayFullEscrowEnabled' =>
-				array(
-					'required' => false,
-					'type' => 'boolean',
-					'nsURI' => 'http://www.w3.org/2001/XMLSchema',
-					'array' => false,
-					'cardinality' => '0..1'
-				),
-				'UPCIdentifierEnabled' =>
-				array(
-					'required' => false,
-					'type' => 'boolean',
-					'nsURI' => 'http://www.w3.org/2001/XMLSchema',
-					'array' => false,
-					'cardinality' => '0..1'
-				),
-				'EANIdentifierEnabled' =>
-				array(
-					'required' => false,
-					'type' => 'boolean',
-					'nsURI' => 'http://www.w3.org/2001/XMLSchema',
-					'array' => false,
-					'cardinality' => '0..1'
-				),
-				'ISBNIdentifierEnabled' =>
 				array(
 					'required' => false,
 					'type' => 'boolean',
@@ -1559,6 +1536,30 @@ class CategoryFeatureType extends EbatNs_ComplexType
 				array(
 					'required' => false,
 					'type' => 'ProductCreationEnabledCodeType',
+					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
+					'array' => false,
+					'cardinality' => '0..1'
+				),
+				'EANEnabled' =>
+				array(
+					'required' => false,
+					'type' => 'ProductIdentiferEnabledCodeType',
+					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
+					'array' => false,
+					'cardinality' => '0..1'
+				),
+				'ISBNEnabled' =>
+				array(
+					'required' => false,
+					'type' => 'ProductIdentiferEnabledCodeType',
+					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
+					'array' => false,
+					'cardinality' => '0..1'
+				),
+				'UPCEnabled' =>
+				array(
+					'required' => false,
+					'type' => 'ProductIdentiferEnabledCodeType',
 					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
 					'array' => false,
 					'cardinality' => '0..1'
@@ -2305,54 +2306,6 @@ class CategoryFeatureType extends EbatNs_ComplexType
 	function setPaisaPayFullEscrowEnabled($value)
 	{
 		$this->PaisaPayFullEscrowEnabled = $value;
-	}
-
-	/**
-	 * @return boolean
-	 **/
-	function getUPCIdentifierEnabled()
-	{
-		return $this->UPCIdentifierEnabled;
-	}
-
-	/**
-	 * @return void
-	 **/
-	function setUPCIdentifierEnabled($value)
-	{
-		$this->UPCIdentifierEnabled = $value;
-	}
-
-	/**
-	 * @return boolean
-	 **/
-	function getEANIdentifierEnabled()
-	{
-		return $this->EANIdentifierEnabled;
-	}
-
-	/**
-	 * @return void
-	 **/
-	function setEANIdentifierEnabled($value)
-	{
-		$this->EANIdentifierEnabled = $value;
-	}
-
-	/**
-	 * @return boolean
-	 **/
-	function getISBNIdentifierEnabled()
-	{
-		return $this->ISBNIdentifierEnabled;
-	}
-
-	/**
-	 * @return void
-	 **/
-	function setISBNIdentifierEnabled($value)
-	{
-		$this->ISBNIdentifierEnabled = $value;
 	}
 
 	/**
@@ -3515,6 +3468,54 @@ class CategoryFeatureType extends EbatNs_ComplexType
 	function setProductCreationEnabled($value)
 	{
 		$this->ProductCreationEnabled = $value;
+	}
+
+	/**
+	 * @return ProductIdentiferEnabledCodeType
+	 **/
+	function getEANEnabled()
+	{
+		return $this->EANEnabled;
+	}
+
+	/**
+	 * @return void
+	 **/
+	function setEANEnabled($value)
+	{
+		$this->EANEnabled = $value;
+	}
+
+	/**
+	 * @return ProductIdentiferEnabledCodeType
+	 **/
+	function getISBNEnabled()
+	{
+		return $this->ISBNEnabled;
+	}
+
+	/**
+	 * @return void
+	 **/
+	function setISBNEnabled($value)
+	{
+		$this->ISBNEnabled = $value;
+	}
+
+	/**
+	 * @return ProductIdentiferEnabledCodeType
+	 **/
+	function getUPCEnabled()
+	{
+		return $this->UPCEnabled;
+	}
+
+	/**
+	 * @return void
+	 **/
+	function setUPCEnabled($value)
+	{
+		$this->UPCEnabled = $value;
 	}
 
 	/**

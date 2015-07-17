@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -27,6 +27,7 @@ class PaidStatusCodeType extends EbatNs_FacetType
 	const CodeType_PaidCOD = 'PaidCOD';
 	const CodeType_CustomCode = 'CustomCode';
 	const CodeType_Paid = 'Paid';
+	const CodeType_PayUponInvoice = 'PayUponInvoice';
 
 	/**
 	 * @return 

@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -9,6 +9,7 @@ require_once 'AmountType.php';
 require_once 'UserType.php';
 require_once 'ListingStatusCodeType.php';
 require_once 'PromotionalSaleDetailsType.php';
+require_once 'SuggestedBidValueType.php';
 
 /**
   * Contains various details about the current status of a listing. These
@@ -102,6 +103,11 @@ class SellingStatusType extends EbatNs_ComplexType
 	* @var int
 	**/
 	protected $QuantitySoldByPickupInStore;
+
+	/**
+	* @var SuggestedBidValueType
+	**/
+	protected $SuggestedBidValues;
 
 
 	/**
@@ -247,6 +253,14 @@ class SellingStatusType extends EbatNs_ComplexType
 					'required' => false,
 					'type' => 'int',
 					'nsURI' => 'http://www.w3.org/2001/XMLSchema',
+					'array' => false,
+					'cardinality' => '0..1'
+				),
+				'SuggestedBidValues' =>
+				array(
+					'required' => false,
+					'type' => 'SuggestedBidValueType',
+					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
 					'array' => false,
 					'cardinality' => '0..1'
 				)));
@@ -526,6 +540,22 @@ class SellingStatusType extends EbatNs_ComplexType
 	function setQuantitySoldByPickupInStore($value)
 	{
 		$this->QuantitySoldByPickupInStore = $value;
+	}
+
+	/**
+	 * @return SuggestedBidValueType
+	 **/
+	function getSuggestedBidValues()
+	{
+		return $this->SuggestedBidValues;
+	}
+
+	/**
+	 * @return void
+	 **/
+	function setSuggestedBidValues($value)
+	{
+		$this->SuggestedBidValues = $value;
 	}
 
 }

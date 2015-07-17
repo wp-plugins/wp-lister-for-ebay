@@ -1,18 +1,14 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
 
 require_once 'EbatNs_ComplexType.php';
 
-/** 
-  * This type defines the International Standard Book Number (ISBN) feature, and whether
-  * this feature is enabled at the site level. An empty ISBNIdentifierEnabled
-  * field is returned under the FeatureDefinitions container in GetCategoryFeatures
-  * if the feature is applicable to the site and if ISBNIdentifierEnabled is
-  * passed in as a FeatureID (or if no FeatureID is passed in, hence all features are
-  * returned).
+/**
+  * This type is deprecated and has been replaced by <b>ISBNEnabledDefinitionType</b>.
+  * 
   * 
  **/
 

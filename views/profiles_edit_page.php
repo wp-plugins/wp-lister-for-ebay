@@ -135,7 +135,11 @@
 
 							<label for="wpl-text-condition_id" class="text_label">
 								<?php echo __('Condition','wplister'); ?> *
-                                <?php wplister_tooltip('The available item conditions depend on the primary eBay category.<br>Please select a primary category in order to load the available item conditions - or set a default primary category in WP-Lister &raquo; Settings.') ?>
+								<?php if ( $wpl_item['profile_id'] ): ?>
+	                                <?php wplister_tooltip('Which item conditions are available depends on the primary eBay category.<br><br>Please select a primary category below to load the available item conditions.<br>    Or you can set a default primary category in <i>eBay &raquo; Settings &raquo; Categories</i>.') ?>
+								<?php else: ?>
+    	                            <?php wplister_tooltip('Which item conditions are available depends on the primary eBay category.<br><br>Please select a primary category below to load the available item conditions.<br><br>Or you can set a default primary category in <i>eBay &raquo; Settings &raquo; Categories</i>, but <b>first you need to save your profile </b> in order to see the conditions for your default category here.') ?>
+								<?php endif; ?>
 							</label>
 							<select id="wpl-text-condition_id" name="wpl_e2e_condition_id" title="Condition" class=" required-entry select">
 							<?php if ( isset( $wpl_available_conditions ) && is_array( $wpl_available_conditions ) ): ?>
@@ -266,11 +270,11 @@
 
 							<?php if ( isset( $wpl_seller_payment_profiles ) && is_array( $wpl_seller_payment_profiles ) ): ?>
 							<label for="wpl-text-seller_payment_profile_id" class="text_label">
-								<?php echo __('Payment profile','wplister'); ?> (beta)
-                                <?php wplister_tooltip('Instead of setting your payment details in WP-Lister you can select a predefined payment profile from your eBay account.') ?>
+								<?php echo __('Payment policy','wplister'); ?> (beta)
+                                <?php wplister_tooltip('Instead of setting your payment details in WP-Lister you can select a predefined payment policy from your eBay account.') ?>
 							</label>
 							<select id="wpl-text-seller_payment_profile_id" name="wpl_e2e_seller_payment_profile_id" class=" required-entry select">
-								<option value="">-- <?php echo __('no profile','wplister'); ?> --</option>
+								<option value="">-- <?php echo __('no policy','wplister'); ?> --</option>
 								<?php foreach ($wpl_seller_payment_profiles as $seller_profile ) : ?>
 									<option value="<?php echo $seller_profile->ProfileID ?>" 
 										<?php if ( @$item_details['seller_payment_profile_id'] == $seller_profile->ProfileID ) : ?>
@@ -393,11 +397,11 @@
 
 							<?php if ( isset( $wpl_seller_return_profiles ) && is_array( $wpl_seller_return_profiles ) ): ?>
 							<label for="wpl-text-seller_return_profile_id" class="text_label">
-								<?php echo __('Return policy profile','wplister'); ?> (beta)
-                                <?php wplister_tooltip('Instead of setting your return policy details in WP-Lister you can select a predefined return policy profile from your eBay account.') ?>
+								<?php echo __('Return policy','wplister'); ?> (beta)
+                                <?php wplister_tooltip('Instead of setting your return policy details in WP-Lister you can select a predefined return policy from your eBay account.') ?>
 							</label>
 							<select id="wpl-text-seller_return_profile_id" name="wpl_e2e_seller_return_profile_id" class=" required-entry select">
-								<option value="">-- <?php echo __('no profile','wplister'); ?> --</option>
+								<option value="">-- <?php echo __('no policy','wplister'); ?> --</option>
 								<?php foreach ($wpl_seller_return_profiles as $seller_profile ) : ?>
 									<option value="<?php echo $seller_profile->ProfileID ?>" 
 										<?php if ( @$item_details['seller_return_profile_id'] == $seller_profile->ProfileID ) : ?>

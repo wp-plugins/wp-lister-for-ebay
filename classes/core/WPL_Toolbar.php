@@ -107,7 +107,7 @@ class WPLister_Toolbar  {
 			// Settings - Accounts tab
 			$args = array(
 				'id'    => 'wplister_settings_accounts',
-				'title' => __('Account', 'wplister'),
+				'title' => __('Accounts', 'wplister'),
 				'href'  => admin_url( 'admin.php?page=wplister-settings&tab=accounts' ),
 				'parent'  => 'wplister_settings',
 				'meta'  => array('class' => 'wplister-toolbar-page')
@@ -213,7 +213,7 @@ class WPLister_Toolbar  {
 			}
 
 			// View in WP-Lister
-			$url = 'admin.php?page=wplister&s='.$post_id;
+			$url = admin_url( 'admin.php?page=wplister&s='.$post_id );
 			$args = array(
 				'id'    => 'wplister_view_on_listings_page',
 				'title' => __('View item in WP-Lister', 'wplister'),

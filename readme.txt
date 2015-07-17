@@ -1,4 +1,4 @@
-=== WP-Lister for eBay ===
+=== WP-Lister Lite for eBay ===
 Contributors: wp-lab
 Tags: ebay, woocommerce, products, export
 Requires at least: 3.9

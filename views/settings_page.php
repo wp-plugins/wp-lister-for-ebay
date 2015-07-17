@@ -2,13 +2,6 @@
 
 <style type="text/css">
 	
-	#AuthSettingsBox ol li {
-		margin-bottom: 25px;
-	}
-	#AuthSettingsBox ol li > small {
-		margin-left: 4px;
-	}
-
 	#side-sortables .postbox input.text_input,
 	#side-sortables .postbox select.select {
 	    width: 50%;
@@ -54,10 +47,6 @@
 								</div>
 
 								<div id="major-publishing-actions">
-
-									<?php #if ( $wpl_ebay_token_userid ): ?>
-									<?php #elseif ( $wpl_text_ebay_token ): ?>
-									<?php #endif; ?>
 
 									<div id="publishing-action">
 										<input type="submit" value="<?php echo __('Save Settings','wplister'); ?>" id="save_settings" class="button-primary" name="save">
@@ -154,21 +143,6 @@
 					</div>
 					<?php endif; ?>
 
-					<!--
-					<div class="postbox" id="PayPalSettingsBox" style="display:none">
-						<h3 class="hndle"><span><?php echo __('PayPal','wplister') ?></span></h3>
-						<div class="inside">
-
-							<label for="wpl-text_paypal_email-field" class="text_label"><?php echo __('PayPal account','wplister'); ?></label>
-							<input type="text" name="wpl_e2e_text_paypal_email" id="wpl-text_paypal_email-field" value="<?php echo $wpl_text_paypal_email; ?>" class="text_input" />
-							<p class="desc" style="display: block;">
-								<?php echo __('To use PayPal you need to enter your PayPal address.','wplister'); ?>
-							</p>
-
-						</div>
-					</div>
-					-->
-
 				</div>
 			</div> <!-- #postbox-container-1 -->
 
@@ -177,83 +151,8 @@
 			<div id="postbox-container-2" class="postbox-container">
 				<div class="meta-box-sortables ui-sortable">
 					
-				<?php #if ( $wpl_text_ebay_token == '' ) : ?>
-					<!--
-					<div class="postbox" id="AuthSettingsBox">
-						<h3 class="hndle"><span><?php echo __('eBay authorization','wplister') ?></span></h3>
-						<div class="inside">
-							<p><strong><?php echo __('Follow these steps to link WP-Lister with your eBay account','wplister') ?></strong></p>
-
-							<p>
-								<ol>
-									<li>
-										<form id="frmSetEbaySite" method="post" action="<?php echo $wpl_form_action; ?>">
-											<input type="hidden" name="action" value="save_ebay_site" >
-											<select id="wpl-text-ebay_site_id" name="wpl_e2e_text_ebay_site_id" class="required-entry select" style="width:auto;float: right">
-												<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
-												<?php unset( $wpl_ebay_sites[100] ); // remove eBay Motors - signin url doesn't exist ?>
-												<?php foreach ($wpl_ebay_sites as $site_id => $site_name) : ?>
-													<option value="<?php echo $site_id ?>" <?php if ( $wpl_text_ebay_site_id == $site_id ): ?>selected="selected"<?php endif; ?>><?php echo str_replace('_',' ',$site_name) ?></option>					
-												<?php endforeach; ?>
-											</select>
-											<?php echo __('Select the eBay site you want to list your items on:','wplister') ?>
-											<br>
-											<small>
-											If you want to change the site later, you will need to go through setup again. <br>
-											</small>
-										</form>
-								</li>
-									<li>
-										<a style="float:right;" href="<?php echo $wpl_auth_url; ?>" class="button-primary" target="_blank">Connect with eBay</a>
-										<?php echo __('Click "Connect with eBay" to sign in to eBay and grant access for WP-Lister','wplister') ?>
-										<br>
-										<small>This will open the eBay Sign In page in a new window.</small><br>
-										<small>Please sign in, grant access for WP-Lister and close the new window to come back here.</small>
-									</li>
-									<li>
-										<form id="frmFetchToken" method="post" action="<?php echo $wpl_form_action; ?>">
-											<input type="hidden" name="action" value="FetchToken" >
-											<input  style="float:right;" type="submit" value="<?php echo __('Fetch eBay Token','wplister') ?>" name="submit" class="button">
-											<?php echo __('After linking WP-Lister with your eBay account, click here to fetch your token','wplister') ?>
-											<br>
-											<small>
-											After retrieving your token, we will proceed with the first time set up. 
-											</small>
-										</form>
-									</li>
-								</ol>
-							</p>
-
-							<p style=""><small>
-								You can view and revoke this authorization by visiting: <br>&raquo; My eBay &raquo; Account &raquo; Site Preferences  &raquo; General Preferences  &raquo; Third-party authorizations
-							</small>
-							</p>
-
-						</div>
-					</div>
-					-->
-				<?php #else: // $wpl_text_ebay_token != ''  ?>
-
 				<form method="post" id="settingsForm" action="<?php echo $wpl_form_action; ?>">
 					<input type="hidden" name="action" value="save_wplister_settings" >
-					<input type="hidden" name="wpl_e2e_text_paypal_email" id="wpl_text_paypal_email" value="<?php echo $wpl_text_paypal_email; ?>" >
-
-					<!--
-					<div class="postbox" id="ConnectionSettingsBox">
-						<h3 class="hndle"><span><?php echo __('eBay settings','wplister') ?></span></h3>
-						<div class="inside">
-
-							<label for="wpl-text-ebay_site_id" class="text_label"><?php echo __('eBay site','wplister'); ?></label>
-							<select id="wpl-text-ebay_site_id" name="wpl_e2e_text_ebay_site_id" class=" required-entry select">
-								<option value="">-- <?php echo __('Please select','wplister'); ?> --</option>
-								<?php foreach ($wpl_ebay_sites as $site_id => $site_name) : ?>
-									<option value="<?php echo $site_id ?>" <?php if ( $wpl_text_ebay_site_id == $site_id ): ?>selected="selected"<?php endif; ?>><?php echo str_replace('_',' ',$site_name) ?></option>					
-								<?php endforeach; ?>
-							</select>
-
-						</div>
-					</div>
-					-->
 
 					<div class="postbox" id="UpdateOptionBox">
 						<h3 class="hndle"><span><?php echo __('Automatic updates','wplister') ?></span></h3>
@@ -309,7 +208,6 @@
 
 
 				</form>
-				<?php #endif; // $wpl_text_ebay_token == ''  ?>
 
 				<?php if ( ( is_multisite() ) && ( is_main_site() ) ) : ?>
 				<p>
@@ -336,27 +234,12 @@
 		jQuery( document ).ready(
 			function () {
 		
-				// ebay site selector during install: submit form on selection
-				jQuery('#AuthSettingsBox #wpl-text-ebay_site_id').change( function(event, a, b) {					
-
-					var site_id = event.target.value;
-					if ( site_id ) {
-						jQuery('#frmSetEbaySite').submit();
-					}
-					
-				});
-
-				// change account button (1.x)
-				// jQuery('#remove_token').click( function() {					
-				// 	return confirm('Do you really want to do this?');				
-				// });
-
 				// save changes button
 				jQuery('#save_settings').click( function() {					
 
-					// handle input fields outside of form
-					var paypal_address = jQuery('#wpl-text_paypal_email-field').first().attr('value');
-					jQuery('#wpl_text_paypal_email').attr('value', paypal_address );
+					// // handle input fields outside of form
+					// var paypal_address = jQuery('#wpl-text_paypal_email-field').first().attr('value');
+					// jQuery('#wpl_text_paypal_email').attr('value', paypal_address );
 
 					jQuery('#settingsForm').first().submit();
 					

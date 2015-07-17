@@ -53,6 +53,7 @@ class WPL_API_Hooks extends WPL_Core {
 
 		// example of using wplister_custom_attributes filter to add SKU as a virtual attribute
 		add_filter( 'wplister_custom_attributes', array( &$this, 'wplister_custom_attributes' ), 10, 1 );
+		add_filter( 'wplister_custom_attributes', array( &$this, 'wplister_custom_brand_attribute' ), 10, 1 );
 
 		// add support for Store Exporter plugin (http://www.visser.com.au/documentation/store-exporter/usage/)
 		add_filter( 'woo_ce_product_fields', array( &$this, 'woo_ce_product_fields' ) );
@@ -199,6 +200,11 @@ class WPL_API_Hooks extends WPL_Core {
 			$data['TrackingCarrier'] = WpLister_Order_MetaBox::findMatchingTrackingProvider( $data['TrackingCarrier'] );
 		}
 
+		// use default feedback text unless FeedbackText parameter is set
+		if ( ! isset($data['FeedbackText']) ) {
+			$data['FeedbackText'] = get_option( 'wplister_default_feedback_text', '' );
+		}
+
 
     	// complete sale on eBay
 		$response = WpLister_Order_MetaBox::callCompleteOrder( $post_id, $data, true );
@@ -307,6 +313,36 @@ class WPL_API_Hooks extends WPL_Core {
 		);
 
 		return $attributes;
+	}	
+
+	// add support for WooCommerce Brands extension
+	function wplister_custom_brand_attribute( $attributes ) {
+		if ( ! class_exists('WC_Brands')     ) return $attributes;
+		if ( ! function_exists('get_brands') ) return $attributes;
+
+		$attributes[] = array(
+			'label'    => 'Brand (WC Brands Addon)',
+			'id'       => '_wc_brand',
+			'callback' => array( $this, 'wc_brands_get_brand_name' )
+		);
+
+		return $attributes;
+	}	
+
+	// add support for WooCommerce Brands extension
+	function wc_brands_get_brand_name( $post_id, $listing_id ) {
+		if ( ! class_exists('WC_Brands')     ) return;
+		if ( ! function_exists('get_brands') ) return;
+
+		// get array of brands (taxonomy terms) for $post_id
+		$brands = get_the_terms( $post_id, 'product_brand' );
+		if ( ! is_array($brands) ) return '';
+		if (   empty($brands)    ) return '';
+
+		// return name of first brand
+		$value = $brands[0]->name;
+
+		return $value;
 	}	
 
 	// add support for Store Exporter plugin (http://www.visser.com.au/documentation/store-exporter/usage/)

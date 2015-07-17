@@ -185,6 +185,14 @@ class LogTable extends WP_List_Table {
             }
         }
 
+        if ( 'GetCategories' == $item['callname'] ) {
+            if ( preg_match("/<CategoryParent>(.*)<\/CategoryParent>/", $item['request'], $matches) ) {
+                $match = str_replace('<![CDATA[', '', $matches[1] );
+                $match = str_replace(']]>', '', $match );
+                $link .= ' - ' . strip_tags( $match );
+            }
+        }
+
         if ( 'GetMyMessages' == $item['callname'] ) {
             if ( preg_match("/<MessageID>(.*)<\/MessageID>/", $item['request'], $matches) ) {
                 $match = str_replace('<![CDATA[', '', $matches[1] );
@@ -469,6 +477,7 @@ class LogTable extends WP_List_Table {
             'GetUserPreferences',
             'GeteBayDetails',
             'GetShippingDiscountProfiles',
+            'CompleteSale',
         );
         $usertype = ( isset($_REQUEST['usertype']) ? $_REQUEST['usertype'] : false);
         $wpl_usertypes = array(

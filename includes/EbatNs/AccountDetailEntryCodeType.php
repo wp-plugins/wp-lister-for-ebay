@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -295,6 +295,8 @@ class AccountDetailEntryCodeType extends EbatNs_FacetType
 	const CodeType_CreditEBPReimbursement = 'CreditEBPReimbursement';
 	const CodeType_FeePromotedListingFeature = 'FeePromotedListingFeature';
 	const CodeType_CreditPromotedListingFeature = 'CreditPromotedListingFeature';
+	const CodeType_FeeAd = 'FeeAd';
+	const CodeType_CreditAd = 'CreditAd';
 
 	/**
 	 * @return 

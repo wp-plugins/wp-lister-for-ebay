@@ -14,7 +14,7 @@ class ToolsPage extends WPL_Page {
 		// parent::onWpInit();
 
 		// custom (raw) screen options for tools page
-		add_screen_options_panel('wplister_setting_options', '', array( &$this, 'renderSettingsOptions'), $this->main_admin_menu_slug.'_page_wplister-tools' );
+		add_screen_options_panel('wplister_tools_options', '', array( &$this, 'renderSettingsOptions'), $this->main_admin_menu_slug.'_page_wplister-tools' );
 
 		// load styles and scripts for this page only
 		// add_action( 'admin_print_styles', array( &$this, 'onWpPrintStyles' ) );
@@ -297,6 +297,11 @@ class ToolsPage extends WPL_Page {
 					$this->showMessage( $msg );
 				}
 	
+				// wple_upgrade_tables_to_utf8mb4
+				if ( $_REQUEST['action'] == 'wple_upgrade_tables_to_utf8mb4') {				
+					$this->upgradeTablesUTF8MB4();
+				}
+
 	
 			} else {
 				die ('not allowed');
@@ -426,6 +431,32 @@ class ToolsPage extends WPL_Page {
 	    // wp_enqueue_script ( 'jquery-ui-dialog' ); 
 
 	} // onWpEnqueueScripts
+
+
+
+	// convert plugin tables to utf8mb4
+	// (this should happen automatically on WP4.2, but WordPress only converts utf8 tables and leaves latin1 tables unchanged)
+	public function upgradeTablesUTF8MB4() {
+		global $wpdb;
+
+		// get list of our tables
+		$tables = $wpdb->get_col( "SHOW TABLES LIKE '{$wpdb->prefix}ebay_%'" );
+		if ( empty($tables) ) {
+			wple_show_message('no tables found.','error');
+			return;
+		}
+
+		// convert all tables
+		foreach ( $tables as $table ) {
+			$converted = WPLE_UpgradeHelper::convert_custom_table_to_utf8mb4( $table );
+			if ( $converted ) {
+				wple_show_message('Table <i>'.$table.'</i> was converted.');
+			} else {
+				wple_show_message('Table <i>'.$table.'</i> was not converted.','error');
+			}
+		}
+
+	} // upgradeTablesUTF8MB4()
 
 
 
@@ -722,7 +753,7 @@ class ToolsPage extends WPL_Page {
 		curl_setopt($cURLhandle, CURLOPT_SSL_VERIFYHOST, 0) ;
 		// curl_setopt($cURLhandle, CURLOPT_MAXCONNECTS, 10) ;
 		curl_setopt($cURLhandle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1) ;
-		curl_setopt($cURLhandle, CURLOPT_CLOSEPOLICY, CURLCLOSEPOLICY_LEAST_RECENTLY_USED) ;
+		// curl_setopt($cURLhandle, CURLOPT_CLOSEPOLICY, CURLCLOSEPOLICY_LEAST_RECENTLY_USED) ;
 		curl_setopt($cURLhandle, CURLOPT_TIMEOUT, 10 ) ;
 		curl_setopt($cURLhandle, CURLOPT_CONNECTTIMEOUT, 5 ) ;
 		// curl_setopt($cURLhandle, CURLOPT_FAILONERROR, TRUE); // there w

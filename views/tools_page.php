@@ -164,7 +164,7 @@
 								<input type="hidden" name="action" value="GetUser" />
 								<input type="submit" value="<?php echo __('Update user details','wplister'); ?>" name="submit" class="button">
 								<p><?php echo __('Update account details from eBay','wplister'); ?> 
-									<?php echo __('and update your seller profiles for shipping, payment and return policy.','wplister'); ?></p>
+									<?php echo __('and update your business policies for shipping, payment and returns.','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
 						-->
@@ -321,6 +321,17 @@
 								<p><?php echo __('Unlock all items.','wplister'); ?></p>
 						</form>
 						<br style="clear:both;"/>
+
+						<!-- convert tables -->
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="wple_upgrade_tables_to_utf8mb4" />
+								<input type="submit" value="<?php echo __('Convert tables to utf8mb4','wplister'); ?>" name="submit" class="button">
+								<p>
+									<?php echo __('Manually upgrade tables that were skipped by the WordPress updater.','wplister'); ?>
+									<?php echo __('Please backup your database. Only applicable for WordPress 4.2+.','wplister'); ?>
+								</p>
+						</form>
 
 					</div>
 				</div> <!-- postbox -->

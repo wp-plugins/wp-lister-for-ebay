@@ -76,7 +76,7 @@
 							</div>
 							<div class="clear"></div>
 
-							<?php if ( @$wpl_default_ebay_category_id && ! $item_details['ebay_category_1_id'] ) : ?>
+							<?php if ( @$wpl_default_ebay_category_id && ! $item_details['ebay_category_1_id'] && ! empty($wpl_item['profile_id']) ) : ?>
 							<div style="position:relative; margin: 5px 10px; clear:both">
 								<?php echo __('Conditions and item specifics are based on the category','wplister'); ?>: <?php echo EbayCategoriesModel::getCategoryName( $wpl_default_ebay_category_id ) ?>
 							</div>

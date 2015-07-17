@@ -28,12 +28,12 @@ class WPLE_AccountsPage extends WPL_Page {
 	public function handleActions() {
         // $this->logger->debug("handleActions()");
 
-		// save accounts
+		// add new account (triggered by 'Fetch eBay Token' button on accounts page)
 		if ( $this->requestAction() == 'wplister_add_account' ) {
 			$this->newAccount();
 		}
 
-		// fetch token for accounts
+		// fetch token for account (triggered from edit account page, right sidebar)
 		if ( $this->requestAction() == 'wplister_fetch_ebay_token' ) {
 			$this->fetchTokenForAccount( $_REQUEST['account_id'] );
 		}
@@ -318,7 +318,7 @@ class WPLE_AccountsPage extends WPL_Page {
 
 		// call FetchToken
 		$this->initEC();
-		$ebay_token = $this->EC->doFetchToken();
+		$ebay_token = $this->EC->doFetchToken( false );
 		$this->EC->closeEbay();
 
 		// check if we have a token

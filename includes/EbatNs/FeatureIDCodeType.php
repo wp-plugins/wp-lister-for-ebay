@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -119,6 +119,9 @@ class FeatureIDCodeType extends EbatNs_FacetType
 	const CodeType_ConditionValues = 'ConditionValues';
 	const CodeType_ValueCategory = 'ValueCategory';
 	const CodeType_ProductCreationEnabled = 'ProductCreationEnabled';
+	const CodeType_EANEnabled = 'EANEnabled';
+	const CodeType_ISBNEnabled = 'ISBNEnabled';
+	const CodeType_UPCEnabled = 'UPCEnabled';
 	const CodeType_MaxGranularFitmentCount = 'MaxGranularFitmentCount';
 	const CodeType_CompatibleVehicleType = 'CompatibleVehicleType';
 	const CodeType_PaymentOptionsGroup = 'PaymentOptionsGroup';

@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -11,6 +11,7 @@ require_once 'NameValueListArrayType.php';
 require_once 'SellingStatusType.php';
 require_once 'SellingManagerProductInventoryStatusType.php';
 require_once 'DiscountPriceInfoType.php';
+require_once 'VariationProductListingDetailsType.php';
 
 /**
   * This type defines the <b>Variation</b> container, which provides full
@@ -89,6 +90,11 @@ class VariationType extends EbatNs_ComplexType
 	* @var DiscountPriceInfoType
 	**/
 	protected $DiscountPriceInfo;
+
+	/**
+	* @var VariationProductListingDetailsType
+	**/
+	protected $VariationProductListingDetails;
 
 
 	/**
@@ -209,6 +215,14 @@ class VariationType extends EbatNs_ComplexType
 				array(
 					'required' => false,
 					'type' => 'DiscountPriceInfoType',
+					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
+					'array' => false,
+					'cardinality' => '0..1'
+				),
+				'VariationProductListingDetails' =>
+				array(
+					'required' => false,
+					'type' => 'VariationProductListingDetailsType',
 					'nsURI' => 'urn:ebay:apis:eBLBaseComponents',
 					'array' => false,
 					'cardinality' => '0..1'
@@ -441,6 +455,22 @@ class VariationType extends EbatNs_ComplexType
 	function setDiscountPriceInfo($value)
 	{
 		$this->DiscountPriceInfo = $value;
+	}
+
+	/**
+	 * @return VariationProductListingDetailsType
+	 **/
+	function getVariationProductListingDetails()
+	{
+		return $this->VariationProductListingDetails;
+	}
+
+	/**
+	 * @return void
+	 **/
+	function setVariationProductListingDetails($value)
+	{
+		$this->VariationProductListingDetails = $value;
 	}
 
 }

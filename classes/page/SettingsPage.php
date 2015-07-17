@@ -103,11 +103,6 @@ class SettingsPage extends WPL_Page {
 			$this->saveDeveloperSettings();
 		}
 
-		// set ebay site
-		if ( $this->requestAction() == 'save_ebay_site' ) {
-			self::updateOption( 'ebay_site_id',		$this->getValueFromPost( 'text_ebay_site_id' ) );
-		}
-
 	}
 	
 
@@ -122,21 +117,21 @@ class SettingsPage extends WPL_Page {
         if ( 'accounts'   == $active_tab ) return $this->displayAccountsPage();
 	
 
-		// action FetchToken
-		if ( $this->requestAction() == 'FetchToken' ) {
+		// // action FetchToken
+		// if ( $this->requestAction() == 'FetchToken' ) {
 
-			// FetchToken
-			$this->initEC();
-			$ebay_token = $this->EC->doFetchToken();
-			$this->EC->closeEbay();
+		// 	// FetchToken
+		// 	$this->initEC();
+		// 	$ebay_token = $this->EC->doFetchToken();
+		// 	$this->EC->closeEbay();
 
-			// check if we have a token
-			if ( self::getOption('ebay_token') == '' ) {
-				$this->showMessage( "There was a problem fetching your token. Make sure you follow the instructions.", 1 );
-			}
+		// 	// check if we have a token
+		// 	if ( self::getOption('ebay_token') == '' ) {
+		// 		$this->showMessage( "There was a problem fetching your token. Make sure you follow the instructions.", 1 );
+		// 	}
 
-			$this->check_wplister_setup('settings');
-		}
+		// 	$this->check_wplister_setup('settings');
+		// }
 
 
 		$aData = array(
@@ -144,9 +139,9 @@ class SettingsPage extends WPL_Page {
 			'message'					=> $this->message,
 
 			// deprecated parameters
-			'text_ebay_token'			=> self::getOption( 'ebay_token' ),
-			'text_ebay_site_id'			=> self::getOption( 'ebay_site_id' ),
-			'text_paypal_email'			=> self::getOption( 'paypal_email' ),
+			// 'text_ebay_token'			=> self::getOption( 'ebay_token' ),
+			// 'text_ebay_site_id'			=> self::getOption( 'ebay_site_id' ),
+			// 'text_paypal_email'			=> self::getOption( 'paypal_email' ),
 			'ebay_sites'				=> EbayController::getEbaySites(),
 			'ebay_token_userid'			=> self::getOption( 'ebay_token_userid' ),
 			'ebay_user'					=> self::getOption( 'ebay_user' ),
@@ -224,6 +219,7 @@ class SettingsPage extends WPL_Page {
 			'disable_sale_price'            => self::getOption( 'disable_sale_price', 0 ),
 			'api_enable_auto_relist'        => self::getOption( 'api_enable_auto_relist', 0 ),
 			'auto_update_ended_items'       => self::getOption( 'auto_update_ended_items', 0 ),
+			'archive_days_limit'       		=> self::getOption( 'archive_days_limit', 90 ),
 			'option_preview_in_new_tab'     => self::getOption( 'preview_in_new_tab', 0 ),
 			'enable_categories_page'        => self::getOption( 'enable_categories_page', 0 ),
 			'enable_accounts_page'			=> self::getOption( 'enable_accounts_page', 0 ),
@@ -232,8 +228,10 @@ class SettingsPage extends WPL_Page {
 			'option_disable_wysiwyg_editor' => self::getOption( 'disable_wysiwyg_editor', 0 ),
 			'enable_item_compat_tab'        => self::getOption( 'enable_item_compat_tab', 1 ),
 			'convert_dimensions'        	=> self::getOption( 'convert_dimensions' ),
+			'convert_attributes_mode'      	=> self::getOption( 'convert_attributes_mode', 'all' ),
 			'exclude_attributes'        	=> self::getOption( 'exclude_attributes' ),
 			'exclude_variation_values'      => self::getOption( 'exclude_variation_values' ),
+			'autofill_missing_gtin'         => self::getOption( 'autofill_missing_gtin', '' ),
 			'option_local_timezone'         => self::getOption( 'local_timezone', '' ),
 			'text_admin_menu_label'         => self::getOption( 'admin_menu_label', $this->app_name ),
 			'timezones'                     => self::get_timezones(),
@@ -269,7 +267,6 @@ class SettingsPage extends WPL_Page {
 			'staging_site_pattern'		=> self::getOption( 'staging_site_pattern', '' ),
 			'ignore_orders_before_ts'	=> get_option( 'ignore_orders_before_ts' ),
 
-			'text_ebay_token'			=> self::getOption( 'ebay_token' ),
 			'text_log_level'			=> self::getOption( 'log_level' ),
 
 			'option_log_to_db'			=> self::getOption( 'log_to_db' ),
@@ -344,12 +341,15 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'disable_wysiwyg_editor',			$this->getValueFromPost( 'option_disable_wysiwyg_editor' ) );
 			self::updateOption( 'enable_item_compat_tab', 			$this->getValueFromPost( 'enable_item_compat_tab' ) );
 			self::updateOption( 'convert_dimensions', 				$this->getValueFromPost( 'convert_dimensions' ) );
+			self::updateOption( 'convert_attributes_mode', 			$this->getValueFromPost( 'convert_attributes_mode' ) );
 			self::updateOption( 'exclude_attributes', 				$this->getValueFromPost( 'exclude_attributes' ) );
 			self::updateOption( 'local_timezone',					$this->getValueFromPost( 'option_local_timezone' ) );
 			self::updateOption( 'allow_backorders',					$this->getValueFromPost( 'option_allow_backorders' ) );
 			self::updateOption( 'disable_sale_price',				$this->getValueFromPost( 'disable_sale_price' ) );
+			self::updateOption( 'autofill_missing_gtin',			$this->getValueFromPost( 'autofill_missing_gtin' ) );
 			self::updateOption( 'api_enable_auto_relist',			$this->getValueFromPost( 'api_enable_auto_relist' ) );
 			self::updateOption( 'auto_update_ended_items',			$this->getValueFromPost( 'auto_update_ended_items' ) );
+			self::updateOption( 'archive_days_limit',				$this->getValueFromPost( 'archive_days_limit' ) );
 
 			self::updateOption( 'exclude_variation_values', 		str_replace( ', ', ',', $this->getValueFromPost( 'exclude_variation_values' ) ) );
 
@@ -534,16 +534,16 @@ class SettingsPage extends WPL_Page {
 			
 			$this->handleChangedUpdateChannel();
 
-			// new manual token ?
-			if ( $oldToken != $this->getValueFromPost( 'text_ebay_token' ) ) {
-				self::updateOption( 'ebay_token', $this->getValueFromPost( 'text_ebay_token' ) );
-				$this->initEC();
-				$UserID = $this->EC->GetUser();
-				$this->EC->GetUserPreferences();
-				$this->EC->closeEbay();
-				$this->showMessage( __('Your token was changed.','wplister') );
-				$this->showMessage( __('Your UserID is','wplister') . ' ' . $UserID );
-			}
+			// // new manual token ?
+			// if ( $oldToken != $this->getValueFromPost( 'text_ebay_token' ) ) {
+			// 	self::updateOption( 'ebay_token', $this->getValueFromPost( 'text_ebay_token' ) );
+			// 	$this->initEC();
+			// 	$UserID = $this->EC->GetUser();
+			// 	$this->EC->GetUserPreferences();
+			// 	$this->EC->closeEbay();
+			// 	$this->showMessage( __('Your token was changed.','wplister') );
+			// 	$this->showMessage( __('Your UserID is','wplister') . ' ' . $UserID );
+			// }
 
 			$this->showMessage( __('Settings updated.','wplister') );
 

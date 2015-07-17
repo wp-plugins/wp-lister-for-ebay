@@ -202,6 +202,7 @@ class WPL_Setup extends WPL_Core {
 	public function isWindowsServer( $page ) {
 
 		if ( $page != 'settings' ) return;
+		if ( defined('WPLE_EXPERIMENTAL_WIN_SUPPORT') ) return;
 
 		if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 

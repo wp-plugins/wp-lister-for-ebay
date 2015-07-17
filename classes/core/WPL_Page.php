@@ -87,7 +87,7 @@ class WPL_Page extends WPL_Core {
 	}  
 	function change_admin_footer_version( $version ) {
 		// $plugin_name  = WPLISTER_LIGHT ? $this->app_name : $this->app_name . ' Pro';  
-		$plugin_name  = WPLISTER_LIGHT ? 'WP-Lister for eBay' : 'WP-Lister Pro';  
+		$plugin_name  = WPLISTER_LIGHT ? 'WP-Lister Lite for eBay' : 'WP-Lister Pro';  
 		$plugin_name .= ' ' . WPLE_VERSION;
 		$network_activated = get_option('wplister_is_network_activated') == 1 ? true : false;
 		if ( $network_activated ) $plugin_name .= 'n';

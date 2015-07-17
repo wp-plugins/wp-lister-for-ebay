@@ -318,7 +318,7 @@ class ListingsModel extends WPL_Model {
 			WHERE status <> 'archived'
 			  AND ( post_id = %s
 			   OR parent_id = %s )
-			ORDER BY id DESC
+			ORDER BY id ASC
 		", $post_id, $post_id ) );
 		return $items;
 	}
@@ -775,7 +775,7 @@ class ListingsModel extends WPL_Model {
 			
 			// get details like ViewItemURL from ebay automatically - unless item does not exist on eBay (17)
 			if (  17 != $this->handle_error_code ) {
-				$this->updateItemDetails( $id, $session );
+				$this->updateItemDetails( $id, $session, true );
 				$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
 			}
 
@@ -851,7 +851,7 @@ class ListingsModel extends WPL_Model {
 			
 			// get details like ViewItemURL from ebay automatically - unless item does not exist on eBay (17)
 			if (  17 != $this->handle_error_code ) {
-				$this->updateItemDetails( $id, $session );
+				$this->updateItemDetails( $id, $session, true );
 				$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
 			}
 
@@ -954,7 +954,7 @@ class ListingsModel extends WPL_Model {
 			
 			// get details like ViewItemURL from ebay automatically - unless item does not exist on eBay (17)
 			if (  17 != $this->handle_error_code ) {
-				$this->updateItemDetails( $id, $session );
+				$this->updateItemDetails( $id, $session, true );
 				$this->postProcessListing( $id, $res->ItemID, $item, $listing_item, $res, $session );
 			}
 
@@ -1359,7 +1359,7 @@ class ListingsModel extends WPL_Model {
 
 
 	function processErrorsAndWarnings( $id, $preprocessed_result ) {
-		// echo "<pre>";print_r($preprocessed_result);echo"</pre>";#die();
+		// echo "<pre>preprocessed_result: ";print_r($preprocessed_result);echo"</pre>";#die();
 
 		// handle errors and warnings
 		$errors         = array();
@@ -1476,19 +1476,20 @@ class ListingsModel extends WPL_Model {
 			if ( sizeof($allowed_statuses) == 1 )
 				$msg = sprintf( 'Skipped %s item "%s" as its listing status is not %s', $item['status'], $item['auction_title'], join( $allowed_statuses, ' or ' ) );
 
-			if ( $this->is_ajax() ) {
-				$this->showMessage( $msg, true, false );
-			} else {
-				$this->showMessage( $msg, true, true );				
-			}
+			// if ( $this->is_ajax() ) {
+			// 	$this->showMessage( $msg, true, false );
+			// } else {
+			// 	$this->showMessage( $msg, true, true );
+			// }
+			wple_show_message( $msg, 'error' );
 
 			// create error object
 			$errorObj = new stdClass();
 			$errorObj->SeverityCode = 'Info';
 			$errorObj->ErrorCode 	= 102;
 			$errorObj->ShortMessage = 'Invalid listing status';
-			$errorObj->LongMessage 	= $this->message;
-			$errorObj->HtmlMessage 	= $this->message;
+			$errorObj->LongMessage 	= $msg;
+			$errorObj->HtmlMessage 	= $msg;
 			// $errors[] = $errorObj;
 
 			// save results as local property
@@ -1544,7 +1545,7 @@ class ListingsModel extends WPL_Model {
 
 	}
 
-	public function updateItemDetails( $id, $session ) {
+	public function updateItemDetails( $id, $session, $is_second_request = false ) {
 
 		// get item data
 		$item = $this->getItem( $id );
@@ -1563,7 +1564,7 @@ class ListingsModel extends WPL_Model {
 		$res = $this->_cs->GetItem($req);		
 
 		// handle response and check if successful
-		if ( $this->handleResponse($res) ) {
+		if ( $this->handleResponse($res, $is_second_request ) ) {
 			$this->logger->info( "Item #$id was updated from eBay, ItemID is ".$item['ebay_id'] );
 
 			// archive listing if API returned error 17: "This item cannot be accessed..."
@@ -1857,7 +1858,7 @@ class ListingsModel extends WPL_Model {
 
 		$limit = esc_sql( $limit );
 		$items = $wpdb->get_results("
-			SELECT *
+			SELECT DISTINCT li.*
 			FROM $this->tablename li
 			$where_sql
 			$order_sql
@@ -2434,7 +2435,7 @@ class ListingsModel extends WPL_Model {
 		// if ( $post->post_status != 'publish' ) { 
 		if ( ! in_array( $post->post_status, array('publish','private') ) ) { 
 			if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'wpl_prepare_single_listing' ) {
-				$this->showMessage( __('Skipped product with status','wplister') . ' <em>' . $post->post_status . '</em>: ' . $post_title, 2, 1 );
+				wple_show_message( __('Skipped product with status','wplister') . ' <em>' . $post->post_status . '</em>: ' . $post_title, 'warn' );
 			}
 			$this->warnings[] = sprintf( __('Skipped product %s with status %s.','wpla'), $post_id, $post->post_status );
 			return false; 

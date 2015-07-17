@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -10,8 +10,8 @@ require_once 'TicketListingDetailsType.php';
 
 /**
   * Contains product information that can be included in a listing.
-  * Applicable for listings that use eBay's Pre-filled Item Information feature.
-  * See <a href="http://developer.ebay.com/DevZone//guides/ebayfeatures/Development/ItemSpecifics-CatalogDetails.html">Pre-filling Item Specifics with Product Details</a> 
+  * Applicable for listings that use eBay's Pre-filled Item Information feature and listings in categories that require product identifiers.
+  * See <a href="http://developer.ebay.com/DevZone/guides/ebayfeatures/Development/ItemSpecifics-CatalogDetails.html">Pre-filling Item Specifics with Product Details</a>
   * for details on working with Pre-filled Item Information.
   * 
  **/
@@ -67,16 +67,6 @@ class ProductListingDetailsType extends EbatNs_ComplexType
 	* @var boolean
 	**/
 	protected $ReturnSearchResultOnDuplicates;
-
-	/**
-	* @var boolean
-	**/
-	protected $ListIfNoProduct;
-
-	/**
-	* @var string
-	**/
-	protected $GTIN;
 
 	/**
 	* @var string
@@ -195,22 +185,6 @@ class ProductListingDetailsType extends EbatNs_ComplexType
 				array(
 					'required' => false,
 					'type' => 'boolean',
-					'nsURI' => 'http://www.w3.org/2001/XMLSchema',
-					'array' => false,
-					'cardinality' => '0..1'
-				),
-				'ListIfNoProduct' =>
-				array(
-					'required' => false,
-					'type' => 'boolean',
-					'nsURI' => 'http://www.w3.org/2001/XMLSchema',
-					'array' => false,
-					'cardinality' => '0..1'
-				),
-				'GTIN' =>
-				array(
-					'required' => false,
-					'type' => 'string',
 					'nsURI' => 'http://www.w3.org/2001/XMLSchema',
 					'array' => false,
 					'cardinality' => '0..1'
@@ -453,38 +427,6 @@ class ProductListingDetailsType extends EbatNs_ComplexType
 	function setReturnSearchResultOnDuplicates($value)
 	{
 		$this->ReturnSearchResultOnDuplicates = $value;
-	}
-
-	/**
-	 * @return boolean
-	 **/
-	function getListIfNoProduct()
-	{
-		return $this->ListIfNoProduct;
-	}
-
-	/**
-	 * @return void
-	 **/
-	function setListIfNoProduct($value)
-	{
-		$this->ListIfNoProduct = $value;
-	}
-
-	/**
-	 * @return string
-	 **/
-	function getGTIN()
-	{
-		return $this->GTIN;
-	}
-
-	/**
-	 * @return void
-	 **/
-	function setGTIN($value)
-	{
-		$this->GTIN = $value;
 	}
 
 	/**

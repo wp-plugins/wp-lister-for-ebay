@@ -1,5 +1,5 @@
 <?php
-/* Generated on 4/29/15 3:23 AM by globalsync
+/* Generated on 6/26/15 3:23 AM by globalsync
  * $Id: $
  * $Log: $
  */
@@ -117,6 +117,11 @@ class GetUserPreferencesRequestType extends AbstractRequestType
 	* @var boolean
 	**/
 	protected $ShowOutOfStockControlPreference;
+
+	/**
+	* @var boolean
+	**/
+	protected $ShoweBayPLUSPreference;
 
 
 	/**
@@ -290,6 +295,14 @@ class GetUserPreferencesRequestType extends AbstractRequestType
 					'cardinality' => '0..1'
 				),
 				'ShowOutOfStockControlPreference' =>
+				array(
+					'required' => false,
+					'type' => 'boolean',
+					'nsURI' => 'http://www.w3.org/2001/XMLSchema',
+					'array' => false,
+					'cardinality' => '0..1'
+				),
+				'ShoweBayPLUSPreference' =>
 				array(
 					'required' => false,
 					'type' => 'boolean',
@@ -637,6 +650,22 @@ class GetUserPreferencesRequestType extends AbstractRequestType
 	function setShowOutOfStockControlPreference($value)
 	{
 		$this->ShowOutOfStockControlPreference = $value;
+	}
+
+	/**
+	 * @return boolean
+	 **/
+	function getShoweBayPLUSPreference()
+	{
+		return $this->ShoweBayPLUSPreference;
+	}
+
+	/**
+	 * @return void
+	 **/
+	function setShoweBayPLUSPreference($value)
+	{
+		$this->ShoweBayPLUSPreference = $value;
 	}
 
 }
