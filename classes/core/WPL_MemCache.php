@@ -6,6 +6,9 @@ class WPLE_MemCache {
 	private $product_attributes = array();
 	private $product_variations = array();
 	private $product_objects    = array();
+    private $short_variations   = array();
+    private $taxonomies         = array();
+    private $taxonomy_terms     = array();
 
 
 	// get WooCommerce product object
@@ -41,6 +44,30 @@ class WPLE_MemCache {
         }
 
         return $this->product_variations[ $post_id ];
+    }
+
+    // get product variations (short version)
+    public function getShortProductVariations( $post_id ) {
+
+        // update cache if required
+        if ( ! array_key_exists( $post_id, $this->short_variations ) ) {
+            $this->short_variations[ $post_id ] = ProductWrapper::getVariations( $post_id, true );
+        }
+
+        return $this->short_variations[ $post_id ];
+    }
+
+
+    // cached version of get_term_by
+    public function getTermBy( $field, $value, $taxonomy ) {
+
+        // update cache if required
+        $cache_key = $field.$value.$taxonomy;
+        if ( ! array_key_exists( $cache_key, $this->taxonomy_terms ) ) {
+            $this->taxonomy_terms[ $cache_key ] = get_term_by( $field, $value, $taxonomy );
+        }
+
+        return $this->taxonomy_terms[ $cache_key ];
     }
 
 

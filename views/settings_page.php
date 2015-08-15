@@ -155,7 +155,7 @@
 					<input type="hidden" name="action" value="save_wplister_settings" >
 
 					<div class="postbox" id="UpdateOptionBox">
-						<h3 class="hndle"><span><?php echo __('Automatic updates','wplister') ?></span></h3>
+						<h3 class="hndle"><span><?php echo __('Background Tasks','wplister') ?></span></h3>
 						<div class="inside">
 							<!-- <p><?php echo __('Enable to update listings and transactions using WP-Cron.','wplister'); ?></p> -->
 
@@ -175,7 +175,7 @@
 
 
 					<div class="postbox" id="OtherSettingsBox">
-						<h3 class="hndle"><span><?php echo __('Misc options','wplister') ?></span></h3>
+						<h3 class="hndle"><span><?php echo __('Misc Options','wplister') ?></span></h3>
 						<div class="inside">
 
 							<label for="wpl-local_auction_display" class="text_label">

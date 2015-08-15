@@ -511,9 +511,10 @@
 							<br class="clear" />
 
 							<label for="wpl-text-include_prefilled_info" class="text_label">
-								<?php echo __('Prefilled info','wplister'); ?>
-                                <?php wplister_tooltip('This option only applies to products from the eBay catalog which are listed by UPC.<br>
-                                						Disable this if you do not want to include the prefilled product information in your listings.') ?>
+								<?php echo __('Use Catalog Details','wplister'); ?>
+                                <?php wplister_tooltip('<b>Use Catalog Product Details</b><br>
+                                						Disable this if you do not want to include the prefilled product information from the eBay catalog in your listings.<br><br>
+                                						(Applies only to products from the eBay catalog which are listed by UPC, EAN or ePID.)') ?>
 							</label>
 							<select id="wpl-text-include_prefilled_info" name="wpl_e2e_include_prefilled_info" class=" required-entry select">
 								<option value="1" <?php if ( @$item_details['include_prefilled_info'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
@@ -523,11 +524,14 @@
 
 							<label for="wpl-text-strikethrough_pricing" class="text_label">
 								<?php echo __('Strikethrough price','wplister'); ?>
-                                <?php wplister_tooltip('Enable this if you want to list products which have a sale price in WooCommerce, but you want the regular price be displayed on eBay as the original retail price / strikethrough price.<br>This is currently available on the US, UK, and DE sites only.') ?>
+                                <?php wplister_tooltip('<b>Strikethrough Price (STP)</b><br>Enable this if you want products on sale have their regular price be displayed on eBay as the original retail price / strikethrough price.<br><br>Alternatively, you can use an existing MSRP from WooCommerce as STP, if you have the WooCommerce MSRP extension installed.<br><br>Note: Strikethrough Pricing is currently available on the US, UK, and DE sites only.') ?>
 							</label>
 							<select id="wpl-text-strikethrough_pricing" name="wpl_e2e_strikethrough_pricing" class=" required-entry select">
+								<option value="0" <?php if ( @$item_details['strikethrough_pricing'] == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
 								<option value="1" <?php if ( @$item_details['strikethrough_pricing'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
-								<option value="0" <?php if ( @$item_details['strikethrough_pricing'] != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+								<?php if ( class_exists( 'woocommerce_msrp_admin' ) || class_exists( 'WPLA_MSRP_Addon' ) ) : ?>
+								<option value="2" <?php if ( @$item_details['strikethrough_pricing'] == '2' ): ?>selected="selected"<?php endif; ?>><?php echo __('MSRP','wplister'); ?></option>
+								<?php endif; ?>
 							</select>
 							<br class="clear" />
 

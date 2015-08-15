@@ -146,7 +146,7 @@
 		<div class="metabox-holder">
 			<div class="meta-box-sortables ui-sortable">
 				
-				<div class="postbox" id="UpdateToolsBox">
+				<div class="postbox" id="UpdateToolsBox_deprecated" style="display: none;">
 					<h3 class="hndle"><span><?php echo __('Updates','wplister'); ?></span></h3>
 					<div class="inside">
 
@@ -332,6 +332,30 @@
 									<?php echo __('Please backup your database. Only applicable for WordPress 4.2+.','wplister'); ?>
 								</p>
 						</form>
+
+					</div>
+				</div> <!-- postbox -->
+
+
+				<div class="postbox" id="UpdateToolsBox">
+					<h3 class="hndle"><span><?php echo __('Tools','wplister'); ?></span></h3>
+					<div class="inside">
+
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="wple_run_daily_schedule" />
+								<input type="submit" value="<?php echo __('Run daily schedule','wplister'); ?>" name="submit" class="button">
+								<p><?php echo __('Manually trigger the daily task schedule.','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="wple_run_update_schedule" />
+								<input type="submit" value="<?php echo __('Run update schedule','wplister'); ?>" name="submit" class="button">
+								<p><?php echo __('Manually run scheduled background tasks.','wplister'); ?></p>
+						</form>
+						<!-- <br style="clear:both;"/> -->
 
 					</div>
 				</div> <!-- postbox -->

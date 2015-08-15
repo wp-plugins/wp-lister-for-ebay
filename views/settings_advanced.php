@@ -80,7 +80,6 @@
 				</div>
 			</div> <!-- #postbox-container-1 -->
 
-
 			<!-- #postbox-container-3 -->
 			<?php if ( ( ! is_multisite() || is_main_site() ) && apply_filters( 'wpl_enable_capabilities_options', true ) ) : ?>
 			<div id="postbox-container-3" class="postbox-container">
@@ -138,6 +137,8 @@
 			<div id="postbox-container-2" class="postbox-container">
 				<div class="meta-box-sortables ui-sortable">
 					
+					<?php do_action( 'wple_before_advanced_settings' ) ?>
+
 					<div class="postbox" id="TemplateSettingsBox">
 						<h3 class="hndle"><span><?php echo __('Listing Templates','wplister') ?></span></h3>
 						<div class="inside">
@@ -264,6 +265,16 @@
 								<option value="2" <?php if ( $wpl_enable_custom_product_prices == '2' ): ?>selected="selected"<?php endif; ?>><?php echo __('Hide for variations','wplister'); ?></option>
 							</select>
 
+							<label for="wpl-enable_mpn_and_isbn_fields" class="text_label">
+								<?php echo __('Enable MPN and ISBN fields','wplister') ?>
+                                <?php wplister_tooltip('If your variable products have MPNs or ISBNs, set this option to Yes.') ?>
+							</label>
+							<select id="wpl-enable_mpn_and_isbn_fields" name="wpl_e2e_enable_mpn_and_isbn_fields" class=" required-entry select">
+								<option value="0" <?php if ( $wpl_enable_mpn_and_isbn_fields == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+								<option value="1" <?php if ( $wpl_enable_mpn_and_isbn_fields == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
+								<option value="2" <?php if ( $wpl_enable_mpn_and_isbn_fields == '2' ): ?>selected="selected"<?php endif; ?>><?php echo __('Hide for variations','wplister'); ?> (<?php _e('default','wplister'); ?>)</option>
+							</select>
+
 							<label for="wpl-enable_categories_page" class="text_label">
 								<?php echo __('Categories in main menu','wplister') ?>
                                 <?php wplister_tooltip('This will add a <em>Categories</em> submenu entry visible to users who can manage listings.') ?>
@@ -317,7 +328,7 @@
 
 
 					<div class="postbox" id="OtherSettingsBox">
-						<h3 class="hndle"><span><?php echo __('Misc options','wplister') ?></span></h3>
+						<h3 class="hndle"><span><?php echo __('Misc Options','wplister') ?></span></h3>
 						<div class="inside">
 
 							<label for="wpl-autofill_missing_gtin" class="text_label">
@@ -471,6 +482,7 @@
 						</div>
 					</div>
 
+					<?php do_action( 'wple_after_advanced_settings' ) ?>
 
 
 				<?php if ( ( is_multisite() ) && ( is_main_site() ) ) : ?>
@@ -482,7 +494,6 @@
 
 				</div> <!-- .meta-box-sortables -->
 			</div> <!-- #postbox-container-1 -->
-
 
 
 		</div> <!-- #post-body -->

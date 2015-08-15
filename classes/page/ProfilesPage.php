@@ -140,6 +140,7 @@ class ProfilesPage extends WPL_Page {
 		// $available_attributes[] = $attrib;
 
 		// process custom attributes
+		$wpl_custom_attributes = array();
 		$custom_attributes = apply_filters( 'wplister_custom_attributes', array() );
 		if ( is_array( $custom_attributes ) )
 		foreach ( $custom_attributes as $attrib ) {
@@ -147,7 +148,7 @@ class ProfilesPage extends WPL_Page {
 			$new_attribute = new stdClass();
 			$new_attribute->name  = $attrib['id'];
 			$new_attribute->label = $attrib['label'];
-			$available_attributes[] = $new_attribute;
+			$wpl_custom_attributes[] = $new_attribute;
 
 		}
 
@@ -242,6 +243,7 @@ class ProfilesPage extends WPL_Page {
 			'loc_calc_shipping_options' => $loc_calc_shipping_options,
 			'int_calc_shipping_options' => $int_calc_shipping_options,
 			'available_attributes'      => $available_attributes,
+			'custom_attributes'      	=> $wpl_custom_attributes,
 			'calc_shipping_enabled'	 	=> in_array( self::getOption('ebay_site_id'), array(0,2,15,100) ),
 			'default_ebay_category_id'	=> self::getOption('default_ebay_category_id'),
 			'shipping_locations'        => $shipping_locations,

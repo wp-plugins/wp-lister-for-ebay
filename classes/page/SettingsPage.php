@@ -225,6 +225,7 @@ class SettingsPage extends WPL_Page {
 			'enable_accounts_page'			=> self::getOption( 'enable_accounts_page', 0 ),
 			'enable_thumbs_column'          => self::getOption( 'enable_thumbs_column', 0 ),
 			'enable_custom_product_prices'  => self::getOption( 'enable_custom_product_prices', 1 ),
+			'enable_mpn_and_isbn_fields'    => self::getOption( 'enable_mpn_and_isbn_fields', 2 ),
 			'option_disable_wysiwyg_editor' => self::getOption( 'disable_wysiwyg_editor', 0 ),
 			'enable_item_compat_tab'        => self::getOption( 'enable_item_compat_tab', 1 ),
 			'convert_dimensions'        	=> self::getOption( 'convert_dimensions' ),
@@ -313,6 +314,8 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'local_auction_display',$this->getValueFromPost( 'local_auction_display' ) );
 			self::updateOption( 'send_weight_and_size', $this->getValueFromPost( 'send_weight_and_size' ) );
 
+			do_action('wple_save_settings');
+
 			$this->handleCronSettings( $this->getValueFromPost( 'option_cron_auctions' ) );
 			$this->showMessage( __('Settings saved.','wplister') );
 		}
@@ -338,6 +341,7 @@ class SettingsPage extends WPL_Page {
 			self::updateOption( 'enable_accounts_page',				$this->getValueFromPost( 'enable_accounts_page' ) );
 			self::updateOption( 'enable_thumbs_column',				$this->getValueFromPost( 'enable_thumbs_column' ) );
 			self::updateOption( 'enable_custom_product_prices', 	$this->getValueFromPost( 'enable_custom_product_prices' ) );
+			self::updateOption( 'enable_mpn_and_isbn_fields', 		$this->getValueFromPost( 'enable_mpn_and_isbn_fields' ) );
 			self::updateOption( 'disable_wysiwyg_editor',			$this->getValueFromPost( 'option_disable_wysiwyg_editor' ) );
 			self::updateOption( 'enable_item_compat_tab', 			$this->getValueFromPost( 'enable_item_compat_tab' ) );
 			self::updateOption( 'convert_dimensions', 				$this->getValueFromPost( 'convert_dimensions' ) );
@@ -356,6 +360,8 @@ class SettingsPage extends WPL_Page {
 			if ( ! defined('WPLISTER_RESELLER_VERSION') ) 
 				self::updateOption( 'admin_menu_label',				$this->getValueFromPost( 'text_admin_menu_label' ) );
 
+
+			do_action('wple_save_settings');
 
 			$this->showMessage( __('Settings saved.','wplister') );
 		}
@@ -410,8 +416,32 @@ class SettingsPage extends WPL_Page {
 
 	} // savePermissions()
 
+	static function check_max_post_vars() {
+
+		// count total number of post parameters - to show warning when running into max_input_vars limit ( or close: limit - 100 )
+		$max_input_vars = ini_get('max_input_vars');
+        $post_var_count = 0;
+        foreach ( $_POST as $parameter ) {
+            $post_var_count += is_array( $parameter ) ? sizeof( $parameter ) : 1;
+        }
+    	// show warning warning message if post count is close to limit
+        if ( $post_var_count > $max_input_vars - 100 ) {
+
+	    	$estimate = intval( $post_var_count / 100 ) * 100;
+	    	$msg  = '<b>Warning: Your server has a limit of '.$max_input_vars.' input fields set for PHP</b> (max_input_vars)';
+	    	$msg .= '<br><br>';
+	    	$msg .= 'This page submitted more than '.$estimate.' fields, which means that either some data is already discarded by your server when this page is updated - or it will be when you add a few more product categories to your site. ';
+	    	$msg .= '<br><br>';
+	    	$msg .= 'Please contact your hosting provider and have them increase the <code>max_input_vars</code> PHP setting to at least '.($max_input_vars*2).' to prevent any issues saving your category mappings.';
+	    	wple_show_message( $msg, 'warn' );
+
+        }
+
+	} // check_max_post_vars()
 
 	protected function saveCategoriesSettings() {
+
+		self::check_max_post_vars();
 
 		// TODO: check nonce
 		if ( isset( $_POST['wpl_e2e_ebay_category_id'] ) && isset( $_POST['submit'] ) ) {
@@ -544,6 +574,8 @@ class SettingsPage extends WPL_Page {
 			// 	$this->showMessage( __('Your token was changed.','wplister') );
 			// 	$this->showMessage( __('Your UserID is','wplister') . ' ' . $UserID );
 			// }
+
+			do_action('wple_save_settings');
 
 			$this->showMessage( __('Settings updated.','wplister') );
 

@@ -435,33 +435,38 @@ class EbayOrdersTable extends WP_List_Table {
     // status filter links
     // http://wordpress.stackexchange.com/questions/56883/how-do-i-create-links-at-the-top-of-wp-list-table
     function get_views(){
-       $views    = array();
-       $current  = ( !empty($_REQUEST['order_status']) ? $_REQUEST['order_status'] : 'all');
-       $base_url = esc_url_raw( remove_query_arg( array( 'action', 'order', 'order_status' ) ) );
+        $views    = array();
+        $current  = ( !empty($_REQUEST['order_status']) ? $_REQUEST['order_status'] : 'all');
+        $base_url = esc_url_raw( remove_query_arg( array( 'action', 'order', 'order_status' ) ) );
 
-       // get order status summary
-       $om = new EbayOrdersModel();
-       $summary = $om->getStatusSummary();
+        // handle search query
+        if ( isset($_REQUEST['s']) && $_REQUEST['s'] ) {
+            $base_url = add_query_arg( 's', $_REQUEST['s'], $base_url );
+        }
 
-       // All link
-       $class = ($current == 'all' ? ' class="current"' :'');
-       $all_url = remove_query_arg( 'order_status', $base_url );
-       $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
-       $views['all'] .= '<span class="count">('.$summary->total_items.')</span>';
+        // get order status summary
+        $om = new EbayOrdersModel();
+        $summary = $om->getStatusSummary();
 
-       // Completed link
-       $Completed_url = add_query_arg( 'order_status', 'Completed', $base_url );
-       $class = ($current == 'Completed' ? ' class="current"' :'');
-       $views['Completed'] = "<a href='{$Completed_url}' {$class} >".__('Completed','wplister')."</a>";
-       if ( isset($summary->Completed) ) $views['Completed'] .= '<span class="count">('.$summary->Completed.')</span>';
+        // All link
+        $class = ($current == 'all' ? ' class="current"' :'');
+        $all_url = remove_query_arg( 'order_status', $base_url );
+        $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
+        $views['all'] .= '<span class="count">('.$summary->total_items.')</span>';
 
-       // Active link
-       $Active_url = add_query_arg( 'order_status', 'Active', $base_url );
-       $class = ($current == 'Active' ? ' class="current"' :'');
-       $views['Active'] = "<a href='{$Active_url}' {$class} >".__('Active','wplister')."</a>";
-       if ( isset($summary->Active) ) $views['Active'] .= '<span class="count">('.$summary->Active.')</span>';
+        // Completed link
+        $Completed_url = add_query_arg( 'order_status', 'Completed', $base_url );
+        $class = ($current == 'Completed' ? ' class="current"' :'');
+        $views['Completed'] = "<a href='{$Completed_url}' {$class} >".__('Completed','wplister')."</a>";
+        if ( isset($summary->Completed) ) $views['Completed'] .= '<span class="count">('.$summary->Completed.')</span>';
 
-       return $views;
+        // Active link
+        $Active_url = add_query_arg( 'order_status', 'Active', $base_url );
+        $class = ($current == 'Active' ? ' class="current"' :'');
+        $views['Active'] = "<a href='{$Active_url}' {$class} >".__('Active','wplister')."</a>";
+        if ( isset($summary->Active) ) $views['Active'] .= '<span class="count">('.$summary->Active.')</span>';
+
+        return $views;
     }    
 
 

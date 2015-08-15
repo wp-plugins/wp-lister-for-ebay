@@ -325,7 +325,7 @@ class ProductWrapper {
 	} // sortVariationAttributes()
 
 	// get all product variations
-	static function getVariations( $post_id ) {
+	static function getVariations( $post_id, $short_result = false ) {
 		global $product; // make $product globally available for some badly coded themes...		
 
 		$product = self::getProduct( $post_id );
@@ -424,14 +424,15 @@ class ProductWrapper {
 				// $newvar['name'] = $value; #deprecated
 				// v2
 				$taxonomy = str_replace('attribute_', '', $key); // attribute_pa_color -> pa_color
-				$term = get_term_by('slug', $value, $taxonomy );
+				// $term = get_term_by('slug', $value, $taxonomy );
+				$term = WPLE()->memcache->getTermBy( 'slug', $value, $taxonomy );
 				// echo "<pre>key  : ";print_r($key);echo"</pre>";
 				// echo "<pre>term : ";print_r($term);echo"</pre>";
 				// echo "<pre>value: ";print_r($value);echo"</pre>";
 
 				// try to fetch term by name - required for values like "0" or "000"
 				if ( ! $term ) {
-					$term = get_term_by('name', $value, $taxonomy );
+					$term = WPLE()->memcache->getTermBy( 'name', $value, $taxonomy );
 				}
 
 				// get attribute label
@@ -492,26 +493,30 @@ class ProductWrapper {
 			$newvar['price']      = self::getPrice( $var_id );
 			$newvar['stock']      = self::getStock( $var_id );
 			$newvar['sku']        = self::getSKU( $var_id );
-			$newvar['weight']     = self::getWeight( $var_id );
-			$newvar['dimensions'] = self::getDimensions( $var_id );
+
+			// omit some data in short result for increased performance on listings page
+			if ( ! $short_result ) {
+
+				// image thumbnail
+				$var_image 		  = self::getImageURL( $var_id );
+				$newvar['image']  = ($var_image == '') ? self::getImageURL( $post_id ) : $var_image;
+
+				// weight / dimensions
+				$newvar['weight']     = self::getWeight( $var_id );
+				$newvar['dimensions'] = self::getDimensions( $var_id );
+	
+				// ebay weight
+				list( $weight_major, $weight_minor ) = self::getEbayWeight( $var_id );
+				$newvar['weight_major']     = $weight_major;
+				$newvar['weight_minor']     = $weight_minor;
+
+			}
 
 			// regard custom eBay price for variation (even locked)
 			if ( $ebay_start_price = get_post_meta( $var_id, '_ebay_start_price', true ) ) {
 				$newvar['price'] = $ebay_start_price;
 			}
 
-			// check parent if variation has no dimensions
-			// if ( ($newvar['dimensions']['length'] == 0) && ($newvar['dimensions']['width'] == 0) ) {
-			// 	$newvar['dimensions'] = self::getDimensions( $post_id );
-			// }
-
-			// ebay weight
-			list( $weight_major, $weight_minor ) = self::getEbayWeight( $var_id );
-			$newvar['weight_major']     = $weight_major;
-			$newvar['weight_minor']     = $weight_minor;
-
-			$var_image 		  = self::getImageURL( $var_id );
-			$newvar['image']  = ($var_image == '') ? self::getImageURL( $post_id ) : $var_image;
 
 			// do we have some attributes without values that need post-processing?
 			if ( sizeof($attributes_without_values) > 0 ) {
@@ -528,7 +533,7 @@ class ProductWrapper {
 					// create a new variation for each value
 					if ( is_array( $all_values ) )
 					foreach ($all_values as $value) {
-						$term = get_term_by('slug', $value, $taxonomy );
+						$term = WPLE()->memcache->getTermBy( 'slug', $value, $taxonomy );
 						// echo "<pre>";print_r($term);echo"</pre>";#die();
 	
 						if ( $term ) {

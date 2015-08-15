@@ -16,6 +16,7 @@ class WpLister_Product_MetaBox {
         // add options to variable products
         add_action('woocommerce_product_after_variable_attributes', array(&$this, 'woocommerce_variation_options'), 1, 3);
         add_action('woocommerce_process_product_meta_variable', array(&$this, 'process_product_meta_variable'), 10, 1);
+		add_action('woocommerce_ajax_save_product_variations',  array( $this, 'process_product_meta_variable') ); // WC2.4
 
 		if ( get_option( 'wplister_external_products_inventory' ) == 1 ) {
 			add_action( 'woocommerce_process_product_meta_external', array( &$this, 'save_external_inventory' ) );
@@ -32,6 +33,9 @@ class WpLister_Product_MetaBox {
 
 		$title = __('eBay Options', 'wplister');
 		add_meta_box( 'wplister-ebay-details', $title, array( &$this, 'meta_box_basic' ), 'product', 'normal', 'default');
+
+		$title = __('eBay Product Identifiers', 'wplister');
+		add_meta_box( 'wplister-ebay-gtins', $title, array( &$this, 'meta_box_gtins' ), 'product', 'normal', 'default');
 
 		$title = __('Advanced eBay Options', 'wplister');
 		add_meta_box( 'wplister-ebay-advanced', $title, array( &$this, 'meta_box_advanced' ), 'product', 'normal', 'default');
@@ -50,7 +54,7 @@ class WpLister_Product_MetaBox {
 	}
 
 	function meta_box_basic() {
-		global $woocommerce, $post;
+		global $post;
 
         ?>
         <style type="text/css">
@@ -76,6 +80,7 @@ class WpLister_Product_MetaBox {
 			}
         </style>
         <?php
+		do_action('wple_before_basic_ebay_options');
 
 		woocommerce_wp_text_input( array(
 			'id' 			=> 'wpl_ebay_title',
@@ -134,10 +139,11 @@ class WpLister_Product_MetaBox {
 
 		$this->showItemConditionOptions();
 		$this->include_character_count_script();
+		do_action('wple_after_basic_ebay_options');
 	}
 
 	function showItemConditionOptions() {
-		global $woocommerce, $post;
+		global $post;
 
 		// default conditions - used when no primary category has been selected
 		$default_conditions = array( 
@@ -215,62 +221,30 @@ class WpLister_Product_MetaBox {
 	}
 
 
-	function meta_box_advanced() {
-		global $woocommerce, $post;
+	function meta_box_gtins() {
+		global $post;
 
         ?>
         <style type="text/css">
-            #wplister-ebay-advanced label { 
+            #wplister-ebay-gtins label { 
             	float: left;
             	width: 33%;
             	line-height: 2em;
             }
-            #wplister-ebay-advanced input, 
-            #wplister-ebay-advanced select.select { 
+            #wplister-ebay-gtins input, 
+            #wplister-ebay-gtins select.select { 
             	width: 62%; 
             }
-            #wplister-ebay-advanced input.checkbox { 
+            #wplister-ebay-gtins input.checkbox { 
             	width:auto; 
             }
-            #wplister-ebay-advanced input.input_specs,
-            #wplister-ebay-advanced input.select_specs { 
-            	width:100%; 
-            }
 
-            #wplister-ebay-advanced .description { 
+            #wplister-ebay-gtins .description { 
             	clear: both;
             	margin-left: 33%;
             }
-            #wplister-ebay-advanced .wpl_ebay_hide_from_unlisted_field .description,
-            #wplister-ebay-advanced .wpl_ebay_bestoffer_enabled_field .description { 
-            	margin-left: 0.3em;
-				height: 1.4em;
-				display: inline-block;
-            	vertical-align: bottom;
-            }
-
         </style>
         <?php
-
-		woocommerce_wp_text_input( array(
-			'id' 			=> 'wpl_ebay_buynow_price',
-			'label' 		=> __('Buy Now Price', 'wplister'),
-			'placeholder' 	=> __('Buy Now Price', 'wplister'),
-			'description' 	=> __('The optional Buy Now Price is only used for auction style listings. It has no effect on fixed price listings.','wplister'),
-			'desc_tip'		=>  true,
-			'class' 		=> 'wc_input_price',
-			'value'			=> get_post_meta( $post->ID, '_ebay_buynow_price', true )
-		) );
-
-		woocommerce_wp_text_input( array(
-			'id' 			=> 'wpl_ebay_reserve_price',
-			'label' 		=> __('Reserve Price', 'wplister'),
-			'placeholder' 	=> __('Reserve Price', 'wplister'),
-			'description' 	=> __('The lowest price at which you are willing to sell the item. Not all categories support a reserve price.<br>Note: This only applies to auction style listings.','wplister'),
-			'desc_tip'		=>  true,
-			'class' 		=> 'wc_input_price',
-			'value'			=> get_post_meta( $post->ID, '_ebay_reserve_price', true )
-		) );
 
 		// woocommerce_wp_text_input( array(
 		// 	'id' 			=> 'wpl_ebay_epid',
@@ -311,6 +285,101 @@ class WpLister_Product_MetaBox {
 			'desc_tip'		=>  true,
 			'wrapper_class' => 'show_if_simple show_if_external',
 			'value'			=> get_post_meta( $post->ID, '_ebay_ean', true )
+		) );
+
+    	if ( get_option( 'wplister_enable_mpn_and_isbn_fields', 2 ) != 0 ) {
+
+			woocommerce_wp_text_input( array(
+				'id' 			=> 'wpl_ebay_isbn',
+				'label' 		=> __('ISBN', 'wplister'),
+				'placeholder' 	=> __('Enter the ISBN for this product, if applicable.', 'wplister'),
+				'description' 	=> __('As of 2015, eBay requires product identifiers (UPC, EAN, MPN or ISBN) in selected categories.<br><br>If your product does not have an ISBN, leave this empty.','wplister'),
+				'desc_tip'		=>  true,
+				'wrapper_class' => 'show_if_simple show_if_external',
+				'value'			=> get_post_meta( $post->ID, '_ebay_isbn', true )
+			) );
+
+			woocommerce_wp_text_input( array(
+				'id' 			=> 'wpl_ebay_mpn',
+				'label' 		=> __('MPN', 'wplister'),
+				'placeholder' 	=> __('Enter the MPN for this product, if applicable.', 'wplister'),
+				'description' 	=> __('As of 2015, eBay requires product identifiers (UPC, EAN or Brand/MPN) in selected categories.<br><br>If your product does not have an MPN, leave this empty.','wplister'),
+				'desc_tip'		=>  true,
+				'wrapper_class' => 'show_if_simple show_if_external',
+				'value'			=> get_post_meta( $post->ID, '_ebay_mpn', true )
+			) );
+
+		}
+
+		woocommerce_wp_text_input( array(
+			'id' 			=> 'wpl_ebay_brand',
+			'label' 		=> __('Brand', 'wplister'),
+			'placeholder' 	=> __('Enter the brand for this product, if applicable.', 'wplister'),
+			'description' 	=> __('As of 2015, eBay requires product identifiers (UPC, EAN or Brand/MPN) in selected categories.<br><br>If your product has an MPN, you need to enter both brand and MPN.','wplister'),
+			'desc_tip'		=>  true,
+			'value'			=> get_post_meta( $post->ID, '_ebay_brand', true )
+		) );
+
+	} // meta_box_gtins()
+
+
+
+	function meta_box_advanced() {
+		global $post;
+
+        ?>
+        <style type="text/css">
+            #wplister-ebay-advanced label { 
+            	float: left;
+            	width: 33%;
+            	line-height: 2em;
+            }
+            #wplister-ebay-advanced input, 
+            #wplister-ebay-advanced select.select { 
+            	width: 62%; 
+            }
+            #wplister-ebay-advanced input.checkbox { 
+            	width:auto; 
+            }
+            #wplister-ebay-advanced input.input_specs,
+            #wplister-ebay-advanced input.select_specs { 
+            	width:100%; 
+            }
+
+            #wplister-ebay-advanced .description { 
+            	clear: both;
+            	margin-left: 33%;
+            }
+            #wplister-ebay-advanced .wpl_ebay_hide_from_unlisted_field .description,
+            #wplister-ebay-advanced .wpl_ebay_bestoffer_enabled_field .description { 
+            	margin-left: 0.3em;
+				height: 1.4em;
+				display: inline-block;
+            	vertical-align: bottom;
+            }
+
+        </style>
+        <?php
+		do_action('wple_before_advanced_ebay_options');
+
+		woocommerce_wp_text_input( array(
+			'id' 			=> 'wpl_ebay_buynow_price',
+			'label' 		=> __('Buy Now Price', 'wplister'),
+			'placeholder' 	=> __('Buy Now Price', 'wplister'),
+			'description' 	=> __('The optional Buy Now Price is only used for auction style listings. It has no effect on fixed price listings.','wplister'),
+			'desc_tip'		=>  true,
+			'class' 		=> 'wc_input_price',
+			'value'			=> get_post_meta( $post->ID, '_ebay_buynow_price', true )
+		) );
+
+		woocommerce_wp_text_input( array(
+			'id' 			=> 'wpl_ebay_reserve_price',
+			'label' 		=> __('Reserve Price', 'wplister'),
+			'placeholder' 	=> __('Reserve Price', 'wplister'),
+			'description' 	=> __('The lowest price at which you are willing to sell the item. Not all categories support a reserve price.<br>Note: This only applies to auction style listings.','wplister'),
+			'desc_tip'		=>  true,
+			'class' 		=> 'wc_input_price',
+			'value'			=> get_post_meta( $post->ID, '_ebay_reserve_price', true )
 		) );
 
 		woocommerce_wp_text_input( array(
@@ -438,12 +507,13 @@ class WpLister_Product_MetaBox {
 		}
 
 		// woocommerce_wp_checkbox( array( 'id' => 'wpl_update_ebay_on_save', 'wrapper_class' => 'update_ebay', 'label' => __('Update on save?', 'wplister') ) );
+		do_action('wple_after_advanced_ebay_options');
 	
 	} // meta_box_advanced()
 
 
 	function meta_box_categories() {
-		global $woocommerce, $post;
+		global $post;
 
         ?>
         <style type="text/css">
@@ -1119,7 +1189,7 @@ class WpLister_Product_MetaBox {
 	} // enabledInventoryOnExternalProducts()
 
 	function meta_box_shipping() {
-		global $woocommerce, $post;
+		global $post;
 
 		// enqueue chosen.js from WooCommerce
 	   	wp_enqueue_script( 'chosen' );
@@ -1171,7 +1241,7 @@ class WpLister_Product_MetaBox {
 	} // meta_box_shipping()
 
 	function showShippingOptions() {
-		global $woocommerce, $post;
+		global $post;
 
 		// get listing object
 		$listing        = $this->get_current_ebay_item();
@@ -1306,7 +1376,7 @@ class WpLister_Product_MetaBox {
     	$msg .= '<br><br>';
     	$msg .= 'This page submitted more than '.$estimate.' fields, which means that either some data is already discarded by your server when this product is updated - or it will be when you add a few more variations to your product. ';
     	$msg .= '<br><br>';
-    	$msg .= 'Please contact your hosting provider and have them increase the <code>max_input_vars</code> PHP setting to at least '.($max_input_vars*2).' to prevent any is129sues updating your products.';
+    	$msg .= 'Please contact your hosting provider and have them increase the <code>max_input_vars</code> PHP setting to at least '.($max_input_vars*2).' to prevent any issues updating your products.';
     	wple_show_message( $msg, 'warn' );
 
     	// only show this warning once
@@ -1351,6 +1421,9 @@ class WpLister_Product_MetaBox {
 			$wpl_ebay_buynow_price          = esc_attr( @$_POST['wpl_ebay_buynow_price'] );
 			$wpl_ebay_upc          			= esc_attr( @$_POST['wpl_ebay_upc'] );
 			$wpl_ebay_ean          			= esc_attr( @$_POST['wpl_ebay_ean'] );
+			$wpl_ebay_isbn          		= esc_attr( @$_POST['wpl_ebay_isbn'] );
+			$wpl_ebay_mpn          			= esc_attr( @$_POST['wpl_ebay_mpn'] );
+			$wpl_ebay_brand        			= esc_attr( @$_POST['wpl_ebay_brand'] );
 			$wpl_ebay_epid          		= esc_attr( @$_POST['wpl_ebay_epid'] );
 			$wpl_ebay_hide_from_unlisted  	= esc_attr( @$_POST['wpl_ebay_hide_from_unlisted'] );
 			$wpl_ebay_category_1_id      	= esc_attr( @$_POST['wpl_ebay_category_1_id'] );
@@ -1378,6 +1451,9 @@ class WpLister_Product_MetaBox {
 			update_post_meta( $post_id, '_ebay_buynow_price', $wpl_ebay_buynow_price );
 			update_post_meta( $post_id, '_ebay_upc', $wpl_ebay_upc );
 			update_post_meta( $post_id, '_ebay_ean', $wpl_ebay_ean );
+			update_post_meta( $post_id, '_ebay_isbn', $wpl_ebay_isbn );
+			update_post_meta( $post_id, '_ebay_mpn', $wpl_ebay_mpn );
+			update_post_meta( $post_id, '_ebay_brand', $wpl_ebay_brand );
 			update_post_meta( $post_id, '_ebay_epid', $wpl_ebay_epid );
 			update_post_meta( $post_id, '_ebay_hide_from_unlisted', $wpl_ebay_hide_from_unlisted );
 			update_post_meta( $post_id, '_ebay_category_1_id', $wpl_ebay_category_1_id );
@@ -1497,6 +1573,8 @@ class WpLister_Product_MetaBox {
 		$_ebay_is_disabled       = get_post_meta( $variation_post_id, '_ebay_is_disabled'  		, true );
 		$_ebay_upc    		     = get_post_meta( $variation_post_id, '_ebay_upc'  				, true );
 		$_ebay_ean    		     = get_post_meta( $variation_post_id, '_ebay_ean'  				, true );
+		$_ebay_mpn    		     = get_post_meta( $variation_post_id, '_ebay_mpn'  				, true );
+		$_ebay_isbn    		     = get_post_meta( $variation_post_id, '_ebay_isbn' 				, true );
 
         ?>
             <div>
@@ -1516,6 +1594,25 @@ class WpLister_Product_MetaBox {
                     <input type="text" name="variable_ebay_ean[<?php echo $loop; ?>]" class="" value="<?php echo $_ebay_ean ?>" />
                 </p>
             </div>
+
+            <?php if ( get_option( 'wplister_enable_mpn_and_isbn_fields', 2 ) == 1 ) : ?>
+            <div>
+                <p class="form-row form-row-first">
+                    <label>
+                        <?php _e('MPN', 'wplister'); ?>
+                        <a class="tips" data-tip="eBay will require product identifiers (UPC, EAN or Brand/MPN) for variations in selected categories starting September 2015.<br><br>If your products do not have an MPN, leave this empty." href="#">[?]</a>
+                    </label> 
+                    <input type="text" name="variable_ebay_mpn[<?php echo $loop; ?>]" class="" value="<?php echo $_ebay_mpn ?>" />
+                </p>
+                <p class="form-row form-row-last">
+                    <label>
+                        <?php _e('ISBN', 'wplister'); ?>
+                        <a class="tips" data-tip="eBay will require product identifiers (UPC/EAN/MPN/ISBN) for variations in selected categories starting September 2015.<br><br>If your products do not have an ISBN, leave this empty." href="#">[?]</a>
+                    </label> 
+                    <input type="text" name="variable_ebay_isbn[<?php echo $loop; ?>]" class="" value="<?php echo $_ebay_isbn ?>" />
+                </p>
+            </div>
+	        <?php endif; ?>
 
             <?php if ( get_option( 'wplister_enable_custom_product_prices', 1 ) == 1 ) : ?>
             <div>
@@ -1553,6 +1650,8 @@ class WpLister_Product_MetaBox {
 			$variable_ebay_is_disabled     = isset( $_POST['variable_ebay_is_disabled'] ) ? $_POST['variable_ebay_is_disabled'] : '';
 			$variable_ebay_upc     	       = isset( $_POST['variable_ebay_upc'] ) 		  ? $_POST['variable_ebay_upc'] 		: '';
 			$variable_ebay_ean     	       = isset( $_POST['variable_ebay_ean'] ) 		  ? $_POST['variable_ebay_ean'] 		: '';
+			$variable_ebay_mpn     	       = isset( $_POST['variable_ebay_mpn'] ) 		  ? $_POST['variable_ebay_mpn'] 		: '';
+			$variable_ebay_isbn     	   = isset( $_POST['variable_ebay_isbn'] ) 		  ? $_POST['variable_ebay_isbn'] 		: '';
 
             // if (isset($_POST['variable_enabled']))
             //     $variable_enabled           = $_POST['variable_enabled'];
@@ -1569,6 +1668,11 @@ class WpLister_Product_MetaBox {
                 update_post_meta( $variation_id, '_ebay_is_disabled', isset( $variable_ebay_is_disabled[$i] ) ? $variable_ebay_is_disabled[$i] : '' );
                 update_post_meta( $variation_id, '_ebay_upc', 		  isset( $variable_ebay_upc[$i] ) 		  ? $variable_ebay_upc[$i] 		   : '' );
                 update_post_meta( $variation_id, '_ebay_ean', 		  isset( $variable_ebay_ean[$i] ) 		  ? $variable_ebay_ean[$i] 		   : '' );
+
+            	if ( get_option( 'wplister_enable_mpn_and_isbn_fields', 2 ) == 1 ) {
+                	update_post_meta( $variation_id, '_ebay_mpn', 	  isset( $variable_ebay_mpn[$i] ) 		  ? $variable_ebay_mpn[$i] 		   : '' );
+                	update_post_meta( $variation_id, '_ebay_isbn', 	  isset( $variable_ebay_isbn[$i] ) 		  ? $variable_ebay_isbn[$i] 	   : '' );
+                }
 
             } // each variation
 
@@ -1590,6 +1694,8 @@ class WpLister_Product_MetaBox {
 		// delete_post_meta( $new_id, '_ebay_start_price' 		);
 		delete_post_meta( $new_id, '_ebay_upc' 				);
 		delete_post_meta( $new_id, '_ebay_ean' 				);
+		delete_post_meta( $new_id, '_ebay_mpn' 				);
+		delete_post_meta( $new_id, '_ebay_isbn' 				);
 		delete_post_meta( $new_id, '_ebay_epid' 			);
 		delete_post_meta( $new_id, '_ebay_gallery_image_url');
 		delete_post_meta( $new_id, '_ebay_item_id'			); // created by importer add-on

@@ -302,6 +302,16 @@ class ToolsPage extends WPL_Page {
 					$this->upgradeTablesUTF8MB4();
 				}
 
+				// wple_run_daily_schedule
+				if ( $_REQUEST['action'] == 'wple_run_daily_schedule') {
+					do_action( 'wple_daily_schedule' );
+				}
+				
+				// wple_run_update_schedule
+				if ( $_REQUEST['action'] == 'wple_run_update_schedule') {
+					do_action( 'wplister_update_auctions' );
+				}
+
 	
 			} else {
 				die ('not allowed');
@@ -853,8 +863,17 @@ class ToolsPage extends WPL_Page {
 
 	public function checkUrl( $url, $display_url, $expected_http_code = 200, $match_content = false, $use_curl = false ) {
 
+		// set user agent - paypal.com return 403 for default WP user agent
+		$args = array(
+		    'timeout'     => 5,
+		    'redirection' => 5,
+		    // 'user-agent'  => 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' ),
+		    'user-agent'  => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/600.7.12 (KHTML, like Gecko) Version/8.0.7 Safari/600.7.12',
+		    'sslverify'   => true,
+		);
+
 		// wp_remote_get()
-		$response = wp_remote_get( $url );
+		$response = wp_remote_get( $url, $args );
         $body = is_array( $response ) ? $response['body'] : '';
 
 		if ( ! is_wp_error( $response ) && $response['response']['code'] == $expected_http_code ) {
@@ -868,6 +887,7 @@ class ToolsPage extends WPL_Page {
     		$success = false;
     	} else {
     		$details  = 'wp_remote_get() returned an unexpected HTTP status code: ' . wp_remote_retrieve_response_code( $response );
+    		$details .= '<br>url: ' . $url;
     		$this->addLogMessage( 'Connection to '.$display_url.' failed', false, $details );
     		$success = false;
     	}
@@ -938,11 +958,12 @@ class ToolsPage extends WPL_Page {
 
 
 		// try PayPal
-		$url = 'https://www.paypal.com/cgi-bin/webscr';
+		// $url = 'https://www.paypal.com/cgi-bin/webscr';
+		$url = 'https://www.paypal.com/';
 		$this->results->successPaypal = $this->checkUrl( $url, 'PayPal' );
 
 		// try wordpress.org
-		$url = 'http://www.wordpress.org/';
+		$url = 'https://www.wordpress.org/';
 		$this->results->successWordPress = $this->checkUrl( $url, 'WordPress.org' );
 
 		// try PayPal

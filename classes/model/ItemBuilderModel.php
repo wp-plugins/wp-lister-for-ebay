@@ -166,6 +166,7 @@ class ItemBuilderModel extends WPL_Model {
 
 		// filter final item object before it's sent to eBay
 		$item = apply_filters( 'wplister_filter_listing_item', $item, $listing, $profile_details, $post_id );
+		$item = apply_filters( 'wple_filter_listing_item', $item, $listing, $profile_details, $post_id, $reviseItem );
 
 		return $item;
 
@@ -532,7 +533,9 @@ class ItemBuilderModel extends WPL_Model {
 
 		// optional DiscountPriceInfo.OriginalRetailPrice
 		if ( intval($profile_details['strikethrough_pricing']) != 0) {
-			if ( method_exists( ProductWrapper, 'getOriginalPrice' ) ) {
+
+			// mode 1 - use sale price
+			if ( 1 == $profile_details['strikethrough_pricing'] ) {
 				$original_price = ProductWrapper::getOriginalPrice( $post_id );
 				if ( ( $original_price ) && ( $start_price != $original_price ) ) {
 					$item->DiscountPriceInfo = new DiscountPriceInfoType();
@@ -541,7 +544,19 @@ class ItemBuilderModel extends WPL_Model {
 					$item->DiscountPriceInfo->OriginalRetailPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
 				}
 			}
-		}
+
+			// mode 2 - use MSRP
+			if ( 2 == $profile_details['strikethrough_pricing'] ) {
+				$msrp_price = get_post_meta( $post_id, '_msrp_price', true ); // simple product
+				if ( ( $msrp_price ) && ( $start_price != $msrp_price ) ) {
+					$item->DiscountPriceInfo = new DiscountPriceInfoType();
+					$item->DiscountPriceInfo->OriginalRetailPrice = new AmountType();
+					$item->DiscountPriceInfo->OriginalRetailPrice->setTypeValue( $msrp_price );
+					$item->DiscountPriceInfo->OriginalRetailPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
+				}
+			}
+
+		} // OriginalRetailPrice / STP
 
 	
 
@@ -636,6 +651,16 @@ class ItemBuilderModel extends WPL_Model {
 			$item->setProductListingDetails( $ProductListingDetails );
 		}
 
+		// set ISBN from product - if provided
+		if ( $product_isbn = get_post_meta( $post_id, '_ebay_isbn', true ) ) {
+			$ProductListingDetails = new ProductListingDetailsType();
+			$ProductListingDetails->setISBN( $product_isbn );
+			$ProductListingDetails->setIncludeStockPhotoURL( true );
+			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
+			$ProductListingDetails->setUseFirstProduct( true );
+			$item->setProductListingDetails( $ProductListingDetails );
+		}
+
 		// set EPID from product - if provided
 		if ( $product_epid = get_post_meta( $post_id, '_ebay_epid', true ) ) {
 			$ProductListingDetails = new ProductListingDetailsType();
@@ -644,6 +669,31 @@ class ItemBuilderModel extends WPL_Model {
 			$ProductListingDetails->setIncludeStockPhotoURL( true );
 			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
 			$ProductListingDetails->setUseFirstProduct( true );
+			$item->setProductListingDetails( $ProductListingDetails );
+		}
+
+		// set Brand/MPN from product - if provided
+		$product_brand = get_post_meta( $post_id, '_ebay_brand', true );
+		$product_mpn   = get_post_meta( $post_id, '_ebay_mpn', true );
+		if ( $product_brand && $product_mpn ) {
+
+			if ( ! isset($ProductListingDetails) ) {
+				$ProductListingDetails = new ProductListingDetailsType();
+				$ProductListingDetails->setUseFirstProduct( true );
+				$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
+			}
+
+			// Note: MPN is always paired with Brand for single-variation listings, 
+			// but for multiple-variation listings, only the Brand value should be specified in the BrandMPN container 
+			// and the MPN for each product variation will be specified through a VariationSpecifics.NameValueList container.
+			// (the above might be wrong - submitting a BrandMPN container without MPN set results in error 37...)
+			$ProductListingDetails->BrandMPN = new BrandMPNType();
+			$ProductListingDetails->BrandMPN->setBrand( $product_brand );
+
+			if ( $product_mpn ) {
+				$ProductListingDetails->BrandMPN->setMPN( $product_mpn );
+			}
+
 			$item->setProductListingDetails( $ProductListingDetails );
 		}
 
@@ -840,6 +890,7 @@ class ItemBuilderModel extends WPL_Model {
 		$this->logger->debug('localShippingOptions: '.print_r($localShippingOptions,1));
 
 		$pr = 1;
+		$localShippingServices = array();
 		foreach ($localShippingOptions as $opt) {
 
 			$price = $this->getDynamicShipping( $opt['price'], $post_id );
@@ -870,14 +921,16 @@ class ItemBuilderModel extends WPL_Model {
 				if ( ( $free_shipping_enabled ) && ( $pr == 1 ) ) $ShippingServiceOptions->setFreeShipping( true );
 			}
 
-			$localShippingServices[]=$ShippingServiceOptions;
+			$localShippingServices[] = $ShippingServiceOptions;
 			$pr++;
 			
 			$EbayShippingModel = new EbayShippingModel();
 			$lastShippingCategory = $EbayShippingModel->getShippingCategoryByServiceName( $opt['service_name'] );
 			$this->logger->debug('ShippingCategory: '.print_r($lastShippingCategory,1));
 		}
-		$shippingDetails->setShippingServiceOptions($localShippingServices, null);
+		// apply filter and set shipping services
+		$localShippingServices = apply_filters( 'wple_local_shipping_services', $localShippingServices, $post_id, $actual_post_id, $listing );
+		$shippingDetails->setShippingServiceOptions( $localShippingServices, null );
 
 
 		// $intlShipping = array(
@@ -893,6 +946,7 @@ class ItemBuilderModel extends WPL_Model {
 		$this->logger->debug('intlShipping: '.print_r($intlShipping,1));
 
 		$pr = 1;
+		$shippingInternational = array();
 		foreach ($intlShipping as $opt) {
 			// foreach ($opt as $loc=>$price) {
 				$price = $this->getDynamicShipping( $opt['price'], $post_id );
@@ -925,13 +979,18 @@ class ItemBuilderModel extends WPL_Model {
 						$InternationalShippingServiceOptions->setShippingServiceAdditionalCost( $add_price );
 					}				
 				}
-				$shippingInternational[]=$InternationalShippingServiceOptions;
+				$shippingInternational[] = $InternationalShippingServiceOptions;
 				$pr++;
 			// }
 		}
+		
+		// filter international shipping services
+		$shippingInternational = apply_filters( 'wple_international_shipping_services', $shippingInternational, $post_id, $actual_post_id, $listing );
+
 		// only set international shipping if $intlShipping array contains one or more valid items
 		if ( isset( $intlShipping[0]['service_name'] ) && ( $intlShipping[0]['service_name'] != '' ) )
-			$shippingDetails->setInternationalShippingServiceOption($shippingInternational,null);
+			$shippingDetails->setInternationalShippingServiceOption( $shippingInternational, null );
+
 
 		// set CalculatedShippingRate
 		if ( $isCalcLoc || $isCalcInt ) {
@@ -1376,7 +1435,9 @@ class ItemBuilderModel extends WPL_Model {
 			$post_id     = $var['post_id'];
 			$start_price = $newvar->StartPrice;
 			if ( intval($profile_details['strikethrough_pricing']) != 0) {
-				if ( method_exists( ProductWrapper, 'getOriginalPrice' ) ) {
+	
+				// mode 1 - use sale price
+				if ( 1 == $profile_details['strikethrough_pricing'] ) {
 					$original_price = ProductWrapper::getOriginalPrice( $post_id );
 					if ( ( $original_price ) && ( $start_price != $original_price ) ) {
 						$newvar->DiscountPriceInfo = new DiscountPriceInfoType();
@@ -1385,7 +1446,20 @@ class ItemBuilderModel extends WPL_Model {
 						$newvar->DiscountPriceInfo->OriginalRetailPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
 					}
 				}
-			}
+
+				// mode 2 - use MSRP
+				if ( 2 == $profile_details['strikethrough_pricing'] ) {
+					$msrp_price = get_post_meta( $post_id, '_msrp', true ); // variation
+					if ( ( $msrp_price ) && ( $start_price != $msrp_price ) ) {
+						$newvar->DiscountPriceInfo = new DiscountPriceInfoType();
+						$newvar->DiscountPriceInfo->OriginalRetailPrice = new AmountType();
+						$newvar->DiscountPriceInfo->OriginalRetailPrice->setTypeValue( $msrp_price );
+						$newvar->DiscountPriceInfo->OriginalRetailPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
+					}
+				}
+
+			} // OriginalRetailPrice / STP
+
 
 			// handle variation level Product ID (UPC/EAN)
 			$autofill_missing_gtin = get_option('wplister_autofill_missing_gtin');
@@ -1407,6 +1481,7 @@ class ItemBuilderModel extends WPL_Model {
 				$newvar->setVariationProductListingDetails( $VariationProductListingDetails );
 			}
 
+			// set EAN
 			if ( $product_ean = get_post_meta( $post_id, '_ebay_ean', true ) ) {
 				$VariationProductListingDetails = new VariationProductListingDetailsType();
 				$VariationProductListingDetails->setEAN( $product_ean );
@@ -1415,6 +1490,32 @@ class ItemBuilderModel extends WPL_Model {
 				$VariationProductListingDetails = new VariationProductListingDetailsType();
 				$VariationProductListingDetails->setEAN( $DoesNotApplyText );
 				$newvar->setVariationProductListingDetails( $VariationProductListingDetails );
+			}
+
+			// set ISBN
+			if ( $product_isbn = get_post_meta( $post_id, '_ebay_isbn', true ) ) {
+				$VariationProductListingDetails = new VariationProductListingDetailsType();
+				$VariationProductListingDetails->setISBN( $product_isbn );
+				$newvar->setVariationProductListingDetails( $VariationProductListingDetails );
+			} elseif ( $autofill_missing_gtin == 'isbn') {
+				$VariationProductListingDetails = new VariationProductListingDetailsType();
+				$VariationProductListingDetails->setISBN( $DoesNotApplyText );
+				$newvar->setVariationProductListingDetails( $VariationProductListingDetails );
+			}
+
+			// set MPN
+			// Note: If Brand and MPN are being used to identify product variations in a multiple-variation listing, 
+			// the Brand must be specified at the item level (ItemSpecifics container) 
+			// and the MPN for each product variation must be specified at the variation level (VariationSpecifics container). 
+			// The Brand name must be the same for all variations within a single listing.
+			if ( $product_mpn = get_post_meta( $post_id, '_ebay_mpn', true ) ) {
+	
+	            $NameValueList = new NameValueListType();
+    	    	$NameValueList->setName ( 'MPN' );
+        		$NameValueList->setValue( $product_mpn );
+	        	$VariationSpecifics->addNameValueList( $NameValueList );
+
+	        	$newvar->setVariationSpecifics( $VariationSpecifics );
 			}
 
 

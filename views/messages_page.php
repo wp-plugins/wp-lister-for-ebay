@@ -3,11 +3,11 @@
 <style type="text/css">
 
 	th.column-details {
-		width: 33%;
+		width: 45%;
 	}
 
 	th.column-item_title {
-		width: 25%;
+		width: 30%;
 	}
 
 	th.column-flag_read {

@@ -1786,6 +1786,16 @@ class ListingsModel extends WPL_Model {
 
 			}
 
+			// check item details to make sure we don't end GTC items
+			// (if GTC listings are imported from eBay and assigned a listing profile not using GTC, they would be ended...)
+			if ( is_object( $item_details = $this->decodeObject( $item['details'] ) ) ) {
+				$actual_listing_duration = $item_details->getListingDuration();
+				if ( 'GTC' == $actual_listing_duration ) {
+					$this->logger->info('skipped GTC item, assuming it is still published: '.$item['ebay_id']);
+					continue;
+				}
+			}
+
 			// check if ebay ID has changed - ie. item has been relisted
             if ( $auto_update_ended_items ) {
 

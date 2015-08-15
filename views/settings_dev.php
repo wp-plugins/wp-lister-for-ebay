@@ -217,6 +217,7 @@
 								<option value="1" <?php if ( $wpl_disable_compat_list == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 
+
 							<label for="wpl-option-enable_item_edit_link" class="text_label">
 								<?php echo __('Allow direct editing','wplister'); ?>
                                 <?php wplister_tooltip('Shows an additional "edit" link on the listing page, which allows you to edit the listing database fields directly. It is not recommended to use this option at all - all your changes will be overwritten when the linked product is updated again!') ?>
@@ -268,15 +269,6 @@
 						<h3 class="hndle"><span><?php echo __('Developer options','wplister') ?></span></h3>
 						<div class="inside">
 
-							<label for="wpl-option-enable_messages_page" class="text_label">
-								<?php echo __('eBay Messages','wplister'); ?>
-                                <?php wplister_tooltip('Enable handling of eBay messages within WP-Lister. This feature is still in beta.') ?>
-							</label>
-							<select id="wpl-option-enable_messages_page" name="wpl_e2e_enable_messages_page" class=" required-entry select">
-								<option value="0" <?php if ( $wpl_enable_messages_page == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('Disabled','wplister'); ?> (default)</option>
-								<option value="1" <?php if ( $wpl_enable_messages_page == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Enabled','wplister'); ?></option>
-							</select>
-
 							<label for="wpl-text-log_level" class="text_label"><?php echo __('Log to logfile','wplister'); ?></label>
 							<select id="wpl-text-log_level" name="wpl_e2e_text_log_level" title="Logging" class=" required-entry select">
 								<option value=""> -- <?php echo __('no logfile','wplister'); ?> -- </option>
@@ -319,12 +311,12 @@
 
 							<p>
 								<?php #echo __('The eBay sandbox allows you to list items to a testing area free of charge.','wplister'); ?>
-								<?php echo __('This is feature intended for developers only and not recommended for end users.','wplister'); ?><br>
+								<?php #echo __('This is feature intended for developers only and not recommended for end users.','wplister'); ?><br>
+								<?php echo __('This option is deprecated and should not be used anymore.','wplister'); ?><br>
 							</p>
 							<label for="wpl-option-sandbox_enabled" class="text_label">
 								<?php echo __('Sandbox enabled','wplister') ?>
-								<?php $tip_msg  = __('To use the sandbox, you need to create a dedicated sandbox account and connect WP-Lister with it.','wplister'); ?>
-								<?php $tip_msg .= __('After enabling sandbox mode click "Change Account" and authenticate WP-Lister using your sandbox account.','wplister'); ?>
+								<?php $tip_msg  = __('This option is deprecated and should not be used anymore.','wplister'); ?>
                                 <?php wplister_tooltip($tip_msg) ?>
 							</label>
 							<select id="wpl-option-sandbox_enabled" name="wpl_e2e_option_sandbox_enabled" title="Sandbox" class=" required-entry select">

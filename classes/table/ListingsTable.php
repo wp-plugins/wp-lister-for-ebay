@@ -866,7 +866,7 @@ class ListingsTable extends WP_List_Table {
     // get product variations - if possible from cache
     function getProductVariations( $post_id ) {
 
-        return WPLE()->memcache->getProductVariations( $post_id );
+        return WPLE()->memcache->getShortProductVariations( $post_id );
 
         // update cache if required
         // if ( $this->last_product_id != $post_id ) {

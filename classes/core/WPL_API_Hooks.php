@@ -41,7 +41,8 @@ class WPL_API_Hooks extends WPL_Core {
 		// handle ajax requests from third party CSV import plugins
 		add_action( 'wp_ajax_woo-product-importer-ajax',      	array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );	// Woo Product Importer 		https://github.com/dgrundel/woo-product-importer
 		add_action( 'wp_ajax_woocommerce_csv_import_request', 	array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );	// Product CSV Import Suite 	http://www.woothemes.com/products/product-csv-import-suite/
-		add_action( 'wp_ajax_runImport',      					array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );	// WooCommerce CSV importer 	http://wordpress.org/plugins/woocommerce-csvimport/
+		add_action( 'wp_ajax_runImport',      					array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );	// WooCommerce CSV importer 2.x	http://wordpress.org/plugins/woocommerce-csvimport/
+		add_action( 'wp_ajax_run_import',      					array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );	// WooCommerce CSV importer 3.x	http://wordpress.org/plugins/woocommerce-csvimport/
 		// add_action( 'load-all-import_page_pmxi-admin-import', array( &$this, 'handle_third_party_ajax_csv_import' ), 1, 1 );	// WP All Import				
 		add_action( 'pmxi_saved_post', 							array( &$this, 'wplister_product_has_changed' ), 20, 1 ); 		// WP All Import				http://www.wpallimport.com/documentation/advanced/action-reference/
 
@@ -310,6 +311,18 @@ class WPL_API_Hooks extends WPL_Core {
 			'label'    => 'SKU',
 			'id'       => '_sku',
 			'meta_key' => '_sku'
+		);
+
+		$attributes[] = array(
+			'label'    => 'MPN',
+			'id'       => '_ebay_mpn',
+			'meta_key' => '_ebay_mpn'
+		);
+
+		$attributes[] = array(
+			'label'    => 'Brand',
+			'id'       => '_ebay_brand',
+			'meta_key' => '_ebay_brand'
 		);
 
 		return $attributes;

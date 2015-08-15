@@ -136,7 +136,7 @@ class EbayMessagesTable extends WP_List_Table {
 
     function column_item_title($item){
         //Return buyer name and ID
-        return sprintf('%1$s <br><span style="color:silver">%2$s</span>',
+        return sprintf('%1$s <br><a href="admin.php?page=wplister&s=%2$s" target="_blank" title="View item">%2$s</span>',
             /*$1%s*/ $item['item_title'] ? $item['item_title'] : '&mdash;',
             /*$2%s*/ $item['item_id']    ? $item['item_id']    : ''
         );
@@ -226,9 +226,9 @@ class EbayMessagesTable extends WP_List_Table {
             // 'item_id'  			=> __('eBay ID','wplister'),
             'item_title'  		=> __('Product','wplister'),
             // 'flag_read'         => '&nbsp;', // __('Read','wplister'),
-            'message_id'        => __('Message ID','wplister'),
+            // 'message_id'        => __('Message ID','wplister'),
             // 'status'		 	=> __('Status','wplister'),
-            'expiration_date'	=> __('Expires at','wplister'),
+            // 'expiration_date'	=> __('Expires at','wplister'),
             'account'           => __('Account','wplister'),
         );
         if ( ! WPLE()->multi_account ) unset( $columns['account'] );
@@ -313,35 +313,66 @@ class EbayMessagesTable extends WP_List_Table {
     // status filter links
     // http://wordpress.stackexchange.com/questions/56883/how-do-i-create-links-at-the-top-of-wp-list-table
     function get_views(){
-       $views    = array();
-       $current  = ( !empty($_REQUEST['message_status']) ? $_REQUEST['message_status'] : 'all');
-       $base_url = esc_url_raw( remove_query_arg( array( 'action', 'message', 'message_status' ) ) );
+        $views    = array();
+        $current  = ( !empty($_REQUEST['message_status']) ? $_REQUEST['message_status'] : 'all');
+        $base_url = esc_url_raw( remove_query_arg( array( 'action', 'message', 'message_status' ) ) );
 
-       // get message status summary
-       $om = new EbayMessagesModel();
-       $summary = $om->getStatusSummary();
+        // handle search query
+        if ( isset($_REQUEST['s']) && $_REQUEST['s'] ) {
+            $base_url = add_query_arg( 's', $_REQUEST['s'], $base_url );
+        }
 
-       // All link
-       $class = ($current == 'all' ? ' class="current"' :'');
-       $all_url = remove_query_arg( 'message_status', $base_url );
-       $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
-       $views['all'] .= '<span class="count">('.$summary->total_items.')</span>';
+        // get message status summary
+        $om = new EbayMessagesModel();
+        $summary = $om->getStatusSummary();
 
-       // Read link
-       $Read_url = add_query_arg( 'message_status', 'Read', $base_url );
-       $class = ($current == 'Read' ? ' class="current"' :'');
-       $views['Read'] = "<a href='{$Read_url}' {$class} >".__('Read','wplister')."</a>";
-       if ( isset($summary->Read) ) $views['Read'] .= '<span class="count">('.$summary->Read.')</span>';
+        // All link
+        $class = ($current == 'all' ? ' class="current"' :'');
+        $all_url = remove_query_arg( 'message_status', $base_url );
+        $views['all']  = "<a href='{$all_url }' {$class} >".__('All','wplister')."</a>";
+        $views['all'] .= '<span class="count">('.$summary->total_items.')</span>';
 
-       // Unread link
-       $Unread_url = add_query_arg( 'message_status', 'Unread', $base_url );
-       $class = ($current == 'Unread' ? ' class="current"' :'');
-       $views['Unread'] = "<a href='{$Unread_url}' {$class} >".__('Unread','wplister')."</a>";
-       if ( isset($summary->Unread) ) $views['Unread'] .= '<span class="count">('.$summary->Unread.')</span>';
+        // Read link
+        $Read_url = add_query_arg( 'message_status', 'Read', $base_url );
+        $class = ($current == 'Read' ? ' class="current"' :'');
+        $views['Read'] = "<a href='{$Read_url}' {$class} >".__('Read','wplister')."</a>";
+        if ( isset($summary->Read) ) $views['Read'] .= '<span class="count">('.$summary->Read.')</span>';
 
-       return $views;
+        // Unread link
+        $Unread_url = add_query_arg( 'message_status', 'Unread', $base_url );
+        $class = ($current == 'Unread' ? ' class="current"' :'');
+        $views['Unread'] = "<a href='{$Unread_url}' {$class} >".__('Unread','wplister')."</a>";
+        if ( isset($summary->Unread) ) $views['Unread'] .= '<span class="count">('.$summary->Unread.')</span>';
+
+        return $views;
     }    
+
     
+    function extra_tablenav( $which ) {
+        if ( 'top' != $which ) return;
+        $account_id = ( isset($_REQUEST['account_id']) ? $_REQUEST['account_id'] : false);
+        ?>
+        <div class="alignleft actions" style="">
+
+            <?php if ( WPLE()->multi_account ) : ?>
+
+            <select name="account_id">
+                <option value=""><?php _e('All accounts','wplister') ?></option>
+                <?php foreach ( WPLE()->accounts as $account ) : ?>
+                    <option value="<?php echo $account->id ?>"
+                        <?php if ( $account_id == $account->id ) echo 'selected'; ?>
+                        ><?php echo $account->title ?></option>
+                <?php endforeach; ?>
+            </select>            
+
+            <input type="submit" name="" id="post-query-submit" class="button" value="Filter">
+
+            <?php endif; ?>
+
+        </div>
+        <?php
+    }
+
     /** ************************************************************************
      * REQUIRED! This is where you prepare your data for display. This method will
      * usually be used to query the database, sort and filter the data, and generally

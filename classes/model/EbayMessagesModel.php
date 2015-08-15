@@ -486,6 +486,14 @@ class EbayMessagesModel extends WPL_Model {
 			$where_sql .= "AND flag_read <> 1 ";
 		} 
 
+        // filter account_id
+		$account_id = ( isset($_REQUEST['account_id']) ? esc_sql( $_REQUEST['account_id'] ) : false);
+		if ( $account_id ) {
+			$where_sql .= "
+				 AND m.account_id = '".$account_id."'
+			";
+		} 
+
         // filter search_query
 		$search_query = ( isset($_REQUEST['s']) ? esc_sql( $_REQUEST['s'] ) : false);
 		if ( $search_query ) {
