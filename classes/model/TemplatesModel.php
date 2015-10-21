@@ -9,8 +9,8 @@ class TemplatesModel extends WPL_Model {
 
 	function TemplatesModel( $foldername = false )
 	{
-		global $wpl_logger;
-		$this->logger = &$wpl_logger;
+		// global $wpl_logger;
+		// $this->logger = &$wpl_logger;
 
 		if ( $foldername ) {
 
@@ -264,15 +264,15 @@ class TemplatesModel extends WPL_Model {
 
 		// handle errors
 		if ( ! $tpl_html ) {
-			$this->logger->error( 'template not found ' . $item['template'] );
-			$this->logger->error( 'should be here: ' . WP_CONTENT_DIR . '/uploads/wp-lister/templates/' . $item['template']  );
+			WPLE()->logger->error( 'template not found ' . $item['template'] );
+			WPLE()->logger->error( 'should be here: ' . WP_CONTENT_DIR . '/uploads/wp-lister/templates/' . $item['template']  );
 			$this->showMessage( 'There was a problem processing your listing template',1,1);
 			return '';
 			// echo 'Template not found: '.$item['template'];
 			// die();
 		}
-		// $this->logger->debug( 'template loaded from ' . $tpl_path );
-		// $this->logger->info( $tpl_html );
+		// WPLE()->logger->debug( 'template loaded from ' . $tpl_path );
+		// WPLE()->logger->info( $tpl_html );
 		// TODO: check if $item['post_id'] point to a valid product. Could have been deleted...
 
 		// custom template hook
@@ -302,7 +302,7 @@ class TemplatesModel extends WPL_Model {
 		// handle images...
 		$main_image = $ibm->getProductMainImageURL( $item['post_id'] );
 		$images = $ibm->getProductImagesURL( $item['post_id'] );
-		$this->logger->debug( 'images found ' . print_r($images,1) );
+		WPLE()->logger->debug( 'images found ' . print_r($images,1) );
 		
 		// [[product_main_image]]
 		$the_main_image = '<img class="wpl_product_image" src="'.$main_image.'" alt="main product image" />';
@@ -500,9 +500,8 @@ class TemplatesModel extends WPL_Model {
 	public function processAllTextShortcodes( $post_id, $tpl_html, $max_length = false, $ItemObj = false ) {
 
 		// get item object
-		$listingsModel = new ListingsModel();
-		$listing_id    = $listingsModel->getListingIDFromPostID( $post_id );
-		$item          = $listingsModel->getItem( $listing_id );
+		$listing_id    = WPLE_ListingQueryHelper::getListingIDFromPostID( $post_id );
+		$item          = ListingsModel::getItem( $listing_id );
 
 		// main content - [[product_content]] (unless updating title when saving product...)
 		if ( ! isset( $_REQUEST['action'] ) || ( $_REQUEST['action'] != 'editpost' ) || isset( $_REQUEST['wpl_ebay_revise_on_update'] )  || isset( $_REQUEST['wpl_ebay_relist_on_update'] ) ) {
@@ -511,10 +510,10 @@ class TemplatesModel extends WPL_Model {
 
 		// product excerpt
 		$product_id = $item['parent_id'] ? $item['parent_id'] : $item['post_id']; // maybe use parent post_id (for split variations)
-		$tpl_html = str_replace( '[[product_excerpt]]', 				        $listingsModel->getRawPostExcerpt( $product_id )  , $tpl_html );
-		$tpl_html = str_replace( '[[product_excerpt_nl2br]]', 			 nl2br( $listingsModel->getRawPostExcerpt( $product_id ) ), $tpl_html );
-		$tpl_html = str_replace( '[[product_additional_content]]', 	   wpautop( $listingsModel->getRawPostExcerpt( $product_id ) ), $tpl_html );
-		$tpl_html = str_replace( '[[product_additional_content_nl2br]]', nl2br( $listingsModel->getRawPostExcerpt( $product_id ) ), $tpl_html );
+		$tpl_html = str_replace( '[[product_excerpt]]', 				        WPLE_ListingQueryHelper::getRawPostExcerpt( $product_id )  , $tpl_html );
+		$tpl_html = str_replace( '[[product_excerpt_nl2br]]', 			 nl2br( WPLE_ListingQueryHelper::getRawPostExcerpt( $product_id ) ), $tpl_html );
+		$tpl_html = str_replace( '[[product_additional_content]]', 	   wpautop( WPLE_ListingQueryHelper::getRawPostExcerpt( $product_id ) ), $tpl_html );
+		$tpl_html = str_replace( '[[product_additional_content_nl2br]]', nl2br( WPLE_ListingQueryHelper::getRawPostExcerpt( $product_id ) ), $tpl_html );
 		
 		// product price
 		$item_price = $item['price'];
@@ -559,23 +558,39 @@ class TemplatesModel extends WPL_Model {
 			
 			$url = admin_url( 'admin-ajax.php' ) . '?action=wpl_gallery&type='.$type.'&id='.$listing_id;
 
+			// build attributes for iframe tag
+			// $iframe_attributes_html = ' id="wpl_widget_new_listings" class="wpl_gallery" style="height:175px;width:100%;border:none;" src="'.$url.'" border="0" ';
+			$iframe_attributes_array = array(
+				'id'     => 'wpl_widget_'.$type.'_listings',
+				'class'  => 'wpl_gallery',
+				'style'  => 'height:175px; width:100%; border:none;',
+				'src'    => $url,
+				'border' => '0',
+			);
+			$iframe_attributes_array = apply_filters( 'wple_gallery_iframe_attributes', $iframe_attributes_array, $listing_id, $type );
 
-			// v2 - does verify
-			$iframe_attributes = ' id="wpl_widget_new_listings" class="wpl_gallery" style="height:175px;width:100%;border:none;" src="'.$url.'" border="0" ';
+			// convert array to attributes string
+			$iframe_attributes_html = '';
+			foreach ( $iframe_attributes_array as $key => $value ) {
+				$iframe_attributes_html .= ' ' . $key   . '=';
+				$iframe_attributes_html .= '"' . $value . '"';
+			}
+
+			// javascript iframe - workaround to list on eBay
 			$html = '
 			<script type="text/javascript">
 				document.write("<"+"if"+"ra"+"me");
-				document.write("'.addslashes($iframe_attributes).'");
+				document.write(" '.addslashes( $iframe_attributes_html ).' ");
 				document.write("></"+"if"+"ra"+"me"+">");
 			</script>
 			';
 
-			// v1 - wont verify
+			// plain iframe - wont verify, but works well for preview
 			if ( isset($_REQUEST['action']) && $_REQUEST['action'] == 'preview_auction' ) {
-				$html = '<iframe id="wpl_widget_new_listings" class="wpl_gallery" style="height:175px;width:100%;border:none;" src="'.$url.'" border="0"></iframe>';
+				$html = '<iframe '.$iframe_attributes_html.'></iframe>';
 			}
 			if ( isset($_REQUEST['action']) && $_REQUEST['action'] == 'preview_template' ) {
-				$html = '<iframe id="wpl_widget_new_listings" class="wpl_gallery" style="height:175px;width:100%;border:none;" src="'.$url.'" border="0"></iframe>';
+				$html = '<iframe '.$iframe_attributes_html.'></iframe>';
 			}
 
 			// this is how the ebay billboard app does it:
@@ -598,12 +613,12 @@ class TemplatesModel extends WPL_Model {
 
 			// attribute shortcodes i.e. [[attribute_Brand]]
 			$product_attributes = ProductWrapper::getAttributes( $post_id );
-			$this->logger->debug('processAttributeShortcodes() - product_attributes: '.print_r($product_attributes,1));
+			WPLE()->logger->debug('processAttributeShortcodes() - product_attributes: '.print_r($product_attributes,1));
 
 			// parent attribute for split child variations
 			$parent_post_id    = ProductWrapper::getVariationParent( $post_id );
 			$parent_attributes = $parent_post_id ? ProductWrapper::getAttributes( $parent_post_id ) : array();
-			$this->logger->debug('processAttributeShortcodes() - parent_attributes: '.print_r($parent_attributes,1));
+			WPLE()->logger->debug('processAttributeShortcodes() - parent_attributes: '.print_r($parent_attributes,1));
 
 			// process each found shortcode
 			foreach ( $matches[1] as $attribute ) {
@@ -716,9 +731,8 @@ class TemplatesModel extends WPL_Model {
 
 	function getVariationsHTML( $item ) {
 
-        $listingsModel = new ListingsModel();
-        $profile_data = $listingsModel->decodeObject( $item['profile_data'], true );
-        $variations = ProductWrapper::getVariations( $item['post_id'] );
+        $profile_data = ListingsModel::decodeObject( $item['profile_data'], true );
+        $variations   = ProductWrapper::getVariations( $item['post_id'] );
 
         $variations_html = '<div class="variations_list" style="margin:10px 0;">';
         $variations_html .= '<table style="margin-bottom: 8px;">';
@@ -764,7 +778,7 @@ class TemplatesModel extends WPL_Model {
             
             // last column: price
             $variations_html .= '<td align="right">';
-            $price = $listingsModel->applyProfilePrice( $var['price'], $profile_data['details']['start_price'] );
+            $price = ListingsModel::applyProfilePrice( $var['price'], $profile_data['details']['start_price'] );
             $variations_html .= number_format_i18n( floatval($price), 2 );
 
             $variations_html .= '</td></tr>';

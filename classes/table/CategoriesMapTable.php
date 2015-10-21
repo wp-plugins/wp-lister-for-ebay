@@ -183,6 +183,9 @@ class CategoriesMapTable extends WP_List_Table {
 
             <?php endif; ?>
 
+            &nbsp;
+            <input type="submit" value="<?php echo __('Save changes','wplister') ?>" name="submit" class="button-primary">
+
         </div>
         <?php
     }
@@ -225,7 +228,7 @@ class CategoriesMapTable extends WP_List_Table {
     function get_columns(){
         $columns = array(
             // 'cb'             => '<input type="checkbox" />', //Render a checkbox instead of text
-            'category'          => __('Category','wplister'),
+            'category'          => __('Local category','wplister'),
             'ebay_category'     => __('eBay category','wplister'),
             'store_category'    => __('eBay Store category','wplister')
         );

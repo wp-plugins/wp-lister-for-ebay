@@ -26,7 +26,7 @@ class WPLE_AccountsPage extends WPL_Page {
 
 	
 	public function handleActions() {
-        // $this->logger->debug("handleActions()");
+        // WPLE()->logger->debug("handleActions()");
 
 		// add new account (triggered by 'Fetch eBay Token' button on accounts page)
 		if ( $this->requestAction() == 'wplister_add_account' ) {
@@ -173,6 +173,14 @@ class WPLE_AccountsPage extends WPL_Page {
 			$default_account = WPLE_eBayAccount::getAccount( $default_account_id );
 			if ( ! $default_account ) {
 				$this->showMessage( __('Your default account does not exist anymore. Please select a new default account.','wplister'),1);
+			} else {
+				// make sure the eBay token stored in wp_options matches the default account
+				$ebay_token_v1 = get_option('wplister_ebay_token');
+				if ( $ebay_token_v1 != $default_account->token ) {
+					// update_option( 'wplister_ebay_token', $default_account->token );
+					$this->makeDefaultAccount( $default_account->id ); // update everything, including expiration time
+					$this->showMessage( __('A new eBay token was found and your default account has been updated accordingly.','wplister'),2);
+				}
 			}
 		}
 

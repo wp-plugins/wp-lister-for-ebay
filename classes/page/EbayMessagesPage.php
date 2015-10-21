@@ -29,7 +29,7 @@ class EbayMessagesPage extends WPL_Page {
 	}
 
 	public function handleActionsOnInit() {
-        $this->logger->debug("handleActionsOnInit()");
+        WPLE()->logger->debug("handleActionsOnInit()");
 
 		// these actions have to wait until 'init'
 		if ( $this->requestAction() == 'view_ebay_message_details' ) {
@@ -150,13 +150,8 @@ class EbayMessagesPage extends WPL_Page {
 		// get ebay_message record
 		$ebay_message = $messagesModel->getItem( $id );
 		
-		// get auction item record
-		// $listingsModel = new ListingsModel();		
-		// $auction_item = $listingsModel->getItemByEbayID( $ebay_message['item_id'] );
-		
 		$aData = array(
 			'ebay_message'				=> $ebay_message,
-			// 'auction_item'			=> $auction_item
 		);
 		$this->display( 'message_details', $aData );
 		

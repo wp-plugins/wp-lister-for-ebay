@@ -10,7 +10,7 @@ class WPL_AjaxHandler extends WPL_Core {
 		add_action('wp_ajax_e2e_get_store_categories_tree', array( &$this, 'ajax_get_store_categories_tree' ) );		
 
 		// called from edit products page
-		add_action('wp_ajax_wpl_getCategorySpecifics', array( &$this, 'ajax_getCategorySpecifics' ) );		
+		add_action('wp_ajax_wpl_getCategorySpecifics',  array( &$this, 'ajax_getCategorySpecifics' ) );		
 		add_action('wp_ajax_wpl_getCategoryConditions', array( &$this, 'ajax_getCategoryConditions' ) );		
 		
 		// called from jobs window
@@ -95,7 +95,7 @@ class WPL_AjaxHandler extends WPL_Core {
 				$profile = $pm->getItem( $profile_id );
 				// $items = $lm->applyProfileToListings( $profile, $product_ids );
 				foreach ($product_ids as $listing_id) {
-					$item = $lm->getItem( $listing_id );
+					$item = ListingsModel::getItem( $listing_id );
 					$lm->applyProfileToItem( $profile, $item );
 				}
 
@@ -154,12 +154,17 @@ class WPL_AjaxHandler extends WPL_Core {
 		
 		$category_id = $_REQUEST['id'];
 		$account_id  = isset( $_REQUEST['account_id'] ) ? $_REQUEST['account_id'] : get_option( 'wplister_default_account_id' );
+		$site_id     = isset( $_REQUEST['site_id'] )    ? $_REQUEST['site_id']    : 0;
 
-		$this->initEC( $account_id );
-		$result = $this->EC->getCategorySpecifics( $category_id );
-		$this->EC->closeEbay();
+		// $this->initEC( $account_id );
+		// $result = $this->EC->getCategorySpecifics( $category_id );
+		// $this->EC->closeEbay();
 
-		$this->returnJSON( $result );
+		// improved version of the above, using ebay_categories as cache
+		$specifics = EbayCategoriesModel::getItemSpecificsForCategory( $category_id, $site_id, $account_id );
+		// $result         = array( $category_id => $specifics );
+
+		$this->returnJSON( $specifics );
 		exit();
 	}
 	
@@ -168,12 +173,16 @@ class WPL_AjaxHandler extends WPL_Core {
 		
 		$category_id = $_REQUEST['id'];
 		$account_id  = isset( $_REQUEST['account_id'] ) ? $_REQUEST['account_id'] : get_option( 'wplister_default_account_id' );
+		$site_id     = isset( $_REQUEST['site_id'] )    ? $_REQUEST['site_id']    : 0;
 
-		$this->initEC( $account_id );
-		$result = $this->EC->getCategoryConditions( $category_id );
-		$this->EC->closeEbay();
+		// $this->initEC( $account_id );
+		// $result = $this->EC->getCategoryConditions( $category_id );
+		// $this->EC->closeEbay();
 
-		$this->returnJSON( $result );
+		// improved version of the above, using ebay_categories as cache
+		$conditions = EbayCategoriesModel::getConditionsForCategory( $category_id, $site_id, $account_id );
+
+		$this->returnJSON( $conditions );
 		exit();
 	}
 	
@@ -217,7 +226,7 @@ class WPL_AjaxHandler extends WPL_Core {
 		$wpl_shutdown_handler_enabled = true;
 		register_shutdown_function( array( $this, 'shutdown_handler' ) );
 
-		$this->logger->info('running task: '.print_r($task,1));
+		WPLE()->logger->info('running task: '.print_r($task,1));
 
 		// handle job name
 		switch ( $task['task'] ) {
@@ -454,9 +463,9 @@ class WPL_AjaxHandler extends WPL_Core {
 		        $profile = $profilesModel->getItem( $profile_id );
 
 		        $lm = new ListingsModel();
-				$items1 = $lm->getAllPreparedWithProfile( $profile_id );
-				$items2 = $lm->getAllVerifiedWithProfile( $profile_id );
-				$items3 = $lm->getAllPublishedWithProfile( $profile_id );
+				$items1 = WPLE_ListingQueryHelper::getAllPreparedWithProfile( $profile_id );
+				$items2 = WPLE_ListingQueryHelper::getAllVerifiedWithProfile( $profile_id );
+				$items3 = WPLE_ListingQueryHelper::getAllPublishedWithProfile( $profile_id );
 				$items  = array_merge( $items1, $items2, $items3 );
 				$total_items = sizeof($items);
 
@@ -515,10 +524,10 @@ class WPL_AjaxHandler extends WPL_Core {
 		$jobname = $_REQUEST['job'];
 
 		// check if an array of listing IDs was provided
-        $lm = new ListingsModel();
 		$listing_ids = ( isset( $_REQUEST['listing_ids'] ) && is_array( $_REQUEST['listing_ids'] ) ) ? $_REQUEST['listing_ids'] : false;
-		if ( $listing_ids ) 
-	        $items = $lm->getItemsByIdArray( $listing_ids );
+		if ( $listing_ids ) {
+	        $items = WPLE_ListingQueryHelper::getItemsByIdArray( $listing_ids );
+		}
 
 		// handle job name
 		switch ( $jobname ) {
@@ -611,8 +620,7 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'verifyAllPreparedItems':
 				
 				// get prepared items
-		        $lm = new ListingsModel();
-		        $items = $lm->getAllPrepared();
+		        $items = WPLE_ListingQueryHelper::getAllPrepared();
 		        
 		        // create job from items and send response
 		        $response = $this->_create_bulk_listing_job( 'verifyItem', $items, $jobname );
@@ -622,8 +630,7 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'publishAllVerifiedItems':
 				
 				// get verified items
-		        $lm = new ListingsModel();
-		        $items = $lm->getAllVerified();
+		        $items = WPLE_ListingQueryHelper::getAllVerified();
 		        
 		        // create job from items and send response
 		        $response = $this->_create_bulk_listing_job( 'publishItem', $items, $jobname );
@@ -632,9 +639,8 @@ class WPL_AjaxHandler extends WPL_Core {
 			
 			case 'publishAllPreparedItems':
 				
-				// get verified items
-		        $lm = new ListingsModel();
-		        $items = $lm->getAllPrepared();
+				// get prepared items
+		        $items = WPLE_ListingQueryHelper::getAllPrepared();
 		        
 		        // create job from items and send response
 		        $response = $this->_create_bulk_listing_job( 'publishItem', $items, $jobname );
@@ -644,8 +650,7 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'reviseAllChangedItems':
 				
 				// get changed items
-		        $lm = new ListingsModel();
-		        $items = $lm->getAllChangedItemsToRevise();
+		        $items = WPLE_ListingQueryHelper::getAllChangedItemsToRevise();
 		        
 		        // create job from items and send response
 		        $response = $this->_create_bulk_listing_job( 'reviseItem', $items, $jobname );
@@ -654,9 +659,8 @@ class WPL_AjaxHandler extends WPL_Core {
 			
 			case 'relistAllRestockedItems':
 				
-				// get changed items
-		        $lm = new ListingsModel();
-		        $items = $lm->getAllEndedItemsToRelist();
+				// get restocked items
+		        $items = WPLE_ListingQueryHelper::getAllEndedItemsToRelist();
 		        
 		        // create job from items and send response
 		        $response = $this->_create_bulk_listing_job( 'relistItem', $items, $jobname );
@@ -666,8 +670,7 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'updateAllPublishedItems':
 				
 				// get published items
-		        $lm = new ListingsModel();
-		        $items = $lm->getAllPublished();
+		        $items = WPLE_ListingQueryHelper::getAllPublished();
 		        
 		        // create job from items and send response
 		        $response = $this->_create_bulk_listing_job( 'updateItem', $items, $jobname );
@@ -677,8 +680,7 @@ class WPL_AjaxHandler extends WPL_Core {
 			case 'updateAllRelistedItems':
 				
 				// get published items
-		        $lm = new ListingsModel();
-		        $items = $lm->getAllRelisted();
+		        $items = WPLE_ListingQueryHelper::getAllRelisted();
 		        
 		        // create job from items and send response
 		        $response = $this->_create_bulk_listing_job( 'updateItem', $items, $jobname );
@@ -691,10 +693,9 @@ class WPL_AjaxHandler extends WPL_Core {
 				$profile_id = get_option('wple_job_reapply_profile_id' );
 				if ( ! $profile_id ) return;
 
-		        $lm = new ListingsModel();
-				$items1 = $lm->getAllPreparedWithProfile( $profile_id );
-				$items2 = $lm->getAllVerifiedWithProfile( $profile_id );
-				$items3 = $lm->getAllPublishedWithProfile( $profile_id );
+				$items1 = WPLE_ListingQueryHelper::getAllPreparedWithProfile( $profile_id );
+				$items2 = WPLE_ListingQueryHelper::getAllVerifiedWithProfile( $profile_id );
+				$items3 = WPLE_ListingQueryHelper::getAllPublishedWithProfile( $profile_id );
 				$items  = array_merge( $items1, $items2, $items3 );
 
 				$total_items = sizeof($items);
@@ -752,7 +753,7 @@ class WPL_AjaxHandler extends WPL_Core {
 		// create tasklist
         $tasks = array();
         foreach( $items as $item ) {
-			$this->logger->info('adding task for item #'.$item['id'] . ' - '.$item['auction_title']);
+			WPLE()->logger->info('adding task for item #'.$item['id'] . ' - '.$item['auction_title']);
 			
 			$tasks = $this->_prepare_eps_tasks( $item, $taskname, $tasks );
 
@@ -988,7 +989,6 @@ class WPL_AjaxHandler extends WPL_Core {
 				if ( is_array( $products ) )  {
 
 					// load template
-					global $oWPL_WPLister;
 					$tpldata = array(
 						'plugin_url'				=> self::$PLUGIN_URL,
 						'message'					=> $this->message,
@@ -1002,7 +1002,7 @@ class WPL_AjaxHandler extends WPL_Core {
 						'form_action'				=> 'admin.php?page='.self::ParentMenuId
 					);
 
-					$oWPL_WPLister->pages['listings']->display( 'match_product', $tpldata );
+					WPLE()->pages['listings']->display( 'match_product', $tpldata );
 
 				// } elseif ( $product->Error->Message ) {
 				// 	$errors  = sprintf( __('There was a problem fetching product details for %s.','wpla'), $product->post->post_title ) .'<br>Error: '. $reports->Error->Message;
@@ -1031,8 +1031,7 @@ class WPL_AjaxHandler extends WPL_Core {
 		$id            = isset( $_REQUEST['id'] )     ? $_REQUEST['id']     : false;	
 		$format        = isset( $_REQUEST['format'] ) ? $_REQUEST['format'] : 'html';	
 
-		$lm = new ListingsModel();
-		$items = $lm->getItemsForGallery( $type, $id, $limit );
+		$items = WPLE_ListingQueryHelper::getItemsForGallery( $type, $id, $limit );
 		// echo "<pre>";print_r($items);echo"</pre>";die();
 
 		if ( $format == 'json' ) {
@@ -1054,14 +1053,22 @@ class WPL_AjaxHandler extends WPL_Core {
 				$json_item->status         = $item['status'];
 				$json_data[] = $json_item;
 			}
-			header('content-type: application/json; charset=utf-8');
-			echo json_encode( $json_data );
+
+			// check if callback parameter is set (JSONP support)
+			if ( isset($_REQUEST['callback']) ) {				
+				header('content-type: application/javascript; charset=utf-8');
+			    echo $_REQUEST['callback'] . '(' . json_encode( $json_data ) . ')'; // JSONP 
+			} else {
+				header('content-type: application/json; charset=utf-8');
+				echo json_encode( $json_data ); // plain JSON
+			}
+
 			exit();
 		}
 
 		// get from_item and template path
 		$view = WPLISTER_PATH.'/views/template/gallery.php';
-		$from_item = $id ? $lm->getItem( $id ) : false;
+		$from_item = $id ? ListingsModel::getItem( $id ) : false;
 		if ( $from_item ) {
 			// if gallery.php exists in listing template, use it
 			$gallery_tpl_file = WPLISTER_PATH.'/../../' . $from_item['template'] . '/gallery.php';
@@ -1091,8 +1098,18 @@ class WPL_AjaxHandler extends WPL_Core {
 
 		$store_categories = EbayCategoriesModel::getEntireStoreCategoryTree( 0, $account_id );
 
-		header('content-type: application/json; charset=utf-8');
-		echo json_encode( $store_categories );
+
+		// check if callback parameter is set
+		if ( isset($_REQUEST['callback']) ) {
+			// return JSONP 
+			header('content-type: application/javascript; charset=utf-8');
+		    echo $_REQUEST['callback'] . '(' . json_encode( $store_categories ) . ')';
+		} else {
+			// return plain JSON
+			header('content-type: application/json; charset=utf-8');
+			echo json_encode( $store_categories );
+		}
+
 		exit();
 	} // ajax_wpl_ebay_store_categories()
 
@@ -1104,7 +1121,7 @@ class WPL_AjaxHandler extends WPL_Core {
 		require_once( WPLISTER_PATH . '/includes/php-tail/PHPTail.php' );
 		
 		// Initilize a new instance of PHPTail - 3 sec reload, 512k max
-		$tail = new PHPTail( $this->logger->file, 3000, 524288 );
+		$tail = new PHPTail( WPLE()->logger->file, 3000, 524288 );
 
 		// handle ajax call
 		if(isset($_GET['ajax']))  {
@@ -1121,37 +1138,50 @@ class WPL_AjaxHandler extends WPL_Core {
 	// this handler is for debugging purposes - it will send request details to the developer
 	// for manual test call: www.example.com/wp-admin/admin-ajax.php?action=handle_ebay_notify
 	public function ajax_handle_ebay_notify() {
+		// require_once WPLISTER_PATH . '/includes/EbatNs/' . 'EbatNs_NotificationClient.php';
+		// require_once WPLISTER_PATH . '/includes/EbatNs/' . 'EbatNs_ResponseError.php';
 
-		// TODO: call loadEbayClasses() instead
-		require_once WPLISTER_PATH . '/includes/EbatNs/' . 'EbatNs_NotificationClient.php';
-		require_once WPLISTER_PATH . '/includes/EbatNs/' . 'EbatNs_ResponseError.php';
+		// load eBay classes
+		EbayController::loadEbayClasses();
 
 		$handler = new EbatNs_NotificationClient();
-		$body = file_get_contents('php://input');
-		$res = $handler->getResponse($body);
+		$body    = file_get_contents('php://input');
+		$res     = $handler->getResponse($body);
 	
-		$this->logger->info('handle_ebay_notify() - time: '.date('Y-m-d H:i:s') );
-		#$this->logger->info('POST:'.print_r($_POST,1));
-		$this->logger->info('REQUEST:'.print_r($_REQUEST,1));
-		$this->logger->info('SERVER:'.print_r($_SERVER,1));
+		WPLE()->logger->info('handle_ebay_notify() - time: '.date('Y-m-d H:i:s') );
+		//WPLE()->logger->info('POST:  '.print_r($_POST,1));
+		WPLE()->logger->info('REQUEST: '.print_r($_REQUEST,1));
+		WPLE()->logger->info('SERVER:  '.print_r($_SERVER,1));
 		
 		$headers = getallheaders();
-		$this->logger->info('headers:'.print_r($headers,1));
-		$this->logger->info('body:'.print_r($body,1));
-		$this->logger->info('response:'.print_r($res,1));
+		WPLE()->logger->info('headers: '.print_r($headers,1));
+		WPLE()->logger->info('body:    '.print_r($body,1));
+		WPLE()->logger->info('response:'.print_r($res,1));
 
-		$msg = 'I received a notification at '.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."\n\n";
-		$msg .= 'Body: '.print_r($body,1)."\n\n";
-		$msg .= 'Response: '.print_r($res,1)."\n";
-		$msg .= 'REQUEST: '.print_r($_REQUEST,1)."\n";
-		$msg .= 'SERVER: '.print_r($_SERVER,1)."\n";
-		$msg .= 'Headers: '.print_r($headers,1)."\n";
-
-		$to = get_option('admin_email', 'support@wplab.com');
-		$subject = 'New eBay platform notification';
-		wp_mail($to, $subject, $msg);
+        // log to db
+        $this->dblogger = new WPL_EbatNs_Logger();
+        $this->dblogger->updateLog( array(
+            'callname'    => 'handle_ebay_notify',
+            'request_url' => 'platform notification',
+            'request'     => $body."\n\n" . print_r($_REQUEST,1)."\n\n" . print_r($_SERVER,1),
+            'response'    => json_encode( $res ),
+            'success'     => 'Success'
+        ));
 		
-		echo 'OK';
+        // send email (for debugging only)
+		$msg = 'A notification was received at '.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."\n\n";
+		$msg .= 'Body:     '.print_r($body,1)."\n\n";
+		$msg .= 'Response: '.print_r($res,1)."\n";
+		$msg .= 'REQUEST:  '.print_r($_REQUEST,1)."\n";
+		$msg .= 'SERVER:   '.print_r($_SERVER,1)."\n";
+		$msg .= 'Headers:  '.print_r($headers,1)."\n";
+
+		// $to = get_option('admin_email', 'info@wplab.com');
+		$to      = 'info@wplab.com';
+		$subject = 'New WPLE platform notification (debug info)';
+		wp_mail( $to, $subject, $msg );
+		
+		echo 'ACK';
 		exit();
 	}
 		

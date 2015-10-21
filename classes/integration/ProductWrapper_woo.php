@@ -189,8 +189,7 @@ class ProductWrapper {
 		
 		$attribute_taxnomies = $product->get_attributes();
 		
-		global $wpl_logger;
-		$wpl_logger->debug('attribute_taxnomies: '.print_r($attribute_taxnomies,1));
+		WPLE()->logger->debug('attribute_taxnomies: '.print_r($attribute_taxnomies,1));
 
 		foreach ($attribute_taxnomies as $attribute) {
 
@@ -198,7 +197,7 @@ class ProductWrapper {
 
 				// handle taxonomy attributes
 				$terms = wp_get_post_terms( $post_id, $attribute['name'] );
-				$wpl_logger->debug('terms: '.print_r($terms,1));
+				WPLE()->logger->debug('terms: '.print_r($terms,1));
 				if ( is_wp_error($terms) ) {
 					// echo "post id: $post_id <br>";
 					// echo "attribute name: " . $attribute['name']."<br>";
@@ -273,9 +272,9 @@ class ProductWrapper {
 
 	// get all product addons (requires Product Add-Ons extension)
 	static function getAddons( $post_id ) {
-		global $wpl_logger;
+
 		$addons = array();
-		// $wpl_logger->info('getAddons() for post_id '.print_r($post_id,1));
+		// WPLE()->logger->info('getAddons() for post_id '.print_r($post_id,1));
 
 		// check if addons are enabled
 		$product_addons = get_post_meta( $post_id, '_product_addons', true );
@@ -286,7 +285,7 @@ class ProductWrapper {
 		// $available_addons = shopp_product_addons( $post_id );
 		// $meta = shopp_product_meta($post_id, 'options');
 		// $a = $meta['a'];
-		// $wpl_logger->info('a:'.print_r($a,1));
+		// WPLE()->logger->info('a:'.print_r($a,1));
 
 		// build clean options array
 		$options = array();
@@ -305,7 +304,7 @@ class ProductWrapper {
 			}
 			$options[] = $addonGroup;
 		}
-		$wpl_logger->info('addons:'.print_r($options,1));
+		WPLE()->logger->info('addons:'.print_r($options,1));
 
 		return $options;
 	}
@@ -563,8 +562,7 @@ class ProductWrapper {
 			$variations[0]['is_default'] = true;
 		}
 
-        // global $wpl_logger;
-        // $wpl_logger->info( 'getVariations() result: '.print_r($variations,1));
+        // WPLE()->logger->info( 'getVariations() result: '.print_r($variations,1));
 
 		return $variations;
 
@@ -635,8 +633,7 @@ class ProductWrapper {
 		}
 		// print_r($attributes);die();
 
-        // global $wpl_logger;
-        // $wpl_logger->info( 'getAttributeTaxonomies() result: '.print_r($attributes,1));
+        // WPLE()->logger->info( 'getAttributeTaxonomies() result: '.print_r($attributes,1));
 
 		return $attributes;
 	}	
@@ -683,16 +680,16 @@ class ProductWrapper {
 	
 	// find variation by attributes (private)
 	static function findVariationID( $parent_id, $VariationSpecifics, $sku ) {
-		global $wpl_logger;
+
 		$variations = self::getVariations( $parent_id );
-		$wpl_logger->info('findVariationID('.$parent_id.','.$sku.') checking '.count($variations).' variations...');
+		WPLE()->logger->info('findVariationID('.$parent_id.','.$sku.') checking '.count($variations).' variations...');
 
 		// search variations for matching attributes
 		foreach ($variations as $var) {
 			$diffs = array_diff_assoc( $var['variation_attributes'], $VariationSpecifics );
 			if ( count($diffs) == 0 ) {
-				$wpl_logger->info('findVariationID('.$parent_id.') found: '.$var['post_id']);
-				$wpl_logger->info('VariationSpecifics: '.print_r($VariationSpecifics,1));
+				WPLE()->logger->info('findVariationID('.$parent_id.') found: '.$var['post_id']);
+				WPLE()->logger->info('VariationSpecifics: '.print_r($VariationSpecifics,1));
 				return $var['post_id'];
 			}
 		}
@@ -701,7 +698,7 @@ class ProductWrapper {
 		if ( $sku ) {	
 			foreach ($variations as $var) {
 				if ( $sku == $var['sku'] ) {
-					$wpl_logger->info('findVariationID('.$parent_id.','.$sku.') found SKU match: '.$var['post_id']);
+					WPLE()->logger->info('findVariationID('.$parent_id.','.$sku.') found SKU match: '.$var['post_id']);
 					return $var['post_id'];				
 				}
 			}
@@ -712,13 +709,13 @@ class ProductWrapper {
 		foreach ($variations as $var) {
 			$diffs = array_udiff( $var['variation_attributes'], $VariationSpecifics, 'strcasecmp' );
 			if ( count($diffs) == 0 ) {
-				$wpl_logger->info('findVariationID('.$parent_id.') found fuzzy match: '.$var['post_id']);
-				$wpl_logger->info('VariationSpecifics: '.print_r($VariationSpecifics,1));
+				WPLE()->logger->info('findVariationID('.$parent_id.') found fuzzy match: '.$var['post_id']);
+				WPLE()->logger->info('VariationSpecifics: '.print_r($VariationSpecifics,1));
 				return $var['post_id'];
 			}
 		}
 
-		$wpl_logger->info('findVariationID('.$parent_id.','.$sku.') found nothing...');
+		WPLE()->logger->info('findVariationID('.$parent_id.','.$sku.') found nothing...');
 		return false;
 	}	
 	

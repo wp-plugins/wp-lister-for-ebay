@@ -59,7 +59,7 @@
 	<?php echo $wpl_message ?>
 
 	<p>
-    	<?php echo __('This is where you can assign eBay categories to your all your WooCommerce product categories.','wplister') ?>
+    	<?php echo __('This is where you can assign official eBay categories and eBay Store categories to your all your local WooCommerce product categories.','wplister') ?>
     </p><p>
     	<?php echo __('Once you selected a destination category for each local category, you can leave the profile category settings empty to automatically select the category according to this list.','wplister') ?>
     	<!-- <br> -->
@@ -94,7 +94,7 @@
 		<div class="submit" style="padding-top: 0; float: right;">
             <input type="button" value="<?php echo __('Select default category','wplister') ?>" class="button btn_select_default_category">
 	        <!-- <a href="#" onclick="jQuery('#import_export_container').slideToggle();return false;" class="button"><?php echo __('Import / Export','wplister'); ?></a>  -->
-			<input type="submit" value="<?php echo __('Update','wplister') ?>" name="submit" class="button-primary">
+			<input type="submit" value="<?php echo __('Save changes','wplister') ?>" name="submit" class="button-primary">
 		</div>
 		<br style="clear:both;"/>
 	

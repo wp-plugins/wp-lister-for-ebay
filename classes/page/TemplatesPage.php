@@ -29,7 +29,7 @@ class TemplatesPage extends WPL_Page {
 	}
 
 	public function handleSubmit() {
-        $this->logger->debug("handleSubmit()");
+        WPLE()->logger->debug("handleSubmit()");
 
 		// handle download template
 		if ( $this->requestAction() == 'download_listing_template' ) {
@@ -62,8 +62,7 @@ class TemplatesPage extends WPL_Page {
 			// handle parameters to select custom listing item
 			$listing_id = isset( $_REQUEST['listing_id'] ) ? $_REQUEST['listing_id'] : false;
 			if ( ! $listing_id && isset( $_REQUEST['post_id'] ) ) {
-				$lm = new ListingsModel();
-				$listing_id = $lm->getListingIDFromPostID( $_REQUEST['post_id'] );
+				$listing_id = WPLE_ListingQueryHelper::getListingIDFromPostID( $_REQUEST['post_id'] );
 			}
 
 			$this->previewTemplate( $_REQUEST['template'], $listing_id );
@@ -206,15 +205,14 @@ class TemplatesPage extends WPL_Page {
 			$this->showMessage( "Warning: Your template footer contains CDATA tags which can break the listing process. You should remove them as they don't fullfill any purpose in an eBay listing anyway.", 1 );
 		}
 
-		$listingsModel = new ListingsModel();
-		$prepared_listings  = $listingsModel->countItemsUsingTemplate( $template, 'prepared' );
-		$verified_listings  = $listingsModel->countItemsUsingTemplate( $template, 'verified' );
-		$published_listings = $listingsModel->countItemsUsingTemplate( $template, 'published' );
+		$prepared_listings  = WPLE_ListingQueryHelper::countItemsUsingTemplate( $template, 'prepared' );
+		$verified_listings  = WPLE_ListingQueryHelper::countItemsUsingTemplate( $template, 'verified' );
+		$published_listings = WPLE_ListingQueryHelper::countItemsUsingTemplate( $template, 'published' );
 
 		// this turned out to be to ressource intensive with 10k listings:
-		// $prepared_listings  = $listingsModel->getAllPreparedWithTemplate( $template );
-		// $verified_listings  = $listingsModel->getAllVerifiedWithTemplate( $template );
-		// $published_listings = $listingsModel->getAllPublishedWithTemplate( $template );
+		// $prepared_listings  = WPLE_ListingQueryHelper::getAllPreparedWithTemplate( $template );
+		// $verified_listings  = WPLE_ListingQueryHelper::getAllVerifiedWithTemplate( $template );
+		// $published_listings = WPLE_ListingQueryHelper::getAllPublishedWithTemplate( $template );
 
 		$aData = array(
 			'plugin_url'				=> self::$PLUGIN_URL,
@@ -252,7 +250,7 @@ class TemplatesPage extends WPL_Page {
 		
 		// save as option
 		self::updateOption( 'templates_cache', $templates_cache );
-		// $this->logger->info( print_r($templates_cache,1));
+		// WPLE()->logger->info( print_r($templates_cache,1));
 
 	}
 
@@ -313,13 +311,13 @@ class TemplatesPage extends WPL_Page {
 
 			// re-apply profile to all published
 			$listingsModel = new ListingsModel();
-			$items = $listingsModel->getAllPublishedWithTemplate( $dirname );
+			$items = WPLE_ListingQueryHelper::getAllPublishedWithTemplate( $dirname );
 			if ( ! empty( $items ) ) {
 		        foreach ($items as $item) {
 
 		        	// don't mark locked items as changed
 		        	if ( ! $item['locked'] ) {
-			        	// $listingsModel->updateListing( $item['id'], array('status' => 'changed') ); // for some reason, this was messing up quantities
+			        	// ListingsModel::updateListing( $item['id'], array('status' => 'changed') ); // for some reason, this was messing up quantities
 			        	$listingsModel->reapplyProfileToItem( $item['id'] );
 			        	$changed++;
 		        	}

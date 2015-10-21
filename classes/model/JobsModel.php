@@ -7,8 +7,8 @@ class JobsModel extends WPL_Model {
 
 	function JobsModel( $job = null )
 	{
-		global $wpl_logger;
-		$this->logger = &$wpl_logger;
+		// global $wpl_logger;
+		// $this->logger = &$wpl_logger;
 
 		global $wpdb;
 		$this->tablename = $wpdb->prefix . 'ebay_jobs';
@@ -38,7 +38,7 @@ class JobsModel extends WPL_Model {
 		", ARRAY_A);		
 
 		foreach( $jobs as &$job ) {
-			$job['tasklist'] = $this->decodeObject( $job['tasklist'] );
+			$job['tasklist'] = self::decodeObject( $job['tasklist'] );
 		}
 
 		return $jobs;		
@@ -54,7 +54,7 @@ class JobsModel extends WPL_Model {
 		", $id 
 		), ARRAY_A);		
 
-		$item['tasklist'] = $this->decodeObject( $item['tasklist'], true );
+		$item['tasklist'] = self::decodeObject( $item['tasklist'], true );
 
 		return $item;		
 	}
@@ -68,7 +68,7 @@ class JobsModel extends WPL_Model {
 		", $key 
 		), ARRAY_A);		
 
-		$item['tasklist'] = $this->decodeObject( $item['tasklist'], true );
+		$item['tasklist'] = self::decodeObject( $item['tasklist'], true );
 
 		$this->key = $key;
 		return $item;		
@@ -99,13 +99,13 @@ class JobsModel extends WPL_Model {
 		$data = array();
 		$data['job_key'] = $key;
 		$data['job_name'] = $jobname;
-		$data['tasklist'] = $this->encodeObject($tasklist);
+		$data['tasklist'] = self::encodeObject($tasklist);
 		$data['date_created'] = date( 'Y-m-d H:i:s' );
 		$data['user_id'] = $user->ID;
 
 		$wpdb->insert($this->tablename, $data);
 
-		$this->logger->info("insertJob( $jobname ) - key $key" );
+		WPLE()->logger->info("insertJob( $jobname ) - key $key" );
 		$this->key = $key;					
 		return $key;
 	}

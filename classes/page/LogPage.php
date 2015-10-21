@@ -28,7 +28,7 @@ class LogPage extends WPL_Page {
 	}
 
 	public function handleSubmit() {
-        $this->logger->debug("handleSubmit()");
+        WPLE()->logger->debug("handleSubmit()");
 
 		if ( $this->requestAction() == 'display_log_entry' ) {
 			$this->displayLogEntry( $_REQUEST['log_id'] );

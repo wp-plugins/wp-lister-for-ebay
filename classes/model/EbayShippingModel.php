@@ -25,8 +25,8 @@ class EbayShippingModel extends WPL_Model {
 
 	function EbayShippingModel()
 	{
-		global $wpl_logger;
-		$this->logger = &$wpl_logger;
+		// global $wpl_logger;
+		// $this->logger = &$wpl_logger;
 
 		global $wpdb;
 		$this->tablename = $wpdb->prefix . self::table;
@@ -89,7 +89,7 @@ class EbayShippingModel extends WPL_Model {
 		// only save valid shipping services to db
 		if ( $Detail->ValidForSellingFlow == 1) {
 			$wpdb->insert($this->tablename, $data);
-			$this->logger->info('inserted shipping service '.$Detail->ShippingService);
+			WPLE()->logger->info('inserted shipping service '.$Detail->ShippingService);
 		}
 					
 		return true;
@@ -176,7 +176,7 @@ class EbayShippingModel extends WPL_Model {
 
 	function downloadDispatchTimes( $session, $site_id )
 	{
-		$this->logger->info( "downloadDispatchTimes()" );
+		WPLE()->logger->info( "downloadDispatchTimes()" );
 		$this->initServiceProxy($session);
 		
 		// download ebay details 
@@ -208,7 +208,7 @@ class EbayShippingModel extends WPL_Model {
 	
 	function downloadShippingPackages( $session, $site_id )
 	{
-		$this->logger->info( "downloadShippingPackages()" );
+		WPLE()->logger->info( "downloadShippingPackages()" );
 		$this->initServiceProxy($session);
 		
 		// download ebay details 
@@ -248,7 +248,7 @@ class EbayShippingModel extends WPL_Model {
 	
 	function downloadShippingDiscountProfiles($session)
 	{
-		$this->logger->info( "downloadShippingDiscountProfiles()" );
+		WPLE()->logger->info( "downloadShippingDiscountProfiles()" );
 		$this->initServiceProxy($session);
 		
 		// download shipping discount profiles 
@@ -294,7 +294,7 @@ class EbayShippingModel extends WPL_Model {
 	// this should go into another class eventually
 	function fetchDoesNotApplyText( $session, $site_id )
 	{
-		$this->logger->info( "fetchDoesNotApplyText()" );
+		WPLE()->logger->info( "fetchDoesNotApplyText()" );
 		$this->initServiceProxy($session);
 		
 		// download ebay details 
@@ -421,7 +421,7 @@ class EbayShippingModel extends WPL_Model {
 
 	static function getShippingLocations( $site_id ) {
 		// $locations = maybe_unserialize( get_option( 'wplister_ShippingLocationDetails' ) );
-		// $this->logger->info('wplister_ShippingLocationDetails'.print_r($locations,1));
+		// WPLE()->logger->info('wplister_ShippingLocationDetails'.print_r($locations,1));
 
 		$locations = maybe_unserialize( WPLE_eBaySite::getSiteObj( $site_id )->ShippingLocationDetails );
 
@@ -430,16 +430,20 @@ class EbayShippingModel extends WPL_Model {
 	}
 	static function getExcludeShippingLocations( $site_id ) {
 		// $locations = maybe_unserialize( get_option( 'wplister_ExcludeShippingLocationDetails' ) );
-		// $this->logger->info('wplister_ExcludeShippingLocationDetails'.print_r($locations,1));
+		// WPLE()->logger->info('wplister_ExcludeShippingLocationDetails'.print_r($locations,1));
 
 		$locations = maybe_unserialize( WPLE_eBaySite::getSiteObj( $site_id )->ExcludeShippingLocationDetails );
 
 		if ( ! is_array($locations) ) return array();
+
+		// add NONE value to remove all previously sent locations
+		$locations['NONE'] = 'NONE';
+		
 		return $locations;
 	}
 	static function getEbayCountries( $site_id ) {
 		// $countries = maybe_unserialize( get_option( 'wplister_CountryDetails' ) );
-		// $this->logger->info('wplister_CountryDetails'.print_r($countries,1));
+		// WPLE()->logger->info('wplister_CountryDetails'.print_r($countries,1));
 
 		$countries = maybe_unserialize( WPLE_eBaySite::getSiteObj( $site_id )->CountryDetails );
 

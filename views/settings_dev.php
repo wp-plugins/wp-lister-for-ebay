@@ -305,34 +305,6 @@
 						</div>
 					</div>
 
-					<div class="postbox dev_box" id="SandboxSettingsBox" style="display:none;">
-						<h3 class="hndle"><span><?php echo __('eBay Sandbox','wplister') ?></span></h3>
-						<div class="inside">
-
-							<p>
-								<?php #echo __('The eBay sandbox allows you to list items to a testing area free of charge.','wplister'); ?>
-								<?php #echo __('This is feature intended for developers only and not recommended for end users.','wplister'); ?><br>
-								<?php echo __('This option is deprecated and should not be used anymore.','wplister'); ?><br>
-							</p>
-							<label for="wpl-option-sandbox_enabled" class="text_label">
-								<?php echo __('Sandbox enabled','wplister') ?>
-								<?php $tip_msg  = __('This option is deprecated and should not be used anymore.','wplister'); ?>
-                                <?php wplister_tooltip($tip_msg) ?>
-							</label>
-							<select id="wpl-option-sandbox_enabled" name="wpl_e2e_option_sandbox_enabled" title="Sandbox" class=" required-entry select">
-								<option value="1" <?php if ( $wpl_option_sandbox_enabled == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
-								<option value="0" <?php if ( $wpl_option_sandbox_enabled != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
-							</select>
-
-						</div>
-					</div>
-
-					<!--
-					<div class="submit" style="padding-top: 0; float: right;">
-						<input type="submit" value="<?php echo __('Save Settings','wplister') ?>" name="submit" class="button-primary">
-					</div>
-					-->
-
 
 				</div> <!-- .meta-box-sortables -->
 			</div> <!-- #postbox-container-1 -->

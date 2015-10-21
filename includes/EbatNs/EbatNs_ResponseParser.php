@@ -168,7 +168,7 @@ class EbatNs_ResponseParser
         xml_set_object($parser, $this);
         xml_set_element_handler($parser, '_startElement', '_endElement');
         xml_set_character_data_handler($parser, '_cData');
-
+        
         // ***** BEGIN EBATNS PATCH *****
         // try to fix XML if it includes HTTP headers for some reason... (LiteSpeed?)
         if ( preg_match( "/^(.*?)\r?\n\r?\n(<\?xml.*)/s", $messageText, $match ) ) {
@@ -179,12 +179,11 @@ class EbatNs_ResponseParser
         if (! xml_parse($parser, $messageText, true))
         {
             $errMsg = sprintf('XML error on line %d col %d byte %d %s', xml_get_current_line_number($parser), xml_get_current_column_number($parser), xml_get_current_byte_index($parser), xml_error_string(xml_get_error_code($parser)));
-
+            
             // ***** BEGIN EBATNS PATCH *****
             // log XML parsing errors to WP-Lister logfile
-            global $wpl_logger;
-            $wpl_logger->error($errMsg);
-            $wpl_logger->error($messageText);
+            WPLE()->logger->error($errMsg);
+            WPLE()->logger->error($messageText);
             // ***** END EBATNS PATCH *****
             
             // create a error-object

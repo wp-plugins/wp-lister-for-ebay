@@ -12,7 +12,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 
 		// get listings - or return false
 		$lm = new ListingsModel();
-		$listings = $mode == 'published' ? $lm->getAllPublished( $limit, $offset ) : $lm->getAllEnded( $limit, $offset );
+		$listings = $mode == 'published' ? WPLE_ListingQueryHelper::getAllPublished( $limit, $offset ) : WPLE_ListingQueryHelper::getAllEnded( $limit, $offset );
 		if ( empty($listings) ) return false;
 
 		// restore previous data
@@ -42,7 +42,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 			// echo "<pre>";print_r($item);echo"</pre>";die();
 
 			// apply profile settings to stock level
-			$profile_data    = $lm->decodeObject( $item['profile_data'], true );
+			$profile_data    = ListingsModel::decodeObject( $item['profile_data'], true );
 			$profile_details = $profile_data['details'];
 			$item['qty']     = $item['quantity'] - $item['quantity_sold'];
 			// echo "<pre>";print_r($profile_details);echo"</pre>";#die();
@@ -129,7 +129,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 
 				$price_to_compare = $price;
 				if ( $profile_start_price ) {
-					$price_to_compare = $lm->applyProfilePrice( $price, $profile_start_price );
+					$price_to_compare = ListingsModel::applyProfilePrice( $price, $profile_start_price );
 				}
 				if ( round( $price_to_compare, 2 ) != round( $item['price'], 2 ) )
 					$in_sync = false;
@@ -154,7 +154,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 				}
 
 				// in case the product is locked or missing, force the listing to be changed
-				$lm->updateListing( $item['id'], array( 'status' => 'changed' ) );
+				ListingsModel::updateListing( $item['id'], array( 'status' => 'changed' ) );
 
 				$item['status'] = 'changed';
 			}
@@ -327,8 +327,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 		$offset = $this->batch_size * $step;
 
 		// get listings - or return false
-		$lm = new ListingsModel();
-		$listings = $lm->getAllPublished( $limit, $offset );
+		$listings = WPLE_ListingQueryHelper::getAllPublished( $limit, $offset );
 		if ( empty($listings) ) return false;
 
 		// restore previous data
@@ -354,7 +353,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 
 			// mark listing as changed
 			if ( isset( $_REQUEST['mark_as_changed'] ) && $_REQUEST['mark_as_changed'] == 'yes' ) {
-				$lm->updateListing( $item['id'], array( 'status' => 'changed' ) );
+				ListingsModel::updateListing( $item['id'], array( 'status' => 'changed' ) );
 				$item['status'] = 'changed';
 			}
 
@@ -464,9 +463,8 @@ class WPL_InventoryCheck extends WPL_Model  {
 	// check_wc_sold_stock
 	public function checkSoldStock() {
 
-		// get all published listings
-		$lm = new ListingsModel();
-		$listings = $lm->getAllWithStatus('sold');
+		// get all sold listings
+		$listings = WPLE_ListingQueryHelper::getAllWithStatus('sold');
 		$out_of_stock_products = array();
 
 		// process published listings
@@ -483,7 +481,7 @@ class WPL_InventoryCheck extends WPL_Model  {
 
 			// mark listing as changed
 			// if ( isset( $_REQUEST['mark_as_changed'] ) && $_REQUEST['mark_as_changed'] == 'yes' ) {
-			// 	$lm->updateListing( $item['id'], array( 'status' => 'changed' ) );
+			// 	ListingsModel::updateListing( $item['id'], array( 'status' => 'changed' ) );
 			// 	$item['status'] = 'changed';
 			// }
 

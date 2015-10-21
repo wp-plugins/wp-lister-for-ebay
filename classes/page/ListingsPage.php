@@ -26,8 +26,7 @@ class ListingsPage extends WPL_Page {
 	}
 
 	// public function onWpNetworkAdminMenu() {
-	// 	global $oWPL_WPLister;
-	// 	$settingsPage = $oWPL_WPLister->pages['settings'];
+	// 	$settingsPage = WPLE()->pages['settings'];
 
 	// 	$page_id = add_menu_page( $this->app_name, $this->main_admin_menu_label, self::ParentPermissions, 
 	// 				   self::ParentMenuId, array( $settingsPage, 'onDisplaySettingsPage' ), $this->getImageUrl( 'hammer-16x16.png' ), ProductWrapper::menu_page_position );
@@ -40,7 +39,7 @@ class ListingsPage extends WPL_Page {
 	}
 
 	public function handleSubmitOnInit() {
-        $this->logger->debug("handleSubmit()");
+        WPLE()->logger->debug("handleSubmit()");
 
 		if ( $this->requestAction() == 'prepare_auction' ) {
 
@@ -54,8 +53,7 @@ class ListingsPage extends WPL_Page {
 
 		if ( $this->requestAction() == 'reselect' ) {
 
-			$listingsModel = new ListingsModel();
-	        $listingsModel->reSelectListings( $_REQUEST['auction'] );
+			ListingsModel::reSelectListings( $_REQUEST['auction'] );
 	        
 	        // redirect to listings page
 			wp_redirect( get_admin_url().'admin.php?page=wplister' );
@@ -64,8 +62,8 @@ class ListingsPage extends WPL_Page {
 
 		if ( $this->requestAction() == 'apply_listing_profile' ) {
 
-	        $this->logger->info( 'apply_listing_profile' );
-	        #$this->logger->info( print_r( $_REQUEST, 1 ) );
+	        WPLE()->logger->info( 'apply_listing_profile' );
+	        #WPLE()->logger->info( print_r( $_REQUEST, 1 ) );
 			$profilesModel = new ProfilesModel();
 	        $profile = $profilesModel->getItem( $_REQUEST['wpl_e2e_profile_to_apply'] );
 
@@ -135,8 +133,7 @@ class ListingsPage extends WPL_Page {
 		}
 
 		// set account_id
-		$lm = new ListingsModel();
-		$account_id = isset( $_REQUEST['auction'] ) ? $lm->getAccountID( $_REQUEST['auction'] ) : false;
+		$account_id = isset( $_REQUEST['auction'] ) ? WPLE_ListingQueryHelper::getAccountID( $_REQUEST['auction'] ) : false;
 
 		// handle verify action
 		if ( $this->requestAction() == 'verify' ) {
@@ -199,15 +196,14 @@ class ListingsPage extends WPL_Page {
 		// handle delete action
 		if ( isset( $_REQUEST['auction'] ) && ( $this->requestAction() == 'delete_listing' ) ) {
 
-	        $lm = new ListingsModel();
 	        $id = $_REQUEST['auction'];
 
 	        if ( is_array( $id )) {
 	            foreach( $id as $single_id ) {
-	                $lm->deleteItem( $single_id );  
+	                WPLE_ListingQueryHelper::deleteItem( $single_id );  
 	            }
 	        } else {
-	            $lm->deleteItem( $id );         
+	            WPLE_ListingQueryHelper::deleteItem( $id );         
 	        }
 
 			$this->showMessage( __('Selected items were removed.','wplister') );
@@ -216,16 +212,15 @@ class ListingsPage extends WPL_Page {
 		// handle archive action
 		if ( $this->requestAction() == 'archive' ) {
 
-	        $lm = new ListingsModel();
 	        $id = $_REQUEST['auction'];
 	        $data = array( 'status' => 'archived' );
 
 	        if ( is_array( $id )) {
 	            foreach( $id as $single_id ) {
-	                $lm->updateListing( $single_id, $data );
+	                ListingsModel::updateListing( $single_id, $data );
 	            }
 	        } else {
-	            $lm->updateListing( $id, $data );
+	            ListingsModel::updateListing( $id, $data );
 	        }
 
 			$this->showMessage( __('Selected items were archived.','wplister') );
@@ -246,12 +241,13 @@ class ListingsPage extends WPL_Page {
 
 	        if ( is_array( $id ) ) {
 	            foreach( $id as $single_id ) {
-	            	$status = $lm->getStatus( $single_id );
+	            	$status = WPLE_ListingQueryHelper::getStatus( $single_id );
 	            	if ( ! in_array( $status, array('ended','sold','archived') ) ) {
 	            		wple_show_message("Item with status <i>$status</i> was skipped. Only ended and sold items can have their status reset to <i>prepared</i>.", 'warn' );
 	            		continue;
 	            	}
-	                $lm->updateListing( $single_id, $data );
+	                ListingsModel::updateListing( $single_id, $data );
+			        $lm->reapplyProfileToItem( $single_id );
 	            }
 				wple_show_message( __('Selected items had their status reset to prepared.','wplister') );
 	        }
@@ -277,16 +273,15 @@ class ListingsPage extends WPL_Page {
 		// handle lock action
 		if ( $this->requestAction() == 'lock' ) {
 
-	        $lm = new ListingsModel();
 	        $id = $_REQUEST['auction'];
 	        $data = array( 'locked' => true );
 
 	        if ( is_array( $id )) {
 	            foreach( $id as $single_id ) {
-	                $lm->updateListing( $single_id, $data );
+	                ListingsModel::updateListing( $single_id, $data );
 	            }
 	        } else {
-	            $lm->updateListing( $id, $data );
+	            ListingsModel::updateListing( $id, $data );
 	        }
 
 			$this->showMessage( __('Selected items were locked.','wplister') );
@@ -295,16 +290,15 @@ class ListingsPage extends WPL_Page {
 		// handle unlock action
 		if ( $this->requestAction() == 'unlock' ) {
 
-	        $lm = new ListingsModel();
 	        $id = $_REQUEST['auction'];
 	        $data = array( 'locked' => false );
 
 	        if ( is_array( $id )) {
 	            foreach( $id as $single_id ) {
-	                $lm->updateListing( $single_id, $data );
+	                ListingsModel::updateListing( $single_id, $data );
 	            }
 	        } else {
-	            $lm->updateListing( $id, $data );
+	            ListingsModel::updateListing( $id, $data );
 	        }
 
 			$this->showMessage( __('Selected items were unlocked.','wplister') );
@@ -313,16 +307,15 @@ class ListingsPage extends WPL_Page {
 		// handle cancel_schedule action
 		if ( $this->requestAction() == 'cancel_schedule' ) {
 
-	        $lm = new ListingsModel();
 	        $id = $_REQUEST['auction'];
 	        $data = array( 'relist_date' => null );
 
 	        if ( is_array( $id )) {
 	            foreach( $id as $single_id ) {
-	                $lm->updateListing( $single_id, $data );
+	                ListingsModel::updateListing( $single_id, $data );
 	            }
 	        } else {
-	            $lm->updateListing( $id, $data );
+	            ListingsModel::updateListing( $id, $data );
 	        }
 
 			$this->showMessage( __('Selected items were unscheduled from auto relist.','wplister') );
@@ -330,8 +323,7 @@ class ListingsPage extends WPL_Page {
 
 		// clean listing archive
 		if ( $this->requestAction() == 'wpl_clean_listing_archive' ) {
-	        $lm = new ListingsModel();
-			$lm->cleanArchive();				
+	        WPLE_ListingQueryHelper::cleanArchive();				
 			$this->showMessage( __('Archive was cleared.','wplister') );
 		}
 
@@ -381,10 +373,7 @@ class ListingsPage extends WPL_Page {
 
 		// cancel (re-)selecting profile process
 		if ( $this->requestAction() == 'cancel_profile_selection' ) {
-
-			$listingsModel = new ListingsModel();
-	        $listingsModel->cancelSelectingListings();
-
+			ListingsModel::cancelSelectingListings();
 		}
 
 	} // handleActions()
@@ -397,11 +386,8 @@ class ListingsPage extends WPL_Page {
 		// handle actions
 		$this->handleActions();
 
-		// init model
-		$listingsModel = new ListingsModel();
-		$selectedProducts = $listingsModel->selectedProducts();
-		
 		// do we have new products with no profile yet?
+		$selectedProducts = WPLE_ListingQueryHelper::selectedProducts();
 		if ( $selectedProducts ) {
 	
 			$this->displayPrepareListingsPage( $selectedProducts );
@@ -421,7 +407,7 @@ class ListingsPage extends WPL_Page {
 			$this->checkForDelayedProfiles();
 
 	        // get listing status summary
-	        $summary = $listingsModel->getStatusSummary();
+	        $summary = WPLE_ListingQueryHelper::getStatusSummary();
 
 	        // check for changed items and display reminder
 	        if ( isset($summary->changed) && current_user_can( 'publish_ebay_listings' ) ) {
@@ -457,7 +443,7 @@ class ListingsPage extends WPL_Page {
 	        }
 
 			// get all items
-			// $listings = $listingsModel->getAll();
+			// $listings = WPLE_ListingQueryHelper::getAll();
 	
 		    //Create an instance of our package class...
 		    // $this->listingsTable = new ListingsTable();
@@ -513,8 +499,7 @@ class ListingsPage extends WPL_Page {
 	public function displayEditPage() {
 
 		// get item
-		$listingsModel = new ListingsModel();
-		$item = $listingsModel->getItem( $_REQUEST['auction'] );
+		$item = ListingsModel::getItem( $_REQUEST['auction'] );
 
 		// unserialize details
 		$this->initEC( $item['account_id'] );
@@ -586,7 +571,7 @@ class ListingsPage extends WPL_Page {
 
 		// optionally revise item on save
 		if ( 'yes' == $this->getValueFromPost( 'revise_item_on_save' ) ) {
-			$account_id = $lm->getAccountID( $item['id'] );
+			$account_id = WPLE_ListingQueryHelper::getAccountID( $item['id'] );
 			$this->initEC( $account_id );
 			$this->EC->reviseItems( $item['id'] );
 			$this->EC->closeEbay();
@@ -601,8 +586,7 @@ class ListingsPage extends WPL_Page {
 		if ( self::getOption( 'hide_dupe_msg' ) ) return;
 	
 		// show warning if duplicate products found
-		$listingsModel = new ListingsModel();
-		$duplicateProducts = $listingsModel->getAllDuplicateProducts();
+		$duplicateProducts = WPLE_ListingQueryHelper::getAllDuplicateProducts();
 		if ( ! empty($duplicateProducts) ) {
 
 	        // get current page with paging as url param
@@ -635,9 +619,7 @@ class ListingsPage extends WPL_Page {
         // get current page with paging as url param
         $page = $_REQUEST['page'];
         if ( isset( $_REQUEST['paged'] )) $page .= '&paged='.$_REQUEST['paged'];
-
-		$listingsModel = new ListingsModel();
-		$msg           = '';
+		$msg = '';
 
 		foreach ($listings as $dupe) {
 
@@ -646,7 +628,7 @@ class ListingsPage extends WPL_Page {
 			$msg .= '<b>'.__('Listings for product','wplister').' #'.$dupe->post_id.' ('.$account_title.'):</b>';
 			$msg .= '<br>';
 
-			$duplicateListings = $listingsModel->getAllListingsForProductAndAccount( $dupe->post_id, $dupe->account_id );
+			$duplicateListings = WPLE_ListingQueryHelper::getAllListingsForProductAndAccount( $dupe->post_id, $dupe->account_id );
 			
 			foreach ($duplicateListings as $listing) {
 				$color = $listing->status == 'archived' ? 'silver' : '';
@@ -697,8 +679,7 @@ class ListingsPage extends WPL_Page {
 	
 		// init model
 		$ibm        = new ItemBuilderModel();
-		$lm         = new ListingsModel();
-		$account_id = $lm->getAccountID( $id );
+		$account_id = WPLE_ListingQueryHelper::getAccountID( $id );
 		$account    = WPLE_eBayAccount::getAccount( $account_id );
 
 		$this->initEC( $account_id );

@@ -4,8 +4,8 @@ class ProfilesModel extends WPL_Model {
 
 	function ProfilesModel()
 	{
-		global $wpl_logger;
-		$this->logger = &$wpl_logger;
+		// global $wpl_logger;
+		// $this->logger = &$wpl_logger;
 
 		global $wpdb;
 		$this->tablename = $wpdb->prefix . 'ebay_profiles';
@@ -21,7 +21,7 @@ class ProfilesModel extends WPL_Model {
 		", ARRAY_A);		
 
 		foreach( $profiles as &$profile ) {
-			$profile['details'] = $this->decodeObject( $profile['details'] );
+			$profile['details'] = self::decodeObject( $profile['details'] );
 		}
 
 		return $profiles;		
@@ -37,7 +37,7 @@ class ProfilesModel extends WPL_Model {
 		", $id 
 		), ARRAY_A);		
 
-		$item['details'] = $this->decodeObject( $item['details'], true );
+		$item['details'] = self::decodeObject( $item['details'], true );
 		$item['conditions'] = unserialize( $item['conditions'] );
 		
 		// get category names
@@ -119,8 +119,7 @@ class ProfilesModel extends WPL_Model {
 		global $wpdb;
 
 		// check if there are listings using this profile
-		$lm = new ListingsModel();
-		$listings = $lm->getAllWithProfile( $id );
+		$listings = WPLE_ListingQueryHelper::getAllWithProfile( $id );
 		if ( ! empty($listings) ) {
 			$this->showMessage('This profile is applied to '.count($listings).' listings and can not be deleted.',1,1);
 			return false;
@@ -140,7 +139,7 @@ class ProfilesModel extends WPL_Model {
 
 		$data['profile_id'] = $id;
 		$data['profile_name'] = $data['profile_name'];
-		$data['details'] = $this->encodeObject($details);
+		$data['details'] = self::encodeObject($details);
 
 		$wpdb->insert($this->tablename, $data);
 					
@@ -245,7 +244,7 @@ class ProfilesModel extends WPL_Model {
 		}
 
 		foreach( $items as &$profile ) {
-			$profile['details'] = $this->decodeObject( $profile['details'] );
+			$profile['details'] = self::decodeObject( $profile['details'] );
 		}
 
 		return $items;

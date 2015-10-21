@@ -31,6 +31,9 @@ class WpLister_Product_MetaBox {
 
 	function add_meta_box() {
 
+		// check if current user can manage listings
+		if ( ! current_user_can('manage_ebay_listings') ) return;
+
 		$title = __('eBay Options', 'wplister');
 		add_meta_box( 'wplister-ebay-details', $title, array( &$this, 'meta_box_basic' ), 'product', 'normal', 'default');
 
@@ -169,13 +172,18 @@ class WpLister_Product_MetaBox {
 		    $primary_category_id = get_option('wplister_default_ebay_category_id');
 		}
 
+		// get listing object
+		$listing        = $this->get_current_ebay_item();
+		$wpl_account_id = $listing && $listing->account_id ? $listing->account_id : get_option( 'wplister_default_account_id' );
+		$wpl_site_id    = $listing                         ? $listing->site_id    : get_option( 'wplister_ebay_site_id' );
+
 		// fetch updated available conditions array
-		$item_conditions = $this->fetchItemConditions( $primary_category_id );
+		$item_conditions = EbayCategoriesModel::getConditionsForCategory( $primary_category_id, $wpl_site_id, $wpl_account_id );
 
 		// check if conditions are available for this category - or fall back to default
-		if ( isset( $item_conditions[ $primary_category_id ] ) && is_array( $item_conditions[ $primary_category_id ] ) ) {
+		if ( is_array( $item_conditions && ! empty( $item_conditions ) ) ) {
 			// get available conditions and add default value "use profile setting" to the beginning
-		    $available_conditions = array('' => __('-- use profile setting --','wplister')) + $item_conditions[ $primary_category_id ]; 
+		    $available_conditions = array('' => __('-- use profile setting --','wplister')) + $item_conditions; 
 		} else {
 			$available_conditions = $default_conditions;
 		}
@@ -196,29 +204,7 @@ class WpLister_Product_MetaBox {
 			'value'			=> get_post_meta( $post->ID, '_ebay_condition_description', true )
 		) );
 
-	}
-
-	public function fetchItemConditions( $ebay_category_id ) {
-		global $wpdb;
-		global $oWPL_WPLister;
-
-		if ( ! $ebay_category_id ) return array();
-
-		$transient_key = 'wplister_ebay_item_conditions_'.$ebay_category_id;
-
-		$conditions = get_transient( $transient_key );
-		if ( empty( $conditions ) ){
-		   
-			// fetch ebay conditions and update transient
-			$oWPL_WPLister->initEC();
-			$conditions = $oWPL_WPLister->EC->getCategoryConditions( $ebay_category_id );
-			$oWPL_WPLister->EC->closeEbay();
-
-			set_transient( $transient_key, $conditions, 24 * 60 * 60 );
-		}
-
-		return $conditions;
-	}
+	} // showItemConditionOptions()
 
 
 	function meta_box_gtins() {
@@ -429,7 +415,7 @@ class WpLister_Product_MetaBox {
 		// get listing object
 		$listing        = $this->get_current_ebay_item();
 		$wpl_account_id = $listing && $listing->account_id ? $listing->account_id : get_option( 'wplister_default_account_id' );
-		$wpl_site_id    = $listing && $listing->site_id    ? $listing->site_id    : get_option( 'wplister_ebay_site_id' );
+		$wpl_site_id    = $listing                         ? $listing->site_id    : get_option( 'wplister_ebay_site_id' );
 
 		// get available seller profiles
 		$wpl_seller_profiles_enabled	= get_option('wplister_ebay_seller_profiles_enabled');
@@ -606,38 +592,38 @@ class WpLister_Product_MetaBox {
 	function showCategoryOptions() {
 		global $post;
 
+		// get listing object
+		$listing        = $this->get_current_ebay_item();
+		$wpl_account_id = $listing && $listing->account_id ? $listing->account_id : get_option( 'wplister_default_account_id' );
+		$wpl_site_id    = $listing                         ? $listing->site_id    : get_option( 'wplister_ebay_site_id' );
+
 		$default_text = '<span style="color:silver"><i>&mdash; ' . __('will be assigned automatically', 'wplister') . ' &mdash;</i></span>';
 
 		// primary ebay category
 		$ebay_category_1_id   = get_post_meta( $post->ID, '_ebay_category_1_id', true );
-		$ebay_category_1_name = $ebay_category_1_id ? EbayCategoriesModel::getFullEbayCategoryName( $ebay_category_1_id ) : $default_text;
+		$ebay_category_1_name = $ebay_category_1_id ? EbayCategoriesModel::getFullEbayCategoryName( $ebay_category_1_id, $wpl_site_id ) : $default_text;
 
 		// secondary ebay category
 		$ebay_category_2_id   = get_post_meta( $post->ID, '_ebay_category_2_id', true );
-		$ebay_category_2_name = $ebay_category_2_id ? EbayCategoriesModel::getFullEbayCategoryName( $ebay_category_2_id ) : $default_text;
+		$ebay_category_2_name = $ebay_category_2_id ? EbayCategoriesModel::getFullEbayCategoryName( $ebay_category_2_id, $wpl_site_id ) : $default_text;
 
 		// primary store category
 		$store_category_1_id   = get_post_meta( $post->ID, '_ebay_store_category_1_id', true );
-		$store_category_1_name = $store_category_1_id ? EbayCategoriesModel::getFullStoreCategoryName( $store_category_1_id ) : $default_text;
+		$store_category_1_name = $store_category_1_id ? EbayCategoriesModel::getFullStoreCategoryName( $store_category_1_id, $wpl_account_id ) : $default_text;
 
 		// secondary store category
 		$store_category_2_id   = get_post_meta( $post->ID, '_ebay_store_category_2_id', true );
-		$store_category_2_name = $store_category_2_id ? EbayCategoriesModel::getFullStoreCategoryName( $store_category_2_id ) : $default_text;
-
-		// get listing object
-		$listing        = $this->get_current_ebay_item();
-		$wpl_account_id = $listing && $listing->account_id ? $listing->account_id : get_option( 'wplister_default_account_id' );
-		$wpl_site_id    = $listing && $listing->site_id    ? $listing->site_id    : get_option( 'wplister_ebay_site_id' );
+		$store_category_2_name = $store_category_2_id ? EbayCategoriesModel::getFullStoreCategoryName( $store_category_2_id, $wpl_account_id ) : $default_text;
 
 		// if no eBay category selected on product level, check profile
 		$profile = $this->get_current_listing_profile();
 		if ( $profile && ( empty($ebay_category_1_id) || empty($ebay_category_2_id) ) ) {
 			if ( ! $ebay_category_1_id && $profile['details']['ebay_category_1_id'] ) {
-				$ebay_category_1_name = EbayCategoriesModel::getFullEbayCategoryName( $profile['details']['ebay_category_1_id'] );
+				$ebay_category_1_name = EbayCategoriesModel::getFullEbayCategoryName( $profile['details']['ebay_category_1_id'], $wpl_site_id );
 				$ebay_category_1_name = '<span style="color:silver">Profile category: ' . $ebay_category_1_name . ' </span>';
 			}
 			if ( ! $ebay_category_2_id && $profile['details']['ebay_category_2_id'] ) {
-				$ebay_category_2_name = EbayCategoriesModel::getFullEbayCategoryName( $profile['details']['ebay_category_2_id'] );
+				$ebay_category_2_name = EbayCategoriesModel::getFullEbayCategoryName( $profile['details']['ebay_category_2_id'], $wpl_site_id );
 				$ebay_category_2_name = '<span style="color:silver">Profile category: ' . $ebay_category_2_name . ' </span>';
 			}
 		}
@@ -645,11 +631,11 @@ class WpLister_Product_MetaBox {
 		// if no Store category selected on product level, check profile
 		if ( $profile && ( empty($store_category_1_id) || empty($store_category_2_id) ) ) {
 			if ( ! $store_category_1_id && $profile['details']['store_category_1_id'] ) {
-				$store_category_1_name = EbayCategoriesModel::getFullStoreCategoryName( $profile['details']['store_category_1_id'] );
+				$store_category_1_name = EbayCategoriesModel::getFullStoreCategoryName( $profile['details']['store_category_1_id'], $wpl_account_id );
 				$store_category_1_name = '<span style="color:silver">Profile category: ' . $store_category_1_name . ' </span>';
 			}
 			if ( ! $store_category_2_id && $profile['details']['store_category_2_id'] ) {
-				$store_category_2_name = EbayCategoriesModel::getFullStoreCategoryName( $profile['details']['store_category_2_id'] );
+				$store_category_2_name = EbayCategoriesModel::getFullStoreCategoryName( $profile['details']['store_category_2_id'], $wpl_account_id );
 				$store_category_2_name = '<span style="color:silver">Profile category: ' . $store_category_2_name . ' </span>';
 			}
 		}
@@ -1156,6 +1142,123 @@ class WpLister_Product_MetaBox {
 	} // showCompatibilityTable()
 
 	function showItemSpecifics() {
+		global $post;
+
+		// get data
+		$wpl_available_attributes     = ProductWrapper::getAttributeTaxonomies();
+		$wpl_default_ebay_category_id = get_post_meta( $post->ID, '_ebay_category_1_id', true );
+
+		// $specifics contains all available item specifics for the selected category
+		// $item_specifics contains values set for this particular product / profile
+		// $specifics                 = get_post_meta( $post->ID, '_ebay_category_specifics', true );
+		$specifics                    = array();
+		$item_specifics               = get_post_meta( $post->ID, '_ebay_item_specifics', true );
+
+
+		// get listing object
+		$listing        = $this->get_current_ebay_item();
+		$wpl_account_id = $listing && $listing->account_id ? $listing->account_id : get_option( 'wplister_default_account_id' );
+		$wpl_site_id    = $listing                         ? $listing->site_id    : get_option( 'wplister_ebay_site_id' );
+		// $profile_id  = $listing && $listing->profile_id ? $listing->profile_id : false;
+		$post_id        = $post->ID;
+
+		// // if primary category is set on product level, update stored category specifics if required
+		// // (fixes empty item specifics box on imported products)
+		// if ( $wpl_default_ebay_category_id && ! $specifics ) {
+		// 	$specifics = $this->get_updated_item_specifics_for_product_and_category( $post_id, $wpl_default_ebay_category_id, $wpl_account_id );			
+		// }
+
+		// if no primary category selected on product level, check profile for primary category
+		$profile = $this->get_current_listing_profile();
+		if ( ! $wpl_default_ebay_category_id ) {
+			if ( $profile && $profile['details']['ebay_category_1_id'] ) {
+				$wpl_default_ebay_category_id = $profile['details']['ebay_category_1_id'];
+				// $specifics = maybe_unserialize( $profile['category_specifics'] );
+			}
+		}
+
+		// if there is still no primary eBay category, look up the product's category in the category map
+		if ( ! $wpl_default_ebay_category_id ) {
+
+			// get ebay categories map
+			$categories_map_ebay = get_option( 'wplister_categories_map_ebay' );
+			if ( isset( WPLE()->accounts[ $wpl_account_id ] ) ) {
+				$account = WPLE()->accounts[ $wpl_account_id ];
+				$categories_map_ebay = maybe_unserialize( $account->categories_map_ebay );
+			}
+            
+			// fetch products local category terms
+			$terms = wp_get_post_terms( $post_id, ProductWrapper::getTaxonomy() );
+			// WPLE()->logger->info('terms: '.print_r($terms,1));
+			// echo "<pre>";print_r($terms);echo"</pre>";#die();
+			// echo "<pre>";print_r($categories_map_ebay);echo"</pre>";#die();
+
+			$ebay_category_id = false;
+  			foreach ( $terms as $term ) {
+
+	            // look up ebay category 
+	            if ( isset( $categories_map_ebay[ $term->term_id ] ) ) {
+    		        $ebay_category_id = $categories_map_ebay[ $term->term_id ];
+    		        $ebay_category_id = apply_filters( 'wplister_apply_ebay_category_map', $ebay_category_id, $post_id );
+	            }
+
+	            // check ebay category 
+	            if ( intval( $ebay_category_id ) > 0 ) {
+	            	$wpl_default_ebay_category_id = $ebay_category_id;
+					// $specifics = $this->get_updated_item_specifics_for_product_and_category( $post_id, $ebay_category_id, $wpl_account_id );
+	            	break;
+	            }
+
+  			} // each term
+
+		} // if still no ebay category
+
+		// load specifics if we have a category
+		if ( $wpl_default_ebay_category_id ) {
+			$specifics = EbayCategoriesModel::getItemSpecificsForCategory( $wpl_default_ebay_category_id, false, $wpl_account_id );
+			// $specifics = array( $wpl_default_ebay_category_id => $specifics );
+		}
+
+		// echo "<pre>";print_r($wpl_default_ebay_category_id);echo"</pre>";#die();
+		// echo "<pre>";print_r($profile);echo"</pre>";#die();
+		// echo "<pre>";print_r($specifics);echo"</pre>";#die();
+		// echo "<pre>";print_r($item_specifics);echo"</pre>";#die();
+
+		// add attribute for SKU
+		// $attrib = new stdClass();
+		// $attrib->name = '_sku';
+		// $attrib->label = 'SKU';
+		// $wpl_available_attributes[] = $attrib;
+
+		// process custom attributes
+		$wpl_custom_attributes = array();
+		$custom_attributes = apply_filters( 'wplister_custom_attributes', array() );
+		if ( is_array( $custom_attributes ) )
+		foreach ( $custom_attributes as $attrib ) {
+
+			$new_attribute = new stdClass();
+			$new_attribute->name  = $attrib['id'];
+			$new_attribute->label = $attrib['label'];
+			$wpl_custom_attributes[] = $new_attribute;
+
+		}
+
+
+		echo '<div class="ebay_item_specifics_wrapper">';
+		echo '<h2>'.  __('Item Specifics','wplister') . '</h2>';
+		include( WPLISTER_PATH . '/views/profile/edit_item_specifics.php' );
+
+		// let the user know which category the available item specifics are based on
+		if ( $profile && $profile['details']['ebay_category_1_id'] ) {
+			$profile_link = '<a href="admin.php?page=wplister-profiles&action=edit&profile='.$profile['profile_id'].'" target="_blank">'.$profile['profile_name'].'</a>';
+			echo '<small>These options are based on the selected profile <b>'.$profile_link.'</b> and its primary eBay category <b>'.$profile['details']['ebay_category_1_name'].'</b>.</small>';
+		} elseif ( $wpl_default_ebay_category_id && isset($categories_map_ebay) ) {
+			$category_path = EbayCategoriesModel::getFullEbayCategoryName( $wpl_default_ebay_category_id, $wpl_site_id );
+			echo '<small>Item specifics are based on the eBay category <b>'.$category_path.'</b> according to your category settings.</small>';
+		}
+
+		echo '</div>';
+		
 	} // showItemSpecifics()
 
 	function enabledInventoryOnExternalProducts() {
@@ -1246,7 +1349,7 @@ class WpLister_Product_MetaBox {
 		// get listing object
 		$listing        = $this->get_current_ebay_item();
 		$wpl_account_id = $listing && $listing->account_id ? $listing->account_id : get_option( 'wplister_default_account_id' );
-		$wpl_site_id    = $listing && $listing->site_id    ? $listing->site_id    : get_option( 'wplister_ebay_site_id' );
+		$wpl_site_id    = $listing                         ? $listing->site_id    : get_option( 'wplister_ebay_site_id' );
 
 		$wpl_loc_flat_shipping_options = EbayShippingModel::getAllLocal( $wpl_site_id, 'flat' );
 		$wpl_int_flat_shipping_options = EbayShippingModel::getAllInternational( $wpl_site_id, 'flat' );
@@ -1403,154 +1506,207 @@ class WpLister_Product_MetaBox {
 
 	function save_meta_box( $post_id, $post ) {
 
+		// check if current user can manage listings
+		if ( ! current_user_can('manage_ebay_listings') ) return;
+
+		if ( ! isset( $_POST['wpl_ebay_title'] ) ) return;
+
 		self::check_max_post_vars();
 
-		if ( isset( $_POST['wpl_ebay_title'] ) ) {
 
-			// get field values
-			$wpl_ebay_title                 = esc_attr( @$_POST['wpl_ebay_title'] );
-			$wpl_ebay_subtitle              = esc_attr( @$_POST['wpl_ebay_subtitle'] );
-			$wpl_ebay_global_shipping       = esc_attr( @$_POST['wpl_ebay_global_shipping'] );
-			$wpl_ebay_payment_instructions  = esc_attr( @$_POST['wpl_ebay_payment_instructions'] );
-			$wpl_ebay_condition_description = esc_attr( @$_POST['wpl_ebay_condition_description'] );
-			$wpl_ebay_condition_id 			= esc_attr( @$_POST['wpl_ebay_condition_id'] );
-			$wpl_ebay_auction_type          = esc_attr( @$_POST['wpl_ebay_auction_type'] );
-			$wpl_ebay_listing_duration      = esc_attr( @$_POST['wpl_ebay_listing_duration'] );
-			$wpl_ebay_start_price           = esc_attr( @$_POST['wpl_ebay_start_price'] );
-			$wpl_ebay_reserve_price         = esc_attr( @$_POST['wpl_ebay_reserve_price'] );
-			$wpl_ebay_buynow_price          = esc_attr( @$_POST['wpl_ebay_buynow_price'] );
-			$wpl_ebay_upc          			= esc_attr( @$_POST['wpl_ebay_upc'] );
-			$wpl_ebay_ean          			= esc_attr( @$_POST['wpl_ebay_ean'] );
-			$wpl_ebay_isbn          		= esc_attr( @$_POST['wpl_ebay_isbn'] );
-			$wpl_ebay_mpn          			= esc_attr( @$_POST['wpl_ebay_mpn'] );
-			$wpl_ebay_brand        			= esc_attr( @$_POST['wpl_ebay_brand'] );
-			$wpl_ebay_epid          		= esc_attr( @$_POST['wpl_ebay_epid'] );
-			$wpl_ebay_hide_from_unlisted  	= esc_attr( @$_POST['wpl_ebay_hide_from_unlisted'] );
-			$wpl_ebay_category_1_id      	= esc_attr( @$_POST['wpl_ebay_category_1_id'] );
-			$wpl_ebay_category_2_id      	= esc_attr( @$_POST['wpl_ebay_category_2_id'] );
-			$wpl_store_category_1_id      	= esc_attr( @$_POST['wpl_ebay_store_category_1_id'] );
-			$wpl_store_category_2_id      	= esc_attr( @$_POST['wpl_ebay_store_category_2_id'] );
-			$wpl_ebay_gallery_image_url   	= esc_attr( @$_POST['wpl_ebay_gallery_image_url'] );
+		// get field values
+		$wpl_ebay_title                 = esc_attr( @$_POST['wpl_ebay_title'] );
+		$wpl_ebay_subtitle              = esc_attr( @$_POST['wpl_ebay_subtitle'] );
+		$wpl_ebay_global_shipping       = esc_attr( @$_POST['wpl_ebay_global_shipping'] );
+		$wpl_ebay_payment_instructions  = esc_attr( @$_POST['wpl_ebay_payment_instructions'] );
+		$wpl_ebay_condition_description = esc_attr( @$_POST['wpl_ebay_condition_description'] );
+		$wpl_ebay_condition_id 			= esc_attr( @$_POST['wpl_ebay_condition_id'] );
+		$wpl_ebay_auction_type          = esc_attr( @$_POST['wpl_ebay_auction_type'] );
+		$wpl_ebay_listing_duration      = esc_attr( @$_POST['wpl_ebay_listing_duration'] );
+		$wpl_ebay_start_price           = esc_attr( @$_POST['wpl_ebay_start_price'] );
+		$wpl_ebay_reserve_price         = esc_attr( @$_POST['wpl_ebay_reserve_price'] );
+		$wpl_ebay_buynow_price          = esc_attr( @$_POST['wpl_ebay_buynow_price'] );
+		$wpl_ebay_upc          			= esc_attr( @$_POST['wpl_ebay_upc'] );
+		$wpl_ebay_ean          			= esc_attr( @$_POST['wpl_ebay_ean'] );
+		$wpl_ebay_isbn          		= esc_attr( @$_POST['wpl_ebay_isbn'] );
+		$wpl_ebay_mpn          			= esc_attr( @$_POST['wpl_ebay_mpn'] );
+		$wpl_ebay_brand        			= esc_attr( @$_POST['wpl_ebay_brand'] );
+		$wpl_ebay_epid          		= esc_attr( @$_POST['wpl_ebay_epid'] );
+		$wpl_ebay_hide_from_unlisted  	= esc_attr( @$_POST['wpl_ebay_hide_from_unlisted'] );
+		$wpl_ebay_category_1_id      	= esc_attr( @$_POST['wpl_ebay_category_1_id'] );
+		$wpl_ebay_category_2_id      	= esc_attr( @$_POST['wpl_ebay_category_2_id'] );
+		$wpl_store_category_1_id      	= esc_attr( @$_POST['wpl_ebay_store_category_1_id'] );
+		$wpl_store_category_2_id      	= esc_attr( @$_POST['wpl_ebay_store_category_2_id'] );
+		$wpl_ebay_gallery_image_url   	= esc_attr( @$_POST['wpl_ebay_gallery_image_url'] );
+		
+		$wpl_amazon_id_type   			= esc_attr( @$_POST['wpl_amazon_id_type'] );
+		$wpl_amazon_product_id   		= esc_attr( @$_POST['wpl_amazon_product_id'] );
 
-			// sanitize prices - convert decimal comma to decimal point
-			$wpl_ebay_start_price			= str_replace( ',', '.', $wpl_ebay_start_price );
-			$wpl_ebay_reserve_price			= str_replace( ',', '.', $wpl_ebay_reserve_price );
-			$wpl_ebay_buynow_price			= str_replace( ',', '.', $wpl_ebay_buynow_price );
+		// sanitize prices - convert decimal comma to decimal point
+		$wpl_ebay_start_price			= str_replace( ',', '.', $wpl_ebay_start_price );
+		$wpl_ebay_reserve_price			= str_replace( ',', '.', $wpl_ebay_reserve_price );
+		$wpl_ebay_buynow_price			= str_replace( ',', '.', $wpl_ebay_buynow_price );
 
-			// Update order data
-			update_post_meta( $post_id, '_ebay_title', $wpl_ebay_title );
-			update_post_meta( $post_id, '_ebay_subtitle', $wpl_ebay_subtitle );
-			update_post_meta( $post_id, '_ebay_global_shipping', $wpl_ebay_global_shipping );
-			update_post_meta( $post_id, '_ebay_payment_instructions', $wpl_ebay_payment_instructions );
-			update_post_meta( $post_id, '_ebay_condition_id', $wpl_ebay_condition_id );
-			update_post_meta( $post_id, '_ebay_condition_description', $wpl_ebay_condition_description );
-			update_post_meta( $post_id, '_ebay_listing_duration', $wpl_ebay_listing_duration );
-			update_post_meta( $post_id, '_ebay_auction_type', $wpl_ebay_auction_type );
-			update_post_meta( $post_id, '_ebay_start_price', $wpl_ebay_start_price );
-			update_post_meta( $post_id, '_ebay_reserve_price', $wpl_ebay_reserve_price );
-			update_post_meta( $post_id, '_ebay_buynow_price', $wpl_ebay_buynow_price );
-			update_post_meta( $post_id, '_ebay_upc', $wpl_ebay_upc );
-			update_post_meta( $post_id, '_ebay_ean', $wpl_ebay_ean );
-			update_post_meta( $post_id, '_ebay_isbn', $wpl_ebay_isbn );
-			update_post_meta( $post_id, '_ebay_mpn', $wpl_ebay_mpn );
-			update_post_meta( $post_id, '_ebay_brand', $wpl_ebay_brand );
-			update_post_meta( $post_id, '_ebay_epid', $wpl_ebay_epid );
-			update_post_meta( $post_id, '_ebay_hide_from_unlisted', $wpl_ebay_hide_from_unlisted );
-			update_post_meta( $post_id, '_ebay_category_1_id', $wpl_ebay_category_1_id );
-			update_post_meta( $post_id, '_ebay_category_2_id', $wpl_ebay_category_2_id );
-			update_post_meta( $post_id, '_ebay_store_category_1_id', $wpl_store_category_1_id );
-			update_post_meta( $post_id, '_ebay_store_category_2_id', $wpl_store_category_2_id );
-			update_post_meta( $post_id, '_ebay_gallery_image_url', $wpl_ebay_gallery_image_url );
+		// use UPC from WPLA, if currently empty
+		if ( empty( $wpl_ebay_upc ) && 'UPC' == $wpl_amazon_id_type ) {
+			$wpl_ebay_upc = $wpl_amazon_product_id;
+		}
 
-			update_post_meta( $post_id, '_ebay_seller_payment_profile_id', 	esc_attr( @$_POST['wpl_ebay_seller_payment_profile_id'] ) );
-			update_post_meta( $post_id, '_ebay_seller_return_profile_id', 	esc_attr( @$_POST['wpl_ebay_seller_return_profile_id'] ) );
-			update_post_meta( $post_id, '_ebay_bestoffer_enabled', 			esc_attr( @$_POST['wpl_ebay_bestoffer_enabled'] ) );
-			update_post_meta( $post_id, '_ebay_bo_autoaccept_price', 		esc_attr( @$_POST['wpl_ebay_bo_autoaccept_price'] ) );
-			update_post_meta( $post_id, '_ebay_bo_minimum_price', 			esc_attr( @$_POST['wpl_ebay_bo_minimum_price'] ) );
+		// use EAN from WPLA, if currently empty
+		if ( empty( $wpl_ebay_ean ) && 'EAN' == $wpl_amazon_id_type ) {
+			$wpl_ebay_ean = $wpl_amazon_product_id;
+		}
 
-			// shipping options
-			$ebay_shipping_service_type = esc_attr( @$_POST['wpl_e2e_shipping_service_type'] );
+		// Update product data
+		update_post_meta( $post_id, '_ebay_title', $wpl_ebay_title );
+		update_post_meta( $post_id, '_ebay_subtitle', $wpl_ebay_subtitle );
+		update_post_meta( $post_id, '_ebay_global_shipping', $wpl_ebay_global_shipping );
+		update_post_meta( $post_id, '_ebay_payment_instructions', $wpl_ebay_payment_instructions );
+		update_post_meta( $post_id, '_ebay_condition_id', $wpl_ebay_condition_id );
+		update_post_meta( $post_id, '_ebay_condition_description', $wpl_ebay_condition_description );
+		update_post_meta( $post_id, '_ebay_listing_duration', $wpl_ebay_listing_duration );
+		update_post_meta( $post_id, '_ebay_auction_type', $wpl_ebay_auction_type );
+		update_post_meta( $post_id, '_ebay_start_price', $wpl_ebay_start_price );
+		update_post_meta( $post_id, '_ebay_reserve_price', $wpl_ebay_reserve_price );
+		update_post_meta( $post_id, '_ebay_buynow_price', $wpl_ebay_buynow_price );
+		update_post_meta( $post_id, '_ebay_upc', $wpl_ebay_upc );
+		update_post_meta( $post_id, '_ebay_ean', $wpl_ebay_ean );
+		update_post_meta( $post_id, '_ebay_isbn', $wpl_ebay_isbn );
+		update_post_meta( $post_id, '_ebay_mpn', $wpl_ebay_mpn );
+		update_post_meta( $post_id, '_ebay_brand', $wpl_ebay_brand );
+		update_post_meta( $post_id, '_ebay_epid', $wpl_ebay_epid );
+		update_post_meta( $post_id, '_ebay_hide_from_unlisted', $wpl_ebay_hide_from_unlisted );
+		update_post_meta( $post_id, '_ebay_category_1_id', $wpl_ebay_category_1_id );
+		update_post_meta( $post_id, '_ebay_category_2_id', $wpl_ebay_category_2_id );
+		update_post_meta( $post_id, '_ebay_store_category_1_id', $wpl_store_category_1_id );
+		update_post_meta( $post_id, '_ebay_store_category_2_id', $wpl_store_category_2_id );
+		update_post_meta( $post_id, '_ebay_gallery_image_url', $wpl_ebay_gallery_image_url );
 
-			if ( $ebay_shipping_service_type && $ebay_shipping_service_type != 'disabled' ) {
-	
-				update_post_meta( $post_id, '_ebay_shipping_service_type', $ebay_shipping_service_type );
+		update_post_meta( $post_id, '_ebay_seller_payment_profile_id', 	esc_attr( @$_POST['wpl_ebay_seller_payment_profile_id'] ) );
+		update_post_meta( $post_id, '_ebay_seller_return_profile_id', 	esc_attr( @$_POST['wpl_ebay_seller_return_profile_id'] ) );
+		update_post_meta( $post_id, '_ebay_bestoffer_enabled', 			esc_attr( @$_POST['wpl_ebay_bestoffer_enabled'] ) );
+		update_post_meta( $post_id, '_ebay_bo_autoaccept_price', 		esc_attr( @$_POST['wpl_ebay_bo_autoaccept_price'] ) );
+		update_post_meta( $post_id, '_ebay_bo_minimum_price', 			esc_attr( @$_POST['wpl_ebay_bo_minimum_price'] ) );
 
-				$details = ProfilesPage::getPreprocessedPostDetails();
-				update_post_meta( $post_id, '_ebay_loc_shipping_options', $details['loc_shipping_options'] );
-				update_post_meta( $post_id, '_ebay_int_shipping_options', $details['int_shipping_options'] );
+		// shipping options
+		$ebay_shipping_service_type = esc_attr( @$_POST['wpl_e2e_shipping_service_type'] );
 
-				update_post_meta( $post_id, '_ebay_shipping_package', esc_attr( @$_POST['wpl_e2e_shipping_package'] ) );
-				update_post_meta( $post_id, '_ebay_PackagingHandlingCosts', esc_attr( @$_POST['wpl_e2e_PackagingHandlingCosts'] ) );
-				update_post_meta( $post_id, '_ebay_InternationalPackagingHandlingCosts', esc_attr( @$_POST['wpl_e2e_InternationalPackagingHandlingCosts'] ) );
+		if ( $ebay_shipping_service_type && $ebay_shipping_service_type != 'disabled' ) {
 
-				update_post_meta( $post_id, '_ebay_shipping_loc_flat_profile', esc_attr( @$_POST['wpl_e2e_shipping_loc_flat_profile'] ) );
-				update_post_meta( $post_id, '_ebay_shipping_int_flat_profile', esc_attr( @$_POST['wpl_e2e_shipping_int_flat_profile'] ) );
-				update_post_meta( $post_id, '_ebay_shipping_loc_calc_profile', esc_attr( @$_POST['wpl_e2e_shipping_loc_calc_profile'] ) );
-				update_post_meta( $post_id, '_ebay_shipping_int_calc_profile', esc_attr( @$_POST['wpl_e2e_shipping_int_calc_profile'] ) );
-				update_post_meta( $post_id, '_ebay_seller_shipping_profile_id', esc_attr( @$_POST['wpl_e2e_seller_shipping_profile_id'] ) );
-				
-				$loc_free_shipping = strstr( 'calc', strtolower($ebay_shipping_service_type) ) ? @$_POST['wpl_e2e_shipping_loc_calc_free_shipping'] : @$_POST['wpl_e2e_shipping_loc_flat_free_shipping'];
-				update_post_meta( $post_id, '_ebay_shipping_loc_enable_free_shipping', $loc_free_shipping );
+			update_post_meta( $post_id, '_ebay_shipping_service_type', $ebay_shipping_service_type );
 
-				update_post_meta( $post_id, '_ebay_shipping_ShipToLocations', @$_POST['wpl_e2e_ShipToLocations'] );
-				update_post_meta( $post_id, '_ebay_shipping_ExcludeShipToLocations', @$_POST['wpl_e2e_ExcludeShipToLocations'] );
+			$details = ProfilesPage::getPreprocessedPostDetails();
+			update_post_meta( $post_id, '_ebay_loc_shipping_options', $details['loc_shipping_options'] );
+			update_post_meta( $post_id, '_ebay_int_shipping_options', $details['int_shipping_options'] );
 
-			} else {
+			update_post_meta( $post_id, '_ebay_shipping_package', esc_attr( @$_POST['wpl_e2e_shipping_package'] ) );
+			update_post_meta( $post_id, '_ebay_PackagingHandlingCosts', esc_attr( @$_POST['wpl_e2e_PackagingHandlingCosts'] ) );
+			update_post_meta( $post_id, '_ebay_InternationalPackagingHandlingCosts', esc_attr( @$_POST['wpl_e2e_InternationalPackagingHandlingCosts'] ) );
 
-				delete_post_meta( $post_id, '_ebay_shipping_service_type' );
-				delete_post_meta( $post_id, '_ebay_loc_shipping_options' );
-				delete_post_meta( $post_id, '_ebay_int_shipping_options' );
-				delete_post_meta( $post_id, '_ebay_shipping_package' );
-				delete_post_meta( $post_id, '_ebay_PackagingHandlingCosts' );
-				delete_post_meta( $post_id, '_ebay_InternationalPackagingHandlingCosts' );
-				delete_post_meta( $post_id, '_ebay_shipping_loc_flat_profile' );
-				delete_post_meta( $post_id, '_ebay_shipping_int_flat_profile' );
-				delete_post_meta( $post_id, '_ebay_shipping_loc_calc_profile' );
-				delete_post_meta( $post_id, '_ebay_shipping_int_calc_profile' );
+			update_post_meta( $post_id, '_ebay_shipping_loc_flat_profile', esc_attr( @$_POST['wpl_e2e_shipping_loc_flat_profile'] ) );
+			update_post_meta( $post_id, '_ebay_shipping_int_flat_profile', esc_attr( @$_POST['wpl_e2e_shipping_int_flat_profile'] ) );
+			update_post_meta( $post_id, '_ebay_shipping_loc_calc_profile', esc_attr( @$_POST['wpl_e2e_shipping_loc_calc_profile'] ) );
+			update_post_meta( $post_id, '_ebay_shipping_int_calc_profile', esc_attr( @$_POST['wpl_e2e_shipping_int_calc_profile'] ) );
+			update_post_meta( $post_id, '_ebay_seller_shipping_profile_id', esc_attr( @$_POST['wpl_e2e_seller_shipping_profile_id'] ) );
+			
+			$loc_free_shipping = strstr( 'calc', strtolower($ebay_shipping_service_type) ) ? @$_POST['wpl_e2e_shipping_loc_calc_free_shipping'] : @$_POST['wpl_e2e_shipping_loc_flat_free_shipping'];
+			update_post_meta( $post_id, '_ebay_shipping_loc_enable_free_shipping', $loc_free_shipping );
 
-				delete_post_meta( $post_id, '_ebay_seller_shipping_profile_id' );
-				delete_post_meta( $post_id, '_ebay_shipping_loc_enable_free_shipping' );
-				delete_post_meta( $post_id, '_ebay_shipping_ShipToLocations' );
-				delete_post_meta( $post_id, '_ebay_shipping_ExcludeShipToLocations' );
+			update_post_meta( $post_id, '_ebay_shipping_ShipToLocations', @$_POST['wpl_e2e_ShipToLocations'] );
+			update_post_meta( $post_id, '_ebay_shipping_ExcludeShipToLocations', @$_POST['wpl_e2e_ExcludeShipToLocations'] );
 
-			}
+		} else {
 
+			delete_post_meta( $post_id, '_ebay_shipping_service_type' );
+			delete_post_meta( $post_id, '_ebay_loc_shipping_options' );
+			delete_post_meta( $post_id, '_ebay_int_shipping_options' );
+			delete_post_meta( $post_id, '_ebay_shipping_package' );
+			delete_post_meta( $post_id, '_ebay_PackagingHandlingCosts' );
+			delete_post_meta( $post_id, '_ebay_InternationalPackagingHandlingCosts' );
+			delete_post_meta( $post_id, '_ebay_shipping_loc_flat_profile' );
+			delete_post_meta( $post_id, '_ebay_shipping_int_flat_profile' );
+			delete_post_meta( $post_id, '_ebay_shipping_loc_calc_profile' );
+			delete_post_meta( $post_id, '_ebay_shipping_int_calc_profile' );
+
+			delete_post_meta( $post_id, '_ebay_seller_shipping_profile_id' );
+			delete_post_meta( $post_id, '_ebay_shipping_loc_enable_free_shipping' );
+			delete_post_meta( $post_id, '_ebay_shipping_ShipToLocations' );
+			delete_post_meta( $post_id, '_ebay_shipping_ExcludeShipToLocations' );
 
 		}
+
+
+		// get listing object
+		$listing        = $this->get_current_ebay_item();
+		$wpl_account_id = $listing && $listing->account_id ? $listing->account_id : get_option( 'wplister_default_account_id' );
+		$wpl_site_id    = $listing                         ? $listing->site_id    : get_option( 'wplister_ebay_site_id' );
+
+		// process item specifics
+		$item_specifics  = array();
+		$itmSpecs_name   = @$_POST['itmSpecs_name'];
+		$itmSpecs_value  = @$_POST['itmSpecs_value'];
+		$itmSpecs_attrib = @$_POST['itmSpecs_attrib'];
+
+		if ( is_array( $itmSpecs_name ) )
+		foreach ($itmSpecs_name as $key => $name) {
+			
+			#$name = str_replace('\\\\', '', $name );
+			$name = stripslashes( $name );
+
+			$value = trim( $itmSpecs_value[$key] );
+			$attribute = trim( $itmSpecs_attrib[$key] );
+
+			if ( ( $value != '') || ( $attribute != '' ) ) {
+				// $spec = new stdClass();
+				// $spec->name = $name;
+				// $spec->value = $value;
+				// $spec->attribute = $attribute;
+				$spec = array();
+				$spec['name']      = $name;
+				$spec['value']     = $value;
+				$spec['attribute'] = $attribute;
+				$item_specifics[]  = $spec;
+			}
+
+		}
+		update_post_meta( $post_id, '_ebay_item_specifics', $item_specifics );
+
+
 
 	} // save_meta_box()
 
 
 
-	/* show additional fields for variations */
-    function get_updated_item_specifics_for_product_and_category( $post_id, $primary_category_id, $account_id  ) {
-		global $oWPL_WPLister;
+	// // deprecated
+    // function get_updated_item_specifics_for_product_and_category( $post_id, $primary_category_id, $account_id  ) {
 
-		// fetch category specifics for primary category
-		$saved_specifics = maybe_unserialize( get_post_meta( $post_id, '_ebay_category_specifics', true ) );
+	// 	// fetch category specifics for primary category
+	// 	$saved_specifics = maybe_unserialize( get_post_meta( $post_id, '_ebay_category_specifics', true ) );
 
-		// fetch required item specifics for primary category
-		if ( ( isset( $saved_specifics[ $primary_category_id ] ) ) && ( $saved_specifics[ $primary_category_id ] != 'none' ) ) {
+	// 	// fetch required item specifics for primary category
+	// 	if ( ( isset( $saved_specifics[ $primary_category_id ] ) ) && ( $saved_specifics[ $primary_category_id ] != 'none' ) ) {
 
-			$specifics = $saved_specifics; 
+	// 		$specifics = $saved_specifics; 
 
-		} elseif ( (int)$primary_category_id != 0 ) {
+	// 	} elseif ( (int)$primary_category_id != 0 ) {
 
-			$oWPL_WPLister->initEC( $account_id );
-			$specifics = $oWPL_WPLister->EC->getCategorySpecifics( $primary_category_id );
-			$oWPL_WPLister->EC->closeEbay();
+	// 		$site_id = WPLE()->accounts[ $account_id ]->site_id;
 
-		} else {
+	// 		WPLE()->initEC( $account_id );
+	// 		$specifics = WPLE()->EC->getCategorySpecifics( $primary_category_id, $site_id );
+	// 		WPLE()->EC->closeEbay();
 
-			$specifics = array();
+	// 	} else {
 
-		}
+	// 		$specifics = array();
 
-		// store available item specific as product meta
-		update_post_meta( $post_id, '_ebay_category_specifics', $specifics );
+	// 	}
 
-		return $specifics;
-	} // get_updated_item_specifics_for_product_and_category()
+	// 	// store available item specific as product meta
+	// 	update_post_meta( $post_id, '_ebay_category_specifics', $specifics );
+
+	// 	return $specifics;
+	// } // get_updated_item_specifics_for_product_and_category()
 
 
 
@@ -1560,6 +1716,9 @@ class WpLister_Product_MetaBox {
 	/* show additional fields for variations */
     function woocommerce_variation_options( $loop, $variation_data, $variation ) {
         // echo "<pre>";print_r($variation_data);echo"</pre>";#die();
+
+		// check if current user can manage listings
+		if ( ! current_user_can('manage_ebay_listings') ) return;
     
 		// current values
 		// $_ebay_start_price	= isset( $variation_data['_ebay_start_price'][0] )	? $variation_data['_ebay_start_price'][0]	: '';
@@ -1643,15 +1802,21 @@ class WpLister_Product_MetaBox {
     public function process_product_meta_variable( $post_id ) {
         // echo "<pre>";print_r($_POST);echo"</pre>";die();
 
+		// check if current user can manage listings
+		if ( ! current_user_can('manage_ebay_listings') ) return;
+
         if (isset($_POST['variable_sku'])) {
 
 			$variable_post_id              = $_POST['variable_post_id'];
-			$variable_ebay_start_price     = isset( $_POST['variable_ebay_start_price'] ) ? $_POST['variable_ebay_start_price'] : '';
-			$variable_ebay_is_disabled     = isset( $_POST['variable_ebay_is_disabled'] ) ? $_POST['variable_ebay_is_disabled'] : '';
-			$variable_ebay_upc     	       = isset( $_POST['variable_ebay_upc'] ) 		  ? $_POST['variable_ebay_upc'] 		: '';
-			$variable_ebay_ean     	       = isset( $_POST['variable_ebay_ean'] ) 		  ? $_POST['variable_ebay_ean'] 		: '';
-			$variable_ebay_mpn     	       = isset( $_POST['variable_ebay_mpn'] ) 		  ? $_POST['variable_ebay_mpn'] 		: '';
-			$variable_ebay_isbn     	   = isset( $_POST['variable_ebay_isbn'] ) 		  ? $_POST['variable_ebay_isbn'] 		: '';
+			$variable_ebay_start_price     = isset( $_POST['variable_ebay_start_price'] )  ? $_POST['variable_ebay_start_price']  : '';
+			$variable_ebay_is_disabled     = isset( $_POST['variable_ebay_is_disabled'] )  ? $_POST['variable_ebay_is_disabled']  : '';
+			$variable_ebay_upc     	       = isset( $_POST['variable_ebay_upc'] ) 		   ? $_POST['variable_ebay_upc'] 		  : '';
+			$variable_ebay_ean     	       = isset( $_POST['variable_ebay_ean'] ) 		   ? $_POST['variable_ebay_ean'] 		  : '';
+			$variable_ebay_mpn     	       = isset( $_POST['variable_ebay_mpn'] ) 		   ? $_POST['variable_ebay_mpn'] 		  : '';
+			$variable_ebay_isbn     	   = isset( $_POST['variable_ebay_isbn'] ) 		   ? $_POST['variable_ebay_isbn'] 		  : '';
+
+			$variable_amazon_id_type       = isset( $_POST['variable_amazon_id_type'] )    ? $_POST['variable_amazon_id_type'] 	  : '';
+			$variable_amazon_product_id    = isset( $_POST['variable_amazon_product_id'] ) ? $_POST['variable_amazon_product_id'] : '';
 
             // if (isset($_POST['variable_enabled']))
             //     $variable_enabled           = $_POST['variable_enabled'];
@@ -1666,8 +1831,22 @@ class WpLister_Product_MetaBox {
                 // Update post meta
                 update_post_meta( $variation_id, '_ebay_start_price', isset( $variable_ebay_start_price[$i] ) ? $variable_ebay_start_price[$i] : '' );
                 update_post_meta( $variation_id, '_ebay_is_disabled', isset( $variable_ebay_is_disabled[$i] ) ? $variable_ebay_is_disabled[$i] : '' );
-                update_post_meta( $variation_id, '_ebay_upc', 		  isset( $variable_ebay_upc[$i] ) 		  ? $variable_ebay_upc[$i] 		   : '' );
-                update_post_meta( $variation_id, '_ebay_ean', 		  isset( $variable_ebay_ean[$i] ) 		  ? $variable_ebay_ean[$i] 		   : '' );
+                // update_post_meta( $variation_id, '_ebay_upc', 		  isset( $variable_ebay_upc[$i] ) 		  ? $variable_ebay_upc[$i] 		   : '' );
+                // update_post_meta( $variation_id, '_ebay_ean', 		  isset( $variable_ebay_ean[$i] ) 		  ? $variable_ebay_ean[$i] 		   : '' );
+
+
+				// use UPC or EAN from WPLA, if currently empty in WPLE
+                $ebay_upc    = isset( $variable_ebay_upc[$i] )          ? $variable_ebay_upc[$i]          : '';
+                $ebay_ean    = isset( $variable_ebay_ean[$i] )          ? $variable_ebay_ean[$i]          : '';
+                $amz_id_type = isset( $variable_amazon_id_type[$i] )    ? $variable_amazon_id_type[$i]    : '';
+                $amz_upc_ean = isset( $variable_amazon_product_id[$i] ) ? $variable_amazon_product_id[$i] : '';
+
+                if ( empty( $ebay_upc ) && $amz_id_type == 'UPC' )		$ebay_upc = $amz_upc_ean;
+                if ( empty( $ebay_ean ) && $amz_id_type == 'EAN' )		$ebay_ean = $amz_upc_ean;
+
+                update_post_meta( $variation_id, '_ebay_upc', 		  $ebay_upc );
+                update_post_meta( $variation_id, '_ebay_ean', 		  $ebay_ean );
+
 
             	if ( get_option( 'wplister_enable_mpn_and_isbn_fields', 2 ) == 1 ) {
                 	update_post_meta( $variation_id, '_ebay_mpn', 	  isset( $variable_ebay_mpn[$i] ) 		  ? $variable_ebay_mpn[$i] 		   : '' );
@@ -1725,8 +1904,7 @@ class WpLister_Product_MetaBox {
 		global $post;
 
 		if ( $this->_ebay_item === null ) {
-			$lm               = new ListingsModel();
-			$listings         = $lm->getAllListingsFromPostID( $post->ID );
+			$listings         = WPLE_ListingQueryHelper::getAllListingsFromPostID( $post->ID );
 			$this->_ebay_item = is_array($listings) && !empty($listings) ? $listings[0] : false;
 		}
 

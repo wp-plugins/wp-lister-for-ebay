@@ -30,7 +30,7 @@ class ToolsPage extends WPL_Page {
 	}
 
 	public function handleSubmit() {
-        $this->logger->debug("handleSubmit()");
+        WPLE()->logger->debug("handleSubmit()");
 
 		// force wp update check
 		if ( $this->requestAction() == 'force_update_check') {				
@@ -216,15 +216,18 @@ class ToolsPage extends WPL_Page {
 
 				// lock_all_listings
 				if ( $_REQUEST['action'] == 'lock_all_listings') {				
-					$lm = new ListingsModel();
-					$count = $lm->lockAll( 1 );
+					$count = WPLE_ListingQueryHelper::lockAll( 1 );
 		    		$this->showMessage( $count .' '. 'items were locked.' );
 				}
 				// unlock_all_listings
 				if ( $_REQUEST['action'] == 'unlock_all_listings') {				
-					$lm = new ListingsModel();
-					$count = $lm->lockAll( 0 );
+					$count = WPLE_ListingQueryHelper::lockAll( 0 );
 		    		$this->showMessage( $count .' '. 'items were unlocked.' );
+				}
+
+				// import_wpla_product_ids
+				if ( $_REQUEST['action'] == 'import_wpla_product_ids') {				
+					$count = self::importWplaProductIds();
 				}
 
 				// assign_all_data_to_default_account
@@ -257,12 +260,35 @@ class ToolsPage extends WPL_Page {
 					$this->initEC();
 					$debug = $this->EC->GetNotificationPreferences();
 					$this->EC->closeEbay();
+					wple_show_message( '<pre>'.print_r($debug,1).'</pre>' );
 				}
-				// SetNotificationPreferences
-				if ( $_REQUEST['action'] == 'SetNotificationPreferences') {				
+				// EnableUserNotificationPreferences
+				if ( $_REQUEST['action'] == 'EnableUserNotificationPreferences') {				
 					$this->initEC();
-					$debug = $this->EC->SetNotificationPreferences();
+					$debug = $this->EC->SetUserNotificationPreferences( 'Enable' );
 					$this->EC->closeEbay();
+					wple_show_message( '<pre>'.print_r($debug,1).'</pre>' );
+				}
+				// DisableUserNotificationPreferences
+				if ( $_REQUEST['action'] == 'DisableUserNotificationPreferences') {				
+					$this->initEC();
+					$debug = $this->EC->SetUserNotificationPreferences( 'Disable' );
+					$this->EC->closeEbay();
+					wple_show_message( '<pre>'.print_r($debug,1).'</pre>' );
+				}
+				// ResetNotificationPreferences
+				if ( $_REQUEST['action'] == 'ResetNotificationPreferences') {				
+					$this->initEC();
+					$debug = $this->EC->ResetNotificationPreferences();
+					$this->EC->closeEbay();
+					wple_show_message( '<pre>'.print_r($debug,1).'</pre>' );
+				}
+				// GetNotificationsUsage
+				if ( $_REQUEST['action'] == 'GetNotificationsUsage') {				
+					$this->initEC();
+					$debug = $this->EC->GetNotificationsUsage();
+					$this->EC->closeEbay();
+					wple_show_message( '<pre>'.print_r($debug,1).'</pre>' );
 				}
 	
 				// update_ebay_transactions
@@ -323,7 +349,7 @@ class ToolsPage extends WPL_Page {
 	
 
 	public function onDisplayToolsPage() {
-		global $wpl_logger;
+
 		$this->check_wplister_setup();
 
 		$this->handleActions();
@@ -334,7 +360,7 @@ class ToolsPage extends WPL_Page {
 			'results'					=> isset($this->results) ? $this->results : '',
 			'resultsHtml'				=> isset($this->resultsHtml) ? $this->resultsHtml : '',
 			'debug'						=> isset($debug) ? $debug : '',
-			'log_size'					=> file_exists($wpl_logger->file) ? filesize($wpl_logger->file) : '',
+			'log_size'					=> file_exists(WPLE()->logger->file) ? filesize(WPLE()->logger->file) : '',
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-tools'
 		);
 		$this->display( 'tools_page', $aData );
@@ -367,18 +393,16 @@ class ToolsPage extends WPL_Page {
 	}
 
 	public function viewLogfile() {
-		global $wpl_logger;
 
 		echo "<pre>";
-		echo readfile( $wpl_logger->file );
-		echo "<br>logfile: " . $wpl_logger->file . "<br>";
+		echo readfile( WPLE()->logger->file );
+		echo "<br>logfile: " . WPLE()->logger->file . "<br>";
 		echo "</pre>";
 
 	}
 
 	public function clearLogfile() {
-		global $wpl_logger;
-		file_put_contents( $wpl_logger->file, '' );
+		file_put_contents( WPLE()->logger->file, '' );
 	}
 
 	public function renderSettingsOptions() {
@@ -467,6 +491,39 @@ class ToolsPage extends WPL_Page {
 		}
 
 	} // upgradeTablesUTF8MB4()
+
+
+
+	// Import WPLA Product IDs
+	public function importWplaProductIds() {
+		global $wpdb;
+
+		// fetch all UPCs
+		$sql      = "SELECT post_id FROM `{$wpdb->prefix}postmeta` WHERE meta_key = '_amazon_id_type' AND meta_value = 'UPC' ";
+		$products = $wpdb->get_col($sql);
+		$count    = 0;
+		foreach ( $products as $post_id ) {
+			$upc = get_post_meta( $post_id, '_amazon_product_id', true );
+			if ( empty( $upc ) ) continue;
+			update_post_meta( $post_id, '_ebay_upc', $upc );
+			$count++;
+		}
+		wple_show_message( $count .' '. 'UPCs were imported.' );
+
+		// fetch all EANs
+		$sql      = "SELECT post_id FROM `{$wpdb->prefix}postmeta` WHERE meta_key = '_amazon_id_type' AND meta_value = 'EAN' ";
+		$products = $wpdb->get_col($sql);
+		$count    = 0;
+		foreach ( $products as $post_id ) {
+			$ean = get_post_meta( $post_id, '_amazon_product_id', true );
+			if ( empty( $ean ) ) continue;
+			update_post_meta( $post_id, '_ebay_ean', $ean );
+			$count++;
+		}
+		wple_show_message( $count .' '. 'EANs were imported.' );
+
+		return $count;
+	} // importWplaProductIds()
 
 
 
@@ -614,9 +671,8 @@ class ToolsPage extends WPL_Page {
 	public function checkProductImages() {
 
 		// get all listings
-		$lm = new ListingsModel();
-		$listings = $lm->getAll();
-		$found_images = array();
+		$listings       = WPLE_ListingQueryHelper::getAll();
+		$found_images   = array();
 		$found_products = array();
 
 		// allow WP to upscale images
@@ -661,7 +717,7 @@ class ToolsPage extends WPL_Page {
 					update_post_meta( $attachment_id, '_wp_attachment_metadata', $meta );
 
 					// clear EPS cache for listing item
-					$lm->updateListing( $item['id'], array( 'eps' => NULL ) );
+					ListingsModel::updateListing( $item['id'], array( 'eps' => NULL ) );
 
 					$this->showMessage( sprintf('Resized image <code>%s</code> to %s x %s.', $meta['file'], $meta['width'], $meta['height'] ) );
 					continue;					
@@ -946,7 +1002,6 @@ class ToolsPage extends WPL_Page {
 
 
 	public function checkEbayConnection() {
-		global $wpl_logger;
 
 		if ( isset($_GET['debug']) ) $this->debug = true;
 		$this->icon_success = '<img src="'.WPLISTER_URL.'img/icon-success.png" class="inline_status" />';

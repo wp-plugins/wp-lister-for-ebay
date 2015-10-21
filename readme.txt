@@ -64,6 +64,8 @@ Yes, it does.
 
 WP-Lister requires a recent version of WordPress (3.9+) with WooCommerce 2.2+ installed. Your server should run on Linux and have PHP 5.3 or better with cURL support.
 
+Please check out the list of incompatible hosting providers as well: http://docs.wplab.com/article/8-wp-lister-for-ebay-requirements - if your provider is on that list, we will not be able to provide any kind of support.
+
 = I use products variations on my site but eBay doesn’t allow variations in the selected category. How can I find out in which categories variations are allowed? =
 
 To learn more about variations and allowed categories you should visit this page: http://pages.ebay.com/help/sell/listing-variations.html. There you will find a link to eBay’s look up table for categories allowing variations. If you can only list to categories where no variations are allowed, consider purchasing WP-Lister Pro which can split variations into single listings.
@@ -92,6 +94,146 @@ Yes, there is. WP-Lister for Amazon is currently in beta and we still have to wo
 2. Profile Editor
 
 == Changelog ==
+= 2.0.9.12 =
+* added the value NONE to the Exclude Locations profile option - and improved tooltip and layout 
+* added Deutsche Post shipping provider 
+* show warning on edit product page if stock management is enabled for parent but disabled for variations 
+* removed deprecated sandbox option from developer settings 
+* include variation MPNs in VariationSpecificsSet container - prevent Error: Variation Specifics Mismatch. (21916664) and Error: Missing name in name-value list. (21916587) 
+* fixed possible Error 10019: Inconsistent shipping parameters 
+* fixed issue with recommended item specific values containing UTF-8 BOM (broken characters) causing item specifics to break on some servers 
+* fix possible invalid eBay token error after reconnecting eBay account 
+* enabled full item specifics support in WP-Lister Lite 
+
+= 2.0.9.11 =
+* fixed possible fatal error on revise and preview 
+* fixed issues on servers with localized PHP settings (decimal comma in StartPrice if profile price is calculated) 
+* improved error 21916543 - suggest to set EPS transfer mode to active if uploading images to EPS fails 
+
+= 2.0.9.10 =
+* check if item specifics have more values than allowed and remove additional values automatically 
+* fixed issue with "0" sizes as variation attributes (duplicate item specific would be set to Does not apply) 
+* improved progress window: auto scroll, fixed cancel button and improved error display 
+* added JSONP support for dynamic gallery and dynamic categories AJAX requests 
+* added action hook wplister_end_item 
+* added DHL Global Mail shipping provider 
+
+= 2.0.9.9.1 =
+* fixed Error: Requires Unique Variation Specifics and Item Specifics (21916626) 
+* fixed issue where only one product ID (UPC or EAN or MPN) would be used even when multiple IDs are set 
+* fixed product identifiers (UPC, EAN, MPN, etc.) for split variations 
+* fixed error 37 on servers with localized PHP settings 
+* fixed item specifics for eBay Motors categories 
+
+= 2.0.9.9 =
+* fill in missing required item specifics with "Does not apply" automatically 
+* profile editor: set Brand / MPN item specifics automatically to pull value from eBay options meta box 
+* validate UPCs and EANSs and show warning on edit product page 
+* if UPC or EAN are empty when saving a product, use UPC / EAN from WPLA if present 
+* added button to import Product IDs (UPC/EAN) from WPLA (tools page) 
+* indicate promotional sale in listings table - show original price and tooltip 
+* omit price and shipping when revising an item with an active promotional sale 
+* fixed empty item specifics on products imported from eBay 
+* fixed possible issue fetching available item specifics for eBay Motors categories (if eBay UK/AU are used in additional to US) 
+* fixed issue where variable items could be incorrectly marked as sold when auto replenish option is enabled 
+* database upgrade to version 48 - store item specifics and conditions in bay_categories table 
+* change details columns to medium text for listings and orders (prevent large orders from not being stored in the database) 
+* code cleanup - moved static methods from ListingsModel to new WPLE_ListingQueryHelper class 
+* added Smart Send shipping provider 
+* added filter hook wple_process_single_variation_title 
+* added filter wple_gallery_iframe_attributes to customize html attributes on gallery iframe tag 
+
+= 2.0.9.8.1 =
+* added option to filter orders by eBay account on WooCommerce Orders page 
+* added Star Track shipping carrier 
+* automatically reapply profile when resetting ended items 
+* changed default status for new orders to Processing on new sites 
+* show warning on Auto Complete option if default status is set to Completed 
+* show warning if max_post_vars is too low on category settings page 
+* listing page: reduce database queries for variations 
+* added filters hooks wple_local_shipping_services / wple_international_shipping_services 
+* added filter hooks for add-ons (wple_filter_listing_item, wple_after_basic_ebay_options, ...) 
+* added action hooks wple_before_advanced_settings, wple_after_advanced_settings and wple_save_settings 
+* fixed issue where imported GTC items would have their status changed to ended if a non-GTC listing profile was assigned during import 
+* fixed error for paypal when testing connection to eBay 
+
+= 2.0.9.8 =
+* added support for Brand/MPN and ISBN on product and variation level 
+* added support for custom order statuses on settings page 
+* added support for WooCommerce CSV importer 3.x 
+* added support for WooCommerce MSRP Pricing extension 
+* added profile option to use MSRP as STP (DiscountPriceInfo.OriginalRetailPrice) 
+* improved attribute selector in item specifics - separate product attributes and custom attributes (SKU, MPN, Brand) 
+* improved edit product page: moved all product identifiers (UPC, EAN, MPN, etc.) in new meta box 
+* improved messages page - added account filter and fixed view links with search query 
+* relabeled "Prefilled info" profile option to "Use Catalog Details" and improved tooltip 
+* fixed saving variations via AJAX on WooCommerce 2.4 
+* fixed possible display issue on category settings page 
+
+= 2.0.9.7.1 =
+* added support for WooCommerce Additional Variation Images Addon 
+* added button to manually convert custom tables to utf8mb4 on WordPress 4.2+ (fix "Illegal mix of collations" sql error) 
+* category settings page: indicate if product category was imported from eBay 
+* improved error handling if update server is unreachable 
+
+= 2.0.9.7 =
+* use eBay UserID as default title for new accounts 
+* added option to remove listings from archive N days after they ended 
+* relabeled seller profiles to business policies (applies to shipping, payment and return policy) 
+* fixed issue where using Automotive category on eBay Canada would attempt to list on eBayMotors US (make sure to only enable eBayMotors if US site is selected) 
+* fixed php warning: Invalid argument supplied for foreach() in ProfilesPage.php on line 144 (and meta box) 
+
+= 2.0.9.6 =
+* added support for WooCommerce Brands extension 
+* fixed issue where adding a new eBay account would overwrite the token for the current default account 
+* fixed "Use SKU as UPC" profile option for variable products 
+* fixed empty product description for split variations 
+* fixed empty Automotive category on eBay Canada 
+
+= 2.0.9.5 =
+* added product identifiers (UPC/EAN) on variation level 
+* added advanced setting option to handle "Missing Product Identifiers" (auto fill in "Does not apply" if missing) 
+* fetch site specific "Does not apply" text when refreshing eBay details 
+* hide parent level EAN/UPC fields for variable products 
+* fixed issue where product_price template shortcode would show sale price instead of custom eBay price 
+* allow fixed values for custom attributes defined by wplister_custom_attributes filter hook 
+* updated eBay API SDK to version 927 
+
+= 2.0.9.4 =
+* fixed redundant "Duplicate request, seller has already marked paid" error message on completed orders 
+* fixed issue where reseted ended items were skipped when publishing prepared items in bulk (remove eBay ID, and expiry date when resetting an item) 
+* fixed warnings not being stored for items that were successfully published 
+* fixed enforced single attribute value mode 
+
+= 2.0.9.3 =
+* added option to control whether product attributes should be converted to item specifics 
+* fixed empty weight issue for variable products (Error: Package weight is not valid or is missing) 
+* wple_complete_sale_on_ebay action hook: use default feedback text unless FeedbackText parameter is set 
+
+= 2.0.9.2 =
+* variable listings: regard product attribute to item specifics mapping table defined in listing profile 
+* indicate orders where stock has been reduced by WP-Lister automatically on eBay Orders page 
+* improved order details view - show shipping fee and order total 
+* show subtitle in listing preview 
+* fixed "View in WP-Lister" toolbar link on frontend 
+* fixed storing payment date in created WooCommerce orders 
+* fixed rare issue where "skipped listing ... status is neither..." warning would break URL redirect 
+* fixed rare issue where gallery widget would show duplicate featured items (caused by duplicate _featured keys in wp_postmeta) 
+* fixed issue where shipping cost would show up as tax - if VAT was enabled in profile but no global VAT rate set 
+* fixed eBay specific details not working for grouped child products (but pulled from parent instead) 
+* fixed line breaks when pulling custom WYSIWYG field using meta_ shortcode by running content through nl2br() (Advanced Custom Fields plugin) 
+* when an order is updated (paid / shipped) on eBay, do not update WooCommerce order status if a custom order status is set (WooCommerce Order Status Manager extension) 
+
+= 2.0.9.1 =
+* fixed issue where items were ended even though OOSC was enabled 
+* indicate when OOSC is enabled in listing table view (icon and tooltip) 
+* store payment date in created WooCommerce orders (used by REST API and 3rd party plugins) 
+* improved profile gallery option labeling - and made options translatable 
+* improved error handling when uploading and downloading listing templates 
+* fixed rare blank profile selector issue (404 error on admin-ajax.php) on some themes 
+* allow listing templates to fetch eBay store categories dynamically (wpl_ebay_store_categories) 
+* show warning when running into max_input_vars limit - causing partial data being saved when updating a product with 40+ variations 
+
 = 2.0.9 =
 * automatically detect whether the Out Of Stock Control option is enabled when updating an eBay account
 * ignore Out Of Stock Control preference when processing non-GTC listings

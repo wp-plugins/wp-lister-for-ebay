@@ -210,6 +210,7 @@
 
 
 					<?php include('profile/edit_categories.php') ?>
+					<?php include('profile/edit_item_specifics.php') ?>
 					<?php include('profile/edit_shipping.php') ?>
 
 
@@ -724,17 +725,18 @@
 		function buildItemConditions() {
 
 			var primary_category_id = jQuery('#ebay_category_id_1')[0].value;
-			var conditions = CategoryConditionsData[ primary_category_id ];
+			// var conditions = CategoryConditionsData[ primary_category_id ];
+			var conditions = CategoryConditionsData;
 
 			// console.log('buildItemConditions()');
 			// console.log('primary_category_id',primary_category_id);
 			// console.log('conditions step 1',conditions);
 
-			// possibly use default category
-			if ( ( ! conditions ) && ( default_ebay_category_id ) ) {
-				conditions = CategoryConditionsData[ default_ebay_category_id ];
-			}
-			// console.log('conditions step 2',conditions);
+			// // possibly use default category
+			// if ( ( ! conditions ) && ( default_ebay_category_id ) ) {
+			// 	conditions = CategoryConditionsData[ default_ebay_category_id ];
+			// }
+			// // console.log('conditions step 2',conditions);
 
 			// console.log('conditions: ',conditions);
 			// console.log('CategoryConditionsData: ',CategoryConditionsData);

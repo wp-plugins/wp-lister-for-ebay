@@ -23,8 +23,8 @@ class EbayPaymentModel extends WPL_Model {
 
 	function EbayPaymentModel()
 	{
-		global $wpl_logger;
-		$this->logger = &$wpl_logger;
+		// global $wpl_logger;
+		// $this->logger = &$wpl_logger;
 	
 		global $wpdb;
 		$this->tablename = $wpdb->prefix . self::table;
@@ -60,7 +60,7 @@ class EbayPaymentModel extends WPL_Model {
 		$data['site_id']             = $this->site_id;
 
 		$wpdb->insert($this->tablename, $data);
-		$this->logger->info('inserted payment option '.$Detail->PaymentOption);
+		WPLE()->logger->info('inserted payment option '.$Detail->PaymentOption);
 					
 		return true;
 	}
@@ -68,7 +68,7 @@ class EbayPaymentModel extends WPL_Model {
 	
 	function downloadMinimumStartPrices( $session, $site_id )
 	{
-		$this->logger->info( "downloadMinimumStartPrices()" );
+		WPLE()->logger->info( "downloadMinimumStartPrices()" );
 		$this->initServiceProxy($session);
 		
 		// download ebay details 
@@ -100,7 +100,7 @@ class EbayPaymentModel extends WPL_Model {
 	
 	function downloadReturnPolicyDetails( $session, $site_id )
 	{
-		$this->logger->info( "downloadReturnPolicyDetails()" );
+		WPLE()->logger->info( "downloadReturnPolicyDetails()" );
 		$this->initServiceProxy($session);
 		
 		// download ebay details 

@@ -204,7 +204,7 @@
 								
 								<label class="text_label">
 									<?php echo __('Exclude locations','wplister'); ?>
-		                            <?php wplister_tooltip('Select the locations you do not want to ship to. (optional)') ?>
+		                            <?php wplister_tooltip('Select the locations you do not want to ship to. (optional)<br><br>Note: If you leave this empty, your default set of locations as set up in My eBay will be applied - unless you sent a specific set of locations previously in which case it will remain unchanged.<br>To remove the default or previously defined set of locations you have to select "NONE".') ?>
 								</label>
 								<select multiple="multiple" class="wple_chosen_select" id="wpl_e2e_ExcludeShipToLocations" name="wpl_e2e_ExcludeShipToLocations[]" data-placeholder="Select locations" style="width: 65%;">
 									<?php

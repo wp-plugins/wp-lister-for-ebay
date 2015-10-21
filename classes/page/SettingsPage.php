@@ -58,7 +58,7 @@ class SettingsPage extends WPL_Page {
 	}
 	
 	public function handleSubmit() {
-        $this->logger->debug("handleSubmit()");
+        WPLE()->logger->debug("handleSubmit()");
 
 		// handle redirect to ebay auth url
 		if ( $this->requestAction() == 'wplRedirectToAuthURL') {				
@@ -68,7 +68,7 @@ class SettingsPage extends WPL_Page {
 			$auth_url = $this->EC->getAuthUrl();
 			$this->EC->closeEbay();
 
-			$this->logger->info( "wplRedirectToAuthURL() to: ", $auth_url );
+			WPLE()->logger->info( "wplRedirectToAuthURL() to: ", $auth_url );
 			wp_redirect( $auth_url );
 		}
 
@@ -271,7 +271,6 @@ class SettingsPage extends WPL_Page {
 			'text_log_level'			=> self::getOption( 'log_level' ),
 
 			'option_log_to_db'			=> self::getOption( 'log_to_db' ),
-			'option_sandbox_enabled'	=> self::getOption( 'sandbox_enabled' ),
 
 			'settings_url'				=> 'admin.php?page='.self::ParentMenuId.'-settings',
 			'form_action'				=> 'admin.php?page='.self::ParentMenuId.'-settings'.'&tab=developer'
@@ -281,8 +280,7 @@ class SettingsPage extends WPL_Page {
 
 
 	public function displayAccountsPage() {
-		global $oWPL_WPLister;
-    	return $oWPL_WPLister->pages['accounts']->displayAccountsPage();
+    	return WPLE()->pages['accounts']->displayAccountsPage();
 	}
 
 
@@ -480,66 +478,10 @@ class SettingsPage extends WPL_Page {
 	protected function saveDeveloperSettings() {
 
 		// TODO: check nonce
-		if ( isset( $_POST['wpl_e2e_option_sandbox_enabled'] ) ) {
-
-			// toggle sandbox ?
-			$oldToken = self::getOption( 'ebay_token' );
-			if ( self::getOption( 'sandbox_enabled' ) != $this->getValueFromPost( 'option_sandbox_enabled' ) ) {
-				
-				$sandbox_enabled = ($this->getValueFromPost( 'option_sandbox_enabled' ) == '1') ? true : false ;
-				$tokens = self::getOption( 'ebay_tokens' );
-				if (!$tokens) $tokens = array();
-				
-				if ( $sandbox_enabled ) {
-					
-					// backup token
-					$tokens['production'] = array();
-					$tokens['production']['mode'] = 'production';
-					$tokens['production']['token'] = self::getOption( 'ebay_token' );
-					self::updateOption( 'ebay_tokens', $tokens );
-					
-					// restore sandbox token
-					if ( isset($tokens['sandbox']) && $tokens['sandbox']['token'] ) {
-						self::updateOption( 'ebay_token', $tokens['sandbox']['token'] );
-						self::updateOption( 'sandbox_enabled',	$this->getValueFromPost( 'option_sandbox_enabled' ) );
-						$this->initEC();
-						$UserID = $this->EC->GetUser();
-						$this->EC->GetUserPreferences();
-						$this->EC->closeEbay();
-						$this->showMessage( __('Enabled sandbox mode.','wplister') . ' ' .
-											sprintf( "Your token for %s was restored.", $UserID ) );
-					} else {
-						$this->showMessage( __('Enabled sandbox mode.','wplister') );
-					}
-
-				} else {
-					
-					// backup token
-					$tokens['sandbox'] = array();
-					$tokens['sandbox']['mode'] = 'sandbox';
-					$tokens['sandbox']['token'] = self::getOption( 'ebay_token' );
-					self::updateOption( 'ebay_tokens', $tokens );
-					
-					// restore production token
-					if ( isset($tokens['production']) && $tokens['production']['token'] ) {
-						self::updateOption( 'ebay_token', $tokens['production']['token'] );
-						self::updateOption( 'sandbox_enabled',	$this->getValueFromPost( 'option_sandbox_enabled' ) );
-						$this->initEC();
-						$UserID = $this->EC->GetUser();
-						$this->EC->GetUserPreferences();
-						$this->EC->closeEbay();
-						$this->showMessage( __('Switched to production mode.','wplister') . ' ' .
-											sprintf( "Your token for %s was restored.", $UserID ) );
-					} else {
-						$this->showMessage( __('Switched to production mode.','wplister') );
-					}
-
-				}
-			}
+		if ( isset( $_POST['wpl_e2e_option_log_to_db'] ) ) {
 
 			self::updateOption( 'log_level',				$this->getValueFromPost( 'text_log_level' ) );
 			self::updateOption( 'log_to_db',				$this->getValueFromPost( 'option_log_to_db' ) );
-			self::updateOption( 'sandbox_enabled',			$this->getValueFromPost( 'option_sandbox_enabled' ) );
 			self::updateOption( 'ajax_error_handling',		$this->getValueFromPost( 'ajax_error_handling' ) );
 			self::updateOption( 'php_error_handling',		$this->getValueFromPost( 'php_error_handling' ) );
 			self::updateOption( 'disable_variations',		$this->getValueFromPost( 'disable_variations' ) );
@@ -564,23 +506,12 @@ class SettingsPage extends WPL_Page {
 			
 			$this->handleChangedUpdateChannel();
 
-			// // new manual token ?
-			// if ( $oldToken != $this->getValueFromPost( 'text_ebay_token' ) ) {
-			// 	self::updateOption( 'ebay_token', $this->getValueFromPost( 'text_ebay_token' ) );
-			// 	$this->initEC();
-			// 	$UserID = $this->EC->GetUser();
-			// 	$this->EC->GetUserPreferences();
-			// 	$this->EC->closeEbay();
-			// 	$this->showMessage( __('Your token was changed.','wplister') );
-			// 	$this->showMessage( __('Your UserID is','wplister') . ' ' . $UserID );
-			// }
-
 			do_action('wple_save_settings');
 
 			$this->showMessage( __('Settings updated.','wplister') );
-
 		}
-	}
+		
+	} // saveDeveloperSettings()
 	
 	protected function handleChangedUpdateChannel() {
 
@@ -901,7 +832,7 @@ class SettingsPage extends WPL_Page {
 
 
 	protected function handleCronSettings( $schedule ) {
-        $this->logger->info("handleCronSettings( $schedule )");
+        WPLE()->logger->info("handleCronSettings( $schedule )");
 
         // remove scheduled event
 	    $timestamp = wp_next_scheduled(  'wplister_update_auctions' );

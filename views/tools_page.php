@@ -322,6 +322,15 @@
 						</form>
 						<br style="clear:both;"/>
 
+						<!-- Import WPLA Product IDs --> 
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="import_wpla_product_ids" />
+								<input type="submit" value="<?php echo __('Import WPLA Product IDs','wplister'); ?>" name="submit" class="button">
+								<p><?php echo __('Import UPC / EAN from WP-Lister for Amazon.','wplister'); ?></p>
+						</form>
+						<br style="clear:both;"/>
+
 						<!-- convert tables -->
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
@@ -462,28 +471,56 @@
 						<br style="clear:both;"/>
 						-->
 
+					</div>
+				</div> <!-- postbox -->
+
+
+				<div class="postbox dev_box" id="TestNotificationPreferencesBox" style="display:none;">
+					<h3 class="hndle"><span><?php echo __('Experimental Options','wplister'); ?></span></h3>
+					<div class="inside">
+
 						<!-- platform notifictions don't work yet -->
-						<!--
-						<p>GetNotificationPreferences</p>
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
-							<div class="submit" style="padding-top: 0; float: left;">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
 								<input type="hidden" name="action" value="GetNotificationPreferences" />
-								<input type="submit" value="GetNotificationPreferences" name="submit" class="button">
-							</div>
+								<input type="submit" value="Get Notification Preferences" name="submit" class="button">
+								<p>GetNotificationPreferences</p>
 						</form>
 						<br style="clear:both;"/>
 
-						<p>SetNotificationPreferences</p>
 						<form method="post" action="<?php echo $wpl_form_action; ?>">
-							<div class="submit" style="padding-top: 0; float: left;">
 								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
-								<input type="hidden" name="action" value="SetNotificationPreferences" />
-								<input type="submit" value="SetNotificationPreferences" name="submit" class="button">
-							</div>
+								<input type="hidden" name="action" value="EnableUserNotificationPreferences" />
+								<input type="submit" value="Enable Notifications for User" name="submit" class="button">
+								<p>Enable notifications for default account</p>
 						</form>
 						<br style="clear:both;"/>
-						-->
+
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="DisableUserNotificationPreferences" />
+								<input type="submit" value="Disable Notifications for User" name="submit" class="button">
+								<p>Disable notifications for default account</p>
+						</form>
+						<br style="clear:both;"/>
+
+						<?php if ( get_option('wplister_log_level') > 1 ): ?>
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="ResetNotificationPreferences" />
+								<input type="submit" value="Reset Notification Preferences" name="submit" class="button">
+								<p>Reset notification preferences for application</p>
+						</form>
+						<br style="clear:both;"/>
+
+						<form method="post" action="<?php echo $wpl_form_action; ?>">
+								<?php wp_nonce_field( 'e2e_tools_page' ); ?>
+								<input type="hidden" name="action" value="GetNotificationsUsage" />
+								<input type="submit" value="Check Notifications Usage" name="submit" class="button">
+								<p>Get notifications usage (last 48h)</p>
+						</form>
+						<br style="clear:both;"/>
+						<?php endif; ?>
 
 					</div>
 				</div> <!-- postbox -->

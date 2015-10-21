@@ -14,15 +14,14 @@ function wplister_tooltip( $desc ) {
 // fetch eBay ItemID for a specific product_id / variation_id
 // Note: this function does not return archived listings
 function wplister_get_ebay_id_from_post_id( $post_id ) {
-	$lm = new ListingsModel();
-	$ebay_id = $lm->getEbayIDFromPostID( $post_id );
+	$ebay_id = WPLE_ListingQueryHelper::getEbayIDFromPostID( $post_id );
 	return $ebay_id;
 }
 
 // fetch fetch eBay items by column
 // example: wple_get_listings_where( 'status', 'changed' );
 function wple_get_listings_where( $column, $value ) {
-	return ListingsModel::getWhere( $column, $value );
+	return WPLE_ListingQueryHelper::getWhere( $column, $value );
 }
 
 
@@ -32,8 +31,6 @@ function wple_show_message( $message, $type = 'info', $params = null ) {
 }
 
 // get instance of WP-Lister object
-// TODO: singleton pattern
 function WPLE() {
-	global $oWPL_WPLister;
-	return $oWPL_WPLister;
+	return WPL_WPLister::get_instance();
 }

@@ -289,6 +289,23 @@ class WPL_Setup extends WPL_Core {
 
 		}
 
+		// Plugin Name: WooTabs
+		// Plugin URI: http://codecanyon.net/item/wootabsadd-extra-tabs-to-woocommerce-product-page/7891253
+		// Version: 2.1.3
+		if ( class_exists('Woocommerce_Wootabs_Admin') ) {
+
+			wple_show_message("
+				<b>Warning: An incompatible plugin was found.</b><br>
+				<br>
+				You seem to have the <i>WooTabs</i> plugin installed, which is known to cause issues with WP-Lister.<br>
+				Version 2.1.3 of this plugin breaks interaction on the edit product page by loading a custom version of the jQuery UI framework instead of using the version included in WordPress.<br>
+				<br>
+				In order to use WP-Lister, you need to deactivate this plugin and use another tabs plugin - like the <i>WooCommerce Tab Manager</i> extension by WooThemes.
+			",'warn');
+			return false;
+
+		}
+
 	}
 
 	// check if a recent version of WooCommerce is installed
@@ -690,8 +707,7 @@ class WPL_Setup extends WPL_Core {
 
 	// check folders
 	public function checkFolders() {
-		// global $wpl_logger;
-		// $wpl_logger->info('creating wp-content/uploads/wp-lister/templates');		
+		// WPLE()->logger->info('creating wp-content/uploads/wp-lister/templates');		
 
 		// create wp-content/uploads/wp-lister/templates if not exists
 		$uploads = wp_upload_dir();
@@ -719,7 +735,7 @@ class WPL_Setup extends WPL_Core {
 
 		}
 
-		// $wpl_logger->info('template folder: '.$tpldir);		
+		// WPLE()->logger->info('template folder: '.$tpldir);		
 	
 	}
 	

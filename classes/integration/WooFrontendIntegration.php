@@ -144,11 +144,10 @@ class WPL_WooFrontendIntegration {
 	// update current details from ebay
 	function updateItemDetails( $ebay_id ) {
 
-		global $oWPL_WPLister;
-		$oWPL_WPLister->initEC();
+		WPLE()->initEC();
 
 		$lm = new ListingsModel();
-		$details = $lm->getLatestDetails( $ebay_id, $oWPL_WPLister->EC->session );
+		$details = $lm->getLatestDetails( $ebay_id, WPLE()->EC->session );
 
 		return $details;
 
@@ -158,8 +157,7 @@ class WPL_WooFrontendIntegration {
 	// check if product is currently on auction
 	function is_on_auction( $post_id ) {
 
-		$lm = new ListingsModel();
-		$listings = $lm->getAllListingsFromPostID( $post_id );
+		$listings = WPLE_ListingQueryHelper::getAllListingsFromPostID( $post_id );
 		foreach ($listings as $listing) {
 
 			// check listing type on product level
@@ -188,8 +186,7 @@ class WPL_WooFrontendIntegration {
 	// check if product is currently published on ebay
 	function is_published_on_ebay( $post_id ) {
 
-		$lm = new ListingsModel();
-		$listings = $lm->getAllListingsFromPostID( $post_id );
+		$listings = WPLE_ListingQueryHelper::getAllListingsFromPostID( $post_id );
 		foreach ($listings as $listing) {
 
 			// check status

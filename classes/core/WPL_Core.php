@@ -32,8 +32,11 @@ class WPL_Core {
 	var $app_name;
 	
 	public function __construct() {
-		global $wpl_logger;
-		$this->logger   = &$wpl_logger;
+		// deprecated
+		// global $wpl_logger;
+		// $this->logger   = &$wpl_logger;
+		// $this->logger = WPLE()->logger;
+
 		$this->app_name = apply_filters( 'wplister_app_name', 'eBay' );
 
 		add_action( 'init', 				array( &$this, 'onWpInit' ), 1 );
@@ -62,8 +65,13 @@ class WPL_Core {
 
 	// init eBay connection
 	public function initEC( $account_id = null, $site_id = null ) { 
-		$this->EC = new EbayController();
-		
+
+		// make sure the database is up to date
+	 	WPLE_UpgradeHelper::maybe_upgrade_db();
+
+	 	// init controller
+		$this->EC = new EbayController();	
+
 		// use current default account by default (WPL1)
 		$ebay_site_id    = self::getOption('ebay_site_id'); 
 		$sandbox_enabled = self::getOption('sandbox_enabled');

@@ -193,6 +193,20 @@ class LogTable extends WP_List_Table {
             }
         }
 
+        if ( 'GetNotificationPreferences' == $item['callname'] ) {
+            if ( preg_match("/<PreferenceLevel>(.*)<\/PreferenceLevel>/", $item['request'], $matches) ) {
+                $match = str_replace('<![CDATA[', '', $matches[1] );
+                $match = str_replace(']]>', '', $match );
+                $link .= ' - ' . strip_tags( $match );
+            }
+        }
+
+        if ( 'SetNotificationPreferences' == $item['callname'] ) {
+            if ( preg_match("/<EventType>(.*)<\/EventType>/", $item['request'], $matches) ) {
+                $link .= ' - ' . 'User Events';
+            }
+        }
+
         if ( 'GetMyMessages' == $item['callname'] ) {
             if ( preg_match("/<MessageID>(.*)<\/MessageID>/", $item['request'], $matches) ) {
                 $match = str_replace('<![CDATA[', '', $matches[1] );
@@ -210,7 +224,11 @@ class LogTable extends WP_List_Table {
             if ( preg_match("/<CategoryID>(.*)<\/CategoryID>/", $item['request'], $matches) ) {
                 $match = str_replace('<![CDATA[', '', $matches[1] );
                 $match = str_replace(']]>', '', $match );
-                $link .= ' - ' . strip_tags( $match );
+                $category_id = strip_tags( $match );
+                $link .= ' - ' . $category_id;
+                $link .= '<br><span style="color: silver; font-size: small;">';
+                $link .= EbayCategoriesModel::getFullEbayCategoryName( $category_id, $item['site_id'] );
+                $link .= '</span>';
             }
         }
 

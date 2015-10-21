@@ -35,6 +35,14 @@
 	height: 120px;
 }
 
+/* adjust chosen field height on edit profile page */
+.wplister-page .chosen-container-multi .chosen-choices li.search-field input[type=text] {
+	height: auto;
+}
+.wplister-page .chosen-container-multi .chosen-choices  {
+	border: 1px solid #ccc;
+}
+
 
 /* sandbox reminder - styled similar to screen options button */
 #wpl-sandbox-reminder-wrap {

@@ -140,7 +140,7 @@ class WPLE_AccountsTable extends WP_List_Table {
         }
 
         if ( $item['sandbox_mode'] ) {
-            $title .= '<br><i style="color:silver">This is a sandbox account.'.'</i>';
+            $title .= '<br><i style="color:darkred">This is a sandbox account. Developers only!'.'</i>';
         }
 
         if ( $item['oosc_mode'] ) {

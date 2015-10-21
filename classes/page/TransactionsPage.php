@@ -30,7 +30,7 @@ class TransactionsPage extends WPL_Page {
 	}
 
 	public function handleActionsOnInit() {
-        $this->logger->debug("handleActionsOnInit()");
+        WPLE()->logger->debug("handleActionsOnInit()");
 
 		// these actions have to wait until 'init'
 		if ( $this->requestAction() == 'view_trx_details' ) {
@@ -246,8 +246,7 @@ class TransactionsPage extends WPL_Page {
 		$transaction = $transactionsModel->getItem( $id );
 		
 		// get auction item record
-		$listingsModel = new ListingsModel();		
-		$auction_item = $listingsModel->getItemByEbayID( $transaction['item_id'] );
+		$auction_item = ListingsModel::getItemByEbayID( $transaction['item_id'] );
 		
 		$aData = array(
 			'transaction'				=> $transaction,

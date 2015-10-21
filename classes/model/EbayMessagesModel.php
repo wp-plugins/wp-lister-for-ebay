@@ -27,8 +27,8 @@ class EbayMessagesModel extends WPL_Model {
 	var $current_lastdate;
 
 	function EbayMessagesModel() {
-		global $wpl_logger;
-		$this->logger = &$wpl_logger;
+		// global $wpl_logger;
+		// $this->logger = &$wpl_logger;
 
 		global $wpdb;
 		$this->tablename = $wpdb->prefix . 'ebay_messages';
@@ -36,7 +36,7 @@ class EbayMessagesModel extends WPL_Model {
 
 
 	function updateMessages( $session, $days = null, $current_page = 1, $message_ids = false ) {
-		$this->logger->info('*** updateMessages('.$days.') - page '.$current_page);
+		WPLE()->logger->info('*** updateMessages('.$days.') - page '.$current_page);
 
 		$this->initServiceProxy($session);
 
@@ -51,19 +51,19 @@ class EbayMessagesModel extends WPL_Model {
 		// check if we need to calculate lastdate
 		if ( $this->current_lastdate ) {
 			$lastdate = $this->current_lastdate;
-			$this->logger->info('used current_lastdate from last run: '.$lastdate);
+			WPLE()->logger->info('used current_lastdate from last run: '.$lastdate);
 		} else {
 
 			// period 30 days, which is the maximum allowed
 			$now = time();
 			// $lastdate = $this->getDateOfLastMessage();
-			// $this->logger->info('getDateOfLastMessage() returned: '.$lastdate);
+			// WPLE()->logger->info('getDateOfLastMessage() returned: '.$lastdate);
 			$lastdate = null;
 			if ($lastdate) $lastdate = mysql2date('U', $lastdate);
 
 			// if last date is older than 30 days, fall back to default
 			if ( $lastdate < $now - 3600 * 24 * 30 ) {
-				$this->logger->info('resetting lastdate - fall back default ');
+				WPLE()->logger->info('resetting lastdate - fall back default ');
 				$lastdate = false;
 			} 
 
@@ -86,8 +86,8 @@ class EbayMessagesModel extends WPL_Model {
 
 			$req->StartTime  = gmdate( 'Y-m-d H:i:s', $lastdate );
 			$this->StartTime = $req->StartTime;
-			$this->logger->info('lastdate: '.$lastdate);
-			$this->logger->info('StartTime: '.$req->StartTime);
+			WPLE()->logger->info('lastdate: '.$lastdate);
+			WPLE()->logger->info('StartTime: '.$req->StartTime);
 
 		}
 
@@ -104,21 +104,21 @@ class EbayMessagesModel extends WPL_Model {
 		} elseif ( $days ) {
 			$req->NumberOfDays  = $days;
 			$this->NumberOfDays = $days;
-			$this->logger->info('NumberOfDays: '.$req->NumberOfDays);
+			WPLE()->logger->info('NumberOfDays: '.$req->NumberOfDays);
 
 		// default: messages since last change
 		} elseif ( $lastdate ) {
 			$req->StartTime  = gmdate( 'Y-m-d H:i:s', $lastdate );
 			$this->StartTime = $req->StartTime;
-			$this->logger->info('lastdate: '.$lastdate);
-			$this->logger->info('StartTime: '.$req->StartTime);
+			WPLE()->logger->info('lastdate: '.$lastdate);
+			WPLE()->logger->info('StartTime: '.$req->StartTime);
 
 		// fallback: one day (max allowed by ebay: 30 days)
 		} else {
 			$days = 1;
 			$req->NumberOfDays  = $days;
 			$this->NumberOfDays = $days;
-			$this->logger->info('NumberOfDays (fallback): '.$req->NumberOfDays);
+			WPLE()->logger->info('NumberOfDays (fallback): '.$req->NumberOfDays);
 		}
 		*/
 
@@ -141,7 +141,7 @@ class EbayMessagesModel extends WPL_Model {
 
 
 		// get messages (single page)
-		$this->logger->info('fetching messages - page '.$this->current_page);
+		WPLE()->logger->info('fetching messages - page '.$this->current_page);
 		$res = $this->_cs->GetMyMessages( $req );
 
 		$this->total_pages = $res->PaginationResult->TotalNumberOfPages;
@@ -155,13 +155,13 @@ class EbayMessagesModel extends WPL_Model {
 
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
-			$this->logger->info( "*** Messages updated successfully." );
-			// $this->logger->info( "*** PaginationResult:".print_r($res->PaginationResult,1) );
-			// $this->logger->info( "*** processed response:".print_r($res,1) );
+			WPLE()->logger->info( "*** Messages updated successfully." );
+			// WPLE()->logger->info( "*** PaginationResult:".print_r($res->PaginationResult,1) );
+			// WPLE()->logger->info( "*** processed response:".print_r($res,1) );
 
-			$this->logger->info( "*** current_page: ".$this->current_page );
-			$this->logger->info( "*** total_pages: ".$this->total_pages );
-			$this->logger->info( "*** total_items: ".$this->total_items );
+			WPLE()->logger->info( "*** current_page: ".$this->current_page );
+			WPLE()->logger->info( "*** total_pages: ".$this->total_pages );
+			WPLE()->logger->info( "*** total_items: ".$this->total_items );
 
 			// fetch next page recursively - only in days mode
 			/*
@@ -172,19 +172,19 @@ class EbayMessagesModel extends WPL_Model {
 			*/
 
 		} else {
-			$this->logger->error( "Error on messages update".print_r( $res, 1 ) );			
+			WPLE()->logger->error( "Error on messages update".print_r( $res, 1 ) );			
 		}
 	}
 
 	function handleMyMessagesMessageType( $type, $Detail ) {
 		//global $wpdb;
 		//#type $Detail MyMessagesMessageType
-		// $this->logger->info( 'handleMyMessagesMessageType()'.print_r( $Detail, 1 ) );
+		// WPLE()->logger->info( 'handleMyMessagesMessageType()'.print_r( $Detail, 1 ) );
 
 		// map MyMessagesMessageType to DB columns
 		$data = $this->mapItemDetailToDB( $Detail );
 		if (!$data) return true;
-		$this->logger->info( 'handleMyMessagesMessageType() mapped data: '.print_r( $data, 1 ) );
+		WPLE()->logger->info( 'handleMyMessagesMessageType() mapped data: '.print_r( $data, 1 ) );
 
 		$this->insertOrUpdate( $data, $Detail );
 
@@ -201,7 +201,7 @@ class EbayMessagesModel extends WPL_Model {
 		if ( $message ) {
 
 			// update existing message
-			$this->logger->info( 'update message #'.$data['message_id'] );
+			WPLE()->logger->info( 'update message #'.$data['message_id'] );
 			$wpdb->update( $this->tablename, $data, array( 'message_id' => $data['message_id'] ) );
 			$insert_id = $message['id'];
 
@@ -210,17 +210,17 @@ class EbayMessagesModel extends WPL_Model {
 		} else {
 		
 			// create new message
-			$this->logger->info( 'insert message #'.$data['message_id'] );
+			WPLE()->logger->info( 'insert message #'.$data['message_id'] );
 			$result = $wpdb->insert( $this->tablename, $data );
 			if ( ! $result ) {
-				$this->logger->error( 'insert message failed - MySQL said: '.$wpdb->last_error );
+				WPLE()->logger->error( 'insert message failed - MySQL said: '.$wpdb->last_error );
 				$this->addToReport( 'error', $data, false, $wpdb->last_error );
 				return false;
 			}
 			$Details       = maybe_unserialize( $data['details'] );
 			$message_post_id = false;
 			$insert_id     = $wpdb->insert_id;
-			// $this->logger->info( 'insert_id: '.$insert_id );
+			// WPLE()->logger->info( 'insert_id: '.$insert_id );
 
 			$this->addToReport( 'inserted', $data, $message_post_id );
 
@@ -233,8 +233,8 @@ class EbayMessagesModel extends WPL_Model {
 		//#type $Detail MyMessagesMessageType
 
 		$data['message_id']      = $Detail->MessageID;
-		$data['received_date']   = $this->convertEbayDateToSql( $Detail->ReceiveDate );
-		$data['expiration_date'] = $this->convertEbayDateToSql( $Detail->ExpirationDate );
+		$data['received_date']   = self::convertEbayDateToSql( $Detail->ReceiveDate );
+		$data['expiration_date'] = self::convertEbayDateToSql( $Detail->ExpirationDate );
 		$data['subject']         = $Detail->Subject;
 		$data['sender']          = $Detail->Sender;
 		$data['flag_read']       = $Detail->Read;
@@ -255,9 +255,9 @@ class EbayMessagesModel extends WPL_Model {
 		}
 
         // save GetMyMessages reponse in details
-		$data['details'] = $this->encodeObject( $Detail );
+		$data['details'] = self::encodeObject( $Detail );
 
-		$this->logger->info( "IMPORTING message #".$Detail->MessageID );							
+		WPLE()->logger->info( "IMPORTING message #".$Detail->MessageID );							
 
 		return $data;
 	}
@@ -367,7 +367,7 @@ class EbayMessagesModel extends WPL_Model {
 		), ARRAY_A );
 
 		// decode MyMessagesMessageType object with eBay classes loaded
-		$item['details'] = $this->decodeObject( $item['details'], false, true );
+		$item['details'] = self::decodeObject( $item['details'], false, true );
 
 		return $item;
 	}
@@ -534,7 +534,7 @@ class EbayMessagesModel extends WPL_Model {
 		}
 
 		// foreach( $items as &$profile ) {
-		// 	$profile['details'] = $this->decodeObject( $profile['details'] );
+		// 	$profile['details'] = self::decodeObject( $profile['details'] );
 		// }
 
 		return $items;

@@ -620,7 +620,7 @@ class EbatNs_Client
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt( $ch, CURLOPT_HEADER, 1 );
 		curl_setopt( $ch, CURLOPT_HTTP_VERSION, 1 );
-
+		
         // ***** BEGIN EBATNS PATCH *****
         // regard WP proxy server
         if ( defined('WP_USEPROXY') && WP_USEPROXY ) {
@@ -666,7 +666,7 @@ class EbatNs_Client
 			$this->_currentResult = new EbatNs_ResponseError();
 			$this->_currentResult->raise( 'curl_error ' . curl_errno( $ch ) . ' ' . curl_error( $ch ), 80000 + 1, EBAT_SEVERITY_ERROR );
 	        // ***** BEGIN EBATNS PATCH *****
-            $this->log( curl_error( $ch ), 'curl_error' );
+            $this->log( curl_error( $ch ) . ' - ref: sendMessage()', 'curl_error' );
 	        // ***** END EBATNS PATCH *****
 			curl_close( $ch );
 			
@@ -851,7 +851,7 @@ class EbatNs_Client
 			$this->_currentResult = new EbatNs_ResponseError();
 			$this->_currentResult->raise( 'curl_error ' . curl_errno( $ch ) . ' ' . curl_error( $ch ), 80000 + 1, EBAT_SEVERITY_ERROR );
 	        // ***** BEGIN EBATNS PATCH *****
-            $this->log( curl_error( $ch ), 'curl_error' );
+            $this->log( curl_error( $ch ) . ' - ref: sendMessageShoppingApiStyle()', 'curl_error' );
 	        // ***** END EBATNS PATCH *****
 			curl_close( $ch );
 			
@@ -1066,7 +1066,7 @@ class EbatNs_Client
 			$this->_currentResult = new EbatNs_ResponseError();
 			$this->_currentResult->raise( 'curl_error ' . curl_errno( $ch ) . ' ' . curl_error( $ch ), 80000 + 1, EBAT_SEVERITY_ERROR );
 	        // ***** BEGIN EBATNS PATCH *****
-            $this->log( curl_error( $ch ), 'curl_error' );
+            $this->log( curl_error( $ch ) . ' - ref: sendMessageXmlStyle()', 'curl_error' );
 	        // ***** END EBATNS PATCH *****
 			curl_close( $ch );
 			
@@ -1190,4 +1190,3 @@ class EbatNs_Client
 		return $this->_session;
 	}
 } 
-?>

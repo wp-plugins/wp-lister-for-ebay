@@ -243,7 +243,7 @@ class EbayOrdersTable extends WP_List_Table {
         $item_details = maybe_unserialize( $item['details'] );
         $paid = '';
         if ( $item_details ) {
-            $PaidTime = $this->convertEbayDateToSql( $item_details->PaidTime );
+            $PaidTime = self::convertEbayDateToSql( $item_details->PaidTime );
             if ( $PaidTime ) $paid = __('Paid','wplister') .': '. sprintf( __('%s ago','wplister'), human_time_diff( strtotime( $PaidTime ) ) );
         }
         
@@ -275,7 +275,7 @@ class EbayOrdersTable extends WP_List_Table {
         $item_details = maybe_unserialize( $item['details'] );
         $shipped_status = '';
         if ( $item_details ) {
-            $ShippedTime = $this->convertEbayDateToSql( $item_details->ShippedTime );
+            $ShippedTime = self::convertEbayDateToSql( $item_details->ShippedTime );
             if ( $ShippedTime ) $shipped_status = __('Shipped','wplister') .': '. sprintf( __('%s ago','wplister'), human_time_diff( strtotime( $ShippedTime ) ) );
         }
 
@@ -298,7 +298,7 @@ class EbayOrdersTable extends WP_List_Table {
     }
     
     // convert 2013-02-14T08:00:58.000Z to 2013-02-14 08:00:58
-    public function convertEbayDateToSql( $ebay_date ) {
+    static public function convertEbayDateToSql( $ebay_date ) {
         $search = array( 'T', '.000Z' );
         $replace = array( ' ', '' );
         $sql_date = str_replace( $search, $replace, $ebay_date );

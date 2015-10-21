@@ -27,11 +27,11 @@ class WPL_CronActions extends WPL_Core {
 	
 	// update auctions - called by wp_cron if activated
 	public function cron_update_auctions() {
-        $this->logger->info("WP-CRON: cron_update_auctions()");
+        WPLE()->logger->info("WP-CRON: cron_update_auctions()");
 
         // check if this is a staging site
         if ( $this->isStagingSite() ) {
-	        $this->logger->info("WP-CRON: staging site detected! terminating execution...");
+	        WPLE()->logger->info("WP-CRON: staging site detected! terminating execution...");
 			self::updateOption( 'cron_auctions', '' );
 			self::updateOption( 'create_orders', '' );
         	return;
@@ -39,7 +39,7 @@ class WPL_CronActions extends WPL_Core {
 
         // check if update is already running
         if ( ! $this->checkLock() ) {
-	        $this->logger->error("WP-CRON: already running! terminating execution...");
+	        WPLE()->logger->error("WP-CRON: already running! terminating execution...");
         	return;
         }
 
@@ -85,13 +85,13 @@ class WPL_CronActions extends WPL_Core {
 		// store timestamp
 		self::updateOption( 'cron_last_run', time() );
 
-        $this->logger->info("WP-CRON: cron_update_auctions() finished");
+        WPLE()->logger->info("WP-CRON: cron_update_auctions() finished");
 	} // cron_update_auctions()
 
 
 	// run daily schedule - called by wp_cron
 	public function cron_daily_schedule() {
-        $this->logger->info("*** WP-CRON: cron_daily_schedule()");
+        WPLE()->logger->info("*** WP-CRON: cron_daily_schedule()");
 
 		// clean log table
 		do_action('wple_clean_log_table');
@@ -102,7 +102,7 @@ class WPL_CronActions extends WPL_Core {
 		// store timestamp
 		update_option( 'wple_daily_cron_last_run', time() );
 
-        $this->logger->info("*** WP-CRON: cron_daily_schedule() finished");
+        WPLE()->logger->info("*** WP-CRON: cron_daily_schedule() finished");
 	}
 
 	public function action_clean_log_table() {
@@ -130,7 +130,7 @@ class WPL_CronActions extends WPL_Core {
 
 		// skip locking if lockfile is not writeable
 		if ( ! is_writable( $lockfile ) && ! is_writable( dirname( $lockfile ) ) ) {
-	        $this->logger->error("lockfile not writable: ".$lockfile);
+	        WPLE()->logger->error("lockfile not writable: ".$lockfile);
 	        return true;
 		}
 
@@ -138,7 +138,7 @@ class WPL_CronActions extends WPL_Core {
 		if ( ! file_exists( $lockfile ) ) {
 			$ts = time();
 			file_put_contents( $lockfile, $ts );
-	        $this->logger->info("lockfile created at TS $ts: ".$lockfile);
+	        WPLE()->logger->info("lockfile created at TS $ts: ".$lockfile);
 	        return true;
 		}
 
@@ -147,17 +147,17 @@ class WPL_CronActions extends WPL_Core {
 
 		// check if TS is outdated (after 10min.)
 		if ( $ts < ( time() - 600 ) ) { 
-	        $this->logger->info("stale lockfile found for TS ".$ts.' - '.human_time_diff( $ts ).' ago' );
+	        WPLE()->logger->info("stale lockfile found for TS ".$ts.' - '.human_time_diff( $ts ).' ago' );
 
 	        // update lockfile 
 			$ts = time();
 			file_put_contents( $lockfile, $ts ); 
 	        
-	        $this->logger->info("lockfile updated for TS $ts: ".$lockfile);
+	        WPLE()->logger->info("lockfile updated for TS $ts: ".$lockfile);
 	        return true;
 		} else { 
 			// process is still alive - can not run twice
-	        $this->logger->info("SKIP CRON - sync already running with TS ".$ts.' - '.human_time_diff( $ts ).' ago' );
+	        WPLE()->logger->info("SKIP CRON - sync already running with TS ".$ts.' - '.human_time_diff( $ts ).' ago' );
 			return false; 
 		} 
 
@@ -167,7 +167,7 @@ class WPL_CronActions extends WPL_Core {
 	public function removeLock() {
 		if ( file_exists( $this->lockfile ) ) {
 			unlink( $this->lockfile );
-	        $this->logger->info("lockfile was removed: ".$this->lockfile);
+	        WPLE()->logger->info("lockfile was removed: ".$this->lockfile);
 		}
 	}
 

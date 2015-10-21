@@ -25,7 +25,7 @@ class ProfilesPage extends WPL_Page {
 	}
 
 	public function handleSubmit() {
-        $this->logger->debug("handleSubmit()");
+        WPLE()->logger->debug("handleSubmit()");
 
 		// handle duplicate profile
 		if ( $this->requestAction() == 'duplicate_auction_profile' ) {
@@ -162,19 +162,18 @@ class ProfilesPage extends WPL_Page {
 		$ShippingCostPaidByOptions       = WPLE_eBaySite::getSiteObj( $site_id )->getShippingCostPaidByOptions();
 		
 
-		$listingsModel = new ListingsModel();
-		$prepared_listings  = $listingsModel->countItemsUsingProfile( $item['profile_id'], 'prepared' );
-		$verified_listings  = $listingsModel->countItemsUsingProfile( $item['profile_id'], 'verified' );
-		$published_listings = $listingsModel->countItemsUsingProfile( $item['profile_id'], 'published' );
-		$ended_listings     = $listingsModel->countItemsUsingProfile( $item['profile_id'], 'ended' );
-		$locked_listings    = $listingsModel->countItemsUsingProfile( $item['profile_id'], 'locked' );
+		$prepared_listings  = WPLE_ListingQueryHelper::countItemsUsingProfile( $item['profile_id'], 'prepared' );
+		$verified_listings  = WPLE_ListingQueryHelper::countItemsUsingProfile( $item['profile_id'], 'verified' );
+		$published_listings = WPLE_ListingQueryHelper::countItemsUsingProfile( $item['profile_id'], 'published' );
+		$ended_listings     = WPLE_ListingQueryHelper::countItemsUsingProfile( $item['profile_id'], 'ended' );
+		$locked_listings    = WPLE_ListingQueryHelper::countItemsUsingProfile( $item['profile_id'], 'locked' );
 
 		// this turned out to be to ressource intensive with 10k listings:
-		// $prepared_listings  = $listingsModel->getAllPreparedWithProfile( $item['profile_id'] );
-		// $verified_listings  = $listingsModel->getAllVerifiedWithProfile( $item['profile_id'] );
-		// $published_listings = $listingsModel->getAllPublishedWithProfile( $item['profile_id'] );
-		// $ended_listings     = $listingsModel->getAllEndedWithProfile( $item['profile_id'] );
-		// $locked_listings    = $listingsModel->getAllLockedWithProfile( $item['profile_id'] );
+		// $prepared_listings  = WPLE_ListingQueryHelper::getAllPreparedWithProfile( $item['profile_id'] );
+		// $verified_listings  = WPLE_ListingQueryHelper::getAllVerifiedWithProfile( $item['profile_id'] );
+		// $published_listings = WPLE_ListingQueryHelper::getAllPublishedWithProfile( $item['profile_id'] );
+		// $ended_listings     = WPLE_ListingQueryHelper::getAllEndedWithProfile( $item['profile_id'] );
+		// $locked_listings    = WPLE_ListingQueryHelper::getAllLockedWithProfile( $item['profile_id'] );
 
 
 		// do we have a primary category?
@@ -186,15 +185,19 @@ class ProfilesPage extends WPL_Page {
 		    $primary_category_id = self::getOption('default_ebay_category_id');
 		}
 
-		// fetch updated available conditions array
-		$item['conditions'] = $this->fetchItemConditions( $primary_category_id, $item['profile_id'], $item['account_id'] );
+		// fetch updated item specifics for category
+		$specifics = EbayCategoriesModel::getItemSpecificsForCategory( $primary_category_id, $site_id, $account_id );
 
-		// build available conditions array
-		$available_conditions = false;
-		if ( isset( $item['conditions'][ $primary_category_id ] ) ) {
-			$available_conditions = $item['conditions'][ $primary_category_id ];
-		}
-		// echo "<pre>";print_r($available_conditions);echo"</pre>";
+		// fetch updated available conditions array
+		// $item['conditions'] = $this->fetchItemConditions( $primary_category_id, $item['profile_id'], $item['account_id'] );
+		$available_conditions = EbayCategoriesModel::getConditionsForCategory( $primary_category_id, false, $account_id );
+
+		// // build available conditions array
+		// $available_conditions = false;
+		// if ( isset( $item['conditions'][ $primary_category_id ] ) ) {
+		// 	$available_conditions = $item['conditions'][ $primary_category_id ];
+		// }
+		// // echo "<pre>";print_r($available_conditions);echo"</pre>";
 
 		// check if COD is available on the selected site
 		$cod_available = false;
@@ -258,6 +261,7 @@ class ProfilesPage extends WPL_Page {
 			'locked_listings_count'     => $locked_listings,
 			'total_listings_count'      => $prepared_listings + $verified_listings + $published_listings,
 			'available_dispatch_times'  => $available_dispatch_times,
+			'specifics'  				=> $specifics,
 			'available_conditions'  	=> $available_conditions,
 			'available_shipping_packages' => $available_shipping_packages,
 			'shipping_flat_profiles'  	=> $shipping_flat_profiles,
@@ -387,7 +391,29 @@ class ProfilesPage extends WPL_Page {
 		$details = self::fixProfilePrices( $details );
 
 		// process item specifics
-		$item_specifics = array();
+		$item_specifics  = array();
+		$itmSpecs_name   = @$_POST['itmSpecs_name'];
+		$itmSpecs_value  = @$_POST['itmSpecs_value'];
+		$itmSpecs_attrib = @$_POST['itmSpecs_attrib'];
+
+		if ( is_array( $itmSpecs_name ) )
+		foreach ($itmSpecs_name as $key => $name) {
+			
+			#$name = str_replace('\\\\', '', $name );
+			$name = stripslashes( $name );
+
+			$value = trim( $itmSpecs_value[$key] );
+			$attribute = trim( $itmSpecs_attrib[$key] );
+
+			if ( ( $value != '') || ( $attribute != '' ) ) {
+				$spec = new stdClass();
+				$spec->name       = $name;
+				$spec->value      = $value;
+				$spec->attribute  = $attribute;
+				$item_specifics[] = $spec;
+			}
+
+		}
 		$details['item_specifics'] = $item_specifics;
 
 	
@@ -421,9 +447,33 @@ class ProfilesPage extends WPL_Page {
 		    $primary_category_id = self::getOption('default_ebay_category_id');
 		}
 
-		// do we have ConditionDetails for primary category?
-		$conditions = $this->fetchItemConditions( $primary_category_id, $profile_id, $account_id );
+		// // do we have ConditionDetails for primary category?
+		// // $conditions = $this->fetchItemConditions( $primary_category_id, $profile_id, $account_id );
+		// $conditions = EbayCategoriesModel::getConditionsForCategory( $primary_category_id, false, $account_id );
 
+
+		// // do we have item specifics for primary category?
+		// if ( intval($profile_id) != 0 ) {
+		// 	// $saved_specifics = $wpdb->get_var('SELECT category_specifics FROM '.$wpdb->prefix.'ebay_profiles WHERE profile_id = '.$profile_id);
+		// 	$saved_specifics = $wpdb->get_var( $wpdb->prepare( "SELECT category_specifics FROM {$wpdb->prefix}ebay_profiles WHERE profile_id = %d", $profile_id ) );
+		// 	$saved_specifics = unserialize($saved_specifics);
+		// }
+
+		// // fetch required item specifics for primary category
+		// if ( ( isset( $saved_specifics[ $primary_category_id ] ) ) && ( $saved_specifics[ $primary_category_id ] != 'none' ) ) {
+		// 	$specifics = $saved_specifics; 
+		// } elseif ( (int)$primary_category_id != 0 ) {
+		// 	$this->initEC( $account_id );
+		// 	$specifics = $this->EC->getCategorySpecifics( $primary_category_id );
+		// 	$this->EC->closeEbay();
+		// } else {
+		// 	$specifics = array();
+		// }
+
+		// // do we have item specifics for primary category?
+		// (improved version of the above, using ebay_categories as cache)
+		// $specifics = EbayCategoriesModel::getItemSpecificsForCategory( $primary_category_id, false, $account_id );
+		// // $specifics = array( $primary_category_id => $specifics );
 
 		if ( WPLISTER_LIGHT ) $specifics = array();
 			
@@ -436,8 +486,10 @@ class ProfilesPage extends WPL_Page {
 		$item['type']						= $this->getValueFromPost( 'auction_type' );
 		$item['sort_order'] 				= intval( $this->getValueFromPost( 'sort_order' ) );
 		$item['details']			 		= json_encode( $details );		
-		$item['conditions']			 		= serialize( $conditions );		
-		$item['category_specifics']	 		= serialize( $specifics );		
+		// $item['conditions']			 		= serialize( $conditions );	// deprecated	
+		// $item['category_specifics']	 		= serialize( $specifics );	// deprecated	
+		$item['conditions']			 		= '';
+		$item['category_specifics']	 		= '';
 		$item['account_id']					= $account_id;
 		$item['site_id']					= WPLE()->accounts[ $item['account_id'] ]->site_id;
 		
@@ -480,28 +532,28 @@ class ProfilesPage extends WPL_Page {
 
 		// re-apply profile to all prepared
 		if ( $this->getValueFromPost( 'apply_changes_to_all_prepared' ) == 'yes' ) {
-			$items = $listingsModel->getAllPreparedWithProfile( $item['profile_id'] );
+			$items = WPLE_ListingQueryHelper::getAllPreparedWithProfile( $item['profile_id'] );
 	        $listingsModel->applyProfileToItems( $profile, $items );
 			$this->showMessage( sprintf( __('%s prepared items updated.','wplister'), count($items) ) );			
 		}
 		
 		// re-apply profile to all verified
 		if ( $this->getValueFromPost( 'apply_changes_to_all_verified' ) == 'yes' ) {
-			$items = $listingsModel->getAllVerifiedWithProfile( $item['profile_id'] );
+			$items = WPLE_ListingQueryHelper::getAllVerifiedWithProfile( $item['profile_id'] );
 	        $listingsModel->applyProfileToItems( $profile, $items );
 			$this->showMessage( sprintf( __('%s verified items updated.','wplister'), count($items) ) );			
 		}
 		
 		// re-apply profile to all published
 		if ( $this->getValueFromPost( 'apply_changes_to_all_published' ) == 'yes' ) {
-			$items = $listingsModel->getAllPublishedWithProfile( $item['profile_id'] );
+			$items = WPLE_ListingQueryHelper::getAllPublishedWithProfile( $item['profile_id'] );
 	        $listingsModel->applyProfileToItems( $profile, $items );
 			$this->showMessage( sprintf( __('%s published items changed.','wplister'), count($items) ) );			
 		}
 		
 		// re-apply profile to all ended
 		if ( $this->getValueFromPost( 'apply_changes_to_all_ended' ) == 'yes' ) {
-			$items = $listingsModel->getAllEndedWithProfile( $item['profile_id'] );
+			$items = WPLE_ListingQueryHelper::getAllEndedWithProfile( $item['profile_id'] );
 	        $listingsModel->applyProfileToItems( $profile, $items );
 			$this->showMessage( sprintf( __('%s ended items updated.','wplister'), count($items) ) );			
 
@@ -515,34 +567,35 @@ class ProfilesPage extends WPL_Page {
 	} // saveProfile()
 
 	
-	public function fetchItemConditions( $ebay_category_id, $profile_id, $account_id ) {
-		global $wpdb;
+	// // deprecated
+	// public function fetchItemConditions( $ebay_category_id, $profile_id, $account_id ) {
+	// 	global $wpdb;
 
-		if ( ! $profile_id ) return array();
+	// 	if ( ! $profile_id ) return array();
 
-		// get saved conditions for profile
-		// $saved_conditions = $wpdb->get_var('SELECT conditions FROM '.$wpdb->prefix.'ebay_profiles WHERE profile_id = '.$profile_id );
-		$saved_conditions = $wpdb->get_var( $wpdb->prepare( "SELECT conditions FROM {$wpdb->prefix}ebay_profiles WHERE profile_id = %d", $profile_id ) );
-		$saved_conditions = unserialize( $saved_conditions );
+	// 	// get saved conditions for profile
+	// 	// $saved_conditions = $wpdb->get_var('SELECT conditions FROM '.$wpdb->prefix.'ebay_profiles WHERE profile_id = '.$profile_id );
+	// 	$saved_conditions = $wpdb->get_var( $wpdb->prepare( "SELECT conditions FROM {$wpdb->prefix}ebay_profiles WHERE profile_id = %d", $profile_id ) );
+	// 	$saved_conditions = unserialize( $saved_conditions );
 
-		if ( ( isset( $saved_conditions[ $ebay_category_id ] ) ) && ( $saved_conditions[ $ebay_category_id ] != 'none' ) ) {
+	// 	if ( ( isset( $saved_conditions[ $ebay_category_id ] ) ) && ( $saved_conditions[ $ebay_category_id ] != 'none' ) ) {
 
-			// conditions for primary category are already saved
-			$conditions = $saved_conditions; 
+	// 		// conditions for primary category are already saved
+	// 		$conditions = $saved_conditions; 
 
-		} elseif ( intval( $ebay_category_id ) != 0 ) {
+	// 	} elseif ( intval( $ebay_category_id ) != 0 ) {
 
-			// call GetCategoryFeatures for primary category
-			$this->initEC( $account_id );
-			$conditions = $this->EC->getCategoryConditions( $ebay_category_id );
-			$this->EC->closeEbay();
+	// 		// call GetCategoryFeatures for primary category
+	// 		$this->initEC( $account_id );
+	// 		$conditions = $this->EC->getCategoryConditions( $ebay_category_id );
+	// 		$this->EC->closeEbay();
 
-		} else {
-			$conditions = array();
-		}
+	// 	} else {
+	// 		$conditions = array();
+	// 	}
 
-		return $conditions;
-	} // fetchItemConditions()
+	// 	return $conditions;
+	// } // fetchItemConditions()
 
 	
 	public function getTemplatesList() {

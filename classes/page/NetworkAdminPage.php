@@ -18,7 +18,6 @@ class NetworkAdminPage extends WPL_Page {
 	}
 
 	public function onWpNetworkAdminMenu() {
-		global $oWPL_WPLister;
 
 		$page_id = add_menu_page( __('eBay','wplister'), __('eBay','wplister'), self::ParentPermissions, 
 					   self::ParentMenuId, array( $this, 'onDisplayNetworkAdminPage' ), $this->getImageUrl( 'hammer-16x16.png' ), ProductWrapper::menu_page_position );
@@ -143,8 +142,7 @@ class NetworkAdminPage extends WPL_Page {
 		$transaction = $sitesModel->getItem( $id );
 		
 		// get auction item record
-		$listingsModel = new ListingsModel();		
-		$auction_item = $listingsModel->getItemByEbayID( $transaction['item_id'] );
+		$auction_item = ListingsModel::getItemByEbayID( $transaction['item_id'] );
 		
 		$aData = array(
 			'transaction'				=> $transaction,

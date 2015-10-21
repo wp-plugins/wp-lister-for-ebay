@@ -1,7 +1,18 @@
 <?php
 
 class WPLE_UpgradeHelper {
+
+	const DB_VERSION = 47;
 	
+	// upgrade db - if required
+	static public function maybe_upgrade_db() {
+
+		$current_db_version = get_option('wplister_db_version', 0);
+		if ( $current_db_version >= self::DB_VERSION ) return;
+
+		self::upgradeDB();
+	}
+
 	// upgrade db
 	static public function upgradeDB() {
 		global $wpdb;
@@ -745,8 +756,7 @@ class WPLE_UpgradeHelper {
 				// disable transaction conversion when updating from an ancient version (1.3.5)
 				$more_orders_to_process = false;
 			} else {
-				global $oWPL_WPLister;
-				$more_orders_to_process = isset($oWPL_WPLister->pages['tools']) ? $oWPL_WPLister->pages['tools']->checkTransactions() : false;
+				$more_orders_to_process = isset(WPLE()->pages['tools']) ? WPLE()->pages['tools']->checkTransactions() : false;
 			}
 
 			// check if database upgrade is finished yet
@@ -1176,6 +1186,64 @@ class WPLE_UpgradeHelper {
 			";
 			$wpdb->query($sql);	echo $wpdb->last_error;
 	
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('Database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+		// upgrade to version 46 (2.0.9.8.2)
+		if ( 46 > $db_version ) {
+			$new_db_version = 46;
+
+			// set column type to mediumtext in table: ebay_auctions
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_auctions`
+			        CHANGE details details MEDIUMTEXT ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			
+			// set column type to mediumtext in table: ebay_orders
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_orders`
+			        CHANGE details details MEDIUMTEXT ";
+			$wpdb->query($sql);	echo $wpdb->last_error;
+			
+			// set column type to mediumtext in table: ebay_transactions
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_transactions`
+			        CHANGE details details MEDIUMTEXT ";
+			$wpdb->query($sql);	echo $wpdb->last_error;		
+			
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('Database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+		// upgrade to version 47 (2.0.9.8.2)
+		if ( 47 > $db_version ) {
+			$new_db_version = 47;
+
+			// restructure categories table
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_categories`
+			        CHANGE conditions features MEDIUMTEXT ";
+			$wpdb->query($sql);	echo $wpdb->last_error;		
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_categories`
+			        CHANGE specifics specifics MEDIUMTEXT ";
+			$wpdb->query($sql);	echo $wpdb->last_error;		
+			$sql = "ALTER TABLE `{$wpdb->prefix}ebay_categories`
+			        CHANGE wp_term_id last_updated datetime ";
+			$wpdb->query($sql);	echo $wpdb->last_error;		
+
+			update_option('wplister_db_version', $new_db_version);
+			$msg  = __('Database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
+		}
+
+		// upgrade to version 48 (2.0.9.8.2)
+		if ( 48 > $db_version ) {
+			$new_db_version = 48;
+
+			// remove legacy data
+			$sql = "DELETE FROM `{$wpdb->prefix}postmeta` WHERE meta_key    =    '_ebay_category_specifics' ";
+			$wpdb->query($sql);	echo $wpdb->last_error;		
+			$sql = "DELETE FROM `{$wpdb->prefix}options`  WHERE option_name LIKE '_transient_wplister_ebay_item_conditions_%' ";
+			$wpdb->query($sql);	echo $wpdb->last_error;		
+			$sql = "DELETE FROM `{$wpdb->prefix}options`  WHERE option_name LIKE '_transient_timeout_wplister_ebay_item_conditions_%' ";
+			$wpdb->query($sql);	echo $wpdb->last_error;		
+
 			update_option('wplister_db_version', $new_db_version);
 			$msg  = __('Database was upgraded to version', 'wplister') .' '. $new_db_version . '.';
 		}

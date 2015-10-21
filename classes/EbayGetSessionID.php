@@ -16,8 +16,8 @@ class EbayGetSessionID {
 	var $compLevel;
 
 	function EbayGetSessionID( $site_id, $sandbox_enabled = false ) {
-		global $wpl_logger;
-		$this->logger = &$wpl_logger;
+		// global $wpl_logger;
+		// $this->logger = &$wpl_logger;
 
 		$this->siteId = $site_id;
 		$this->sandbox = $sandbox_enabled;
@@ -52,14 +52,14 @@ class EbayGetSessionID {
 		$body = "\n  <SessionID>{$SessionID}</SessionID>\n";
 		$token = $this->TradeAPI( 'FetchToken', $body, 'eBayAuthToken' );
 		#echo '<p/>Your token is:<p/>' . $token;
-		$this->logger->info('FetchToken: '.$token);
+		WPLE()->logger->info('FetchToken: '.$token);
 		return $token;
 	}
 
 	function getTokenExpirationTime( $token ) {
 		$body = "\n  <RequesterCredentials><eBayAuthToken>{$token}</eBayAuthToken></RequesterCredentials>\n";
 		$expdate = $this->TradeAPI( 'GetTokenStatus', $body, 'ExpirationTime' );
-		$this->logger->info('getTokenExpirationTime: '.$expdate);
+		WPLE()->logger->info('getTokenExpirationTime: '.$expdate);
 		$expdate = str_replace('T', ' ', $expdate);
 		$expdate = str_replace('.000Z', '', $expdate);
 		#echo '<p/>Your token expires on:<p/>' . $expdate;

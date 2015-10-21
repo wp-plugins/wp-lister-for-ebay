@@ -3,10 +3,10 @@
 Plugin Name: WP-Lister Lite for eBay
 Plugin URI: http://www.wplab.com/plugins/wp-lister/
 Description: List your products on eBay the easy way.
-Version: 2.0.9.8
+Version: 2.0.9.12
 Author: Matthias Krok
 Author URI: http://www.wplab.com/ 
-Max WP Version: 4.2
+Max WP Version: 4.3
 Text Domain: wplister
 Domain Path: /languages/
 License: GPL2+
@@ -14,7 +14,7 @@ License: GPL2+
 
 if ( class_exists('WPL_WPLister') ) die(sprintf( 'WP-Lister for eBay %s is already installed and activated. Please deactivate any other version before you activate this one.', WPLISTER_VERSION ));
 
-define('WPLISTER_VERSION', '2.0.9.8' );
+define('WPLISTER_VERSION', '2.0.9.12' );
 define('WPLISTER_PATH', realpath( dirname(__FILE__) ) );
 define('WPLISTER_URL', plugins_url() . '/' . basename(dirname(__FILE__)) . '/' );
 define('WPLE_VERSION', WPLISTER_VERSION );
@@ -24,6 +24,7 @@ if ( get_option('wplister_php_error_handling') == '9' ) error_reporting( E_ERROR
 
 // include base classes
 require_once( WPLISTER_PATH . '/classes/core/WPL_Autoloader.php' );
+require_once( WPLISTER_PATH . '/classes/core/WPL_Functions.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Core.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_BasePlugin.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Logger.php' );
@@ -35,7 +36,6 @@ require_once( WPLISTER_PATH . '/classes/core/WPL_AjaxHandler.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Setup.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Install_Uninstall.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_Toolbar.php' );
-require_once( WPLISTER_PATH . '/classes/core/WPL_Functions.php' );
 require_once( WPLISTER_PATH . '/classes/core/WPL_API_Hooks.php' );
 require_once( WPLISTER_PATH . '/classes/core/EbayController.php' );
 require_once( WPLISTER_PATH . '/classes/integration/WooBackendIntegration.php' );
@@ -62,7 +62,19 @@ class WPL_WPLister extends WPL_BasePlugin {
 	var $multi_account = false;
 	var $db_version    = 0;
 	var $logger;
+
+	protected static $_instance = null;
 	
+	// get singleton instance
+    public static function get_instance() {
+
+        if ( is_null( self::$_instance ) ) {
+        	self::$_instance = new self();
+        }
+
+        return self::$_instance;
+    }
+
 	public function __construct() {
 		parent::__construct();
 
@@ -238,6 +250,6 @@ class WPL_WPLister extends WPL_BasePlugin {
 } // class WPL_WPLister
 } // if class does not exists
 
-// instantiate object
-$oWPL_WPLister = new WPL_WPLister();
-
+// instantiate plugin
+global $oWPL_WPLister; // keep backward compatibility for importer add-on
+$oWPL_WPLister = WPL_WPLister::get_instance();

@@ -35,6 +35,9 @@ class WPL_WooBackendIntegration {
 		add_filter( 'parse_query', array( &$this, 'wplister_woocommerce_admin_order_filter_query' ) );
 		add_filter( 'views_edit-shop_order', array( &$this, 'wplister_add_woocommerce_order_views' ) );
 
+		// custom filters for order table
+		add_action( 'restrict_manage_posts', array( $this, 'add_wc_order_table_filter_options' ) );
+
 		// submitbox actions
 		add_action( 'post_submitbox_misc_actions', array( &$this, 'wplister_product_submitbox_misc_actions' ), 100 );
 		add_action( 'woocommerce_process_product_meta', array( &$this, 'wplister_product_handle_submitbox_actions' ), 100, 2 );
@@ -99,11 +102,11 @@ class WPL_WooBackendIntegration {
 
 		// warn about missing details
         // $this->checkForMissingData( $post );
+        $this->checkForInvalidData( $post );
 
 		// get listing item
-		$lm = new ListingsModel();
-		$listing_id = $lm->getListingIDFromPostID( $post_ID );
-		$listing = $lm->getItem( $listing_id );
+		$listing_id = WPLE_ListingQueryHelper::getListingIDFromPostID( $post_ID );
+		$listing    = ListingsModel::getItem( $listing_id );
 		if ( ! $listing ) return;
 
 
@@ -132,6 +135,89 @@ class WPL_WooBackendIntegration {
             self::showMessage( $errors_msg, 1, 1 );
 
 	} // wple_product_admin_notices()
+
+
+    // check if UPC and/or EAN are valid
+    function checkForInvalidData( $post ) {
+    	global $page;
+		if ( 'product' != $post->post_type ) return;
+		if ( 'auto-draft' == $post->post_status ) return;
+	    // if ( ! get_option( 'wple_enable_missing_details_warning' ) ) return;
+
+		$product      = get_product( $post );
+		$invalid_eans = array();    	
+		$invalid_upcs = array();    	
+		$var_no_stock = array();    	
+
+		// UPC
+		$ebay_upc = get_post_meta( $product->id, '_ebay_upc', true );
+		if ( $ebay_upc && ! WPLE_ValidationHelper::isValidUPC( $ebay_upc ) ) {
+			$invalid_upcs[] = $ebay_upc;
+		}
+
+		// EAN
+		$ebay_ean = get_post_meta( $product->id, '_ebay_ean', true );
+		if ( $ebay_ean && ! WPLE_ValidationHelper::isValidEAN( $ebay_ean ) ) {
+			$invalid_eans[] = $ebay_ean;
+		}
+
+		// variable product
+		if ( $product->product_type == 'variable' ) {
+
+			// get variations
+			$variation_ids = $product->get_children();
+			$parent_manage_stock = get_post_meta( $product->id, '_manage_stock', true );
+
+			foreach ( $variation_ids as $variation_id ) {
+				$_product = get_product( $variation_id );
+				$var_info = " (#$variation_id)";
+
+				// UPC
+				$ebay_upc = get_post_meta( $variation_id, '_ebay_upc', true );
+				if ( $ebay_upc && ! WPLE_ValidationHelper::isValidUPC( $ebay_upc ) ) {
+					$invalid_upcs[] = $ebay_upc . $var_info;
+				}
+
+				// EAN
+				$ebay_ean = get_post_meta( $variation_id, '_ebay_ean', true );
+				if ( $ebay_ean && ! WPLE_ValidationHelper::isValidEAN( $ebay_ean ) ) {
+					$invalid_eans[] = $ebay_ean . $var_info;
+				}
+
+				// check if stock management is enabled on variation level
+				$variation_manage_stock = get_post_meta( $variation_id, '_manage_stock', true );
+				if ( $parent_manage_stock == 'yes' && $variation_manage_stock == 'no' ) {
+					$var_no_stock[] = " #$variation_id";
+				}
+
+
+			} // foreach variation
+
+		} // variable product
+
+		// show warning
+		$errors_msg = '';
+		if ( ! empty($invalid_upcs) ) {
+			$errors_msg .= __('Warning: This number does not seem to be a valid UPC:','wplister') .' <b>'. join($invalid_upcs, ', ') . '</b><br>';
+			$errors_msg .= __('Valid UPCs must have 12 digits.','wplister') . '<br>';
+		}
+		if ( ! empty($invalid_eans) ) {
+			$errors_msg .= __('Warning: This number does not seem to be a valid EAN:','wplister') .' <b>'. join($invalid_eans, ', ') . '</b><br>';
+			$errors_msg .= __('Valid EANs must have 13 digits.','wplister') . '<br>';
+		}
+		if ( ! empty($var_no_stock) ) {
+			$errors_msg .= __('Warning: Stock management is enabled for this product but is disabled for these variations:','wplister') .' <b>'. join($var_no_stock, ', ') . '</b><br>';
+			$errors_msg .= __('eBay requires separate stock levels for each variation. So please enable stock management for each variation and set the stock level on the variation level.','wplister') . '<br>';
+			$errors_msg .= __('Disabling stock management for single variations will cause the inventory sync not to work properly.','wplister') . '<br>';
+		}
+		if ( ! empty($errors_msg) ) {
+            wple_show_message( $errors_msg, 'warn' );
+            do_action('wple_admin_notices');
+		}
+
+	} // checkForInvalidData()
+
+
 
 	/* Generic message display */
 	public function showMessage($message, $errormsg = false, $echo = true) {		
@@ -170,8 +256,7 @@ class WPL_WooBackendIntegration {
 		if ( $post->post_type == 'product' ) {
 
 			// get listing status
-			$listingsModel = new ListingsModel();
-			$status = $listingsModel->getStatusFromPostID( $post->ID );
+			$status = WPLE_ListingQueryHelper::getStatusFromPostID( $post->ID );
 			
 			// skip if listing exists
 			if ( $status ) return $actions;
@@ -191,11 +276,10 @@ class WPL_WooBackendIntegration {
 	// add_filter('woocommerce_get_product_from_item', 'wpl_woocommerce_get_product_from_item', 10, 2 );
 
 	function wpl_woocommerce_get_product_from_item( $_product, $item, $order ){
-		// global $wpl_logger;
 
-		// $wpl_logger->info('wpl_woocommerce_get_product_from_item - item: '.print_r($item,1));
-		// $wpl_logger->info('wpl_woocommerce_get_product_from_item - _product: '.print_r($_product,1));
-		// $wpl_logger->info('wpl_woocommerce_get_product_from_item - order: '.print_r($order,1));
+		// WPLE()->logger->info('wpl_woocommerce_get_product_from_item - item: '.print_r($item,1));
+		// WPLE()->logger->info('wpl_woocommerce_get_product_from_item - _product: '.print_r($_product,1));
+		// WPLE()->logger->info('wpl_woocommerce_get_product_from_item - order: '.print_r($order,1));
 
 		// if this is not a valid WC product object, post processing or email generation might fail
 		if ( ! $_product ) {
@@ -206,7 +290,7 @@ class WPL_WooBackendIntegration {
 
 				// create a new ebay product object to allow email templates or other plugins to do $_product->get_sku() and more...
 				$_product = new WC_Product_Ebay( $item['product_id'] );
-				// $wpl_logger->info('wpl_woocommerce_get_product_from_item - NEW _product: '.print_r($_product,1));
+				// WPLE()->logger->info('wpl_woocommerce_get_product_from_item - NEW _product: '.print_r($_product,1));
 
 			}
 
@@ -221,9 +305,8 @@ class WPL_WooBackendIntegration {
 	// add_filter('woocommerce_order_get_items', 'wpl_woocommerce_order_get_items', 10, 2 );
 
 	function wpl_woocommerce_order_get_items( $items, $order ){
-		global $wpl_logger;
-		$wpl_logger->info('wpl_woocommerce_order_get_items - items: '.print_r($items,1));
-		// $wpl_logger->info('wpl_woocommerce_order_get_items - order: '.print_r($order,1));
+		WPLE()->logger->info('wpl_woocommerce_order_get_items - items: '.print_r($items,1));
+		// WPLE()->logger->info('wpl_woocommerce_order_get_items - order: '.print_r($order,1));
 	}
 
 
@@ -307,8 +390,7 @@ class WPL_WooBackendIntegration {
 			case "listed_on_ebay" :
 
 				// get all listings for product ID - including split variations
-				$listingsModel = new ListingsModel();
-				$listings      = $listingsModel->getAllListingsFromPostOrParentID( $post->ID );
+				$listings = WPLE_ListingQueryHelper::getAllListingsFromPostOrParentID( $post->ID );
 			
 				// show select profile button if no listings found
 				if ( empty($listings) ) {
@@ -632,10 +714,28 @@ class WPL_WooBackendIntegration {
 
 		    	if ( $_GET['is_from_ebay'] == 'yes' ) {
 
-		        	$query->query_vars['meta_query'][] = array(
-						'key'     => '_ebay_order_id',
-						'compare' => 'EXISTS'
-					);
+    		        $account_id = isset($_REQUEST['wple_account_id']) ? $_REQUEST['wple_account_id'] : false;
+    		        if ( $account_id ) {
+
+    		        	// find post_ids for all orders for this account
+    		        	$post_ids = array();
+    		        	$orders = EbayOrdersModel::getWhere( 'account_id', $account_id );
+    		        	foreach ($orders as $order) {
+    		        		if ( ! $order->post_id ) continue;
+    		        		$post_ids[] = $order->post_id;
+    		        	}
+	    		        if ( empty( $post_ids ) ) $post_ids = array('0');
+
+			        	$query->query_vars['post__in'] = $post_ids;
+
+    		        } else {
+
+			        	$query->query_vars['meta_query'][] = array(
+							'key'     => '_ebay_order_id',
+							'compare' => 'EXISTS'
+						);
+
+    		        }
 
 		        } elseif ( $_GET['is_from_ebay'] == 'no' ) {
 
@@ -734,17 +834,17 @@ class WPL_WooBackendIntegration {
 		$this->wplister_product_submitbox_imported_status();
 
 		// check listing status
-		$listingsModel = new ListingsModel();
-		// $status = $listingsModel->getStatusFromPostID( $post->ID );
+		// $listingsModel = new ListingsModel();
+		// $status = WPLE_ListingQueryHelper::getStatusFromPostID( $post->ID );
 		// if ( ! in_array($status, array('published','changed','ended','sold','prepared','verified') ) ) return;
 
 		// get first item
-		// $listings = $listingsModel->getAllListingsFromPostID( $post->ID );
+		// $listings = WPLE_ListingQueryHelper::getAllListingsFromPostID( $post->ID );
 		// if ( sizeof($listings) == 0 ) return;
 		// $item = $listings[0];
 
 		// get all listings for product ID - including check for split variations
-		$listings = $listingsModel->getAllListingsFromPostOrParentID( $post->ID );
+		$listings = WPLE_ListingQueryHelper::getAllListingsFromPostOrParentID( $post->ID );
 		if ( empty($listings) ) return;
 
 		// use different template if there are multiple results
@@ -931,8 +1031,7 @@ class WPL_WooBackendIntegration {
 		$ebay_id = get_post_meta( $post->ID, '_ebay_item_id', true );
 
 		// get ViewItemURL - fall back to generic url on ebay.com
-		$listingsModel = new ListingsModel();
-		$ebay_url = $listingsModel->getViewItemURLFromPostID( $post->ID );
+		$ebay_url = WPLE_ListingQueryHelper::getViewItemURLFromPostID( $post->ID );
 		if ( ! $ebay_url ) $ebay_url = 'http://www.ebay.com/itm/'.$ebay_id;
 
 		?>
@@ -954,8 +1053,6 @@ class WPL_WooBackendIntegration {
 	// handle submitbox options
 	// add_action( 'woocommerce_process_product_meta', 'wplister_product_handle_submitbox_actions', 100, 2 );
 	function wplister_product_handle_submitbox_actions( $post_id, $post ) {
-		global $oWPL_WPLister;
-		global $wpl_logger;
 
 		if ( isset( $_POST['wpl_ebay_revise_on_update'] ) ) {
 
@@ -963,14 +1060,14 @@ class WPL_WooBackendIntegration {
 			$lm = new ListingsModel();
 			$lm->markItemAsModified( $post_id );
 
-			$wpl_logger->info('revising listing '.$_POST['wpl_ebay_listing_id'] );
+			WPLE()->logger->info('revising listing '.$_POST['wpl_ebay_listing_id'] );
 
 			// call EbayController
-			$oWPL_WPLister->initEC();
-			$results = $oWPL_WPLister->EC->reviseItems( $_POST['wpl_ebay_listing_id'] );
-			$oWPL_WPLister->EC->closeEbay();
+			WPLE()->initEC();
+			$results = WPLE()->EC->reviseItems( $_POST['wpl_ebay_listing_id'] );
+			WPLE()->EC->closeEbay();
 
-			$wpl_logger->info('revised listing '.$_POST['wpl_ebay_listing_id'] );
+			WPLE()->logger->info('revised listing '.$_POST['wpl_ebay_listing_id'] );
 
 			// $message = __('Selected items were revised on eBay.', 'wplister');
 			// $message .= ' ID: '.$_POST['wpl_ebay_listing_id'];
@@ -985,14 +1082,14 @@ class WPL_WooBackendIntegration {
 			$lm = new ListingsModel();
 			$lm->markItemAsModified( $post_id );
 
-			$wpl_logger->info('relisting listing '.$_POST['wpl_ebay_listing_id'] );
+			WPLE()->logger->info('relisting listing '.$_POST['wpl_ebay_listing_id'] );
 
 			// call EbayController
-			$oWPL_WPLister->initEC();
-			$results = $oWPL_WPLister->EC->relistItems( $_POST['wpl_ebay_listing_id'] );
-			$oWPL_WPLister->EC->closeEbay();
+			WPLE()->initEC();
+			$results = WPLE()->EC->relistItems( $_POST['wpl_ebay_listing_id'] );
+			WPLE()->EC->closeEbay();
 
-			$wpl_logger->info('relisted listing '.$_POST['wpl_ebay_listing_id'] );
+			WPLE()->logger->info('relisted listing '.$_POST['wpl_ebay_listing_id'] );
 
 			// $message = __('Selected items were revised on eBay.', 'wplister');
 			// $message .= ' ID: '.$_POST['wpl_ebay_listing_id'];
@@ -1055,6 +1152,28 @@ class WPL_WooBackendIntegration {
 
 	} // wplister_product_updated_notices()
 
+
+	function add_wc_order_table_filter_options() {
+		global $typenow;
+		if ( $typenow != 'shop_order' ) return;
+		if ( ! isset( $_REQUEST['is_from_ebay'] ) ) return;
+
+        $account_id   = isset($_REQUEST['wple_account_id']) ? $_REQUEST['wple_account_id'] : false;
+        ?>
+
+            <select name="wple_account_id">
+                <option value=""><?php _e('All eBay accounts','wplister') ?></option>
+                <?php foreach ( WPLE()->accounts as $account ) : ?>
+                    <option value="<?php echo $account->id ?>"
+                        <?php if ( $account_id == $account->id ) echo 'selected'; ?>
+                        ><?php echo $account->title ?></option>
+                <?php endforeach; ?>
+            </select>            
+
+            <input type="hidden" name="is_from_ebay" value="<?php echo isset($_REQUEST['is_from_ebay']) ? $_REQUEST['is_from_ebay'] : '' ?>">
+
+        <?php
+	} // add_wc_order_table_filter_options()
 
 
 } // class WPL_WooBackendIntegration

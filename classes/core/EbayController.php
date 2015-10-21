@@ -22,8 +22,8 @@ class EbayController {
     public $lastResults = array();
 
     public function __construct() {
-        global $wpl_logger;
-        $this->logger = &$wpl_logger;
+        // global $wpl_logger;
+        // $this->logger = &$wpl_logger;
         // $this->config();
 
         // set up autoloader for eBay classes
@@ -89,13 +89,13 @@ class EbayController {
 
         // save SessionID to DB
         update_option('wplister_ebay_sessionid', $SessionID);
-        $this->logger->info( 'new SessionID: ' . $SessionID );
+        WPLE()->logger->info( 'new SessionID: ' . $SessionID );
 
 
         // build auth url
         $query = array( 'RuName' => $this->RuName, 'SessID' => $SessionID );
         $url = $this->GetEbaySignInUrl() . '&' . http_build_query( $query, '', '&' );
-        $this->logger->info( 'AuthUrl: ' . $url );
+        WPLE()->logger->info( 'AuthUrl: ' . $url );
 
         return $url;
     }
@@ -154,14 +154,14 @@ class EbayController {
         // init autoloader fro EbatNs classes
         $this->loadEbayClasses();
 
-        $this->logger->info("initEbay( $account_id )");
+        WPLE()->logger->info("initEbay( $account_id )");
         // require_once 'EbatNs_ServiceProxy.php';
         // require_once 'EbatNs_Logger.php';
 
         // hide inevitable cURL warnings from SDK 
         // *** DISABLE FOR DEBUGGING ***
         $this->error_reporting_level = error_reporting();
-        $this->logger->debug( 'original error reporting level: '.$this->error_reporting_level );
+        WPLE()->logger->debug( 'original error reporting level: '.$this->error_reporting_level );
 
         // // regard php_error_handling option
         // // first bit (1) will show all php errors if set
@@ -172,7 +172,7 @@ class EbayController {
         //     error_reporting( E_ERROR );            
         // }
         error_reporting( E_ERROR );            
-        $this->logger->debug( 'new error reporting level: '.error_reporting() );
+        WPLE()->logger->debug( 'new error reporting level: '.error_reporting() );
 
         $this->siteId = $site_id;
         $this->sandbox = $sandbox_enabled;
@@ -221,7 +221,7 @@ class EbayController {
 
         // environment (0=production, 1=sandbox)
         if ( $sandbox_enabled == '1' ) {
-            $this->logger->info('initEbay(): SANDBOX ENABLED');
+            WPLE()->logger->info('initEbay(): SANDBOX ENABLED');
             $session->setAppMode(1);    // this must be set *before* setting the keys (appId, devId, ...)
         } else {
             $session->setAppMode(0);    
@@ -252,12 +252,12 @@ class EbayController {
         // // logger doc: http://www.intradesys.com/de/forum/1528
         // if ( get_option('wplister_log_level') > 5 ) {
         //     #$sp->attachLogger( new EbatNs_Logger(false, 'stdout', true, false) );
-        //     $sp->attachLogger( new EbatNs_Logger(false, $this->logger->file ) );
+        //     $sp->attachLogger( new EbatNs_Logger(false, WPLE()->logger->file ) );
         // }
 
         // attach custom DB Logger for Tools page
         // if ( get_option('wplister_log_to_db') == '1' ) {
-        if ( 'wplister-tools' == $_REQUEST['page'] ) {
+        if ( isset($_REQUEST['page']) && $_REQUEST['page'] == 'wplister-tools' ) {
             $sp->attachLogger( new WPL_EbatNs_Logger( false, 'db', $account_id, $site_id ) );
         }
         
@@ -276,7 +276,7 @@ class EbayController {
     public function closeEbay(){ 
         // restore error reporting level 
         error_reporting( $this->error_reporting_level );
-        // $this->logger->info( 'switched back error reporting level to: '.error_reporting() );
+        // WPLE()->logger->info( 'switched back error reporting level to: '.error_reporting() );
     }
  
 
@@ -358,12 +358,12 @@ class EbayController {
         return $cm->loadEbayCategoriesBranch( $cat_id, $this->session, $site_id );
     }
 
-    // load full categories list and insert to db (old)
-    public function loadCategories(){ 
-        $site_id = get_option('wplister_ebay_site_id');
-        $cm = new EbayCategoriesModel();
-        $cm->downloadCategories( $this->session, $site_id );
-    }
+    // // load full categories list and insert to db (old)
+    // public function loadCategories(){ 
+    //     $site_id = get_option('wplister_ebay_site_id');
+    //     $cm = new EbayCategoriesModel();
+    //     $cm->downloadCategories( $this->session, $site_id );
+    // }
 
     // load Store categories list and insert to db
     public function loadStoreCategories( $account_id ) { 
@@ -481,22 +481,30 @@ class EbayController {
     }
 
     // get category conditions
-    public function getCategoryConditions( $category_id ){ 
+    public function getCategoryConditions( $category_id, $site_id = false ) { 
+        if ( ! $site_id ) $site_id = $this->siteId;
         $cm = new EbayCategoriesModel();
-        return $cm->getCategoryConditions( $this->session, $category_id );
+        // always update conditions before specifics
+        $conditions = $cm->fetchCategoryConditions( $this->session, $category_id, $site_id );
+        $specifics  = $cm->fetchCategorySpecifics(  $this->session, $category_id, $site_id );
+        return $conditions;
     }
 
     // get category specifics
-    public function getCategorySpecifics( $category_id ){ 
+    public function getCategorySpecifics( $category_id, $site_id = false ) { 
+        if ( ! $site_id ) $site_id = $this->siteId;
         $cm = new EbayCategoriesModel();
-        return $cm->getCategorySpecifics( $this->session, $category_id );
+        // always update conditions before specifics
+        $conditions = $cm->fetchCategoryConditions( $this->session, $category_id, $site_id );
+        $specifics  = $cm->fetchCategorySpecifics(  $this->session, $category_id, $site_id );
+        return $specifics;
     }
 
 
 
     // process $this->lastResults and look for errors and/or warnings
     public function processLastResults(){ 
-        $this->logger->debug('processLastResults()'.print_r( $this->lastResults, 1 ));
+        WPLE()->logger->debug('processLastResults()'.print_r( $this->lastResults, 1 ));
 
         $this->isSuccess = true;
         $this->hasErrors = false;
@@ -512,7 +520,7 @@ class EbayController {
 
     // call verifyAddItem on selected items
     public function verifyItems( $id ){ 
-        $this->logger->info('EC::verifyItems('.$id.')');
+        WPLE()->logger->info('EC::verifyItems('.$id.')');
         
         $sm = new ListingsModel();
 
@@ -569,7 +577,7 @@ class EbayController {
         
         $lm = new ListingsModel();
         foreach( $product_ids as $post_id ) {
-            $listing_id = $lm->getListingIDFromPostID( $post_id );
+            $listing_id = WPLE_ListingQueryHelper::getListingIDFromPostID( $post_id );
 
             // if no listing found, check parent_id for variations
             if ( ! $listing_id ) {
@@ -577,7 +585,7 @@ class EbayController {
                 if ( ! $_product ) continue;
 
                 if ( $_product->product_type == 'variation' ) {
-                    $listing_id = $lm->getListingIDFromPostID( $_product->parent->id );                                        
+                    $listing_id = WPLE_ListingQueryHelper::getListingIDFromPostID( $_product->parent->id );                                        
                 }
             }
 
@@ -589,8 +597,8 @@ class EbayController {
                 if ( $lm->itemHasAllowedStatus( $listing_id, $allowed_statuses ) ) {
 
                     // ok, we have an ended item - check if it's in stock
-                    $listing_item = $lm->getItem( $listing_id );
-                    if ( $lm->checkStockLevel( $listing_item ) ) {
+                    $listing_item = ListingsModel::getItem( $listing_id );
+                    if ( ListingsModel::checkStockLevel( $listing_item ) ) {
 
                         // let's relist
                         $this->lastResults[] = $lm->relistItem( $listing_id, $this->session );  
@@ -648,7 +656,7 @@ class EbayController {
 
     // call relistItem on selected items
     public function relistItems( $id ){ 
-        $this->logger->info('EC::relistItems('.$id.')');
+        WPLE()->logger->info('EC::relistItems('.$id.')');
         
         $sm = new ListingsModel();
 
@@ -668,7 +676,7 @@ class EbayController {
 
     // call autoRelistItem on selected items - quick relist without any changes
     public function autoRelistItems( $id ){ 
-        $this->logger->info('EC::autoRelistItems('.$id.')');
+        WPLE()->logger->info('EC::autoRelistItems('.$id.')');
         
         $sm = new ListingsModel();
 
@@ -754,8 +762,7 @@ class EbayController {
     // call verifyAddItem on all prepared items
     public function verifyAllPreparedItems(){   
 
-        $sm = new ListingsModel();
-        $items = $sm->getAllPrepared();
+        $items = WPLE_ListingQueryHelper::getAllPrepared();
         
         foreach( $items as $item ) {
             $sm->verifyAddItem( $item['id'], $this->session );  
@@ -766,8 +773,7 @@ class EbayController {
     // call AddItem on all verified items
     public function publishAllVerifiedItems(){  
 
-        $sm = new ListingsModel();
-        $items = $sm->getAllVerified();
+        $items = WPLE_ListingQueryHelper::getAllVerified();
         
         foreach( $items as $item ) {
             $sm->addItem( $item['id'], $this->session );    
@@ -778,8 +784,7 @@ class EbayController {
     // call reviseItem on all changed items
     public function reviseAllChangedItems(){   
 
-        $sm = new ListingsModel();
-        $items = $sm->getAllChangedItemsToRevise();
+        $items = WPLE_ListingQueryHelper::getAllChangedItemsToRevise();
         
         foreach( $items as $item ) {
             $sm->reviseItem( $item['id'], $this->session );  
@@ -791,7 +796,7 @@ class EbayController {
     // public function updateAllPublishedItems(){   
 
     //     $sm = new ListingsModel();
-    //     $items = $sm->getAllPublished();
+    //     $items = WPLE_ListingQueryHelper::getAllPublished();
         
     //     foreach( $items as $item ) {
     //         $sm->updateItemDetails( $item['id'], $this->session );  
@@ -818,81 +823,121 @@ class EbayController {
 
     // GetNotificationPreferences
     public function GetNotificationPreferences(){ 
-        // require_once 'GetNotificationPreferencesRequestType.php';
-
-        // prepare request
         $req = new GetNotificationPreferencesRequestType();
-        $req->setPreferenceLevel('Application');
-        #$req->setPreferenceLevel('User');
         
-        // send request
+        // 1st request for user prefs
+        $req->setPreferenceLevel('User');
         $res = $this->sp->GetNotificationPreferences($req);
 
-        // second request for user data
-        $req->setPreferenceLevel('User');
+        // 2nd request for user data
+        $this->initLogger();
+        $req->setPreferenceLevel('UserData');
         $res2 = $this->sp->GetNotificationPreferences($req);
 
+        // 3rd request for app data
+        $this->initLogger();
+        $req->setPreferenceLevel('Application');
+        $res3 = $this->sp->GetNotificationPreferences($req);
+
         // handle result
-        return ( print_r( $res, 1 ) . print_r( $res2, 1 ) );
-        
+        return ( print_r( $res, 1 ) . print_r( $res2, 1 )  . print_r( $res3, 1 ) );        
     }
 
-    // SetNotificationPreferences
-    public function SetNotificationPreferences(){ 
-        // require_once 'SetNotificationPreferencesRequestType.php';
+    // SetNotificationPreferences for User
+    // inspired by http://jolierouge.net/2011/05/spree-commerce-ebay-trading-api-and-the-ebay-accelerator-toolkit-from-intradesys-ebatns/
+    public function SetUserNotificationPreferences( $mode = 'Enable' ){ 
+        // $app_url = admin_url().'admin-ajax.php?action=handle_ebay_notify';
 
-        $app_url = admin_url().'admin-ajax.php?action=handle_ebay_notify';
-
-        // prepare request
-        #$req = new SetNotificationPreferencesRequestType();
-        #$req->setDeliveryURLName('http://www.example.com/wp-admin/admin-ajax.php?action=handle_ebay_notify');
-
-
-
-        # example from http://jolierouge.net/2011/05/spree-commerce-ebay-trading-api-and-the-ebay-accelerator-toolkit-from-intradesys-ebatns/
+        // build request
         $req = new SetNotificationPreferencesRequestType();
 
-        // ApplicationDeliveryPreferences
-        $req->ApplicationDeliveryPreferences = new ApplicationDeliveryPreferencesType();
-        $req->ApplicationDeliveryPreferences->setApplicationEnable('Enable');
-        $req->ApplicationDeliveryPreferences->setApplicationURL($app_url);
-        //$req->ApplicationDeliveryPreferences->setAlertEmail("youremail");
-        $req->ApplicationDeliveryPreferences->setAlertEnable("Enable");
+        // set UserData
+        $UserData = new NotificationUserDataType();
+        $UserData->setExternalUserData( admin_url() );
+        $req->setUserData( $UserData );
 
-        // ApplicationDeliveryPreferences.DeliveryURLDetails
-        $details = new DeliveryURLDetailType();
-        $details->setDeliveryURLName('wplister_notify_handler');
-        $details->setDeliveryURL($app_url.'&details=true');
-        $details->setStatus('Enable');
-        $req->ApplicationDeliveryPreferences->setDeliveryURLDetails($details,null);
 
-        // UserDeliveryPreferenceArray
-        $user = new NotificationEnableArrayType();
-        $notifs = array();
-         // put all of the notices you want here.
-        foreach (array('BidReceived',
-                       'EndOfListing',
-                       'FixedPriceEndOfTransaction',
-                       'FixedPriceTransaction',
-                       'ItemListed',
-                       'ItemSold',
-                       'FeedbackReceived') as $event) {
-          $n = new NotificationEnableType();
-          $n->setEventType($event);
-          $n->setEventEnable('Enable');
-          $notifs[] = $n;
+        // set UserDeliveryPreferenceArray
+        $UserDeliveryPreferenceArray = new NotificationEnableArrayType();
+        $NotificationEnable          = array();
+        $mode                        = $mode == 'Enable' ? $mode : 'Disable';
+
+        // subscribe to events
+        $events = array(
+            'ItemSold',
+            'ItemClosed',
+            'ItemListed',
+            'ItemRevised',
+            'BidReceived',
+            'EndOfAuction',
+            'FeedbackReceived',
+            'FixedPriceTransaction',
+        );
+
+        foreach ( $events as $event ) {
+            $n = new NotificationEnableType();
+            $n->setEventType( $event );
+            $n->setEventEnable( $mode ); // Enable / Disable
+            $NotificationEnable[] = $n;
         }
-        $user->setNotificationEnable($notifs,null);
-        $req->setUserDeliveryPreferenceArray($user);
+
+        $UserDeliveryPreferenceArray->setNotificationEnable( $NotificationEnable, null );
+        $req->setUserDeliveryPreferenceArray( $UserDeliveryPreferenceArray );
 
         
         // send request
         $res = $this->sp->SetNotificationPreferences($req);
 
         // handle result
+        return ( print_r( $res, 1 ) );        
+    } // SetUserNotificationPreferences()
+
+
+    // reset NotificationPreferences for Application
+    public function ResetNotificationPreferences(){ 
+
+        // reset application prefs to default
+        $req = new SetNotificationPreferencesRequestType();
+        $req->ApplicationDeliveryPreferences = new ApplicationDeliveryPreferencesType();
+        $req->ApplicationDeliveryPreferences->setAlertEmail('mailto://info@wplab.com');
+        $req->ApplicationDeliveryPreferences->setAlertEnable('Enable');
+        $req->ApplicationDeliveryPreferences->setApplicationEnable('Enable');
+        $req->ApplicationDeliveryPreferences->setApplicationURL( 'http://ping.wplab.com/?key=wple_notify_handler' );
+        $req->ApplicationDeliveryPreferences->setPayloadVersion( 927 );
+
+        // // disabled
+        // $details = new DeliveryURLDetailType();
+        // $details->setDeliveryURLName('wple_notify_handler');
+        // $details->setDeliveryURL('mailto://info@wplab.com');
+        // $details->setStatus('Disable');
+        // $req->ApplicationDeliveryPreferences->setDeliveryURLDetails($details,null);
+
+        // send request
+        $res = $this->sp->SetNotificationPreferences($req);
+        // echo "<pre>";print_r($req);echo"</pre>";
+
+        // handle result
         return ( print_r( $res, 1 ) );
-        
+    } // ResetNotificationPreferences()
+
+
+    // GetNotificationsUsage
+    public function GetNotificationsUsage(){ 
+
+        $EndTime   = gmdate('Y-m-d\TH:i:s').'.000Z';                        // now
+        $StartTime = gmdate('Y-m-d\TH:i:s', strtotime('-2 days') ).'.000Z'; // 2 days ago (3 days max)
+       
+        // send request
+        $req = new GetNotificationsUsageRequestType();
+        $req->setEndTime( $EndTime );
+        $req->setStartTime( $StartTime );
+        // $req->setItemID( $ebay_id ); // get detailed events for single item
+        $res = $this->sp->GetNotificationsUsage($req);
+
+        // handle result
+        return ( print_r( $res, 1 ) );
     }
+
 
 
 

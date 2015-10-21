@@ -34,9 +34,6 @@ class TransactionsModel extends WPL_Model {
 	var $current_lastdate;
 
 	function TransactionsModel() {
-		global $wpl_logger;
-		$this->logger = &$wpl_logger;
-
 		global $wpdb;
 		$this->tablename = $wpdb->prefix . 'ebay_transactions';
 	}
@@ -44,7 +41,7 @@ class TransactionsModel extends WPL_Model {
 
 	// deprecated - only createTransactionFromEbayOrder() is used now
 	function updateTransactions( $session, $days = null, $current_page = 1 ) {
-		$this->logger->info('*** updateTransactions('.$days.') - page '.$current_page);
+		WPLE()->logger->info('*** updateTransactions('.$days.') - page '.$current_page);
 
 		$this->initServiceProxy($session);
 
@@ -59,18 +56,18 @@ class TransactionsModel extends WPL_Model {
 		// check if we need to calculate lastdate
 		if ( $this->current_lastdate ) {
 			$lastdate = $this->current_lastdate;
-			$this->logger->info('used current_lastdate from last run: '.$lastdate);
+			WPLE()->logger->info('used current_lastdate from last run: '.$lastdate);
 		} else {
 
 			// period 30 days, which is the maximum allowed
 			$now = time();
 			$lastdate = $this->getDateOfLastTransaction();
-			$this->logger->info('getDateOfLastTransaction() returned: '.$lastdate);
+			WPLE()->logger->info('getDateOfLastTransaction() returned: '.$lastdate);
 			if ($lastdate) $lastdate = mysql2date('U', $lastdate);
 
 			// if last date is older than 30 days, fall back to default
 			if ( $lastdate < $now - 3600 * 24 * 30 ) {
-				$this->logger->info('resetting lastdate - fall back default ');
+				WPLE()->logger->info('resetting lastdate - fall back default ');
 				$lastdate = false;
 			} 
 
@@ -83,7 +80,7 @@ class TransactionsModel extends WPL_Model {
 		if ( $days ) {
 			$req->NumberOfDays  = $days;
 			$this->NumberOfDays = $days;
-			$this->logger->info('NumberOfDays: '.$req->NumberOfDays);
+			WPLE()->logger->info('NumberOfDays: '.$req->NumberOfDays);
 
 		// default: transactions since last change
 		} elseif ( $lastdate ) {
@@ -91,16 +88,16 @@ class TransactionsModel extends WPL_Model {
 			$req->ModTimeTo    = gmdate( 'Y-m-d H:i:s', time() );
 			$this->ModTimeFrom = $req->ModTimeFrom;
 			$this->ModTimeTo   = $req->ModTimeTo;
-			$this->logger->info('lastdate: '.$lastdate);
-			$this->logger->info('ModTimeFrom: '.$req->ModTimeFrom);
-			$this->logger->info('ModTimeTo: '.$req->ModTimeTo);
+			WPLE()->logger->info('lastdate: '.$lastdate);
+			WPLE()->logger->info('ModTimeFrom: '.$req->ModTimeFrom);
+			WPLE()->logger->info('ModTimeTo: '.$req->ModTimeTo);
 
 		// fallback: last 7 days (max allowed by ebay: 30 days)
 		} else {
 			$days = 7;
 			$req->NumberOfDays  = $days;
 			$this->NumberOfDays = $days;
-			$this->logger->info('NumberOfDays (fallback): '.$req->NumberOfDays);
+			WPLE()->logger->info('NumberOfDays (fallback): '.$req->NumberOfDays);
 		}
 
 
@@ -118,7 +115,7 @@ class TransactionsModel extends WPL_Model {
 
 
 		// get transactions (single page)
-		$this->logger->info('fetching transactions - page '.$this->current_page);
+		WPLE()->logger->info('fetching transactions - page '.$this->current_page);
 		$res = $this->_cs->GetSellerTransactions( $req );
 
 		$this->total_pages = $res->PaginationResult->TotalNumberOfPages;
@@ -132,13 +129,13 @@ class TransactionsModel extends WPL_Model {
 
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
-			$this->logger->info( "*** Transactions updated successfully." );
-			// $this->logger->info( "*** PaginationResult:".print_r($res->PaginationResult,1) );
-			// $this->logger->info( "*** processed response:".print_r($res,1) );
+			WPLE()->logger->info( "*** Transactions updated successfully." );
+			// WPLE()->logger->info( "*** PaginationResult:".print_r($res->PaginationResult,1) );
+			// WPLE()->logger->info( "*** processed response:".print_r($res,1) );
 
-			$this->logger->info( "*** current_page: ".$this->current_page );
-			$this->logger->info( "*** total_pages: ".$this->total_pages );
-			$this->logger->info( "*** total_items: ".$this->total_items );
+			WPLE()->logger->info( "*** current_page: ".$this->current_page );
+			WPLE()->logger->info( "*** total_pages: ".$this->total_pages );
+			WPLE()->logger->info( "*** total_items: ".$this->total_items );
 
 			// fetch next page recursively - only in days mode
 			if ( $res->HasMoreTransactions ) {
@@ -148,7 +145,7 @@ class TransactionsModel extends WPL_Model {
 
 
 		} else {
-			$this->logger->error( "Error on transactions update".print_r( $res, 1 ) );			
+			WPLE()->logger->error( "Error on transactions update".print_r( $res, 1 ) );			
 		}
 	}
 
@@ -164,8 +161,8 @@ class TransactionsModel extends WPL_Model {
 		$req->ItemID 		= $transaction['item_id'];
 		$req->TransactionID = $transaction['transaction_id'];
 
-		$this->logger->info('ItemID: '.$req->ItemID);
-		$this->logger->info('TransactionID: '.$req->TransactionID);
+		WPLE()->logger->info('ItemID: '.$req->ItemID);
+		WPLE()->logger->info('TransactionID: '.$req->TransactionID);
 
 		// $req->DetailLevel = $Facet_DetailLevelCodeType->ReturnAll;
 		$req->setDetailLevel('ReturnAll');
@@ -183,9 +180,9 @@ class TransactionsModel extends WPL_Model {
 			$Transaction->Item = $res->Item;
 			$this->handleTransactionType( 'TransactionType', $Transaction );
 
-			$this->logger->info( sprintf("Transaction %s updated successfully.", $req->TransactionID ) );
+			WPLE()->logger->info( sprintf("Transaction %s updated successfully.", $req->TransactionID ) );
 		} else {
-			$this->logger->error( "Error on transactions update".print_r( $res, 1 ) );			
+			WPLE()->logger->error( "Error on transactions update".print_r( $res, 1 ) );			
 		}
 	}
 
@@ -193,14 +190,14 @@ class TransactionsModel extends WPL_Model {
 		//#type $Detail PaginationResultType
 		$this->total_pages = $Detail->TotalNumberOfPages;
 		$this->total_items = $Detail->TotalNumberOfEntries;
-		$this->logger->info( 'handlePaginationResultType()'.print_r( $Detail, 1 ) );
+		WPLE()->logger->info( 'handlePaginationResultType()'.print_r( $Detail, 1 ) );
 	}
 
 	// deprecated - only createTransactionFromEbayOrder() is used now
 	function handleTransactionType( $type, $Detail ) {
 		//global $wpdb;
 		//#type $Detail TransactionType
-		$this->logger->debug( 'handleTransactionType()'.print_r( $Detail, 1 ) );
+		WPLE()->logger->debug( 'handleTransactionType()'.print_r( $Detail, 1 ) );
 
 		// map TransactionType to DB columns
 		$data = $this->mapItemDetailToDB( $Detail );
@@ -242,7 +239,7 @@ class TransactionsModel extends WPL_Model {
 		if ( $transaction ) {
 
 			// update existing transaction
-			$this->logger->info( 'update transaction #'.$data['transaction_id'].' for item #'.$data['item_id'] );
+			WPLE()->logger->info( 'update transaction #'.$data['transaction_id'].' for item #'.$data['item_id'] );
 			$wpdb->update( $this->tablename, $data, array( 'transaction_id' => $data['transaction_id'] ) );
 
 
@@ -251,15 +248,15 @@ class TransactionsModel extends WPL_Model {
 		} else {
 		
 			// create new transaction
-			$this->logger->info( 'insert transaction #'.$data['transaction_id'].' for item #'.$data['item_id'] );
+			WPLE()->logger->info( 'insert transaction #'.$data['transaction_id'].' for item #'.$data['item_id'] );
 			$result = $wpdb->insert( $this->tablename, $data );
 			if ( ! $result ) {
-				$this->logger->error( 'insert transaction failed - MySQL said: '.$wpdb->last_error );
+				WPLE()->logger->error( 'insert transaction failed - MySQL said: '.$wpdb->last_error );
 				$this->addToReport( 'error', $data, false, false, $wpdb->last_error );
 				return false;
 			}
 			$id = $wpdb->insert_id;
-			// $this->logger->info( 'insert_id: '.$id );
+			// WPLE()->logger->info( 'insert_id: '.$id );
 
 
 			// update listing sold quantity and status
@@ -288,7 +285,7 @@ class TransactionsModel extends WPL_Model {
 					array( 'status' => 'sold', 'date_finished' => $data['date_created'], ), 
 					array( 'ebay_id' => $data['item_id'] ) 
 				);
-				$this->logger->info( 'marked item #'.$data['item_id'].' as SOLD ');
+				WPLE()->logger->info( 'marked item #'.$data['item_id'].' as SOLD ');
 			}
 
 
@@ -393,7 +390,7 @@ class TransactionsModel extends WPL_Model {
 
 	function createTransactionFromEbayOrder( $order, $Detail ) {
 		global $wpdb;
-		// $this->logger->debug( 'createTransactionFromEbayOrder()'.print_r( $Detail, 1 ) );
+		// WPLE()->logger->debug( 'createTransactionFromEbayOrder()'.print_r( $Detail, 1 ) );
 
 		// map TransactionType to DB columns
 		$data = $this->mapItemDetailToDB( $Detail, true );
@@ -421,15 +418,15 @@ class TransactionsModel extends WPL_Model {
 		$data['account_id']    	      = $order['account_id'];
 
 		// create new transaction
-		$this->logger->info( 'insert transaction #'.$data['transaction_id'].' for item #'.$data['item_id'].' from order #'.$data['order_id'] );
+		WPLE()->logger->info( 'insert transaction #'.$data['transaction_id'].' for item #'.$data['item_id'].' from order #'.$data['order_id'] );
 		$result = $wpdb->insert( $this->tablename, $data );
 		if ( ! $result ) {
-			$this->logger->error( 'insert transaction failed - MySQL said: '.$wpdb->last_error );
+			WPLE()->logger->error( 'insert transaction failed - MySQL said: '.$wpdb->last_error );
 			$this->addToReport( 'error', $data, false, false, $wpdb->last_error );
 			return false;
 		}
 		$id = $wpdb->insert_id;
-		// $this->logger->info( 'insert_id: '.$id );
+		// WPLE()->logger->info( 'insert_id: '.$id );
 
 		return $id;
 	} // createTransactionFromEbayOrder
@@ -460,7 +457,7 @@ class TransactionsModel extends WPL_Model {
 
 		// prevent fatal error if $history is not an array
 		if ( ! is_array( $history ) ) {
-			$this->logger->error( "invalid history value in TransactionsModel::addHistory(): ".$history);
+			WPLE()->logger->error( "invalid history value in TransactionsModel::addHistory(): ".$history);
 
 			// build history record
 			$rec = new stdClass();
@@ -493,7 +490,7 @@ class TransactionsModel extends WPL_Model {
 
 		$data['item_id']                   = $Detail->Item->ItemID;
 		$data['transaction_id']            = $Detail->TransactionID;
-		$data['date_created']              = $this->convertEbayDateToSql( $Detail->CreatedDate );
+		$data['date_created']              = self::convertEbayDateToSql( $Detail->CreatedDate );
 		$data['price']                     = $Detail->TransactionPrice->value;
 		$data['quantity']                  = $Detail->QuantityPurchased;
 		$data['buyer_userid']              = @$Detail->Buyer->UserID;
@@ -508,22 +505,21 @@ class TransactionsModel extends WPL_Model {
 		$data['ShippingAddress_City']      = @$Detail->Buyer->BuyerInfo->ShippingAddress->CityName;
 		$data['PaymentMethod']             = $Detail->Status->PaymentMethodUsed;
 		$data['CompleteStatus']            = $Detail->Status->CompleteStatus;
-		$data['LastTimeModified']          = $this->convertEbayDateToSql( $Detail->Status->LastTimeModified );
+		$data['LastTimeModified']          = self::convertEbayDateToSql( $Detail->Status->LastTimeModified );
 		$data['OrderLineItemID']           = $Detail->OrderLineItemID;
 
 		$data['site_id']    	           = $this->site_id;
 		$data['account_id']    	           = $this->account_id;
 
-		$listingsModel = new ListingsModel();
-		$listingItem = $listingsModel->getItemByEbayID( $Detail->Item->ItemID );
+		$auction_item = ListingsModel::getItemByEbayID( $Detail->Item->ItemID );
 
 		// skip items not found in listings
 		if ( $listingItem ) {
 
 			$data['post_id']    = $listingItem->post_id;
 			$data['item_title'] = $listingItem->auction_title;
-			$this->logger->info( "process transaction #".$Detail->TransactionID." for item '".$data['item_title']."' - #".$Detail->Item->ItemID );
-			$this->logger->info( "post_id: ".$data['post_id']);
+			WPLE()->logger->info( "process transaction #".$Detail->TransactionID." for item '".$data['item_title']."' - #".$Detail->Item->ItemID );
+			WPLE()->logger->info( "post_id: ".$data['post_id']);
 
 		} else {
 
@@ -532,11 +528,11 @@ class TransactionsModel extends WPL_Model {
 
 			// only skip if foreign_transactions option is disabled
 			if ( ( get_option( 'wplister_foreign_transactions' ) != 1 ) && ! $always_process_foreign_transactions ) {
-				$this->logger->info( "skipped transaction #".$Detail->TransactionID." for foreign item #".$Detail->Item->ItemID );			
+				WPLE()->logger->info( "skipped transaction #".$Detail->TransactionID." for foreign item #".$Detail->Item->ItemID );			
 				$this->addToReport( 'skipped', $data );
 				return false;			
 			} else {
-				$this->logger->info( "IMPORTED transaction #".$Detail->TransactionID." for foreign item #".$Detail->Item->ItemID );							
+				WPLE()->logger->info( "IMPORTED transaction #".$Detail->TransactionID." for foreign item #".$Detail->Item->ItemID );							
 			}
 
 		}
@@ -554,7 +550,7 @@ class TransactionsModel extends WPL_Model {
 
 
         // save GetSellerTransactions reponse in details
-		$data['details'] = $this->encodeObject( $Detail );
+		$data['details'] = self::encodeObject( $Detail );
 
 		return $data;
 	} // mapItemDetailToDB
@@ -672,7 +668,7 @@ class TransactionsModel extends WPL_Model {
 		), ARRAY_A );
 
 		// decode TransactionType object with eBay classes loaded
-		$item['details'] = $this->decodeObject( $item['details'], false, true );
+		$item['details'] = self::decodeObject( $item['details'], false, true );
 		$item['history'] = maybe_unserialize( $item['history'] );
 
 		return $item;
@@ -870,7 +866,7 @@ class TransactionsModel extends WPL_Model {
 
 
 		// foreach( $items as &$profile ) {
-		// 	$profile['details'] = $this->decodeObject( $profile['details'] );
+		// 	$profile['details'] = self::decodeObject( $profile['details'] );
 		// }
 
 		return $items;
@@ -886,8 +882,8 @@ class TransactionsModel extends WPL_Model {
 			if ( NULL === $value ) {
 				$key = esc_sql( $key );
 				$wpdb->query( $wpdb->prepare("UPDATE {$this->tablename} SET $key = NULL WHERE id = %s", $id ) );
-				$this->logger->info('SQL to set NULL value: '.$wpdb->last_query );
-				$this->logger->info( $wpdb->last_error );
+				WPLE()->logger->info('SQL to set NULL value: '.$wpdb->last_query );
+				WPLE()->logger->info( $wpdb->last_error );
 				unset( $data[$key] );
 			}
 		}
@@ -895,8 +891,8 @@ class TransactionsModel extends WPL_Model {
 		// update
 		$wpdb->update( $this->tablename, $data, array( 'id' => $id ) );
 
-		$this->logger->debug('sql: '.$wpdb->last_query );
-		$this->logger->info( $wpdb->last_error );
+		WPLE()->logger->debug('sql: '.$wpdb->last_query );
+		WPLE()->logger->info( $wpdb->last_error );
 	}
 
 

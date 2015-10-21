@@ -24,6 +24,7 @@ class WPL_API_Hooks extends WPL_Core {
 		// revise item on eBay
 		add_action( 'wplister_revise_item', array( &$this, 'wplister_revise_item' ), 10, 1 );
 		add_action( 'wplister_relist_item', array( &$this, 'wplister_relist_item' ), 10, 1 );
+		add_action( 'wplister_end_item',    array( &$this, 'wplister_end_item'    ), 10, 2 ); 
 
 		// re-apply profile and mark listing item as changed
 		add_action( 'wplister_product_has_changed', array( &$this, 'wplister_product_has_changed' ), 10, 1 );
@@ -68,7 +69,7 @@ class WPL_API_Hooks extends WPL_Core {
 	
 	// revise inventory status for given product_id or array of product_ids 
 	function wplister_revise_inventory_status( $products ) {
-		global $wpl_logger;
+
         $this->dblogger = new WPL_EbatNs_Logger();
 
         // log to db - before request
@@ -83,7 +84,7 @@ class WPL_API_Hooks extends WPL_Core {
 		$this->initEC();
 		$results = $this->EC->reviseInventoryForProducts( $products );
 		$this->EC->closeEbay();
-		$wpl_logger->info('revised inventory status for products: ' . print_r($products,1) . '');
+		WPLE()->logger->info('revised inventory status for products: ' . print_r($products,1) . '');
 
         // log to db 
         $this->dblogger->updateLog( array(
@@ -101,15 +102,15 @@ class WPL_API_Hooks extends WPL_Core {
 		$lm = new ListingsModel();
 		$lm->markItemAsModified( $post_id );
 
-		$listing_id = $lm->getListingIDFromPostID( $post_id );
-		$this->logger->info('revising listing '.$listing_id );
+		$listing_id = WPLE_ListingQueryHelper::getListingIDFromPostID( $post_id );
+		WPLE()->logger->info('revising listing '.$listing_id );
 
 		// call EbayController
 		$this->initEC();
 		$results = $this->EC->reviseItems( $listing_id );
 		$this->EC->closeEbay();
 
-		$this->logger->info('revised listing '.$listing_id );
+		WPLE()->logger->info('revised listing '.$listing_id );
 		return isset( $this->EC->lastResults ) ? $this->EC->lastResults : false;
 
 	}
@@ -121,15 +122,35 @@ class WPL_API_Hooks extends WPL_Core {
 		$lm = new ListingsModel();
 		$lm->markItemAsModified( $post_id );
 
-		$listing_id = $lm->getListingIDFromPostID( $post_id );
-		$this->logger->info('relisting item '.$listing_id );
+		$listing_id = WPLE_ListingQueryHelper::getListingIDFromPostID( $post_id );
+		WPLE()->logger->info('relisting item '.$listing_id );
 
 		// call EbayController
 		$this->initEC();
 		$results = $this->EC->relistItems( $listing_id );
 		$this->EC->closeEbay();
 
-		$this->logger->info('relisted item '.$listing_id );
+		WPLE()->logger->info('relisted item '.$listing_id );
+		return isset( $this->EC->lastResults ) ? $this->EC->lastResults : false;
+
+	}
+
+	// end ebay item for given listing_id 
+	function wplister_end_item( $listing_id, $account_id = null ) {
+		WPLE()->logger->info('ending item '.$listing_id );
+
+		// if listing_id is an eBay Item ID, find the listing_id automatically
+		if ( ! is_array( $listing_id ) && strlen( $listing_id ) > 10 ) {
+			$listing = WPLE_ListingQueryHelper::findItemByEbayID( $listing_id, false );
+			if ( $listing ) $listing_id = $listing->id;
+		}
+
+		// call EbayController
+		$this->initEC( $account_id );
+		$results = $this->EC->endItemsOnEbay( $listing_id );
+		$this->EC->closeEbay();
+
+		WPLE()->logger->info('ended item '.$listing_id );
 		return isset( $this->EC->lastResults ) ? $this->EC->lastResults : false;
 
 	}
@@ -141,7 +162,7 @@ class WPL_API_Hooks extends WPL_Core {
 		$listing_id = $lm->markItemAsModified( $post_id );
 
 		// handle locked items
-		$listing = $lm->getItem( $listing_id );
+		$listing = ListingsModel::getItem( $listing_id );
 		if ( $listing['locked'] ) 
 			do_action( 'wplister_revise_inventory_status', $post_id );
 
@@ -235,8 +256,7 @@ class WPL_API_Hooks extends WPL_Core {
 	 */
 
 	function handle_third_party_ajax_csv_import() {
-		global $wpl_logger;
-		$wpl_logger->info("CSV import mode ENABLED");
+		WPLE()->logger->info("CSV import mode ENABLED");
 
 		// disable default action for save_post
 		global $WPL_WooBackendIntegration;
@@ -252,8 +272,7 @@ class WPL_API_Hooks extends WPL_Core {
 
 	// collect changed product IDs
 	function collect_updated_products( $post_id, $post ) {
-		// global $wpl_logger;
-		// $wpl_logger->info("collect_updated_products( $post_id )");
+		// WPLE()->logger->info("collect_updated_products( $post_id )");
 
 		if ( !$_POST ) return $post_id;
 		// if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
@@ -266,7 +285,7 @@ class WPL_API_Hooks extends WPL_Core {
 		// if ( $parent_id = ProductWrapper::getVariationParent( $post_id ) ) {
 		if ( $post->post_type == 'product_variation' ) {
 			$parent_id = ProductWrapper::getVariationParent( $post_id );
-			// $wpl_logger->info("single variation found - use parent $parent_id for $post_id");
+			// WPLE()->logger->info("single variation found - use parent $parent_id for $post_id");
 			$post_id = $parent_id;
 		}
 
@@ -278,7 +297,7 @@ class WPL_API_Hooks extends WPL_Core {
 		if ( ! in_array( $post_id, $collected_products ) )
 			$collected_products[] = $post_id;
 
-		// $wpl_logger->info("collected products".print_r($collected_products,1));
+		// WPLE()->logger->info("collected products".print_r($collected_products,1));
 
 		// update queue
 		update_option( 'wplister_updated_products_queue', $collected_products );
@@ -291,8 +310,7 @@ class WPL_API_Hooks extends WPL_Core {
 		if ( ! is_array( $collected_products ) ) $collected_products = array();
 
 		// DEBUG
-		// global $wpl_logger;
-		// $wpl_logger->info("update_products_on_shutdown() - collected_products: ".print_r($collected_products,1));
+		// WPLE()->logger->info("update_products_on_shutdown() - collected_products: ".print_r($collected_products,1));
 
 		// mark each queued product as modified
 		foreach ($collected_products as $post_id ) {
@@ -374,9 +392,8 @@ class WPL_API_Hooks extends WPL_Core {
 	}
 
 	function woo_ce_product_item( $product, $product_id ) {
-		$lm = new ListingsModel();
-		$product->ebay_item_id = $lm->getEbayIDFromPostID( $product_id );
-		$product->ebay_status  = $lm->getStatusFromPostID( $product_id );
+		$product->ebay_item_id = WPLE_ListingQueryHelper::getEbayIDFromPostID( $product_id );
+		$product->ebay_status  = WPLE_ListingQueryHelper::getStatusFromPostID( $product_id );
 		return $product;
 	}
 

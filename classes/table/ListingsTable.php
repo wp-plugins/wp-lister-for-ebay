@@ -58,8 +58,7 @@ class ListingsTable extends WP_List_Table {
     }
 
     function getProfileData( $item ) {
-        $lm = new ListingsModel();
-        $profile_data = $lm->decodeObject( $item['profile_data'], true );
+        $profile_data = ListingsModel::decodeObject( $item['profile_data'], true );
         return $profile_data;        
     }    
     
@@ -158,8 +157,7 @@ class ListingsTable extends WP_List_Table {
         $listing_title = $item['auction_title'];
 
         // limit item title to 80 characters
-        $lm = new ListingsModel();
-        if ( $lm->mb_strlen($listing_title) > 80 ) $listing_title = $lm->mb_substr( $listing_title, 0, 77 ) . '...';
+        if ( ListingsModel::mb_strlen($listing_title) > 80 ) $listing_title = ListingsModel::mb_substr( $listing_title, 0, 77 ) . '...';
         
 
         // make title link to products edit page
@@ -299,15 +297,13 @@ class ListingsTable extends WP_List_Table {
         // check for variations
         if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
 
-            $listingsModel = new ListingsModel();
-            $variations    = $this->getProductVariations( $item['post_id'] );
+            $variations = $this->getProductVariations( $item['post_id'] );
 
             // check variations cache
-            $result = $listingsModel->matchCachedVariations( $item );
-            if ( $result && $result->success ) 
+            $result = ListingsModel::matchCachedVariations( $item );
+            if ( $result && $result->success ) {
                 $variations = $result->variations;
-            // echo "<pre>";print_r($result);echo"</pre>";#die();
-
+            }
 
             // show warning if no variations found
             if ( ! is_array($variations) || ! sizeof($variations) ) {
@@ -378,7 +374,7 @@ class ListingsTable extends WP_List_Table {
 
                 // last column: price
                 $variations_html .= '<td align="right">';
-                $price = $listingsModel->applyProfilePrice( $var['price'], @$profile_data['details']['start_price'] );
+                $price = ListingsModel::applyProfilePrice( $var['price'], @$profile_data['details']['start_price'] );
                 $variations_html .= $this->number_format( $price, 2 );
 
                 $variations_html .= '</td></tr>';
@@ -662,6 +658,23 @@ class ListingsTable extends WP_List_Table {
     }
     
     function column_price($item){
+
+        $display_price = $this->get_display_price( $item );
+        $OriginalPrice = ListingsModel::thisListingHasPromotionalSale( $item );
+
+        if ( $OriginalPrice = ListingsModel::thisListingHasPromotionalSale( $item ) ) {
+            $OriginalPrice  = $this->number_format( $OriginalPrice, 2 );             
+            $tip_msg        = '<b>Promotional sale is active.</b><br>Price and shipping will not be revised.';
+            $img_url        = WPLISTER_URL . '/img/info.png';
+            $display_price .= '<br>';
+            $display_price .= '&nbsp;<img src="'.$img_url.'" style="height:11px; padding:0;" class="tips" data-tip="'.$tip_msg.'"/>';
+            $display_price .= '&nbsp;<i><s>'.$OriginalPrice.'</s></i>';
+        }
+
+        return $display_price;
+    }
+    
+    function get_display_price($item){
         
         // if item has variations check each price...
         if ( ProductWrapper::hasVariations( $item['post_id'] ) ) {
@@ -683,10 +696,9 @@ class ListingsTable extends WP_List_Table {
             }
 
             // apply price modifiers
-            $listingsModel = new ListingsModel();
             $profile_data = $this->getProfileData( $item );
-            $price_min = $listingsModel->applyProfilePrice( $price_min, @$profile_data['details']['start_price'] );
-            $price_max = $listingsModel->applyProfilePrice( $price_max, @$profile_data['details']['start_price'] );
+            $price_min = ListingsModel::applyProfilePrice( $price_min, @$profile_data['details']['start_price'] );
+            $price_max = ListingsModel::applyProfilePrice( $price_max, @$profile_data['details']['start_price'] );
 
             // use lowest price for flattened variations
             if ( isset( $profile_data['details']['variations_mode'] ) && ( $profile_data['details']['variations_mode'] == 'flat' ) ) {
@@ -1057,8 +1069,7 @@ class ListingsTable extends WP_List_Table {
         }
 
         // get listing status summary
-        $lm = new ListingsModel();
-        $summary = $lm->getStatusSummary();
+        $summary = WPLE_ListingQueryHelper::getStatusSummary();
 
         // All link
         $class = ($current == 'all' ? ' class="current"' :'');
@@ -1242,9 +1253,9 @@ class ListingsTable extends WP_List_Table {
         // fetch listings from model - if no selected products were found
         if ( ! $this->selectedItems ) {
 
-            $listingsModel = new ListingsModel();
-            $this->items = $listingsModel->getPageItems( $current_page, $per_page );
-            $this->total_items = $listingsModel->total_items;
+            $result = WPLE_ListingQueryHelper::getPageItems( $current_page, $per_page );
+            $this->items       = $result->items;
+            $this->total_items = $result->total_items;
 
         } else {
 

@@ -21,8 +21,8 @@ class ItemBuilderModel extends WPL_Model {
 
 	function ItemBuilderModel()
 	{
-		global $wpl_logger;
-		$this->logger = &$wpl_logger;
+		// global $wpl_logger;
+		// $this->logger = &$wpl_logger;
 
 		// provide listings model
 		$this->lm = new ListingsModel();
@@ -34,7 +34,7 @@ class ItemBuilderModel extends WPL_Model {
 	{
 
 		// fetch record from db
-		$listing         = $this->lm->getItem( $id );
+		$listing         = ListingsModel::getItem( $id );
 		$post_id 		 = $listing['post_id'];
 		$profile_details = $listing['profile_data']['details'];
 		$hasVariations   = ProductWrapper::hasVariations( $post_id );
@@ -161,7 +161,7 @@ class ItemBuilderModel extends WPL_Model {
 			// build UUID from listing Title, product_id, previous ItemID and today's date and hour
 			$uuid_src = $item->Title . $post_id . $listing['ebay_id'] . date('Y-m-d h');
 			$item->setUUID( md5( $uuid_src ) );
-			$this->logger->info('UUID src: '.$uuid_src);
+			WPLE()->logger->info('UUID src: '.$uuid_src);
 		}
 
 		// filter final item object before it's sent to eBay
@@ -234,7 +234,7 @@ class ItemBuilderModel extends WPL_Model {
             
 			// fetch products local category terms
 			$terms = wp_get_post_terms( $post_id, ProductWrapper::getTaxonomy() );
-			// $this->logger->info('terms: '.print_r($terms,1));
+			// WPLE()->logger->info('terms: '.print_r($terms,1));
 
 			$ebay_category_id = false;
 			$primary_category_id = false;
@@ -259,8 +259,8 @@ class ItemBuilderModel extends WPL_Model {
 
   			}
 
-			$this->logger->info('mapped primary_category_id: '.$primary_category_id);
-			$this->logger->info('mapped secondary_category_id: '.$secondary_category_id);
+			WPLE()->logger->info('mapped primary_category_id: '.$primary_category_id);
+			WPLE()->logger->info('mapped secondary_category_id: '.$secondary_category_id);
 
             if ( intval( $primary_category_id ) > 0 ) {
 				$item->PrimaryCategory = new CategoryType();
@@ -305,7 +305,7 @@ class ItemBuilderModel extends WPL_Model {
 
 			// fetch products local category terms
 			$terms = wp_get_post_terms( $post_id, ProductWrapper::getTaxonomy() );
-			// $this->logger->info('terms: '.print_r($terms,1));
+			// WPLE()->logger->info('terms: '.print_r($terms,1));
 
 			$store_category_id = false;
 			$primary_store_category_id = false;
@@ -329,8 +329,8 @@ class ItemBuilderModel extends WPL_Model {
 
   			}
 
-			$this->logger->info('mapped primary_store_category_id: '.$primary_store_category_id);
-			$this->logger->info('mapped secondary_store_category_id: '.$secondary_store_category_id);
+			WPLE()->logger->info('mapped primary_store_category_id: '.$primary_store_category_id);
+			WPLE()->logger->info('mapped secondary_store_category_id: '.$secondary_store_category_id);
 
             if ( intval( $primary_store_category_id ) > 0 ) {
 				$item->Storefront = new StorefrontType();
@@ -508,12 +508,12 @@ class ItemBuilderModel extends WPL_Model {
 
 		// Set the Listing Starting Price and Buy It Now Price
 		$item->StartPrice = new AmountType();
-		$item->StartPrice->setTypeValue( $start_price );
+		$item->StartPrice->setTypeValue( self::dbSafeFloatval( $start_price ) );
 		$item->StartPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
 
 		// optional BuyItNow price
 		if ( intval($profile_details['fixed_price']) != 0) {
-			$buynow_price = $this->lm->applyProfilePrice( $listing['price'], $profile_details['fixed_price'] );
+			$buynow_price = ListingsModel::applyProfilePrice( $listing['price'], $profile_details['fixed_price'] );
 			$item->BuyItNowPrice = new AmountType();
 			$item->BuyItNowPrice->setTypeValue( $buynow_price );
 			$item->BuyItNowPrice->setTypeAttribute('currencyID', $profile_details['currency'] );
@@ -588,100 +588,61 @@ class ItemBuilderModel extends WPL_Model {
 	} /* end of buildImages() */
 
 
-	public function buildProductOptions( $id, $item, $post_id, $profile_details, $listing, $isVariation ) {
+	public function buildProductListingDetails( $id, $item, $post_id, $profile_details, $listing, $isVariation, $product_sku ) {
 
-		// get product SKU
-		$product_sku = ProductWrapper::getSKU( $post_id );
+		// if this is a single split variation, use variation post_id - but remember parent_id to fetch Brand
+		$parent_id = $post_id;
+		if ( $isVariation ) $post_id = $listing['post_id'];
 
-		// if this is a single split variation, use variation SKU instead of parent SKU
-		if ( $isVariation ) $product_sku = ProductWrapper::getSKU( $listing['post_id'] );
-
-		// set SKU - if not empty
-		if ( trim( $product_sku ) == '' ) $product_sku = false;
-		if ( $product_sku ) $item->SKU = $product_sku;
-
-
-		// include prefilled info by default
-		$include_prefilled_info = isset( $profile_details['include_prefilled_info'] ) ? (bool)$profile_details['include_prefilled_info'] : true;  
-
-		// handle variation level Product ID (UPC/EAN)
+		// handle Product ID (UPC, EAN, MPN, etc.)
 		$autofill_missing_gtin = get_option('wplister_autofill_missing_gtin');
 		$DoesNotApplyText = WPLE_eBaySite::getSiteObj( $this->site_id )->DoesNotApplyText;
 		$DoesNotApplyText = empty( $DoesNotApplyText ) ? 'Does not apply' : $DoesNotApplyText;
 
+		// build ProductListingDetails
+		$ProductListingDetails = new ProductListingDetailsType();
+		$has_details           = false;
+
 		// set UPC from SKU - if enabled
-		if ( ($product_sku) && ( $profile_details['use_sku_as_upc'] == '1' ) ) {
-			$ProductListingDetails = new ProductListingDetailsType();
+		if ( $product_sku && ( $profile_details['use_sku_as_upc'] == '1' ) ) {
 			$ProductListingDetails->setUPC( $product_sku );
-			// $ProductListingDetails->setListIfNoProduct( true ); // deprecated in API 921
-			$ProductListingDetails->setIncludeStockPhotoURL( true );
-			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
-			$ProductListingDetails->setUseFirstProduct( true );
-			// $ProductListingDetails->setUseStockPhotoURLAsGallery( true );
-			$item->setProductListingDetails( $ProductListingDetails );
+			$has_details = true;
 		}
 
 		// set UPC from product - if provided
 		if ( $product_upc = get_post_meta( $post_id, '_ebay_upc', true ) ) {
-			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setUPC( $product_upc );
-			// $ProductListingDetails->setListIfNoProduct( true ); // deprecated in API 921
-			$ProductListingDetails->setIncludeStockPhotoURL( true );
-			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
-			$ProductListingDetails->setUseFirstProduct( true );
-			$item->setProductListingDetails( $ProductListingDetails );
+			$has_details = true;
 		} elseif ( $autofill_missing_gtin == 'upc') {
-			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setUPC( $DoesNotApplyText );
-			$item->setProductListingDetails( $ProductListingDetails );
+			$has_details = true;
 		}
 
 		// set EAN from product - if provided
 		if ( $product_ean = get_post_meta( $post_id, '_ebay_ean', true ) ) {
-			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setEAN( $product_ean );
-			// $ProductListingDetails->setListIfNoProduct( true ); // deprecated in API 921
-			$ProductListingDetails->setIncludeStockPhotoURL( true );
-			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
-			$ProductListingDetails->setUseFirstProduct( true );
-			$item->setProductListingDetails( $ProductListingDetails );
+			$has_details = true;
 		} elseif ( $autofill_missing_gtin == 'ean') {
-			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setEAN( $DoesNotApplyText );
-			$item->setProductListingDetails( $ProductListingDetails );
+			$has_details = true;
 		}
 
 		// set ISBN from product - if provided
 		if ( $product_isbn = get_post_meta( $post_id, '_ebay_isbn', true ) ) {
-			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setISBN( $product_isbn );
-			$ProductListingDetails->setIncludeStockPhotoURL( true );
-			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
-			$ProductListingDetails->setUseFirstProduct( true );
-			$item->setProductListingDetails( $ProductListingDetails );
+			$has_details = true;
 		}
 
 		// set EPID from product - if provided
 		if ( $product_epid = get_post_meta( $post_id, '_ebay_epid', true ) ) {
-			$ProductListingDetails = new ProductListingDetailsType();
 			$ProductListingDetails->setProductReferenceID( $product_epid );
-			// $ProductListingDetails->setListIfNoProduct( true ); // deprecated in API 921
-			$ProductListingDetails->setIncludeStockPhotoURL( true );
-			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
-			$ProductListingDetails->setUseFirstProduct( true );
-			$item->setProductListingDetails( $ProductListingDetails );
+			$has_details = true;
 		}
 
 		// set Brand/MPN from product - if provided
-		$product_brand = get_post_meta( $post_id, '_ebay_brand', true );
-		$product_mpn   = get_post_meta( $post_id, '_ebay_mpn', true );
+		$product_brand = get_post_meta( $parent_id, '_ebay_brand', true );
+		$product_mpn   = get_post_meta( $post_id,   '_ebay_mpn',   true );
 		if ( $product_brand && $product_mpn ) {
-
-			if ( ! isset($ProductListingDetails) ) {
-				$ProductListingDetails = new ProductListingDetailsType();
-				$ProductListingDetails->setUseFirstProduct( true );
-				$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
-			}
 
 			// Note: MPN is always paired with Brand for single-variation listings, 
 			// but for multiple-variation listings, only the Brand value should be specified in the BrandMPN container 
@@ -694,9 +655,42 @@ class ItemBuilderModel extends WPL_Model {
 				$ProductListingDetails->BrandMPN->setMPN( $product_mpn );
 			}
 
-			$item->setProductListingDetails( $ProductListingDetails );
+			$has_details = true;
 		}
 
+		// include prefilled info - if enabled in profile
+		$include_prefilled_info = isset( $profile_details['include_prefilled_info'] ) ? (bool)$profile_details['include_prefilled_info'] : true;  
+		if ( $include_prefilled_info ) {
+			$ProductListingDetails->setUseFirstProduct( true );
+			$ProductListingDetails->setIncludeStockPhotoURL( true );
+			$ProductListingDetails->setIncludePrefilledItemInformation( $include_prefilled_info ? 1 : 0 );
+			// $ProductListingDetails->setUseStockPhotoURLAsGallery( true );			
+		}
+
+		// only set ProductListingDetails if at least one product ID is set
+		if ( $has_details ) {
+			$item->setProductListingDetails( $ProductListingDetails );			
+			// WPLE()->logger->info("buildProductListingDetails: " . print_r($item->getProductListingDetails(),1) );
+		}
+
+		return $item;
+	} /* end of buildProductListingDetails() */
+
+
+	public function buildProductOptions( $id, $item, $post_id, $profile_details, $listing, $isVariation ) {
+
+		// get product SKU
+		$product_sku = ProductWrapper::getSKU( $post_id );
+
+		// if this is a single split variation, use variation SKU instead of parent SKU
+		if ( $isVariation ) $product_sku = ProductWrapper::getSKU( $listing['post_id'] );
+
+		// set SKU - if not empty
+		if ( trim( $product_sku ) == '' ) $product_sku = false;
+		if ( $product_sku ) $item->SKU = $product_sku;
+
+		// build buildProductListingDetails (UPC, EAN, MPN, etc.)
+		$item = $this->buildProductListingDetails( $id, $item, $post_id, $profile_details, $listing, $isVariation, $product_sku );
 
 		// add subtitle if enabled
 		if ( @$profile_details['subtitle_enabled'] == 1 ) {
@@ -721,7 +715,7 @@ class ItemBuilderModel extends WPL_Model {
 			$subtitle = substr( $subtitle, 0, 55 );
 
 			$item->setSubTitle( $subtitle );			
-			$this->logger->debug( 'setSubTitle: '.$subtitle );
+			WPLE()->logger->debug( 'setSubTitle: '.$subtitle );
 		}
 
 		// item condition description
@@ -763,7 +757,7 @@ class ItemBuilderModel extends WPL_Model {
 		// handle VAT (percent)
 		if ( $profile_details['tax_mode'] == 'fix' ) {
 			$item->VATDetails = new VATDetailsType();
-			$item->VATDetails->VATPercent = floatval( $profile_details['vat_percent'] );
+			$item->VATDetails->VATPercent = self::dbSafeFloatval( $profile_details['vat_percent'] );
 		}
 
 		// use Sales Tax Table
@@ -863,7 +857,7 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $item->ListingType == 'LeadGeneration' ) return $item;
 
 		// handle flat and calc shipping
-		$this->logger->info('shipping_service_type: '.$profile_details['shipping_service_type'] );
+		WPLE()->logger->info('shipping_service_type: '.$profile_details['shipping_service_type'] );
 		// $isFlat = $profile_details['shipping_service_type'] != 'calc' ? true : false;
 		// $isCalc = $profile_details['shipping_service_type'] == 'calc' ? true : false;
 
@@ -883,11 +877,11 @@ class ItemBuilderModel extends WPL_Model {
 
 		$shippingDetails = new ShippingDetailsType();
 		$shippingDetails->ShippingType = $service_type;
-		$this->logger->info('shippingDetails->ShippingType: '.$shippingDetails->ShippingType );
+		WPLE()->logger->info('shippingDetails->ShippingType: '.$shippingDetails->ShippingType );
 
 		// local shipping options
 		$localShippingOptions = $profile_details['loc_shipping_options'];
-		$this->logger->debug('localShippingOptions: '.print_r($localShippingOptions,1));
+		WPLE()->logger->debug('localShippingOptions: '.print_r($localShippingOptions,1));
 
 		$pr = 1;
 		$localShippingServices = array();
@@ -926,7 +920,7 @@ class ItemBuilderModel extends WPL_Model {
 			
 			$EbayShippingModel = new EbayShippingModel();
 			$lastShippingCategory = $EbayShippingModel->getShippingCategoryByServiceName( $opt['service_name'] );
-			$this->logger->debug('ShippingCategory: '.print_r($lastShippingCategory,1));
+			WPLE()->logger->debug('ShippingCategory: '.print_r($lastShippingCategory,1));
 		}
 		// apply filter and set shipping services
 		$localShippingServices = apply_filters( 'wple_local_shipping_services', $localShippingServices, $post_id, $actual_post_id, $listing );
@@ -943,7 +937,7 @@ class ItemBuilderModel extends WPL_Model {
 		// 	)
 		// );
 		$intlShipping = $profile_details['int_shipping_options'];
-		$this->logger->debug('intlShipping: '.print_r($intlShipping,1));
+		WPLE()->logger->debug('intlShipping: '.print_r($intlShipping,1));
 
 		$pr = 1;
 		$shippingInternational = array();
@@ -1002,16 +996,16 @@ class ItemBuilderModel extends WPL_Model {
 			if ( $isCalcLoc ) $calculatedShippingRate->setShippingPackage( $profile_details['shipping_package'] );
 
 			if ( $isCalcLoc ) {
-				$calculatedShippingRate->setPackagingHandlingCosts( floatval( @$profile_details['PackagingHandlingCosts'] ) );	
+				$calculatedShippingRate->setPackagingHandlingCosts( self::dbSafeFloatval( @$profile_details['PackagingHandlingCosts'] ) );	
 			} 
 			if ( $isCalcInt ) {
-				$calculatedShippingRate->setPackagingHandlingCosts( floatval( @$profile_details['PackagingHandlingCosts'] ) );	
-				$calculatedShippingRate->setInternationalPackagingHandlingCosts( floatval( @$profile_details['InternationalPackagingHandlingCosts'] ) );
+				// $calculatedShippingRate->setPackagingHandlingCosts( self::dbSafeFloatval( @$profile_details['PackagingHandlingCosts'] ) );	
+				$calculatedShippingRate->setInternationalPackagingHandlingCosts( self::dbSafeFloatval( @$profile_details['InternationalPackagingHandlingCosts'] ) );
 			}
 
 			list( $weight_major, $weight_minor ) = ProductWrapper::getEbayWeight( $actual_post_id );
-			$calculatedShippingRate->setWeightMajor( floatval( $weight_major) );
-			$calculatedShippingRate->setWeightMinor( floatval( $weight_minor) );
+			$calculatedShippingRate->setWeightMajor( self::dbSafeFloatval( $weight_major) );
+			$calculatedShippingRate->setWeightMinor( self::dbSafeFloatval( $weight_minor) );
 
 			$dimensions = ProductWrapper::getDimensions( $actual_post_id );
 			if ( trim( @$dimensions['width']  ) != '' ) $calculatedShippingRate->setPackageWidth( $dimensions['width'] );
@@ -1020,8 +1014,8 @@ class ItemBuilderModel extends WPL_Model {
 
 			// debug
 			// $weight = ProductWrapper::getWeight( $actual_post_id ) ;
-			// $this->logger->info('weight: '.print_r($weight,1));
-			// $this->logger->info('dimensions: '.print_r($dimensions,1));
+			// WPLE()->logger->info('weight: '.print_r($weight,1));
+			// WPLE()->logger->info('dimensions: '.print_r($dimensions,1));
 
 
 			$shippingDetails->setCalculatedShippingRate( $calculatedShippingRate );
@@ -1041,8 +1035,8 @@ class ItemBuilderModel extends WPL_Model {
 			if ( $isCalcLoc ) $shippingPackageDetails->setShippingPackage( $profile_details['shipping_package'] );
 			
 			list( $weight_major, $weight_minor ) = ProductWrapper::getEbayWeight( $actual_post_id );
-			$shippingPackageDetails->setWeightMajor( floatval( $weight_major) );
-			$shippingPackageDetails->setWeightMinor( floatval( $weight_minor) );
+			$shippingPackageDetails->setWeightMajor( self::dbSafeFloatval( $weight_major) );
+			$shippingPackageDetails->setWeightMinor( self::dbSafeFloatval( $weight_minor) );
 
 			$dimensions = ProductWrapper::getDimensions( $actual_post_id );
 			if ( trim( @$dimensions['width']  ) != '' ) $shippingPackageDetails->setPackageWidth( $dimensions['width'] );
@@ -1051,8 +1045,8 @@ class ItemBuilderModel extends WPL_Model {
 
 			// debug
 			// $weight = ProductWrapper::getWeight( $actual_post_id ) ;
-			// $this->logger->info('weight: '.print_r($weight,1));
-			// $this->logger->info('dimensions: '.print_r($dimensions,1));
+			// WPLE()->logger->info('weight: '.print_r($weight,1));
+			// WPLE()->logger->info('dimensions: '.print_r($dimensions,1));
 
 			$item->setShippingPackageDetails( $shippingPackageDetails );
 		}
@@ -1139,7 +1133,7 @@ class ItemBuilderModel extends WPL_Model {
 
 			$item->setShipToLocations( 'None' );
 			$item->setDispatchTimeMax( null );
-			$this->logger->info('PICKUP ONLY mode');
+			WPLE()->logger->info('PICKUP ONLY mode');
 
 			// don't set ShippingDetails for pickup-only in UK!
 			if ( $item->Site != 'UK' ) {
@@ -1165,12 +1159,12 @@ class ItemBuilderModel extends WPL_Model {
     	$ItemSpecifics = new NameValueListArrayType();
 
 		// get listing data
-		// $listing = $this->lm->getItem( $id );
+		// $listing = ListingsModel::getItem( $id );
 
 		// get product attributes
 		$processed_attributes = array();
         $attributes = ProductWrapper::getAttributes( $post_id );
-		$this->logger->info('product attributes: '. ( sizeof($attributes)>0 ? print_r($attributes,1) : '-- empty --' ) );
+		WPLE()->logger->info('product attributes: '. ( sizeof($attributes)>0 ? print_r($attributes,1) : '-- empty --' ) );
 
 		// apply item specifics from profile
 		$specifics = $listing['profile_data']['details']['item_specifics'];
@@ -1180,9 +1174,9 @@ class ItemBuilderModel extends WPL_Model {
 		if ( ! empty($product_specifics) )
 			$specifics = array_merge( $specifics, $product_specifics ); 
 
-		$this->logger->debug('item_specifics: '.print_r($specifics,1));
-		// $this->logger->debug('get variationAttributes: '.print_r($this->variationAttributes,1));
-		// $this->logger->debug('get variationSplitAttributes: '.print_r($this->variationSplitAttributes,1));
+		// WPLE()->logger->info('item_specifics: '.print_r($specifics,1));
+		// WPLE()->logger->debug('get variationAttributes: '.print_r($this->variationAttributes,1));
+		// WPLE()->logger->debug('get variationSplitAttributes: '.print_r($this->variationSplitAttributes,1));
         foreach ($specifics as $spec) {
         	if ( $spec['value'] != '' ) {
 
@@ -1197,7 +1191,7 @@ class ItemBuilderModel extends WPL_Model {
 	        	if ( ! in_array( $spec['name'], $this->variationAttributes ) ) {
 		        	$ItemSpecifics->addNameValueList( $NameValueList );
 		        	$processed_attributes[] = $spec['name'];
-					$this->logger->info("specs: added custom value: {$spec['name']} - $value");
+					WPLE()->logger->info("specs: added custom value: {$spec['name']} - $value");
 	        	}
 
         	} elseif ( $spec['attribute'] != '' ) {
@@ -1214,6 +1208,13 @@ class ItemBuilderModel extends WPL_Model {
         				// pull value from attribute
         				if ( isset( $attrib['meta_key'] ) ) {
 	        				$value = get_post_meta( $post_id, $attrib['meta_key'], true );
+
+	        				// for split variations, check for value on variation level
+	        				if ( $post_id != $listing['post_id'] ) {
+	        					$variation_value = get_post_meta( $listing['post_id'], $attrib['meta_key'], true );
+								if ( $variation_value ) $value = $variation_value;
+								// WPLE()->logger->info("specs: variation_value for: {$spec['name']} - " . $variation_value );
+	        				}
         				}
 
         				// set fixed value (since 2.0.9.5)
@@ -1236,8 +1237,14 @@ class ItemBuilderModel extends WPL_Model {
         			$value = $this->variationSplitAttributes[ $spec['attribute'] ];
         		}
 
+        		// skip empty values
+        		if ( ! $value ) {
+					WPLE()->logger->info("specs: skipped empty product attribute: {$spec['name']} - " . $value );
+        			continue;
+        		}
+
 	            $NameValueList = new NameValueListType();
-		    	$NameValueList->setName ( $spec['name']  );
+		    	$NameValueList->setName ( $spec['name'] );
 	    		// $NameValueList->setValue( $value );
 	
 	    		// support for multi value attributes
@@ -1251,7 +1258,7 @@ class ItemBuilderModel extends WPL_Model {
 	        	if ( ! in_array( $spec['name'], $this->variationAttributes ) ) {
 		        	$ItemSpecifics->addNameValueList( $NameValueList );
 		        	$processed_attributes[] = $spec['attribute'];
-					$this->logger->info("specs: added product attribute: {$spec['name']} - " . join(', ',$values) );
+					WPLE()->logger->info("specs: added product attribute: {$spec['name']} - " . join(', ',$values) );
 	        	}
         	}
         }
@@ -1291,13 +1298,13 @@ class ItemBuilderModel extends WPL_Model {
         	// only add attribute to ItemSpecifics if not already present in variations or processed attributes
         	if ( ( ! in_array( $name, $this->variationAttributes ) ) && ( ! in_array( $name, $processed_attributes ) ) ) {
 	        	$ItemSpecifics->addNameValueList( $NameValueList );
-				$this->logger->info("attrib: added product attribute: {$name} - " . join(', ',$values) );
+				WPLE()->logger->info("attrib: added product attribute: {$name} - " . join(', ',$values) );
         	}
         }
 
         if ( count($ItemSpecifics) > 0 ) {
     		$item->setItemSpecifics( $ItemSpecifics );        	
-			$this->logger->info( count($ItemSpecifics) . " item specifics were added.");
+			WPLE()->logger->info( count($ItemSpecifics) . " item specifics were added.");
         }
 
 		return $item;
@@ -1350,7 +1357,7 @@ class ItemBuilderModel extends WPL_Model {
         }
 
 		$item->setItemCompatibilityList( $ItemCompatibilityList );        	
-		$this->logger->info( count($ItemCompatibilityList) . " compatible applications were added.");
+		WPLE()->logger->info( count($ItemCompatibilityList) . " compatible applications were added.");
 
 		return $item;
 
@@ -1362,7 +1369,7 @@ class ItemBuilderModel extends WPL_Model {
 		$item->Variations = new VariationsType();
 
 		// get product variations
-		// $listing = $this->lm->getItem( $id );
+		// $listing = ListingsModel::getItem( $id );
         $variations = ProductWrapper::getVariations( $listing['post_id'] );
 
         // get max_quantity from profile
@@ -1370,6 +1377,7 @@ class ItemBuilderModel extends WPL_Model {
 
 		// get variation attributes / item specifics map according to profile
 		$specifics_map = $profile_details['item_specifics'];
+    	$collectedMPNs = array();
 
         // loop each combination
         foreach ($variations as $var) {
@@ -1377,15 +1385,15 @@ class ItemBuilderModel extends WPL_Model {
         	$newvar = new VariationType();
 
         	// handle price
-			$newvar->StartPrice = $this->lm->applyProfilePrice( $var['price'], $profile_details['start_price'] );
+			$newvar->StartPrice = self::dbSafeFloatval( ListingsModel::applyProfilePrice( $var['price'], $profile_details['start_price'] ) );
 
 			// handle StartPrice on parent product level
 			if ( $product_start_price = get_post_meta( $listing['post_id'], '_ebay_start_price', true ) ) {
-				$newvar->StartPrice = $product_start_price;
+				$newvar->StartPrice = self::dbSafeFloatval( $product_start_price );
 			}
 			// handle StartPrice on variation level
 			if ( $product_start_price = get_post_meta( $var['post_id'], '_ebay_start_price', true ) ) {
-				$newvar->StartPrice = $product_start_price;
+				$newvar->StartPrice = self::dbSafeFloatval( $product_start_price );
 			}
 
         	// handle variation quantity - if no quantity set in profile
@@ -1516,6 +1524,8 @@ class ItemBuilderModel extends WPL_Model {
 	        	$VariationSpecifics->addNameValueList( $NameValueList );
 
 	        	$newvar->setVariationSpecifics( $VariationSpecifics );
+
+	        	$collectedMPNs[] = $product_mpn;
 			}
 
 
@@ -1547,6 +1557,19 @@ class ItemBuilderModel extends WPL_Model {
             }
 
         }
+
+		// add collected MPNs to tmp array
+		foreach ( $collectedMPNs as $value ) {
+			$name = 'MPN';
+
+	    	if ( ! is_array($this->tmpVariationSpecificsSet[ $name ]) ) {
+	        	$this->tmpVariationSpecificsSet[ $name ] = array();
+	    	}
+        	if ( ! in_array( $value, $this->tmpVariationSpecificsSet[ $name ], true ) ) {
+        		$this->tmpVariationSpecificsSet[ $name ][] = $value;	        		
+        	}
+        }
+
         // build VariationSpecificsSet
     	$VariationSpecificsSet = new NameValueListArrayType();
         foreach ($this->tmpVariationSpecificsSet as $name => $values) {
@@ -1567,7 +1590,7 @@ class ItemBuilderModel extends WPL_Model {
         foreach ($this->tmpVariationSpecificsSet as $key => $value) {
         	$this->variationAttributes[] = $key;
         }
-        $this->logger->debug('set variationAttributes: '.print_r($this->variationAttributes,1));
+        WPLE()->logger->debug('set variationAttributes: '.print_r($this->variationAttributes,1));
 
 
         // select *one* VariationSpecificsSet for Pictures set
@@ -1597,7 +1620,7 @@ class ItemBuilderModel extends WPL_Model {
 
 
 				if ( ! $image_url ) continue;
-				$this->logger->info( "using variation image: ".$image_url );
+				WPLE()->logger->info( "using variation image: ".$image_url );
 
 		    	$VariationSpecificPictureSet = new VariationSpecificPictureSetType();
     	    	$VariationSpecificPictureSet->setVariationSpecificValue( $VariationValue );
@@ -1616,7 +1639,7 @@ class ItemBuilderModel extends WPL_Model {
 							$size = get_option( 'wplister_default_image_size', 'full' );
 							$large_image_url = wp_get_attachment_image_src( $attachment_id, $size );
 			    			$image_url = $this->encodeUrl( $large_image_url[0] );
-							$this->logger->info( "found additional variation image: ".$image_url );
+							WPLE()->logger->info( "found additional variation image: ".$image_url );
 
 					        // upload variation images if enabled
 					        if ( $with_additional_images ) 
@@ -1624,7 +1647,7 @@ class ItemBuilderModel extends WPL_Model {
 
 					        // add variation image to picture set
 			        		$VariationSpecificPictureSet->addPictureURL( $image_url );
-							$this->logger->info( "added additional variation image: ".$image_url );
+							WPLE()->logger->info( "added additional variation image: ".$image_url );
         				}
         			}
         		}
@@ -1657,8 +1680,8 @@ class ItemBuilderModel extends WPL_Model {
 			$weight_minor = $first_variation['weight_minor'];
 			$dimensions   = $first_variation['dimensions'];
 
-			$item->ShippingDetails->CalculatedShippingRate->setWeightMajor( floatval( $weight_major ) );
-			$item->ShippingDetails->CalculatedShippingRate->setWeightMinor( floatval( $weight_minor ) );
+			$item->ShippingDetails->CalculatedShippingRate->setWeightMajor( self::dbSafeFloatval( $weight_major ) );
+			$item->ShippingDetails->CalculatedShippingRate->setWeightMinor( self::dbSafeFloatval( $weight_minor ) );
 
 			if ( trim( @$dimensions['width']  ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageWidth( $dimensions['width'] );
 			if ( trim( @$dimensions['length'] ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageLength( $dimensions['length'] );
@@ -1666,16 +1689,16 @@ class ItemBuilderModel extends WPL_Model {
 
 			// update ShippingPackageDetails with weight and dimensions of first variations
 			$shippingPackageDetails = new ShipPackageDetailsType();
-			$shippingPackageDetails->setWeightMajor( floatval( $weight_major) );
-			$shippingPackageDetails->setWeightMinor( floatval( $weight_minor) );
+			$shippingPackageDetails->setWeightMajor( self::dbSafeFloatval( $weight_major) );
+			$shippingPackageDetails->setWeightMinor( self::dbSafeFloatval( $weight_minor) );
 			if ( trim( @$dimensions['width']  ) != '' ) $shippingPackageDetails->setPackageWidth( $dimensions['width'] );
 			if ( trim( @$dimensions['length'] ) != '' ) $shippingPackageDetails->setPackageLength( $dimensions['length'] );
 			if ( trim( @$dimensions['height'] ) != '' ) $shippingPackageDetails->setPackageDepth( $dimensions['height'] );
 			$item->setShippingPackageDetails( $shippingPackageDetails );
 
 			// debug
-			$this->logger->info('first variations weight: '.print_r($weight,1));
-			$this->logger->info('first variations dimensions: '.print_r($dimensions,1));
+			WPLE()->logger->info('first variations weight: '.print_r($weight,1));
+			WPLE()->logger->info('first variations dimensions: '.print_r($dimensions,1));
 		}
 
 
@@ -1750,14 +1773,14 @@ class ItemBuilderModel extends WPL_Model {
         	}
 
         }
-		$this->logger->info("variation images: ".print_r($variation_images,1));
+		WPLE()->logger->info("variation images: ".print_r($variation_images,1));
 
         return $variation_images;
 	} // getVariationImages()
 
 
 	public function prepareSplitVariation( $id, $post_id, $listing ) {
-		$this->logger->info("prepareSplitVariation( $id ) - parent_id: ".$listing['parent_id']);
+		WPLE()->logger->info("prepareSplitVariation( $id ) - parent_id: ".$listing['parent_id']);
 		$parent_id = $listing['parent_id'];
 
 		// get (all) parent variations
@@ -1776,16 +1799,16 @@ class ItemBuilderModel extends WPL_Model {
         foreach ($single_variation['variation_attributes'] as $name => $value) {
         	$this->variationSplitAttributes[ $name ] = $value;
         }
-        $this->logger->debug('set variationSplitAttributes: '.print_r($this->variationSplitAttributes,1));
+        WPLE()->logger->debug('set variationSplitAttributes: '.print_r($this->variationSplitAttributes,1));
 
 	} // prepareSplitVariation()
 
 
 	public function flattenVariations( $id, $item, $post_id, $profile_details ) {
-		$this->logger->info("flattenVariations($id)");
+		WPLE()->logger->info("flattenVariations($id)");
 
 		// get product variations
-		// $p = $this->lm->getItem( $id );
+		// $p = ListingsModel::getItem( $id );
         $variations      = ProductWrapper::getVariations( $post_id );
         $this->variationAttributes = array();
         $total_stock = 0;
@@ -1814,9 +1837,9 @@ class ItemBuilderModel extends WPL_Model {
 		if ( intval($item->StartPrice->value) == 0 ) {
 
 			$start_price = $default_variation['price'];
-			$start_price = $this->lm->applyProfilePrice( $start_price, $profile_details['start_price'] );
-			$item->StartPrice->setTypeValue( $start_price );
-			$this->logger->info("using default variations price: ".print_r($item->StartPrice->value,1));
+			$start_price = ListingsModel::applyProfilePrice( $start_price, $profile_details['start_price'] );
+			$item->StartPrice->setTypeValue( self::dbSafeFloatval( $start_price ) );
+			WPLE()->logger->info("using default variations price: ".print_r($item->StartPrice->value,1));
 
 		}
 
@@ -1837,16 +1860,16 @@ class ItemBuilderModel extends WPL_Model {
 			$weight_minor = $default_variation['weight_minor'];
 			$dimensions   = $default_variation['dimensions'];
 
-			$item->ShippingDetails->CalculatedShippingRate->setWeightMajor( floatval( $weight_major ) );
-			$item->ShippingDetails->CalculatedShippingRate->setWeightMinor( floatval( $weight_minor ) );
+			$item->ShippingDetails->CalculatedShippingRate->setWeightMajor( self::dbSafeFloatval( $weight_major ) );
+			$item->ShippingDetails->CalculatedShippingRate->setWeightMinor( self::dbSafeFloatval( $weight_minor ) );
 
 			if ( trim( @$dimensions['width']  ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageWidth( $dimensions['width'] );
 			if ( trim( @$dimensions['length'] ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageLength( $dimensions['length'] );
 			if ( trim( @$dimensions['height'] ) != '' ) $item->ShippingDetails->CalculatedShippingRate->setPackageDepth( $dimensions['height'] );
 
 			// debug
-			$this->logger->info('default variations weight: '.print_r($weight,1));
-			$this->logger->info('default variations dimensions: '.print_r($dimensions,1));
+			WPLE()->logger->info('default variations weight: '.print_r($weight,1));
+			WPLE()->logger->info('default variations dimensions: '.print_r($dimensions,1));
 		}
 
 		// set ShippingPackageDetails
@@ -1858,8 +1881,8 @@ class ItemBuilderModel extends WPL_Model {
 			$dimensions   = $default_variation['dimensions'];
 
 			$shippingPackageDetails = new ShipPackageDetailsType();
-			$shippingPackageDetails->setWeightMajor( floatval( $weight_major) );
-			$shippingPackageDetails->setWeightMinor( floatval( $weight_minor) );
+			$shippingPackageDetails->setWeightMajor( self::dbSafeFloatval( $weight_major) );
+			$shippingPackageDetails->setWeightMinor( self::dbSafeFloatval( $weight_minor) );
 
 			if ( trim( @$dimensions['width']  ) != '' ) $shippingPackageDetails->setPackageWidth( $dimensions['width'] );
 			if ( trim( @$dimensions['length'] ) != '' ) $shippingPackageDetails->setPackageLength( $dimensions['length'] );
@@ -1931,11 +1954,11 @@ class ItemBuilderModel extends WPL_Model {
 	        	// tell eBay to delete this variation - only possible for items without sales
 	        	if ( isset($var['sold']) && ( intval($var['sold']) == 0 ) ) {
 		        	$newvar->setDelete( true );
-	                $this->logger->info('setDelete(true) - sold qty: '.$var['sold']);
+	                WPLE()->logger->info('setDelete(true) - sold qty: '.$var['sold']);
 	        	}
 
 				$item->Variations->addVariation( $newvar );
-                $this->logger->info('added variation to be deleted: '.print_r($newvar,1) );
+                WPLE()->logger->info('added variation to be deleted: '.print_r($newvar,1) );
 
                 //
                 // update VariationSpecificsSet - to avoid Error 21916608: Variation cannot be deleted during restricted revise
@@ -1991,7 +2014,7 @@ class ItemBuilderModel extends WPL_Model {
             // compare variation SKU
             if ( ! empty( $variation['sku'] ) ) {
             	if ( $variation['sku'] == $Variation->SKU ) {
-	                // $this->logger->info('found matching variation by SKU: '.$Variation->SKU);
+	                // WPLE()->logger->info('found matching variation by SKU: '.$Variation->SKU);
 	                return true;
             	}
             }
@@ -2003,21 +2026,21 @@ class ItemBuilderModel extends WPL_Model {
         		if ( isset( $variation_attributes[ $name ] ) ) {
 
         			if ( $variation_attributes[ $name ] == $val ) {
-	                	// $this->logger->info('found matching name value pair: '.print_r($spec,1) );
+	                	// WPLE()->logger->info('found matching name value pair: '.print_r($spec,1) );
         				// $found_match = true;
         			} else {
-	                	// $this->logger->info('variation spec value does not match with "'.$variation_attributes[ $name ].'": '.print_r($spec,1) );
+	                	// WPLE()->logger->info('variation spec value does not match with "'.$variation_attributes[ $name ].'": '.print_r($spec,1) );
         				$found_match = false;
         			}
 
         		} else {
-                	// $this->logger->info('variation spec name does not exist "'.$name.'" does not exist in attributes: '.print_r($variation_attributes,1) );
+                	// WPLE()->logger->info('variation spec name does not exist "'.$name.'" does not exist in attributes: '.print_r($variation_attributes,1) );
     				$found_match = false;        			
         		}
         	}
 
             if ( $found_match ) {
-                // $this->logger->info('found matching variation by attributes: '.print_r($Variation->VariationSpecifics->NameValueList,1) );
+                // WPLE()->logger->info('found matching variation by attributes: '.print_r($Variation->VariationSpecifics->NameValueList,1) );
                 return true;
             }
 
@@ -2054,7 +2077,7 @@ class ItemBuilderModel extends WPL_Model {
 			foreach ($item->Variations->Variation as $var) {
 				
 				// StartPrice must be greater than 0
-				if ( floatval($var->StartPrice) == 0 ) {
+				if ( self::dbSafeFloatval( $var->StartPrice ) == 0 ) {
 					$longMessage = __('Some variations seem to have no price.','wplister');
 					$success = false;
 				}
@@ -2114,7 +2137,7 @@ class ItemBuilderModel extends WPL_Model {
 			// item has no variations
 
 			// StartPrice must be greater than 0
-			if ( floatval($item->StartPrice) == 0 ) {
+			if ( self::dbSafeFloatval( $item->StartPrice->value ) == 0 ) {
 				$longMessage = __('Price can not be zero.','wplister');
 				$success = false;
 			}
@@ -2135,8 +2158,64 @@ class ItemBuilderModel extends WPL_Model {
 
 		}
 
+
+		// check if any required item specifics are missing
+		$primary_category_id = $item->PrimaryCategory->CategoryID;
+		$specifics           = EbayCategoriesModel::getItemSpecificsForCategory( $primary_category_id, $this->site_id, $this->account_id );
+
+		foreach ( $specifics as $req_spec ) {
+
+			// skip non-required specs
+			if ( ! $req_spec->MinValues ) continue;
+
+			// skip if Name already exists in ItemSpecifics
+			if ( self::thisNameExistsInNameValueList( $req_spec->Name, $item->ItemSpecifics->NameValueList ) ) {
+				continue;
+			}
+		
+			// skip if Name already exists in VariationSpecificsSet
+			if ( is_object( $item->Variations ) ) {
+				$VariationSpecificsSet = $item->Variations->getVariationSpecificsSet();
+				if ( self::thisNameExistsInNameValueList( $req_spec->Name, $VariationSpecificsSet->NameValueList ) ) {
+					continue;
+				}
+			}
+		
+			$DoesNotApplyText = WPLE_eBaySite::getSiteObj( $this->site_id )->DoesNotApplyText;
+			$DoesNotApplyText = empty( $DoesNotApplyText ) ? 'Does not apply' : $DoesNotApplyText;
+        
+			// // add missing item specifics
+			$NameValueList = new NameValueListType();
+			$NameValueList->setName ( $req_spec->Name  );
+			$NameValueList->setValue( $DoesNotApplyText );
+			$item->ItemSpecifics->addNameValueList( $NameValueList );
+
+			wple_show_message( '<b>Note:</b> Missing item specifics <b>'.$req_spec->Name.'</b> was set to "'.$DoesNotApplyText.'" in order to prevent listing errors.', 'warn' );
+		}
+
+		// check if any item specific have more values than allowed
+		foreach ( $specifics as $req_spec ) {
+
+			// skip specs without limit
+			if ( ! $req_spec->MaxValues ) continue;
+
+			// count values for this item specific
+			$number_of_values = self::countValuesForNameInNameValueList( $req_spec->Name, $item->ItemSpecifics->NameValueList );
+			if ( $number_of_values <= $req_spec->MaxValues ) continue;
+
+			// remove additional values from item specific
+			for ( $i=0; $i < sizeof( $item->ItemSpecifics->NameValueList ); $i++ ) { 
+				if ( $item->ItemSpecifics->NameValueList[ $i ]->Name != $req_spec->Name ) continue;
+				$values_array =	$item->ItemSpecifics->NameValueList[ $i ]->Value;
+				$item->ItemSpecifics->NameValueList[ $i ]->Value = reset( $values_array );
+			}
+
+			wple_show_message( '<b>Note:</b> The item specifics <b>'.$req_spec->Name.'</b> has '.$number_of_values.' values, but eBay allows only '.$req_spec->MaxValues.' value(s).<br>In order to prevent listing errors, additional values will be omitted.', 'warn' );
+		}
+
+
 		// ItemSpecifics values can't be longer than 50 characters
-		foreach ($item->ItemSpecifics->NameValueList as $spec) {
+		foreach ( $item->ItemSpecifics->NameValueList as $spec ) {
 			$values = is_array( $spec->Value ) ? $spec->Value : array( $spec->Value );
 			foreach ($values as $value) {
 				if ( strlen($value) > 50 ) {
@@ -2167,11 +2246,17 @@ class ItemBuilderModel extends WPL_Model {
 			// $success = false;
 		}
 
+		// omit price and shipping cost when revising an item with promotional sale enabled
+		if ( $reviseItem && ListingsModel::thisListingHasPromotionalSale( $this->listing_id ) ) {
+			$item->setStartPrice( null );
+			$item->setShippingDetails( null );
+			wple_show_message( __('Price and shipping were omitted since this item has promotional sale enabled.','wplister'), 'info' );
+		}
 
 		if ( ! $success && ! $this->is_ajax() ) {
-			$this->showMessage( $longMessage, 1, true );
+			wple_show_message( $longMessage, 'error' );
 		} elseif ( ( $longMessage != '' ) && ! $this->is_ajax() ) {
-			$this->showMessage( $longMessage, 2, true );
+			wple_show_message( $longMessage, 'warn' );
 		}
 
 		$htmlMsg  = '<div id="message" class="error" style="display:block !important;"><p>';
@@ -2198,10 +2283,40 @@ class ItemBuilderModel extends WPL_Model {
 	} /* end of checkItem() */
 
 
+	static public function thisNameExistsInNameValueList( $name, $NameValueList ) {
+		foreach ( $NameValueList as $listitem ) {
+			if ( $listitem->Name == $name ) {
+				// name exists, check value
+				if ( is_array( $listitem->Value ) ) {
+					if ( ! $listitem->Value[0]  &&  $listitem->Value[0] !== '0' ) return false;
+				} else {
+					if ( ! $listitem->Value     &&  $listitem->Value    !== '0' ) return false;
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	static public function countValuesForNameInNameValueList( $name, $NameValueList ) {
+		foreach ( $NameValueList as $listitem ) {
+			if ( $listitem->Name == $name ) {
+				// name found, count array values
+				if ( is_array( $listitem->Value ) ) {
+					return sizeof( $listitem->Value );
+				} else {
+					return 1;
+				}
+			}
+		}
+		return false;
+	}
+
+
 	public function getDynamicShipping( $price, $post_id ) {
 		
 		// return price if no mapping
-		if ( ! substr( $price, 0, 1 ) == '[' ) return floatval($price);
+		if ( ! substr( $price, 0, 1 ) == '[' ) return self::dbSafeFloatval($price);
 
 		// split values list			
 		$values = substr( $price, 1, -1 );
@@ -2219,35 +2334,47 @@ class ItemBuilderModel extends WPL_Model {
 				list( $limit, $price ) = explode(':', $val);
 				if ( $product_weight >= $limit) $shipping_cost = $price;
 			}
-			return floatval($shipping_cost);
+			return self::dbSafeFloatval($shipping_cost);
 		}
 		
 		// convert '0.00' to '0' - ebay api doesn't like '0.00'
 		if ( $price == 0 ) $price = '0';
 
-		return floatval($price);
+		return self::dbSafeFloatval($price);
 
+	}
+
+	// this version of floatval() makes sure to use decimal points, no matter what locale is set for PHP
+	static public function dbSafeFloatval( $value ) {
+		// WPLE()->logger->info('dbSafeFloatval()  IN: '.$value);
+
+		// set locale to use C style floats for numeric calculations
+		setlocale( LC_NUMERIC, 'C' );
+		$value = floatval( $value );
+
+		// WPLE()->logger->info('dbSafeFloatval() OUT: '.$value);
+	    return $value;
 	}
 
 
 	public function prepareTitleAsHTML( $title ) {
 
-		$this->logger->debug('prepareTitleAsHTML()  in: ' . $title );
+		WPLE()->logger->debug('prepareTitleAsHTML()  in: ' . $title );
 		$title = htmlentities( $title, ENT_QUOTES, 'UTF-8', false );
-		$this->logger->debug('prepareTitleAsHTML() out: ' . $title );
+		WPLE()->logger->debug('prepareTitleAsHTML() out: ' . $title );
 		return $title;
 	}
 
 
 	public function prepareTitle( $title ) {
 
-		$this->logger->info('prepareTitle()  in: ' . $title );
+		WPLE()->logger->info('prepareTitle()  in: ' . $title );
 		$title = html_entity_decode( $title, ENT_QUOTES, 'UTF-8' );
 
         // limit item title to 80 characters
-        if ( $this->mb_strlen($title) > 80 ) $title = $this->mb_substr( $title, 0, 77 ) . '...';
+        if ( $this->mb_strlen($title) > 80 ) $title = self::mb_substr( $title, 0, 77 ) . '...';
 
-		$this->logger->info('prepareTitle() out: ' . $title );
+		WPLE()->logger->info('prepareTitle() out: ' . $title );
 		return $title;
 	}
 	
@@ -2255,7 +2382,7 @@ class ItemBuilderModel extends WPL_Model {
 	public function getFinalHTML( $id, $ItemObj, $preview = false ) {
 		
 		// get item data
-		$item = $this->lm->getItem( $id );
+		$item = ListingsModel::getItem( $id );
 
 		// use latest post_content from product - moved to TemplatesModel
 		// $post = get_post( $item['post_id'] );
@@ -2276,9 +2403,9 @@ class ItemBuilderModel extends WPL_Model {
 		
 		// get item data
 		if ( $id ) {
-			$item = $this->lm->getItem( $id );
+			$item = ListingsModel::getItem( $id );
 		} else {
-			$item = $this->lm->getItemForPreview();
+			$item = WPLE_ListingQueryHelper::getItemForPreview();
 		}
 		if ( ! $item ) {
 			return '<div style="text-align:center; margin-top:5em;">You need to prepare at least one listing in order to preview a listing template.</div>';
@@ -2329,8 +2456,8 @@ class ItemBuilderModel extends WPL_Model {
 				$imageID = str_replace('ngg-', '', $thumbnail_id);
 				$picture = nggdb::find_image($imageID);
 				$image_url = $picture->imageURL;
-				// $this->logger->info( "NGG - picture: " . print_r($picture,1) );
-				$this->logger->info( "NGG - image_url: " . print_r($image_url,1) );
+				// WPLE()->logger->info( "NGG - picture: " . print_r($picture,1) );
+				WPLE()->logger->info( "NGG - image_url: " . print_r($image_url,1) );
 			}
 		}
 
@@ -2364,7 +2491,7 @@ class ItemBuilderModel extends WPL_Model {
 			  AND post_parent = %s
 			ORDER BY menu_order
 		", $id ) );
-		$this->logger->debug( "getProductImagesURL( $id ) : " . print_r($results,1) );
+		WPLE()->logger->debug( "getProductImagesURL( $id ) : " . print_r($results,1) );
         #echo "<pre>";print_r($results);echo"</pre>";#die();
 
 		// fetch images using default size
@@ -2399,7 +2526,7 @@ class ItemBuilderModel extends WPL_Model {
 				if ( $url && ! in_array($url, $images) ) $images[] = $url;
 			}
 			
-			$this->logger->info( "found WC2 product gallery images for product #$id " . print_r($images,1) );
+			WPLE()->logger->info( "found WC2 product gallery images for product #$id " . print_r($images,1) );
 		}
 
 		$product_images = array();

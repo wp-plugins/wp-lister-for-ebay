@@ -181,13 +181,12 @@ class WPLister_Toolbar  {
 
 
 		// get all items
-		$lm = new ListingsModel();
-		$listings = $lm->getAllListingsFromPostID( $post_id );
+		$listings = WPLE_ListingQueryHelper::getAllListingsFromPostID( $post_id );
 
 		if ( sizeof($listings) > 0 ) {
 
-			$ebay_id = $lm->getEbayIDFromPostID( $post_id );
-			$url = $lm->getViewItemURLFromPostID( $post_id );
+			$ebay_id = WPLE_ListingQueryHelper::getEbayIDFromPostID( $post_id );
+			$url     = WPLE_ListingQueryHelper::getViewItemURLFromPostID( $post_id );
 
 			// View on eBay link
 			$args = array(

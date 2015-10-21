@@ -4,14 +4,14 @@ class WPL_Model {
 	
 	const OptionPrefix = 'wplister_';
 
-	var $logger;
+	// var $logger;
 	public $result;
 	public $site_id;
 	public $account_id;
 	
 	public function __construct() {
-		global $wpl_logger;
-		$this->logger = &$wpl_logger;
+		// deprecated 
+		// $this->logger = WPLE()->logger;
 	}
 
 	// function loadEbayClasses()
@@ -48,18 +48,18 @@ class WPL_Model {
 
 		// attach Logger if log level is debug or greater
 		// if ( get_option('wplister_log_level') > 6 ) {
-		// 	$this->_cs->attachLogger( new EbatNs_Logger( false, $this->logger->file ) );
+		// 	$this->_cs->attachLogger( new EbatNs_Logger( false, WPLE()->logger->file ) );
 		// }
 
 	}
 
 	// flexible object encoder
-	public function encodeObject( $obj ) {
+	static public function encodeObject( $obj ) {
 
 		$str = json_encode( $obj );
-		#$this->logger->info('json_encode - input: '.print_r($obj,1));
-		#$this->logger->info('json_encode - output: '.$str);
-		#$this->logger->info('json_last_error(): '.json_last_error() );
+		#WPLE()->logger->info('json_encode - input: '.print_r($obj,1));
+		#WPLE()->logger->info('json_encode - output: '.$str);
+		#WPLE()->logger->info('json_last_error(): '.json_last_error() );
 
 		if ( $str == '{}' ) return serialize( $obj );
 		else return $str;
@@ -139,7 +139,7 @@ class WPL_Model {
 		if ( ! is_object($res) ) {
 			echo 'Unexpected error: eBay response is invalid.<br>';
 			echo "<pre>";print_r($res);echo"</pre>";
-			$this->logger->error('eBay response is not an object: '.print_r($res,1));
+			WPLE()->logger->error('eBay response is not an object: '.print_r($res,1));
 			return false;
 		}
 
@@ -265,6 +265,8 @@ class WPL_Model {
 				$longMessage .= 'You should wait a few hours and see if this issue disappears, but if it persists you should consider moving to a better hosting provider.';
 				$longMessage .= '<br>';
 				$longMessage .= 'If your site uses SSL, make sure that static content like images is accessible both with and without SSL. eBay is not able to fetch images from SSL-only sites.';
+				$longMessage .= '<br>';
+				$longMessage .= 'Alternatively visit the developer settings page and set the <i>EPS transfer mode</i> option to active. This will send the image data directly instead of an URL and should fix uploading image on SSL sites.';
 			}
 			
 			// #21919028 - Error: Portions of this listing cannot be revised if the item has bid or active Best Offers or is ending in 12 hours.
@@ -314,7 +316,7 @@ class WPL_Model {
 			}
 			
 			// #90002 - soap-fault: org.xml.sax.SAXParseException: The element type "Description" must be terminated by the matching end-tag "</Description>".
-			if ( $error->getErrorCode() == 90002 ) { 
+			if ( $error->getErrorCode() == 90002 && strpos( $longMessage, 'Description' ) ) { 
 				$longMessage .= '<br><br>'. '<b>Why am I seeing this message?</b>'.'<br>';
 				$longMessage .= 'Your listing template probably contains CDATA tags which can not be used in a listing description.<br>';
 				$longMessage .= 'Please remove all CDATA tags from your listing template and try again - or contact support. ';
@@ -416,8 +418,8 @@ class WPL_Model {
 		// // save last result - except for GetItem calls which usually follow ReviseItem calls
 		// if ( 'GetItemResponseType' != get_class($res) )
 		// 	$this->save_last_result();
-		// // $this->logger->info('handleResponse() - type: '.get_class($res));
-		// // $this->logger->info('handleResponse() - result: '.print_r($this->result,1));
+		// // WPLE()->logger->info('handleResponse() - type: '.get_class($res));
+		// // WPLE()->logger->info('handleResponse() - result: '.print_r($this->result,1));
 
 		return $success;
 
@@ -462,7 +464,7 @@ class WPL_Model {
 	}
 
 	// custom mb_strlen implementation
-	public function mb_strlen( $string ) {
+	static public function mb_strlen( $string ) {
 
 		// use mb_strlen() if available
 		if ( function_exists('mb_strlen') ) return mb_strlen( $string );
@@ -474,7 +476,7 @@ class WPL_Model {
 	}
 
 	// custom mb_substr implementation
-	public function mb_substr( $string, $start, $length ) {
+	static public function mb_substr( $string, $start, $length ) {
 
 		// use mb_substr() if available
 		if ( function_exists('mb_substr') ) return mb_substr( $string, $start, $length );
@@ -490,7 +492,7 @@ class WPL_Model {
 	}
 
 	// convert 2013-02-14T08:00:58.000Z to 2013-02-14 08:00:58
-	public function convertEbayDateToSql( $ebay_date ) {
+	static public function convertEbayDateToSql( $ebay_date ) {
 		$search = array( 'T', '.000Z' );
 		$replace = array( ' ', '' );
 		$sql_date = str_replace( $search, $replace, $ebay_date );

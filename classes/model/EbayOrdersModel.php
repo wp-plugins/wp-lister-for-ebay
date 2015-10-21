@@ -7,6 +7,9 @@
  */
 
 class EbayOrdersModel extends WPL_Model {
+
+	const TABLENAME = 'ebay_orders';
+
 	var $_session;
 	var $_cs;
 
@@ -26,8 +29,8 @@ class EbayOrdersModel extends WPL_Model {
 	var $current_lastdate;
 
 	function EbayOrdersModel() {
-		global $wpl_logger;
-		$this->logger = &$wpl_logger;
+		// global $wpl_logger;
+		// $this->logger = &$wpl_logger;
 
 		global $wpdb;
 		$this->tablename = $wpdb->prefix . 'ebay_orders';
@@ -35,7 +38,7 @@ class EbayOrdersModel extends WPL_Model {
 
 
 	function updateOrders( $session, $days = null, $current_page = 1, $order_ids = false ) {
-		$this->logger->info('*** updateOrders('.$days.') - page '.$current_page);
+		WPLE()->logger->info('*** updateOrders('.$days.') - page '.$current_page);
 
 		$this->initServiceProxy($session);
 
@@ -51,18 +54,18 @@ class EbayOrdersModel extends WPL_Model {
 		// check if we need to calculate lastdate
 		if ( $this->current_lastdate ) {
 			$lastdate = $this->current_lastdate;
-			$this->logger->info('used current_lastdate from last run: '.$lastdate);
+			WPLE()->logger->info('used current_lastdate from last run: '.$lastdate);
 		} else {
 
 			// period 30 days, which is the maximum allowed
 			$now = time();
 			$lastdate = $this->getDateOfLastOrder( $this->account_id );
-			$this->logger->info("getDateOfLastOrder( {$this->account_id} ) returned: ".$lastdate);
+			WPLE()->logger->info("getDateOfLastOrder( {$this->account_id} ) returned: ".$lastdate);
 			if ($lastdate) $lastdate = mysql2date('U', $lastdate);
 
 			// if last date is older than 30 days, fall back to default
 			if ( $lastdate < $now - 3600 * 24 * 30 ) {
-				$this->logger->info('resetting lastdate - fall back default ');
+				WPLE()->logger->info('resetting lastdate - fall back default ');
 				$lastdate = false;
 			} 
 
@@ -83,7 +86,7 @@ class EbayOrdersModel extends WPL_Model {
 		} elseif ( $days ) {
 			$req->NumberOfDays  = $days;
 			$this->NumberOfDays = $days;
-			$this->logger->info('NumberOfDays: '.$req->NumberOfDays);
+			WPLE()->logger->info('NumberOfDays: '.$req->NumberOfDays);
 
 		// default: orders since last change
 		} elseif ( $lastdate ) {
@@ -91,16 +94,16 @@ class EbayOrdersModel extends WPL_Model {
 			$req->ModTimeTo    = gmdate( 'Y-m-d H:i:s', time() );
 			$this->ModTimeFrom = $req->ModTimeFrom;
 			$this->ModTimeTo   = $req->ModTimeTo;
-			$this->logger->info('lastdate: '.$lastdate);
-			$this->logger->info('ModTimeFrom: '.$req->ModTimeFrom);
-			$this->logger->info('ModTimeTo: '.$req->ModTimeTo);
+			WPLE()->logger->info('lastdate: '.$lastdate);
+			WPLE()->logger->info('ModTimeFrom: '.$req->ModTimeFrom);
+			WPLE()->logger->info('ModTimeTo: '.$req->ModTimeTo);
 
 		// fallback: one day (max allowed by ebay: 30 days)
 		} else {
 			$days = 1;
 			$req->NumberOfDays  = $days;
 			$this->NumberOfDays = $days;
-			$this->logger->info('NumberOfDays (fallback): '.$req->NumberOfDays);
+			WPLE()->logger->info('NumberOfDays (fallback): '.$req->NumberOfDays);
 		}
 
 
@@ -118,7 +121,7 @@ class EbayOrdersModel extends WPL_Model {
 
 
 		// get orders (single page)
-		$this->logger->info('fetching orders - page '.$this->current_page);
+		WPLE()->logger->info('fetching orders - page '.$this->current_page);
 		$res = $this->_cs->GetOrders( $req );
 
 		$this->total_pages = $res->PaginationResult->TotalNumberOfPages;
@@ -132,13 +135,13 @@ class EbayOrdersModel extends WPL_Model {
 
 		// handle response and check if successful
 		if ( $this->handleResponse($res) ) {
-			$this->logger->info( "*** Orders updated successfully." );
-			// $this->logger->info( "*** PaginationResult:".print_r($res->PaginationResult,1) );
-			// $this->logger->info( "*** processed response:".print_r($res,1) );
+			WPLE()->logger->info( "*** Orders updated successfully." );
+			// WPLE()->logger->info( "*** PaginationResult:".print_r($res->PaginationResult,1) );
+			// WPLE()->logger->info( "*** processed response:".print_r($res,1) );
 
-			$this->logger->info( "*** current_page: ".$this->current_page );
-			$this->logger->info( "*** total_pages: ".$this->total_pages );
-			$this->logger->info( "*** total_items: ".$this->total_items );
+			WPLE()->logger->info( "*** current_page: ".$this->current_page );
+			WPLE()->logger->info( "*** total_pages: ".$this->total_pages );
+			WPLE()->logger->info( "*** total_items: ".$this->total_items );
 
 			// fetch next page recursively - only in days mode
 			if ( $res->HasMoreOrders ) {
@@ -148,7 +151,7 @@ class EbayOrdersModel extends WPL_Model {
 
 
 		} else {
-			$this->logger->error( "Error on orders update".print_r( $res, 1 ) );			
+			WPLE()->logger->error( "Error on orders update".print_r( $res, 1 ) );			
 		}
 	}
 
@@ -164,8 +167,8 @@ class EbayOrdersModel extends WPL_Model {
 	// 	$req->ItemID 		= $order['item_id'];
 	// 	$req->OrderID = $order['order_id'];
 
-	// 	$this->logger->info('ItemID: '.$req->ItemID);
-	// 	$this->logger->info('OrderID: '.$req->OrderID);
+	// 	WPLE()->logger->info('ItemID: '.$req->ItemID);
+	// 	WPLE()->logger->info('OrderID: '.$req->OrderID);
 
 	// 	// $req->DetailLevel = $Facet_DetailLevelCodeType->ReturnAll;
 	// 	$req->setDetailLevel('ReturnAll');
@@ -183,9 +186,9 @@ class EbayOrdersModel extends WPL_Model {
 	// 		$Order->Item = $res->Item;
 	// 		$this->handleOrderType( 'OrderType', $Order );
 
-	// 		$this->logger->info( sprintf("Order %s updated successfully.", $req->OrderID ) );
+	// 		WPLE()->logger->info( sprintf("Order %s updated successfully.", $req->OrderID ) );
 	// 	} else {
-	// 		$this->logger->error( "Error on orders update".print_r( $res, 1 ) );			
+	// 		WPLE()->logger->error( "Error on orders update".print_r( $res, 1 ) );			
 	// 	}
 	// }
 
@@ -193,18 +196,18 @@ class EbayOrdersModel extends WPL_Model {
 	// 	//#type $Detail PaginationResultType
 	// 	$this->total_pages = $Detail->TotalNumberOfPages;
 	// 	$this->total_items = $Detail->TotalNumberOfEntries;
-	// 	$this->logger->info( 'handlePaginationResultType()'.print_r( $Detail, 1 ) );
+	// 	WPLE()->logger->info( 'handlePaginationResultType()'.print_r( $Detail, 1 ) );
 	// }
 
 	function handleOrderType( $type, $Detail ) {
 		//global $wpdb;
 		//#type $Detail OrderType
-		// $this->logger->info( 'handleOrderType()'.print_r( $Detail, 1 ) );
+		// WPLE()->logger->info( 'handleOrderType()'.print_r( $Detail, 1 ) );
 
 		// map OrderType to DB columns
 		$data = $this->mapItemDetailToDB( $Detail );
 		if (!$data) return true;
-		// $this->logger->info( 'handleOrderType() mapped data: '.print_r( $data, 1 ) );
+		// WPLE()->logger->info( 'handleOrderType() mapped data: '.print_r( $data, 1 ) );
 
 		$this->insertOrUpdate( $data, $Detail );
 
@@ -220,10 +223,10 @@ class EbayOrdersModel extends WPL_Model {
 		if ( $order ) {
 
 			// update existing order
-			$this->logger->info( 'update order #'.$data['order_id'] );
+			WPLE()->logger->info( 'update order #'.$data['order_id'] );
 			$result = $wpdb->update( $this->tablename, $data, array( 'order_id' => $data['order_id'] ) );
 			if ( $result === false ) {
-				$this->logger->error( 'failed to update order - MySQL said: '.$wpdb->last_error );
+				WPLE()->logger->error( 'failed to update order - MySQL said: '.$wpdb->last_error );
 				wple_show_message( 'Failed to update order #'.$data['order_id'].' - MySQL said: '.$wpdb->last_error, 'error' );
 			}
 			$insert_id = $order['id'];
@@ -234,10 +237,10 @@ class EbayOrdersModel extends WPL_Model {
 		} else {
 		
 			// create new order
-			$this->logger->info( 'insert order #'.$data['order_id'] );
+			WPLE()->logger->info( 'insert order #'.$data['order_id'] );
 			$result = $wpdb->insert( $this->tablename, $data );
 			if ( $result === false ) {
-				$this->logger->error( 'insert order failed - MySQL said: '.$wpdb->last_error );
+				WPLE()->logger->error( 'insert order failed - MySQL said: '.$wpdb->last_error );
 				$this->addToReport( 'error', $data, false, $wpdb->last_error );
 				wple_show_message( 'Failed to insert order #'.$data['order_id'].' - MySQL said: '.$wpdb->last_error, 'error' );
 				return false;
@@ -245,7 +248,7 @@ class EbayOrdersModel extends WPL_Model {
 			$Details       = maybe_unserialize( $data['details'] );
 			$order_post_id = false;
 			$insert_id     = $wpdb->insert_id;
-			// $this->logger->info( 'insert_id: '.$insert_id );
+			// WPLE()->logger->info( 'insert_id: '.$insert_id );
 
 			// process order line items
 			$tm = new TransactionsModel();
@@ -307,7 +310,7 @@ class EbayOrdersModel extends WPL_Model {
 		$_order = new WC_Order();
 		if ( $_order->get_order( $post_id ) ) {
 
-			// $this->logger->info( 'post_status for order ID '.$post_id.' is '.$_order->post_status );
+			// WPLE()->logger->info( 'post_status for order ID '.$post_id.' is '.$_order->post_status );
 			if ( $_order->post_status == 'trash' ) return false;
 
 			return $_order->id;
@@ -321,6 +324,7 @@ class EbayOrdersModel extends WPL_Model {
 	// update listing sold quantity and status
 	function processListingItem( $order_id, $ebay_id, $quantity_purchased, $data, $VariationSpecifics, $Transaction ) {
 		global $wpdb;
+		$has_been_replenished = false;
 
 		// check if this listing exists in WP-Lister
 		$listing_id = $wpdb->get_var( $wpdb->prepare("SELECT id FROM {$wpdb->prefix}ebay_auctions WHERE ebay_id = %s", $ebay_id ) );
@@ -351,14 +355,20 @@ class EbayOrdersModel extends WPL_Model {
 
 
 		// mark listing as sold when last item is sold - unless Out Of Stock Control (oosc) is enabled
-		// $lm = new ListingsModel();
         if ( ! ListingsModel::thisAccountUsesOutOfStockControl( $data['account_id'] ) ) {
-			if ( $quantity_sold == $quantity_total ) {
-				$wpdb->update( $wpdb->prefix.'ebay_auctions', 
-					array( 'status' => 'sold', 'date_finished' => $data['date_created'], ), 
-					array( 'ebay_id' => $ebay_id ) 
-				);
-				$this->logger->info( 'marked item #'.$ebay_id.' as SOLD ');
+			if ( $quantity_sold == $quantity_total && ! $has_been_replenished ) {
+
+                // make sure this product is out of stock before we mark listing as sold - free version excluded
+                $listing_item = ListingsModel::getItem( $listing_id );
+                if ( WPLISTER_LIGHT || ListingsModel::checkStockLevel( $listing_item ) == false ) {
+
+					$wpdb->update( $wpdb->prefix.'ebay_auctions', 
+						array( 'status' => 'sold', 'date_finished' => $data['date_created'], ), 
+						array( 'ebay_id' => $ebay_id ) 
+					);
+					WPLE()->logger->info( 'marked item #'.$ebay_id.' as SOLD ');
+
+				}
 			}
         }
 
@@ -390,7 +400,7 @@ class EbayOrdersModel extends WPL_Model {
 
 		// prevent fatal error if $history is not an array
 		if ( ! is_array( $history ) ) {
-			$this->logger->error( "invalid history value in EbayOrdersModel::addHistory(): ".$history);
+			WPLE()->logger->error( "invalid history value in EbayOrdersModel::addHistory(): ".$history);
 
 			// build history record
 			$rec = new stdClass();
@@ -420,8 +430,8 @@ class EbayOrdersModel extends WPL_Model {
 	function mapItemDetailToDB( $Detail ) {
 		//#type $Detail OrderType
 
-		$data['date_created']              = $this->convertEbayDateToSql( $Detail->CreatedTime );
-		$data['LastTimeModified']          = $this->convertEbayDateToSql( $Detail->CheckoutStatus->LastModifiedTime );
+		$data['date_created']              = self::convertEbayDateToSql( $Detail->CreatedTime );
+		$data['LastTimeModified']          = self::convertEbayDateToSql( $Detail->CheckoutStatus->LastModifiedTime );
 
 		$data['order_id']            	   = $Detail->OrderID;
 		$data['total']                     = $Detail->Total->value;
@@ -489,7 +499,7 @@ class EbayOrdersModel extends WPL_Model {
 
 			// check if sites match - skip if they don't
 			if ( $Transaction->TransactionSiteID != $wplister_site ) {
-				$this->logger->info( "skipped order #".$Detail->OrderID." from foreign site #".$Detail->Item->Site." / ".$Transaction->TransactionSiteID );			
+				WPLE()->logger->info( "skipped order #".$Detail->OrderID." from foreign site #".$Detail->Item->Site." / ".$Transaction->TransactionSiteID );			
 				$this->addToReport( 'skipped', $data );
 				return false;						
 			}
@@ -504,8 +514,8 @@ class EbayOrdersModel extends WPL_Model {
 
 			// skip if order date is older
 			if ( $this_order_date_created_ts < $first_order_date_created_ts ) {
-				$this->logger->info( "skipped old order #".$Detail->OrderID." created at ".$data['date_created'] );			
-				$this->logger->info( "timestamps: $this_order_date_created_ts / ".date('Y-m-d H:i:s',$this_order_date_created_ts)." (order)  <  $first_order_date_created_ts ".date('Y-m-d H:i:s',$first_order_date_created_ts)." (ref)" );			
+				WPLE()->logger->info( "skipped old order #".$Detail->OrderID." created at ".$data['date_created'] );			
+				WPLE()->logger->info( "timestamps: $this_order_date_created_ts / ".date('Y-m-d H:i:s',$this_order_date_created_ts)." (order)  <  $first_order_date_created_ts ".date('Y-m-d H:i:s',$first_order_date_created_ts)." (ref)" );			
 				$this->addToReport( 'skipped', $data );
 				return false;						
 			}
@@ -514,9 +524,9 @@ class EbayOrdersModel extends WPL_Model {
 
 
         // save GetOrders reponse in details
-		$data['details'] = $this->encodeObject( $Detail );
+		$data['details'] = self::encodeObject( $Detail );
 
-		$this->logger->info( "IMPORTING order #".$Detail->OrderID );							
+		WPLE()->logger->info( "IMPORTING order #".$Detail->OrderID );							
 
 		return $data;
 	}
@@ -634,11 +644,25 @@ class EbayOrdersModel extends WPL_Model {
 		), ARRAY_A );
 
 		// decode OrderType object with eBay classes loaded
-		$item['details'] = $this->decodeObject( $item['details'], false, true );
+		$item['details'] = self::decodeObject( $item['details'], false, true );
 		$item['history'] = maybe_unserialize( $item['history'] );
 		$item['items']   = maybe_unserialize( $item['items'] );
 
 		return $item;
+	}
+
+	static function getWhere( $column, $value ) {
+		global $wpdb;	
+		$table = $wpdb->prefix . self::TABLENAME;
+
+		$items = $wpdb->get_results( $wpdb->prepare("
+			SELECT *
+			FROM $table
+			WHERE $column = %s
+		", $value 
+		), OBJECT_K);		
+
+		return $items;
 	}
 
 	function getOrderByOrderID( $order_id ) {
@@ -728,7 +752,7 @@ class EbayOrdersModel extends WPL_Model {
 
 		// regard ignore_orders_before_ts timestamp if set
 		if ( $ts = get_option('ignore_orders_before_ts') ) {
-			$this->logger->info( "getDateOfFirstOrder() - using ignore_orders_before_ts: $ts (raw)");
+			WPLE()->logger->info( "getDateOfFirstOrder() - using ignore_orders_before_ts: $ts (raw)");
 			return $ts;
 		}
 
@@ -849,7 +873,7 @@ class EbayOrdersModel extends WPL_Model {
 		}
 
 		// foreach( $items as &$profile ) {
-		// 	$profile['details'] = $this->decodeObject( $profile['details'] );
+		// 	$profile['details'] = self::decodeObject( $profile['details'] );
 		// }
 
 		return $items;

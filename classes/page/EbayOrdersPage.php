@@ -29,7 +29,7 @@ class EbayOrdersPage extends WPL_Page {
 	}
 
 	public function handleActionsOnInit() {
-        $this->logger->debug("handleActionsOnInit()");
+        WPLE()->logger->debug("handleActionsOnInit()");
 
 		// these actions have to wait until 'init'
 		if ( $this->requestAction() == 'view_ebay_order_details' ) {
@@ -168,10 +168,10 @@ class EbayOrdersPage extends WPL_Page {
 			$msg .= '<br>';
 			$msg .= 'This can happen when the scheduled order update is triggered twice at the same time - which is a rare <a href="http://wordpress.stackexchange.com/a/122805" target="_blank">race condition issue</a> in the WordPress scheduling system WP-Cron.';
 			$msg .= '<br><br>';
-			$msg .= 'To prevent this from happening again, it is recommended to use the ';
-			$msg .= '<a href="http://wordpress.org/plugins/wp-cron-control/" target="_blank">WP-Cron Control</a> ';
-			$msg .= 'plugin to set up a dedicated cron job on your server and ';
-			$msg .= '<a href="http://bloglow.com/tutorials/how-to-and-why-you-should-disable-wordpress-cron/" target="_blank">disable WP-Cron entirely</a>.';
+			$msg .= 'To prevent this from happening again, it is highly recommended to use an ';
+			$msg .= '<a href="http://docs.wplab.com/article/99-external-cron-job-setup" target="_blank">external cron job</a> ';
+			$msg .= 'instead of relying on WP-Cron to trigger background actions for WP-Lister. ';
+			$msg .= 'Please read that FAQ article, then set the update interval to "use external cron job" and follow the instructions. If you are still having issues after doing so, you might have to move to a better hosting provider.';
 			$msg .= '</p>';
 
 
@@ -284,14 +284,9 @@ class EbayOrdersPage extends WPL_Page {
 		// get WooCommerce order
 		$wc_order_notes = $ebay_order['post_id'] ? $this->get_order_notes( $ebay_order['post_id'] ) : false;
 
-		// get auction item record
-		// $listingsModel = new ListingsModel();		
-		// $auction_item = $listingsModel->getItemByEbayID( $ebay_order['item_id'] );
-		
 		$aData = array(
 			'ebay_order'				=> $ebay_order,
 			'wc_order_notes'			=> $wc_order_notes,
-			// 'auction_item'			=> $auction_item
 		);
 		$this->display( 'order_details', $aData );
 		

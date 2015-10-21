@@ -11,8 +11,7 @@ class WPLister_Install {
  
 	public function onWpActivatePlugin( $networkwide ) {
 		global $wpdb;
-        // global $wpl_logger;
-        // $wpl_logger = new WPL_Logger();
+
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
 	    // check for multisite installation
@@ -102,8 +101,7 @@ class WPLister_Install {
 	}
 	
 	public function createFolders() {
-		// global $wpl_logger;
-		// $wpl_logger->info('creating wp-content/uploads/wp-lister/templates etc.');		
+		// WPLE()->logger->info('creating wp-content/uploads/wp-lister/templates etc.');		
 
 		// make subdirectories in wp-content/uploads
 		$uploads = wp_upload_dir();
@@ -115,18 +113,16 @@ class WPLister_Install {
 		$tpldir = $wpldir . '/templates';
 		if ( !is_dir($tpldir) ) mkdir($tpldir);
 
-		// $wpl_logger->info('template folder: '.$tpldir);		
+		// WPLE()->logger->info('template folder: '.$tpldir);		
 	
 	}
 	
 	public function createTables() {
 		global $wpdb;
-        global $wpl_logger;
-        // $wpl_logger = new WPL_Logger();
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
 
-		$wpl_logger->info("creating table {$wpdb->prefix}ebay_auctions");		
+		WPLE()->logger->info("creating table {$wpdb->prefix}ebay_auctions");		
 
 		// create table: ebay_auctions
 		$sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ebay_auctions` (
@@ -157,8 +153,8 @@ class WPLister_Install {
 		#dbDelta($sql);
 		$result = $wpdb->query($sql);
 
-		$wpl_logger->info( $sql );		
-		$wpl_logger->info( $wpdb->last_error );		
+		WPLE()->logger->info( $sql );		
+		WPLE()->logger->info( $wpdb->last_error );		
 		
 		
 		// create table: ebay_categories

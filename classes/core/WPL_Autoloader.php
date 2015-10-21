@@ -15,20 +15,22 @@ class WPL_Autoloader {
 	protected static $class_cache = array(
 
 		// core
-		'WPLE_MemCache'      	=> '/classes/core/WPL_MemCache.php',
-		'WPLE_AdminMessages'   	=> '/classes/core/WPL_AdminMessages.php',
+		'WPLE_MemCache'      		=> '/classes/core/WPL_MemCache.php',
+		'WPLE_AdminMessages'   		=> '/classes/core/WPL_AdminMessages.php',
 
 		// helper
-		'WPLE_UpgradeHelper'   	=> '/classes/helper/WPLE_UpgradeHelper.php',
+		'WPLE_UpgradeHelper'   		=> '/classes/helper/WPLE_UpgradeHelper.php',
+		'WPLE_ListingQueryHelper'   => '/classes/helper/WPLE_ListingQueryHelper.php',
+		'WPLE_ValidationHelper'     => '/classes/helper/WPLE_ValidationHelper.php',
 
 		// integration
-		'ProductWrapper'   		=> '/classes/integration/ProductWrapper_woo.php',
-		'OrderWrapper'   		=> '/classes/integration/OrderWrapper_woo.php',
-		'WC_Product_Ebay'   	=> '/classes/integration/WooEbayProduct.php',
+		'ProductWrapper'   			=> '/classes/integration/ProductWrapper_woo.php',
+		'OrderWrapper'   			=> '/classes/integration/OrderWrapper_woo.php',
+		'WC_Product_Ebay'   		=> '/classes/integration/WooEbayProduct.php',
 
 		// models		
-		'WPLE_eBaySite'         => '/classes/model/eBaySite.php',
-		'WPLE_eBayAccount'      => '/classes/model/eBayAccount.php',
+		'WPLE_eBaySite'         	=> '/classes/model/eBaySite.php',
+		'WPLE_eBayAccount'      	=> '/classes/model/eBayAccount.php',
 
 	);
 

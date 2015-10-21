@@ -25,8 +25,8 @@ class EbayCategoriesModel extends WPL_Model {
 
 	function EbayCategoriesModel()
 	{
-		global $wpl_logger;
-		$this->logger = &$wpl_logger;
+		// global $wpl_logger;
+		// $this->logger = &$wpl_logger;
 
 		global $wpdb;
 		$this->tablename = $wpdb->prefix . self::table;
@@ -35,7 +35,7 @@ class EbayCategoriesModel extends WPL_Model {
 	function initCategoriesUpdate( $session, $site_id )
 	{
 		$this->initServiceProxy($session);
-		$this->logger->info("initCategoriesUpdate( $site_id )");
+		WPLE()->logger->info("initCategoriesUpdate( $site_id )");
 
 		// set handler to receive CategoryType items from result
 		$this->_cs->setHandler('CategoryType', array(& $this, 'storeCategory'));	
@@ -113,7 +113,7 @@ class EbayCategoriesModel extends WPL_Model {
         echo $wpdb->last_error;
 		foreach ($rows as $row)
 		{
-			$this->logger->info('adding task for category #'.$row['cat_id'] . ' - '.$row['cat_name']);
+			WPLE()->logger->info('adding task for category #'.$row['cat_id'] . ' - '.$row['cat_name']);
 
 			$task = array( 
 				'task'        => 'loadEbayCategoriesBranch', 
@@ -130,7 +130,7 @@ class EbayCategoriesModel extends WPL_Model {
 	function loadEbayCategoriesBranch( $cat_id, $session, $site_id )
 	{
 		$this->initServiceProxy($session);
-		$this->logger->info("loadEbayCategoriesBranch() - cat_id: $cat_id, site_id: $site_id" );
+		WPLE()->logger->info("loadEbayCategoriesBranch() - cat_id: $cat_id, site_id: $site_id" );
 
 		// handle eBay Motors category (US only)
 		if ( $cat_id == 6000 && $site_id == 0 ) $site_id = 100;
@@ -148,53 +148,7 @@ class EbayCategoriesModel extends WPL_Model {
 		$req->CategoryParent = $cat_id;
 		$this->_cs->GetCategories($req);
 
-	}
-	
-	function downloadCategories($session, $site_id)
-	{
-		$this->initServiceProxy($session);
-		$this->logger->info('downloadCategories() - DEPRECATED');
-
-		// // set handler to receive CategoryType items from result
-		// $this->_cs->setHandler('CategoryType', array(& $this, 'storeCategory'));	
-		
-		// // we will not know the version till the first call went through !
-		// $this->_categoryVersion = -1;
-		
-		// // truncate the db
-		// global $wpdb;
-		// $wpdb->query('truncate '.$this->tablename);
-		
-		// // download the data of level 1 only !
-		// $req = new GetCategoriesRequestType();
-		// $req->CategorySiteID = $site_id;
-		// $req->LevelLimit = 1;
-		// $req->DetailLevel = 'ReturnAll';
-		
-		// $res = $this->_cs->GetCategories($req);
-		// $this->_categoryVersion = $res->CategoryVersion;
-		
-		// // let's update the version information on the top-level entries
-		// $data['version'] = $this->_categoryVersion;
-		// $wpdb->update( $this->tablename, $data, array( 'parent_cat_id' => '0') );
-		
-		// // fetch the data back from the db and run a query for
-		// // each top-level id
-		// $rows = $wpdb->get_results( "select cat_id, cat_name from $this->tablename where parent_cat_id=0", ARRAY_A );
-		// foreach ($rows as $row)
-		// {
-		// 	#echo "Loading tree for " . $row['cat_id'] . "<br>\n";
-		// 	$this->logger->info('Loading tree for category #'.$row['cat_id'] . ' - '.$row['cat_name']);
-			
-		// 	$req = new GetCategoriesRequestType();
-		// 	$req->CategorySiteID = $site_id;
-		// 	$req->LevelLimit = 255;
-		// 	$req->DetailLevel = 'ReturnAll';
-		// 	$req->ViewAllNodes = true;
-		// 	$req->CategoryParent = $row['cat_id'];
-		// 	$this->_cs->GetCategories($req);
-		// }
-	}
+	}	
 	
 	function storeCategory( $type, $Category )
 	{
@@ -223,11 +177,11 @@ class EbayCategoriesModel extends WPL_Model {
 
 		$wpdb->insert( $this->tablename, $data );
 		if ( $wpdb->last_error ) {
-			$this->logger->error('failed to insert category '.$data['cat_id'] . ' - ' . $data['cat_name'] );
-			$this->logger->error('mysql said: '.$wpdb->last_error );
-			$this->logger->error('data: '. print_r( $data, 1 ) );
+			WPLE()->logger->error('failed to insert category '.$data['cat_id'] . ' - ' . $data['cat_name'] );
+			WPLE()->logger->error('mysql said: '.$wpdb->last_error );
+			WPLE()->logger->error('data: '. print_r( $data, 1 ) );
 		} else {
-			$this->logger->info('category inserted() '.$data['cat_id'] . ' - ' . $data['cat_name'] );
+			WPLE()->logger->info('category inserted() '.$data['cat_id'] . ' - ' . $data['cat_name'] );
 		}
 					
 		return true;
@@ -239,7 +193,7 @@ class EbayCategoriesModel extends WPL_Model {
 	{
 		global $wpdb;
 		$this->initServiceProxy($session);
-		$this->logger->info('downloadStoreCategories()');
+		WPLE()->logger->info('downloadStoreCategories()');
 		$this->account_id = $account_id;
 		
 		// download store categories
@@ -293,13 +247,16 @@ class EbayCategoriesModel extends WPL_Model {
 	
 
 	
-	function getCategoryConditions($session, $category_id )
+	function fetchCategoryConditions( $session, $category_id, $site_id )
 	{
 
 		// adjust Site if required - eBay Motors (beta)
-		$primary_category = $this->getItem( $category_id );
-		if ( $primary_category['site_id'] == 100 ) {
+		$test_site_id = $site_id == 0 ? 100 : $site_id;
+		$primary_category = $this->getItem( $category_id, $test_site_id );
+		WPLE()->logger->info("fetchCategoryConditions( $category_id, $test_site_id ) primary_category: ".print_r($primary_category,1));
+		if ( $primary_category && $primary_category['site_id'] == 100 ) {
 			$session->setSiteId( 100 );
+			$site_id = 100;
 		}
 
 		$this->initServiceProxy($session);
@@ -310,8 +267,8 @@ class EbayCategoriesModel extends WPL_Model {
 		$req->setDetailLevel( 'ReturnAll' );
 		
 		$res = $this->_cs->GetCategoryFeatures($req);
-		$this->logger->info('getCategoryConditions() for category ID '.$category_id);
-		// $this->logger->info('getCategoryConditions: '.print_r($res,1));
+		WPLE()->logger->info('fetchCategoryConditions() for category ID '.$category_id);
+		// WPLE()->logger->info('fetchCategoryConditions: '.print_r($res,1));
 
 		// $conditions as array
 		// if (!isset($res->Category[0]->ConditionValues->Condition)) return null;
@@ -319,20 +276,38 @@ class EbayCategoriesModel extends WPL_Model {
 		foreach ($res->Category[0]->ConditionValues->Condition as $Condition) {
 			$conditions[$Condition->ID] = $Condition->DisplayName;
 		}
-		$this->logger->info('getCategoryConditions: '.print_r($conditions,1));
+		WPLE()->logger->info('fetchCategoryConditions: '.print_r($conditions,1));
 		
 		if (!is_array($conditions)) $conditions = 'none';
+
+		// build features object
+		$features = new stdClass();
+		$features->conditions = $conditions;
+
+		// store result in ebay_categories table
+		global $wpdb;
+		$data = array();
+		$data['features']     = serialize( $features );
+		// $data['last_updated'] = date('Y-m-d H:i:s'); // will be updated when storing item specifics
+		$wpdb->update( $wpdb->prefix . self::table, $data, array( 'cat_id' => $category_id, 'site_id' => $session->getSiteId() ) );
+		WPLE()->logger->info('category features / conditions were stored...'.$wpdb->last_error);
+		
+		// legacy return format
 		return array( $category_id => $conditions );
-	}
+
+	} // fetchCategoryConditions()
 		
 	
-	function getCategorySpecifics($session, $category_id )
+	function fetchCategorySpecifics( $session, $category_id, $site_id = false )
 	{
 
 		// adjust Site if required - eBay Motors (beta)
-		$primary_category = $this->getItem( $category_id );
-		if ( $primary_category['site_id'] == 100 ) {
+		$test_site_id = $site_id == 0 ? 100 : $site_id;
+		$primary_category = $this->getItem( $category_id, $test_site_id );
+		WPLE()->logger->info("fetchCategorySpecifics( $category_id, $test_site_id ) primary_category: ".print_r($primary_category,1));
+		if ( $primary_category && $primary_category['site_id'] == 100 ) {
 			$session->setSiteId( 100 );
+			$site_id = 100;
 		}
 
 		$this->initServiceProxy($session);
@@ -345,37 +320,120 @@ class EbayCategoriesModel extends WPL_Model {
 		$req->setMaxValuesPerName( 250 ); 	// eBay default is 25 - no maximum
 		
 		$res = $this->_cs->GetCategorySpecifics($req);
-		$this->logger->info('getCategorySpecifics() for category ID '.$category_id);
+		WPLE()->logger->info('fetchCategorySpecifics() for category ID '.$category_id);
 
-		// $specifics as array
-		// if (!isset($res->Category[0]->ConditionValues->Condition)) return null;
-		if ( count($res->Recommendations[0]->NameRecommendation) > 0 )
-		foreach ($res->Recommendations[0]->NameRecommendation as $Recommendation) {
-			$new_specs                = new stdClass();
-			$new_specs->Name          = $Recommendation->Name;
-			$new_specs->ValueType     = $Recommendation->ValidationRules->ValueType;
-			$new_specs->MinValues     = $Recommendation->ValidationRules->MinValues;
-			$new_specs->MaxValues     = $Recommendation->ValidationRules->MaxValues;
-			$new_specs->SelectionMode = $Recommendation->ValidationRules->SelectionMode;
+		// build $specifics array
+		$specifics = array();
+		if ( count($res->Recommendations[0]->NameRecommendation) > 0 ) {
+			foreach ($res->Recommendations[0]->NameRecommendation as $Recommendation) {
+				$new_specs                = new stdClass();
+				$new_specs->Name          = $Recommendation->Name;
+				$new_specs->ValueType     = $Recommendation->ValidationRules->ValueType;
+				$new_specs->MinValues     = $Recommendation->ValidationRules->MinValues;
+				$new_specs->MaxValues     = $Recommendation->ValidationRules->MaxValues;
+				$new_specs->SelectionMode = $Recommendation->ValidationRules->SelectionMode;
 
-			if ( is_array( $Recommendation->ValueRecommendation ) ) {
-				foreach ($Recommendation->ValueRecommendation as $recommendedValue) {
-					$new_specs->recommendedValues[] = $recommendedValue->Value;
+				if ( is_array( $Recommendation->ValueRecommendation ) ) {
+					foreach ($Recommendation->ValueRecommendation as $recommendedValue) {
+						// WPLE()->logger->info('*** '.$Recommendation->Name.' recommendedValue: '.$recommendedValue->Value);
+						if ( strpos( $recommendedValue->Value, chr(239) ) ) continue; // skip values with 0xEF / BOM (these are broken an eBay and cause problems on some servers)
+						$new_specs->recommendedValues[] = $recommendedValue->Value;
+					}
 				}
-			}
 
-			$specifics[] = $new_specs;
+				$specifics[] = $new_specs;
+			}		
 		}
-		$this->logger->info('getCategorySpecifics: '.print_r($specifics,1));
-		
+		// WPLE()->logger->info('fetchCategorySpecifics: '.print_r($specifics,1));
 		if (!is_array($specifics)) $specifics = 'none';
+
+		// store result in ebay_categories table
+		global $wpdb;
+		$data = array();
+		$data['specifics']    = serialize( $specifics );
+		$data['last_updated'] = date('Y-m-d H:i:s');
+		$wpdb->update( $wpdb->prefix . self::table, $data, array( 'cat_id' => $category_id, 'site_id' => $site_id ) );
+		WPLE()->logger->info('category specifics were stored...'.$wpdb->last_error);
+		
+		// legacy return format
 		return array( $category_id => $specifics );
-	}
+
+	} // fetchCategorySpecifics()
 		
 	
-	
+	static function getItemSpecificsForCategory( $category_id, $site_id = false, $account_id = false ) {
+
+		// if site_id is empty, get it from account_id or default account
+		if ( ! $site_id && ! $account_id ) {
+			$account = WPLE()->accounts[ get_option('wplister_default_account_id') ];
+			$site_id = $account->site_id;
+		}
+		if ( ! $site_id && $account_id ) {
+			$account = WPLE()->accounts[ $account_id ];
+			$site_id = $account->site_id;
+		}
+
+		// get category from db
+		$category = self::getItem( $category_id, $site_id );
+		if ( ! $category_id ) return array();
+		if ( ! $category    ) return false;
+
+		// if timestamp is recent, return item specifics
+		if ( strtotime( $category['last_updated']  ) > strtotime('-1 month') ) {
+			// WPLE()->logger->info('found recent item specifics from '.$category['last_updated'] );
+			return maybe_unserialize( $category['specifics'] );
+		}
+		WPLE()->logger->info('updating outdated item specifics - last update: '.$category['last_updated'] );
+
+		// fetch info from eBay
+		WPLE()->initEC( $account_id );
+		$result = WPLE()->EC->getCategorySpecifics( $category_id );
+		WPLE()->EC->closeEbay();
+
+		// always return an array
+		return is_array($result) ? reset($result) : array();
+
+	} // getItemSpecificsForCategory()
 
 	
+	static function getConditionsForCategory( $category_id, $site_id = false, $account_id = false ) {
+
+		// if site_id is empty, get it from account_id or default account
+		if ( ! $site_id && ! $account_id ) {
+			$account = WPLE()->accounts[ get_option('wplister_default_account_id') ];
+			$site_id = $account->site_id;
+		}
+		if ( ! $site_id && $account_id ) {
+			$account = WPLE()->accounts[ $account_id ];
+			$site_id = $account->site_id;
+		}
+
+		// get category from db
+		$category = self::getItem( $category_id, $site_id );
+		if ( ! $category_id ) return array();
+		if ( ! $category    ) return false;
+
+		// if timestamp is recent, return category conditions
+		if ( strtotime( $category['last_updated']  ) > strtotime('-1 month') ) {
+			// WPLE()->logger->info('found recent category conditions from '.$category['last_updated'] );
+			$features = maybe_unserialize( $category['features'] );
+			if ( is_object($features) )
+				return $features->conditions;
+		}
+		WPLE()->logger->info('updating outdated category conditions - last update: '.$category['last_updated'] );
+
+		// fetch info from eBay
+		WPLE()->initEC( $account_id );
+		$result = WPLE()->EC->getCategoryConditions( $category_id );
+		WPLE()->EC->closeEbay();
+
+		// always return an array
+		return is_array($result) ? reset($result) : array();
+
+	} // getConditionsForCategory()
+
+	
+
 	/* the following methods could go into another class, since they use wpdb instead of EbatNs_DatabaseProvider */
 	
 	static function getAll() {
@@ -393,7 +451,11 @@ class EbayCategoriesModel extends WPL_Model {
 	static function getItem( $id, $site_id = false ) {
 		global $wpdb;	
 		$table = $wpdb->prefix . self::table;
+		
+		// when site is US (0), find eBay Motors categories (100) as well
 		$where_site_sql = $site_id === false ? '' : "AND site_id ='".esc_sql($site_id)."'";
+		if ( $site_id === 0 || $site_id === '0' ) $where_site_sql = "AND ( site_id = 0 OR site_id = 100 )";
+
         $item = $wpdb->get_row( $wpdb->prepare("
 			SELECT * 
 			FROM $table
