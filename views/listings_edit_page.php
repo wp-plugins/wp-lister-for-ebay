@@ -3,11 +3,11 @@
 <style type="text/css">
 
 	/* sideboxes */
-	#side-sortables .postbox input.text_input,
-	#side-sortables .postbox select.select {
+	#poststuff #side-sortables .postbox input.text_input,
+	#poststuff #side-sortables .postbox select.select {
 	    width: 50%;
 	}
-	#side-sortables .postbox label.text_label {
+	#poststuff #side-sortables .postbox label.text_label {
 	    width: 45%;
 	}
 

@@ -9,19 +9,19 @@
 <style type="text/css">
 
 	/* sidebar */
-	#side-sortables .postbox input.text_input,
-	#side-sortables .postbox select.select {
+	#poststuff #side-sortables .postbox input.text_input,
+	#poststuff #side-sortables .postbox select.select {
 	    width: 30%;
 	}
-	#side-sortables .postbox label.text_label {
+	#poststuff #side-sortables .postbox label.text_label {
 	    width: 66%;
 	}
 
-	#side-sortables .postbox .inside p.desc {
+	#poststuff #side-sortables .postbox .inside p.desc {
 		/*margin-left: 2%;*/
 	}
 
-	#side-sortables .postbox .inside h4 {
+	#poststuff #side-sortables .postbox .inside h4 {
 		/*margin-left: 1%;*/
 		margin-top: 1em;
 		margin-bottom: 0.5em;

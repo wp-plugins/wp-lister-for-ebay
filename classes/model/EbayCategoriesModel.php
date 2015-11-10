@@ -326,6 +326,10 @@ class EbayCategoriesModel extends WPL_Model {
 		$specifics = array();
 		if ( count($res->Recommendations[0]->NameRecommendation) > 0 ) {
 			foreach ($res->Recommendations[0]->NameRecommendation as $Recommendation) {
+
+				// ignore invalid data - Name is required
+				if ( empty($Recommendation->Name) ) continue;
+
 				$new_specs                = new stdClass();
 				$new_specs->Name          = $Recommendation->Name;
 				$new_specs->ValueType     = $Recommendation->ValidationRules->ValueType;

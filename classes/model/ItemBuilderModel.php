@@ -114,7 +114,7 @@ class ItemBuilderModel extends WPL_Model {
 		$item = $this->buildProfileOptions( $item, $profile_details );			
 
 		// add various options that depend on $profile_details and $post_id
-		$item = $this->buildProductOptions( $id, $item, $post_id, $profile_details, $listing, $isVariation );			
+		$item = $this->buildProductOptions( $id, $item, $post_id, $profile_details, $listing, $hasVariations, $isVariation );			
 
 		// add payment and return options
 		$item = $this->buildPayment( $item, $profile_details );			
@@ -588,7 +588,7 @@ class ItemBuilderModel extends WPL_Model {
 	} /* end of buildImages() */
 
 
-	public function buildProductListingDetails( $id, $item, $post_id, $profile_details, $listing, $isVariation, $product_sku ) {
+	public function buildProductListingDetails( $id, $item, $post_id, $profile_details, $listing, $hasVariations, $isVariation, $product_sku ) {
 
 		// if this is a single split variation, use variation post_id - but remember parent_id to fetch Brand
 		$parent_id = $post_id;
@@ -613,7 +613,7 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $product_upc = get_post_meta( $post_id, '_ebay_upc', true ) ) {
 			$ProductListingDetails->setUPC( $product_upc );
 			$has_details = true;
-		} elseif ( $autofill_missing_gtin == 'upc') {
+		} elseif ( $autofill_missing_gtin == 'upc' && ! $hasVariations ) {
 			$ProductListingDetails->setUPC( $DoesNotApplyText );
 			$has_details = true;
 		}
@@ -622,7 +622,7 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $product_ean = get_post_meta( $post_id, '_ebay_ean', true ) ) {
 			$ProductListingDetails->setEAN( $product_ean );
 			$has_details = true;
-		} elseif ( $autofill_missing_gtin == 'ean') {
+		} elseif ( $autofill_missing_gtin == 'ean' && ! $hasVariations ) {
 			$ProductListingDetails->setEAN( $DoesNotApplyText );
 			$has_details = true;
 		}
@@ -677,7 +677,7 @@ class ItemBuilderModel extends WPL_Model {
 	} /* end of buildProductListingDetails() */
 
 
-	public function buildProductOptions( $id, $item, $post_id, $profile_details, $listing, $isVariation ) {
+	public function buildProductOptions( $id, $item, $post_id, $profile_details, $listing, $hasVariations, $isVariation ) {
 
 		// get product SKU
 		$product_sku = ProductWrapper::getSKU( $post_id );
@@ -690,7 +690,7 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $product_sku ) $item->SKU = $product_sku;
 
 		// build buildProductListingDetails (UPC, EAN, MPN, etc.)
-		$item = $this->buildProductListingDetails( $id, $item, $post_id, $profile_details, $listing, $isVariation, $product_sku );
+		$item = $this->buildProductListingDetails( $id, $item, $post_id, $profile_details, $listing, $hasVariations, $isVariation, $product_sku );
 
 		// add subtitle if enabled
 		if ( @$profile_details['subtitle_enabled'] == 1 ) {
@@ -758,6 +758,13 @@ class ItemBuilderModel extends WPL_Model {
 		if ( $profile_details['tax_mode'] == 'fix' ) {
 			$item->VATDetails = new VATDetailsType();
 			$item->VATDetails->VATPercent = self::dbSafeFloatval( $profile_details['vat_percent'] );
+		}
+
+		// handle B2B option
+		if ( @$profile_details['b2b_only'] == 1 ) {
+			if ( $item->getVATDetails() == null ) $item->VATDetails = new VATDetailsType();
+			$item->VATDetails->BusinessSeller = true;
+			$item->VATDetails->RestrictedToBusiness = true;
 		}
 
 		// use Sales Tax Table
@@ -2121,7 +2128,7 @@ class ItemBuilderModel extends WPL_Model {
 			if ( $VariationsSkuMissing ) {
 				$longMessage = __('Some variations are missing a SKU.','wplister');
 				$longMessage .= '<br>';
-				$longMessage .= __('It is required to assign a unique SKU to each variation to prevent inventory sync issues.','wplister');
+				$longMessage .= __('It is required to assign a unique SKU to each variation to prevent issues syncing sales.','wplister');
 				// $success = false;
 			}
 

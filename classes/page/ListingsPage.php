@@ -597,14 +597,14 @@ class ListingsPage extends WPL_Page {
 			$msg .= '&nbsp; <a href="#" onclick="jQuery(\'#wpl_dupe_details\').toggle()" class="button button-small">'.__('Show details','wplister').'</a></p>';
 			// $msg .= '<br>';
 			$msg .= '<div id="wpl_dupe_details" style="display:none"><p>';
-			$msg .= __('Creating multiple listings for one product is not recommended as it can cause issues syncing inventory and other unexpected behaviour.','wplister');
+			$msg .= __('Creating multiple listings for one product is not recommended as it can cause issues syncing sales and other unexpected behaviour.','wplister');
 			$msg .= '<br>';
 			$msg .= __('Please keep only one listing and move unwanted duplicates to the archive.','wplister');
 			$msg .= '<br><br>';
 
 			$msg .= $this->renderDupeTable( $duplicateProducts );
 
-			$msg .= __('If you are not planning to use the inventory sync, you can hide this warning in settings.','wplister');
+			$msg .= __('If you are not planning to use the synchronize sales option, you can hide this warning in settings.','wplister');
 			// $msg .= '<br>';
 			// $msg .= 'If you need to list single products multiple times for some reason, please contact support@wplab.com and we will find a solution.';
 			$msg .= '</p></div>';

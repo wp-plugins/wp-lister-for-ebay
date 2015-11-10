@@ -260,7 +260,8 @@ class WPL_API_Hooks extends WPL_Core {
 
 		// disable default action for save_post
 		global $WPL_WooBackendIntegration;
-		remove_action( 'save_post', array( &$WPL_WooBackendIntegration, 'wplister_on_woocommerce_product_quick_edit_save' ), 10, 2 );
+		remove_action( 'save_post', array( &$WPL_WooBackendIntegration, 'wplister_on_woocommerce_product_save'           ), 20, 2 );
+		remove_action( 'save_post', array( &$WPL_WooBackendIntegration, 'wplister_on_woocommerce_product_bulk_edit_save' ), 20, 2 );
 
 		// add new save_post action to collect changed post IDs
 		add_action( 'save_post', array( &$this, 'collect_updated_products' ), 10, 2 );
@@ -272,7 +273,7 @@ class WPL_API_Hooks extends WPL_Core {
 
 	// collect changed product IDs
 	function collect_updated_products( $post_id, $post ) {
-		// WPLE()->logger->info("collect_updated_products( $post_id )");
+		WPLE()->logger->info("CSV: collect_updated_products( $post_id )");
 
 		if ( !$_POST ) return $post_id;
 		// if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
@@ -297,7 +298,7 @@ class WPL_API_Hooks extends WPL_Core {
 		if ( ! in_array( $post_id, $collected_products ) )
 			$collected_products[] = $post_id;
 
-		// WPLE()->logger->info("collected products".print_r($collected_products,1));
+		// WPLE()->logger->info("collected products: ".print_r($collected_products,1));
 
 		// update queue
 		update_option( 'wplister_updated_products_queue', $collected_products );
@@ -310,7 +311,7 @@ class WPL_API_Hooks extends WPL_Core {
 		if ( ! is_array( $collected_products ) ) $collected_products = array();
 
 		// DEBUG
-		// WPLE()->logger->info("update_products_on_shutdown() - collected_products: ".print_r($collected_products,1));
+		WPLE()->logger->info("CSV: update_products_on_shutdown() - collected_products: ".print_r($collected_products,1));
 
 		// mark each queued product as modified
 		foreach ($collected_products as $post_id ) {

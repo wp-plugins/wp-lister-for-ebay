@@ -1,0 +1,5480 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP-Lister Pro v1.2.1.5\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: Thu Oct 22 2015 13:05:49 GMT+0100 (BST (Britisk "
+"normaltid))\n"
+"Last-Translator: Øystein Sandmo <oystein@safenursing.co>\n"
+"Language-Team: \n"
+"Language: Norwegian (Bokmål)\n"
+"Plural-Forms: nplurals=2; plural=n != 1\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: ..\n"
+"X-Poedit-KeywordsList: _:1;gettext:1;dgettext:2;ngettext:1,2;dngettext:2,3;"
+"__:1;_e:1;_c:1;_n:1,2;_n_noop:1,2;_nc:1,2;__ngettext:1,2;__ngettext_noop:1,2;"
+"_x:1,2c;_ex:1,2c;_nx:1,2,4c;_nx_noop:1,2,3c;_n_js:1,2;_nx_js:1,2,3c;"
+"esc_attr__:1;esc_html__:1;esc_attr_e:1;esc_html_e:1;esc_attr_x:1,2c;"
+"esc_html_x:1,2c;comments_number_link:2,3;t:1;st:1;trans:1;transChoice:1,2\n"
+"X-Generator: Loco - https://localise.biz/\n"
+"X-Loco-Target-Locale: nb_NO"
+
+#: ../wp-lister-ebay.php:201 ../wp-lister-ebay.php:202 ..
+#: classes/core/WPL_Toolbar.php:255 ../classes/integration/WooBackendIntegration.
+#: php:181 ../classes/integration/WooBackendIntegration.php:359
+msgid "List on eBay"
+msgstr "Publiser oppføringen på eBay"
+
+#: ../classes/core/WPL_AjaxHandler.php:106
+#, php-format
+msgid "Profile \"%s\" was applied to %s items."
+msgstr "Profilen \"%s\" ble angitt til %s produkter."
+
+#: ../classes/core/WPL_AjaxHandler.php:120
+#, php-format
+msgid "%s product(s) have been prepared and %s products were skipped."
+msgstr "%s produkt(er) er klargjort og %s produkt(er) ble ignorert."
+
+#: ../classes/core/WPL_AjaxHandler.php:122
+#, php-format
+msgid "%s product(s) have been prepared."
+msgstr "%s produkt(er) er klargjort."
+
+#: ../classes/core/WPL_AjaxHandler.php:126
+msgid "View prepared listings"
+msgstr "Vis klargjorte oppføringer"
+
+#: ../classes/core/WPL_AjaxHandler.php:130
+#, php-format
+msgid "%s products have been skipped."
+msgstr "%s produkt(er) er ignorert."
+
+#: ../classes/core/WPL_AjaxHandler.php:830
+msgid "image"
+msgstr "bilde"
+
+#: ../classes/core/WPL_AjaxHandler.php:1062 ../views/match_product.php:138
+#, php-format
+msgid "There were no products found for query %s."
+msgstr "Ingen produkter ble funnet i søket etter %s."
+
+#: ../classes/core/WPL_BasePlugin.php:74 ../classes/core/WPL_Toolbar.php:90 ..
+#: classes/page/SettingsPage.php:33 ../classes/table/NetworkSitesTable.php:114
+msgid "Settings"
+msgstr "Innstillinger"
+
+#: ../classes/core/WPL_InventoryCheck.php:298 ../classes/core/WPL_InventoryCheck.
+#: php:560
+msgid "Check again"
+msgstr "Sjekk igjen"
+
+#: ../classes/core/WPL_InventoryCheck.php:304 ../classes/core/WPL_InventoryCheck.
+#: php:451
+msgid "Mark all as changed"
+msgstr "Merk alt som endret"
+
+#: ../classes/core/WPL_InventoryCheck.php:307 ../classes/page/ListingsPage.php:
+#: 435 ../views/listings_page.php:106 ../views/listings_page.php:143
+msgid "Revise all changed items"
+msgstr "Revider alle endrede produkter"
+
+#: ../classes/core/WPL_Model.php:382
+msgid "Additional details about this error"
+msgstr "Utfyllende detaljer om denne feilen"
+
+#: ../classes/core/WPL_Page.php:85
+#, php-format
+msgid "Thank you for listing with %s"
+msgstr "Takk for at du publiserer med %s"
+
+#: ../classes/core/WPL_Setup.php:50
+msgid "You have not linked WP-Lister to your eBay account yet."
+msgstr "Du har ikke koblet WP-Lister til din eBay konto enda."
+
+#: ../classes/core/WPL_Setup.php:51
+#, php-format
+msgid "To complete the setup procedure go to %s and follow the instructions."
+msgstr "For å fullføre oppsettet, gå til %s og følg instruksjonene."
+
+#: ../classes/core/WPL_Setup.php:53 ../classes/core/WPL_Setup.php:466
+msgid "Account Settings"
+msgstr "Kontoinnstillinger"
+
+#: ../classes/core/WPL_Setup.php:60
+msgid "Setup - Step 2"
+msgstr "Oppsett - Trinn 2"
+
+#: ../classes/core/WPL_Setup.php:61
+msgid ""
+"Before creating your first profile, we need to download certain information "
+"which are specific to the eBay site you selected."
+msgstr ""
+"Før du oppretter din første profil må vi laste ned visse opplysninger som er "
+"spesifikke for eBay siden du valgte."
+
+#: ../classes/core/WPL_Setup.php:62
+msgid ""
+"This includes shipping options, payment methods, your custom store "
+"categories as well as the whole eBay category tree, which might take a while."
+msgstr ""
+"Dette inkluderer fraktalternativer, betalingsmåter, tilpassede "
+"butikkategorier samt hele eBay kategoritre. Dette kan ta en stund."
+
+#: ../classes/core/WPL_Setup.php:69
+msgid "Refresh eBay details"
+msgstr "Oppfrisk Detaljer"
+
+#: ../classes/core/WPL_Setup.php:85
+msgid "Setup - Step 3"
+msgstr "Oppsett - Trinn 3"
+
+#: ../classes/core/WPL_Setup.php:86
+msgid "Create a default listing template."
+msgstr "Opprett en standard oppføringsmal."
+
+#: ../classes/core/WPL_Setup.php:87
+#, php-format
+msgid "To create your first listing template click on %s."
+msgstr "For å opprette din første oppføringsmal, klikk på %s."
+
+#: ../classes/core/WPL_Setup.php:89
+msgid ""
+"Replace the default text according to your requirements and save your "
+"template to continue."
+msgstr ""
+"Erstatt standardteksten i henhold til dine krav og lagre malen for å "
+"fortsette."
+
+#: ../classes/core/WPL_Setup.php:90 ../views/templates_edit_page.php:91
+msgid "New Template"
+msgstr "Ny Mal"
+
+#: ../classes/core/WPL_Setup.php:103
+msgid "Setup - Step 4"
+msgstr "Oppsett - Trinn 4"
+
+#: ../classes/core/WPL_Setup.php:104
+msgid "The final step: create your first listing profile."
+msgstr "Siste trinn: Opprett din første oppføringsprofil"
+
+#: ../classes/core/WPL_Setup.php:105
+#, php-format
+msgid ""
+"Click on %s and start defining your listing options.<br>After saving your "
+"profile, visit your Products page and select the products to list on eBay."
+msgstr ""
+"Klikk på %s for å definere dine oppføringsalternativer. <br>Etter du har "
+"lagret profilen går du til produktsiden din og velger hvilke produkter du "
+"vil publisere på eBay."
+
+#: ../classes/core/WPL_Setup.php:106 ../views/profiles_edit_page.php:24
+msgid "New Profile"
+msgstr "Ny profil"
+
+#: ../classes/core/WPL_Setup.php:114
+msgid "Setup is complete."
+msgstr "Oppsettet er fullført"
+
+#: ../classes/core/WPL_Setup.php:115
+msgid "You are ready now to list your first items."
+msgstr "Du er nå klar for å publisere ditt første produkt."
+
+#: ../classes/core/WPL_Setup.php:116
+msgid ""
+"Visit your Products page, select a few items and select \"List on eBay\" from "
+"the bulk actions menu."
+msgstr ""
+"Besøk din Produktside, velg noen få elementer og velg \"Publiser på eBay\" fra "
+"massehandlingsmenyen."
+
+#: ../classes/core/WPL_Setup.php:396
+msgid "Install Update"
+msgstr "Installer Oppdatering"
+
+#: ../classes/core/WPL_Setup.php:399
+#, php-format
+msgid "An update to %s is available."
+msgstr "En oppdatering til %s er tilgjengelig."
+
+#: ../classes/core/WPL_Setup.php:402
+msgid "Show Details"
+msgstr "Vis Detaljer"
+
+#: ../classes/core/WPL_Setup.php:463
+msgid "Site specific eBay details need to be updated."
+msgstr "Sidespesifikke detaljer for eBay må oppdateres."
+
+#: ../classes/core/WPL_Setup.php:464
+#, php-format
+msgid "Please visit your %s and click on \"Refresh Details\"."
+msgstr "Vennligst gå til %s og klikk \"Oppfrisk Detaljer\"."
+
+#: ../classes/core/WPL_Setup.php:711
+#, php-format
+msgid "Warning: The token for your eBay account %s has expired on %s."
+msgstr "Advarsel: ID-brikken for eBay kontoen %s utløp den %s."
+
+#: ../classes/core/WPL_Setup.php:724
+#, php-format
+msgid "Warning: The token for your eBay account %s will expire on %s."
+msgstr "Advarsel: ID-brikken for eBay kontoen %s utløper den %s."
+
+#: ../classes/core/WPL_Setup.php:742
+#, php-format
+msgid "The token for your eBay account %s seems to be invalid."
+msgstr "ID-brikken for eBay kontoen %s fremkommer som ugyldig."
+
+#: ../classes/core/WPL_Toolbar.php:22 ../classes/integration/WooOrderMetaBox.php:
+#: 46 ../classes/page/NetworkAdminPage.php:23 ../classes/page/NetworkAdminPage.
+#: php:23
+msgid "eBay"
+msgstr "eBay"
+
+#: ../classes/core/WPL_Toolbar.php:31 ../classes/page/ListingsPage.php:770 ..
+#: views/listings_page.php:56
+msgid "Listings"
+msgstr "Oppføringer"
+
+#: ../classes/core/WPL_Toolbar.php:41 ../classes/page/ProfilesPage.php:23 ..
+#: views/profiles_page.php:20
+msgid "Profiles"
+msgstr "Profiler"
+
+#: ../classes/core/WPL_Toolbar.php:54 ../classes/page/EbayOrdersPage.php:27 ..
+#: views/orders_page.php:13
+msgid "Orders"
+msgstr "Ordrer"
+
+#: ../classes/core/WPL_Toolbar.php:66 ../classes/page/TransactionsPage.php:28 ..
+#: views/transactions_page.php:13
+msgid "Transactions"
+msgstr "Transaksjoner"
+
+#: ../classes/core/WPL_Toolbar.php:78 ../classes/page/ToolsPage.php:28 ..
+#: views/tools_page.php:37
+msgid "Tools"
+msgstr "Verktøy"
+
+#: ../classes/core/WPL_Toolbar.php:100 ../views/settings_tabs.php:19
+msgid "General Settings"
+msgstr "Generelle innstillinger"
+
+#: ../classes/core/WPL_Toolbar.php:110 ../classes/page/SettingsPage.php:45 ..
+#: classes/table/AccountsTable.php:229 ../classes/table/EbayMessagesTable.php:
+#: 232 ../classes/table/EbayOrdersTable.php:339 ../classes/table/ListingsTable.
+#: php:975 ../classes/table/LogTable.php:319 ../classes/table/ProfilesTable.php:
+#: 190 ../classes/table/TransactionsTable.php:252 ../views/listings_edit_page.php:
+#: 145 ../views/settings_tabs.php:22 ../views/profile/edit_sidebar.php:291
+msgid "Account"
+msgstr "Konto"
+
+#: ../classes/core/WPL_Toolbar.php:120 ../classes/page/SettingsPage.php:38 ..
+#: views/settings_tabs.php:8 ../views/settings_tabs.php:25
+msgid "Categories"
+msgstr "Kategorier"
+
+#: ../classes/core/WPL_Toolbar.php:130 ../views/settings_tabs.php:28
+msgid "Advanced"
+msgstr "Avansert"
+
+#: ../classes/core/WPL_Toolbar.php:140 ../views/settings_accounts.php:111 ..
+#: views/settings_tabs.php:31
+msgid "Developer"
+msgstr "Utvikler"
+
+#: ../classes/core/WPL_Toolbar.php:151 ../views/settings_tabs.php:36 ..
+#: views/tools_page.php:150
+msgid "Updates"
+msgstr "Oppdateringer"
+
+#: ../classes/core/WPL_Toolbar.php:166 ../classes/page/LogPage.php:25 ..
+#: views/log_page.php:27
+msgid "Logs"
+msgstr "Logger"
+
+#: ../classes/core/WPL_Toolbar.php:206
+msgid "View item on eBay"
+msgstr "Vis produktet på eBay"
+
+#: ../classes/core/WPL_Toolbar.php:230
+msgid "View item in WP-Lister"
+msgstr "Vis produktet i WP-Lister"
+
+#: ../classes/helper/WPLE_UpgradeHelper.php:152 ..
+#: classes/helper/WPLE_UpgradeHelper.php:239 ..
+#: classes/helper/WPLE_UpgradeHelper.php:258 ..
+#: classes/helper/WPLE_UpgradeHelper.php:270 ..
+#: classes/helper/WPLE_UpgradeHelper.php:285 ..
+#: classes/helper/WPLE_UpgradeHelper.php:297 ..
+#: classes/helper/WPLE_UpgradeHelper.php:311 ..
+#: classes/helper/WPLE_UpgradeHelper.php:326 ..
+#: classes/helper/WPLE_UpgradeHelper.php:368 ..
+#: classes/helper/WPLE_UpgradeHelper.php:383 ..
+#: classes/helper/WPLE_UpgradeHelper.php:397 ..
+#: classes/helper/WPLE_UpgradeHelper.php:411 ..
+#: classes/helper/WPLE_UpgradeHelper.php:425 ..
+#: classes/helper/WPLE_UpgradeHelper.php:440 ..
+#: classes/helper/WPLE_UpgradeHelper.php:463 ..
+#: classes/helper/WPLE_UpgradeHelper.php:477 ..
+#: classes/helper/WPLE_UpgradeHelper.php:491 ..
+#: classes/helper/WPLE_UpgradeHelper.php:524 ..
+#: classes/helper/WPLE_UpgradeHelper.php:538 ..
+#: classes/helper/WPLE_UpgradeHelper.php:553 ..
+#: classes/helper/WPLE_UpgradeHelper.php:567 ..
+#: classes/helper/WPLE_UpgradeHelper.php:594 ..
+#: classes/helper/WPLE_UpgradeHelper.php:619 ..
+#: classes/helper/WPLE_UpgradeHelper.php:641 ..
+#: classes/helper/WPLE_UpgradeHelper.php:672 ..
+#: classes/helper/WPLE_UpgradeHelper.php:686 ..
+#: classes/helper/WPLE_UpgradeHelper.php:711 ..
+#: classes/helper/WPLE_UpgradeHelper.php:737 ..
+#: classes/helper/WPLE_UpgradeHelper.php:759 ..
+#: classes/helper/WPLE_UpgradeHelper.php:776 ..
+#: classes/helper/WPLE_UpgradeHelper.php:793 ..
+#: classes/helper/WPLE_UpgradeHelper.php:815 ..
+#: classes/helper/WPLE_UpgradeHelper.php:912 ..
+#: classes/helper/WPLE_UpgradeHelper.php:1012 ..
+#: classes/helper/WPLE_UpgradeHelper.php:1026 ..
+#: classes/helper/WPLE_UpgradeHelper.php:1040 ..
+#: classes/helper/WPLE_UpgradeHelper.php:1091 ..
+#: classes/helper/WPLE_UpgradeHelper.php:1128 ..
+#: classes/helper/WPLE_UpgradeHelper.php:1144 ..
+#: classes/helper/WPLE_UpgradeHelper.php:1166
+msgid "Database was upgraded to version"
+msgstr "Databasen er oppgradert til versjon"
+
+#: ../classes/helper/WPLE_UpgradeHelper.php:754
+msgid "Database upgrade is in progress"
+msgstr "Oppgradering av Database pågår"
+
+#: ../classes/integration/OrderWrapper_woo.php:84
+#, php-format
+msgid "Preparing to update inventory for %s item(s) on eBay..."
+msgstr "Forbereder oppdatering av varebeholdning for %s produkt(er) på eBay..."
+
+#: ../classes/integration/OrderWrapper_woo.php:93
+msgid "eBay inventory was updated successfully."
+msgstr "eBay varebeholdning ble oppdatert."
+
+#: ../classes/integration/OrderWrapper_woo.php:95
+msgid ""
+"There was a problem revising the inventory on eBay! Please check the "
+"database log and contact support."
+msgstr ""
+"Det oppsto et problem med å revidere varebeholdning på eBay! Vennligst sjekk "
+"databaseloggen og kontakt brukerstøtte."
+
+#: ../classes/integration/OrderWrapper_woo.php:102
+msgid "No active eBay listings found in this order."
+msgstr "Fant ingen aktive oppføringer i denne ordren på eBay."
+
+#: ../classes/integration/WooBackendIntegration.php:181
+msgid "Prepare this product to be listed on eBay."
+msgstr "Forbered dette produktet på å bli publisert på eBay."
+
+#: ../classes/integration/WooBackendIntegration.php:244
+msgid "Source"
+msgstr "Kilde"
+
+#: ../classes/integration/WooBackendIntegration.php:305 ..
+#: views/listings_edit_page.php:270
+msgid "Listing status"
+msgstr "Status for oppføringen"
+
+#: ../classes/integration/WooBackendIntegration.php:671
+msgid "On eBay"
+msgstr "På eBay"
+
+#: ../classes/integration/WooBackendIntegration.php:677
+msgid "Not on eBay"
+msgstr "Ikke på eBay"
+
+#: ../classes/integration/WooBackendIntegration.php:698
+msgid "Placed on eBay"
+msgstr "Publisert på eBay"
+
+#: ../classes/integration/WooBackendIntegration.php:704
+msgid "Not placed on eBay"
+msgstr "Ikke publisert på eBay"
+
+#: ../classes/integration/WooBackendIntegration.php:778
+msgid "eBay listing is"
+msgstr "eBay oppføringer er"
+
+#: ../classes/integration/WooBackendIntegration.php:785 ..
+#: classes/integration/WooBackendIntegration.php:836 ..
+#: classes/integration/WooBackendIntegration.php:941 ..
+#: classes/integration/WooFrontendIntegration.php:60 ..
+#: classes/integration/WooFrontendIntegration.php:102 ..
+#: classes/table/ListingsTable.php:147 ../classes/table/ListingsTable.php:618
+msgid "View on eBay"
+msgstr "Vis på eBay"
+
+#: ../classes/integration/WooBackendIntegration.php:789 ..
+#: classes/integration/WooBackendIntegration.php:840 ..
+#: classes/table/ListingsTable.php:145
+msgid "Verify"
+msgstr "Verifiser"
+
+#: ../classes/integration/WooBackendIntegration.php:793 ..
+#: classes/integration/WooBackendIntegration.php:844 ..
+#: classes/table/ListingsTable.php:146
+msgid "Publish"
+msgstr "Publiser"
+
+#: ../classes/integration/WooBackendIntegration.php:826
+#, php-format
+msgid "This product is linked to %s eBay listings"
+msgstr "Dette produktet er koblet til %s eBay oppføringer"
+
+#: ../classes/integration/WooBackendIntegration.php:865
+msgid ""
+"This listing is locked. When this product is changed, its price and stock "
+"level will be updated automatically on eBay."
+msgstr ""
+"Denne oppføringen er låst. Når dette produktet blir endret vil prisen og "
+"lagernivå oppdateres automatisk på eBay."
+
+#: ../classes/integration/WooBackendIntegration.php:867 ..
+#: classes/integration/WooBackendIntegration.php:880
+msgid "If the product is out of stock, the listing will be ended on eBay."
+msgstr "Hvis produktet er utsolgt vil oppføringen avsluttes på eBay."
+
+#: ../classes/integration/WooBackendIntegration.php:872
+msgid "Revise inventory on update"
+msgstr "Revider varelager ved oppdatering"
+
+#: ../classes/integration/WooBackendIntegration.php:879
+msgid "Revise eBay listing when updating the product"
+msgstr "Revider eBay oppføringen når du oppdaterer produktet"
+
+#: ../classes/integration/WooBackendIntegration.php:885
+msgid "Revise listing on update"
+msgstr "Revider oppføringen ved oppdatering"
+
+#: ../classes/integration/WooBackendIntegration.php:904
+msgid "Relist eBay listing when updating the product"
+msgstr "Republiser oppføringen på eBay når du oppdaterer produktet"
+
+#: ../classes/integration/WooBackendIntegration.php:905
+msgid "If the product is out of stock, it can not be relisted on eBay."
+msgstr "Hvis produktet er utsolgt i varelager kan det ikke republiseres på eBay."
+
+#: ../classes/integration/WooBackendIntegration.php:910
+msgid "Relist item"
+msgstr "Republiser produktet"
+
+#: ../classes/integration/WooBackendIntegration.php:938
+msgid "This product was imported"
+msgstr "Dette produktet ble importert"
+
+#: ../classes/integration/WooBackendIntegration.php:1021
+#, php-format
+msgid "Product and eBay listing were updated. <a href=\"%s\">View Product</a>"
+msgstr "Produkt og eBayoppføring ble oppdatert. <a href=\"%s\">Vis Produkt</a>"
+
+#: ../classes/integration/WooFrontendIntegration.php:29 ..
+#: classes/integration/WooFrontendIntegration.php:38
+msgid "View details"
+msgstr "Vis detaljer"
+
+#: ../classes/integration/WooFrontendIntegration.php:83
+msgid "Starting bid"
+msgstr "Startbud"
+
+#: ../classes/integration/WooFrontendIntegration.php:86
+msgid "Current bid"
+msgstr "Gjeldende bud"
+
+#: ../classes/integration/WooFrontendIntegration.php:87
+msgid "bids"
+msgstr "bud"
+
+#: ../classes/integration/WooFrontendIntegration.php:93
+#, php-format
+msgid "This item is currently on auction and will end in %s"
+msgstr "Dette produktet er for øyeblikket på auksjon og vil avsluttes om %s"
+
+#: ../classes/integration/WooFrontendIntegration.php:96
+msgid "This item is currently on auction on eBay."
+msgstr "Dette produktet er for øyeblikket på auksjon på eBay."
+
+#: ../classes/integration/WooFrontendIntegration.php:222
+msgid "Compatibility"
+msgstr "Kompatibillitet"
+
+#: ../classes/integration/WooFrontendIntegration.php:245
+msgid "Item Compatibility List"
+msgstr "Liste for produktkompatibillitet"
+
+#: ../classes/integration/WooOrderBuilder.php:483
+msgid "VAT"
+msgstr "MVA"
+
+#: ../classes/integration/WooOrderMetaBox.php:68
+msgid "This order was placed on eBay."
+msgstr "Denne ordren ble utført på eBay."
+
+#: ../classes/integration/WooOrderMetaBox.php:85 ..
+#: views/profile/edit_shipping_int.php:12 ../views/profile/edit_shipping_int.php:
+#: 76 ../views/profile/edit_shipping_loc.php:14 ..
+#: views/profile/edit_shipping_loc.php:61
+msgid "Shipping service"
+msgstr "Frakttjeneste"
+
+#: ../classes/integration/WooOrderMetaBox.php:87
+msgid "Select shipping service"
+msgstr "Velg frakttjeneste"
+
+#: ../classes/integration/WooOrderMetaBox.php:104
+msgid "Tracking ID:"
+msgstr "Sporing:"
+
+#: ../classes/integration/WooOrderMetaBox.php:112
+msgid "Shipping date:"
+msgstr "Dato sendt:"
+
+#: ../classes/integration/WooOrderMetaBox.php:121
+msgid "Your feedback:"
+msgstr "Din tilbakemelding:"
+
+#: ../classes/integration/WooOrderMetaBox.php:391
+msgid "Preparing to complete sale on eBay..."
+msgstr "Forbereder å fullføre salg på eBay..."
+
+#: ../classes/integration/WooOrderMetaBox.php:418
+msgid "eBay sale was completed successfully."
+msgstr "eBay salget ble fullført."
+
+#: ../classes/integration/WooOrderMetaBox.php:421
+msgid "There was a problem completing the sale on eBay."
+msgstr "Det oppsto et problem i gjennomførelse av salget på eBay!"
+
+#: ../classes/integration/WooOrderMetaBox.php:424
+msgid ""
+"There was a problem completing the sale on eBay! Please check the database "
+"log and contact support."
+msgstr ""
+"Det oppsto et problem i gjennomførelse av salget på eBay! Vennligst sjekk "
+"databaseloggen og kontakt brukerstøtte."
+
+#: ../classes/integration/WooProductMetaBox.php:33 ..
+#: classes/integration/WooProductMetaBox.php:1719
+msgid "eBay Options"
+msgstr "eBay alternativer"
+
+#: ../classes/integration/WooProductMetaBox.php:36
+msgid "Advanced eBay Options"
+msgstr "Avanserte eBay alternativer"
+
+#: ../classes/integration/WooProductMetaBox.php:39
+msgid "eBay Categories and Item Specifics"
+msgstr "eBay kategorier og produktspesifikasjoner"
+
+#: ../classes/integration/WooProductMetaBox.php:42
+msgid "eBay Part Compatibility"
+msgstr "eBay delekompatibilitet"
+
+#: ../classes/integration/WooProductMetaBox.php:45
+msgid "eBay Shipping Options"
+msgstr "eBay frakt alternativer"
+
+#: ../classes/integration/WooProductMetaBox.php:82
+msgid "Listing title"
+msgstr "Tittel for oppføringen"
+
+#: ../classes/integration/WooProductMetaBox.php:83
+msgid "Custom listing title"
+msgstr "Egendefinert tittel for oppføringen"
+
+#: ../classes/integration/WooProductMetaBox.php:84
+msgid ""
+"Leave empty to generate title from product name. Maximum length: 80 "
+"characters"
+msgstr "La stå tom for å generere tittel fra produktnavnet. Maksimal lengde: 80 tegn"
+
+#: ../classes/integration/WooProductMetaBox.php:91
+msgid "Listing subtitle"
+msgstr "Undertittel for oppføring"
+
+#: ../classes/integration/WooProductMetaBox.php:92
+msgid "Custom listing subtitle"
+msgstr "Egendefinert undertittel for oppføringen"
+
+#: ../classes/integration/WooProductMetaBox.php:93
+msgid "Leave empty to use the product excerpt. Maximum length: 55 characters"
+msgstr "La stå tom å bruke produktutdrag. Maksimal lengde: 55 tegn"
+
+#: ../classes/integration/WooProductMetaBox.php:100
+msgid "Price / Start Price"
+msgstr "Pris / Startpris"
+
+#: ../classes/integration/WooProductMetaBox.php:101
+msgid "Start Price"
+msgstr "Startpris"
+
+#: ../classes/integration/WooProductMetaBox.php:108
+msgid "Listing Type"
+msgstr "Oppføringstype"
+
+#: ../classes/integration/WooProductMetaBox.php:110 ..
+#: classes/integration/WooProductMetaBox.php:121 ..
+#: classes/integration/WooProductMetaBox.php:144 ..
+#: classes/integration/WooProductMetaBox.php:172 ..
+#: classes/integration/WooProductMetaBox.php:353 ..
+#: classes/integration/WooProductMetaBox.php:396 ..
+#: classes/integration/WooProductMetaBox.php:413 ..
+#: classes/integration/WooProductMetaBox.php:1353
+msgid "-- use profile setting --"
+msgstr "-- bruk profilinnstillinger --"
+
+#: ../classes/integration/WooProductMetaBox.php:111 ../views/listings_edit_page.
+#: php:284 ../views/profiles_edit_page.php:79
+msgid "Auction"
+msgstr "Auksjon"
+
+#: ../classes/integration/WooProductMetaBox.php:112 ..
+#: classes/table/ProfilesTable.php:77 ../views/listings_edit_page.php:285 ..
+#: views/profiles_edit_page.php:80
+msgid "Fixed Price"
+msgstr "Fastsatt Pris"
+
+#: ../classes/integration/WooProductMetaBox.php:119
+msgid "Listing Duration"
+msgstr "Oppføring varighet"
+
+#: ../classes/integration/WooProductMetaBox.php:122 ../views/listings_edit_page.
+#: php:235 ../views/profiles_edit_page.php:119
+msgid "Day"
+msgstr "Dag"
+
+#: ../classes/integration/WooProductMetaBox.php:123 ..
+#: classes/integration/WooProductMetaBox.php:124 ..
+#: classes/integration/WooProductMetaBox.php:125 ..
+#: classes/integration/WooProductMetaBox.php:126 ..
+#: classes/integration/WooProductMetaBox.php:127 ..
+#: classes/integration/WooProductMetaBox.php:128 ..
+#: classes/integration/WooProductMetaBox.php:129 ../views/listings_edit_page.php:
+#: 236 ../views/listings_edit_page.php:237 ../views/listings_edit_page.php:238 ..
+#: views/listings_edit_page.php:239 ../views/listings_edit_page.php:240 ..
+#: views/listings_edit_page.php:241 ../views/listings_edit_page.php:242 ..
+#: views/listings_edit_page.php:243 ../views/listings_edit_page.php:244 ..
+#: views/profiles_edit_page.php:120 ../views/profiles_edit_page.php:121 ..
+#: views/profiles_edit_page.php:122 ../views/profiles_edit_page.php:123 ..
+#: views/profiles_edit_page.php:124 ../views/profiles_edit_page.php:125 ..
+#: views/profiles_edit_page.php:126 ../views/profiles_edit_page.php:127 ..
+#: views/profiles_edit_page.php:128 ../views/profile/edit_sidebar.php:679
+msgid "Days"
+msgstr "Dager"
+
+#: ../classes/integration/WooProductMetaBox.php:130 ../views/listings_edit_page.
+#: php:245 ../views/profiles_edit_page.php:129
+msgid "Good Till Canceled"
+msgstr "Fortsett til Avbrutt (GTC)"
+
+#: ../classes/integration/WooProductMetaBox.php:145 ..
+#: classes/integration/WooProductMetaBox.php:146 ../views/profiles_edit_page.php:
+#: 155
+msgid "New"
+msgstr "Ny"
+
+#: ../classes/integration/WooProductMetaBox.php:147
+msgid "New other"
+msgstr "Ny annet"
+
+#: ../classes/integration/WooProductMetaBox.php:148
+msgid "New with defects"
+msgstr "Ny med defekter"
+
+#: ../classes/integration/WooProductMetaBox.php:149
+msgid "Manufacturer refurbished"
+msgstr "Rnovert av Produsent"
+
+#: ../classes/integration/WooProductMetaBox.php:150
+msgid "Seller refurbished"
+msgstr "Renovert av selger"
+
+#: ../classes/integration/WooProductMetaBox.php:151 ../views/profiles_edit_page.
+#: php:156
+msgid "Used"
+msgstr "Brukt"
+
+#: ../classes/integration/WooProductMetaBox.php:152
+msgid "Very Good"
+msgstr "Veldig god"
+
+#: ../classes/integration/WooProductMetaBox.php:153
+msgid "Good"
+msgstr "God"
+
+#: ../classes/integration/WooProductMetaBox.php:154
+msgid "Acceptable"
+msgstr "Akseptabel"
+
+#: ../classes/integration/WooProductMetaBox.php:155
+msgid "For parts or not working"
+msgstr "For deler eller i ustand"
+
+#: ../classes/integration/WooProductMetaBox.php:179 ../views/profiles_edit_page.
+#: php:140
+msgid "Condition"
+msgstr "Tilstand"
+
+#: ../classes/integration/WooProductMetaBox.php:187 ..
+#: classes/integration/WooProductMetaBox.php:188 ../views/profiles_edit_page.php:
+#: 167
+msgid "Condition description"
+msgstr "Tilstand beskrivelse"
+
+#: ../classes/integration/WooProductMetaBox.php:189 ../views/profiles_edit_page.
+#: php:168 ../views/profiles_edit_page.php:173
+msgid ""
+"This field should only be used to further clarify the condition of used "
+"items."
+msgstr ""
+"Dette feltet skal kun brukes til å ytterligere avklare tilstanden for brukte "
+"produkter."
+
+#: ../classes/integration/WooProductMetaBox.php:257 ..
+#: classes/integration/WooProductMetaBox.php:258 ../views/profiles_edit_page.php:
+#: 100
+msgid "Buy Now Price"
+msgstr "Pris for Kjøp Nå"
+
+#: ../classes/integration/WooProductMetaBox.php:259
+msgid ""
+"The optional Buy Now Price is only used for auction style listings. It has "
+"no effect on fixed price listings."
+msgstr ""
+"Den valgfrie Kjøp Nå Prisen brukes kun for auksjoner. Det har ingen effekt "
+"på fastprisoppføringer."
+
+#: ../classes/integration/WooProductMetaBox.php:267 ..
+#: classes/integration/WooProductMetaBox.php:268
+msgid "Reserve Price"
+msgstr "Minstepris"
+
+#: ../classes/integration/WooProductMetaBox.php:269
+msgid ""
+"The lowest price at which you are willing to sell the item. Not all "
+"categories support a reserve price.<br>Note: This only applies to auction "
+"style listings."
+msgstr ""
+"Den laveste prisen som du er villig til å selge varen for. Ikke alle "
+"kategorier støtte en minstepris. Merk: Dette gjelder bare for auksjoner."
+
+#: ../classes/integration/WooProductMetaBox.php:283
+msgid "Find matching product on eBay"
+msgstr "Finn tilsvarende produkt på eBay"
+
+#: ../classes/integration/WooProductMetaBox.php:290
+msgid "Enter a eBay Product ID (EPID) or click the search icon on the right."
+msgstr "Angi en eBay Produkt ID (EPID) eller klikk søkesymbolet til høyre."
+
+#: ../classes/integration/WooProductMetaBox.php:297
+msgid "UPC"
+msgstr "UPC"
+
+#: ../classes/integration/WooProductMetaBox.php:298
+msgid "Enter a UPC to use product details from the eBay catalog."
+msgstr "Angi en UPC for å benytte detaljer fra eBays katalog."
+
+#: ../classes/integration/WooProductMetaBox.php:304
+msgid "EAN"
+msgstr "EAN"
+
+#: ../classes/integration/WooProductMetaBox.php:305
+msgid "Enter an EAN to use product details from the eBay catalog."
+msgstr "Angi en EAN for å benytte detaljer fra eBays katalog."
+
+#: ../classes/integration/WooProductMetaBox.php:311
+msgid "Gallery Image URL"
+msgstr "Bildegalleri URL"
+
+#: ../classes/integration/WooProductMetaBox.php:312
+msgid "Enter an URL if you want to use a custom gallery image on eBay."
+msgstr "Angi en URL hvis du ønsker å bruke egendefinert bildegalleri på eBay."
+
+#: ../classes/integration/WooProductMetaBox.php:318 ../views/profile/edit_sidebar.
+#: php:735
+msgid "Global Shipping"
+msgstr "Internasjonal frakt"
+
+#: ../classes/integration/WooProductMetaBox.php:324
+msgid "Hide from eBay"
+msgstr "Skjul på eBay"
+
+#: ../classes/integration/WooProductMetaBox.php:325
+msgid "Hide this product from the list of products currently not listed on eBay."
+msgstr ""
+"Skjul dette produktet fra listen over produkter som for øyeblikket ikke er "
+"publisert på eBay."
+
+#: ../classes/integration/WooProductMetaBox.php:331 ../views/listings_edit_page.
+#: php:166 ../views/profile/edit_sidebar.php:495
+msgid "Best Offer"
+msgstr "Beste tilbud"
+
+#: ../classes/integration/WooProductMetaBox.php:332
+msgid "Enable Best Offer to allow a buyer to make a lower-priced binding offer."
+msgstr ""
+"Aktiver Beste tilbud for å godta at kjøpere kan fremme et bindende lavere "
+"bud."
+
+#: ../classes/integration/WooProductMetaBox.php:338 ../views/listings_edit_page.
+#: php:176 ../views/profile/edit_sidebar.php:511
+msgid "Auto accept price"
+msgstr "Pris for automatisk aksept"
+
+#: ../classes/integration/WooProductMetaBox.php:339
+msgid "The price at which Best Offers are automatically accepted."
+msgstr "Prisen som angir når beste tilbud godtas automatisk."
+
+#: ../classes/integration/WooProductMetaBox.php:345 ../views/listings_edit_page.
+#: php:180 ../views/profile/edit_sidebar.php:518
+msgid "Minimum price"
+msgstr "Minstepris"
+
+#: ../classes/integration/WooProductMetaBox.php:346
+msgid "Specifies the minimum acceptable Best Offer price."
+msgstr "Angir minste akseptable Tilbudspris."
+
+#: ../classes/integration/WooProductMetaBox.php:354 ../views/profiles_edit_page.
+#: php:263
+msgid "Yes, require immediate payment through PayPal"
+msgstr "Ja, krev umiddelbar betaling via PayPal"
+
+#: ../classes/integration/WooProductMetaBox.php:355 ../views/listings_edit_page.
+#: php:172 ../views/profiles_edit_page.php:262 ../views/profiles_edit_page.php:
+#: 319 ../views/settings_advanced.php:67 ../views/settings_advanced.php:242 ..
+#: views/settings_advanced.php:254 ../views/settings_advanced.php:266 ..
+#: views/settings_advanced.php:276 ../views/settings_advanced.php:288 ..
+#: views/settings_advanced.php:300 ../views/settings_advanced.php:312 ..
+#: views/settings_advanced.php:332 ../views/settings_advanced.php:341 ..
+#: views/settings_advanced.php:350 ../views/settings_advanced.php:359 ..
+#: views/settings_advanced.php:373 ../views/settings_advanced.php:430 ..
+#: views/settings_advanced.php:491 ../views/settings_advanced.php:505 ..
+#: views/settings_advanced.php:571 ../views/settings_advanced.php:584 ..
+#: views/settings_advanced.php:597 ../views/settings_advanced.php:611 ..
+#: views/settings_advanced.php:623 ../views/settings_advanced.php:636 ..
+#: views/settings_dev.php:118 ../views/settings_dev.php:227 ..
+#: views/settings_dev.php:236 ../views/settings_dev.php:245 ..
+#: views/settings_dev.php:359 ../views/settings_page.php:290 ..
+#: views/settings_page.php:299 ../views/settings_page.php:335 ..
+#: views/profile/edit_shipping_int.php:184 ../views/profile/edit_shipping_loc.
+#: php:111 ../views/profile/edit_shipping_loc.php:147 ..
+#: views/profile/edit_shipping_loc.php:183 ../views/profile/edit_sidebar.php:259
+#: ../views/profile/edit_sidebar.php:352 ../views/profile/edit_sidebar.php:362 ..
+#: views/profile/edit_sidebar.php:409 ../views/profile/edit_sidebar.php:438 ..
+#: views/profile/edit_sidebar.php:456 ../views/profile/edit_sidebar.php:477 ..
+#: views/profile/edit_sidebar.php:504 ../views/profile/edit_sidebar.php:600 ..
+#: views/profile/edit_sidebar.php:648 ../views/profile/edit_sidebar.php:742 ..
+#: views/profile/edit_sidebar.php:754 ../views/profile/edit_sidebar.php:765 ..
+#: views/profile/edit_sidebar.php:776 ../views/profile/edit_sidebar.php:787 ..
+#: views/profile/edit_sidebar.php:797
+msgid "No"
+msgstr "Nei"
+
+#: ../classes/integration/WooProductMetaBox.php:359 ../views/profiles_edit_page.
+#: php:257
+msgid "Immediate payment"
+msgstr "Umiddelbar betaling"
+
+#: ../classes/integration/WooProductMetaBox.php:403 ../views/profiles_edit_page.
+#: php:288
+msgid "Payment profile"
+msgstr "Betaling profil"
+
+#: ../classes/integration/WooProductMetaBox.php:420
+msgid "Return profile"
+msgstr "Retur profil"
+
+#: ../classes/integration/WooProductMetaBox.php:433
+msgid "Payment Instructions"
+msgstr "Betalingsinstruksjoner"
+
+#: ../classes/integration/WooProductMetaBox.php:545
+msgid "will be assigned automatically"
+msgstr "vil angis automatisk"
+
+#: ../classes/integration/WooProductMetaBox.php:606 ..
+#: views/profile/edit_categories.php:46
+msgid "eBay categories"
+msgstr "eBay kategorier"
+
+#: ../classes/integration/WooProductMetaBox.php:609 ..
+#: views/profile/edit_categories.php:51
+msgid "Primary eBay category"
+msgstr "Primær eBay kategori"
+
+#: ../classes/integration/WooProductMetaBox.php:613 ..
+#: classes/integration/WooProductMetaBox.php:623 ..
+#: classes/integration/WooProductMetaBox.php:640 ..
+#: classes/integration/WooProductMetaBox.php:654 ..
+#: classes/table/CategoriesMapTable.php:101 ../classes/table/CategoriesMapTable.
+#: php:131 ../views/profile/edit_categories.php:59 ..
+#: views/profile/edit_categories.php:73 ../views/profile/edit_categories.php:101
+#: ../views/profile/edit_categories.php:115
+msgid "select"
+msgstr "velg"
+
+#: ../classes/integration/WooProductMetaBox.php:614 ..
+#: classes/integration/WooProductMetaBox.php:624 ..
+#: classes/integration/WooProductMetaBox.php:641 ..
+#: classes/integration/WooProductMetaBox.php:655 ..
+#: classes/table/CategoriesMapTable.php:102 ../classes/table/CategoriesMapTable.
+#: php:132 ../views/profiles_edit_page.php:240 ../views/profile/edit_categories.
+#: php:60 ../views/profile/edit_categories.php:74 ..
+#: views/profile/edit_categories.php:102 ../views/profile/edit_categories.php:
+#: 116 ../views/profile/edit_shipping_int.php:63 ..
+#: views/profile/edit_shipping_int.php:121 ../views/profile/edit_shipping_loc.
+#: php:43 ../views/profile/edit_shipping_loc.php:76
+msgid "remove"
+msgstr "fjern"
+
+#: ../classes/integration/WooProductMetaBox.php:619 ..
+#: views/profile/edit_categories.php:66
+msgid "Secondary eBay category"
+msgstr "Sekundær eBay kategori"
+
+#: ../classes/integration/WooProductMetaBox.php:629 ..
+#: views/profile/edit_categories.php:89
+msgid "Store categories"
+msgstr "Butikk kategorier"
+
+#: ../classes/integration/WooProductMetaBox.php:633 ..
+#: classes/integration/WooProductMetaBox.php:647 ..
+#: views/profile/edit_categories.php:94 ../views/profile/edit_categories.php:108
+msgid "Store category"
+msgstr "Butikk kategori"
+
+#: ../classes/integration/WooProductMetaBox.php:918
+msgid "Clear all"
+msgstr "Slett alt"
+
+#: ../classes/integration/WooProductMetaBox.php:919
+msgid "Add row"
+msgstr "Legg til rad"
+
+#: ../classes/integration/WooProductMetaBox.php:922
+msgid "To remove a row empty the first column and update."
+msgstr "For å fjerne en rad, tøm den første kolonnen og oppdater."
+
+#: ../classes/integration/WooProductMetaBox.php:928
+msgid "Add compatibility table"
+msgstr "Legg til kompatibillitetstabell"
+
+#: ../classes/integration/WooProductMetaBox.php:976
+msgid "Are you sure you want to remove the entire table?"
+msgstr "Er du sikker på at du vil fjerne hele denne tabellen?"
+
+#: ../classes/integration/WooProductMetaBox.php:1180 ..
+#: views/profile/edit_item_specifics.php:236
+msgid "Item Specifics"
+msgstr "Produktspesifikasjoner"
+
+#: ../classes/integration/WooProductMetaBox.php:1349
+msgid "Custom shipping options"
+msgstr "Egendefinerte fraktalternativer"
+
+#: ../classes/integration/WooProductMetaBox.php:1354 ..
+#: views/profile/edit_shipping.php:32
+msgid "Use Flat Shipping"
+msgstr "Bruk fastsatt frakt"
+
+#: ../classes/integration/WooProductMetaBox.php:1355 ..
+#: views/profile/edit_shipping.php:33
+msgid "Use Calculated Shipping"
+msgstr "Bruk beregnet frakt"
+
+#: ../classes/integration/WooProductMetaBox.php:1356 ..
+#: views/profile/edit_shipping.php:34
+msgid "Use Flat Domestic and Calculated International Shipping"
+msgstr "Bruk fastsatt innenlandsk og beregnet internasjonal frakt"
+
+#: ../classes/integration/WooProductMetaBox.php:1357 ..
+#: views/profile/edit_shipping.php:35
+msgid "Use Calculated Domestic and Flat International Shipping"
+msgstr "Bruk beregnet innenlandsk og fastsatt internasjonal frakt."
+
+#: ../classes/integration/WooProductMetaBox.php:1358 ..
+#: views/profile/edit_shipping.php:36
+msgid "Use Freight Shipping"
+msgstr "Bruk Godstransportør"
+
+#: ../classes/integration/WooProductMetaBox.php:1365
+msgid "Domestic shipping"
+msgstr "Innenlandsk forendelse"
+
+#: ../classes/integration/WooProductMetaBox.php:1368 ..
+#: views/profile/edit_shipping.php:59
+msgid "International shipping"
+msgstr "Internasjonal forsendelse"
+
+#: ../classes/integration/WooProductMetaBox.php:1722
+msgid "eBay Price"
+msgstr "Pris på eBay"
+
+#: ../classes/integration/WooProductMetaBox.php:1729
+msgid "eBay Visibility"
+msgstr "Synlighet på eBay"
+
+#: ../classes/integration/WooProductMetaBox.php:1735
+msgid "Hide on eBay"
+msgstr "Skjul fra eBay"
+
+#: ../classes/integration/WPL_CustomUpdater.php:118 ..
+#: classes/integration/WPL_CustomUpdater.php:194 ..
+#: classes/integration/WPL_CustomUpdater.php:235 ..
+#: classes/integration/WPL_CustomUpdater.php:281
+msgid "An unknown error occurred"
+msgstr "En ukjent feil oppsto"
+
+#: ../classes/model/EbayCategoriesModel.php:541 ..
+#: classes/model/EbayCategoriesModel.php:568 ../classes/table/CategoriesMapTable.
+#: php:88 ../classes/table/CategoriesMapTable.php:118
+msgid "Unknown category ID"
+msgstr "Ukjent kategori ID"
+
+#: ../classes/model/EbayMessagesModel.php:301 ../classes/model/EbayOrdersModel.
+#: php:793 ../classes/model/TransactionsModel.php:642
+#, php-format
+msgid "the last %s days"
+msgstr "siste %s dager"
+
+#: ../classes/model/EbayMessagesModel.php:303 ../classes/model/EbayOrdersModel.
+#: php:795 ../classes/model/TransactionsModel.php:644
+#, php-format
+msgid "from %s to %s"
+msgstr "fra %s til %s"
+
+#: ../classes/model/EbayMessagesModel.php:311
+msgid "New messages created"
+msgstr "Nye meldinger opprettet"
+
+#: ../classes/model/EbayMessagesModel.php:312
+msgid "Existing messages updated"
+msgstr "Eksisterende meldinger oppdatert"
+
+#: ../classes/model/EbayMessagesModel.php:317 ../classes/table/EbayMessagesTable.
+#: php:222
+msgid "Received at"
+msgstr "Mottatt"
+
+#: ../classes/model/EbayMessagesModel.php:318 ../classes/table/EbayMessagesTable.
+#: php:229
+msgid "Message ID"
+msgstr "Meldings ID"
+
+#: ../classes/model/EbayMessagesModel.php:319 ../classes/table/EbayMessagesTable.
+#: php:224
+msgid "Subject"
+msgstr "Emne"
+
+#: ../classes/model/EbayMessagesModel.php:320 ../classes/table/ListingsTable.php:
+#: 962 ../classes/table/NetworkSitesTable.php:271 ..
+#: classes/table/TransactionsTable.php:239
+msgid "eBay ID"
+msgstr "eBay ID"
+
+#: ../classes/model/EbayMessagesModel.php:321 ../classes/model/TransactionsModel.
+#: php:666 ../classes/table/ListingsTable.php:964 ..
+#: classes/table/NetworkSitesTable.php:269 ../views/listings_edit_page.php:216 ..
+#: views/match_product.php:75 ../views/account/settings_add_account.php:22
+msgid "Title"
+msgstr "Tittel"
+
+#: ../classes/model/EbayMessagesModel.php:322
+msgid "Sender"
+msgstr "Avsender"
+
+#: ../classes/model/EbayOrdersModel.php:803
+msgid "New orders created"
+msgstr "Nye ordrer opprettet"
+
+#: ../classes/model/EbayOrdersModel.php:804
+msgid "Existing orders updated"
+msgstr "Eksisterende ordrer ble oppdatert"
+
+#: ../classes/model/EbayOrdersModel.php:805
+msgid "Old or foreign orders skipped"
+msgstr "Hoppet over gamle eller utenlandske ordrer."
+
+#: ../classes/model/EbayOrdersModel.php:806
+msgid "Orders failed to create"
+msgstr "Ordrer feilet i opprettelse"
+
+#: ../classes/model/EbayOrdersModel.php:809
+msgid "Note: Orders from foreign eBay sites were skipping during update."
+msgstr "Merk: Ordrer fra utenlandske eBaysider ble ignorert under oppdatering."
+
+#: ../classes/model/EbayOrdersModel.php:813 ../classes/model/TransactionsModel.
+#: php:662 ../classes/table/TemplatesTable.php:174
+msgid "Last modified"
+msgstr "Sist endret"
+
+#: ../classes/model/EbayOrdersModel.php:814 ../classes/table/EbayOrdersTable.php:
+#: 336
+msgid "Order ID"
+msgstr "Ordre ID"
+
+#: ../classes/model/EbayOrdersModel.php:815 ../classes/model/TransactionsModel.
+#: php:664
+msgid "Action"
+msgstr "Handling"
+
+#: ../classes/model/EbayOrdersModel.php:816 ../classes/table/EbayOrdersTable.php:
+#: 332
+msgid "Total"
+msgstr "Total"
+
+#: ../classes/model/EbayOrdersModel.php:818 ../classes/model/TransactionsModel.
+#: php:667
+msgid "Buyer ID"
+msgstr "Kjøper ID"
+
+#: ../classes/model/EbayOrdersModel.php:819 ../classes/model/TransactionsModel.
+#: php:668
+msgid "Date created"
+msgstr "Dato opprettet"
+
+#: ../classes/model/EbayShippingModel.php:429
+msgid "Economy services"
+msgstr "Økonomitjeneste"
+
+#: ../classes/model/EbayShippingModel.php:433
+msgid "Standard services"
+msgstr "Standard tjeneste"
+
+#: ../classes/model/EbayShippingModel.php:437
+msgid "Expedited services"
+msgstr "Ekspresstjeneste"
+
+#: ../classes/model/EbayShippingModel.php:441
+msgid "One-day services"
+msgstr "Over natten tjeneste"
+
+#: ../classes/model/EbayShippingModel.php:445
+msgid "Pickup services"
+msgstr "Hentetjeneste"
+
+#: ../classes/model/EbayShippingModel.php:449
+msgid "Other services"
+msgstr "Øvrige tjenester"
+
+#: ../classes/model/EbayShippingModel.php:453
+msgid "International services"
+msgstr "Internasjonale tjenester"
+
+#: ../classes/model/EbayShippingModel.php:457
+msgid "eBay shipping services"
+msgstr "eBay frakttjenester"
+
+#: ../classes/model/ItemBuilderModel.php:1972
+msgid "Some variations seem to have no price."
+msgstr "Noen varianter ser ikke ut til å ha pris angitt."
+
+#: ../classes/model/ItemBuilderModel.php:1993 ../classes/model/ItemBuilderModel.
+#: php:2057
+msgid "eBay does not allow attribute values longer than 50 characters."
+msgstr "eBay tillater ikke verdier lengre enn 50 tegn."
+
+#: ../classes/model/ItemBuilderModel.php:1995 ../classes/model/ItemBuilderModel.
+#: php:2059
+msgid "You need to shorten this value:"
+msgstr "Du må forkorte denne verdien:"
+
+#: ../classes/model/ItemBuilderModel.php:2006
+msgid ""
+"You are using the same SKU for more than one variations which is not allowed "
+"by eBay."
+msgstr "Du har angitt samme SKU for flere varianter, noe som ikke er tillatt på eBay."
+
+#: ../classes/model/ItemBuilderModel.php:2008
+msgid "To circumvent this issue, your item will be listed without SKU."
+msgstr "For å omgå dette problemet vil varen bli oppført uten SKU."
+
+#: ../classes/model/ItemBuilderModel.php:2013
+msgid "Some variations are missing a SKU."
+msgstr "Noen varianter mangler SKU."
+
+#: ../classes/model/ItemBuilderModel.php:2015
+msgid ""
+"It is required to assign a unique SKU to each variation to prevent inventory "
+"sync issues."
+msgstr ""
+"Det er krav å tildele en unik SKU til hver variant for å hindre "
+"synkroniseringsproblemer med varelager."
+
+#: ../classes/model/ItemBuilderModel.php:2020
+msgid "None of these variations are in stock."
+msgstr "Ingen av disse variantene finnes på varelager."
+
+#: ../classes/model/ItemBuilderModel.php:2032
+msgid "Price can not be zero."
+msgstr "Pris kan ikke være null"
+
+#: ../classes/model/ItemBuilderModel.php:2045
+#, php-format
+msgid "eBay requires a minimum price of %s for this listing type."
+msgstr "eBay krever en minstepris på %s for denne type oppføringer."
+
+#: ../classes/model/ItemBuilderModel.php:2067
+msgid "There has been no primary category assigned."
+msgstr "Ingen primær kategori er angitt."
+
+#: ../classes/model/ItemBuilderModel.php:2073
+msgid "You need to add at least one image to your product."
+msgstr "Du må angi minst ett bilde for ditt produkt."
+
+#: ../classes/model/ItemBuilderModel.php:2080
+msgid "Reserve price does not apply to fixed price listings."
+msgstr "Minstepris gjelder ikke for oppføringer med fastpris."
+
+#: ../classes/model/ListingsModel.php:3075
+msgid "Skipped product with status"
+msgstr "Hoppet over produkt  med status"
+
+#: ../classes/model/ListingsModel.php:3077
+#, php-format
+msgid "Skipped product %s with status %s."
+msgstr "Hoppet over produkt %s med status %s."
+
+#: ../classes/model/ListingsModel.php:3090
+#, php-format
+msgid "\"%s\" already exists in account %s and has been skipped."
+msgstr "\"%s\" eksisterer allerede i kontoen %s og er blitt ignorert."
+
+#: ../classes/model/ListingsModel.php:3134
+#, php-format
+msgid ""
+"Error: MySQL failed to create listing record for \"%s\" (%s) using profile %s. "
+"Please contact support and include this error message."
+msgstr ""
+"Feil: MySQL klarte ikke å opprette produktlogg for «%s» (%s) brukerprofil %s."
+" Vennligst kontakt support og inkludere denne feilmeldingen."
+
+#: ../classes/model/ProfilesModel.php:170
+msgid "duplicated"
+msgstr "kopiert"
+
+#: ../classes/model/TemplatesModel.php:733 ../classes/table/ListingsTable.php:369
+#: ../classes/table/ListingsTable.php:968 ../classes/table/ProfilesTable.php:186 .
+#: ./classes/table/TransactionsTable.php:242 ../views/invoice_template.php:124 ..
+#: views/order_details.php:104 ../views/transaction_details.php:110
+msgid "Price"
+msgstr "Pris"
+
+#: ../classes/model/TransactionsModel.php:652
+msgid "New transactions created"
+msgstr "Ny transaksjon opprettet"
+
+#: ../classes/model/TransactionsModel.php:653
+msgid "Existing transactions updated"
+msgstr "Eksisterende transaksjoner er oppdatert"
+
+#: ../classes/model/TransactionsModel.php:654
+msgid "Foreign transactions skipped"
+msgstr "Hoppet over utenlandske transaksjoner"
+
+#: ../classes/model/TransactionsModel.php:655
+msgid "Transactions failed to create"
+msgstr "Opprettelse av transaksjoner feilet"
+
+#: ../classes/model/TransactionsModel.php:658
+msgid ""
+"Note: Foreign transactions for which no matching item ID could be found in "
+"WP-Lister's listings table were skipping during update."
+msgstr ""
+"Merk: Jeg hoppet over utenlandske transaksjoner som jeg ikke fant noen "
+"samsvarende ID for i WP-Listers oppføringer."
+
+#: ../classes/model/TransactionsModel.php:663
+msgid "Transaction ID"
+msgstr "Transaksjons ID"
+
+#: ../classes/model/TransactionsModel.php:665 ../classes/table/LogTable.php:317
+msgid "Item ID"
+msgstr "Produkt ID"
+
+#: ../classes/page/AccountsPage.php:50
+msgid "Account has been deleted."
+msgstr "Kontoen er slettet."
+
+#: ../classes/page/AccountsPage.php:58
+msgid "Account has been enabled."
+msgstr "Kontoen er aktivert."
+
+#: ../classes/page/AccountsPage.php:66
+msgid "Account has been disabled."
+msgstr "Kontoen er deaktivert."
+
+#: ../classes/page/AccountsPage.php:72
+msgid "Default account has been changed successfully."
+msgstr "Endring av standard konto er vellykket."
+
+#: ../classes/page/AccountsPage.php:97
+msgid "Account details have been updated."
+msgstr "Kontodetaljer er oppdatert."
+
+#: ../classes/page/AccountsPage.php:175
+msgid ""
+"Your default account does not exist anymore. Please select a new default "
+"account."
+msgstr "Din standard konto eksisterer ikke lengre. Vennligst angi ny standard konto."
+
+#: ../classes/page/AccountsPage.php:274
+msgid "Account was updated."
+msgstr "Konto ble oppdatert."
+
+#: ../classes/page/AccountsPage.php:309
+msgid "eBay token was updated."
+msgstr "eBay ID-brikke ble oppdatert."
+
+#: ../classes/page/AccountsPage.php:354
+msgid "New account was added."
+msgstr "Ny konto ble lagt til."
+
+#: ../classes/page/AccountsPage.php:354
+msgid "Please refresh account and site specific details now."
+msgstr "Vennligst oppfrisk konto og sidespesifikke detaljer nå."
+
+#: ../classes/page/EbayMessagesPage.php:27
+msgid "Messages"
+msgstr "Meldinger"
+
+#: ../classes/page/EbayMessagesPage.php:77
+#, php-format
+msgid "%s message(s) found on eBay for account %s."
+msgstr "%s melding(er) ble funnet på eBay for konto %s."
+
+#: ../classes/page/EbayMessagesPage.php:78 ../classes/page/EbayOrdersPage.php:82 .
+#: ./classes/page/ToolsPage.php:277 ../classes/page/ToolsPage.php:293 ..
+#: classes/page/TransactionsPage.php:80
+msgid "Timespan"
+msgstr "Tidsrom"
+
+#: ../classes/page/EbayMessagesPage.php:79 ../classes/page/EbayMessagesPage.php:
+#: 104 ../classes/page/EbayOrdersPage.php:83 ../classes/page/EbayOrdersPage.php:
+#: 109 ../classes/page/ToolsPage.php:279 ../classes/page/ToolsPage.php:295 ..
+#: classes/page/TransactionsPage.php:82
+msgid "show details"
+msgstr "vis detaljer"
+
+#: ../classes/page/EbayMessagesPage.php:103
+msgid "messages were updated from eBay."
+msgstr "meldinger ble oppdatert fra eBay."
+
+#: ../classes/page/EbayMessagesPage.php:109 ../classes/page/EbayMessagesPage.php:
+#: 122
+msgid ""
+"You need to select at least one item from the list below in message to use "
+"bulk actions."
+msgstr ""
+"Du må velge minst en melding fra listen nedenfor for å kunne bruke "
+"massehandlinger."
+
+#: ../classes/page/EbayMessagesPage.php:120 ../classes/page/EbayOrdersPage.php:
+#: 126 ../classes/page/ListingsPage.php:213 ../classes/page/LogPage.php:45 ..
+#: classes/page/ProfilesPage.php:39 ../classes/page/TransactionsPage.php:103
+msgid "Selected items were removed."
+msgstr "Valgte produkter ble fjernet."
+
+#: ../classes/page/EbayOrdersPage.php:81
+#, php-format
+msgid "%s order(s) found on eBay for account %s."
+msgstr "%s ordre(r) ble funnet på eBay for konto %s."
+
+#: ../classes/page/EbayOrdersPage.php:108
+msgid "orders were updated from eBay."
+msgstr "ordrer ble oppdatert fra eBay."
+
+#: ../classes/page/EbayOrdersPage.php:114 ../classes/page/EbayOrdersPage.php:128 .
+#: ./classes/page/TransactionsPage.php:94 ../classes/page/TransactionsPage.php:
+#: 105 ../classes/page/TransactionsPage.php:115
+msgid ""
+"You need to select at least one item from the list below in order to use "
+"bulk actions."
+msgstr ""
+"Du må velge minst ett produkt fra listen nedenfor for å kunne bruke "
+"massehandlinger."
+
+#: ../classes/page/EbayOrdersPage.php:143
+msgid "WooCommerce order was created from eBay order."
+msgstr "WooCommerce ordre ble opprettet fra eBay ordre."
+
+#: ../classes/page/EbayOrdersPage.php:144
+msgid "View order"
+msgstr "Vis ordre"
+
+#: ../classes/page/EbayOrdersPage.php:153
+msgid "There was a problem creating an order in WooCommerce from this eBay order."
+msgstr ""
+"Det oppsto problem med opprettelse av ordre i WooCommerce fra denne ordren "
+"fra eBay."
+
+#: ../classes/page/EbayOrdersPage.php:197
+msgid "There are duplicate orders for"
+msgstr "Det eksisterer duplikate ordrer for"
+
+#: ../classes/page/HelpPage.php:15 ../views/tutorial_page.php:11
+msgid "Tutorial"
+msgstr "Opplæring"
+
+#: ../classes/page/ListingsPage.php:147
+msgid "Selected items were verified with eBay."
+msgstr "Valgte produkter ble verifisert på eBay."
+
+#: ../classes/page/ListingsPage.php:149
+msgid "There were some problems verifying your items."
+msgstr "Det oppsto problemer med verifisering av dine produkter."
+
+#: ../classes/page/ListingsPage.php:158
+msgid "Selected items were revised on eBay."
+msgstr "Valgte produkter ble revidert på eBay."
+
+#: ../classes/page/ListingsPage.php:160
+msgid "There were some problems revising your items."
+msgstr "Det oppsto problemer med revidering av dine produkter."
+
+#: ../classes/page/ListingsPage.php:169
+msgid "Selected items were published on eBay."
+msgstr "Valgte produkter ble publisert på eBay."
+
+#: ../classes/page/ListingsPage.php:171
+msgid "Some items could not be published."
+msgstr "Noen produkter kunne ikke publiseres."
+
+#: ../classes/page/ListingsPage.php:180
+msgid "Selected items were re-listed on eBay."
+msgstr "Valgte produkter ble republisert på eBay."
+
+#: ../classes/page/ListingsPage.php:182
+msgid "There were some problems relisting your items."
+msgstr "Det oppsto problemer med republisering av dine produkter."
+
+#: ../classes/page/ListingsPage.php:190
+msgid "Selected listings were ended."
+msgstr "Valgte produkter ble avsluttet."
+
+#: ../classes/page/ListingsPage.php:197
+msgid "Selected items were updated from eBay."
+msgstr "Valgte produkter ble oppdatert fra eBay."
+
+#: ../classes/page/ListingsPage.php:231
+msgid "Selected items were archived."
+msgstr "Valgte produkter ble arkivert."
+
+#: ../classes/page/ListingsPage.php:250
+msgid "Selected items had their status reset to prepared."
+msgstr "Valgte produkter ble endret til forberedt."
+
+#: ../classes/page/ListingsPage.php:266
+msgid "EPS cache was cleared for selected items."
+msgstr "EPS hurtiglager ble tømt for valgte produkter."
+
+#: ../classes/page/ListingsPage.php:286
+msgid "Selected items were locked."
+msgstr "Valgte produkter ble låst."
+
+#: ../classes/page/ListingsPage.php:304
+msgid "Selected items were unlocked."
+msgstr "Valgte produkter ble låst opp."
+
+#: ../classes/page/ListingsPage.php:322
+msgid "Selected items were unscheduled from auto relist."
+msgstr "Valgte produkt ble fjernet fra automatisk republisering."
+
+#: ../classes/page/ListingsPage.php:329
+msgid "Archive was cleared."
+msgstr "Arkivet ble tømt."
+
+#: ../classes/page/ListingsPage.php:347
+msgid "New listing was prepared from product."
+msgstr "En ny oppføring ble forberedt for dette produktet."
+
+#: ../classes/page/ListingsPage.php:349
+msgid "Could not create a new listing from this product."
+msgstr "Kunne ikke opprette en ny oppføring for dette produktet."
+
+#: ../classes/page/ListingsPage.php:374
+msgid "Selected variations were split into single items."
+msgstr "Valgte variasjoner ble delt til selvstendige produkter."
+
+#: ../classes/page/ListingsPage.php:382
+msgid "Profiles were re-applied to selected items."
+msgstr "Profilen ble angitt på de valgte produktene."
+
+#: ../classes/page/ListingsPage.php:432
+#, php-format
+msgid ""
+"There are %s changed item(s) which need to be revised on eBay to apply their "
+"latest changes."
+msgstr ""
+"Det er %s endrede produkt(er) som må revideres på eBay for å kunne å bruke "
+"de siste endringene."
+
+#: ../classes/page/ListingsPage.php:444
+#, php-format
+msgid ""
+"There are %s items which are currently ended on eBay, but are in stock on "
+"your website and can be relisted."
+msgstr ""
+"Det er for øyeblikket %s produkter som er avsluttet på eBay men fortsatt er "
+"på lager på nettstedet ditt og kan republiseres."
+
+#: ../classes/page/ListingsPage.php:447
+msgid "Relist all restocked items"
+msgstr "Republiser alle endrede varelinjer"
+
+#: ../classes/page/ListingsPage.php:455
+#, php-format
+msgid ""
+"There are %s manually relisted item(s) which need to be updated from eBay to "
+"fetch their latest changes."
+msgstr ""
+"Det er %s manuelt republiserte produkt(er) som må oppdateres fra eBay for å "
+"hente sine siste endringene."
+
+#: ../classes/page/ListingsPage.php:457
+msgid "Update all relisted items"
+msgstr "Oppdater alle republiserte produkter"
+
+#: ../classes/page/ListingsPage.php:601
+msgid "Listing updated."
+msgstr "Oppføringen er oppdatert."
+
+#: ../classes/page/ListingsPage.php:610
+msgid "Your changes were updated on eBay."
+msgstr "Endringene er oppdatert på eBay."
+
+#: ../classes/page/ListingsPage.php:629
+#, php-format
+msgid "Warning: There are duplicate listings for %s product(s)."
+msgstr "Advarsel: Det finnes duplikate oppføringer for %s produkt(er)."
+
+#: ../classes/page/ListingsPage.php:630
+msgid "Show details"
+msgstr "Vis detaljer"
+
+#: ../classes/page/ListingsPage.php:633
+msgid ""
+"Creating multiple listings for one product is not recommended as it can "
+"cause issues syncing inventory and other unexpected behaviour."
+msgstr ""
+"Å opprette flere oppføringer for ett produkt anbefales ikke da det kan føre "
+"til problemer med å synkronisere varebeholdning og annen uventet oppførsel."
+
+#: ../classes/page/ListingsPage.php:635
+msgid "Please keep only one listing and move unwanted duplicates to the archive."
+msgstr "Vennligst behold kun én oppføring og flytt uønskede duplikater til arkivet."
+
+#: ../classes/page/ListingsPage.php:640
+msgid ""
+"If you are not planning to use the inventory sync, you can hide this warning "
+"in settings."
+msgstr ""
+"Hvis du ikke planlegger å bruke varelagersynkronisering, kan du skjule denne "
+"advarselen i innstillingene."
+
+#: ../classes/page/ListingsPage.php:663
+msgid "Listings for product"
+msgstr "Oppføringer for produkt"
+
+#: ../classes/page/ListingsPage.php:677
+msgid "Click to move to archive"
+msgstr "Klikk for å flytte til arkivet"
+
+#: ../classes/page/ListingsPage.php:682
+msgid "Click to remove this listing"
+msgstr "Klikk for å fjerne denne oppføringen"
+
+#: ../classes/page/ListingsPage.php:706 ../views/listings_prepare_page.php:121
+msgid "Apply Profile"
+msgstr "Angi profilen"
+
+#: ../classes/page/LogPage.php:51
+msgid "Database log has been cleared."
+msgstr "Databaseloggen er tømt."
+
+#: ../classes/page/LogPage.php:55
+msgid "expired records have been removed and the database table has been optimized."
+msgstr "utløpte data er fjernet og databasen er optimalisert."
+
+#: ../classes/page/NetworkAdminPage.php:61
+msgid "WP-Lister was activated on the selected sites."
+msgstr "WP-Lister ble aktivert på valgte sider."
+
+#: ../classes/page/NetworkAdminPage.php:67
+msgid "WP-Lister was deactivated on the selected sites."
+msgstr "WP-Lister ble deaktivert på valgte sider."
+
+#: ../classes/page/NetworkAdminPage.php:72
+msgid "WP-Lister was installed from scratch on the selected sites."
+msgstr "WP-Lister ble installert fra grunnen på valgte sider."
+
+#: ../classes/page/NetworkAdminPage.php:77
+msgid "WP-Lister was installed on the selected sites."
+msgstr "WP-Lister ble installert på valgte sider."
+
+#: ../classes/page/NetworkAdminPage.php:82
+msgid "WP-Lister was uninstalled on the selected sites."
+msgstr "WP-Lister ble avinstallert på valgte sider."
+
+#: ../classes/page/ProfilesPage.php:500
+msgid "Profile saved."
+msgstr "Profilen er lagret"
+
+#: ../classes/page/ProfilesPage.php:525
+#, php-format
+msgid "%s prepared items updated."
+msgstr "%s forberedte produkter er oppdatert."
+
+#: ../classes/page/ProfilesPage.php:532
+#, php-format
+msgid "%s verified items updated."
+msgstr "%s verifiserte produkter oppdatert."
+
+#: ../classes/page/ProfilesPage.php:539
+#, php-format
+msgid "%s published items changed."
+msgstr "%s publiserte produkter endret."
+
+#: ../classes/page/ProfilesPage.php:546
+#, php-format
+msgid "%s ended items updated."
+msgstr "%s avsluttede produkter er oppdatert."
+
+#: ../classes/page/ProfilesPage.php:658 ../views/listings_edit_page.php:234 ..
+#: views/listings_edit_page.php:283 ../views/profiles_edit_page.php:78 ..
+#: views/profiles_edit_page.php:118 ../views/profiles_edit_page.php:192 ..
+#: views/profiles_edit_page.php:230 ../views/profiles_edit_page.php:317 ..
+#: views/settings_page.php:193 ../views/settings_page.php:248 ..
+#: views/account/account_edit_page.php:63 ../views/account/settings_add_account.
+#: php:27 ../views/profile/edit_shipping_int.php:40 ..
+#: views/profile/edit_shipping_int.php:110 ../views/profile/edit_sidebar.php:154
+#: ../views/profile/edit_sidebar.php:192
+msgid "Please select"
+msgstr "Vennligst velg"
+
+#: ../classes/page/SettingsPage.php:120
+msgid "Update available"
+msgstr "Oppdatering tilgjengelig"
+
+#: ../classes/page/SettingsPage.php:122
+msgid "Please visit your WordPress Updates to install the new version."
+msgstr ""
+"Vennligst besøk din WordPress sides oppdateringer for å installere den nye "
+"versjonen."
+
+#: ../classes/page/SettingsPage.php:123 ../classes/page/SettingsPage.php:136 ..
+#: classes/page/SettingsPage.php:1050
+msgid "view updates"
+msgstr "vis oppdateringer"
+
+#: ../classes/page/SettingsPage.php:127
+msgid "You are using the latest version of WP-Lister. That's great!"
+msgstr "Flott, du bruker den nyeste versjonen av WP-Lister."
+
+#: ../classes/page/SettingsPage.php:133
+msgid "Check for updates was initiated."
+msgstr "Sjekk etter oppdateringer ble igangsatt."
+
+#: ../classes/page/SettingsPage.php:134
+msgid "You can visit your WordPress Updates now."
+msgstr "Du kan besøke din WordPress sides oppdateringer nå."
+
+#: ../classes/page/SettingsPage.php:135 ../classes/page/SettingsPage.php:1049
+msgid ""
+"Since the updater runs in the background, it might take a little while "
+"before new updates appear."
+msgstr ""
+"Siden oppdateringsprogrammet kjører i bakgrunnen, kan det ta litt tid før "
+"nye oppdateringer vises."
+
+#: ../classes/page/SettingsPage.php:445 ../classes/page/SettingsPage.php:502
+msgid "Settings saved."
+msgstr "Innstillingene er lagret."
+
+#: ../classes/page/SettingsPage.php:587
+msgid "Categories mapping updated."
+msgstr "Kartlegging av kategorier oppdatert."
+
+#: ../classes/page/SettingsPage.php:607 ../classes/page/SettingsPage.php:699
+msgid "Please enter your license key."
+msgstr "Anngi lisensnøkkelen."
+
+#: ../classes/page/SettingsPage.php:611 ../classes/page/SettingsPage.php:703
+msgid "Please enter your license email address."
+msgstr "Anngi e-postadressen for din lisens"
+
+#: ../classes/page/SettingsPage.php:631
+msgid "Your license was activated."
+msgstr "Lisensen er aktivert."
+
+#: ../classes/page/SettingsPage.php:635 ../classes/page/SettingsPage.php:638 ..
+#: classes/page/SettingsPage.php:641
+msgid "There was a problem activating your license."
+msgstr "Det oppsto et problem under aktivering av din lisens."
+
+#: ../classes/page/SettingsPage.php:659 ../classes/page/SettingsPage.php:838
+msgid "Your license was deactivated."
+msgstr "Din lisens er deaktivert."
+
+#: ../classes/page/SettingsPage.php:665 ../classes/page/SettingsPage.php:908
+msgid "This license has not been activated on this site."
+msgstr "Denne lisensen har ikke blitt aktivert på denne siden."
+
+#: ../classes/page/SettingsPage.php:666 ../classes/page/SettingsPage.php:909
+msgid "The update server responded:"
+msgstr "Oppdateringsserveren responderte:"
+
+#: ../classes/page/SettingsPage.php:674 ../classes/page/SettingsPage.php:677 ..
+#: classes/page/SettingsPage.php:680
+msgid "There was a problem deactivating your license."
+msgstr "Det oppsto et problem under deaktivering av lisensen din."
+
+#: ../classes/page/SettingsPage.php:742
+msgid "Plugin activated. "
+msgstr "Utvidelsen er aktivert"
+
+#: ../classes/page/SettingsPage.php:749
+msgid "Connection failed to the License Key API server. Try again later."
+msgstr "Tilkoblingsproblemer mot lisens API serveren. Vennligst forsøk igjen senere."
+
+#: ../classes/page/SettingsPage.php:887
+msgid "License has been activated on"
+msgstr "Lisensen er aktivert på"
+
+#: ../classes/page/SettingsPage.php:890
+msgid "Your license is currently not activated on this site."
+msgstr "Din lisens er for øyeblikket ikke aktivert på denne siden"
+
+#: ../classes/page/SettingsPage.php:904
+msgid "Your license is currently active on this site."
+msgstr "Din lisens er for øyeblikket aktivert på denne siden"
+
+#: ../classes/page/SettingsPage.php:915 ../classes/page/SettingsPage.php:918 ..
+#: classes/page/SettingsPage.php:921
+msgid "There was a problem checking your license."
+msgstr "Det oppsto et problem mens vi sjekket lisensen din."
+
+#: ../classes/page/SettingsPage.php:959 ../classes/page/SettingsPage.php:962
+msgid "Enabled sandbox mode."
+msgstr "Aktivert sandkassemodus."
+
+#: ../classes/page/SettingsPage.php:981 ../classes/page/SettingsPage.php:984
+msgid "Switched to production mode."
+msgstr "Endret til produksjonsmodus"
+
+#: ../classes/page/SettingsPage.php:1024
+msgid "Your token was changed."
+msgstr "Din ID-brikke er endret."
+
+#: ../classes/page/SettingsPage.php:1025 ../classes/page/ToolsPage.php:252
+msgid "Your UserID is"
+msgstr "Din brukerID er"
+
+#: ../classes/page/SettingsPage.php:1028
+msgid "Settings updated."
+msgstr "Innstillingene er oppdatert."
+
+#: ../classes/page/SettingsPage.php:1047
+msgid "Update channel was changed."
+msgstr "Oppdateringskanal ble endret."
+
+#: ../classes/page/SettingsPage.php:1048
+msgid ""
+"To install the latest version of WP-Lister, please visit your WordPress "
+"Updates now."
+msgstr ""
+"For å installere den nyeste versjonen av WP-Lister kan du gå til din "
+"WordPress sides oppdateringer nå."
+
+#: ../classes/page/TemplatesPage.php:27 ../views/templates_page.php:20
+msgid "Templates"
+msgstr "Maler"
+
+#: ../classes/page/TemplatesPage.php:299
+msgid "New template created in folder:"
+msgstr "Ny mal lagret i mappen:"
+
+#: ../classes/page/TemplatesPage.php:328
+#, php-format
+msgid "%s published items marked as changed."
+msgstr "%s publiserte produkter er merket som endret."
+
+#: ../classes/page/TemplatesPage.php:399
+msgid "Template saved."
+msgstr "Malen ble lagret"
+
+#: ../classes/page/TemplatesPage.php:458
+msgid "There was a problem while extracting the archive:"
+msgstr "Det oppsto et problem under utpakking av arkivet:"
+
+#: ../classes/page/TemplatesPage.php:460
+msgid "Your listing template was uploaded and installed."
+msgstr "Publiseringsmalen ble lastet opp og installert."
+
+#: ../classes/page/TemplatesPage.php:466
+msgid "There was a problem while processing your upload."
+msgstr "Det oppstod et problem under behandling av opplastingen."
+
+#: ../classes/page/ToolsPage.php:242
+msgid "Your token will expire on"
+msgstr "Din ID-brikke uløper den"
+
+#: ../classes/page/ToolsPage.php:276 ../classes/page/TransactionsPage.php:79
+msgid "Transactions were loaded from eBay."
+msgstr "Transaksjonene ble hentet fra eBay."
+
+#: ../classes/page/ToolsPage.php:292
+msgid "Orders were loaded from eBay."
+msgstr "Ordrer ble hentet fra eBay."
+
+#: ../classes/page/ToolsPage.php:414
+msgid "fetching list of tasks"
+msgstr "henter liste over oppgaver"
+
+#: ../classes/page/ToolsPage.php:415
+msgid "estimating time left"
+msgstr "beregnet tid som gjenstår"
+
+#: ../classes/page/ToolsPage.php:416
+msgid "finishing up"
+msgstr "avslutter"
+
+#: ../classes/page/ToolsPage.php:417
+msgid "All {0} tasks have been completed."
+msgstr "Alle {0} oppgaver er fullført."
+
+#: ../classes/page/ToolsPage.php:418
+msgid "processing {0} of {1}"
+msgstr "behandler {0} av {1}"
+
+#: ../classes/page/ToolsPage.php:419
+msgid "about {0} remaining"
+msgstr "omtrent {0} gjennstår"
+
+#: ../classes/page/ToolsPage.php:420 ../views/common_header.php:41
+msgid "Please don't close this window until all tasks are completed."
+msgstr "Ikke lukk dette vinduet før alle oppgaver er fullført."
+
+#: ../classes/page/ToolsPage.php:699
+msgid "Resize all"
+msgstr "Endre størrelse på alle"
+
+#: ../classes/page/TransactionsPage.php:92
+msgid "Selected transactions were updated from eBay."
+msgstr "Valgte transaksjoner ble oppdatert fra eBay."
+
+#: ../classes/page/TransactionsPage.php:113
+msgid "Selected transaction was reverted."
+msgstr "Valgt transaksjon ble tilbakestilt."
+
+#: ../classes/page/TransactionsPage.php:175
+msgid "There are duplicate transactions which should be removed."
+msgstr "Det finnes duplikate transaksjoner som bør fjernes."
+
+#: ../classes/table/AccountsTable.php:110 ../classes/table/ListingsTable.php:142 .
+#: ./classes/table/ListingsTable.php:865 ../classes/table/ListingsTable.php:891 ..
+#: classes/table/ProfilesTable.php:113 ../classes/table/ProfilesTable.php:137 ..
+#: classes/table/TemplatesTable.php:118
+msgid "Edit"
+msgstr "Endre"
+
+#: ../classes/table/AccountsTable.php:111 ../views/listings_edit_page.php:67 ..
+#: views/listings_edit_page.php:115 ../views/settings_advanced.php:36 ..
+#: views/settings_categories.php:97 ../views/settings_dev.php:36 ..
+#: views/settings_license.php:28 ../views/settings_page.php:41 ..
+#: views/templates_edit_page.php:121 ../views/account/account_edit_sidebar.php:
+#: 23 ../views/account/account_edit_sidebar.php:47 ../views/profile/edit_sidebar.
+#: php:49
+msgid "Update"
+msgstr "Oppdater"
+
+#: ../classes/table/AccountsTable.php:112 ../views/profile/edit_sidebar.php:499 ..
+#: views/profile/edit_sidebar.php:643
+msgid "Enable"
+msgstr "Aktiver"
+
+#: ../classes/table/AccountsTable.php:113
+msgid "Disable"
+msgstr "Deaktiver"
+
+#: ../classes/table/AccountsTable.php:114
+msgid "Make default"
+msgstr "Sett som standard"
+
+#: ../classes/table/AccountsTable.php:115 ../classes/table/ListingsTable.php:153 .
+#: ./classes/table/LogTable.php:344 ../classes/table/ProfilesTable.php:115 ..
+#: classes/table/ProfilesTable.php:237 ../classes/table/TemplatesTable.php:120 ..
+#: classes/table/TransactionsTable.php:299
+msgid "Delete"
+msgstr "Slett"
+
+#: ../classes/table/AccountsTable.php:161
+msgid "Refresh Details"
+msgstr "Oppfrisk detaljer"
+
+#: ../classes/table/AccountsTable.php:176
+msgid "Visit Store"
+msgstr "Gå til butikk"
+
+#: ../classes/table/AccountsTable.php:185
+msgid "OK"
+msgstr "OK"
+
+#: ../classes/table/AccountsTable.php:230 ../classes/table/LogTable.php:318 ..
+#: classes/table/TemplatesTable.php:74
+msgid "User"
+msgstr "Bruker"
+
+#: ../classes/table/AccountsTable.php:231 ../views/account/account_edit_sidebar.
+#: php:66
+msgid "Site"
+msgstr "Side"
+
+#: ../classes/table/AccountsTable.php:232
+msgid "Valid Until"
+msgstr "Gyldig til"
+
+#: ../classes/table/CategoriesMapTable.php:89
+msgid "This is not a leaf category"
+msgstr "Dette er ikke en bladkategori"
+
+#: ../classes/table/CategoriesMapTable.php:151 ../classes/table/EbayOrdersTable.
+#: php:462 ../classes/table/ListingsTable.php:1206
+msgid "All accounts"
+msgstr "Alle kontoer"
+
+#: ../classes/table/CategoriesMapTable.php:161 ..
+#: classes/table/CategoriesMapTable.php:167
+#, php-format
+msgid "Refresh categories for account %s"
+msgstr "Oppfrisk kategorier for konto %s"
+
+#: ../classes/table/CategoriesMapTable.php:213 ../classes/table/ProfilesTable.php:
+#: 187
+msgid "Category"
+msgstr "Kategori"
+
+#: ../classes/table/CategoriesMapTable.php:214
+msgid "eBay category"
+msgstr "eBay kategori"
+
+#: ../classes/table/CategoriesMapTable.php:215
+msgid "eBay Store category"
+msgstr "eBay Butikk kategori"
+
+#: ../classes/table/EbayMessagesTable.php:112 ../classes/table/EbayOrdersTable.
+#: php:121 ../classes/table/TransactionsTable.php:117 ../views/settings_page.php:99
+msgid "Details"
+msgstr "Detaljer"
+
+#: ../classes/table/EbayMessagesTable.php:113
+msgid "Reply on eBay"
+msgstr "Svar på eBay"
+
+#: ../classes/table/EbayMessagesTable.php:160 ../classes/table/EbayMessagesTable.
+#: php:339
+msgid "Unread"
+msgstr "Ulest"
+
+#: ../classes/table/EbayMessagesTable.php:164 ../classes/table/EbayMessagesTable.
+#: php:333
+msgid "Read"
+msgstr "Lest"
+
+#: ../classes/table/EbayMessagesTable.php:227 ../classes/table/TransactionsTable.
+#: php:240
+msgid "Product"
+msgstr "Produkt"
+
+#: ../classes/table/EbayMessagesTable.php:231
+msgid "Expires at"
+msgstr "Utløper den"
+
+#: ../classes/table/EbayMessagesTable.php:278
+msgid "Update selected messages from eBay"
+msgstr "Oppdater valgte meldinger fra eBay"
+
+#: ../classes/table/EbayMessagesTable.php:279
+msgid "Delete selected messages"
+msgstr "Slett valgte meldinger"
+
+#: ../classes/table/EbayMessagesTable.php:327 ../classes/table/EbayOrdersTable.
+#: php:434 ../classes/table/ListingsTable.php:1114 ../classes/table/LogTable.php:
+#: 379 ../classes/table/TransactionsTable.php:346
+msgid "All"
+msgstr "Alle"
+
+#: ../classes/table/EbayOrdersTable.php:154 ../classes/table/TransactionsTable.
+#: php:126
+msgid "View Order"
+msgstr "Vis ordre"
+
+#: ../classes/table/EbayOrdersTable.php:156 ../classes/table/TransactionsTable.
+#: php:124
+msgid "Create Order"
+msgstr "Opprett ordre"
+
+#: ../classes/table/EbayOrdersTable.php:213
+msgid "Payment complete"
+msgstr "Betaling fullført"
+
+#: ../classes/table/EbayOrdersTable.php:217
+msgid "Payment in Progress"
+msgstr "Betaling behandles"
+
+#: ../classes/table/EbayOrdersTable.php:221
+msgid "The buyer's eCheck bounced"
+msgstr "Kjøperens eCheck ble avvist"
+
+#: ../classes/table/EbayOrdersTable.php:232
+msgid "Paid"
+msgstr "Betalt"
+
+#: ../classes/table/EbayOrdersTable.php:232 ../classes/table/EbayOrdersTable.php:
+#: 264
+#, php-format
+msgid "%s ago"
+msgstr "%s siden"
+
+#: ../classes/table/EbayOrdersTable.php:249 ../classes/table/EbayOrdersTable.php:
+#: 446 ../classes/table/TransactionsTable.php:358 ../views/settings_dev.php:219 ..
+#: views/account/account_edit_page.php:94
+msgid "Active"
+msgstr "Aktiv"
+
+#: ../classes/table/EbayOrdersTable.php:253 ../classes/table/EbayOrdersTable.php:
+#: 440 ../classes/table/TransactionsTable.php:352
+msgid "Completed"
+msgstr "Fullført"
+
+#: ../classes/table/EbayOrdersTable.php:264
+msgid "Shipped"
+msgstr "Sendt"
+
+#: ../classes/table/EbayOrdersTable.php:328 ../classes/table/ListingsTable.php:
+#: 971 ../classes/table/TransactionsTable.php:238
+msgid "Created at"
+msgstr "Opprettet den "
+
+#: ../classes/table/EbayOrdersTable.php:331 ../views/profiles_edit_page.php:366
+msgid "Buyer"
+msgstr "Kjøper"
+
+#: ../classes/table/EbayOrdersTable.php:334 ../classes/table/TransactionsTable.
+#: php:246
+msgid "Payment method"
+msgstr "Betalingsmåte"
+
+#: ../classes/table/EbayOrdersTable.php:335 ../classes/table/ListingsTable.php:
+#: 976 ../classes/table/LogTable.php:320 ../classes/table/NetworkSitesTable.php:
+#: 270 ../classes/table/TransactionsTable.php:249 ..
+#: views/account/account_edit_sidebar.php:64
+msgid "Status"
+msgstr "Status"
+
+#: ../classes/table/EbayOrdersTable.php:338 ../classes/table/TransactionsTable.
+#: php:251
+msgid "Last change"
+msgstr "Siste endring"
+
+#: ../classes/table/EbayOrdersTable.php:385
+msgid "Update selected orders from eBay"
+msgstr "Oppdater valgte ordrer fra eBay"
+
+#: ../classes/table/EbayOrdersTable.php:386
+msgid "Delete selected orders"
+msgstr "Slett valgte ordrer"
+
+#: ../classes/table/ListingsTable.php:141 ../classes/table/TemplatesTable.php:117
+msgid "Preview"
+msgstr "Forhåndsvis"
+
+#: ../classes/table/ListingsTable.php:143
+msgid "Lock"
+msgstr "Lås"
+
+#: ../classes/table/ListingsTable.php:144
+msgid "Unlock"
+msgstr "Lås opp"
+
+#: ../classes/table/ListingsTable.php:148
+msgid "Revise"
+msgstr "Revider"
+
+#: ../classes/table/ListingsTable.php:149
+msgid "End Listing"
+msgstr "Avslutt oppføring"
+
+#: ../classes/table/ListingsTable.php:151 ../classes/table/ListingsTable.php:1162
+msgid "Relist"
+msgstr "Republiser"
+
+#: ../classes/table/ListingsTable.php:152 ../views/settings_categories.php:104
+msgid "Update from eBay"
+msgstr "Oppdater fra eBay"
+
+#: ../classes/table/ListingsTable.php:154
+msgid "Archive"
+msgstr "Arkiv"
+
+#: ../classes/table/ListingsTable.php:330 ../classes/table/ListingsTable.php:346 .
+#: ./views/profile/edit_sidebar.php:387
+msgid "Variations"
+msgstr "Varianter"
+
+#: ../classes/table/ListingsTable.php:351
+msgid "These variations will be listed as a single item."
+msgstr "Disse variantene vil bli publisert som enkle produkter."
+
+#: ../classes/table/ListingsTable.php:367 ../classes/table/ListingsTable.php:965 .
+#: ./views/match_product.php:76
+msgid "SKU"
+msgstr "SKU"
+
+#: ../classes/table/ListingsTable.php:391
+msgid "Default variation"
+msgstr "Standard variant"
+
+#: ../classes/table/ListingsTable.php:413
+msgid ""
+"Notice: eBay does not support individual weight and dimensions for "
+"variations when using calculated shipping services."
+msgstr ""
+"Merk: eBay støtter ikke enkelte vekt og mål for varianter ved bruk av "
+"kalkulert frakttjenester."
+
+#: ../classes/table/ListingsTable.php:419
+msgid "Split variations into single items"
+msgstr "Del opp varianter til selvstendige produkter"
+
+#: ../classes/table/ListingsTable.php:795 ../views/listings_edit_page.php:272
+msgid "prepared"
+msgstr "forberedt"
+
+#: ../classes/table/ListingsTable.php:799 ../views/listings_edit_page.php:273
+msgid "verified"
+msgstr "verifisert"
+
+#: ../classes/table/ListingsTable.php:803 ../views/listings_edit_page.php:274
+msgid "published"
+msgstr "publisert"
+
+#: ../classes/table/ListingsTable.php:807 ../views/listings_edit_page.php:275
+msgid "sold"
+msgstr "solgt"
+
+#: ../classes/table/ListingsTable.php:811 ../views/listings_edit_page.php:276
+msgid "ended"
+msgstr "avsluttet"
+
+#: ../classes/table/ListingsTable.php:815
+msgid "archived"
+msgstr "arkivert"
+
+#: ../classes/table/ListingsTable.php:819
+msgid "imported"
+msgstr "importert"
+
+#: ../classes/table/ListingsTable.php:823
+msgid "selected"
+msgstr "valgt"
+
+#: ../classes/table/ListingsTable.php:827 ../views/listings_edit_page.php:277
+msgid "changed"
+msgstr "endret"
+
+#: ../classes/table/ListingsTable.php:831
+msgid "relisted"
+msgstr "republisert"
+
+#: ../classes/table/ListingsTable.php:850
+msgid "Profile missing"
+msgstr "Profil mangler"
+
+#: ../classes/table/ListingsTable.php:876
+msgid "Template missing"
+msgstr "Mal mangler"
+
+#: ../classes/table/ListingsTable.php:963
+msgid "Image"
+msgstr "Bilde"
+
+#: ../classes/table/ListingsTable.php:966 ../classes/table/TransactionsTable.php:
+#: 243 ../views/invoice_template.php:120 ../views/listings_edit_page.php:226 ..
+#: views/order_details.php:100 ../views/transaction_details.php:106 ..
+#: views/profile/edit_sidebar.php:219
+msgid "Quantity"
+msgstr "Antall"
+
+#: ../classes/table/ListingsTable.php:967 ../classes/table/ListingsTable.php:1156
+msgid "Sold"
+msgstr "Solgt"
+
+#: ../classes/table/ListingsTable.php:969
+msgid "Fees"
+msgstr "Gebyr"
+
+#: ../classes/table/ListingsTable.php:972
+msgid "Ends at"
+msgstr "Avsluttes den"
+
+#: ../classes/table/ListingsTable.php:973 ../classes/table/ProfilesTable.php:184
+msgid "Profile"
+msgstr "Profil"
+
+#: ../classes/table/ListingsTable.php:974 ../classes/table/ProfilesTable.php:189 .
+#: ./classes/table/TemplatesTable.php:171 ../views/listings_edit_page.php:127 ..
+#: views/profile/edit_sidebar.php:273
+msgid "Template"
+msgstr "Mal"
+
+#: ../classes/table/ListingsTable.php:1029
+msgid "Verify with eBay"
+msgstr "Verifiser mot eBay"
+
+#: ../classes/table/ListingsTable.php:1030
+msgid "Publish to eBay"
+msgstr "Publiser til eBay"
+
+#: ../classes/table/ListingsTable.php:1031
+msgid "Update details from eBay"
+msgstr "Oppdater detaljer fra eBay"
+
+#: ../classes/table/ListingsTable.php:1033
+msgid "Select another profile"
+msgstr "Velg en annen profil"
+
+#: ../classes/table/ListingsTable.php:1034
+msgid "Re-apply profile"
+msgstr "Angi profil på nytt"
+
+#: ../classes/table/ListingsTable.php:1035
+msgid "Revise items"
+msgstr "Revider produktene"
+
+#: ../classes/table/ListingsTable.php:1036
+msgid "End listings"
+msgstr "Avslutt oppføringene"
+
+#: ../classes/table/ListingsTable.php:1037
+msgid "Re-list ended items"
+msgstr "Republiser avsluttede produkter"
+
+#: ../classes/table/ListingsTable.php:1038
+msgid "Lock listings"
+msgstr "Lås oppføringene"
+
+#: ../classes/table/ListingsTable.php:1039
+msgid "Unlock listings"
+msgstr "Lås opp oppføringene"
+
+#: ../classes/table/ListingsTable.php:1040
+msgid "Move to archive"
+msgstr "Flytt til arkiv"
+
+#: ../classes/table/ListingsTable.php:1041
+msgid "Delete listings"
+msgstr "Slett oppføringene"
+
+#: ../classes/table/ListingsTable.php:1042
+msgid "Cancel relist schedule"
+msgstr "Avbryt planlagte republiseringer"
+
+#: ../classes/table/ListingsTable.php:1043
+msgid "Reset ended items"
+msgstr "Nullstill avsluttede produkter"
+
+#: ../classes/table/ListingsTable.php:1044
+msgid "Clear EPS cache"
+msgstr "Tøm EPS Hurtiglager"
+
+#: ../classes/table/ListingsTable.php:1120
+msgid "Prepared"
+msgstr "Forberedt"
+
+#: ../classes/table/ListingsTable.php:1126
+msgid "Verified"
+msgstr "Verifisert"
+
+#: ../classes/table/ListingsTable.php:1132
+msgid "Published"
+msgstr "Publisert"
+
+#: ../classes/table/ListingsTable.php:1138
+msgid "Changed"
+msgstr "Endret"
+
+#: ../classes/table/ListingsTable.php:1144
+msgid "Ended"
+msgstr "Avsluttet"
+
+#: ../classes/table/ListingsTable.php:1150
+msgid "Archived"
+msgstr "Arkivert"
+
+#: ../classes/table/ListingsTable.php:1169
+msgid "Scheduled"
+msgstr "Planlagt"
+
+#: ../classes/table/ListingsTable.php:1177
+msgid "Locked"
+msgstr "Låst"
+
+#: ../classes/table/ListingsTable.php:1195
+msgid "All profiles"
+msgstr "Alle profilene"
+
+#: ../classes/table/ListingsTable.php:1221 ../views/listings_page.php:91 ..
+#: views/listings_page.php:126
+msgid "Verify all prepared items with eBay and get listing fees."
+msgstr "Verifiser alle forberedte produkter mot eBay og vis publiseringsgebyrene"
+
+#: ../classes/table/ListingsTable.php:1222 ../views/listings_page.php:92 ..
+#: views/listings_page.php:125
+msgid "Verify all prepared items"
+msgstr "Verifiser alle forberedte produkter"
+
+#: ../classes/table/ListingsTable.php:1228 ../views/listings_page.php:97 ..
+#: views/listings_page.php:135
+msgid "Publish all verified items on eBay."
+msgstr "Publiser alle verifiserte produkter på eBay."
+
+#: ../classes/table/ListingsTable.php:1229 ../views/listings_page.php:98 ..
+#: views/listings_page.php:134
+msgid "Publish all verified items"
+msgstr "Publiser alle verifiserte produkter"
+
+#: ../classes/table/LogTable.php:315 ../views/order_details.php:138 ..
+#: views/order_details.php:186 ../views/transaction_details.php:137
+msgid "Date"
+msgstr "Dato"
+
+#: ../classes/table/LogTable.php:316
+msgid "Request"
+msgstr "Forespørsel"
+
+#: ../classes/table/LogTable.php:385
+msgid "Successful"
+msgstr "Vellykket"
+
+#: ../classes/table/LogTable.php:391
+msgid "Warnings"
+msgstr "Advarsler"
+
+#: ../classes/table/LogTable.php:397
+msgid "Failed"
+msgstr "Feilet"
+
+#: ../classes/table/LogTable.php:404
+msgid "Partial Failure"
+msgstr "Feilet delvis"
+
+#: ../classes/table/LogTable.php:412
+msgid "Unknown"
+msgstr "Ukjent"
+
+#: ../classes/table/LogTable.php:482
+msgid "All requests"
+msgstr "Alle forespørsler"
+
+#: ../classes/table/LogTable.php:491
+msgid "All users"
+msgstr "Alle brukere"
+
+#: ../classes/table/NetworkSitesTable.php:113
+msgid "Dashboard"
+msgstr "Oversikt"
+
+#: ../classes/table/NetworkSitesTable.php:116
+msgid "Install"
+msgstr "Installer"
+
+#: ../classes/table/NetworkSitesTable.php:117 ../views/settings_advanced.php:65
+msgid "Uninstall"
+msgstr "avinstaller"
+
+#: ../classes/table/NetworkSitesTable.php:118 ../classes/table/NetworkSitesTable.
+#: php:319
+msgid "Activate"
+msgstr "Aktiver"
+
+#: ../classes/table/NetworkSitesTable.php:119 ../classes/table/NetworkSitesTable.
+#: php:320
+msgid "Deactivate"
+msgstr "Deaktiver"
+
+#: ../classes/table/NetworkSitesTable.php:215
+msgid "enabled"
+msgstr "aktivert"
+
+#: ../classes/table/NetworkSitesTable.php:219
+msgid "disabled"
+msgstr "deaktivert"
+
+#: ../classes/table/NetworkSitesTable.php:223
+msgid "not installed"
+msgstr "ikke installert"
+
+#: ../classes/table/NetworkSitesTable.php:272
+msgid "DB Version"
+msgstr "DB Versjon"
+
+#: ../classes/table/NetworkSitesTable.php:273
+msgid "Setup"
+msgstr "Oppsett"
+
+#: ../classes/table/NetworkSitesTable.php:274 ../classes/table/TemplatesTable.php:
+#: 172
+msgid "Folder"
+msgstr "Mappe"
+
+#: ../classes/table/NetworkSitesTable.php:321
+msgid "Update DB"
+msgstr "Oppdater DB"
+
+#: ../classes/table/ProfilesTable.php:49
+msgid "No profiles found."
+msgstr "Ingen profiler funnet"
+
+#: ../classes/table/ProfilesTable.php:77
+msgid "Listing"
+msgstr "Oppføring"
+
+#: ../classes/table/ProfilesTable.php:78 ../views/profiles_edit_page.php:82
+msgid "Classified Ad"
+msgstr "Annonse"
+
+#: ../classes/table/ProfilesTable.php:82 ../views/orders_page.php:68 ..
+#: views/orders_page.php:69 ../views/orders_page.php:70 ../views/orders_page.php:
+#: 71 ../views/orders_page.php:72 ../views/orders_page.php:73 ..
+#: views/orders_page.php:74 ../views/profiles_edit_page.php:341 ..
+#: views/profiles_edit_page.php:342 ../views/profiles_edit_page.php:343 ..
+#: views/profiles_edit_page.php:344
+msgid "days"
+msgstr "dager"
+
+#: ../classes/table/ProfilesTable.php:114 ../classes/table/TemplatesTable.php:119
+msgid "Duplicate"
+msgstr "Kopier"
+
+#: ../classes/table/ProfilesTable.php:185 ../views/listings_edit_page.php:232 ..
+#: views/profiles_edit_page.php:114
+msgid "Duration"
+msgstr "Varighet"
+
+#: ../classes/table/ProfilesTable.php:188 ../views/listings_edit_page.php:281 ..
+#: views/profiles_edit_page.php:74 ../views/account/account_edit_sidebar.php:68
+msgid "Type"
+msgstr "Type"
+
+#: ../classes/table/TemplatesTable.php:74 ../views/profile/edit_sidebar.php:418
+msgid "Default"
+msgstr "Standard"
+
+#: ../classes/table/TemplatesTable.php:121
+msgid "Download"
+msgstr "Last ned"
+
+#: ../classes/table/TransactionsTable.php:139
+msgid "Edit Product"
+msgstr "Endre produkt"
+
+#: ../classes/table/TransactionsTable.php:176
+msgid "InComplete"
+msgstr "Ufullstendig"
+
+#: ../classes/table/TransactionsTable.php:180
+msgid "Complete"
+msgstr "Fullført"
+
+#: ../classes/table/TransactionsTable.php:245 ../views/invoice_template.php:122 ..
+#: views/order_details.php:102 ../views/templates_copy_form.php:37 ..
+#: views/templates_edit_page.php:362 ../views/transaction_details.php:108
+msgid "Name"
+msgstr "Navn"
+
+#: ../classes/table/TransactionsTable.php:298
+msgid "Update transaction from eBay"
+msgstr "Oppdater transaksjoner fra eBay"
+
+#: ../includes/WPLE_CustomUpdater_v2.php:114 ../includes/WPLE_CustomUpdater_v2.
+#: php:123
+msgid "Cheatin&#8217; huh?"
+msgstr "Jasså vi jukser litt?"
+
+#: ../includes/WPLE_CustomUpdater_v2.php:164
+msgid "License Activation"
+msgstr "Aktivering lisens"
+
+#: ../includes/WPLE_CustomUpdater_v2.php:165
+msgid "License Deactivation"
+msgstr "Deaktivering lisens"
+
+#: ../includes/WPLE_CustomUpdater_v2.php:431
+#, php-format
+msgid ""
+"The plugin license key has not been activated, so you won't be able to get "
+"updates! %sClick here%s to activate the license key and the plugin."
+msgstr ""
+"Utvidelsens lisensnøkkel er ikke aktivert så du vil ikke være i stand til å "
+"få oppdateringer! %sKlikk her%s for å aktivere lisensnøkkel og utvidelsen."
+
+#: ../includes/WPLE_CustomUpdater_v2.php:450
+#, php-format
+msgid ""
+"<b>Warning!</b> You're blocking external requests which means you won't be "
+"able to get %s updates. Please add %s to %s."
+msgstr ""
+"<b>Advarsel!</b> Du blokkerer eksterne forespørsler som betyr at du vil ikke "
+"kunne få %s oppdateringer. Vennligst legg %s til %s."
+
+#: ../includes/am/classes/class-wc-plugin-update.php:410
+#, php-format
+msgid ""
+"The license key for %s has expired. You can reactivate or purchase a license "
+"key from your account <a href=\"%s\" target=\"_blank\">dashboard</a>."
+msgstr ""
+"Lisensnøkkelen for %s er utløpt. Du kan reaktivere eller kjøpe ny "
+"lisensnøkkel fra din <a href=\"%s\" target=\"_blank\">konto oversikt</a>."
+
+#: ../includes/am/classes/class-wc-plugin-update.php:425
+#, php-format
+msgid ""
+"The subscription for %s is on-hold. You can reactivate the subscription from "
+"your account <a href=\"%s\" target=\"_blank\">dashboard</a>."
+msgstr ""
+"Abonnementet for %s er plassert på vent. Du kan reaktivere abonnementet fra "
+"din <a href=\"%s\" target=\"_blank\">konto oversikt</a>."
+
+#: ../includes/am/classes/class-wc-plugin-update.php:440
+#, php-format
+msgid ""
+"The subscription for %s has been cancelled. You can renew the subscription "
+"from your account <a href=\"%s\" target=\"_blank\">dashboard</a>. A new license "
+"key will be emailed to you after your order has been completed."
+msgstr ""
+"Abonnementet for %s er kansellert. Du kan fornye abonnementet fra din <a "
+"href=\"%s\" target=\"_blank\">konto oversikt</a>. En ny lisensnøkkel vil bli "
+"sendt til deg på e-post etter at bestillingen er fullført."
+
+#: ../includes/am/classes/class-wc-plugin-update.php:455
+#, php-format
+msgid ""
+"The subscription for %s has expired. You can reactivate the subscription "
+"from your account <a href=\"%s\" target=\"_blank\">dashboard</a>."
+msgstr ""
+"Abonnementet for %s er utløpt. Du kan reaktivere abonnementet fra din <a "
+"href=\"%s\" target=\"_blank\">konto oversikt</a>."
+
+#: ../includes/am/classes/class-wc-plugin-update.php:470
+#, php-format
+msgid ""
+"The subscription for %s has been suspended. You can reactivate the "
+"subscription from your account <a href=\"%s\" target=\"_blank\">dashboard</a>."
+msgstr ""
+"Abonnementet for %s er suspendert. Du kan reaktivere abonnementet fra din <a "
+"href=\"%s\" target=\"_blank\">konto oversikt</a>."
+
+#: ../includes/am/classes/class-wc-plugin-update.php:485
+#, php-format
+msgid ""
+"The subscription for %s is still pending. You can check on the status of the "
+"subscription from your account <a href=\"%s\" target=\"_blank\">dashboard</a>."
+msgstr ""
+"Abonnementet for %s venter fortsatt på behandling. Sjekk status på "
+"abonnementet fra din <a href=\"%s\" target=\"_blank\">konto oversikt</a>."
+
+#: ../includes/am/classes/class-wc-plugin-update.php:500
+#, php-format
+msgid ""
+"The subscription for %s has been placed in the trash and will be deleted "
+"soon. You can purchase a new subscription from your account <a href=\"%s\" "
+"target=\"_blank\">dashboard</a>."
+msgstr ""
+"Abonnementet for %s er sendt til søppelbøtten og vil bli slettet snart. Du "
+"kan kjøpe nytt abonnement fra din <a href=\"%s\" target=\"_blank\">konto "
+"oversikt</a>."
+
+#: ../includes/am/classes/class-wc-plugin-update.php:515
+#, php-format
+msgid ""
+"A subscription for %s could not be found. You can purchase a subscription "
+"from your account <a href=\"%s\" target=\"_blank\">dashboard</a>."
+msgstr ""
+"Kunne ikke finne abonnement for %s. Du kan kjøpe abonnement fra din <a "
+"href=\"%s\" target=\"_blank\">konto oversikt</a>."
+
+#: ../includes/am/classes/class-wc-plugin-update.php:530
+#, php-format
+msgid ""
+"A license key for %s could not be found. Maybe you forgot to enter a license "
+"key when setting up %s, or the key was deactivated in your account. You can "
+"reactivate or purchase a license key from your account <a href=\"%s\" "
+"target=\"_blank\">dashboard</a>."
+msgstr ""
+"Kunne ikke finne lisensnøkkel for %s. Kanskje du glemte å angi "
+"lisensnøkkelen i oppsettet av %s, eller kan nøkkelen vøre deaktivert i "
+"kontoen din. Du kan reaktivere eller kjøpe en lisensnøkkel fra din <a "
+"href=\"%s\" target=\"_blank\">konto oversikt</a>. "
+
+#: ../includes/am/classes/class-wc-plugin-update.php:545
+#, php-format
+msgid ""
+"Download permission for %s has been revoked possibly due to a license key or "
+"subscription expiring. You can reactivate or purchase a license key from "
+"your account <a href=\"%s\" target=\"_blank\">dashboard</a>."
+msgstr ""
+"Nedlastingrettighetene til %s har blitt tilbakekalt, muligens på grunn av en "
+"lisensnøkkel eller abonnement som utløper. Du kan aktivere eller kjøpe en "
+"lisensnøkkel fra din <a href=\"%s\" target=\"_blank\">konto oversikt</a>."
+
+#: ../includes/am/classes/class-wc-plugin-update.php:560
+#, php-format
+msgid ""
+"%s has not been activated. Go to the settings page and enter the license key "
+"and license email to activate %s."
+msgstr ""
+"%s er ikke aktivert. Gå til siden Innstillinger og angi lisensnøkkel og "
+"lisens e-postadresse for å aktivere %s."
+
+#: ../includes/am/classes/class-wc-plugin-update.php:575
+#, php-format
+msgid ""
+"You changed the subscription for %s, so you will need to enter your new API "
+"License Key in the settings page. The License Key should have arrived in "
+"your email inbox, if not you can get it by logging into your account <a "
+"href=\"%s\" target=\"_blank\">dashboard</a>."
+msgstr ""
+"Du endret abonnementet for %s så du må angi din nye API Lisensnøkkel på "
+"siden innstillinger. Lisensnøkkelen burde ha ankommet i innboksen din. Hvis "
+"ikke kan du finne den ved å logge inn på din <a href=\"%s\" "
+"target=\"_blank\">konto oversikt</a>."
+
+#: ../templates/default/functions.php:8
+msgid "Section Header Bar"
+msgstr "Seksjonsheader"
+
+#: ../templates/default/functions.php:9 ../templates/default/functions.php:13
+msgid "Text Color"
+msgstr "Tekstfarge"
+
+#: ../templates/default/functions.php:10
+msgid "Background Top"
+msgstr "Bakgrunn Topp"
+
+#: ../templates/default/functions.php:11
+msgid "Background Bottom"
+msgstr "Bakgrunn Bunn"
+
+#: ../templates/default/functions.php:12
+msgid "Hotline Box"
+msgstr "Hotline boks"
+
+#: ../templates/default/functions.php:14
+msgid "Background Color"
+msgstr "Bakgrunnsfarge"
+
+#: ../templates/default/functions.php:15
+msgid "Other Colors"
+msgstr "Andre farger"
+
+#: ../templates/default/functions.php:16
+msgid "Product Title"
+msgstr "Produkt Tittel"
+
+#: ../templates/default/functions.php:17
+msgid "Other Options"
+msgstr "Øvrige innstillinger"
+
+#: ../views/common_header.php:10 ../views/settings_dev.php:352 ..
+#: views/account/account_edit_page.php:111 ../views/account/settings_add_account.
+#: php:45
+msgid "Sandbox enabled"
+msgstr "Sandkasse aktivert"
+
+#: ../views/common_header.php:44
+msgid "Close window"
+msgstr "Lukk vindu"
+
+#: ../views/common_header.php:45
+msgid "Cancel"
+msgstr "Avbryt"
+
+#: ../views/listings_edit_page.php:51
+msgid "Edit Listing"
+msgstr "Endre oppføringen"
+
+#: ../views/listings_edit_page.php:77
+msgid ""
+"Your changes to this item will only be updated on eBay when you revise this "
+"item."
+msgstr ""
+"Endringene for dette produktet vil bare oppdateres når du reviderer dette "
+"produktet."
+
+#: ../views/listings_edit_page.php:79
+msgid "revise this item when saving"
+msgstr "revider produktet når du lagrer"
+
+#: ../views/listings_edit_page.php:81
+msgid "This item has been ended."
+msgstr "Dette produktet er avsluttet."
+
+#: ../views/listings_edit_page.php:93
+msgid "Current item ID"
+msgstr "Gjeldende produkt ID"
+
+#: ../views/listings_edit_page.php:97
+msgid "Previous item IDs"
+msgstr "Forrige produkt IDer"
+
+#: ../views/listings_edit_page.php:169
+msgid "Enable Best Offer"
+msgstr "Aktiver Beste tilbud"
+
+#: ../views/listings_edit_page.php:171 ../views/profiles_edit_page.php:318 ..
+#: views/settings_advanced.php:68 ../views/settings_advanced.php:243 ..
+#: views/settings_advanced.php:255 ../views/settings_advanced.php:267 ..
+#: views/settings_advanced.php:277 ../views/settings_advanced.php:289 ..
+#: views/settings_advanced.php:301 ../views/settings_advanced.php:333 ..
+#: views/settings_advanced.php:342 ../views/settings_advanced.php:351 ..
+#: views/settings_advanced.php:360 ../views/settings_advanced.php:374 ..
+#: views/settings_advanced.php:431 ../views/settings_advanced.php:492 ..
+#: views/settings_advanced.php:506 ../views/settings_advanced.php:572 ..
+#: views/settings_advanced.php:583 ../views/settings_advanced.php:598 ..
+#: views/settings_advanced.php:612 ../views/settings_advanced.php:624 ..
+#: views/settings_advanced.php:637 ../views/settings_dev.php:117 ..
+#: views/settings_dev.php:228 ../views/settings_dev.php:237 ..
+#: views/settings_dev.php:246 ../views/settings_dev.php:358 ..
+#: views/settings_page.php:289 ../views/settings_page.php:298 ..
+#: views/settings_page.php:336 ../views/profile/edit_shipping_int.php:185 ..
+#: views/profile/edit_shipping_loc.php:112 ../views/profile/edit_shipping_loc.
+#: php:148 ../views/profile/edit_shipping_loc.php:184 ..
+#: views/profile/edit_sidebar.php:260 ../views/profile/edit_sidebar.php:351 ..
+#: views/profile/edit_sidebar.php:361 ../views/profile/edit_sidebar.php:408 ..
+#: views/profile/edit_sidebar.php:437 ../views/profile/edit_sidebar.php:455 ..
+#: views/profile/edit_sidebar.php:503 ../views/profile/edit_sidebar.php:599 ..
+#: views/profile/edit_sidebar.php:647 ../views/profile/edit_sidebar.php:741 ..
+#: views/profile/edit_sidebar.php:753 ../views/profile/edit_sidebar.php:764 ..
+#: views/profile/edit_sidebar.php:775 ../views/profile/edit_sidebar.php:786 ..
+#: views/profile/edit_sidebar.php:796
+msgid "Yes"
+msgstr "Ja"
+
+#: ../views/listings_edit_page.php:189
+msgid "Information"
+msgstr "Informasjon"
+
+#: ../views/listings_edit_page.php:211
+msgid "Item settings"
+msgstr "Produktinnstillinger"
+
+#: ../views/listings_edit_page.php:221 ../views/profiles_edit_page.php:92
+msgid "Price / Start price"
+msgstr "Pris / Startpris"
+
+#: ../views/listings_edit_page.php:223 ../views/listings_edit_page.php:228
+msgid "This will have no effect on product variations."
+msgstr "Dette har ingen effekt på produkt variasjoner"
+
+#: ../views/listings_edit_page.php:256 ../views/settings_dev.php:288
+msgid "Developer options"
+msgstr "Utviklerverktøy"
+
+#: ../views/listings_edit_page.php:262
+msgid "Items sold"
+msgstr "Produkter solgt"
+
+#: ../views/listings_edit_page.php:266
+msgid "eBay Item ID"
+msgstr "eBay produkt ID"
+
+#: ../views/listings_edit_page.php:288 ../views/profiles_edit_page.php:87
+msgid ""
+"Note: eBay does not allow changing the listing type for already published "
+"items."
+msgstr ""
+"Merk: eBay tillater ikke å endre oppføringstype for allerede publiserte "
+"produkter."
+
+#: ../views/listings_edit_page.php:291
+msgid "Product ID"
+msgstr "Produkt ID"
+
+#: ../views/listings_edit_page.php:295
+msgid "Site ID"
+msgstr "Side ID"
+
+#: ../views/listings_edit_page.php:299
+msgid "Update advanced settings"
+msgstr "Oppdater avanserte innstillinger"
+
+#: ../views/listings_edit_page.php:302 ../views/settings_advanced.php:313
+msgid "Yes, I know what I am doing."
+msgstr "Ja, jeg vet hva jeg gjør."
+
+#: ../views/listings_edit_page.php:311
+msgid "Variations Cache"
+msgstr "Variasjon Hurtiglager"
+
+#: ../views/listings_edit_page.php:326
+msgid "EPS Cache"
+msgstr "EPS Hurtiglager"
+
+#: ../views/listings_edit_page.php:355
+msgid "Save listing"
+msgstr "Lagre oppføringen"
+
+#: ../views/listings_page.php:67 ../views/log_page.php:40 ../views/messages_page.
+#: php:32 ../views/orders_page.php:24 ../views/profiles_page.php:30 ..
+#: views/transactions_page.php:24
+msgid "Search"
+msgstr "Søk"
+
+#: ../views/listings_page.php:83
+msgid "Clean Archive"
+msgstr "Tøm arkivet"
+
+#: ../views/listings_page.php:84
+msgid "Delete all listings which have never been listed from the archive."
+msgstr "Slett alle produkter som aldri ble publisert fra arkivet."
+
+#: ../views/listings_page.php:101
+msgid "Publish all prepared items on eBay."
+msgstr "Publiser alle forberedte produkter på eBay."
+
+#: ../views/listings_page.php:102
+msgid "Publish all prepared items"
+msgstr "Publiser alle forberedte produkter"
+
+#: ../views/listings_page.php:105 ../views/listings_page.php:144
+msgid "Revise all changed items on eBay."
+msgstr "Revider alle endrede produkter på eBay."
+
+#: ../views/listings_page.php:109 ../views/listings_page.php:153
+msgid "Update all published items from eBay."
+msgstr "Oppdater alle publiserte produkter fra eBay."
+
+#: ../views/listings_page.php:110 ../views/listings_page.php:152
+msgid "Update all published items"
+msgstr "Oppdater alle publiserte produkter"
+
+#: ../views/listings_page.php:164
+msgid "Are you sure you want to end this listing?"
+msgstr "Er du sikker på at du ønsker å avslutte denne oppføringen?"
+
+#: ../views/listings_page.php:169
+msgid "Are you sure you want to relist this ended listing?"
+msgstr "Er du sikker på at du ønsker å republisere dette avsluttede produktet?"
+
+#: ../views/listings_page.php:174 ../views/listings_page.php:177
+msgid "Are you sure you want to remove this listing?"
+msgstr "Er du sikker på at du ønsker å fjerne denne oppføringen?"
+
+#: ../views/listings_page.php:174 ../views/listings_page.php:177 ..
+#: views/listings_page.php:190
+msgid "You should not delete listings which have been recently published on eBay!"
+msgstr "Du bør ikke slette oppføringer som nylig er publisert på eBay!"
+
+#: ../views/listings_page.php:190 ../views/listings_page.php:195
+msgid "Are you sure you want to do this?"
+msgstr "Er du helt sikker?"
+
+#: ../views/listings_page.php:195
+msgid ""
+"This will reset the status of all selected items to prepared. Only use this "
+"if you want to list them as new listings instead of relisting."
+msgstr ""
+"Dette vil tilbakestille statusen for alle valgte produkter til forberedt. "
+"Bruk dette kun dersom du ønsker å publisere dem som nye oppføringer i stedet "
+"for republisering."
+
+#: ../views/listings_prepare_page.php:84
+msgid "Choose a listing profile"
+msgstr "Angi en publiseringsprofil"
+
+#: ../views/listings_prepare_page.php:93
+msgid "Please select a profile for the products shown below:"
+msgstr "Vennligst velg en profil for produktene oppgitt nedenfor:"
+
+#: ../views/listings_prepare_page.php:119
+msgid "Cancel profile selection"
+msgstr "Avbryt profilvalg"
+
+#: ../views/listings_prepare_page.php:124
+msgid "Verify all selected items with eBay now."
+msgstr "Verifiser alle valgte produkter hos eBay nå."
+
+#: ../views/log_details.php:178 ../views/log_details.php:192 ../views/log_details.
+#: php:198
+msgid "Send to support"
+msgstr "Send til brukerstøtte"
+
+#: ../views/log_details.php:182
+msgid "Your Name"
+msgstr "Ditt navn"
+
+#: ../views/log_details.php:185
+msgid "Your Email"
+msgstr "Din e-post"
+
+#: ../views/log_details.php:188
+msgid "Your Message"
+msgstr "Din melding"
+
+#: ../views/log_page.php:58
+msgid "Empty log"
+msgstr "Tøm logg"
+
+#: ../views/log_page.php:67
+msgid "Optimize log"
+msgstr "Optimaliser logg"
+
+#: ../views/messages_page.php:21 ../views/settings_dev.php:292
+msgid "eBay Messages"
+msgstr "eBay meldinger"
+
+#: ../views/messages_page.php:44 ../views/orders_page.php:40 ..
+#: views/settings_page.php:93 ../views/transactions_page.php:35
+msgid "Next scheduled update"
+msgstr "Neste planlagte oppdatering"
+
+#: ../views/messages_page.php:48 ../views/orders_page.php:44
+msgid "Automatic background updates are currently disabled."
+msgstr "Automatisk bakgrunnsoppdatering er for øyeblikket deaktivert"
+
+#: ../views/messages_page.php:56
+msgid "Update messages"
+msgstr "Oppdater meldinger"
+
+#: ../views/messages_page.php:57
+msgid "Update recent messages from eBay."
+msgstr "Oppdater nylige meldinger fra eBay"
+
+#: ../views/order_details.php:140 ../views/order_details.php:188 ..
+#: views/transaction_details.php:139
+msgid "Time"
+msgstr "Tid"
+
+#: ../views/order_details.php:142 ../views/order_details.php:190 ..
+#: views/transaction_details.php:141
+msgid "Message"
+msgstr "Melding"
+
+#: ../views/orders_page.php:35 ../views/settings_page.php:148
+msgid "Last run"
+msgstr "Siste kjøring"
+
+#: ../views/orders_page.php:49
+msgid "View transactions"
+msgstr "Vis transaksjoner"
+
+#: ../views/orders_page.php:56
+msgid "Update orders"
+msgstr "Oppdater ordrer"
+
+#: ../views/orders_page.php:57
+msgid "Update recent orders from eBay."
+msgstr "Oppdater nylige ordrer fra eBay."
+
+#: ../views/orders_page.php:58
+msgid "Options"
+msgstr "Alternativer"
+
+#: ../views/orders_page.php:62
+msgid "Update timespan"
+msgstr "Oppdater tidsrom"
+
+#: ../views/orders_page.php:66
+msgid "-- since last updated order --"
+msgstr "-- siden siste oppdaterte ordre --"
+
+#: ../views/orders_page.php:67
+msgid "day"
+msgstr "dag"
+
+#: ../views/profiles_edit_page.php:22
+msgid "Edit Profile"
+msgstr "Endre profil"
+
+#: ../views/profiles_edit_page.php:56
+msgid "General eBay settings"
+msgstr "Generelle eBay innstillinger"
+
+#: ../views/profiles_edit_page.php:61
+msgid "Profile name"
+msgstr "Profil navn"
+
+#: ../views/profiles_edit_page.php:67
+msgid "Profile description"
+msgstr "Profil beskrivelse"
+
+#: ../views/profiles_edit_page.php:108
+msgid "Fixed price (199), percent (+10% / -10%) or fixed change (+5 / -5)"
+msgstr "Fastsatt pris (199), prosent (+10% / -10%) eller fastsatt endring (+5 / -5)"
+
+#: ../views/profiles_edit_page.php:134
+msgid "GTC listings will be charged every 30 days."
+msgstr "GTC oppføringer vil bli belastet hver 30. dag."
+
+#: ../views/profiles_edit_page.php:153
+msgid "none"
+msgstr "ingen"
+
+#: ../views/profiles_edit_page.php:161
+msgid "Available conditions may vary for different categories."
+msgstr "Tilgjengelige forhold kan variere for ulike kategorier."
+
+#: ../views/profiles_edit_page.php:162
+msgid "You should set the category first."
+msgstr "Du burde angi kategori først."
+
+#: ../views/profiles_edit_page.php:179
+msgid "Handling time"
+msgstr "Behandlingstid"
+
+#: ../views/profiles_edit_page.php:180 ../views/profiles_edit_page.php:204
+msgid ""
+"The maximum number of business days a seller commits to for shipping an item "
+"to domestic buyers after receiving a cleared payment."
+msgstr ""
+"Det maksimale antall arbeidsdager en selger forplikter seg til for sending "
+"av et produkt til innenlandske kjøpere etter betaling er fullført."
+
+#: ../views/profiles_edit_page.php:219 ../views/profiles_edit_page.php:222
+msgid "Payment methods"
+msgstr "Betalingsalternativer"
+
+#: ../views/profiles_edit_page.php:248
+msgid "Add payment method"
+msgstr "Legg til betalingsalternativ"
+
+#: ../views/profiles_edit_page.php:270
+msgid "Cash on delivery fee"
+msgstr "Gebyr for oppkrav"
+
+#: ../views/profiles_edit_page.php:278
+msgid "Payment instructions"
+msgstr "Betalingsanvisninger"
+
+#: ../views/profiles_edit_page.php:292 ../views/profiles_edit_page.php:419 ..
+#: views/profile/edit_shipping_loc.php:198
+msgid "no profile"
+msgstr "ingen profil"
+
+#: ../views/profiles_edit_page.php:309
+msgid "Return Policy"
+msgstr "Returvilkår"
+
+#: ../views/profiles_edit_page.php:313
+msgid "Enable return policy"
+msgstr "Aktiver returvilkår"
+
+#: ../views/profiles_edit_page.php:326
+msgid "Returns within"
+msgstr "Retur innen"
+
+#: ../views/profiles_edit_page.php:340 ../views/profiles_edit_page.php:365 ..
+#: views/profiles_edit_page.php:377 ../views/profiles_edit_page.php:396
+msgid "not specified"
+msgstr "ikke spesifisert"
+
+#: ../views/profiles_edit_page.php:345
+msgid "month"
+msgstr "måned"
+
+#: ../views/profiles_edit_page.php:351
+msgid "Shipping cost paid by"
+msgstr "Fraktkostnader betales av"
+
+#: ../views/profiles_edit_page.php:367
+msgid "Seller"
+msgstr "Selger"
+
+#: ../views/profiles_edit_page.php:373
+msgid "Refund option"
+msgstr "Refusjonsalternativer"
+
+#: ../views/profiles_edit_page.php:387
+msgid "Not applicable on AU and EU sites."
+msgstr "Ikke tilgjengelig for AUS eller EU sider"
+
+#: ../views/profiles_edit_page.php:392
+msgid "Restocking fee"
+msgstr "Gebyr for lagerendring"
+
+#: ../views/profiles_edit_page.php:397
+msgid "No restocking fee"
+msgstr "Ingen gebyr for lagerendring"
+
+#: ../views/profiles_edit_page.php:398 ../views/profiles_edit_page.php:399 ..
+#: views/profiles_edit_page.php:400
+msgid "percent"
+msgstr "prosent"
+
+#: ../views/profiles_edit_page.php:405
+msgid "Returns description"
+msgstr "Retur beskrivelse"
+
+#: ../views/profiles_edit_page.php:415
+msgid "Return policy profile"
+msgstr "Returvilkår profil"
+
+#: ../views/profiles_edit_page.php:438 ../views/profile/edit_sidebar.php:120
+msgid "Save profile"
+msgstr "Lagre profil"
+
+#: ../views/profiles_page.php:20 ../views/templates_page.php:20
+msgid "Add New"
+msgstr "Legg til ny"
+
+#: ../views/profiles_page.php:40
+msgid "Add New Profile"
+msgstr "Legg til ny profil"
+
+#: ../views/profiles_page.php:60 ../views/templates_page.php:126
+msgid "Are you sure you want to delete this item?."
+msgstr "Er du sikker på at du vil slette dette produktet?"
+
+#: ../views/settings_accounts.php:51 ../views/account/account_edit_page.php:74
+msgid "Account Status"
+msgstr "Konto status"
+
+#: ../views/settings_accounts.php:59
+msgid "WP-Lister is not linked to your eBay account yet."
+msgstr "WP-Lister er ikke koblet til din eBay-konto enda."
+
+#: ../views/settings_accounts.php:61
+msgid "You need to select a default account."
+msgstr "Du må angi en standard konto"
+
+#: ../views/settings_accounts.php:64
+#, php-format
+msgid "Your default account is <b>%s</b>."
+msgstr "Standard konto er <b>%s</b>."
+
+#: ../views/settings_accounts.php:67
+msgid ""
+"The default account will always be used by WP-Lister unless specified "
+"otherwise."
+msgstr ""
+"Standardkontoen vil alltid bli brukt av WP-Lister med mindre annet er "
+"spesifisert."
+
+#: ../views/settings_accounts.php:77 ../views/settings_advanced.php:50 ..
+#: views/settings_dev.php:50 ../views/settings_dev.php:367 ..
+#: views/settings_page.php:63
+msgid "Save Settings"
+msgstr "Lagre innstillingene"
+
+#: ../views/settings_accounts.php:89
+msgid "Active eBay Sites"
+msgstr "Aktive eBay sider"
+
+#: ../views/settings_accounts.php:124 ../views/templates_edit_page.php:241 ..
+#: views/account/account_edit_sidebar.php:114 ../views/profile/edit_sidebar.php:
+#: 829
+msgid "Help"
+msgstr "Hjelp"
+
+#: ../views/settings_accounts.php:128
+msgid "Adding your eBay account"
+msgstr "Legg til eBay konto"
+
+#: ../views/settings_accounts.php:130
+msgid "Select an eBay site"
+msgstr "Velg en eBay side"
+
+#: ../views/settings_accounts.php:131
+msgid "Follow the instructions below"
+msgstr "Følg instruksjonene nedenfor"
+
+#: ../views/settings_accounts.php:150
+msgid "Welcome"
+msgstr "Velkommen"
+
+#: ../views/settings_accounts.php:153
+msgid ""
+"Before you can begin listing your products on eBay, you need to set up your "
+"eBay account."
+msgstr ""
+"Før du kan begynne å publisere dine produkter på eBay må du sette opp din "
+"eBay-konto."
+
+#: ../views/settings_accounts.php:156
+msgid ""
+"Please select the eBay site you want to use and follow the instructions that "
+"will appear below."
+msgstr ""
+"Vennligst velg eBay siden du vil bruke, og følg instruksjonene som vises "
+"nedenfor."
+
+#: ../views/settings_accounts.php:173
+msgid "Accounts"
+msgstr "Kontoer"
+
+#: ../views/settings_accounts.php:216 ../views/settings_accounts.php:220
+msgid "Are you sure you want to remove this account from WP-Lister?"
+msgstr "Er du sikker på at du vil fjerne denne kontoen fra WP-Lister?"
+
+#: ../views/settings_advanced.php:43
+msgid "This page contains some advanced options for special use cases."
+msgstr ""
+"Denne siden inneholder noen avanserte alternativer for spesielle "
+"brukstilfeller."
+
+#: ../views/settings_advanced.php:62
+msgid "Uninstall on deactivation"
+msgstr "Avinstaller ved deaktivering"
+
+#: ../views/settings_advanced.php:71
+msgid ""
+"Enable to completely remove listings, transactions and settings when "
+"deactivating the plugin."
+msgstr ""
+"Aktiver for å fjerne oppføringer, transaksjoner og innstillinger når du "
+"deaktivere utvidelsen."
+
+#: ../views/settings_advanced.php:72
+msgid ""
+"To remove your listing templates as well, please delete the folder <code>wp-"
+"content/uploads/wp-lister/templates/</code>."
+msgstr ""
+"For å fjerne oppføringsmalene må du også slette mappen <code>wp-"
+"content/uploads/wp-lister/templates/</ code>."
+
+#: ../views/settings_advanced.php:75
+msgid "Please deactivate your license first."
+msgstr "Vennligst deaktiver din lisens først"
+
+#: ../views/settings_advanced.php:94
+msgid "Roles and Capabilities"
+msgstr "Roller og muligheter"
+
+#: ../views/settings_advanced.php:99
+msgid "Manage Listings"
+msgstr "Behandle oppføringer"
+
+#: ../views/settings_advanced.php:100
+msgid "Manage Settings"
+msgstr "Behandle innstillinger"
+
+#: ../views/settings_advanced.php:101
+msgid "Prepare Listings"
+msgstr "Forbered oppføringer"
+
+#: ../views/settings_advanced.php:102
+msgid "Publish Listings"
+msgstr "Publiser oppføringer"
+
+#: ../views/settings_advanced.php:146
+msgid "Listing Templates"
+msgstr "Oppføringsmaler"
+
+#: ../views/settings_advanced.php:150
+msgid "Shortcode processing"
+msgstr "Kortkode behandling"
+
+#: ../views/settings_advanced.php:154
+msgid "off"
+msgstr "av"
+
+#: ../views/settings_advanced.php:155
+msgid "only in product description"
+msgstr "kun i produktbeskrivelse"
+
+#: ../views/settings_advanced.php:156
+msgid "in description and listing template"
+msgstr "i beskrivelse og oppføringsmalen"
+
+#: ../views/settings_advanced.php:157
+msgid "remove all shortcodes from description"
+msgstr "fjern alle kortkoder fra beskrivelsen"
+
+#: ../views/settings_advanced.php:160
+msgid ""
+"Enable this if you want to use WordPress shortcodes in your product "
+"description or your listing template."
+msgstr ""
+"Aktiver dette hvis du vil bruke WordPress kortkoder i produktbeskrivelse "
+"eller oppføringsmal."
+
+#: ../views/settings_advanced.php:164
+msgid "Link handling"
+msgstr "Lenkehåndtering"
+
+#: ../views/settings_advanced.php:168
+msgid "remove all links from description"
+msgstr "fjern alle lenker fra beskrivelsen"
+
+#: ../views/settings_advanced.php:169
+msgid "allow all links"
+msgstr "tillat alle lenker"
+
+#: ../views/settings_advanced.php:172
+msgid ""
+"Links are removed from product descriptions by default to avoid violating "
+"the eBay Links policy."
+msgstr ""
+"Lenker fjernes fra produktbeskrivelser som standard for å unngå brudd på "
+"eBays lenkevilkår."
+
+#: ../views/settings_advanced.php:173
+msgid ""
+"Specifically you are not allowed to advertise products that you list on eBay "
+"by linking to their product pages on your site."
+msgstr ""
+"Spesifikt har du ikke lov å reklamere for produkter som du publiserer på "
+"eBay ved å linke til sine respektive produktsider på nettstedet ditt."
+
+#: ../views/settings_advanced.php:175
+msgid "Read more about eBay's Link policy"
+msgstr "Les mer om eBays Lenkevilkår"
+
+#: ../views/settings_advanced.php:176
+msgid "http://pages.ebay.com/help/policies/listing-links.html"
+msgstr "http://pages.ebay.com/help/policies/listing-links.html"
+
+#: ../views/settings_advanced.php:176
+msgid "here"
+msgstr "her"
+
+#: ../views/settings_advanced.php:180
+msgid "Default image size"
+msgstr "Standard bildestørrelse"
+
+#: ../views/settings_advanced.php:184
+msgid "full"
+msgstr "fullstendig"
+
+#: ../views/settings_advanced.php:185
+msgid "large"
+msgstr "stor"
+
+#: ../views/settings_advanced.php:189
+msgid "Product Gallery"
+msgstr "Produktgalleri"
+
+#: ../views/settings_advanced.php:194
+msgid "use attached images if no Gallery found"
+msgstr "bruk vedlagte bilder hvis galleri ikke eksisterer"
+
+#: ../views/settings_advanced.php:195
+msgid "use Product Gallery images"
+msgstr "bruk bilder fra produktgalleri"
+
+#: ../views/settings_advanced.php:195 ../views/settings_advanced.php:242 ..
+#: views/settings_advanced.php:254 ../views/settings_advanced.php:267 ..
+#: views/settings_advanced.php:276 ../views/settings_advanced.php:288 ..
+#: views/settings_advanced.php:300 ../views/settings_advanced.php:430 ..
+#: views/settings_advanced.php:442 ../views/settings_advanced.php:492 ..
+#: views/settings_advanced.php:505 ../views/settings_advanced.php:540 ..
+#: views/settings_advanced.php:572 ../views/settings_advanced.php:583 ..
+#: views/settings_advanced.php:597 ../views/settings_advanced.php:623 ..
+#: views/settings_advanced.php:636 ../views/settings_page.php:370
+msgid "default"
+msgstr "standard"
+
+#: ../views/settings_advanced.php:199
+msgid "If you find unwanted images in your listings try disabling this option."
+msgstr ""
+"Hvis du finner uønskede bilder i oppføringene, forsøke å deaktivere dette "
+"alternativet."
+
+#: ../views/settings_advanced.php:204
+msgid "Gallery Widget limit"
+msgstr "Galleri grense"
+
+#: ../views/settings_advanced.php:208 ../views/settings_advanced.php:209 ..
+#: views/settings_advanced.php:210 ../views/settings_advanced.php:211 ..
+#: views/settings_advanced.php:212 ../views/settings_advanced.php:213
+msgid "items"
+msgstr "produkter"
+
+#: ../views/settings_advanced.php:216
+msgid "The maximum number of items shown by listings template gallery widgets."
+msgstr "Maksimalt antall produkter som vises i galleriet for oppføringsmalen."
+
+#: ../views/settings_advanced.php:223
+msgid "User Interface"
+msgstr "Brukergrensesnitt"
+
+#: ../views/settings_advanced.php:228
+msgid "Menu label"
+msgstr "Meny etikett"
+
+#: ../views/settings_advanced.php:233
+msgid "Customize the main admin menu label of WP-Lister."
+msgstr "Tilpass hoved adminmeny etiketten til WP-Lister."
+
+#: ../views/settings_advanced.php:238
+msgid "Open preview in new tab"
+msgstr "Åpne forhåndsvisning i ny fane"
+
+#: ../views/settings_advanced.php:246
+msgid "Select if you want the listing preview open in a new tab by default."
+msgstr ""
+"Velg om du vil at forhåndsvisning av oppføring skal åpne i en ny fane som "
+"standard."
+
+#: ../views/settings_advanced.php:250
+msgid "Listing thumbnails"
+msgstr "Oppføring miniatyrbilder"
+
+#: ../views/settings_advanced.php:258
+msgid "Show product images on listings page."
+msgstr "Vis produktbilder på oppføringssiden"
+
+#: ../views/settings_advanced.php:262
+msgid "Enable custom price field"
+msgstr "Aktiver tilpasset prisfelt"
+
+#: ../views/settings_advanced.php:268
+msgid "Hide for variations"
+msgstr "Skjul for varianter"
+
+#: ../views/settings_advanced.php:272
+msgid "Categories in main menu"
+msgstr "Kategorier i hovedmeny"
+
+#: ../views/settings_advanced.php:280
+msgid ""
+"Enable this to make category settings available to users without access to "
+"other eBay settings."
+msgstr ""
+"Aktiver dette for å gjøre kategoriinnstillinger tilgjengelig for brukere "
+"uten tilgang til andre eBay innstillinger."
+
+#: ../views/settings_advanced.php:284
+msgid "Accounts in main menu"
+msgstr "Kontoer i hovedmeny"
+
+#: ../views/settings_advanced.php:292
+msgid ""
+"Enable this to make account settings available to users without access to "
+"other eBay settings."
+msgstr ""
+"Aktiver dette for å gjøre kontoinnstillinger tilgjengelig for brukere uten "
+"tilgang til andre eBay innstillinger."
+
+#: ../views/settings_advanced.php:296
+msgid "Disable WYSIWYG editor"
+msgstr "Deaktiver WYSIWYG redigering"
+
+#: ../views/settings_advanced.php:304
+msgid "Select the editor you want to use to edit listing templates."
+msgstr "Velg hvilken utvidelse du vil bruke for å redigere publiseringsmalene."
+
+#: ../views/settings_advanced.php:308
+msgid "Hide duplicates warning"
+msgstr "Skjul duplikate advarsler"
+
+#: ../views/settings_advanced.php:312 ../views/settings_advanced.php:333 ..
+#: views/settings_advanced.php:342 ../views/settings_advanced.php:351 ..
+#: views/settings_advanced.php:360 ../views/settings_advanced.php:374 ..
+#: views/settings_advanced.php:397 ../views/settings_advanced.php:416 ..
+#: views/settings_advanced.php:611 ../views/settings_page.php:356
+msgid "recommended"
+msgstr "anbefalt"
+
+#: ../views/settings_advanced.php:316
+msgid ""
+"If you do not plan to use the inventory sync feature, you can safely list "
+"one product multiple times."
+msgstr ""
+"Hvis du ikke har tenkt å bruke beholdning sync-funksjonen, kan du trygt "
+"liste étt produkt flere ganger."
+
+#: ../views/settings_advanced.php:324
+msgid "Order Processing"
+msgstr "Ordren behandles"
+
+#: ../views/settings_advanced.php:328
+msgid "Disable New Order emails"
+msgstr "Deaktiver e-post ved nye ordrer"
+
+#: ../views/settings_advanced.php:337
+msgid "Disable Processing Order emails"
+msgstr "Deaktiver e-post ved ordrer som behandles"
+
+#: ../views/settings_advanced.php:346
+msgid "Disable Completed Order emails"
+msgstr "Deaktiver e-post ved fullført ordre"
+
+#: ../views/settings_advanced.php:355
+msgid "Disable emails on status change"
+msgstr "Deaktiver e-post ved statusendringer"
+
+#: ../views/settings_advanced.php:364
+msgid "WooCommerce sends out various notifications when an order status is changed."
+msgstr "WooCommerce sender ut forskjellige varsler når en ordrestatus endres."
+
+#: ../views/settings_advanced.php:365
+msgid ""
+"Here you can disable these notifications when creating eBay orders in "
+"WooCommerce."
+msgstr ""
+"Her kan du deaktivere disse meldingene når du oppretter eBay ordrer i "
+"WooCommerce."
+
+#: ../views/settings_advanced.php:369
+msgid "Complete sale on eBay automatically"
+msgstr "Fullfør salget automatisk på eBay"
+
+#: ../views/settings_advanced.php:378
+msgid ""
+"Automatically complete the sale on eBay when an order is completed in "
+"WooCommerce."
+msgstr "Automatisk fullfør salg på eBay når en ordre er fullført i WooCommerce."
+
+#: ../views/settings_advanced.php:382
+msgid "Default feedback text"
+msgstr "Standard tilbakemelding tekst"
+
+#: ../views/settings_advanced.php:387
+msgid ""
+"This is what will be sent as your seller feedback when sales are completed "
+"automatically."
+msgstr ""
+"Dette er hva som automatisk vil bli sendt som din selger tilbakemelding når "
+"salget er gjennomført."
+
+#: ../views/settings_advanced.php:393
+msgid "Create orders when"
+msgstr "Opprett ordrer når"
+
+#: ../views/settings_advanced.php:397
+msgid "When purchase has been completed"
+msgstr "Hår handelen er fullført"
+
+#: ../views/settings_advanced.php:398
+msgid "Immediately"
+msgstr "Umiddelbart"
+
+#: ../views/settings_advanced.php:401
+msgid ""
+"Orders can be created when they are downloaded or when they have been "
+"completed."
+msgstr "Ordrer kan opprettes når de er lastet ned eller når de er ferdigstilt."
+
+#: ../views/settings_advanced.php:412
+msgid "Handle foreign transactions"
+msgstr "Behandle utenlandske transaksjoner"
+
+#: ../views/settings_advanced.php:416
+msgid "Skip"
+msgstr "Hopp over"
+
+#: ../views/settings_advanced.php:417
+msgid "Import"
+msgstr "Importer"
+
+#: ../views/settings_advanced.php:420
+msgid ""
+"Transactions for items which were not listed with WP-Lister are skipped by "
+"default."
+msgstr ""
+"Transaksjoner for produkter som ikke var publisert med WP-Lister hoppes over "
+"som standard."
+
+#: ../views/settings_advanced.php:426
+msgid "Skip orders from foreign sites"
+msgstr "Ignorer ordrer fra utenlandske sider"
+
+#: ../views/settings_advanced.php:434
+msgid "Enable this option to process orders only from the selected eBay site."
+msgstr "Aktiver dette for å kun behandle ordrer fra valgt eBay side."
+
+#: ../views/settings_advanced.php:438
+msgid "Global Shipping Program"
+msgstr "Globalt fraktprogram"
+
+#: ../views/settings_advanced.php:442
+msgid "Use buyer shipping address"
+msgstr "Bruk kundens leveringsadresse"
+
+#: ../views/settings_advanced.php:443
+msgid "Use shipping address of eBay shipping center"
+msgstr "Bruk leveringsadresse til eBay fraktsenter"
+
+#: ../views/settings_advanced.php:446
+msgid ""
+"How international orders using eBay's Global Shipping Program are created in "
+"WooCommerce."
+msgstr ""
+"Hvordan internasjonale ordrer som bruker eBay Globale fraktprogram opprettes "
+"i WooCommerce."
+
+#: ../views/settings_advanced.php:450
+msgid "Sales tax rate"
+msgstr "MVA nivå"
+
+#: ../views/settings_advanced.php:454 ../views/settings_advanced.php:468
+msgid "no tax rate"
+msgstr "ingen MVA nivå"
+
+#: ../views/settings_advanced.php:460 ../views/settings_advanced.php:474
+msgid "Select the tax rate to assign to created orders."
+msgstr "Velg MVA nivå du vil legge til opprettede ordrer."
+
+#: ../views/settings_advanced.php:464
+msgid "VAT tax rate"
+msgstr "MVA nivå"
+
+#: ../views/settings_advanced.php:478
+msgid "VAT rate (percent)"
+msgstr "MVA nivå (prosent)"
+
+#: ../views/settings_advanced.php:483
+msgid "Enter a default tax rate to be applied to created orders by default."
+msgstr "Angi standard avgiftsnivå som skal legges til ordrer som standard."
+
+#: ../views/settings_advanced.php:487
+msgid "Create orders using profile VAT"
+msgstr "Opprett ordrer ved å benytte profilens MVA"
+
+#: ../views/settings_advanced.php:495
+msgid "Process and add VAT to created orders if enabled in the listing profile."
+msgstr ""
+"Behandle og legg til MVA på opprettede ordrer hvis dette er aktivert i "
+"publiseringsprofilen"
+
+#: ../views/settings_advanced.php:501
+msgid "Apply WooCommerce taxes"
+msgstr "Bruk WooCommerce avgifter"
+
+#: ../views/settings_advanced.php:509
+msgid "Enable this to apply WooCommerce taxes for orders created on eBay."
+msgstr ""
+"Aktiver dette for å anvende WooCommerce avgifter for bestillinger som er "
+"opprettet på eBay."
+
+#: ../views/settings_advanced.php:518 ../views/settings_page.php:346
+msgid "Misc options"
+msgstr "Diverse alternativer"
+
+#: ../views/settings_advanced.php:522
+msgid "Local timezone"
+msgstr "lokal tidssone"
+
+#: ../views/settings_advanced.php:526
+msgid "no timezone selected"
+msgstr "Ingen tidssone valgt"
+
+#: ../views/settings_advanced.php:532
+msgid "Select your local timezone."
+msgstr "Velg din lokale tidssone"
+
+#: ../views/settings_advanced.php:536
+msgid "Dimension Unit Conversion"
+msgstr "Konvertering måleenheter"
+
+#: ../views/settings_advanced.php:540
+msgid "No conversion"
+msgstr "Ingen konvertering"
+
+#: ../views/settings_advanced.php:541
+msgid "Convert inches to centimeters"
+msgstr "Konvertere tommer til centimeter"
+
+#: ../views/settings_advanced.php:542
+msgid "Convert milimeters to centimeters"
+msgstr "Konverter millimeter til centimeter"
+
+#: ../views/settings_advanced.php:545
+msgid "Convert length, width and height to the unit required by eBay."
+msgstr "Konverter lengde, bredde og høyde til de enheter som kreves av eBay."
+
+#: ../views/settings_advanced.php:549
+msgid "Exclude attributes"
+msgstr "Ekskluder egenskaper"
+
+#: ../views/settings_advanced.php:554
+msgid "Enter a comma separated list of product attributes to exclude from eBay."
+msgstr ""
+"Skriv inn en kommaseparert liste med produktegenskaper som skal ekskluderes "
+"fra eBay."
+
+#: ../views/settings_advanced.php:558
+msgid "Exclude variations"
+msgstr "Ekskluder varianter"
+
+#: ../views/settings_advanced.php:563
+msgid ""
+"Enter a comma separated list of variation attribute values to exclude from "
+"eBay."
+msgstr ""
+"Skriv inn en kommaseparert liste med variasjonsverdier som skal ekskluderes "
+"fra eBay."
+
+#: ../views/settings_advanced.php:567
+msgid "Enable Item Compatibility tab"
+msgstr "Aktiver produkt kompatibilitetsfane"
+
+#: ../views/settings_advanced.php:575
+msgid "Show eBay Item Compatibility List as new tab on single product page."
+msgstr "Vis eBay Produkt Kompatibilitetsliste som ny fane på enkeltproduktsiden."
+
+#: ../views/settings_advanced.php:579
+msgid "Use sale price"
+msgstr "Bruk salgspriser"
+
+#: ../views/settings_advanced.php:587
+msgid "Should sale prices be used automatically on eBay?"
+msgstr "Skal salgspriser brukes automatisk på eBay?"
+
+#: ../views/settings_advanced.php:593
+msgid "External products inventory"
+msgstr "Ekstern lagerstyring av produkt"
+
+#: ../views/settings_advanced.php:601
+msgid "Enable inventory management on external products."
+msgstr "Aktiver lagerstyring på eksterne produkter."
+
+#: ../views/settings_advanced.php:607
+msgid "Ignore backorders"
+msgstr "Ignorer restordrer"
+
+#: ../views/settings_advanced.php:615
+msgid ""
+"Should a product be marked as out of stock even when it has backorders "
+"enabled?"
+msgstr "Skal et produkt merkes som utsolgt selv når den har restordrer aktivert?"
+
+#: ../views/settings_advanced.php:619
+msgid "Enable API auto relist"
+msgstr "Aktiver API automatisk republisering"
+
+#: ../views/settings_advanced.php:627
+msgid "Enable this if you update your inventory via the API or CSV import."
+msgstr "Aktiver dette hvis du oppdaterer din varebeholdning via API eller CSV import."
+
+#: ../views/settings_advanced.php:628
+msgid "This only effects locked items."
+msgstr "Dette berører kun låste produkter"
+
+#: ../views/settings_advanced.php:632
+msgid "Auto update ended items"
+msgstr "Auto oppdater avsluttede produkter"
+
+#: ../views/settings_advanced.php:640
+msgid "Automatically update item details from eBay when a listing has ended."
+msgstr "Automatisk oppdater produktdetaljer fra eBay når en oppføring er avsluttet."
+
+#: ../views/settings_categories.php:62
+msgid ""
+"This is where you can assign eBay categories to your all your WooCommerce "
+"product categories."
+msgstr ""
+"Her kan du tilegne eBay kategorier til alle dine WooCommerce "
+"produktkategorier."
+
+#: ../views/settings_categories.php:64
+msgid ""
+"Once you selected a destination category for each local category, you can "
+"leave the profile category settings empty to automatically select the "
+"category according to this list."
+msgstr ""
+"Når du har valgt en kategoridestinasjon for hver lokale kategori kan du la "
+"profilkategori innstillinger være tom for å velge kategori automatisk i "
+"henhold til denne listen."
+
+#: ../views/settings_categories.php:66
+msgid ""
+"In order to access item specifics and custom item conditions in a profile "
+"without a primary category it is recommended to select a default category at "
+"the bottom of this page."
+msgstr ""
+"For å få tilgang til produktspesifikke og -tilpassede betingelser i en "
+"profil uten en hovedkategori er det anbefalt å velge en standardkategori "
+"nederst på denne siden."
+
+#: ../views/settings_categories.php:88
+msgid "Default category"
+msgstr "Standard kategori"
+
+#: ../views/settings_categories.php:90
+msgid "Use this to make additional item conditions available in your profile."
+msgstr "Bruk dette for å aktivere produkt tilleggstilstand i din profil."
+
+#: ../views/settings_categories.php:95
+msgid "Select default category"
+msgstr "Velg standard kategori"
+
+#: ../views/settings_categories.php:96 ../views/settings_categories.php:112
+msgid "Import / Export"
+msgstr "Import / Eksport"
+
+#: ../views/settings_categories.php:105 ../views/tools_page.php:155
+msgid "Update eBay data"
+msgstr "Oppdater eBay data"
+
+#: ../views/settings_categories.php:106 ../views/tools_page.php:156
+msgid ""
+"This will load available categories, shipping services, payment options and "
+"your custom store categories from eBay"
+msgstr ""
+"Dette vil laste tilgjengelige kategorier, frakttjenester, "
+"betalingsalternativer og tilpassede butikkategorier fra eBay"
+
+#: ../views/settings_categories.php:111 ../views/settings_categories.php:121
+msgid "Backup and restore category mappings"
+msgstr "Sikkerhetskopiering og gjenoppretting kategori kartlegginger"
+
+#: ../views/settings_categories.php:113
+msgid "Export and import your category mappings as JSON."
+msgstr "Eksport og import kategori kartlegginger som JSON."
+
+#: ../views/settings_categories.php:124
+msgid "Export category mappings"
+msgstr "Eksporter kategori kartlegginger"
+
+#: ../views/settings_categories.php:130
+msgid "Import category mappings"
+msgstr "Importer kategori kartlegginger"
+
+#: ../views/settings_dev.php:43
+msgid ""
+"This page contains some special options intended for developers and "
+"debugging."
+msgstr ""
+"Denne siden inneholder spesielle alternativer beregnet for utviklere og "
+"feilsøking."
+
+#: ../views/settings_dev.php:63 ../views/settings_license.php:133
+msgid "Beta testers"
+msgstr "Betatester"
+
+#: ../views/settings_dev.php:67 ../views/settings_license.php:137
+msgid ""
+"If you want to test new features before they are released, select the \"beta\" "
+"channel."
+msgstr "Hvis du ønsker å prøve nye funksjoner før de gis ut, velg \"beta\" kanal."
+
+#: ../views/settings_dev.php:69 ../views/settings_license.php:140
+msgid "Update channel"
+msgstr "Oppdater kanal"
+
+#: ../views/settings_dev.php:83 ../views/settings_license.php:61
+msgid "Version Info"
+msgstr "Versjonsinfo"
+
+#: ../views/settings_dev.php:109
+msgid "Logging"
+msgstr "Loggføring"
+
+#: ../views/settings_dev.php:113
+msgid "Log to database"
+msgstr "Skriv logg til database"
+
+#: ../views/settings_dev.php:121
+msgid "Enable to log all communication with eBay to the database."
+msgstr "Aktiver for å logge all kommunikasjon med eBay til databasen."
+
+#: ../views/settings_dev.php:125
+msgid "Keep log records for"
+msgstr "Lagre loggen i"
+
+#: ../views/settings_dev.php:137
+msgid "Log entry size limit"
+msgstr "Loggfør oppføringsstørrelse grense"
+
+#: ../views/settings_dev.php:147
+msgid "XML Beautifier"
+msgstr "XML forskjønner"
+
+#: ../views/settings_dev.php:159
+msgid "Staging site"
+msgstr "Oppsetningsside"
+
+#: ../views/settings_dev.php:163
+msgid ""
+"If you frequently clone your WordPress installation to a staging site, you "
+"can make WP-Lister automatically disable background updates and order "
+"creation when running on the staging site."
+msgstr ""
+"\n"
+"Dersom du jevnlig kloner din WordPress installasjon til en oppsetningsside "
+"kan WP-Lister automatisk deaktivere bakgrunnsoppdateringer og "
+"ordreopprettelse når du kjører på oppsetningssiden. Skriv inn en unik del av "
+"oppsetningsdomenet under for å aktivere denne funksjonen."
+
+#: ../views/settings_dev.php:164
+msgid "Enter a unique part of your staging domain below to activate this feature."
+msgstr ""
+"Skriv inn en unik del av oppsetningsdomenet under for å aktivere denne "
+"funksjonen."
+
+#: ../views/settings_dev.php:167
+msgid "Staging site pattern"
+msgstr "Oppsetningsside mønster"
+
+#: ../views/settings_dev.php:168
+msgid "You do not need to enter the full domain name of your staging site."
+msgstr "Du trenger ikke å angi hele domenenavnet for oppsetningssiden."
+
+#: ../views/settings_dev.php:169
+msgid ""
+"If your staging domain is mydomain.staging.wpengine.com enter staging."
+"wpengine.com as a general pattern."
+msgstr ""
+"Hvis oppsetningsdomenet er mydomain.staging.wpengine.com skriv staging."
+"wpengine.com som et generelt mønster."
+
+#: ../views/settings_dev.php:181
+msgid "Debug options"
+msgstr "Feilsøk alternativer"
+
+#: ../views/settings_dev.php:185
+msgid ""
+"Warning: These options are for debugging purposes only. Please do not change "
+"them unless our support told you to do so."
+msgstr ""
+"Advarsel: Disse alternativene er kun for feilsøk. Vennligst ikke endre dem "
+"med mindre brukerstøtten har fortalt deg å gjøre det."
+
+#: ../views/settings_dev.php:189
+msgid "PHP error handling"
+msgstr "PHP feilhåndtering"
+
+#: ../views/settings_dev.php:193 ../views/settings_dev.php:194
+msgid "Production Mode"
+msgstr "Produksjonsmodus"
+
+#: ../views/settings_dev.php:195
+msgid "Show all errors inline"
+msgstr "Vis alle feil innebygd"
+
+#: ../views/settings_dev.php:196
+msgid "Show fatal errors on shutdown"
+msgstr "Vis fatale feil ved avslutning"
+
+#: ../views/settings_dev.php:197
+msgid "Show errors inline and on shutdown"
+msgstr "Vis feil innebygd og ved avslutning"
+
+#: ../views/settings_dev.php:198
+msgid "Show fatal and non-fatal errors on shutdown"
+msgstr "Vis fatale og ikke-fatale feil ved avslutning"
+
+#: ../views/settings_dev.php:202
+msgid "AJAX error handling"
+msgstr "AJAX feilhåndtering"
+
+#: ../views/settings_dev.php:203
+msgid ""
+"404 errors for admin-ajax.php should actually never happen and are generally "
+"a sign of incorrect server configuration."
+msgstr ""
+"404 feil for admin-ajax.php skal egentlig aldri oppstå og er generelt et "
+"tegn på feil server konfigurasjon."
+
+#: ../views/settings_dev.php:203
+msgid ""
+"This setting is just a workaround. You should consider moving to a proper "
+"hosting provider instead."
+msgstr ""
+"Denne innstillingen er bare en midlertidig løsning. Du bør vurdere å flytte "
+"til en skikkelig hosting leverandør i stedet."
+
+#: ../views/settings_dev.php:207
+msgid "Halt on error"
+msgstr "Paus ved feil"
+
+#: ../views/settings_dev.php:208
+msgid "Continue with next item"
+msgstr "Fortsett med neste produkt"
+
+#: ../views/settings_dev.php:209
+msgid "Try again"
+msgstr "Prøv igjen"
+
+#: ../views/settings_dev.php:213
+msgid "EPS transfer mode"
+msgstr "EPS overføringsmodus"
+
+#: ../views/settings_dev.php:214
+msgid ""
+"If you have trouble uploading your images to EPS (eBay Picture Service), set "
+"the transfer mode to active."
+msgstr ""
+"Hvis du har problemer med å laste opp bilder til EPS (eBay Picture Service), "
+"angir du overføringsmodus til aktiv."
+
+#: ../views/settings_dev.php:218
+msgid "Passive"
+msgstr "Passiv"
+
+#: ../views/settings_dev.php:223
+msgid "Disable variations"
+msgstr "Deaktiver varianter"
+
+#: ../views/settings_dev.php:232
+msgid "Disable parts compatibility"
+msgstr "Deaktiver delekompatibilitet"
+
+#: ../views/settings_dev.php:241
+msgid "Allow direct editing"
+msgstr "Tillat direkte redigering"
+
+#: ../views/settings_dev.php:250
+msgid "Limit displayed items"
+msgstr "Begrens viste produkter"
+
+#: ../views/settings_dev.php:254
+msgid "No limit"
+msgstr "Ingen grensen"
+
+#: ../views/settings_dev.php:263
+msgid "Apply profiles in batches of"
+msgstr "Angi profiler i økter på"
+
+#: ../views/settings_dev.php:276
+msgid "Ignore orders before"
+msgstr "Ignorer ordrer før"
+
+#: ../views/settings_dev.php:296 ../views/settings_dev.php:323 ..
+#: views/account/account_edit_page.php:79
+msgid "Disabled"
+msgstr "Deaktivert"
+
+#: ../views/settings_dev.php:297 ../views/settings_dev.php:324 ..
+#: views/account/account_edit_page.php:78
+msgid "Enabled"
+msgstr "Aktivert"
+
+#: ../views/settings_dev.php:300
+msgid "Log to logfile"
+msgstr "Skriv til loggfil"
+
+#: ../views/settings_dev.php:302
+msgid "no logfile"
+msgstr "ingen loggfil"
+
+#: ../views/settings_dev.php:312
+msgid "write debug information to logfile."
+msgstr "skrive feilsøke informasjon til loggfil."
+
+#: ../views/settings_dev.php:319
+msgid "Include auth debug info in log"
+msgstr "Inkluder auth debug info i loggen"
+
+#: ../views/settings_dev.php:327
+msgid "Instance ID"
+msgstr "Forekomst ID"
+
+#: ../views/settings_dev.php:333
+msgid "eBay token"
+msgstr "eBay ID-brikke"
+
+#: ../views/settings_dev.php:344
+msgid "eBay Sandbox"
+msgstr "eBay Sandkassemodus"
+
+#: ../views/settings_dev.php:349
+msgid ""
+"This is feature intended for developers only and not recommended for end "
+"users."
+msgstr "Denne funksjonen er ment for utviklere og er ikke anbefalt for sluttbrukere."
+
+#: ../views/settings_dev.php:353
+msgid ""
+"To use the sandbox, you need to create a dedicated sandbox account and "
+"connect WP-Lister with it."
+msgstr ""
+"For å bruke sandkassemodus må du opprette en egen sandkasse-konto og koble "
+"WP-Lister til med den."
+
+#: ../views/settings_dev.php:354
+msgid ""
+"After enabling sandbox mode click \"Change Account\" and authenticate WP-"
+"Lister using your sandbox account."
+msgstr ""
+"Når du har aktivert sandkassemodus, klikk \"Endre Konto\" for å godkjenne WP-"
+"Lister å bruke sandkasse konto."
+
+#: ../views/settings_license.php:36
+msgid "To find your latest license key, please visit your account on wplab.com."
+msgstr "For å finne din siste lisensnøkkel kan du gå til din konto på wplab.com."
+
+#: ../views/settings_license.php:38
+msgid ""
+"Note: You are using a license for version 1.x. To upgrade to WP-Lister 2.0 "
+"you need to get a new license - please visit your account on wplab.com for "
+"more details."
+msgstr ""
+"Merk: Du bruker en lisens for versjon 1.x. For å oppgradere til WP-Lister 2,"
+"0 trenger du en ny lisens. Besøk din konto på wplab.com for flere detaljer."
+
+#: ../views/settings_license.php:47 ../views/settings_license.php:162
+msgid "Update license"
+msgstr "Oppdater lisens"
+
+#: ../views/settings_license.php:49
+msgid "Activate license"
+msgstr "Aktiver lisens"
+
+#: ../views/settings_license.php:83
+msgid "License"
+msgstr "Lisens"
+
+#: ../views/settings_license.php:88
+msgid "License email"
+msgstr "Lisens e-post"
+
+#: ../views/settings_license.php:94
+msgid "License key"
+msgstr "Lisensnøkkel"
+
+#: ../views/settings_license.php:100
+msgid "Your license has been activated for"
+msgstr "Lisensen er aktivert for"
+
+#: ../views/settings_license.php:103
+msgid "Your license has not been activated."
+msgstr "Lisensen er ikke aktivert."
+
+#: ../views/settings_license.php:104
+msgid "Please check if your license key matches your email address."
+msgstr "Vennligst sjekk om lisensnøkkelen matcher din e-postadresse."
+
+#: ../views/settings_license.php:111
+msgid "Deactivate license"
+msgstr "Deaktiver lisens"
+
+#: ../views/settings_license.php:116
+msgid "Yes, I want to deactivate this license for"
+msgstr "Ja, jeg ønsker å deaktivere denne lisensen for"
+
+#: ../views/settings_license.php:123
+msgid "Your license is currently deactivated on this site."
+msgstr "Lisensen er for tiden deaktivert på dette nettstedet."
+
+#: ../views/settings_license.php:154 ../views/tools_page.php:176
+msgid "Force update check"
+msgstr "Tving sjekk oppdatering"
+
+#: ../views/settings_license.php:160
+msgid "Check license activation"
+msgstr "Sjekk lisensaktivering"
+
+#: ../views/settings_license.php:168
+msgid "Debug Info"
+msgstr "Feilsøk Info"
+
+#: ../views/settings_page.php:49
+msgid "These are the most commonly used configuration options."
+msgstr "Dette er de mest brukte konfigurasjonsalternativene."
+
+#: ../views/settings_page.php:51
+msgid "No eBay account has been set up yet."
+msgstr "Ingen eBaykontoen er satt opp ennå."
+
+#: ../views/settings_page.php:75
+msgid "Staging Site"
+msgstr "Oppsetningsside"
+
+#: ../views/settings_page.php:88
+msgid "Update Schedule"
+msgstr "Tidsplan oppdatering"
+
+#: ../views/settings_page.php:97
+msgid "Background updates are handled by an external cron job."
+msgstr "Bakgrunnsoppdateringer blir håndtert av en ekstern cron jobb."
+
+#: ../views/settings_page.php:104
+msgid "How to set up an external cron job"
+msgstr "Hvordan sette opp en ekstern cron jobb"
+
+#: ../views/settings_page.php:107
+msgid "Luckily, you don't have to be a server admin to set up an external cron job."
+msgstr ""
+"Heldigvis trenger du ikke å være en server administrator å sette opp en "
+"ekstern cron jobb."
+
+#: ../views/settings_page.php:108
+msgid ""
+"You can ask your server admin to set up a cron job on your own server - or "
+"use a 3rd party service like CronBlast, which provides a user friendly "
+"interface and additional features for a small monthly fee."
+msgstr ""
+"Du kan be din server administrator om å sette opp en cron jobb på din egen "
+"server - eller bruke en tredjepartstjeneste som CronBlast som gir et "
+"brukervennlig grensesnitt og ekstra funksjoner for en liten månedlig avgift."
+
+#: ../views/settings_page.php:112
+msgid "Option A: Web cron service"
+msgstr "Alternativ A: Web cron tjeneste"
+
+#: ../views/settings_page.php:116
+#, php-format
+msgid ""
+"The easiest way to set up a cron job is to sign up with %s and use the "
+"following URL to create a new task."
+msgstr ""
+"Den enkleste måten å sette opp en cron jobb er å registrere deg med %s og "
+"bruke følgende URL for å opprette en ny oppgave."
+
+#: ../views/settings_page.php:123
+msgid "Option B: Server cron job"
+msgstr "Alternativ B: Server cron jobb"
+
+#: ../views/settings_page.php:126
+msgid ""
+"If you prefer to set up a cron job on your own server you can create a cron "
+"job that will execute the following command:"
+msgstr ""
+"Hvis du foretrekker å sette opp en cron jobb på din egen server kan du lage "
+"en cron jobb som vil utføre følgende kommando:"
+
+#: ../views/settings_page.php:134
+msgid ""
+"Note: Your cron job should run at least every 15 minutes but not more often "
+"than every 5 minutes."
+msgstr ""
+"Merk: cron jobb bør kjøre minst hvert 15. minutt, men ikke oftere enn hvert "
+"5. minutt."
+
+#: ../views/settings_page.php:159
+msgid "PayPal"
+msgstr "PayPal"
+
+#: ../views/settings_page.php:162
+msgid "PayPal account"
+msgstr "PayPal konto"
+
+#: ../views/settings_page.php:165
+msgid "To use PayPal you need to enter your PayPal address."
+msgstr "For å bruke PayPal du må angi din PayPal-adresse."
+
+#: ../views/settings_page.php:183
+msgid "eBay authorization"
+msgstr "eBay autorisasjon"
+
+#: ../views/settings_page.php:185
+msgid "Follow these steps to link WP-Lister with your eBay account"
+msgstr "Følg disse trinn for å knytte WP-Lister til din eBaykonto"
+
+#: ../views/settings_page.php:199
+msgid "Select the eBay site you want to list your items on:"
+msgstr "Velg hvilken eBay side du vil publisere oppføringene dine på:"
+
+#: ../views/settings_page.php:208 ../views/account/account_edit_sidebar.php:92 ..
+#: views/account/settings_add_account.php:54
+msgid "Click \"Connect with eBay\" to sign in to eBay and grant access for WP-Lister"
+msgstr ""
+"Klikk \"Koble til med eBay\" for å logge deg på eBay og gi tilgang for WP-"
+"Lister"
+
+#: ../views/settings_page.php:216 ../views/account/account_edit_sidebar.php:105 ..
+#: views/account/account_edit_sidebar.php:106 ..
+#: views/account/settings_add_account.php:60
+msgid "Fetch eBay Token"
+msgstr "Hent ID-brikke"
+
+#: ../views/settings_page.php:217 ../views/account/account_edit_sidebar.php:102 ..
+#: views/account/settings_add_account.php:61
+msgid ""
+"After linking WP-Lister with your eBay account, click here to fetch your "
+"token"
+msgstr ""
+"Etter du har knyttet WP-Lister til eBay-kontoen kan du klikke her for å "
+"hente ID-brikken din"
+
+#: ../views/settings_page.php:243
+msgid "eBay settings"
+msgstr "eBay innstillinger"
+
+#: ../views/settings_page.php:246
+msgid "eBay site"
+msgstr "eBay side"
+
+#: ../views/settings_page.php:259
+msgid "Automatic updates"
+msgstr "Automatiske oppdateringer"
+
+#: ../views/settings_page.php:261
+msgid "Enable to update listings and transactions using WP-Cron."
+msgstr "Aktiver for å oppdatere oppføringer og transaksjoner med WP-Cron."
+
+#: ../views/settings_page.php:264
+msgid "Update interval"
+msgstr "Oppdateringsintervall"
+
+#: ../views/settings_page.php:268
+msgid "manually"
+msgstr "manuellt"
+
+#: ../views/settings_page.php:270
+msgid "5 min."
+msgstr "5 min."
+
+#: ../views/settings_page.php:271
+msgid "10 min."
+msgstr "10 min."
+
+#: ../views/settings_page.php:272
+msgid "15 min."
+msgstr "15 min."
+
+#: ../views/settings_page.php:273
+msgid "30 min."
+msgstr "30 min."
+
+#: ../views/settings_page.php:275
+msgid "hourly"
+msgstr "hver time"
+
+#: ../views/settings_page.php:276
+msgid "daily"
+msgstr "daglig"
+
+#: ../views/settings_page.php:278
+msgid "Use external cron job"
+msgstr "Bruk ekstern cron job"
+
+#: ../views/settings_page.php:285
+msgid "Sync inventory"
+msgstr "Synkroniser varelager"
+
+#: ../views/settings_page.php:294
+msgid "Create orders"
+msgstr "Opprett ordrer"
+
+#: ../views/settings_page.php:303
+msgid "Status for shipped orders"
+msgstr "Status for sendte ordrer"
+
+#: ../views/settings_page.php:307 ../views/settings_page.php:316 ..
+#: views/settings_page.php:325
+msgid "completed"
+msgstr "fyllført"
+
+#: ../views/settings_page.php:308 ../views/settings_page.php:317
+msgid "processing"
+msgstr "behandles"
+
+#: ../views/settings_page.php:312
+msgid "Status for completed orders"
+msgstr "Status for fullførte ordrer"
+
+#: ../views/settings_page.php:321
+msgid "Status for unpaid orders"
+msgstr "Status for ikke batalte varer"
+
+#: ../views/settings_page.php:326
+msgid "on-hold"
+msgstr "på vent"
+
+#: ../views/settings_page.php:327
+msgid "pending"
+msgstr "behandles"
+
+#: ../views/settings_page.php:331
+msgid "Create customers"
+msgstr "Opprett kunder"
+
+#: ../views/settings_page.php:350
+msgid "Link auctions to eBay"
+msgstr "Link auksjoner til eBay"
+
+#: ../views/settings_page.php:354
+msgid "Off"
+msgstr "Av"
+
+#: ../views/settings_page.php:356
+msgid "Only if there are bids on eBay or the auction ends within 12 hours"
+msgstr "Bare hvis det er bud på eBay eller auksjonen avsluttes innen 12 timer"
+
+#: ../views/settings_page.php:358
+msgid "Always show link to eBay for products on auction"
+msgstr "Vis alltid link til eBay for produkter på auksjon"
+
+#: ../views/settings_page.php:359
+msgid "Always show link to eBay for auctions and fixed price items"
+msgstr "Vis alltid link til eBay auksjoner og varer med fastpris"
+
+#: ../views/settings_page.php:359
+msgid "not recommended"
+msgstr "ikke anbefalt"
+
+#: ../views/settings_page.php:362
+msgid ""
+"Enable this to modify the product details page for items currently on "
+"auction."
+msgstr "Aktiver dette for å endre produktdetaljer for elementer som er på auksjon."
+
+#: ../views/settings_page.php:366
+msgid "Send weight and dimensions"
+msgstr "Send vekt og mål"
+
+#: ../views/settings_page.php:370
+msgid "Only for calculated shipping services"
+msgstr "Kun for kalkulert frakt tjenester"
+
+#: ../views/settings_page.php:371
+msgid "Always send weight and dimensions if set"
+msgstr "Alltid send vekt og mål hvis angitt"
+
+#: ../views/settings_page.php:374
+msgid "Enable this if eBay requires package weight or dimensions for flat shipping."
+msgstr "Aktiver dette hvis eBay krever forsendelsens vekt eller mål for flat frakt."
+
+#: ../views/settings_tabs.php:12
+msgid "My Account"
+msgstr "Min Konto"
+
+#: ../views/sites_page.php:13
+msgid "WP-Lister Network Sites"
+msgstr "WP-Lister Nettverksider"
+
+#: ../views/sites_page.php:37
+msgid "Update sites"
+msgstr "Oppdater sider"
+
+#: ../views/sites_page.php:38
+msgid "Update recent sites from eBay."
+msgstr "Oppdater nylige sider fra eBay."
+
+#: ../views/templates_copy_form.php:34 ../views/templates_copy_form.php:46
+msgid "Duplicate Template"
+msgstr "Kopier mal"
+
+#: ../views/templates_copy_form.php:40 ../views/templates_edit_page.php:367
+msgid "Description"
+msgstr "Beskrivelse"
+
+#: ../views/templates_edit_page.php:89
+msgid "Edit Template"
+msgstr "Endre malen"
+
+#: ../views/templates_edit_page.php:133
+#, php-format
+msgid ""
+"There are %s prepared, %s verified and %s published items using this "
+"template."
+msgstr ""
+"Det er %s forberedte, %s verifiserte og %s publiserte oppføringer som bruker "
+"denne malen."
+
+#: ../views/templates_edit_page.php:135
+msgid "There are no prepared items using this template."
+msgstr "Ingen forberedte oppføringer bruker denne malen"
+
+#: ../views/templates_edit_page.php:138 ../views/templates_edit_page.php:153
+msgid ""
+"To update already published items you need to revise them after saving the "
+"template."
+msgstr ""
+"For å oppdatere allerede publiserte oppføringer må du revidere den etter du "
+"har lagret malen."
+
+#: ../views/templates_edit_page.php:144
+msgid "You can find the theme files in this folder:"
+msgstr "Du finner temaets filer i mappen:"
+
+#: ../views/templates_edit_page.php:171 ../views/templates_edit_page.php:474
+msgid "Save template"
+msgstr "Lagre mal"
+
+#: ../views/templates_edit_page.php:184
+msgid "Template Options"
+msgstr "Mal innstillinger"
+
+#: ../views/templates_edit_page.php:244
+msgid "You can use the following shortcodes in your listing template."
+msgstr "Du kan benytte følgende kortkoder i oppføringsmalen."
+
+#: ../views/templates_edit_page.php:245
+msgid "WordPress shortcodes will not work here."
+msgstr "WordPress kortkoder virker ikke her."
+
+#: ../views/templates_edit_page.php:248
+msgid "Available Shortcodes"
+msgstr "Tilgjengelige kortkoder"
+
+#: ../views/templates_edit_page.php:252
+msgid "product title"
+msgstr "produkt tittel"
+
+#: ../views/templates_edit_page.php:256
+msgid "product main description"
+msgstr "produktets hovedbeskrivelse"
+
+#: ../views/templates_edit_page.php:262
+msgid "additional product description"
+msgstr "ekstra produktbeskrivelse"
+
+#: ../views/templates_edit_page.php:266
+msgid "product price"
+msgstr "produktpris"
+
+#: ../views/templates_edit_page.php:270
+msgid "product SKU"
+msgstr "produkt SKU"
+
+#: ../views/templates_edit_page.php:274
+msgid "main product image as HTML tag"
+msgstr "produktets hovedbilde som HTML tag"
+
+#: ../views/templates_edit_page.php:278
+msgid "main product image as raw URL"
+msgstr "produktets hovedbilde som raw URL"
+
+#: ../views/templates_edit_page.php:282
+msgid "additional images as HTML list"
+msgstr "påfølgende bilder som HTML liste"
+
+#: ../views/templates_edit_page.php:287
+msgid "single images or their urls"
+msgstr "enkelt bilder eller deres URL"
+
+#: ../views/templates_edit_page.php:294
+msgid "product dimensions"
+msgstr "produkt mål"
+
+#: ../views/templates_edit_page.php:299
+msgid "example for custom product attributes"
+msgstr "eksempel for tilpasset produktegenskaper"
+
+#: ../views/templates_edit_page.php:303
+msgid "product variations as HTML table"
+msgstr "produktvariasjoner som HTML tabell"
+
+#: ../views/templates_edit_page.php:307
+msgid "main product category name"
+msgstr "navn for produktets hovedkategori"
+
+#: ../views/templates_edit_page.php:311
+msgid "custom meta values"
+msgstr "tilpassede meta verdier"
+
+#: ../views/templates_edit_page.php:318
+msgid "Use these dynamic widgets to add a gallery showing your other listings."
+msgstr ""
+"Bruk disse dynamiske modulene for å legge til et galleri som viser dine "
+"andre oppføringer."
+
+#: ../views/templates_edit_page.php:321
+msgid ""
+"Note: The related listings widget will only show up-sells or cross-sells, "
+"which need to be defined for each product in WooCommerce."
+msgstr ""
+"Merk: Modulen relaterte oppføringer vil bare vise oppgradering eller "
+"alternativ, som må defineres for hvert produkt i WooCommerce."
+
+#: ../views/templates_edit_page.php:324
+msgid "Shortcodes for advanced developers"
+msgstr "Kortkoder for avanserte utviklere"
+
+#: ../views/templates_edit_page.php:357
+msgid "Template settings"
+msgstr "Innstillinger Mal"
+
+#: ../views/templates_edit_page.php:371
+msgid "Version"
+msgstr "Versjon"
+
+#: ../views/templates_edit_page.php:377 ../views/profile/edit_sidebar.php:136
+msgid "Location"
+msgstr "Sted"
+
+#: ../views/templates_edit_page.php:383
+msgid "Template description is only for internal use."
+msgstr "Mal beskrivelse er kun til internt bruk."
+
+#: ../views/templates_edit_page.php:421
+msgid "Note: You can disable the WYSIWYG editor on the advanced settings page."
+msgstr "Merk: Du kan deaktivere WYSIWYG på siden Avanserte innstillinger."
+
+#: ../views/templates_edit_page.php:426
+msgid "Template Content"
+msgstr "Innhold Mal"
+
+#: ../views/templates_edit_page.php:432
+msgid "You have disabled the WYSIWYG editor."
+msgstr "Du har deaktivert funksjonen WYSIWYG."
+
+#: ../views/templates_edit_page.php:437
+msgid "Stylesheet"
+msgstr "Stilark"
+
+#: ../views/templates_page.php:39
+msgid "Create new template"
+msgstr "Lag ny mal"
+
+#: ../views/templates_page.php:40
+msgid "Upload existing template"
+msgstr "Last opp eksisterende mal"
+
+#: ../views/templates_page.php:51
+msgid "Upload"
+msgstr "Last opp"
+
+#: ../views/tools_page.php:136
+msgid "Clear log"
+msgstr "Slett logg"
+
+#: ../views/tools_page.php:165
+msgid "Update user details"
+msgstr "Oppdater brukerdetaljer"
+
+#: ../views/tools_page.php:166
+msgid "Update account details from eBay"
+msgstr "Oppdater kontodetaljer fra eBay"
+
+#: ../views/tools_page.php:167
+msgid "and update your seller profiles for shipping, payment and return policy."
+msgstr "og oppdater selgerprofiler for frakt, betaling og returrett."
+
+#: ../views/tools_page.php:177
+msgid ""
+"Since WordPress only checks twice a day for plugin updates, it might be "
+"neccessary to force an immediate update check if you want to install an "
+"update which was released within the last hours."
+msgstr ""
+"Siden WordPress kun sjekker for utvidelsesoppdatering to ganger om dagen kan "
+"det være nødvendig å tvinge en umiddelbar oppdatering om du ønsker å "
+"installere en oppdatering som ble løslatt i løpet av de siste timene."
+
+#: ../views/tools_page.php:209
+msgid "Inventory Check"
+msgstr "Sjekk varebeholdning"
+
+#: ../views/tools_page.php:218
+msgid "Check product inventory and prices"
+msgstr "Sjekk varebeholdning og pris"
+
+#: ../views/tools_page.php:219
+msgid ""
+"Check all published listings and find products with different stock or price "
+"in WooCommerce."
+msgstr ""
+"Sjekk alle publiserte oppføringer og finn produkter med forskjellig "
+"lagerbeholdning eller pris i WooCommerce."
+
+#: ../views/tools_page.php:232
+msgid "Check product inventory only"
+msgstr "Sjekk kun produkt varelager"
+
+#: ../views/tools_page.php:233
+msgid ""
+"Check all published listings and find products with different stock levels "
+"in WooCommerce."
+msgstr ""
+"Sjekk alle publiserte oppføringer og finn produkter med ulike lagernivå i "
+"WooCommerce."
+
+#: ../views/tools_page.php:243
+msgid "Check ended listings"
+msgstr "Sjekk avsluttede oppføringer"
+
+#: ../views/tools_page.php:244
+msgid ""
+"Check all ended listings and find products with different stock levels in "
+"WooCommerce."
+msgstr ""
+"Sjekk alle avsluttede oppføringer og finn produkter med ulike lagernivå i "
+"WooCommerce."
+
+#: ../views/tools_page.php:255
+msgid "Check sold listings"
+msgstr "Sjekk solgte oppføringer"
+
+#: ../views/tools_page.php:256
+msgid ""
+"Check all sold listings and find products which are still in stock in "
+"WooCommerce."
+msgstr ""
+"Sjekk alle solgte oppføringer og finn produkter som fortsatt er på lager i "
+"WooCommerce."
+
+#: ../views/tools_page.php:265
+msgid "Check out of stock products"
+msgstr "Sjekk utsolgte produkter"
+
+#: ../views/tools_page.php:266
+msgid ""
+"Check all published listings and find products which are out of stock in "
+"WooCommerce."
+msgstr ""
+"Sjekk alle publiserte oppføringer og finn produkter som er utsolgt i "
+"WooCommerce."
+
+#: ../views/tools_page.php:275
+msgid "Other"
+msgstr "Annet"
+
+#: ../views/tools_page.php:282
+msgid "Check product images"
+msgstr "Sjekk produktbilder"
+
+#: ../views/tools_page.php:283
+msgid "Check all listings for product images smaller than 500px."
+msgstr "Sjekk alle oppføringer for produktbilder mindre enn 500px."
+
+#: ../views/tools_page.php:291
+msgid "Check transactions"
+msgstr "Sjekk transaksjoner"
+
+#: ../views/tools_page.php:292
+msgid "Fix missing transactions and check for duplicates."
+msgstr "Fiks manglende transaksjoner og se etter duplikater."
+
+#: ../views/tools_page.php:301
+msgid "Update cost of goods data"
+msgstr "Oppdater varekostnader"
+
+#: ../views/tools_page.php:302
+msgid "Fix missing cost of goods data for eBay orders."
+msgstr "Fiks manglende varekostnader for eBay ordrer."
+
+#: ../views/tools_page.php:311
+msgid "Lock all items"
+msgstr "Lås alle produkter"
+
+#: ../views/tools_page.php:312
+msgid "Lock all items."
+msgstr "Lås alle produkter."
+
+#: ../views/tools_page.php:320
+msgid "Unlock all items"
+msgstr "Lås opp alle produkter"
+
+#: ../views/tools_page.php:321
+msgid "Unlock all items."
+msgstr "Lås opp alle produkter."
+
+#: ../views/tools_page.php:329
+msgid "Debugging"
+msgstr "Feilsøk"
+
+#: ../views/tools_page.php:337
+msgid "Test eBay connection"
+msgstr "Sjekk eBay tilkobling"
+
+#: ../views/tools_page.php:338
+msgid "Test connection to eBay API"
+msgstr "Sjekk tilkobling mot eBay API"
+
+#: ../views/tools_page.php:346
+msgid "Test PHP time limit"
+msgstr "Sjekk PHP time grense"
+
+#: ../views/tools_page.php:348
+msgid "Test if your server regards the PHP max_execution_time setting"
+msgstr "Sjekk om din server tar hensyn til PHP max_execution_time"
+
+#: ../views/tools_page.php:360
+msgid "Check eBay time offset"
+msgstr "Sjekk eBay server time offset"
+
+#: ../views/tools_page.php:361
+msgid "Check eBay time to server time offset"
+msgstr "Sjekk eBay tid mot server time offset"
+
+#: ../views/tools_page.php:369
+msgid "Show cURL debug info"
+msgstr "Vis cURL feilsøkinfo"
+
+#: ../views/tools_page.php:370
+msgid "Check availability of CURL php extension and show phpinfo()"
+msgstr "Sjekk tilgjengeligheten av CURL php utvidelse og vis phpinfo()"
+
+#: ../views/tools_page.php:378 ../views/tools_page.php:379
+msgid "Get token expiration date"
+msgstr "Hent ID-brikke utløpsdato"
+
+#: ../views/tools_page.php:389
+msgid "Assign all to default account"
+msgstr "Tilegn alle til standard konto"
+
+#: ../views/tools_page.php:391
+msgid ""
+"This will assign all your listings, profiles and orders to your default "
+"account."
+msgstr ""
+"Dette vil tillegne alle dine oppføringer, profiler og ordrer til din "
+"standard konto."
+
+#: ../views/tools_page.php:392
+msgid "Only use this if you were told so by support!"
+msgstr "Benytt dette kun hvis du ble instruert så av support."
+
+#: ../views/tools_page.php:404 ../views/tools_page.php:424
+msgid "View debug log"
+msgstr "Vis feilsøkslogg"
+
+#: ../views/tools_page.php:405
+msgid "Open logfile viewer in new tab"
+msgstr "Åpne loggfilen i ny fane"
+
+#: ../views/tools_page.php:412
+msgid "Clear debug log"
+msgstr "Slett feilsøkslogg"
+
+#: ../views/tools_page.php:413
+msgid "Current log file size"
+msgstr "Gjeldende loggfil størrelse"
+
+#: ../views/tools_page.php:425
+msgid "View Logfile"
+msgstr "Vis loggfil"
+
+#: ../views/transactions_page.php:44
+msgid "Update transactions"
+msgstr "Oppdater transaksjoner"
+
+#: ../views/transactions_page.php:45
+msgid "Update recent transactions from eBay."
+msgstr "Oppdater nylige transjaksjoner fra eBay."
+
+#: ../views/tutorial_page.php:20
+msgid "Installation and Setup"
+msgstr "Installasjon og Oppsett"
+
+#: ../views/tutorial_page.php:28
+msgid "Begin the setup"
+msgstr "Start oppsettet"
+
+#: ../views/tutorial_page.php:33
+msgid "Listing items"
+msgstr "Produktoppføring"
+
+#: ../views/tutorial_page.php:42
+msgid "Ressources"
+msgstr "Ressurser"
+
+#: ../views/tutorial_page.php:45
+msgid "Helpful links"
+msgstr "Nyttige linker"
+
+#: ../views/tutorial_page.php:47
+msgid "FAQ"
+msgstr "OSS"
+
+#: ../views/tutorial_page.php:48
+msgid "Documentation"
+msgstr "Dokumentasjon"
+
+#: ../views/tutorial_page.php:49
+msgid "Installing WP-Lister"
+msgstr "Installerer WP-Lister"
+
+#: ../views/tutorial_page.php:50
+msgid "Screencasts"
+msgstr "Videopresentasjoner"
+
+#: ../views/account/account_edit_page.php:14
+msgid "Edit Account"
+msgstr "Endre konto"
+
+#: ../views/account/account_edit_page.php:16
+msgid "New Account"
+msgstr "Ny konto"
+
+#: ../views/account/account_edit_page.php:48
+msgid "Account settings"
+msgstr "Kontoinnstillinger"
+
+#: ../views/account/account_edit_page.php:53
+msgid "Account Title"
+msgstr "Konto tittel"
+
+#: ../views/account/account_edit_page.php:59 ..
+#: views/account/settings_add_account.php:25
+msgid "eBay Site"
+msgstr "eBay Side"
+
+#: ../views/account/account_edit_page.php:83
+msgid "PayPal Account"
+msgstr "PayPal Konto"
+
+#: ../views/account/account_edit_page.php:90
+msgid "Out Of Stock Control"
+msgstr "Varelager kontroll"
+
+#: ../views/account/account_edit_page.php:95
+msgid "Inactive"
+msgstr "Inaktiv"
+
+#: ../views/account/account_edit_page.php:98
+msgid "More information about this option at"
+msgstr "Mer informasjon om dette alternativet på"
+
+#: ../views/account/account_edit_page.php:106 ..
+#: views/account/settings_add_account.php:40
+msgid "Sandbox"
+msgstr "Sandbox"
+
+#: ../views/account/account_edit_page.php:110 ..
+#: views/account/settings_add_account.php:44
+msgid "Production (default)"
+msgstr "Produksjon (standard)"
+
+#: ../views/account/account_edit_page.php:116
+msgid "eBay Token"
+msgstr "eBay ID-brikke"
+
+#: ../views/account/account_edit_page.php:129
+msgid "Debug Information"
+msgstr "Informasjon om Feilsøk"
+
+#: ../views/account/account_edit_sidebar.php:32
+msgid "This is your current default account."
+msgstr "Dette er din nåværende standard konto"
+
+#: ../views/account/account_edit_sidebar.php:36
+msgid ""
+"Please do not change any account details except account title and PayPal "
+"address."
+msgstr ""
+"Vennligst ikke endre noen kontoopplysninger unntatt kontotittel eller PayPal "
+"adresse."
+
+#: ../views/account/account_edit_sidebar.php:58
+msgid "Account Details"
+msgstr "Kontodetaljer"
+
+#: ../views/account/account_edit_sidebar.php:63
+msgid "User ID"
+msgstr "Bruker ID"
+
+#: ../views/account/account_edit_sidebar.php:65
+msgid "Score"
+msgstr "Score"
+
+#: ../views/account/account_edit_sidebar.php:71
+msgid "Store"
+msgstr "Butikk"
+
+#: ../views/account/account_edit_sidebar.php:71
+msgid "visit store"
+msgstr "besøk butikken"
+
+#: ../views/account/account_edit_sidebar.php:73
+msgid "Valid until"
+msgstr "Gyldig til"
+
+#: ../views/account/account_edit_sidebar.php:76
+msgid "No details available"
+msgstr "Ingen detaljer tilgjengelig"
+
+#: ../views/account/account_edit_sidebar.php:83
+msgid "Refresh eBay Token"
+msgstr "Forny eBay ID-brikke"
+
+#: ../views/account/account_edit_sidebar.php:87
+#, php-format
+msgid "Your token will expire on %s."
+msgstr "Din ID-brikke vil utløpe den %s."
+
+#: ../views/account/account_edit_sidebar.php:88
+msgid "You should refresh your token before that date by following the steps below."
+msgstr "Du bør oppdatere ID-brikken før denne datoen ved å følge trinnene nedenfor."
+
+#: ../views/account/settings_add_account.php:19
+msgid "Add eBay Account"
+msgstr "Legg til eBay konto"
+
+#: ../views/profile/edit_categories.php:81
+msgid "Conditions and item specifics are based on the category"
+msgstr "Betingelser og produktspesifikke detaljer er basert på kategorien"
+
+#: ../views/profile/edit_item_specifics.php:162
+msgid "There are no recommended item specifics for the primary category."
+msgstr "Det er ingen anbefalte produktdetaljer for den primære kategorien."
+
+#: ../views/profile/edit_shipping.php:27
+msgid "Shipping Options"
+msgstr "Frakt Alternativer"
+
+#: ../views/profile/edit_shipping_int.php:8 ../views/profile/edit_shipping_int.
+#: php:80
+msgid "Destination"
+msgstr "Destinasjon"
+
+#: ../views/profile/edit_shipping_int.php:16 ../views/profile/edit_shipping_loc.
+#: php:18
+msgid "First item cost"
+msgstr "Kostnad for første produkt"
+
+#: ../views/profile/edit_shipping_int.php:20 ../views/profile/edit_shipping_loc.
+#: php:22
+msgid "Additional items cost"
+msgstr "Tilleggsavgift produkter"
+
+#: ../views/profile/edit_shipping_int.php:83
+msgid "Package"
+msgstr "Pakking"
+
+#: ../views/profile/edit_shipping_int.php:84
+msgid "Handling fee"
+msgstr "Ekspedisjonsgebyr"
+
+#: ../views/profile/edit_shipping_int.php:129
+msgid "Add international shipping option"
+msgstr "Legg til Internasjonalt fraktalternativ"
+
+#: ../views/profile/edit_shipping_int.php:138 ../views/profile/edit_shipping_int.
+#: php:163 ../views/profile/edit_shipping_loc.php:93 ..
+#: views/profile/edit_shipping_loc.php:129
+msgid "Shipping discount profile"
+msgstr "Fraktrabatt profil"
+
+#: ../views/profile/edit_shipping_int.php:143 ../views/profile/edit_shipping_int.
+#: php:168 ../views/profile/edit_shipping_loc.php:98 ..
+#: views/profile/edit_shipping_loc.php:134
+msgid "no discount profile"
+msgstr "ingen rabatt profil"
+
+#: ../views/profile/edit_shipping_int.php:151 ../views/profile/edit_shipping_loc.
+#: php:118
+msgid "Packaging and handling costs"
+msgstr "Pakke og ekspedisjonsgebyr"
+
+#: ../views/profile/edit_shipping_int.php:179 ../views/profile/edit_shipping_loc.
+#: php:178
+msgid "Promotional shipping discount"
+msgstr "Kampanje fraktrabatt"
+
+#: ../views/profile/edit_shipping_int.php:194
+msgid "Ship to locations"
+msgstr "Send til følgende steder"
+
+#: ../views/profile/edit_shipping_int.php:206
+msgid "Exclude locations"
+msgstr "Utelat steder"
+
+#: ../views/profile/edit_shipping_loc.php:3
+msgid ""
+"Freight shipping may be used when flat or calculated shipping cannot be used "
+"due to the greater weight of the item."
+msgstr ""
+"\n"
+"Freight frakt kan brukes når flat eller beregnet frakt ikke kan brukes på "
+"grunn av større vekt på varen."
+
+#: ../views/profile/edit_shipping_loc.php:4
+msgid ""
+"Currently, FreightFlat is available only for the US, UK, AU, CA and CAFR "
+"sites, and only for domestic shipping. On the US site, FreightFlat applies "
+"to shipping with carriers that are not affiliated with eBay."
+msgstr ""
+"Foreløpig er FreightFlat kun tilgjengelig for US, UK, AU, CA og CAFR områder,"
+" og bare for innenlands frakt. På det amerikanske nettstedet gjelder "
+"FreightFlat for frakt med operatører som ikke er tilknyttet eBay."
+
+#: ../views/profile/edit_shipping_loc.php:5
+msgid ""
+"Due to limitations in the eBay API, you still need to select at least one "
+"valid domestic shipping service. This will have no effect on the listing on "
+"eBay."
+msgstr ""
+"På grunn av begrensninger i eBay API må du fortsatt velge minst ett gyldig "
+"innenlands fraktalternativ. Dette vil ikke ha noen effekt på oppføring på "
+"eBay."
+
+#: ../views/profile/edit_shipping_loc.php:54
+msgid ""
+"Warning: Calculated shipping is currently only available on eBay US, Canada "
+"and Australia."
+msgstr ""
+"Advarsel: Beregnet frakt er foreløpig kun tilgjengelig på eBay USA, Canada "
+"og Australia."
+
+#: ../views/profile/edit_shipping_loc.php:84
+msgid "Add domestic shipping option"
+msgstr "Legg til innenlands fraktalternativ"
+
+#: ../views/profile/edit_shipping_loc.php:106 ../views/profile/edit_shipping_loc.
+#: php:142
+msgid "Enable free shipping"
+msgstr "Slå på gratis frakt"
+
+#: ../views/profile/edit_shipping_loc.php:158
+msgid "Package type"
+msgstr "Forpakning type"
+
+#: ../views/profile/edit_shipping_loc.php:194
+msgid "Shipping profile"
+msgstr "Frakt profil"
+
+#: ../views/profile/edit_sidebar.php:62 ../views/profile/edit_sidebar.php:86
+#, php-format
+msgid "There are %s prepared, %s verified and %s published items using this profile."
+msgstr ""
+"Det er % forberedte, % bekreftede og % publiserte oppføringer som benytter "
+"denne profilen."
+
+#: ../views/profile/edit_sidebar.php:65 ../views/profile/edit_sidebar.php:89
+#, php-format
+msgid "update %s prepared items"
+msgstr "oppdater % forberedte oppføringer"
+
+#: ../views/profile/edit_sidebar.php:69 ../views/profile/edit_sidebar.php:93
+#, php-format
+msgid "update %s verified items"
+msgstr "oppdater % bekreftede oppføringer"
+
+#: ../views/profile/edit_sidebar.php:73 ../views/profile/edit_sidebar.php:97
+#, php-format
+msgid "update %s published items"
+msgstr "oppdater % publiserte oppføringer"
+
+#: ../views/profile/edit_sidebar.php:77 ../views/profile/edit_sidebar.php:101
+#, php-format
+msgid "update %s ended items"
+msgstr "oppdater % avsluttede oppføringer"
+
+#: ../views/profile/edit_sidebar.php:81 ../views/profile/edit_sidebar.php:105
+#, php-format
+msgid "update %s locked items"
+msgstr "oppdater % låste oppføringer"
+
+#: ../views/profile/edit_sidebar.php:83
+#, php-format
+msgid "This profile will be applied to %s listings."
+msgstr "Denne profilen vil tillegges % oppføringer."
+
+#: ../views/profile/edit_sidebar.php:132
+msgid "Location and Taxes"
+msgstr "Sted og Skatt"
+
+#: ../views/profile/edit_sidebar.php:143
+msgid "Postal code"
+msgstr "Postnummer"
+
+#: ../views/profile/edit_sidebar.php:150
+msgid "Country"
+msgstr "Land"
+
+#: ../views/profile/edit_sidebar.php:167
+msgid "Currency"
+msgstr "Valutta"
+
+#: ../views/profile/edit_sidebar.php:188
+msgid "Taxes"
+msgstr "Skatt"
+
+#: ../views/profile/edit_sidebar.php:193
+msgid "no taxes"
+msgstr "ingen skatt"
+
+#: ../views/profile/edit_sidebar.php:194
+msgid "fixed tax rate"
+msgstr "fastsatt moms"
+
+#: ../views/profile/edit_sidebar.php:195
+msgid "use Sales Tax Table"
+msgstr "bruk momstabell"
+
+#: ../views/profile/edit_sidebar.php:196
+msgid "apply product tax"
+msgstr "legg til moms"
+
+#: ../views/profile/edit_sidebar.php:202
+msgid "Tax rate (VAT)"
+msgstr "Skattenivå (MVA)"
+
+#: ../views/profile/edit_sidebar.php:214
+msgid "Quantity Override"
+msgstr "Overstyr kvantum"
+
+#: ../views/profile/edit_sidebar.php:223
+msgid "auto sync"
+msgstr "automatisk synkronisering"
+
+#: ../views/profile/edit_sidebar.php:224
+msgid "custom qty"
+msgstr "Tilpasset antall"
+
+#: ../views/profile/edit_sidebar.php:232
+msgid "Max. quantity"
+msgstr "Maks kvantum"
+
+#: ../views/profile/edit_sidebar.php:239
+msgid "Fixed quantity"
+msgstr "Fastsatt kvantum"
+
+#: ../views/profile/edit_sidebar.php:248
+msgid "Custom quantities do not apply to locked listings."
+msgstr "Egendefinert kvanta gjelder ikke for låste oppføringer."
+
+#: ../views/profile/edit_sidebar.php:249
+msgid "Leave this empty to use inventory sync!"
+msgstr "La det være tomt for å bruke beholdningssynkronisering!"
+
+#: ../views/profile/edit_sidebar.php:255
+msgid "Auto replenish"
+msgstr "Automatisk etterfyll"
+
+#: ../views/profile/edit_sidebar.php:304
+msgid ""
+"When you change the account, you need to save the profile before you make "
+"any changes."
+msgstr "Når du endrer kontoen må du lagre profilen før du gjør noen endringer."
+
+#: ../views/profile/edit_sidebar.php:313
+msgid "Title and Subtitle"
+msgstr "Tittel og undertittel"
+
+#: ../views/profile/edit_sidebar.php:317
+msgid "Title prefix"
+msgstr "Tittel prefiks"
+
+#: ../views/profile/edit_sidebar.php:324
+msgid "Title suffix"
+msgstr "Tittel suffiks"
+
+#: ../views/profile/edit_sidebar.php:331
+msgid "Add keywords to your listing title."
+msgstr "Legg søkeord til oppføringens tittel."
+
+#: ../views/profile/edit_sidebar.php:333
+msgid "How?"
+msgstr "Hvordan?"
+
+#: ../views/profile/edit_sidebar.php:337
+msgid ""
+"You can use a subset of the available listing shortcodes in title prefix and "
+"suffix."
+msgstr ""
+"Du kan bruke et delsett av de tilgjengelige oppføringers kortkoder i tittel "
+"prefiks og suffiks."
+
+#: ../views/profile/edit_sidebar.php:339
+msgid "Example"
+msgstr "Eksempel"
+
+#: ../views/profile/edit_sidebar.php:347
+msgid "Bold title"
+msgstr "Uthevet undertittel"
+
+#: ../views/profile/edit_sidebar.php:357
+msgid "Enable subtitle"
+msgstr "Slå på undertittel"
+
+#: ../views/profile/edit_sidebar.php:369
+msgid "Custom subtitle"
+msgstr "Selvvalgt undertittel"
+
+#: ../views/profile/edit_sidebar.php:376
+msgid "Leave this empty to use the short description as subtitle."
+msgstr "La dette være tomt for å bruke kort beskrivelse som undertittel."
+
+#: ../views/profile/edit_sidebar.php:377
+msgid "Will be truncated after 55 characters."
+msgstr "Vil bli avkortet etter 55 tegn."
+
+#: ../views/profile/edit_sidebar.php:391
+msgid "Variation mode"
+msgstr "Variant modus"
+
+#: ../views/profile/edit_sidebar.php:395
+msgid "list as variations"
+msgstr "publiser som varianter"
+
+#: ../views/profile/edit_sidebar.php:396
+msgid "flatten variations"
+msgstr "jevn ut varianter"
+
+#: ../views/profile/edit_sidebar.php:398
+msgid "split variations"
+msgstr "del varianter"
+
+#: ../views/profile/edit_sidebar.php:404
+msgid "Var. images"
+msgstr "Bilde varianter"
+
+#: ../views/profile/edit_sidebar.php:414
+msgid "Image attribute"
+msgstr "Bilde attributter"
+
+#: ../views/profile/edit_sidebar.php:433
+msgid "Add var. table"
+msgstr "Legg til variasjonstabell"
+
+#: ../views/profile/edit_sidebar.php:447
+msgid "Images"
+msgstr "Bilder"
+
+#: ../views/profile/edit_sidebar.php:451
+msgid "Gallery image"
+msgstr "Galleri bilde"
+
+#: ../views/profile/edit_sidebar.php:461
+msgid "Gallery type"
+msgstr "Galleri type"
+
+#: ../views/profile/edit_sidebar.php:465
+msgid "Gallery Standard"
+msgstr "Galleri Standard"
+
+#: ../views/profile/edit_sidebar.php:466
+msgid "Gallery Plus"
+msgstr "Galleri Pluss"
+
+#: ../views/profile/edit_sidebar.php:466
+msgid "extra fees"
+msgstr "ekstra gebyr"
+
+#: ../views/profile/edit_sidebar.php:467
+msgid "Gallery Featured"
+msgstr "Utvalgt galleri"
+
+#: ../views/profile/edit_sidebar.php:467
+msgid "considerable extra fees"
+msgstr "betydelige ekstra gebyrer"
+
+#: ../views/profile/edit_sidebar.php:473
+msgid "Upload to EPS"
+msgstr "Last opp til EPS"
+
+#: ../views/profile/edit_sidebar.php:478
+msgid "Upload all images"
+msgstr "Last opp alle bilder"
+
+#: ../views/profile/edit_sidebar.php:479
+msgid "Upload first 12 images"
+msgstr "Last opp første 12 bilder"
+
+#: ../views/profile/edit_sidebar.php:480
+msgid "Upload only main image"
+msgstr "Last opp kun hovedbilde"
+
+#: ../views/profile/edit_sidebar.php:484
+msgid ""
+"Note: Uploading images to eBay Picture Service (EPS) will slow down the "
+"listing process."
+msgstr ""
+"Merk: Opplasting av bilder til eBay Picture Service (EPS) vil gjøre "
+"publiseringen tregere."
+
+#: ../views/profile/edit_sidebar.php:530
+msgid "Schedule Listing"
+msgstr "Planlegg publisering"
+
+#: ../views/profile/edit_sidebar.php:534
+msgid "Schedule hour"
+msgstr "Planlegg time"
+
+#: ../views/profile/edit_sidebar.php:538 ../views/profile/edit_sidebar.php:611 ..
+#: views/profile/edit_sidebar.php:659 ../views/profile/edit_sidebar.php:671 ..
+#: views/profile/edit_sidebar.php:727
+msgid "None"
+msgstr "Ingen"
+
+#: ../views/profile/edit_sidebar.php:569
+msgid "Schedule minute"
+msgstr "Planlegg minutter"
+
+#: ../views/profile/edit_sidebar.php:582
+msgid "The current time is"
+msgstr "Gjeldende tid er"
+
+#: ../views/profile/edit_sidebar.php:591 ../views/profile/edit_sidebar.php:595
+msgid "Auto Relist"
+msgstr "Publiser på nytt automatisk"
+
+#: ../views/profile/edit_sidebar.php:607 ../views/profile/edit_sidebar.php:667
+msgid "Relist Condition"
+msgstr "Publiser på nytt alternativer"
+
+#: ../views/profile/edit_sidebar.php:612 ../views/profile/edit_sidebar.php:672
+msgid "Relist immediately"
+msgstr "Publiser på nytt umiddelbart"
+
+#: ../views/profile/edit_sidebar.php:613
+msgid "Relist after X hours"
+msgstr "Publiser på nytt etter X timer"
+
+#: ../views/profile/edit_sidebar.php:614 ../views/profile/edit_sidebar.php:674
+msgid "Relist at specific time of day"
+msgstr "Publiser på nytt spesifik tid på dagen"
+
+#: ../views/profile/edit_sidebar.php:619 ../views/profile/edit_sidebar.php:686
+msgid "Hours"
+msgstr "Timer"
+
+#: ../views/profile/edit_sidebar.php:626 ../views/profile/edit_sidebar.php:693
+msgid "Time of day"
+msgstr "Tid på dagen"
+
+#: ../views/profile/edit_sidebar.php:639
+msgid "Selling Manager Pro"
+msgstr "Salgsmanager Pro"
+
+#: ../views/profile/edit_sidebar.php:655
+msgid "Auto Relist Type"
+msgstr "Automatisk publiseringsmåte"
+
+#: ../views/profile/edit_sidebar.php:660
+msgid "Relist continuously"
+msgstr "Publiser på nytt gjentagende"
+
+#: ../views/profile/edit_sidebar.php:661
+msgid "Relist continuously until sold"
+msgstr "Publiser på nytt gjentagende inntill solgt"
+
+#: ../views/profile/edit_sidebar.php:662
+msgid "Relist once if not sold"
+msgstr "Publiser på nytt én gang hvis ikke solgt"
+
+#: ../views/profile/edit_sidebar.php:673
+msgid "Relist after days / hours"
+msgstr "Publiser på nytt etter dager / timer"
+
+#: ../views/profile/edit_sidebar.php:700
+msgid "Hold inventory level"
+msgstr "Behold nivå på varelager"
+
+#: ../views/profile/edit_sidebar.php:715
+msgid "Other options"
+msgstr "Øvrige valg"
+
+#: ../views/profile/edit_sidebar.php:720
+msgid "Int. Site Visibility"
+msgstr "Synlig på Internasjonale sider"
+
+#: ../views/profile/edit_sidebar.php:747
+msgid "Store Pickup"
+msgstr "Hent i butikk"
+
+#: ../views/profile/edit_sidebar.php:759
+msgid "Private listing"
+msgstr "Privat oppføring"
+
+#: ../views/profile/edit_sidebar.php:770
+msgid "Use SKU as UPC"
+msgstr "Bruk SKU som UPC"
+
+#: ../views/profile/edit_sidebar.php:781
+msgid "Prefilled info"
+msgstr "Forhåndsutfylt informasjon"
+
+#: ../views/profile/edit_sidebar.php:792
+msgid "Strikethrough price"
+msgstr "Strek over prisen"
+
+#: ../views/profile/edit_sidebar.php:802
+msgid "Hit Counter"
+msgstr "Besøksteller"
+
+#: ../views/profile/edit_sidebar.php:817
+msgid "Sort order"
+msgstr "Sortering"
+
+#: ../views/profile/select_profile.php:40 ../views/profile/select_profile.php:59
+msgid "Select Profile"
+msgstr "Velg profil"
+

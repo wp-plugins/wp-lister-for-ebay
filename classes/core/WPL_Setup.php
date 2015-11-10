@@ -472,7 +472,7 @@ class WPL_Setup extends WPL_Core {
 				. '<br><br>'
 				. 'You should contact your hoster or site administrator to get this fixed as soon as possible. Until then, WP-Lister will not be able to sync the inventory correctly nor process new orders from eBay.'
 				. '<br><br>'
-				. 'The quickest way to make sure this will not happen again is using an external cron job to trigger the inventory sync every 5 minutes. To do so, change the "update interval" setting option to "use external cron job" and follow the instructions. This is strongly recommended if you are using WP-Lister for Amazon as well.'
+				. 'The quickest way to make sure this will not happen again is using an external cron job to trigger the background tasks every 5 minutes. To do so, change the "update interval" setting option to "use external cron job" and follow the instructions. This is strongly recommended if you are using WP-Lister for Amazon as well.'
 				. '<br><br>'
 				. 'Keep in mind that this issue is not related to WP-Lister but to WordPress itself. All plugins and features which rely on scheduled tasks are affected by this issue - which includes scheduled posts, internal cleanup routines in WooCommerce and more.'
 				. '<br><br>'

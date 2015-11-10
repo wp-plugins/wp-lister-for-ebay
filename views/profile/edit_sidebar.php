@@ -1,14 +1,14 @@
 <style type="text/css">
 
-	#side-sortables .postbox input.text_input,
-	#side-sortables .postbox select.select {
+	#poststuff #side-sortables .postbox input.text_input,
+	#poststuff #side-sortables .postbox select.select {
 	    width: 35%;
 	}
-	#side-sortables .postbox label.text_label {
+	#poststuff #side-sortables .postbox label.text_label {
 	    width: 60%;
 	}
 
-	#side-sortables .postbox .inside p.desc {
+	#poststuff #side-sortables .postbox .inside p.desc {
 		margin-left: 2%;
 	}
 
@@ -217,7 +217,7 @@
 							<?php $custom_quantity_enabled = ( @$item_details['quantity'] || @$item_details['max_quantity'] ) ? 1 : 0; ?>
 							<label for="wpl-custom_quantity_enabled" class="text_label">
 								<?php echo __('Quantity','wplister'); ?>
-                                <?php wplister_tooltip('By default WP-Lister uses the current stock level quantity from WooCommerce and keep it in sync with eBay automatically.<br>If you wish to use a custom quantity, you can do so - but please keep in mind that the inventory sync might not work as expected!') ?>
+                                <?php wplister_tooltip('By default WP-Lister uses the current stock level quantity from WooCommerce and keep it in sync with eBay automatically.<br>If you wish to use a custom quantity, you can do so - but please keep in mind that syncing inventory and sales might not work as expected!') ?>
 							</label>
 							<select id="wpl-custom_quantity_enabled" name="wpl_e2e_custom_quantity_enabled" class="select">
 								<option value=""  <?php if ( $custom_quantity_enabled != '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('auto sync','wplister'); ?></option>
@@ -245,8 +245,8 @@
 								<p class="x-desc" style="display: block;">
 									<?php #echo __('Leave this empty to list all available items.','wplister'); ?>
 									<?php #echo __('"Fixed quantity" should be empty to use inventory sync, "Maximum quantity" is effective only with inventory sync.','wplister'); ?>
-									<?php echo __('Custom quantities do not apply to locked listings.','wplister'); ?>
-									<?php echo __('Leave this empty to use inventory sync!','wplister'); ?>
+									<?php #echo __('Custom quantities do not apply to locked listings.','wplister'); // they do as of 2.0.9.15 ?>
+									<?php echo __('Leave this empty if you wish to synchronize inventory and sales!','wplister'); ?>
 								</p>
 
 
@@ -532,6 +532,16 @@
 								<?php if ( class_exists( 'woocommerce_msrp_admin' ) || class_exists( 'WPLA_MSRP_Addon' ) ) : ?>
 								<option value="2" <?php if ( @$item_details['strikethrough_pricing'] == '2' ): ?>selected="selected"<?php endif; ?>><?php echo __('MSRP','wplister'); ?></option>
 								<?php endif; ?>
+							</select>
+							<br class="clear" />
+
+							<label for="wpl-text-b2b_only" class="text_label">
+								<?php echo __('B2B only','wplister'); ?>
+                                <?php wplister_tooltip('<b>Restrict to Business (B2B)</b><br>Enable this option if you want to offer the item exclusively to business users.<br><br>Applicable only to business sellers residing in Germany, Austria, or Switzerland who are listing in a B2B VAT-enabled category on the eBay DE, AT or CH sites.') ?>
+							</label>
+							<select id="wpl-text-b2b_only" name="wpl_e2e_b2b_only" class=" required-entry select">
+								<option value="0" <?php if ( @$item_details['b2b_only'] == '0' ): ?>selected="selected"<?php endif; ?>><?php echo __('No','wplister'); ?></option>
+								<option value="1" <?php if ( @$item_details['b2b_only'] == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes','wplister'); ?></option>
 							</select>
 							<br class="clear" />
 

@@ -665,8 +665,9 @@ class ListingsModel extends WPL_Model {
 			return $this->endItem( $id, $session );
 		}
 
-        // get max_quantity from profile
+        // get max_quantity and fixed qty from profile
         $max_quantity = ( isset( $profile_details['max_quantity'] ) && intval( $profile_details['max_quantity'] )  > 0 ) ? $profile_details['max_quantity'] : PHP_INT_MAX ; 
+        $fix_quantity = ( isset( $profile_details['quantity']     ) && intval( $profile_details['quantity']     )  > 0 ) ? $profile_details['quantity']     : false ; 
 												
 		// set inventory status
 		if ( $isVariableProduct ) {
@@ -708,7 +709,7 @@ class ListingsModel extends WPL_Model {
 			for ( $offset=0; $offset < sizeof($variations); $offset += $batch_size ) { 
 
 				// revise inventory status
-				$res = $this->reviseVariableInventoryStatus( $id, $post_id, $listing_item, $session, $variations, $max_quantity, $offset, $batch_size );		
+				$res = $this->reviseVariableInventoryStatus( $id, $post_id, $listing_item, $session, $variations, $max_quantity, $fix_quantity, $offset, $batch_size );		
 
 			}
 
@@ -730,6 +731,12 @@ class ListingsModel extends WPL_Model {
 				$variation_qty = get_post_meta( $cart_item->variation_id, '_stock', true );
 				$stat->setQuantity( min( $max_quantity, $variation_qty ) );
 				$revised_quantity = min( $max_quantity, $variation_qty );
+
+		        // handle fixed quantity
+		    	if ( $fix_quantity ) {
+					$stat->setQuantity( $fix_quantity );
+					$revised_quantity = $fix_quantity;
+		    	}
 
 				// do not set SKU for single split variations
 				if ( ! $listing_item['parent_id'] ) {				
@@ -757,6 +764,12 @@ class ListingsModel extends WPL_Model {
 
 				$stat->setQuantity( min( $max_quantity, $available_stock ) );
 				$revised_quantity = min( $max_quantity, $available_stock );
+
+		        // handle fixed quantity
+		    	if ( $fix_quantity ) {
+					$stat->setQuantity( $fix_quantity );
+					$revised_quantity = $fix_quantity;
+		    	}
 
 				$req->addInventoryStatus( $stat );
 				WPLE()->logger->info( "Revising inventory status #$id ($post_id) - qty: ".$stat->Quantity );
@@ -800,7 +813,7 @@ class ListingsModel extends WPL_Model {
 	} // reviseInventoryStatus()
 
 
-	private function reviseVariableInventoryStatus( $id, $post_id, $listing_item, $session, $variations, $max_quantity, $offset = 0, $batch_size = 4 ) {
+	private function reviseVariableInventoryStatus( $id, $post_id, $listing_item, $session, $variations, $max_quantity, $fix_quantity, $offset = 0, $batch_size = 4 ) {
 		WPLE()->logger->info( "reviseVariableInventoryStatus() #$id - variations: ".sizeof($variations)." - offset: ".$offset );
 
 		// preparation - set up new ServiceProxy with given session
@@ -830,6 +843,9 @@ class ListingsModel extends WPL_Model {
 			$stat->setSKU( $var['sku'] );
 			$stat->setQuantity( min( $max_quantity, $var['stock'] ) );
 			$stat->setStartPrice( $var['price'] );
+
+	        // handle fixed quantity
+	    	if ( $fix_quantity ) $stat->setQuantity( $fix_quantity );
 
 			$req->addInventoryStatus( $stat );
 			WPLE()->logger->info( "Revising inventory status for product variation #$id ($post_id) - sku: ".$stat->SKU." - qty: ".$stat->Quantity );
@@ -1781,6 +1797,9 @@ class ListingsModel extends WPL_Model {
 		$status 	= WPLE_ListingQueryHelper::getStatus( $id );
 		$ebay_id 	= self::getEbayIDFromID( $id );
 		$post_title = get_the_title( $item['post_id'] );
+
+		WPLE()->logger->info("applyProfileToItem() - listing_id: $id / post_id: $post_id");
+		// WPLE()->logger->callStack( debug_backtrace() );
 
 		// skip ended auctions - or not, if you want to relist them...
 		// if ( $status == 'ended' ) return;

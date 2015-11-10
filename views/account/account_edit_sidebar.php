@@ -1,14 +1,14 @@
 <style type="text/css">
 
-	#side-sortables .postbox input.text_input,
-	#side-sortables .postbox select.select {
+	#poststuff #side-sortables .postbox input.text_input,
+	#poststuff #side-sortables .postbox select.select {
 	    width: 45%;
 	}
-	#side-sortables .postbox label.text_label {
+	#poststuff #side-sortables .postbox label.text_label {
 	    width: 50%;
 	}
 
-	#side-sortables .postbox .inside p.desc {
+	#poststuff #side-sortables .postbox .inside p.desc {
 		margin-left: 2%;
 	}
 

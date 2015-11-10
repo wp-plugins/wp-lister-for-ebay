@@ -2,14 +2,14 @@
 
 <style type="text/css">
 	
-	#side-sortables .postbox input.text_input,
-	#side-sortables .postbox select.select {
+	#poststuff #side-sortables .postbox input.text_input,
+	#poststuff #side-sortables .postbox select.select {
 	    width: 50%;
 	}
-	#side-sortables .postbox label.text_label {
+	#poststuff #side-sortables .postbox label.text_label {
 	    width: 45%;
 	}
-	#side-sortables .postbox p.desc {
+	#poststuff #side-sortables .postbox p.desc {
 	    margin-left: 5px;
 	}
 
@@ -320,7 +320,7 @@
 								<option value="1" <?php if ( $wpl_hide_dupe_msg == '1' ): ?>selected="selected"<?php endif; ?>><?php echo __('Yes, I know what I am doing.','wplister'); ?></option>
 							</select>
 							<p class="desc" style="display: block;">
-								<?php echo __('If you do not plan to use the inventory sync feature, you can safely list one product multiple times.','wplister'); ?>
+								<?php echo __('If you do not plan to use the synchronize sales feature, you can safely list one product multiple times.','wplister'); ?>
 							</p>
 
 						</div>

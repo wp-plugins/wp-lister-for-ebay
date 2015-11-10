@@ -1,22 +1,22 @@
 
 
 /* general styles for edit pages (edit template, edit profile and settings) */
-.wplister-page .postbox .inside {
+.wplister-page #poststuff .postbox .inside {
 	margin-bottom: 15px;
 }
 
-.wplister-page .postbox .inside p.desc {
+.wplister-page #poststuff .postbox .inside p.desc {
 	font-size: smaller;
 	font-style: italic;
 	margin-top: 0;
 	margin-left: 35%;
 }
-.wplister-page .postbox .inside p.edit_links {
+.wplister-page #poststuff .postbox .inside p.edit_links {
 	margin-top: 0;
 	margin-left: 35%;
 }
 
-.wplister-page .postbox label.text_label {
+.wplister-page #poststuff .postbox label.text_label {
 	display: block;
 	float: left;
 	width: 33%;
@@ -24,14 +24,14 @@
 	padding: 3px;
 	/*white-space: nowrap;*/
 }
-.wplister-page .postbox input.text_input,
-.wplister-page .postbox textarea,
-.wplister-page .postbox select.select {
+.wplister-page #poststuff .postbox input.text_input,
+.wplister-page #poststuff .postbox textarea,
+.wplister-page #poststuff .postbox select.select {
 	width: 65%;
 	margin-bottom: 5px;
 	padding: 3px 8px;
 }
-.wplister-page .postbox textarea {
+.wplister-page #poststuff .postbox textarea {
 	height: 120px;
 }
 
@@ -351,6 +351,6 @@ div#message.updated.update-nag {
 }
 
 /* fix cursor on metabox title bars */
-.js .wplister-page .postbox .hndle {
+.js .wplister-page #poststuff .postbox .hndle {
 	cursor: inherit;
 }

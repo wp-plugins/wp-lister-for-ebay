@@ -19,14 +19,14 @@
 		margin-left: 4px;
 	}
 
-	#side-sortables .postbox input.text_input,
-	#side-sortables .postbox select.select {
+	#poststuff #side-sortables .postbox input.text_input,
+	#poststuff #side-sortables .postbox select.select {
 	    width: 50%;
 	}
-	#side-sortables .postbox label.text_label {
+	#poststuff #side-sortables .postbox label.text_label {
 	    width: 45%;
 	}
-	#side-sortables .postbox p.desc {
+	#poststuff #side-sortables .postbox p.desc {
 	    margin-left: 5px;
 	}
 

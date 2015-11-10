@@ -208,7 +208,7 @@ class WPL_WooBackendIntegration {
 		if ( ! empty($var_no_stock) ) {
 			$errors_msg .= __('Warning: Stock management is enabled for this product but is disabled for these variations:','wplister') .' <b>'. join($var_no_stock, ', ') . '</b><br>';
 			$errors_msg .= __('eBay requires separate stock levels for each variation. So please enable stock management for each variation and set the stock level on the variation level.','wplister') . '<br>';
-			$errors_msg .= __('Disabling stock management for single variations will cause the inventory sync not to work properly.','wplister') . '<br>';
+			$errors_msg .= __('Disabling stock management for single variations will cause sales not to be synced properly.','wplister') . '<br>';
 		}
 		if ( ! empty($errors_msg) ) {
             wple_show_message( $errors_msg, 'warn' );

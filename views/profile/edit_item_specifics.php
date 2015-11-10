@@ -179,6 +179,9 @@
 
 							if ( (specs) && (specs.length > 0) )
 							for (var i = 0; i < specs.length; i++) {
+
+								// ignore invalid data - Name is required
+								if ( specs[i].Name == null ) continue;
 								
 								// create template view
 								var spec = specs[i];

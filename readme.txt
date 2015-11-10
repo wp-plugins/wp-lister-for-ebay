@@ -2,7 +2,7 @@
 Contributors: wp-lab
 Tags: ebay, woocommerce, products, export
 Requires at least: 3.9
-Tested up to: 4.2
+Tested up to: 4.3.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -94,6 +94,20 @@ Yes, there is. WP-Lister for Amazon is currently in beta and we still have to wo
 2. Profile Editor
 
 == Changelog ==
+= 2.0.9.14 =
+* fixed possible layout issue caused by 3rd party CSS 
+* fixed VAT tax rate not sent when B2B option is enabled 
+
+= 2.0.9.13 =
+* fixed possible PHP warning during checkout (if no items to revise on eBay and PHP warnings are shown to the browser) 
+* fixed warning: For multiple-variation listings, GTIN values are specified at the variation level. (21919420) 
+* fixed update interval message on bottom of eBay messages page 
+* hide eBay meta boxes on edit product page if current user is not allowed to manage eBay listings 
+* improved category settings page (improved labelling and added second button to save settings on top of the page) 
+* added B2B only profile option 
+* added UK Mail shipping provider 
+* added norwegian language files 
+
 = 2.0.9.12 =
 * added the value NONE to the Exclude Locations profile option - and improved tooltip and layout 
 * added Deutsche Post shipping provider 
